@@ -1,0 +1,6 @@
+count	assembly
+2058	System.Configuration.ConfigurationManager
+279	System.CodeDom
+165	System.Security.Permissions
+77	System.Data.SqlClient
+1	System.Drawing.Common
