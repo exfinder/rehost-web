@@ -7,6 +7,9 @@ using System.Text.RegularExpressions;
 
 internal static class Program
 {
+    private const string SystemWebResourcesGoldenSha256 =
+        "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95";
+
     private static readonly UTF8Encoding Utf8WithoutBom = new(false);
     private static readonly string[] ArtifactNames =
     [
@@ -193,7 +196,8 @@ internal static class Program
             }
 
             string name = line[..separator];
-            string value = DecodeResourceEscapes(line[(separator + 1)..], path, lineNumber);
+            // ResGen ignores whitespace immediately following the separator.
+            string value = DecodeResourceEscapes(line[(separator + 1)..].TrimStart(), path, lineNumber);
             if (!resources.TryAdd(name, value))
             {
                 throw new InvalidDataException($"Duplicate resource key '{name}' at {path}:{lineNumber}.");
@@ -773,6 +777,10 @@ internal static class Program
 
     private static void VerifyResources(string path, SortedDictionary<string, string> expected)
     {
+        string sha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
+        Require(sha256 == SystemWebResourcesGoldenSha256,
+            "System.Web.resources does not byte-match the pinned POC ResGen output.");
+
         Dictionary<string, string> actual = new(StringComparer.Ordinal);
         using ResourceReader reader = new(path);
         foreach (DictionaryEntry entry in reader)
@@ -790,6 +798,12 @@ internal static class Program
             "Resource newline escapes were not decoded.");
         Require(actual["ADMembership_UPN_contains_backslash"].Contains("'\\'", StringComparison.Ordinal),
             "Resource backslash escapes were not decoded.");
+        Require(actual["Invalid_status_string"] == "HTTP status string is not valid.",
+            "ResGen-compatible leading whitespace was not removed from Invalid_status_string.");
+        Require(actual["DataList_TemplateTableNotFound"].StartsWith("A Table control", StringComparison.Ordinal),
+            "ResGen-compatible leading whitespace was not removed from DataList_TemplateTableNotFound.");
+        Require(actual["TableCell_AssociatedHeaderCellID"].StartsWith("Lists the header", StringComparison.Ordinal),
+            "ResGen-compatible leading whitespace was not removed from TableCell_AssociatedHeaderCellID.");
     }
 
     private static void VerifySr(

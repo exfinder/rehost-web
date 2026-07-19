@@ -14,19 +14,19 @@
   },
   "result": {
     "exitCode": 1,
-    "elapsed": "00:00:44.13",
+    "elapsed": "00:00:23.24",
     "errors": 3487,
     "warnings": 755
   },
   "rawArtifacts": {
     "buildLog": {
       "path": "artifacts/build/net10.0-generated-inputs/build.log",
-      "sha256": "ad8466ba32734c9ef8323a2e1b380fe8f133855dcc9bfb6718e270800654ec7a",
+      "sha256": "aa434a1b6a5123c76b38f3826306e8ed1e00203877ab34d2d57c299118d1d741",
       "tracked": false
     },
     "binaryLog": {
       "path": "artifacts/build/net10.0-generated-inputs/build.binlog",
-      "sha256": "ee6ef0b65ef1157d502ab959f96bab2de2dfd666c378336f049041f7e9893c00",
+      "sha256": "934c54fcece6d66905684dfff0cd5b1dc832df6e62462724ae4c3313f140cc07",
       "tracked": false
     }
   },

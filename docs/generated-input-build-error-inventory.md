@@ -21,11 +21,14 @@ the neutral resource are emitted under the runtime project's `obj` directory.
 | Host runtime | 10.0.10 |
 | Host | macOS 26.5, arm64 |
 | Exit code | 1 |
-| Elapsed | 44.13 seconds |
+| Elapsed | 23.24 seconds |
 
 Raw log and binlog hashes are recorded in
 `artifacts/build/net10.0-generated-inputs/build-metadata.json`. The normalized
 inventory contains all 4,242 diagnostics exactly once.
+
+The inventory was refreshed after matching the POC ResGen resource binary. Its
+diagnostic counts and normalized inventory SHA-256 remained identical.
 
 ## Headline delta
 

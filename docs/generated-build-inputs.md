@@ -21,7 +21,7 @@ The generated files are intermediate build artifacts and are not checked into
 
 | Input | Explicit supplemental input | Output | Verification focus |
 | --- | --- | --- | --- |
-| `System.Web.txt` | Resource identity in `assembly-identities.json` | `SR.g.cs`, `System.Web.resources` | 3,327 unique names, escape decoding, resource values, `System.Web` base/logical name |
+| `System.Web.txt` | Resource identity in `assembly-identities.json`; pinned POC ResGen output as golden oracle | `SR.g.cs`, `System.Web.resources` | 3,327 unique names, ResGen-compatible whitespace and escape decoding, exact POC binary hash, `System.Web` base/logical name |
 | `Names.cspp` | `native-names.json` (`names.h` macros and `FEATURE_PAL=false`) | `ModName.g.cs` | Desktop Framework 4 Windows module/registry constants; no unresolved preprocessor branch |
 | `cacheusage.cspp` | None | `CacheUsage.g.cs` | Macro expansion and `UsageEntryRef`, `UsageBucket`, `CacheUsage` symbols |
 | `cacheexpires.cspp` | None | `CacheExpires.g.cs` | Macro expansion and `ExpiresEntryRef`, `ExpiresBucket`, `CacheExpires` symbols |
@@ -31,6 +31,11 @@ The generated files are intermediate build artifacts and are not checked into
 Complete machine-readable provenance, upstream blobs, SHA-256 values, and POC
 comparison boundaries are recorded in
 `docs/provenance/generated-build-inputs.json`.
+
+The POC `System.Web.resources` file is the golden oracle for resource
+serialization. It is not copied into this repository: the portable generator
+reproduces it byte-for-byte from the pinned `System.Web.txt`, including
+ResGen's removal of whitespace immediately following `=`.
 
 ## Identity choices represented by this layer
 
@@ -69,6 +74,7 @@ The verification command generates every artifact twice in separate unique
 temporary directories and requires byte-for-byte equality. It then validates:
 
 - all resource names and values against `System.Web.txt`;
+- byte equality by SHA-256 with the pinned POC ResGen resource output;
 - `SR` constant count and resource base name;
 - every `AssemblyRef` constant referenced by the imported source;
 - native module and registry constants;
@@ -87,8 +93,9 @@ The completed generated-input pass was verified on 2026-07-19 against the
 pinned source tree and .NET SDK 10.0.302:
 
 - the generator project built with 0 errors and 0 warnings;
-- the focused `verify` command passed, including two-run byte repeatability and
-  all symbol, resource, constant, regex, and identity checks listed above;
+- the focused `verify` command passed, including two-run byte repeatability,
+  exact reproduction of the POC ResGen resource SHA-256, and all symbol,
+  resource, constant, regex, and identity checks listed above;
 - `git diff --check`, JSON parsing, and trailing-whitespace checks passed;
 - `git diff --exit-code -- src/System.Web.ReferenceSource` confirmed that the
   imported Reference Source tree was unchanged;

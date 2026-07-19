@@ -4,7 +4,7 @@
     "project": "eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj",
     "projectSha256": "cbda77be076f6ff67d1a510c950892ab127591d8dec1e78eb4f9a23d48b41661",
     "implementation": "eng/Rehost.WebForms.GeneratedInputs/Program.cs",
-    "implementationSha256": "b26444a8d44fe3b26ac7ef1562b2e9487f63c0a7234fb12c4b95ef26d720026b",
+    "implementationSha256": "5651b812fdb532c487bb34b9203d08a26b4feedaf1f1cc4148ad84336fce1270",
     "targetFramework": "net10.0",
     "externalPackages": [],
     "outputPolicy": "Outputs are generated under the runtime project's obj/<Configuration>/net10.0/generated/System.Web directory and are not copied into src/System.Web.ReferenceSource."
@@ -83,9 +83,17 @@
     "ModName.g.cs": "7e88a93b613fe1ac8d1f14db37cd407d297be940d966b5ac60c30674c378c940",
     "RegularExpressions.g.cs": "c66ac69a0f836226d253f671feb41b021fc5385fd8fbe81ba89e9c3320710b4b",
     "SR.g.cs": "0e747c11120d079160aaee055d8dd39c78c1e9c308b6929231521c2d2a996491",
-    "System.Web.resources": "87ddb0279e73c7f51ead008873599392b5a22c79d76270673cd0802294d8a9d1"
+    "System.Web.resources": "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95"
   },
   "pocComparisons": [
+    {
+      "repository": "/Users/vm/repos/Portable.System.Web",
+      "revision": "c9c908fa24dd8dd116fd613de8ffe584a715b4b1",
+      "path": "Portable.System.Web/System.Web.resources",
+      "blob": "aa03faee17ac8feb1e83c50d37c0d7182e3c6f8d",
+      "sha256": "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95",
+      "use": "Golden oracle: require byte-for-byte reproduction of the POC ResGen output from the pinned System.Web.txt without copying the binary into Rehost."
+    },
     {
       "repository": "/Users/vm/repos/Portable.System.Web",
       "revision": "c9c908fa24dd8dd116fd613de8ffe584a715b4b1",
