@@ -9,7 +9,9 @@
 **Provisional umbrella brand:** Rehost  
 **Initial product:** Rehost WebForms  
 **POC repository:** `/Users/vm/repos/Portable.System.Web`  
-**POC revision reviewed:** `c9c908f`
+**POC revision reviewed:** `c9c908f`  
+**Microsoft Reference Source checkout:** `/Users/vm/repos/referencesource`  
+**Microsoft Reference Source revision:** `ec9fa9ae770d522a5b5f0607898044b7478574a3`
 
 ## 1. Executive summary
 
