@@ -1,0 +1,168 @@
+{
+  "namespace": "System.Web.RegularExpressions",
+  "sourceType": "System.Rgc.GetAspnetRegexes",
+  "regexes": [
+    {
+      "name": "TagRegex",
+      "pattern": "\\G<(?<tagname>[\\w:\\.]+)(\\s+(?<attrname>\\w[-\\w:]*)(\\s*=\\s*\"(?<attrval>[^\"]*)\"|\\s*=\\s*'(?<attrval>[^']*)'|\\s*=\\s*(?<attrval><%#.*?%>)|\\s*=\\s*(?<attrval>[^\\s=\"'/>]*)|(?<attrval>\\s*?)))*\\s*(?<empty>/)?>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "DirectiveRegex",
+      "pattern": "\\G<%\\s*@(\\s*(?<attrname>\\w[\\w:]*(?=\\W))(\\s*(?<equal>=)\\s*\"(?<attrval>[^\"]*)\"|\\s*(?<equal>=)\\s*'(?<attrval>[^']*)'|\\s*(?<equal>=)\\s*(?<attrval>[^\\s\"'%>]*)|(?<equal>)(?<attrval>\\s*?)))*\\s*?%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "EndTagRegex",
+      "pattern": "\\G</(?<tagname>[\\w:\\.]+)\\s*>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "AspCodeRegex",
+      "pattern": "\\G<%(?!@)(?<code>.*?)%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "AspExprRegex",
+      "pattern": "\\G<%\\s*?=(?<code>.*?)?%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "DatabindExprRegex",
+      "pattern": "\\G<%#(?<encode>:)?(?<code>.*?)?%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "CommentRegex",
+      "pattern": "\\G<%--(([^-]*)-)*?-%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "IncludeRegex",
+      "pattern": "\\G<!--\\s*#(?i:include)\\s*(?<pathtype>[\\w]+)\\s*=\\s*[\"']?(?<filename>[^\\\"']*?)[\"']?\\s*-->",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "TextRegex",
+      "pattern": "\\G[^<]+",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "GTRegex",
+      "pattern": "[^%]>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "LTRegex",
+      "pattern": "<[^%]",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "ServerTagsRegex",
+      "pattern": "<%(?![#$])(([^%]*)%)*?>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "RunatServerRegex",
+      "pattern": "runat\\W*server",
+      "options": [ "IgnoreCase", "Multiline", "Singleline", "CultureInvariant" ],
+      "isPublic": true
+    },
+    {
+      "name": "SimpleDirectiveRegex",
+      "pattern": "<%\\s*@(\\s*(?<attrname>\\w[\\w:]*(?=\\W))(\\s*(?<equal>=)\\s*\"(?<attrval>[^\"]*)\"|\\s*(?<equal>=)\\s*'(?<attrval>[^']*)'|\\s*(?<equal>=)\\s*(?<attrval>[^\\s\"'%>]*)|(?<equal>)(?<attrval>\\s*?)))*\\s*?%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "DataBindRegex",
+      "pattern": "\\G\\s*<%\\s*?#(?<encode>:)?(?<code>.*?)?%>\\s*\\z",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "ExpressionBuilderRegex",
+      "pattern": "\\G\\s*<%\\s*\\$\\s*(?<code>.*)?%>\\s*\\z",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    },
+    {
+      "name": "BindExpressionRegex",
+      "pattern": "^\\s*bind\\s*\\((?<params>.*)\\)\\s*\\z",
+      "options": [ "IgnoreCase", "Multiline", "Singleline", "CultureInvariant" ],
+      "isPublic": false
+    },
+    {
+      "name": "BindParametersRegex",
+      "pattern": "\\s*((\"(?<fieldName>(([\\w\\.]+)|(\\[.+\\])))\")|('(?<fieldName>(([\\w\\.]+)|(\\[.+\\])))'))\\s*(,\\s*((\"(?<formatString>.*)\")|('(?<formatString>.*)'))\\s*)?\\s*\\z",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    },
+    {
+      "name": "FormatStringRegex",
+      "pattern": "^(([^\"]*(\"\")?)*)$",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    },
+    {
+      "name": "WebResourceRegex",
+      "pattern": "<%\\s*=\\s*WebResource\\(\"(?<resourceName>[^\"]*)\"\\)\\s*%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    },
+    {
+      "name": "NonWordRegex",
+      "pattern": "\\W",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    },
+    {
+      "name": "EvalExpressionRegex",
+      "pattern": "^\\s*eval\\s*\\((?<params>.*)\\)\\s*\\z",
+      "options": [ "IgnoreCase", "Multiline", "Singleline", "CultureInvariant" ],
+      "isPublic": false
+    },
+    {
+      "name": "BrowserCapsRefRegex",
+      "pattern": "\\$(?:\\{(?<name>\\w+)\\})",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    },
+    {
+      "name": "AspEncodedExprRegex",
+      "pattern": "\\G<%:(?<code>.*?)?%>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "TagRegex35",
+      "pattern": "\\G<(?<tagname>[\\w:\\.]+)(\\s+(?<attrname>\\w[-\\w:]*)(\\s*=\\s*\"(?<attrval>[^\"]*)\"|\\s*=\\s*'(?<attrval>[^']*)'|\\s*=\\s*(?<attrval><%#.*?%>)|\\s*=\\s*(?<attrval>[^\\s=/>]*)|(?<attrval>\\s*?)))*\\s*(?<empty>/)?>",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": true
+    },
+    {
+      "name": "BindItemExpressionRegex",
+      "pattern": "^\\s*BindItem\\.(?<params>.*)\\s*\\z",
+      "options": [ "IgnoreCase", "Multiline", "Singleline", "CultureInvariant" ],
+      "isPublic": false
+    },
+    {
+      "name": "BindItemParametersRegex",
+      "pattern": "(?<fieldName>([\\w\\.]+))\\s*\\z",
+      "options": [ "Multiline", "Singleline" ],
+      "isPublic": false
+    }
+  ]
+}

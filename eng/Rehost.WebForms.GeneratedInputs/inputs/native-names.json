@@ -1,0 +1,32 @@
+{
+  "include": "names.h",
+  "targetProfile": "desktop-framework-windows",
+  "symbols": {
+    "FEATURE_PAL": false,
+    "PLATFORM_UNIX": false,
+    "__APPLE__": false,
+    "_AIX": false,
+    "__hppa__": false,
+    "IA64": false
+  },
+  "macros": {
+    "ENGINE_MODULE_BASE_NAME": "\"webengine4\"",
+    "ENGINE_MODULE_FULL_NAME": "\"webengine4.dll\"",
+    "FILTER_MODULE_FULL_NAME": "\"aspnet_filter.dll\"",
+    "ISAPI_MODULE_BASE_NAME": "\"aspnet_isapi\"",
+    "ISAPI_MODULE_FULL_NAME": "\"aspnet_isapi.dll\"",
+    "MGDENGINE_MODULE_BASE_NAME": "\"webengine4\"",
+    "MGDENGINE_MODULE_FULL_NAME": "\"webengine4.dll\"",
+    "PERF_MODULE_BASE_NAME": "\"aspnet_perf\"",
+    "PERF_MODULE_FULL_NAME": "\"aspnet_perf.dll\"",
+    "RC_MODULE_BASE_NAME": "\"aspnet_rc\"",
+    "RC_MODULE_FULL_NAME": "\"aspnet_rc.dll\"",
+    "REGPATH_MACHINE_APP": "\"Software\\\\Microsoft\\\\ASP.NET\"",
+    "STATE_MODULE_BASE_NAME": "\"aspnet_state\"",
+    "STATE_MODULE_FULL_NAME": "\"aspnet_state.exe\"",
+    "WEB_MODULE_BASE_NAME": "\"System.Web\"",
+    "WEB_MODULE_FULL_NAME": "\"System.Web.dll\"",
+    "WP_MODULE_BASE_NAME": "\"aspnet_wp\"",
+    "WP_MODULE_FULL_NAME": "\"aspnet_wp.exe\""
+  }
+}
