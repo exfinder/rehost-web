@@ -6,5 +6,6 @@
   <ItemGroup>
     <PackageVersion Include="System.CodeDom" Version="10.0.10" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.10" />
+    <PackageVersion Include="System.Security.Permissions" Version="10.0.10" />
   </ItemGroup>
 </Project>
