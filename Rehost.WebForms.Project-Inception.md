@@ -2,7 +2,8 @@
 
 > Working document for a compatibility-oriented port of .NET Framework 4.x `System.Web` and related ASP.NET Web Forms libraries to modern .NET, initially .NET 10 and Kestrel.
 
-**Status:** Initial project brief  
+**Status:** Active clean re-baseline; generated-input and foundational-reference layers complete
+
 **Created:** 2026-07-18  
 **Updated:** 2026-07-19  
 **Provisional umbrella brand:** Rehost  
@@ -244,6 +245,46 @@ Classify candidate POC changes into four groups:
 
 Mechanical changes can be replayed after review. Semantics-preserving changes require compatibility tests. Intentional deviations require ADRs and compatibility documentation. Experimental shortcuts should normally be redesigned.
 
+### 8.5 Clean re-baseline checkpoint
+
+The first two mechanical layers were completed on 2026-07-19 without modifying
+Reference Source, adding compatibility shims, excluding sources, suppressing
+warnings, or changing behavior.
+
+| Build checkpoint | Errors | Warnings |
+| --- | ---: | ---: |
+| Untouched `net10.0` baseline | 5,794 | 755 |
+| Deterministic generated inputs | 3,487 | 755 |
+| Foundational package/build references | 286 | 1,083 |
+
+All forwarded-assembly errors are removed. The remaining errors are now
+concentrated in deliberate later layers: 177 Windows/design-time dependencies
+(including 164 missing `UITypeEditor` references), 85 sibling-assembly types,
+19 AppDomain/remoting/serialization dependencies, and five residual
+configuration/generated/internal cascades.
+
+This pass established several durable constraints:
+
+- `System.Drawing.Common` does not restore the classic `UITypeEditor` design
+  surface. Runtime, Windows-only, and design-time profiles require an explicit
+  boundary decision.
+- Reference Source executes MSBuild tasks during runtime compilation. MSBuild
+  deployment and toolset selection are runtime architecture concerns, not only
+  build-time implementation details.
+- Public APIs expose concrete `System.Data.SqlClient` command and exception
+  types. `Microsoft.Data.SqlClient` can coexist, but cannot transparently
+  replace those contracts; any dual-provider strategy requires an ADR and
+  differential tests.
+- Package vulnerability auditing is part of every dependency change. The
+  MSBuild task graph initially resolved a vulnerable transitive
+  `System.Security.Cryptography.Xml`; the dependency is explicitly pinned to a
+  serviced version and the final graph has no reported vulnerable packages.
+
+The next mechanical layer is restoration of authoritative sibling assembly
+partitions, beginning with application services, Web Services/resource
+contracts, and data-protection ownership. Removed APIs, design/profile splits,
+and behavioral substitutions remain decision-gated.
+
 ## 9. Differential compatibility laboratory
 
 Differential testing should be the backbone of the project.
@@ -365,6 +406,8 @@ Historical behavior should not automatically override secure modern defaults. Wh
 | IIS-integrated dependencies | Missing modules and server variables | Define classic-host profile and explicit IIS-only exclusions |
 | Configuration hierarchy | Failures during application startup | Build configuration differential tests early |
 | Legacy cryptography and serialization | Security and data incompatibility | Byte-level baselines, threat model, compatibility switches |
+| Legacy SQL provider types in public APIs | Modern provider types are not interchangeable with compatibility contracts | Preserve legacy API; investigate additive dual-provider strategy through ADR and differential tests |
+| Transitive package vulnerabilities | Build/runtime tooling can introduce vulnerable dependencies indirectly | Audit every dependency layer and pin serviced versions explicitly when upstream constraints lag |
 | Synchronous pipeline under Kestrel | Thread starvation and poor scalability | Measure first; define bounded scheduling and cancellation model |
 | Cross-platform path behavior | Correctness and security defects | Canonical path abstraction plus Windows/Linux differential fixtures |
 | Scope explosion | Project never reaches a usable release | Compatibility profiles and vertical milestones |
@@ -387,6 +430,11 @@ Historical behavior should not automatically override secure modern defaults. Wh
 - Produce the compile-error catalog.
 - Build the .NET Framework differential runner.
 - Characterize the POC's currently working vertical slice.
+
+Repository checkpoint: untouched source import, deterministic original build
+inputs, clean diagnostic catalog, POC comparison, and foundational .NET 10
+references are complete. API inventory, oracle runner, and vertical-slice
+characterization remain.
 
 ### Stage 2: Minimal end-to-end runtime
 
@@ -445,6 +493,11 @@ The first meaningful milestone should require all of the following:
 - A security review of every enabled legacy serialization or cryptographic behavior.
 
 ## 15. Immediate next actions
+
+For repository implementation, restore authoritative sibling assembly
+partitions next. Do not address the remaining design-time, remoting, CAS,
+serialization, native, or hosting errors until their profile/architecture
+decisions and validation plans are approved.
 
 1. Validate and reserve the proposed Rehost identity, GitHub organization/repository, NuGet package IDs, and relevant domains; perform trademark review before public release.
 2. Freeze and tag the POC at `c9c908f`.
