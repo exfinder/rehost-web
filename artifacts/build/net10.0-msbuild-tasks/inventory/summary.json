@@ -1,0 +1,49 @@
+{
+  "affectedFileCounts": {
+    "error": 107,
+    "warning": 173
+  },
+  "codeCounts": {
+    "error": {
+      "CS0115": 1,
+      "CS0234": 30,
+      "CS0246": 254,
+      "SYSLIB0011": 1
+    },
+    "warning": {
+      "CS0108": 1,
+      "CS0436": 1,
+      "CS0618": 77,
+      "CS0672": 36,
+      "CS3021": 2,
+      "SYSLIB0003": 940,
+      "SYSLIB0004": 21,
+      "SYSLIB0023": 3,
+      "SYSLIB0050": 2
+    }
+  },
+  "diagnosticCount": 1369,
+  "errorCategoryCounts": {
+    "AppDomain, remoting, CAS, and serialization": 19,
+    "IIS, Windows, native, and design-time dependencies": 177,
+    "configuration dependencies": 1,
+    "missing assemblies or packages": 85,
+    "removed or inaccessible BCL/framework APIs": 1,
+    "secondary/cascading compiler diagnostics": 1,
+    "source, preprocessing, and resource generation": 2
+  },
+  "forwardedAssemblyCounts": {},
+  "nugetAudit": {
+    "outputOccurrences": 4,
+    "uniqueAdvisories": 2,
+    "package": "System.Security.Cryptography.Xml",
+    "resolvedVersion": "10.0.4",
+    "severity": "high"
+  },
+  "severityCounts": {
+    "error": 286,
+    "warning": 1083
+  },
+  "sourceLog": "temporary build log (not retained)",
+  "uniqueMessageGroups": 105
+}

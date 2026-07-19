@@ -4,6 +4,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageVersion Include="Microsoft.Build.Tasks.Core" Version="18.8.2" />
     <PackageVersion Include="System.CodeDom" Version="10.0.10" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="10.0.10" />
     <PackageVersion Include="System.Data.SqlClient" Version="4.9.1" />
