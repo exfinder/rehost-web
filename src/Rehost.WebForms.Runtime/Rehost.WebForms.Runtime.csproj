@@ -13,5 +13,9 @@
     <Compile Include="../System.Web.ReferenceSource/**/*.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
+  </ItemGroup>
+
   <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets" />
 </Project>
