@@ -1,0 +1,45 @@
+{
+  "affectedFileCounts": {
+    "error": 119,
+    "warning": 167
+  },
+  "codeCounts": {
+    "error": {
+      "CS0115": 1,
+      "CS0234": 37,
+      "CS0246": 276,
+      "CS1069": 77,
+      "SYSLIB0011": 1
+    },
+    "warning": {
+      "CS0108": 1,
+      "CS0436": 1,
+      "CS0672": 36,
+      "CS3021": 2,
+      "SYSLIB0003": 940,
+      "SYSLIB0004": 21,
+      "SYSLIB0023": 3,
+      "SYSLIB0050": 2
+    }
+  },
+  "diagnosticCount": 1398,
+  "errorCategoryCounts": {
+    "AppDomain, remoting, CAS, and serialization": 19,
+    "CodeDOM and runtime compilation": 29,
+    "IIS, Windows, native, and design-time dependencies": 177,
+    "configuration dependencies": 1,
+    "missing assemblies or packages": 162,
+    "removed or inaccessible BCL/framework APIs": 1,
+    "secondary/cascading compiler diagnostics": 1,
+    "source, preprocessing, and resource generation": 2
+  },
+  "forwardedAssemblyCounts": {
+    "System.Data.SqlClient": 77
+  },
+  "severityCounts": {
+    "error": 392,
+    "warning": 1006
+  },
+  "sourceLog": "temporary build log (not retained)",
+  "uniqueMessageGroups": 112
+}
