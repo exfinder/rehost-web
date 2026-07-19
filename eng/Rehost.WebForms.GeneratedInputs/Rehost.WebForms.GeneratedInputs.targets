@@ -1,0 +1,42 @@
+<Project>
+  <PropertyGroup>
+    <SystemWebGeneratedInputsDir>$(BaseIntermediateOutputPath)$(Configuration)/$(TargetFramework)/generated/System.Web/</SystemWebGeneratedInputsDir>
+    <GeneratedInputsToolProject>$(MSBuildThisFileDirectory)Rehost.WebForms.GeneratedInputs.csproj</GeneratedInputsToolProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileFullPath)" />
+    <_SystemWebGeneratorInput Include="$(GeneratedInputsToolProject)" />
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)Program.cs" />
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)inputs/*.json" />
+    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/System.Web.txt" />
+    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/Names.cspp" />
+    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/cacheusage.cspp" />
+    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/cacheexpires.cspp" />
+
+    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)AssemblyRef.g.cs" />
+    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)CacheExpires.g.cs" />
+    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)CacheUsage.g.cs" />
+    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)ModName.g.cs" />
+    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)RegularExpressions.g.cs" />
+    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)SR.g.cs" />
+    <_SystemWebGeneratedResource Include="$(SystemWebGeneratedInputsDir)System.Web.resources" />
+    <_SystemWebGeneratorOutput Include="@(_SystemWebGeneratedSource);@(_SystemWebGeneratedResource)" />
+
+    <Compile Include="@(_SystemWebGeneratedSource)" />
+    <EmbeddedResource Include="@(_SystemWebGeneratedResource)"
+                      LogicalName="System.Web.resources" />
+  </ItemGroup>
+
+  <Target Name="GenerateSystemWebBuildInputs"
+          BeforeTargets="PrepareForBuild"
+          Inputs="@(_SystemWebGeneratorInput)"
+          Outputs="@(_SystemWebGeneratorOutput)">
+    <MSBuild Projects="$(GeneratedInputsToolProject)"
+             Targets="Build"
+             Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="_GeneratedInputsToolOutput" />
+    </MSBuild>
+    <Exec Command="dotnet &quot;%(_GeneratedInputsToolOutput.Identity)&quot; generate &quot;$(MSBuildProjectDirectory)/../..&quot; &quot;$(SystemWebGeneratedInputsDir)&quot;" />
+  </Target>
+</Project>

@@ -7,28 +7,11 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SystemWebGeneratedInputsDir>$(BaseIntermediateOutputPath)$(Configuration)/$(TargetFramework)/generated/System.Web/</SystemWebGeneratedInputsDir>
-    <GeneratedInputsToolProject>$(MSBuildProjectDirectory)/../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj</GeneratedInputsToolProject>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="../System.Web.ReferenceSource/**/*.cs" />
-    <Compile Include="$(SystemWebGeneratedInputsDir)AssemblyRef.g.cs" />
-    <Compile Include="$(SystemWebGeneratedInputsDir)CacheExpires.g.cs" />
-    <Compile Include="$(SystemWebGeneratedInputsDir)CacheUsage.g.cs" />
-    <Compile Include="$(SystemWebGeneratedInputsDir)ModName.g.cs" />
-    <Compile Include="$(SystemWebGeneratedInputsDir)RegularExpressions.g.cs" />
-    <Compile Include="$(SystemWebGeneratedInputsDir)SR.g.cs" />
-    <EmbeddedResource Include="$(SystemWebGeneratedInputsDir)System.Web.resources"
-                      LogicalName="System.Web.resources" />
   </ItemGroup>
 
-  <Target Name="GenerateSystemWebBuildInputs" BeforeTargets="PrepareForBuild">
-    <MSBuild Projects="$(GeneratedInputsToolProject)"
-             Targets="Build"
-             Properties="Configuration=$(Configuration)">
-      <Output TaskParameter="TargetOutputs" ItemName="_GeneratedInputsToolOutput" />
-    </MSBuild>
-    <Exec Command="dotnet &quot;%(_GeneratedInputsToolOutput.Identity)&quot; generate &quot;$(MSBuildProjectDirectory)/../..&quot; &quot;$(SystemWebGeneratedInputsDir)&quot;" />
-  </Target>
+  <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets" />
 </Project>

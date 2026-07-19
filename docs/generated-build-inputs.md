@@ -83,9 +83,12 @@ temporary directories and requires byte-for-byte equality. It then validates:
   timeout constructors;
 - absence of `Portable.*` assembly and resource identities.
 
-The runtime project invokes the same generator automatically before
-`PrepareForBuild`. The SDK remains pinned by `global.json`; the generator has no
-external package references.
+The runtime project imports the generation wiring from
+`eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets`.
+MSBuild `Inputs`/`Outputs` tracking skips generation when every artifact exists
+and is newer than its pinned input. Cleaning `obj`, changing an input, or
+changing the generator runs it before `PrepareForBuild`. The SDK remains pinned
+by `global.json`; the generator has no external package references.
 
 ## Recorded verification results
 

@@ -9,6 +9,12 @@
     "externalPackages": [],
     "outputPolicy": "Outputs are generated under the runtime project's obj/<Configuration>/net10.0/generated/System.Web directory and are not copied into src/System.Web.ReferenceSource."
   },
+  "integration": {
+    "targets": "eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets",
+    "targetsSha256": "a402bf824937307a8a3e227c3005e0f460104121c5c09676b52844b8c0f1ea65",
+    "runtimeImport": "src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj",
+    "incrementalPolicy": "MSBuild skips generation when all seven outputs exist and are newer than the generator, manifests, and pinned Reference Source inputs."
+  },
   "pinnedTreeInputs": [
     {
       "path": "src/System.Web.ReferenceSource/System.Web.txt",
