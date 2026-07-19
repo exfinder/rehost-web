@@ -750,13 +750,14 @@ internal static class Program
             string options = string.Join(
                 " | ",
                 definition.Options.Select(option => "RegexOptions." + option));
+            string compiledOptions = options + " | RegexOptions.Compiled";
             output.Append("    ").Append(visibility).Append(" class ").Append(definition.Name)
                 .AppendLine(" : Regex {");
             output.Append("        public ").Append(definition.Name).Append("() : base(")
-                .Append(CSharpString(definition.Pattern)).Append(", ").Append(options)
+                .Append(CSharpString(definition.Pattern)).Append(", ").Append(compiledOptions)
                 .AppendLine(", Regex.InfiniteMatchTimeout) { }");
             output.Append("        public ").Append(definition.Name).Append("(TimeSpan matchTimeout) : base(")
-                .Append(CSharpString(definition.Pattern)).Append(", ").Append(options)
+                .Append(CSharpString(definition.Pattern)).Append(", ").Append(compiledOptions)
                 .AppendLine(", matchTimeout) { }");
             output.AppendLine("    }");
             output.AppendLine();
@@ -899,10 +900,20 @@ internal static class Program
         foreach (RegularExpressionDefinition definition in manifest.Regexes)
         {
             string visibility = definition.IsPublic ? "public" : "internal";
+            string options = string.Join(
+                " | ",
+                definition.Options.Select(option => "RegexOptions." + option));
+            string compiledOptions = options + " | RegexOptions.Compiled";
             Require(source.Contains($"{visibility} class {definition.Name} : Regex", StringComparison.Ordinal),
                 $"Regex type {definition.Name} has an unexpected visibility or base type.");
-            Require(source.Contains($"public {definition.Name}(TimeSpan matchTimeout)", StringComparison.Ordinal),
-                $"Regex type {definition.Name} is missing its timeout constructor.");
+            Require(source.Contains(
+                    $"public {definition.Name}() : base({CSharpString(definition.Pattern)}, {compiledOptions}, Regex.InfiniteMatchTimeout)",
+                    StringComparison.Ordinal),
+                $"Regex type {definition.Name} has an unexpected default constructor.");
+            Require(source.Contains(
+                    $"public {definition.Name}(TimeSpan matchTimeout) : base({CSharpString(definition.Pattern)}, {compiledOptions}, matchTimeout)",
+                    StringComparison.Ordinal),
+                $"Regex type {definition.Name} has an unexpected timeout constructor.");
             Regex compiled = new(definition.Pattern, ParseRegexOptions(definition.Options), TimeSpan.FromSeconds(1));
             Require(compiled.ToString() == definition.Pattern, $"Regex pattern {definition.Name} did not round-trip.");
         }

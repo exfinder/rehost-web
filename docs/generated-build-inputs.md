@@ -25,7 +25,7 @@ The generated files are intermediate build artifacts and are not checked into
 | `Names.cspp` | `native-names.json` (`names.h` macros and `FEATURE_PAL=false`) | `ModName.g.cs` | Desktop Framework 4 Windows module/registry constants; no unresolved preprocessor branch |
 | `cacheusage.cspp` | None | `CacheUsage.g.cs` | Macro expansion and `UsageEntryRef`, `UsageBucket`, `CacheUsage` symbols |
 | `cacheexpires.cspp` | None | `CacheExpires.g.cs` | Macro expansion and `ExpiresEntryRef`, `ExpiresBucket`, `CacheExpires` symbols |
-| Microsoft `regcomp/RegexPreCompiler.cs` normalized in `regular-expressions.json` | Pinned external-path provenance | `RegularExpressions.g.cs` | 27 original constructible type names, patterns, options, visibility, and timeout constructors |
+| Microsoft `regcomp/RegexPreCompiler.cs` normalized in `regular-expressions.json` | Pinned external-path provenance | `RegularExpressions.g.cs` | 27 original constructible type names, patterns, declared options, visibility, and timeout constructors; generated constructors additionally request `RegexOptions.Compiled` |
 | `assembly-identities.json` | Rehost identity policy and pinned source usages | `AssemblyRef.g.cs` | Exact coverage of every `AssemblyRef.*` use plus explicit `ThisAssembly.Version` |
 
 Complete machine-readable provenance, upstream blobs, SHA-256 values, and POC
@@ -36,6 +36,17 @@ The POC `System.Web.resources` file is the golden oracle for resource
 serialization. It is not copied into this repository: the portable generator
 reproduces it byte-for-byte from the pinned `System.Web.txt`, including
 ResGen's removal of whitespace immediately following `=`.
+
+The regex manifest retains Microsoft's declared options. Generated constructors
+add `RegexOptions.Compiled` when invoking the .NET 10 `Regex` base constructor.
+This requests runtime compilation where dynamic code is available and falls
+back to the interpreter where it is not. It is an intentional performance
+choice and makes the observable `Regex.Options` value differ from the original.
+
+- [ ] **TODO — regex generation:** Revisit build-time `[GeneratedRegex]` or a
+  project-owned source generator after assembly/API, culture, and timeout
+  compatibility decisions. Preserve the original constructible types and
+  callers; benchmark against this `RegexOptions.Compiled` baseline.
 
 ## Identity choices represented by this layer
 
@@ -79,8 +90,8 @@ temporary directories and requires byte-for-byte equality. It then validates:
 - every `AssemblyRef` constant referenced by the imported source;
 - native module and registry constants;
 - cache type symbols and complete removal of function macros;
-- all 27 regex patterns, options, visibility values, default constructors, and
-  timeout constructors;
+- all 27 regex patterns, declared options plus `RegexOptions.Compiled`,
+  visibility values, default constructors, and timeout constructors;
 - absence of `Portable.*` assembly and resource identities.
 
 The runtime project imports the generation wiring from

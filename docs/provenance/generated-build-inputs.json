@@ -4,7 +4,7 @@
     "project": "eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj",
     "projectSha256": "cbda77be076f6ff67d1a510c950892ab127591d8dec1e78eb4f9a23d48b41661",
     "implementation": "eng/Rehost.WebForms.GeneratedInputs/Program.cs",
-    "implementationSha256": "5651b812fdb532c487bb34b9203d08a26b4feedaf1f1cc4148ad84336fce1270",
+    "implementationSha256": "ecd9648d9e746d9eed3dd62b266c887e264dc8253babc76d1775b6b14fba6bdf",
     "targetFramework": "net10.0",
     "externalPackages": [],
     "outputPolicy": "Outputs are generated under the runtime project's obj/<Configuration>/net10.0/generated/System.Web directory and are not copied into src/System.Web.ReferenceSource."
@@ -46,6 +46,7 @@
       "path": "eng/Rehost.WebForms.GeneratedInputs/inputs/regular-expressions.json",
       "sha256": "8972901094998665cfe3a0a34bec379075b09729c607a318bb5e7af2d812c27e",
       "purpose": "Normalized declarations for the 27 constructible System.Web.RegularExpressions types, including patterns, options, visibility, and timeout constructors.",
+      "generatedImplementation": "Generated constructors pass the original declared options plus RegexOptions.Compiled to the .NET 10 Regex base constructor.",
       "derivedFrom": {
         "repository": "https://github.com/microsoft/referencesource.git",
         "revision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
@@ -87,7 +88,7 @@
     "CacheExpires.g.cs": "6794fcc04ce57016c34fe2724afc444687dfe1dfc6ae31c48d5ac773d35457d4",
     "CacheUsage.g.cs": "8a0f297887215bea7bbc0a457d4944f41cdd2205632fa6b23019b1c6fcd42f7a",
     "ModName.g.cs": "7e88a93b613fe1ac8d1f14db37cd407d297be940d966b5ac60c30674c378c940",
-    "RegularExpressions.g.cs": "c66ac69a0f836226d253f671feb41b021fc5385fd8fbe81ba89e9c3320710b4b",
+    "RegularExpressions.g.cs": "35fe82ec2d2a2277e94e5d2f1633d073c8bf4042fab2175bdb80aa176eae7341",
     "SR.g.cs": "0e747c11120d079160aaee055d8dd39c78c1e9c308b6929231521c2d2a996491",
     "System.Web.resources": "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95"
   },
