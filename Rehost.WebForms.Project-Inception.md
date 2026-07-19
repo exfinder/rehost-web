@@ -175,7 +175,7 @@ Maximum semantic compatibility requires a clear authority hierarchy.
 | Purpose | Primary authority |
 | --- | --- |
 | Public API shape | .NET Framework reference assemblies and API metadata |
-| Observable behavior | A running, patched .NET Framework 4.8.1 installation |
+| Observable behavior | A running .NET Framework 4.8.1 installation |
 | Primary implementation | Microsoft Reference Source at a pinned commit |
 | Modern BCL implementation patterns | Current official `dotnet/runtime` sources |
 | Alternative implementation ideas | Mono source |
