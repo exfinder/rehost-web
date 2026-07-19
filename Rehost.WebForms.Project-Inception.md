@@ -2,7 +2,7 @@
 
 > Working document for a compatibility-oriented port of .NET Framework 4.x `System.Web` and related ASP.NET Web Forms libraries to modern .NET, initially .NET 10 and Kestrel.
 
-**Status:** Active clean re-baseline; generated-input, foundational-reference, and design-metadata layers complete
+**Status:** Active clean re-baseline; ApplicationServices sibling restored
 
 **Created:** 2026-07-18  
 **Updated:** 2026-07-19  
@@ -261,6 +261,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | Foundational package/build references | 286 | 1,083 |
 | Design-time metadata marker | 122 | 1,083 |
 | Designer-service markers | 119 | 1,083 |
+| ApplicationServices sibling | 38 | 1,083 |
 
 All forwarded-assembly errors are removed. The remaining errors are now
 concentrated in deliberate later layers: 85 sibling-assembly types, 19
@@ -289,10 +290,12 @@ This pass established several durable constraints:
   `System.Security.Cryptography.Xml`; the dependency is explicitly pinned to a
   serviced version and the final graph has no reported vulnerable packages.
 
-The next mechanical layer is restoration of authoritative sibling assembly
-partitions, beginning with application services, Web Services/resource
-contracts, and data-protection ownership. Removed APIs, design/profile splits,
-and behavioral substitutions remain decision-gated.
+The first authoritative sibling partition, `System.Web.ApplicationServices`,
+is restored. Its custom-loader AppDomain dependency uses an explicitly approved
+in-process overlay; its legacy warning policy is isolated to the sibling
+project. Next sibling candidates are Web Services/resource contracts and
+data-protection ownership. Removed APIs, design/profile splits, and further
+behavioral substitutions remain decision-gated.
 
 ## 9. Differential compatibility laboratory
 

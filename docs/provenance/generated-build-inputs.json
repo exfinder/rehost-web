@@ -4,16 +4,23 @@
     "project": "eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj",
     "projectSha256": "cbda77be076f6ff67d1a510c950892ab127591d8dec1e78eb4f9a23d48b41661",
     "implementation": "eng/Rehost.WebForms.GeneratedInputs/Program.cs",
-    "implementationSha256": "ecd9648d9e746d9eed3dd62b266c887e264dc8253babc76d1775b6b14fba6bdf",
+    "implementationSha256": "cca9bb26562be1257d568ae4ee2a6b3f5c09cca7d015e769cc77aef52a616228",
     "targetFramework": "net10.0",
     "externalPackages": [],
     "outputPolicy": "Outputs are generated under the runtime project's obj/<Configuration>/net10.0/generated/System.Web directory and are not copied into src/System.Web.ReferenceSource."
   },
   "integration": {
     "targets": "eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets",
-    "targetsSha256": "a402bf824937307a8a3e227c3005e0f460104121c5c09676b52844b8c0f1ea65",
+    "targetsSha256": "5a30e0cd1d5a9af516b149766d3c08d157bf7305c3296088e40b00f20491153c",
     "runtimeImport": "src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj",
-    "incrementalPolicy": "MSBuild skips generation when all seven outputs exist and are newer than the generator, manifests, and pinned Reference Source inputs."
+    "incrementalPolicy": "MSBuild skips generation when all six outputs exist and are newer than the generator, manifests, and pinned Reference Source inputs."
+  },
+  "staticBuildInputs": {
+    "project": "eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj",
+    "projectSha256": "45abb77d4fabb7445821418e0d6527c2382317367966ba0a6f11e6e99a75ad26",
+    "assemblyRef": "eng/Rehost.WebForms.ReferenceSource.BuildInputs/AssemblyRef.cs",
+    "assemblyRefSha256": "a963ff973a28547c23a27d11d7d1f236a063e1454a9e496a90fd0a77bdc648b4",
+    "policy": "One internal compile-time constants type is friend-visible to product assemblies. The non-packable helper is not copied to product output and does not appear in product dependency metadata."
   },
   "pinnedTreeInputs": [
     {
@@ -74,17 +81,16 @@
     {
       "path": "eng/Rehost.WebForms.GeneratedInputs/inputs/assembly-identities.json",
       "sha256": "3a1652021615fcbfd701af82d3326a975205816cb52e609d3f5a1f9ab15516bc",
-      "purpose": "Explicit unsigned Rehost output identity, neutral resource identity, legacy Microsoft identity strings, AssemblyRef constants, and ThisAssembly version.",
+      "purpose": "Explicit unsigned Rehost output identity, neutral resource identity, legacy Microsoft identity strings, checked-in AssemblyRef constants, and product version policy.",
       "policySources": [
         "Rehost.WebForms.Project-Inception.md section 17.4",
         "AssemblyRef and ThisAssembly usages in the pinned imported tree",
         "Microsoft public-key token literals already present in the pinned System.Web sources"
       ],
-      "identityDistinction": "The generated output is System.Web, Version=4.0.0.0 with no strong-name token. AssemblyRef.MicrosoftPublicKey remains the legacy b03f5f7f11d50a3a reflection/configuration constant and does not claim that the Rehost output is Microsoft-signed."
+      "identityDistinction": "The System.Web output is Version=4.0.0.0 with no strong-name token. AssemblyRef.MicrosoftPublicKey remains the legacy b03f5f7f11d50a3a reflection/configuration constant and does not claim that the Rehost output is Microsoft-signed."
     }
   ],
   "verifiedOutputSha256": {
-    "AssemblyRef.g.cs": "48f2d383acbec8b663e2fa47a041bb6f147f2ec17cef8d78089cb43f47442e37",
     "CacheExpires.g.cs": "6794fcc04ce57016c34fe2724afc444687dfe1dfc6ae31c48d5ac773d35457d4",
     "CacheUsage.g.cs": "8a0f297887215bea7bbc0a457d4944f41cdd2205632fa6b23019b1c6fcd42f7a",
     "ModName.g.cs": "7e88a93b613fe1ac8d1f14db37cd407d297be940d966b5ac60c30674c378c940",

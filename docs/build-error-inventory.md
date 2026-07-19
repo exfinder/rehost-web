@@ -85,7 +85,7 @@ Error counts by compiler diagnostic:
 | Code | Count | Meaning in this pass |
 | --- | ---: | --- |
 | CS1069 | 2,580 | Forwarded type needs a non-framework assembly/package |
-| CS0103 | 2,269 | Mostly missing generated `SR`, `AssemblyRef`, and `ModName` symbols |
+| CS0103 | 2,269 | Mostly missing original build-input `SR`, `AssemblyRef`, and `ModName` symbols |
 | CS0246 | 684 | Missing type, sibling assembly, platform API, or generated input |
 | CS0182 | 110 | Cascades from missing constant-valued generated symbols |
 | CS0234 | 57 | Missing namespace/assembly partition |

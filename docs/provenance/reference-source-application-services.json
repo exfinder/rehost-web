@@ -1,0 +1,23 @@
+{
+  "component": "System.Web.ApplicationServices",
+  "upstream": {
+    "repository": "https://github.com/microsoft/referencesource.git",
+    "revision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
+    "revisionDate": "2025-10-15T21:56:37+05:30",
+    "sourcePath": "System.Web.ApplicationServices",
+    "sourceTree": "47ea8379f877cc4c797b67c43d42af3daab9ee72",
+    "fileCount": 22
+  },
+  "import": {
+    "path": "src/System.Web.ApplicationServices.ReferenceSource",
+    "policy": "byte-for-byte copy with no source modifications",
+    "verification": "The imported Git tree object must equal upstream.sourceTree."
+  },
+  "license": {
+    "spdxIdentifier": "MIT",
+    "upstreamPath": "LICENSE.txt",
+    "upstreamBlob": "232e566b5f8a015c770c3fc41730593fb0758ef4",
+    "localPath": "third_party/microsoft/referencesource/LICENSE.txt",
+    "sha256": "c1f47cf87974fdc14137ddd32e6273c0d9b30365bba4b96daf0b26243e309a4c"
+  }
+}

@@ -13,7 +13,6 @@ internal static class Program
     private static readonly UTF8Encoding Utf8WithoutBom = new(false);
     private static readonly string[] ArtifactNames =
     [
-        "AssemblyRef.g.cs",
         "CacheExpires.g.cs",
         "CacheUsage.g.cs",
         "ModName.g.cs",
@@ -66,7 +65,6 @@ internal static class Program
 
         WriteText(Path.Combine(outputDirectory, "SR.g.cs"), GenerateSr(resources, identities.Resource.BaseName));
         WriteResources(Path.Combine(outputDirectory, "System.Web.resources"), resources);
-        WriteText(Path.Combine(outputDirectory, "AssemblyRef.g.cs"), GenerateAssemblyRef(identities));
         WriteText(
             Path.Combine(outputDirectory, "ModName.g.cs"),
             Preprocess(
@@ -122,7 +120,10 @@ internal static class Program
 
             VerifyResources(Path.Combine(first, "System.Web.resources"), expectedResources);
             VerifySr(Path.Combine(first, "SR.g.cs"), expectedResources, identities);
-            VerifyAssemblyRef(Path.Combine(first, "AssemblyRef.g.cs"), sourceRoot, identities);
+            VerifyAssemblyRef(
+                Path.Combine(repositoryRoot, "eng", "Rehost.WebForms.ReferenceSource.BuildInputs", "AssemblyRef.cs"),
+                sourceRoot,
+                identities);
             VerifyModName(Path.Combine(first, "ModName.g.cs"));
             VerifyCacheSources(
                 Path.Combine(first, "CacheUsage.g.cs"),
@@ -317,29 +318,6 @@ internal static class Program
             writer.AddResource(name, value);
         }
         writer.Generate();
-    }
-
-    private static string GenerateAssemblyRef(IdentityManifest identities)
-    {
-        StringBuilder output = GeneratedHeader("explicit assembly-identities.json -> AssemblyRef.g.cs");
-        output.Append("[assembly: System.Reflection.AssemblyVersion(")
-            .Append(CSharpString(identities.OutputAssembly.Version)).AppendLine(")] ");
-        output.AppendLine();
-        output.AppendLine("namespace System.Web {");
-        output.AppendLine("    internal static class ThisAssembly {");
-        output.Append("        internal const string Version = ")
-            .Append(CSharpString(identities.OutputAssembly.Version)).AppendLine(";");
-        output.AppendLine("    }");
-        output.AppendLine();
-        output.AppendLine("    internal static class AssemblyRef {");
-        foreach ((string name, string value) in identities.AssemblyRefConstants.OrderBy(pair => pair.Key, StringComparer.Ordinal))
-        {
-            output.Append("        internal const string ").Append(name).Append(" = ")
-                .Append(CSharpString(value)).AppendLine(";");
-        }
-        output.AppendLine("    }");
-        output.AppendLine("}");
-        return output.ToString();
     }
 
     private static string Preprocess(
@@ -826,10 +804,8 @@ internal static class Program
         foreach ((string name, string value) in identities.AssemblyRefConstants)
         {
             Require(generated.Contains($"const string {name} = {CSharpString(value)};", StringComparison.Ordinal),
-                $"AssemblyRef.{name} was not generated with its manifest value.");
+                $"AssemblyRef.{name} does not match its manifest value.");
         }
-        Require(generated.Contains("AssemblyVersion(\"4.0.0.0\")", StringComparison.Ordinal),
-            "The output assembly version is not explicit.");
         Require(!generated.Contains("Portable.", StringComparison.Ordinal), "AssemblyRef inherited a POC identity.");
 
         HashSet<string> referencedConstants = [];

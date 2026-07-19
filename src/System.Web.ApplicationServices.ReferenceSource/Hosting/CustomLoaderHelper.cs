@@ -10,11 +10,17 @@ namespace System.Web.Hosting {
     using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Runtime.Remoting;
+    using System.Runtime.Versioning;
 
     // Used to locate a custom loader implementation within a bin-deployed assembly.
 
     internal sealed class CustomLoaderHelper : MarshalByRefObject {
 
+        // the first framework version where the custom loader feature was implemented
+        private static readonly string _customLoaderTargetFrameworkName = new FrameworkName(".NETFramework", new Version(4, 5, 1)).ToString();
+
+        private static readonly string _customLoaderAssemblyName = typeof(CustomLoaderHelper).Assembly.FullName;
+        private static readonly string _customLoaderTypeName = typeof(CustomLoaderHelper).FullName;
         private static readonly Guid IID_ICustomLoader = new Guid("50A3CE65-2F9F-44E9-9094-32C6C928F966");
 
         // Instances of this type should only ever be created via reflection (see call to CreateObjectAndUnwrap
@@ -41,10 +47,42 @@ namespace System.Web.Hosting {
                 }
             }
 
-            // AppDomain isolation is unavailable on modern .NET. Instantiate the
-            // custom loader in the current process instead.
-            newlyCreatedAppDomain = null;
-            return new CustomLoaderHelper().GetCustomLoaderImpl(customLoaderPhysicalPath);
+            // Step 2: Create the new AD
+
+            string binFolderPhysicalPath = helperFunctions.MapPath("/bin/");
+
+            AppDomainSetup setup = new AppDomainSetup() {
+                PrivateBinPathProbe = "*",  // disable loading from app base
+                PrivateBinPath = binFolderPhysicalPath,
+                ApplicationBase = helperFunctions.AppPhysicalPath,
+                TargetFrameworkName = _customLoaderTargetFrameworkName
+            };
+
+            if (configFilePath != null) {
+                setup.ConfigurationFile = configFilePath;
+            }
+
+            AppDomain newAppDomainForCustomLoader = AppDomain.CreateDomain("aspnet-custom-loader-" + Guid.NewGuid(), null, setup);
+            try {
+                // Step 3: Instantiate helper in new AD so that we can get a reference to the loader
+                CustomLoaderHelper helper = (CustomLoaderHelper)newAppDomainForCustomLoader.CreateInstanceAndUnwrap(_customLoaderAssemblyName, _customLoaderTypeName,
+                    ignoreCase: false,
+                    bindingAttr: BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance | BindingFlags.Instance,
+                    binder: null,
+                    args: null,
+                    culture: null,
+                    activationAttributes: null);
+                ObjectHandle ohCustomLoader = helper.GetCustomLoaderImpl(customLoaderPhysicalPath);
+
+                // If we got this far, success!
+                newlyCreatedAppDomain = newAppDomainForCustomLoader;
+                return ohCustomLoader;
+            }
+            catch {
+                // If something went wrong, kill the new AD.
+                AppDomain.Unload(newAppDomainForCustomLoader);
+                throw;
+            }
         }
 
         private ObjectHandle GetCustomLoaderImpl(string customLoaderPhysicalPath) {

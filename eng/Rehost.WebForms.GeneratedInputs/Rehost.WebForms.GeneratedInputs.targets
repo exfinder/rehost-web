@@ -14,7 +14,6 @@
     <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/cacheusage.cspp" />
     <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/cacheexpires.cspp" />
 
-    <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)AssemblyRef.g.cs" />
     <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)CacheExpires.g.cs" />
     <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)CacheUsage.g.cs" />
     <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)ModName.g.cs" />

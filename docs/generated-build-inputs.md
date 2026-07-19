@@ -7,7 +7,7 @@ to compile the pinned `System.Web` sources. It does not edit the imported tree,
 add packages, port runtime behavior, add compatibility types, suppress warnings,
 or exclude source files.
 
-The runtime project builds a package-free generator first and writes all outputs
+The runtime project builds a package-free generator first and writes its outputs
 under:
 
 ```text
@@ -15,7 +15,9 @@ src/Rehost.WebForms.Runtime/obj/<Configuration>/net10.0/generated/System.Web/
 ```
 
 The generated files are intermediate build artifacts and are not checked into
-`src/System.Web.ReferenceSource`.
+`src/System.Web.ReferenceSource`. Assembly identity constants instead live in
+one checked-in, compile-time-only BuildInputs assembly shared by product
+projects.
 
 ## Inputs and outputs
 
@@ -26,7 +28,7 @@ The generated files are intermediate build artifacts and are not checked into
 | `cacheusage.cspp` | None | `CacheUsage.g.cs` | Macro expansion and `UsageEntryRef`, `UsageBucket`, `CacheUsage` symbols |
 | `cacheexpires.cspp` | None | `CacheExpires.g.cs` | Macro expansion and `ExpiresEntryRef`, `ExpiresBucket`, `CacheExpires` symbols |
 | Microsoft `regcomp/RegexPreCompiler.cs` normalized in `regular-expressions.json` | Pinned external-path provenance | `RegularExpressions.g.cs` | 27 original constructible type names, patterns, declared options, visibility, and timeout constructors; generated constructors additionally request `RegexOptions.Compiled` |
-| `assembly-identities.json` | Rehost identity policy and pinned source usages | `AssemblyRef.g.cs` | Exact coverage of every `AssemblyRef.*` use plus explicit `ThisAssembly.Version` |
+| `assembly-identities.json` | Rehost identity policy and pinned source usages | checked-in `eng/Rehost.WebForms.ReferenceSource.BuildInputs/AssemblyRef.cs` | Exact coverage of every `AssemblyRef.*` use; product assembly versions remain project-local |
 
 Complete machine-readable provenance, upstream blobs, SHA-256 values, and POC
 comparison boundaries are recorded in
@@ -87,7 +89,7 @@ temporary directories and requires byte-for-byte equality. It then validates:
 - all resource names and values against `System.Web.txt`;
 - byte equality by SHA-256 with the pinned POC ResGen resource output;
 - `SR` constant count and resource base name;
-- every `AssemblyRef` constant referenced by the imported source;
+- every checked-in `AssemblyRef` constant referenced by the imported source;
 - native module and registry constants;
 - cache type symbols and complete removal of function macros;
 - all 27 regex patterns, declared options plus `RegexOptions.Compiled`,
@@ -98,8 +100,11 @@ The runtime project imports the generation wiring from
 `eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets`.
 MSBuild `Inputs`/`Outputs` tracking skips generation when every artifact exists
 and is newer than its pinned input. Cleaning `obj`, changing an input, or
-changing the generator runs it before `PrepareForBuild`. The SDK remains pinned
-by `global.json`; the generator has no external package references.
+changing the generator runs it before `PrepareForBuild`. `AssemblyRef` is not a
+generated artifact: product projects reference the non-packable BuildInputs
+project with copy-local disabled, and its constants are inlined. The SDK remains
+pinned by `global.json`; neither build-input project has external package
+references.
 
 ## Recorded verification results
 

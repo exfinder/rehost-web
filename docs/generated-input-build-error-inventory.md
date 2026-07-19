@@ -49,7 +49,7 @@ layer.
 
 | Code | Before | After | Delta | Explanation |
 | --- | ---: | ---: | ---: | --- |
-| CS0103 | 2,269 | 90 | -2,179 | Generated `SR`, `AssemblyRef`, and `ModName` symbols plus related constants now bind |
+| CS0103 | 2,269 | 90 | -2,179 | Generated `SR`/`ModName` and static `AssemblyRef` symbols plus related constants now bind |
 | CS0182 | 110 | 0 | -110 | Attribute arguments became compile-time constants after `AssemblyRef`/`ModName` generation |
 | CS0234 | 57 | 51 | -6 | `System.Web.RegularExpressions` namespace/types restored |
 | CS0246 | 684 | 678 | -6 | Cache `.cspp` types restored |
@@ -58,7 +58,7 @@ layer.
 
 Direct missing-symbol groups are fully eliminated:
 
-| Generated product marker | Before | After |
+| Restored build-product marker | Before | After |
 | --- | ---: | ---: |
 | `SR` | 1,667 | 0 |
 | `AssemblyRef` | 300 | 0 |
