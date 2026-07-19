@@ -1,0 +1,38 @@
+{
+  "analysisPass": "generated-build-inputs",
+  "date": "2026-07-19",
+  "sourceBaselineCommit": "e8a8e33b9f133b190f7b779b00c0a640d66face5",
+  "referenceSourceRevision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
+  "command": "dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj --nologo --verbosity:minimal -flp:logfile=artifacts/build/net10.0-generated-inputs/build.log;verbosity=diagnostic -bl:artifacts/build/net10.0-generated-inputs/build.binlog",
+  "workingDirectory": "/Users/vm/repos/rehost-webforms",
+  "environment": {
+    "dotnetSdk": "10.0.302",
+    "msbuild": "18.6.11.33009",
+    "hostRuntime": "10.0.10",
+    "operatingSystem": "macOS 26.5 (Darwin 25.5.0)",
+    "architecture": "arm64"
+  },
+  "result": {
+    "exitCode": 1,
+    "elapsed": "00:00:44.13",
+    "errors": 3487,
+    "warnings": 755
+  },
+  "rawArtifacts": {
+    "buildLog": {
+      "path": "artifacts/build/net10.0-generated-inputs/build.log",
+      "sha256": "ad8466ba32734c9ef8323a2e1b380fe8f133855dcc9bfb6718e270800654ec7a",
+      "tracked": false
+    },
+    "binaryLog": {
+      "path": "artifacts/build/net10.0-generated-inputs/build.binlog",
+      "sha256": "ee6ef0b65ef1157d502ab959f96bab2de2dfd666c378336f049041f7e9893c00",
+      "tracked": false
+    }
+  },
+  "normalizedDiagnostics": {
+    "path": "artifacts/build/net10.0-generated-inputs/inventory/diagnostics.tsv",
+    "sha256": "b95d2ad1d33316611fdd26cfaa39e169c3e3eb1e378903b717fc51808260c4d8",
+    "containsEveryReportedDiagnostic": true
+  }
+}
