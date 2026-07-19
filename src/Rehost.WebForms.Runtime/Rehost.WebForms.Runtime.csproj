@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Drawing.Common" />
     <PackageReference Include="System.Runtime.Caching" />
     <PackageReference Include="System.Security.Permissions" />
   </ItemGroup>
