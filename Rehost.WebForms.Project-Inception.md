@@ -90,12 +90,27 @@ Support should be published as named, testable profiles rather than as a single 
 - Membership, roles, profiles, and application services
 - Additional historically related ASP.NET packages
 
-### 4.4 Platform-specific compatibility
+### 4.4 Cross-platform requirement
+
+The supported runtime is cross-platform. Windows-only runtime behavior is not
+an accepted implementation outcome, and no feature is considered implemented
+if it requires Windows, IIS, WindowsDesktop, the registry, COM, or DPAPI.
+
+For legacy contracts backed by operating-system facilities, the runtime must
+provide a host-neutral implementation that preserves the application-observable
+contract. If faithful portable behavior is impossible, the feature is
+unsupported on every platform and must fail clearly with actionable migration
+guidance; it must not become a Windows-only compatibility profile. Windows may
+remain necessary for the .NET Framework differential oracle and one-time data
+migration tooling, but never for the supported runtime.
+
+This applies in particular to:
 
 - Windows identity and impersonation
 - COM/Enterprise Services dependencies
 - Windows-only data or drawing facilities
 - IIS-specific integrated-pipeline behavior
+- DPAPI-backed data protection and persisted cryptographic material
 
 ### 4.5 Explicitly deferred or unsupported
 
@@ -270,13 +285,20 @@ Services/data-protection, and four residual configuration/generated cascades.
 
 This pass established several durable constraints:
 
-- Windows-specific functionality and design-time tooling are unsupported. The
-  runtime remains plain `net10.0` and must not acquire a WindowsDesktop
-  dependency. Legacy `UITypeEditor` attribute references resolve to one
+- Windows-specific runtime implementations are not accepted; affected
+  contracts require portable replacements or explicit unsupported behavior on
+  every platform. Design-time tooling is unsupported. The runtime remains plain
+  `net10.0` and must not acquire a WindowsDesktop dependency. Legacy
+  `UITypeEditor` attribute references resolve to one
   internal, non-instantiable metadata marker; designer-only service branches
   resolve to internal compile-time shapes. Both groups remain outside Reference
   Source and were individually approved; they do not grant blanket approval
   for further shims.
+- The removed `System.Security.Cryptography.DataProtector` contract requires a
+  managed cross-platform compatibility implementation. `DpapiDataProtector`
+  cannot define the runtime architecture or default persistence model; existing
+  DPAPI-bound payloads require explicit Windows migration tooling that
+  decrypts and re-protects them into the portable format.
 - Reference Source executes MSBuild tasks during runtime compilation. MSBuild
   deployment and toolset selection are runtime architecture concerns, not only
   build-time implementation details.
@@ -384,7 +406,7 @@ Early ADR candidates include:
 8. Machine-key and data-protection behavior
 9. Configuration hierarchy and `web.config` handling
 10. File monitoring, restart, and dynamic recompilation
-11. Windows-only features and cross-platform profiles
+11. Portable replacements for Windows/IIS/COM/DPAPI contracts
 12. Secure defaults versus vulnerable historical behavior
 
 ## 11. Security principles
@@ -417,7 +439,7 @@ Historical behavior should not automatically override secure modern defaults. Wh
 | AppDomain removal | Affects isolation, reload, shadow copy, static state | Define a process/AssemblyLoadContext model and document limitations |
 | Runtime compilation differences | Broad application incompatibility | Preserve parser/codegen; create C# and VB compiler conformance fixtures |
 | `Thread.Abort` removal | Lifecycle and timeout differences | Characterize all termination paths before choosing replacement semantics |
-| IIS-integrated dependencies | Missing modules and server variables | Define classic-host profile and explicit IIS-only exclusions |
+| IIS-integrated dependencies | Missing modules and server variables | Preserve observable contracts through the host-neutral adapter; classify irreducible IIS behavior unsupported on every platform |
 | Configuration hierarchy | Failures during application startup | Build configuration differential tests early |
 | Legacy cryptography and serialization | Security and data incompatibility | Byte-level baselines, threat model, compatibility switches |
 | Legacy SQL provider types in public APIs | Modern provider types are not interchangeable with compatibility contracts | Preserve legacy API; investigate additive dual-provider strategy through ADR and differential tests |
@@ -501,6 +523,7 @@ The first meaningful milestone should require all of the following:
 - ASPX compilation and execution through real Kestrel integration tests.
 - Differential lifecycle, response, ViewState, and postback tests.
 - Both C# and Visual Basic runtime compilation.
+- Runtime and compatibility suites pass on Windows, Linux, and macOS.
 - No tests operating on repository source directories.
 - No silent no-op compatibility shim without an explicit support classification.
 - Every semantic deviation linked to an ADR and compatibility-matrix entry.
@@ -510,8 +533,8 @@ The first meaningful milestone should require all of the following:
 
 For repository implementation, restore authoritative sibling assembly
 partitions next. Do not address the remaining Windows/native, remoting, CAS,
-serialization, or hosting errors until their profile/architecture decisions
-and validation plans are approved.
+serialization, or hosting errors until their portable replacement or explicit
+cross-platform unsupported behavior and validation plans are approved.
 
 1. Validate and reserve the proposed Rehost identity, GitHub organization/repository, NuGet package IDs, and relevant domains; perform trademark review before public release.
 2. Freeze and tag the POC at `c9c908f`.
@@ -528,7 +551,7 @@ and validation plans are approved.
 
 - Is the primary purpose indefinite operation of Web Forms on modern .NET, or safe staged migration away from Web Forms?
 - What does “minimal changes” allow in project files, configuration, source, and deployment?
-- Is Linux support required for the first stable release or a later compatibility profile?
+- Which Windows, Linux, and macOS versions comprise the initial mandatory support matrix?
 - Must Visual Basic be supported in the first milestone?
 - Which third-party control suites determine real-world success?
 - Will insecure historical behavior ever be the default?
