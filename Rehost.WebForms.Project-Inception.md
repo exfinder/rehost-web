@@ -260,10 +260,11 @@ compile-time-only design-metadata marker outside Reference Source.
 | Deterministic generated inputs | 3,487 | 755 |
 | Foundational package/build references | 286 | 1,083 |
 | Design-time metadata marker | 122 | 1,083 |
+| Designer-service markers | 119 | 1,083 |
 
 All forwarded-assembly errors are removed. The remaining errors are now
 concentrated in deliberate later layers: 85 sibling-assembly types, 19
-AppDomain/remoting/serialization dependencies, 13 other
+AppDomain/remoting/serialization dependencies, 10 other
 Windows/native/design-time dependencies, and five residual
 configuration/generated/internal cascades.
 
@@ -272,8 +273,10 @@ This pass established several durable constraints:
 - Windows-specific functionality and design-time tooling are unsupported. The
   runtime remains plain `net10.0` and must not acquire a WindowsDesktop
   dependency. Legacy `UITypeEditor` attribute references resolve to one
-  internal, non-instantiable metadata marker outside Reference Source. This is
-  an individually approved shim, not blanket approval for further shims.
+  internal, non-instantiable metadata marker; designer-only service branches
+  resolve to internal compile-time shapes. Both groups remain outside Reference
+  Source and were individually approved; they do not grant blanket approval
+  for further shims.
 - Reference Source executes MSBuild tasks during runtime compilation. MSBuild
   deployment and toolset selection are runtime architecture concerns, not only
   build-time implementation details.
