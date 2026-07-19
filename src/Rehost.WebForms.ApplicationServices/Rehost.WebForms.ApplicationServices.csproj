@@ -9,16 +9,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../System.Web.ApplicationServices.ReferenceSource/**/*.cs"
-             Exclude="../System.Web.ApplicationServices.ReferenceSource/Hosting/CustomLoaderHelper.cs" />
-    <EmbeddedResource Include="../System.Web.ApplicationServices.ReferenceSource/ApplicationServicesStrings.resx"
-                      LogicalName="System.Web.ApplicationServicesStrings.resources" />
+    <Compile
+      Include="../System.Web.ApplicationServices.ReferenceSource/**/*.cs"
+      Exclude="../System.Web.ApplicationServices.ReferenceSource/Hosting/CustomLoaderHelper.cs" />
+    <EmbeddedResource
+      Include="../System.Web.ApplicationServices.ReferenceSource/ApplicationServicesStrings.resx"
+      LogicalName="System.Web.ApplicationServicesStrings.resources" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj"
-                      Private="false"
-                      PrivateAssets="all" />
+    <ProjectReference
+      Include="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj"
+      Private="false"
+      PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

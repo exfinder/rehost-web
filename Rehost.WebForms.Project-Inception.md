@@ -263,11 +263,10 @@ compile-time-only design-metadata marker outside Reference Source.
 | Designer-service markers | 119 | 1,083 |
 | ApplicationServices sibling | 38 | 1,083 |
 
-All forwarded-assembly errors are removed. The remaining errors are now
-concentrated in deliberate later layers: 85 sibling-assembly types, 19
-AppDomain/remoting/serialization dependencies, 10 other
-Windows/native/design-time dependencies, and five residual
-configuration/generated/internal cascades.
+All forwarded-assembly and membership/application-services errors are removed.
+The remaining 38 errors are concentrated in deliberate later layers: 16
+AppDomain/remoting/serialization, 10 Windows/native/design-time, eight Web
+Services/data-protection, and four residual configuration/generated cascades.
 
 This pass established several durable constraints:
 
@@ -293,9 +292,12 @@ This pass established several durable constraints:
 The first authoritative sibling partition, `System.Web.ApplicationServices`,
 is restored. Its custom-loader AppDomain dependency uses an explicitly approved
 in-process overlay; its legacy warning policy is isolated to the sibling
-project. Next sibling candidates are Web Services/resource contracts and
-data-protection ownership. Removed APIs, design/profile splits, and further
-behavioral substitutions remain decision-gated.
+project. One non-packable, compile-time-only BuildInputs assembly owns the
+shared `AssemblyRef` constants; constants inline into consumers and the helper
+does not enter product output or dependency metadata. Next sibling candidates
+are Web Services/resource contracts and data-protection ownership. Removed APIs,
+design/profile splits, and further behavioral substitutions remain
+decision-gated.
 
 ## 9. Differential compatibility laboratory
 
