@@ -2,7 +2,7 @@
 
 > Working document for a compatibility-oriented port of .NET Framework 4.x `System.Web` and related ASP.NET Web Forms libraries to modern .NET, initially .NET 10 and Kestrel.
 
-**Status:** Active clean re-baseline; generated-input and foundational-reference layers complete
+**Status:** Active clean re-baseline; generated-input, foundational-reference, and design-metadata layers complete
 
 **Created:** 2026-07-18  
 **Updated:** 2026-07-19  
@@ -251,25 +251,29 @@ Mechanical changes can be replayed after review. Semantics-preserving changes re
 
 The first two mechanical layers were completed on 2026-07-19 without modifying
 Reference Source, adding compatibility shims, excluding sources, suppressing
-warnings, or changing behavior.
+warnings, or changing behavior. A subsequent, explicitly approved shim adds one
+compile-time-only design-metadata marker outside Reference Source.
 
 | Build checkpoint | Errors | Warnings |
 | --- | ---: | ---: |
 | Untouched `net10.0` baseline | 5,794 | 755 |
 | Deterministic generated inputs | 3,487 | 755 |
 | Foundational package/build references | 286 | 1,083 |
+| Design-time metadata marker | 122 | 1,083 |
 
 All forwarded-assembly errors are removed. The remaining errors are now
-concentrated in deliberate later layers: 177 Windows/design-time dependencies
-(including 164 missing `UITypeEditor` references), 85 sibling-assembly types,
-19 AppDomain/remoting/serialization dependencies, and five residual
+concentrated in deliberate later layers: 85 sibling-assembly types, 19
+AppDomain/remoting/serialization dependencies, 13 other
+Windows/native/design-time dependencies, and five residual
 configuration/generated/internal cascades.
 
 This pass established several durable constraints:
 
-- `System.Drawing.Common` does not restore the classic `UITypeEditor` design
-  surface. Runtime, Windows-only, and design-time profiles require an explicit
-  boundary decision.
+- Windows-specific functionality and design-time tooling are unsupported. The
+  runtime remains plain `net10.0` and must not acquire a WindowsDesktop
+  dependency. Legacy `UITypeEditor` attribute references resolve to one
+  internal, non-instantiable metadata marker outside Reference Source. This is
+  an individually approved shim, not blanket approval for further shims.
 - Reference Source executes MSBuild tasks during runtime compilation. MSBuild
   deployment and toolset selection are runtime architecture concerns, not only
   build-time implementation details.
@@ -497,9 +501,9 @@ The first meaningful milestone should require all of the following:
 ## 15. Immediate next actions
 
 For repository implementation, restore authoritative sibling assembly
-partitions next. Do not address the remaining design-time, remoting, CAS,
-serialization, native, or hosting errors until their profile/architecture
-decisions and validation plans are approved.
+partitions next. Do not address the remaining Windows/native, remoting, CAS,
+serialization, or hosting errors until their profile/architecture decisions
+and validation plans are approved.
 
 1. Validate and reserve the proposed Rehost identity, GitHub organization/repository, NuGet package IDs, and relevant domains; perform trademark review before public release.
 2. Freeze and tag the POC at `c9c908f`.
