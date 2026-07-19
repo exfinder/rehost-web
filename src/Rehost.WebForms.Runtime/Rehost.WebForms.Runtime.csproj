@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Data.SqlClient" />
     <PackageReference Include="System.DirectoryServices" />
     <PackageReference Include="System.DirectoryServices.Protocols" />
     <PackageReference Include="System.Drawing.Common" />
