@@ -12,9 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile
-      Include="../System.Web.ReferenceSource/**/*.cs"
-      Exclude="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs;../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs;../System.Web.ReferenceSource/Configuration/RemoteWebConfigurationHostStream.cs;../System.Web.ReferenceSource/Management/regiisutil.cs;../System.Web.ReferenceSource/Util/Transactions.cs" />
+    <Compile Include="../System.Web.ReferenceSource/**/*.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Configuration/RemoteWebConfigurationHostStream.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Management/regiisutil.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Util/Transactions.cs" />
   </ItemGroup>
 
   <ItemGroup>
