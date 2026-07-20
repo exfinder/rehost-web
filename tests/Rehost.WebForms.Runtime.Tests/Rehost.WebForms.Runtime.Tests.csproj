@@ -9,11 +9,13 @@
 
   <ItemGroup>
     <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Resources/StronglyTypedResourceBuilder.cs" Link="StronglyTypedResourceBuilder.cs" />
+    <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Configuration/SmtpSection.cs" Link="SmtpSection.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
 </Project>
