@@ -283,11 +283,14 @@ compile-time-only design-metadata marker outside Reference Source.
 | SMTP configuration contract | 27 | 1,083 |
 | CallContext compatibility | 14 | 1,083 |
 | Enterprise Services contract | 8 | 1,083 |
+| AppDomainManager compile contract | 7 | 1,083 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
 removed. COM+ transaction execution is explicitly unsupported on every
-platform while its public enum and method contracts remain. The remaining 8 errors are
+platform while its internal enum and method contracts remain. A compile-only
+`AppDomainManager` contract supports the imported hosting code; secondary
+AppDomains remain unsupported. The remaining 7 errors are
 concentrated in deliberate later layers: remoting/serialization, Windows/native
 and design-time contracts, and residual configuration/generated inputs.
 
