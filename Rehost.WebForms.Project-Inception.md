@@ -281,10 +281,11 @@ compile-time-only design-metadata marker outside Reference Source.
 | Web Services first iteration | 30 | 1,083 |
 | Generated resource contracts | 28 | 1,083 |
 | SMTP configuration contract | 27 | 1,083 |
+| CallContext compatibility | 14 | 1,083 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
-first-iteration Web Services, and generated resource contract errors are
-removed. The remaining 27 errors are
+first-iteration Web Services, generated resource contract, and CallContext errors are
+removed. The remaining 14 errors are
 concentrated in deliberate later layers: remoting/serialization, Windows/native
 and design-time contracts, and residual configuration/generated inputs.
 

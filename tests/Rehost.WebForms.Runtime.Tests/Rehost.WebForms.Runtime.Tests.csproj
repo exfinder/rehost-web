@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Resources/StronglyTypedResourceBuilder.cs" Link="StronglyTypedResourceBuilder.cs" />
     <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Configuration/SmtpSection.cs" Link="SmtpSection.cs" />
+    <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Remoting/CallContext.cs" Link="CallContext.cs" />
   </ItemGroup>
 
   <ItemGroup>
