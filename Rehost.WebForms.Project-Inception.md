@@ -286,6 +286,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | AppDomainManager compile contract | 7 | 1,083 |
 | BinaryFormatter compatibility enabled | 6 | 1,084 |
 | Remote configuration unsupported | 4 | 1,081 |
+| Windows administration tooling excluded | 2 | 1,075 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
@@ -294,8 +295,8 @@ platform while its internal enum and method contracts remain. A compile-only
 `AppDomainManager` contract supports the imported hosting code; secondary
 AppDomains remain unsupported. BinaryFormatter compatibility is intentionally
 enabled for legacy state serialization. Remote IIS configuration is explicitly
-unsupported cross-platform. The remaining 4 errors are concentrated in Windows/native
-and design-time contracts, and residual configuration/generated inputs.
+unsupported cross-platform. Windows-only `aspnet_regiis` COM/MMC administration
+tooling is excluded. The remaining 2 errors are in the XSD design-time provider.
 
 This pass established several durable constraints:
 
