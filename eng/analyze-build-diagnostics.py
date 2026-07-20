@@ -115,6 +115,7 @@ def main() -> None:
 
     root = args.root.resolve()
     diagnostics: list[dict[str, object]] = []
+    diagnostic_keys: set[tuple[object, ...]] = set()
     for raw_line in args.log.read_text(encoding="utf-8", errors="replace").splitlines():
         match = DIAGNOSTIC.match(raw_line)
         if not match:
@@ -135,6 +136,12 @@ def main() -> None:
             if item["severity"] == "error"
             else "warning"
         )
+        key = tuple(item[field] for field in (
+            "severity", "code", "file", "line", "column", "project", "message"
+        ))
+        if key in diagnostic_keys:
+            continue
+        diagnostic_keys.add(key)
         diagnostics.append(item)
 
     args.output.mkdir(parents=True, exist_ok=True)

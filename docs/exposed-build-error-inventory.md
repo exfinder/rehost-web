@@ -1,0 +1,66 @@
+# Newly exposed build-error inventory
+
+## Checkpoint
+
+This inventory records the compiler wave exposed after the XSD build-provider
+declaration errors were removed on July 20, 2026. It uses the mandated
+non-hanging Runtime build command with an additional diagnostic file logger.
+
+| Measure | Count |
+| --- | ---: |
+| Errors | 79 |
+| Warnings | 2,441 |
+| Files with errors | 23 |
+| Files with warnings | 249 |
+
+MSBuild logged each diagnostic twice (task output and summary). The inventory
+analyzer now deduplicates the full diagnostic identity; raw reported totals and
+all tables below count each source diagnostic once.
+
+## Error groups
+
+Groups are mutually exclusive, assigned by affected file and API family.
+
+| Group | Errors | Main locations / missing contract |
+| --- | ---: | --- |
+| AppDomain, remoting, dynamic assembly | 31 | `ApplicationManager`, `BuildResultCache`, `ClientBuildManager`, `RecycleLimitMonitor`, dynamic assembly helpers |
+| Windows service browser-capability installation | 10 | `BrowserCapabilitiesCodeGenerator`; `ServiceController` |
+| Remote IIS configuration server | 9 | impersonation and file ACL APIs in `RemoteWebConfigurationHost*` |
+| Configuration path helper mismatch | 9 | missing `Debug` and `ConfigPathUtility.GetParent` |
+| Windows CNG algorithms | 5 | `MD5Cng`, `SHA*Cng` |
+| Data-binding metadata | 3 | `BindableTypeAttribute` |
+| Removed database-provider APIs | 3 | SQL notification enlistment, provider permissions, OleDb |
+| AppDomain data overload | 2 | three-argument `AppDomain.SetData` |
+| ResX build provider | 2 | `ResXResourceReader` |
+| Legacy XML load overload | 2 | internal three-argument `XmlDocument.Load` path |
+| LOS serialization overload | 1 | byte-array conversion mismatch |
+| Role claim provider | 1 | `DynamicRoleClaimProvider` |
+| CAS assembly permission metadata | 1 | `Assembly.PermissionSet` |
+| **Total** | **79** | |
+
+The largest group is architectural: modern .NET cannot reproduce secondary
+AppDomain isolation with compatibility members alone. Remote IIS configuration
+has already been declared unsupported, so its remaining server files should be
+handled consistently rather than shimmed individually. Package/API groups must
+still be checked for cross-platform behavior before adding dependencies.
+
+## Warning shape
+
+The 2,441 warnings are also newly complete enough to classify. Largest codes:
+
+| Code | Count | Meaning |
+| --- | ---: | --- |
+| `SYSLIB0003` | 1,117 | CAS unsupported/obsolete |
+| `CS0618` | 504 | obsolete Framework APIs |
+| `CA1416` | 450 | Windows-only API reachability |
+| `CS0436` | 206 | local `System.Web` types conflict with modern facade types |
+
+Warning cleanup should follow compile-error architecture decisions; suppressing
+these categories globally would hide real compatibility boundaries.
+
+## Artifacts and validation
+
+Machine-readable output is under
+`artifacts/build/net10.0/exposed-wave-inventory/`: complete diagnostics,
+message groups, compiler-code counts, subsystem counts, forwarded assemblies,
+and JSON summary. Imported Reference Source remains unchanged.

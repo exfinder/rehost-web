@@ -306,6 +306,8 @@ Build checkpoints are compiler-frontier measurements, not monotonic estimates
 of work remaining. Declaration errors can prevent Roslyn from binding later
 method bodies; removing a group can therefore increase the reported totals.
 Only a successful emit establishes that no compile errors remain.
+The current 79-error wave is grouped and machine-recorded in
+`docs/exposed-build-error-inventory.md`.
 
 This pass established several durable constraints:
 
