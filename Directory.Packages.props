@@ -14,5 +14,7 @@
     <PackageVersion Include="System.Runtime.Caching" Version="10.0.10" />
     <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.10" />
     <PackageVersion Include="System.Security.Permissions" Version="10.0.10" />
+    <PackageVersion Include="Shouldly" Version="4.3.0" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
   </ItemGroup>
 </Project>

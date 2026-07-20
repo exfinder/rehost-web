@@ -1,0 +1,23 @@
+{
+  "component": "System.Web.Services",
+  "upstream": {
+    "repository": "https://github.com/microsoft/referencesource.git",
+    "revision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
+    "revisionDate": "2025-10-15T21:56:37+05:30",
+    "sourcePath": "System.Web.Services",
+    "sourceTree": "8d6a1f157f53489d84f7602a2f63ca0644da8a1f",
+    "fileCount": 175
+  },
+  "import": {
+    "path": "src/System.Web.Services.ReferenceSource",
+    "policy": "byte-for-byte copy with no source modifications",
+    "verification": "The imported directory must recursively match upstream.sourceTree. The product project compiles an explicit staged allowlist."
+  },
+  "license": {
+    "spdxIdentifier": "MIT",
+    "upstreamPath": "LICENSE.txt",
+    "upstreamBlob": "232e566b5f8a015c770c3fc41730593fb0758ef4",
+    "localPath": "third_party/microsoft/referencesource/LICENSE.txt",
+    "sha256": "c1f47cf87974fdc14137ddd32e6273c0d9b30365bba4b96daf0b26243e309a4c"
+  }
+}

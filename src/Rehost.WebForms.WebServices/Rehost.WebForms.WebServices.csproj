@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>System.Web.Services</AssemblyName>
+    <RootNamespace>System.Web.Services</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/Configuration/ProtocolElement.cs" />
+    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/Configuration/ProtocolElementCollection.cs" />
+    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/Configuration/Protocols.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Security.Permissions" />
+  </ItemGroup>
+</Project>

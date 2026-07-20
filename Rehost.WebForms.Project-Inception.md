@@ -2,10 +2,10 @@
 
 > Working document for a compatibility-oriented port of .NET Framework 4.x `System.Web` and related ASP.NET Web Forms libraries to modern .NET, initially .NET 10 and Kestrel.
 
-**Status:** Active clean re-baseline; ApplicationServices sibling restored
+**Status:** Active clean re-baseline; Web Services first iteration restored
 
 **Created:** 2026-07-18  
-**Updated:** 2026-07-19  
+**Updated:** 2026-07-20
 **Provisional umbrella brand:** Rehost  
 **Initial product:** Rehost WebForms  
 **POC repository:** `/Users/vm/repos/Portable.System.Web`  
@@ -277,11 +277,13 @@ compile-time-only design-metadata marker outside Reference Source.
 | Design-time metadata marker | 122 | 1,083 |
 | Designer-service markers | 119 | 1,083 |
 | ApplicationServices sibling | 38 | 1,083 |
+| Data-protection contract | 34 | 1,083 |
+| Web Services first iteration | 30 | 1,083 |
 
-All forwarded-assembly and membership/application-services errors are removed.
-The remaining 38 errors are concentrated in deliberate later layers: 16
-AppDomain/remoting/serialization, 10 Windows/native/design-time, eight Web
-Services/data-protection, and four residual configuration/generated cascades.
+All forwarded-assembly, membership/application-services, data-protection, and
+first-iteration Web Services errors are removed. The remaining 30 errors are
+concentrated in deliberate later layers: remoting/serialization, Windows/native
+and design-time contracts, and residual configuration/generated inputs.
 
 This pass established several durable constraints:
 
@@ -310,14 +312,20 @@ This pass established several durable constraints:
   MSBuild task graph initially resolved a vulnerable transitive
   `System.Security.Cryptography.Xml`; the dependency is explicitly pinned to a
   serviced version and the final graph has no reported vulnerable packages.
+- The first Web Services iteration restores only the configuration contracts
+  required by `System.Web`. Legacy `.wsdl` and `Application_WebReferences`
+  proxy generation is explicitly unsupported and fails with an actionable
+  `PlatformNotSupportedException`. Full ASMX/SOAP support remains a separate,
+  decision-gated layer; see `docs/web-services-build-error-inventory.md`.
 
 The first authoritative sibling partition, `System.Web.ApplicationServices`,
 is restored. Its custom-loader AppDomain dependency uses an explicitly approved
 in-process overlay; its legacy warning policy is isolated to the sibling
 project. One non-packable, compile-time-only BuildInputs assembly owns the
 shared `AssemblyRef` constants; constants inline into consumers and the helper
-does not enter product output or dependency metadata. Next sibling candidates
-are Web Services/resource contracts and data-protection ownership. Removed APIs,
+does not enter product output or dependency metadata. The Web Services sibling
+now owns its initial configuration contracts. Next candidates are residual
+resource/generated inputs; full Web Services behavior, removed APIs,
 design/profile splits, and further behavioral substitutions remain
 decision-gated.
 

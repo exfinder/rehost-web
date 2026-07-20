@@ -9,11 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../System.Web.ReferenceSource/**/*.cs" />
+    <Compile
+      Include="../System.Web.ReferenceSource/**/*.cs"
+      Exclude="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs;../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
     <ProjectReference
       Include="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj"
       Private="false"
