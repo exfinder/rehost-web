@@ -287,6 +287,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | BinaryFormatter compatibility enabled | 6 | 1,084 |
 | Remote configuration unsupported | 4 | 1,081 |
 | Windows administration tooling excluded | 2 | 1,075 |
+| XSD typed DataSet generation unsupported | 79 | 2,441 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
@@ -296,7 +297,10 @@ platform while its internal enum and method contracts remain. A compile-only
 AppDomains remain unsupported. BinaryFormatter compatibility is intentionally
 enabled for legacy state serialization. Remote IIS configuration is explicitly
 unsupported cross-platform. Windows-only `aspnet_regiis` COM/MMC administration
-tooling is excluded. The remaining 2 errors are in the XSD design-time provider.
+tooling is excluded. App_Code typed DataSet generation from `.xsd` is explicitly
+unsupported. Its two blocking diagnostics are removed; compilation now advances
+far enough to expose 79 later errors across AppDomain hosting, remote configuration,
+design-time APIs, XML helpers, and other compatibility layers.
 
 This pass established several durable constraints:
 
