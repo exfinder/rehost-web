@@ -282,10 +282,12 @@ compile-time-only design-metadata marker outside Reference Source.
 | Generated resource contracts | 28 | 1,083 |
 | SMTP configuration contract | 27 | 1,083 |
 | CallContext compatibility | 14 | 1,083 |
+| Enterprise Services contract | 8 | 1,083 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
-removed. The remaining 14 errors are
+removed. COM+ transaction execution is explicitly unsupported on every
+platform while its public enum and method contracts remain. The remaining 8 errors are
 concentrated in deliberate later layers: remoting/serialization, Windows/native
 and design-time contracts, and residual configuration/generated inputs.
 

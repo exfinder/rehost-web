@@ -12,7 +12,7 @@
   <ItemGroup>
     <Compile
       Include="../System.Web.ReferenceSource/**/*.cs"
-      Exclude="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs;../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs" />
+      Exclude="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs;../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs;../System.Web.ReferenceSource/Util/Transactions.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,6 +10,10 @@
   <ItemGroup>
     <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Resources/StronglyTypedResourceBuilder.cs" Link="StronglyTypedResourceBuilder.cs" />
     <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Configuration/SmtpSection.cs" Link="SmtpSection.cs" />
+    <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/EnterpriseServices/ContextUtil.cs" Link="ContextUtil.cs" />
+    <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/EnterpriseServices/TransactionOption.cs" Link="TransactionOption.cs" />
+    <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/EnterpriseServices/TransactionVote.cs" Link="TransactionVote.cs" />
+    <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/EnterpriseServices/Transactions.cs" Link="Transactions.cs" />
     <Compile Include="../../src/Rehost.WebForms.Runtime/Compatibility/Remoting/CallContext.cs" Link="CallContext.cs" />
   </ItemGroup>
 
