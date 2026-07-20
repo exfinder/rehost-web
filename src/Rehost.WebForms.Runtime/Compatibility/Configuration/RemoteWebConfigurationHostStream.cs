@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.IO;
 using System.Security.Principal;
@@ -12,11 +14,11 @@ internal sealed class RemoteWebConfigurationHostStream : Stream
         bool streamForWrite,
         string serverName,
         string streamName,
-        string templateStreamName,
-        string username,
-        string domain,
-        string password,
-        WindowsIdentity identity) => throw new PlatformNotSupportedException(Message);
+        string? templateStreamName,
+        string? username,
+        string? domain,
+        string? password,
+        WindowsIdentity? identity) => throw new PlatformNotSupportedException(Message);
 
     public override bool CanRead => false;
     public override bool CanSeek => false;

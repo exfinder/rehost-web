@@ -21,7 +21,7 @@ dependency, or platform-specific branch changed.
 | Source lineage statement | MSBuild says extracted from System.Design and almost unchanged except visibility/namespace |
 | .NET Framework oracle | user-supplied `System.Design.dll`, SHA-256 `c9387539d4538d24ef8b49e970e4147ad60fade4bd355faaba5085fbf77b52d6` |
 | Oracle inspection | ILSpy/ICSharpCode.Decompiler `10.1.1.8388` |
-| Rehost adapted source | `src/Rehost.WebForms.Runtime/Compatibility/Resources/StronglyTypedResourceBuilder.cs`, SHA-256 `775719197a8f3f9796dcf0e8e284e3e696cadbf7d4fa9ccf3060f1d88d41a972` |
+| Rehost adapted source | `src/Rehost.WebForms.Runtime/Compatibility/Resources/StronglyTypedResourceBuilder.cs`, SHA-256 `e93897560483317a4518f3d7ea7a5222660336d3e281678a92b7e70e29d8a30e` |
 
 The POC copied Mono's implementation and defined `SYSTEM_WEB`. Rehost retains
 the valid constant discovery but replaces the Mono copy with Microsoft source
@@ -64,3 +64,6 @@ remains byte-identical to its pinned POC ResGen oracle.
   providers.
 - Revisit omitted `ResXDataNode` and target-aware-provider paths only when a
   supported runtime provider reaches them.
+- Replace the file-local nullable disable with annotations when Runtime adopts
+  nullable analysis; it currently preserves the legacy source's null-oblivious
+  contract.

@@ -11,13 +11,13 @@ public sealed class EnterpriseServicesContractTests
     public void Transaction_enums_match_framework_contract()
     {
         typeof(TransactionOption).IsNotPublic.ShouldBeTrue();
-        typeof(TransactionOption).IsSerializable.ShouldBeTrue();
+        HasSerializableAttribute(typeof(TransactionOption)).ShouldBeTrue();
         Enum.GetNames<TransactionOption>().ShouldBe(
             new[] { "Disabled", "NotSupported", "Supported", "Required", "RequiresNew" });
         Enum.GetValues<TransactionOption>().Select(value => (int)value).ShouldBe(new[] { 0, 1, 2, 3, 4 });
 
         typeof(TransactionVote).IsNotPublic.ShouldBeTrue();
-        typeof(TransactionVote).IsSerializable.ShouldBeTrue();
+        HasSerializableAttribute(typeof(TransactionVote)).ShouldBeTrue();
         ((int)TransactionVote.Commit).ShouldBe(0);
         ((int)TransactionVote.Abort).ShouldBe(1);
     }
@@ -51,4 +51,7 @@ public sealed class EnterpriseServicesContractTests
         Transactions.Utils.IsInTransaction.ShouldBeFalse();
         Transactions.Utils.AbortPending.ShouldBeFalse();
     }
+
+    private static bool HasSerializableAttribute(Type type) =>
+        type.CustomAttributes.Any(attribute => attribute.AttributeType == typeof(SerializableAttribute));
 }
