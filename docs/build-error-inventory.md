@@ -13,6 +13,31 @@ porting workload. C# compilation reports failures in waves: once missing
 generated inputs and high-fan-out references are restored, later method-body
 and behavioral incompatibilities will become visible.
 
+## Layered-diagnostic checkpoint correction
+
+The July 20, 2026 compatibility pass confirmed that intermediate compiler
+counts are frontier measurements, not remaining-work estimates. With unresolved
+`System.Data.Design` declarations, the mandated build reported only 2 XSD
+errors and 1,075 warnings. After replacing that provider with an explicit
+unsupported contract, Roslyn advanced into method-body binding and reported 79
+errors and 2,441 warnings.
+
+The XSD change did not introduce these failures. Newly visible locations are
+unrelated and include:
+
+- removed AppDomain/AppDomainSetup hosting APIs;
+- Windows impersonation and remote-configuration server APIs;
+- missing ResX, OleDb, data-binding, and browser-capability design contracts;
+- changed XML, SQL, cryptography, serialization, and reflection overloads.
+
+Consequently, checkpoint counts may increase after a root blocker is removed.
+Every compatibility change must report both diagnostics removed from its target
+group and the complete newly exposed build result. “Few remaining errors” must
+not be inferred from an unsuccessful compilation. A complete inventory is only
+available after the project reaches emit successfully; until then, rerun the
+mandated non-hanging build after every group and classify each newly exposed
+wave before choosing implementation work.
+
 ## Provenance and immutable baseline
 
 | Item | Recorded value |

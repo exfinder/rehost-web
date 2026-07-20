@@ -302,6 +302,11 @@ unsupported. Its two blocking diagnostics are removed; compilation now advances
 far enough to expose 79 later errors across AppDomain hosting, remote configuration,
 design-time APIs, XML helpers, and other compatibility layers.
 
+Build checkpoints are compiler-frontier measurements, not monotonic estimates
+of work remaining. Declaration errors can prevent Roslyn from binding later
+method bodies; removing a group can therefore increase the reported totals.
+Only a successful emit establishes that no compile errors remain.
+
 This pass established several durable constraints:
 
 - Windows-specific runtime implementations are not accepted; affected
