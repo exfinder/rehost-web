@@ -60,6 +60,12 @@ portable `MD5`/`SHA*` factories instead. Digest output is preserved; concrete
 provider identity and OS FIPS policy may differ. The approved five-line patch
 moves 51 errors/2,419 warnings to 46 errors/2,419 warnings.
 
+The public `BindableTypeAttribute` contract is copied from pinned Microsoft
+Reference Source into project-owned compatibility source. Recompiled consumers
+retain runtime auto-field behavior; its assembly identity is `System.Web`, not
+Framework `System.ComponentModel.DataAnnotations`. The mandated build moves 46
+errors/2,419 warnings to 43 errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
