@@ -92,6 +92,11 @@ execution explicitly because Jet/ACE OLE DB is Windows COM-only. Diagnostics
 direct applications to `SqlDataSource` with a portable provider. The mandated
 build moves 37 errors/2,419 warnings to 36 errors/2,419 warnings.
 
+A project-owned `DbProviderFactory.CreatePermission` compatibility extension
+returns null because modern .NET does not enforce provider CAS. Existing
+partial-trust checks therefore deny access; full-trust behavior is unchanged.
+The mandated build moves 36 errors/2,419 warnings to 35 errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be

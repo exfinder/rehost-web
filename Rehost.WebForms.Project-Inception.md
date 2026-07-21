@@ -298,6 +298,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | LOS byte-payload guard corrected | 38 | 2,419 |
 | Dynamic role-claim provider contract | 37 | 2,419 |
 | AccessDataSource execution unsupported | 36 | 2,419 |
+| Database-provider CAS checks fail closed | 35 | 2,419 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
