@@ -59,7 +59,13 @@ internal static class CurrentAppDomainHosting
             if (domain.GetData(".appDomain") != null)
             {
                 ValidateBinding(domain, ".appId", appId);
-                ValidateBinding(domain, ".appPath", physicalPath);
+                ValidateBinding(
+                    domain,
+                    ".appPath",
+                    physicalPath,
+                    OperatingSystem.IsWindows()
+                        ? StringComparison.OrdinalIgnoreCase
+                        : StringComparison.Ordinal);
                 ValidateBinding(domain, ".appVPath", virtualPath);
                 return;
             }
@@ -72,10 +78,14 @@ internal static class CurrentAppDomainHosting
         }
     }
 
-    private static void ValidateBinding(AppDomain domain, string key, string expected)
+    private static void ValidateBinding(
+        AppDomain domain,
+        string key,
+        string expected,
+        StringComparison comparison = StringComparison.OrdinalIgnoreCase)
     {
         var actual = domain.GetData(key) as string;
-        if (!String.Equals(actual, expected, StringComparison.OrdinalIgnoreCase))
+        if (!String.Equals(actual, expected, comparison))
         {
             throw new InvalidOperationException(
                 "The process is already bound to a different Web Forms application.");

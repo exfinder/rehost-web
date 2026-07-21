@@ -2,8 +2,8 @@
 
 **Status:** architecture for all 34 build errors approved and implemented.
 Mandated Runtime build: **0 errors / 2,397 warnings**. Runtime loading,
-shutdown/recycle, process restart, and hot reload remain TODOs. No tests or
-commit performed.
+shutdown/recycle, process restart, and hot reload remain TODOs. No tests were
+performed for this group.
 
 ## Approved decisions
 
