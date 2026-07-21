@@ -5,7 +5,7 @@
 **Status:** Active clean re-baseline; Web Services first iteration restored
 
 **Created:** 2026-07-18  
-**Updated:** 2026-07-20
+**Updated:** 2026-07-21
 **Provisional umbrella brand:** Rehost  
 **Initial product:** Rehost WebForms  
 **POC repository:** `/Users/vm/repos/Portable.System.Web`  
@@ -305,6 +305,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | Fusion shadow-cache cleanup removed | 6 | 2,402 |
 | Full-trust CAS compatibility | 2 | 2,397 |
 | Modern dynamic assembly creation | 0 | 2,397 |
+| Runtime imported-warning audit | 0 | 14 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
@@ -326,6 +327,15 @@ method bodies; removing a group can therefore increase the reported totals.
 Only a successful emit establishes that no compile errors remain. The resolved
 79-error wave and its sequential checkpoints are recorded in
 `docs/exposed-build-error-inventory.md`.
+
+The Runtime warning audit centrally suppresses 2,383 diagnostics whose current
+occurrences are exclusively imported legacy compatibility noise. The remaining
+14 stay visible because they identify removed runtime APIs (thread abort,
+AppDomain unload, CLR runtime interfaces, and assembly CodeBase), potentially
+incomplete session-state reads, or URI corruption risk. BinaryFormatter uses the
+unsupported compatibility package; a module initializer enables its process-wide
+switch before Runtime call sites. Windows-only platform diagnostics are temporarily
+treated as known imported debt.
 
 The original `CONFIGPATHUTILITY_SYSTEMWEB` build symbol restores the
 System.Web-specific configuration-path branch without modifying imported source.
