@@ -9,7 +9,6 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Threading;
 using System.Security;
 using System.Security.Permissions;
 
@@ -126,12 +125,7 @@ namespace System.Web.Util {
 
                         // Create a new assembly.
                         AssemblyBuilder newAssembly =
-                           Thread.GetDomain().DefineDynamicAssembly(assemblyName,
-                                                                    AssemblyBuilderAccess.Run,
-                                                                    null, //directory to persist assembly
-                                                                    true, //isSynchronized
-                                                                    null  //assembly attributes
-                                                                    );
+                            AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 
                         // Create a single module in the assembly.
                         _dynamicModule = newAssembly.DefineDynamicModule("M_" + name);

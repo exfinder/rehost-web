@@ -300,6 +300,11 @@ compile-time-only design-metadata marker outside Reference Source.
 | AccessDataSource execution unsupported | 36 | 2,419 |
 | Database-provider CAS checks fail closed | 35 | 2,419 |
 | Modern SqlClient notification integration | 34 | 2,419 |
+| Current-AppDomain hosting bootstrap | 13 | 2,402 |
+| In-process remoting compatibility | 8 | 2,402 |
+| Fusion shadow-cache cleanup removed | 6 | 2,402 |
+| Full-trust CAS compatibility | 2 | 2,397 |
+| Modern dynamic assembly creation | 0 | 2,397 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
@@ -310,15 +315,16 @@ AppDomains remain unsupported. BinaryFormatter compatibility is intentionally
 enabled for legacy state serialization. Remote IIS configuration is explicitly
 unsupported cross-platform. Windows-only `aspnet_regiis` COM/MMC administration
 tooling is excluded. App_Code typed DataSet generation from `.xsd` is explicitly
-unsupported. Its two blocking diagnostics are removed; compilation now advances
-far enough to expose 79 later errors across AppDomain hosting, remote configuration,
-design-time APIs, XML helpers, and other compatibility layers.
+unsupported. The exposed 79-error wave is now resolved. The Runtime project emits
+successfully with a single-process, current-AppDomain, full-trust architecture;
+secondary AppDomains, remoting, `ClientBuildManager`, partial trust, legacy CAS,
+and Fusion shadow-copy caching are explicitly unsupported.
 
 Build checkpoints are compiler-frontier measurements, not monotonic estimates
 of work remaining. Declaration errors can prevent Roslyn from binding later
 method bodies; removing a group can therefore increase the reported totals.
-Only a successful emit establishes that no compile errors remain.
-The current 79-error wave is grouped and machine-recorded in
+Only a successful emit establishes that no compile errors remain. The resolved
+79-error wave and its sequential checkpoints are recorded in
 `docs/exposed-build-error-inventory.md`.
 
 The original `CONFIGPATHUTILITY_SYSTEMWEB` build symbol restores the

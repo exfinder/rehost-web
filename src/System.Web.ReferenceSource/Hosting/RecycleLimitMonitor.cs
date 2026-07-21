@@ -52,9 +52,6 @@ namespace System.Web.Hosting {
     }
 
     public class RecycleLimitMonitor : MarshalByRefObject {
-        private static readonly string _name = "System.Web.Hosting.RecycleLimitMonitor.RecycleLimitMonitorSingleton";
-        private static readonly string _pbLimit = _name + "+pbLimit";
-
         private static object _singletonLock = new object();
         private static RecycleLimitMonitorSingleton _defaultDomainSingleton = null;
 
@@ -143,16 +140,11 @@ namespace System.Web.Hosting {
         }
 
         void GetSingleton() {
-            ApplicationManager appManager = HostingEnvironment.GetApplicationManager();
-            if (_defaultDomainSingleton == null && appManager != null && !AppDomain.CurrentDomain.IsDefaultAppDomain()) {
+            if (_defaultDomainSingleton == null) {
                 lock (_singletonLock) {
                     if (_defaultDomainSingleton == null) {
-                        AppDomain defaultDomain = appManager.GetDefaultAppDomain();
-                        defaultDomain.SetData(_pbLimit, AspNetMemoryMonitor.ProcessPrivateBytesLimit);
-                        defaultDomain.DoCallBack(new CrossAppDomainDelegate(RecycleLimitMonitorSingleton.EnsureCreated));
-
-                        // Keep a proxy reference for later use
-                        _defaultDomainSingleton = (RecycleLimitMonitorSingleton)defaultDomain.GetData(_name);
+                        _defaultDomainSingleton = RecycleLimitMonitorSingleton.GetOrCreate(
+                            AspNetMemoryMonitor.ProcessPrivateBytesLimit);
                     }
                 }
             }
@@ -210,19 +202,19 @@ namespace System.Web.Hosting {
 
 
             public static void EnsureCreated() {
-                // Only create in the default domain
-                if (AppDomain.CurrentDomain.IsDefaultAppDomain() && _singleton == null) {
+                GetOrCreate(AspNetMemoryMonitor.ProcessPrivateBytesLimit);
+            }
+
+            internal static RecycleLimitMonitorSingleton GetOrCreate(long privateBytesLimit) {
+                if (_singleton == null) {
                     lock (_singletonLock) {
                         if (_singleton == null) {
-                            var pbLimit = AppDomain.CurrentDomain.GetData(RecycleLimitMonitor._pbLimit);
-                            if (pbLimit == null) {
-                                return;
-                            }
-                            _singleton = new RecycleLimitMonitorSingleton((long)pbLimit);
-                            AppDomain.CurrentDomain.SetData(RecycleLimitMonitor._name, _singleton);
+                            _singleton = new RecycleLimitMonitorSingleton(privateBytesLimit);
                         }
                     }
                 }
+
+                return _singleton;
             }
 
             private RecycleLimitMonitorSingleton() { }
@@ -627,4 +619,3 @@ namespace System.Web.Hosting {
         }
     }
 }
-

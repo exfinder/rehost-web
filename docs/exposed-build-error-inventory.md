@@ -102,6 +102,25 @@ only `NotificationAutoEnlist` conflict pre-check; modern `System.Data.SqlClient`
 does not expose that member. `SqlDependency` creation remains unchanged. The
 mandated build moves 35 errors/2,419 warnings to 34 errors/2,419 warnings.
 
+## Runtime AppDomain/remoting/CAS resolution
+
+The approved single-process/full-trust architecture resolves the final wave in
+dependency order:
+
+| Checkpoint | Errors | Warnings |
+| --- | ---: | ---: |
+| Current-AppDomain hosting bootstrap | 13 | 2,402 |
+| In-process remoting compatibility | 8 | 2,402 |
+| Fusion shadow-cache cleanup removed | 6 | 2,402 |
+| Full-trust CAS compatibility | 2 | 2,397 |
+| Modern dynamic assembly creation | 0 | 2,397 |
+
+Secondary AppDomains, remoting, `ClientBuildManager`, partial trust, legacy CAS,
+and Fusion shadow-copy caching are unsupported. Current-domain hosting,
+`DataDirectory`, local object handles, and in-memory dynamic emit remain. See
+`docs/appdomain-remoting-cas-architecture-research.md` for decisions, imported
+source deviations, deferred runtime TODOs, and validation.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
@@ -127,4 +146,5 @@ these categories globally would hide real compatibility boundaries.
 Machine-readable output is under
 `artifacts/build/net10.0/exposed-wave-inventory/`: complete diagnostics,
 message groups, compiler-code counts, subsystem counts, forwarded assemblies,
-and JSON summary. Imported Reference Source remains unchanged.
+and JSON summary. Reference Source was unchanged at this historical inventory
+checkpoint; later approved deviations are recorded in the architecture research.

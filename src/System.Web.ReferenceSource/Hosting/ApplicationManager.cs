@@ -730,18 +730,9 @@ namespace System.Web.Hosting {
         }
 
         internal void HostingEnvironmentShutdownComplete(String appId, IApplicationHost appHost) {
-            try {
-                if (appHost != null) {
-                    // make sure application host can be GC'd
-                    MarshalByRefObject realApplicationHost = appHost as MarshalByRefObject;
-                    if (realApplicationHost != null) {
-                        RemotingServices.Disconnect(realApplicationHost);
-                    }
-                }
-            }
-            finally {
-                Interlocked.Decrement(ref _activeHostingEnvCount);
-            }
+            // The current-domain host has no remoting proxy to disconnect. Its
+            // manager-owned reference is cleared by HostingEnvironmentShutdownInitiated.
+            Interlocked.Decrement(ref _activeHostingEnvCount);
         }
 
         internal void HostingEnvironmentShutdownInitiated(String appId, HostingEnvironment env) {
@@ -827,6 +818,7 @@ namespace System.Web.Hosting {
                                 VirtualPath virtualPath,
                                 String physicalPath) {
 
+#if NETFRAMEWORK
             Debug.Trace("AppManager", "CreateObjectInNewWorkerAppDomain, type=" + type.FullName);
 
             IApplicationHost appHost = new SimpleApplicationHost(virtualPath, physicalPath);
@@ -838,6 +830,9 @@ namespace System.Web.Hosting {
             // When marshaling Type, the AppDomain must have FileIoPermission to the assembly, which is not
             // always the case, so we marshal the assembly qualified name instead
             return env.CreateInstance(type.AssemblyQualifiedName);
+#else
+            throw CurrentAppDomainHosting.SecondaryAppDomainsUnsupported();
+#endif
         }
 
         //
@@ -887,6 +882,7 @@ namespace System.Web.Hosting {
                                                 IApplicationHost appHost,
                                                 HostingEnvironmentParameters hostingParameters) {
 
+#if NETFRAMEWORK
             String physicalPath = appHost.GetPhysicalPath();
             if (!StringUtil.StringEndsWith(physicalPath, Path.DirectorySeparatorChar))
                 physicalPath = physicalPath + Path.DirectorySeparatorChar;
@@ -1322,6 +1318,9 @@ setup,
                 env.Initialize(this, appHost, configMapPathFactory, hostingParameters, policyLevel, appDomainStartupConfigurationException);
             }
             return env;
+#else
+            return CurrentAppDomainHosting.CreateHostingEnvironment(this, appId, appHost, hostingParameters);
+#endif
         }
 
         private static string NormalizePublicKeyBlob(string publicKey) {
@@ -1664,6 +1663,7 @@ setup,
             }
         }
 
+#if NETFRAMEWORK
         private static void PopulateDomainBindings(String domainId, String appId, String appName,
                                                     String appPath, VirtualPath appVPath,
                                                     AppDomainSetup setup, IDictionary dict) {
@@ -1700,6 +1700,7 @@ setup,
 
             return evidence;
         }
+#endif
 
         private static int s_domainCount = 0;
         private static Object s_domainCountLock = new Object();
@@ -1768,6 +1769,7 @@ setup,
             return GetAppConfigCommon(serverConfig, siteID, appSegment);
         }
 
+#if NETFRAMEWORK
         private sealed class AppDomainSwitches {
             public bool UseLegacyCas;
             public bool UseRandomizedStringHashAlgorithm;
@@ -1789,6 +1791,7 @@ setup,
                 }
             }
         }
+#endif
 
         // This class holds information about the environment that is hosting ASP.NET. The particular design of this class
         // is that the information is computed once and stored, and the methods which compute the information are private.

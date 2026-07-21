@@ -936,13 +936,6 @@ internal class StandardDiskBuildResultCache: DiskBuildResultCache {
             DiskBuildResultCache.TryDeleteFile(fileData.FullName);
 
         }
-
-
-        // Clean up the fusion shadow copy cache
-
-        AppDomainSetup appDomainSetup = Thread.GetDomain().SetupInformation;
-        UnsafeNativeMethods.DeleteShadowCache(appDomainSetup.CachePath,
-            appDomainSetup.ApplicationName);
     }
 
     // Deletes all files in the directory, but leaves the directory there

@@ -116,7 +116,7 @@ namespace System.Web.DataAccess {
                     appPath = Environment.CurrentDirectory;
 
                 dataDir = Path.Combine(appPath, HttpRuntime.DataDirectoryName);
-                AppDomain.CurrentDomain.SetData(s_strDataDir, dataDir, new FileIOPermission(FileIOPermissionAccess.PathDiscovery, dataDir));
+                AppDomain.CurrentDomain.SetData(s_strDataDir, dataDir);
             }
 
             return dataDir;
@@ -321,4 +321,3 @@ namespace System.Web.DataAccess {
         }
     }
 }
-

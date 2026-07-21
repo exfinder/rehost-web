@@ -70,9 +70,7 @@ namespace System.Windows.Forms
 
         [SecuritySafeCritical]
         private static void DemandGrantSet(Assembly assembly) {
-            PermissionSet targetGrantSet = assembly.PermissionSet;
-            targetGrantSet.AddPermission(RestrictedMemberAccessPermission);
-            targetGrantSet.Demand();
+            MemberAccessPermission.Demand();
         }
 
         private static bool HasReflectionPermission(Type type) {

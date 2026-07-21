@@ -485,17 +485,8 @@ public sealed class ClientBuildManager : MarshalByRefObject, IDisposable {
             throw new ArgumentNullException("virtualPath");
         }
 
-        try {
-            EnsureHostCreated();
-            _host.GetCompiledTypeAndAssemblyName(VirtualPath.Create(virtualPath), callback);
-        }
-        finally {
-            // DevDiv 180798. We are returning null in ClientBuildManagerCallback.InitializeLifetimeService,
-            // so we need to manually disconnect the instance so that it will be released.
-            if (callback != null) {
-                RemotingServices.Disconnect(callback);
-            }
-        }
+        EnsureHostCreated();
+        _host.GetCompiledTypeAndAssemblyName(VirtualPath.Create(virtualPath), callback);
     }
 
     /*
@@ -575,11 +566,6 @@ public sealed class ClientBuildManager : MarshalByRefObject, IDisposable {
                 // Revert precompilationFlags
                 _hostingParameters.ClientBuildManagerParameter.PrecompilationFlags = savedFlags;
             }
-            // DevDiv 180798. We are returning null in ClientBuildManagerCallback.InitializeLifetimeService,
-            // so we need to manually disconnect the instance so that it will be released.
-            if (callback != null) {
-                RemotingServices.Disconnect(callback);
-            }
         }
     }
 
@@ -624,6 +610,7 @@ public sealed class ClientBuildManager : MarshalByRefObject, IDisposable {
 
     private void EnsureHostCreated() {
 
+#if NETFRAMEWORK
         if (_host == null) {
             lock (_lock) {
                 // Create the host if necessary
@@ -642,6 +629,9 @@ public sealed class ClientBuildManager : MarshalByRefObject, IDisposable {
             throw new HttpException(_hostCreationException.Message,
                 _hostCreationException);
         }
+#else
+        throw CurrentAppDomainHosting.ClientBuildManagerUnsupported();
+#endif
     }
 
     private void CreateHost() {
@@ -830,5 +820,4 @@ public sealed class LinePragmaCodeInfo {
 }
 
 }
-
 

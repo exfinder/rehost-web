@@ -347,8 +347,7 @@ namespace System.Web {
 
             // Set the DataDirectory (see VSWhidbey 226834) with permission (DevDiv 29614)
             string dataDirectory = Path.Combine(_appDomainAppPath, DataDirectoryName);
-            AppDomain.CurrentDomain.SetData("DataDirectory", dataDirectory,
-                    new FileIOPermission(FileIOPermissionAccess.PathDiscovery, dataDirectory));
+            AppDomain.CurrentDomain.SetData("DataDirectory", dataDirectory);
         }
 
         private void DisposeAppDomainShutdownTimer() {
@@ -467,6 +466,11 @@ namespace System.Web {
 
                     if (trustSection == null || String.IsNullOrEmpty(trustSection.Level)) {
                         throw new ConfigurationErrorsException(SR.GetString(SR.Config_section_not_present, "trust"));
+                    }
+
+                    if (trustSection.LegacyCasModel || trustSection.Level != "Full") {
+                        throw new PlatformNotSupportedException(
+                            "Rehost supports only full trust; partial trust and legacy CAS are unavailable.");
                     }
 
                     if (trustSection.LegacyCasModel) {
@@ -3228,7 +3232,6 @@ namespace System.Web {
 
 
 #pragma warning disable 618
-            AppDomain.CurrentDomain.SetAppDomainPolicy(policyLevel);
             _namedPermissionSet = policyLevel.GetNamedPermissionSet(trustSection.PermissionSetName);
 #pragma warning restore 618
 
