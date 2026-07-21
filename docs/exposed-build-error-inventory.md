@@ -82,6 +82,11 @@ the string-only emptiness helper. This matches the POC correction and intended
 non-empty payload guard. The mandated build moves 39 errors/2,419 warnings to
 38 errors/2,419 warnings.
 
+The Framework `DynamicRoleClaimProvider` public contract is restored in
+project-owned source. Modern `ClaimsIdentity.AddClaims` eagerly snapshots role
+claims instead of Framework's unavailable lazy external-claims hook. The
+mandated build moves 38 errors/2,419 warnings to 37 errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
