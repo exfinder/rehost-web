@@ -127,7 +127,7 @@ namespace System.Web.UI.WebControls {
             _identityTransform = new XslTransform();
 #pragma warning restore 0618
 
-            _identityTransform.Load(reader, null /*resolver*/, null /*evidence*/);
+            _identityTransform.Load(reader, null /*resolver*/);
         }
 
         [
@@ -592,4 +592,3 @@ namespace System.Web.UI.WebControls {
         }
     }
 }
-

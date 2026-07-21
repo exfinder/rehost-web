@@ -72,6 +72,11 @@ and BinaryFormatter payloads. SOAP and Windows graphics fail explicitly. The
 mandated build moves 43 errors/2,419 warnings to 41 errors/2,419 warnings. See
 `docs/resx-reader-research.md` for provenance and format decisions.
 
+Two imported XSL call sites use the modern two-argument `Load` overload. Their
+Framework-only CAS evidence argument was always null; resolver behavior is
+unchanged. The mandated build moves 41 errors/2,419 warnings to 39
+errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
