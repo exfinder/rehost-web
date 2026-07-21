@@ -38,6 +38,13 @@ Groups are mutually exclusive, assigned by affected file and API family.
 | CAS assembly permission metadata | 1 | `Assembly.PermissionSet` |
 | **Total** | **79** | |
 
+## Configuration-path resolution
+
+Defining the original `CONFIGPATHUTILITY_SYSTEMWEB` symbol selects the intended
+System.Web branch: `GetParent` and the `System.Web.Util.Debug` alias compile.
+The mandated build moves 79 errors/2,441 warnings to 70 errors/2,441 warnings.
+Imported Reference Source remains unchanged.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be

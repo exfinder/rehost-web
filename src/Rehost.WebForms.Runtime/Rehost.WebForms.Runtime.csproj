@@ -8,7 +8,7 @@
     <Nullable>disable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
-    <DefineConstants>$(DefineConstants);SYSTEM_WEB</DefineConstants>
+    <DefineConstants>$(DefineConstants);SYSTEM_WEB;CONFIGPATHUTILITY_SYSTEMWEB</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

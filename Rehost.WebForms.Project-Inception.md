@@ -288,6 +288,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | Remote configuration unsupported | 4 | 1,081 |
 | Windows administration tooling excluded | 2 | 1,075 |
 | XSD typed DataSet generation unsupported | 79 | 2,441 |
+| System.Web configuration-path branch restored | 70 | 2,441 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
@@ -308,6 +309,9 @@ method bodies; removing a group can therefore increase the reported totals.
 Only a successful emit establishes that no compile errors remain.
 The current 79-error wave is grouped and machine-recorded in
 `docs/exposed-build-error-inventory.md`.
+
+The original `CONFIGPATHUTILITY_SYSTEMWEB` build symbol restores the
+System.Web-specific configuration-path branch without modifying imported source.
 
 This pass established several durable constraints:
 
