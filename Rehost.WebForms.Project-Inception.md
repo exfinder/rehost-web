@@ -290,6 +290,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | XSD typed DataSet generation unsupported | 79 | 2,441 |
 | System.Web configuration-path branch restored | 70 | 2,441 |
 | Remote IIS configuration surface excluded | 61 | 2,431 |
+| Browser administration and `App_Browsers` compilation excluded | 51 | 2,419 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are

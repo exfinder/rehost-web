@@ -50,6 +50,11 @@ excluded by decision. A minimal internal host remains only so remote requests
 fail explicitly. The mandated build moves 70 errors/2,441 warnings to 61
 errors/2,431 warnings.
 
+Windows browser-capability administration and application-level `App_Browsers`
+compilation are excluded. A project-owned compiler uses the built-in browser
+factory and rejects an `App_Browsers` directory explicitly. The mandated build
+moves 61 errors/2,431 warnings to 51 errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
