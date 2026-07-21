@@ -77,6 +77,11 @@ Framework-only CAS evidence argument was always null; resolver behavior is
 unchanged. The mandated build moves 41 errors/2,419 warnings to 39
 errors/2,419 warnings.
 
+The imported LOS parser now checks decoded byte-array length instead of calling
+the string-only emptiness helper. This matches the POC correction and intended
+non-empty payload guard. The mandated build moves 39 errors/2,419 warnings to
+38 errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be

@@ -295,6 +295,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | Bindable-type metadata contract | 43 | 2,419 |
 | Cross-platform ResX reader | 41 | 2,419 |
 | Modern XSL load overloads | 39 | 2,419 |
+| LOS byte-payload guard corrected | 38 | 2,419 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are

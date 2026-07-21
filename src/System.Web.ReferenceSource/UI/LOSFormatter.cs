@@ -465,7 +465,7 @@ namespace System.Web.UI {
                     byte[] serializedData;
                     serializedData = Convert.FromBase64String(text);
 
-                    if (!String.IsNullOrEmpty(serializedData)) {
+                    if (serializedData.Length > 0) {
                         System.Runtime.Serialization.IFormatter formatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
                         value = formatter.Deserialize(new MemoryStream(serializedData));
                     }
