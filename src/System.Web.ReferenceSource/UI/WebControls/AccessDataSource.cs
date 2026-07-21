@@ -11,7 +11,6 @@ namespace System.Web.UI.WebControls {
     using System.ComponentModel;
     using System.Data;
     using System.Data.Common;
-    using System.Data.OleDb;
     using System.Diagnostics;
     using System.Drawing;
     using System.Drawing.Design;
@@ -215,7 +214,9 @@ namespace System.Web.UI.WebControls {
         }
 
         protected override DbProviderFactory GetDbProviderFactory() {
-            return OleDbFactory.Instance;
+            throw new PlatformNotSupportedException(
+                "AccessDataSource requires Windows OLE DB and is not supported by Rehost.WebForms. " +
+                "Migrate to SqlDataSource with a portable provider.");
         }
 
         /// <devdoc>
@@ -261,4 +262,3 @@ namespace System.Web.UI.WebControls {
         }*/
     }
 }
-
