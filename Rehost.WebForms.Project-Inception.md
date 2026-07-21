@@ -293,6 +293,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | Browser administration and `App_Browsers` compilation excluded | 51 | 2,419 |
 | Portable hash algorithm factories | 46 | 2,419 |
 | Bindable-type metadata contract | 43 | 2,419 |
+| Cross-platform ResX reader | 41 | 2,419 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are

@@ -66,6 +66,12 @@ retain runtime auto-field behavior; its assembly identity is `System.Web`, not
 Framework `System.ComponentModel.DataAnnotations`. The mandated build moves 46
 errors/2,419 warnings to 43 errors/2,419 warnings.
 
+A project-owned internal ResX reader adapts the WinForms Framework-era read
+path. It preserves aliases, converters, file references, byte arrays, nulls,
+and BinaryFormatter payloads. SOAP and Windows graphics fail explicitly. The
+mandated build moves 43 errors/2,419 warnings to 41 errors/2,419 warnings. See
+`docs/resx-reader-research.md` for provenance and format decisions.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
