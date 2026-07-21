@@ -97,6 +97,11 @@ returns null because modern .NET does not enforce provider CAS. Existing
 partial-trust checks therefore deny access; full-trust behavior is unchanged.
 The mandated build moves 36 errors/2,419 warnings to 35 errors/2,419 warnings.
 
+The imported `SqlCacheDependency` constructor no longer performs its Framework-
+only `NotificationAutoEnlist` conflict pre-check; modern `System.Data.SqlClient`
+does not expose that member. `SqlDependency` creation remains unchanged. The
+mandated build moves 35 errors/2,419 warnings to 34 errors/2,419 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be

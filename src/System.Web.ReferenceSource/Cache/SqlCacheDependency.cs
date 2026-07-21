@@ -103,20 +103,12 @@ namespace System.Web.Caching {
 
         // For SQL9, we use SqlDependency
         public SqlCacheDependency(SqlCommand sqlCmd) {
-            HttpContext context = HttpContext.Current;
-
             if (sqlCmd == null) {
                 throw new ArgumentNullException("sqlCmd");
             }
 
-            // Prevent a conflict between using SQL9 outputcache and an explicit 
-            // SQL9 SqlCacheDependency at the same time.  See VSWhidey 396429 and
-            // the attached email in the bug.
-            if (context != null && context.SqlDependencyCookie != null &&  // That means We have already setup SQL9 dependency for output cache
-                sqlCmd.NotificationAutoEnlist) {    // This command will auto-enlist in that output cache dependency
-                throw new HttpException(SR.GetString(SR.SqlCacheDependency_OutputCache_Conflict));
-            }
-            
+            // Modern System.Data.SqlClient no longer exposes NotificationAutoEnlist,
+            // so the Framework-only output-cache conflict pre-check cannot be retained.
             CreateSqlDep(sqlCmd);
 
             InitUniqueID();
@@ -1733,5 +1725,3 @@ namespace System.Web.Caching {
         }
     }
 }
-
-
