@@ -16,6 +16,9 @@
     <Compile Remove="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Compilation/XsdBuildProvider.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Configuration/IRemoteWebConfigurationHostServer.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Configuration/RemoteWebConfigurationHost.cs" />
+    <Compile Remove="../System.Web.ReferenceSource/Configuration/RemoteWebConfigurationHostServer.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Configuration/RemoteWebConfigurationHostStream.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Management/regiisutil.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Util/Transactions.cs" />

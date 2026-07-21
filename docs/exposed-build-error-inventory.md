@@ -45,6 +45,11 @@ System.Web branch: `GetParent` and the `System.Web.Util.Debug` alias compile.
 The mandated build moves 79 errors/2,441 warnings to 70 errors/2,441 warnings.
 Imported Reference Source remains unchanged.
 
+The remaining remote IIS host, server, stream, and public server interface are
+excluded by decision. A minimal internal host remains only so remote requests
+fail explicitly. The mandated build moves 70 errors/2,441 warnings to 61
+errors/2,431 warnings.
+
 The largest group is architectural: modern .NET cannot reproduce secondary
 AppDomain isolation with compatibility members alone. Remote IIS configuration
 has already been declared unsupported, so its remaining server files should be
