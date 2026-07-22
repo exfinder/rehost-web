@@ -899,7 +899,12 @@ namespace System.Resources {
         private Hashtable cachedAssemblies;
         private Hashtable cachedTypes;
 
-        private static string NetFrameworkPath = Path.Combine(Environment.GetEnvironmentVariable("SystemRoot"), "Microsoft.Net\\Framework");
+        private static string NetFrameworkPath = GetNetFrameworkPath();
+
+        private static string GetNetFrameworkPath() {
+            string systemRoot = Environment.GetEnvironmentVariable("SystemRoot");
+            return systemRoot == null ? null : Path.Combine(systemRoot, "Microsoft.Net\\Framework");
+        }
 
         internal AssemblyNamesTypeResolutionService(AssemblyName[] names) {
             this.names = names;
@@ -1063,7 +1068,7 @@ namespace System.Resources {
         /// </devdoc>
         private bool IsNetFrameworkAssembly(string assemblyPath)
         {
-            return assemblyPath != null && assemblyPath.StartsWith(NetFrameworkPath, StringComparison.OrdinalIgnoreCase);
+            return assemblyPath != null && NetFrameworkPath != null && assemblyPath.StartsWith(NetFrameworkPath, StringComparison.OrdinalIgnoreCase);
         }
 
         public void ReferenceAssembly(AssemblyName name) {
