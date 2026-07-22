@@ -1,2 +1,2 @@
-# Preserve exact upstream whitespace in the immutable source snapshot.
+# Preserve upstream whitespace in the imported source.
 *.cs -whitespace

@@ -3613,16 +3613,18 @@ Etw_Failure=failure
 ;Error strings used by the ResX code we pull from fx\src\WinForms\Managed\System\Resources
 ;These error strings are copied from fx\src\WinForms\Managed\system.windows.forms.txt
 ;See DevDiv 9030 for a reference to this issue.
-;InvalidResXFile=Parse error parsing ResX file: {0}
-;InvalidResXFileReaderWriterTypes=Invalid ResX input.  Could not find valid "resheader" tags for the ResX reader and writer type names.
-;InvalidResXResourceNoName=Could not find a name for a resource.  The resource value was '{0}'.
-;InvocationException=The type {0} in the data at line {1}, position {2} could not be loaded because it threw the following exception during construction: {3}
-;NotSerializableType=An item named '{0}' of type '{1}' cannot be added to the resource file because it is not serializable.
-;NotSupported=The type {0} on line {1}, position {2} threw the following exception while being converted: {3}
-;ResXResourceWriterSaved=Resource writer has been saved.  You may not edit it.
-;SerializationException=The type {0} could not be read from the data in line {1}, position {2}.  The type's internal structure may have changed.  Either implement ISerializable on the type or provide a type converter that can provide a more reliable conversion format, such as text or an array of bytes.  The conversion exception was: {3}
-;TypeLoadException=The type {0} in the data at line {1}, position {2} could not be located.
-;TypeLoadExceptionShort=The type {0} could not be located.
+InvalidResXBasePathOperation=Property can be changed only before the enumeration.
+InvalidResXFile=Parse error parsing ResX file: {0}
+InvalidResXFileReaderWriterTypes=Invalid ResX input.  Could not find valid "resheader" tags for the ResX reader and writer type names.
+InvalidResXNoType=Could not find a type for a name.  The type name was '{0}'.
+InvalidResXResourceNoName=Could not find a name for a resource.  The resource value was '{0}'.
+InvocationException=The type {0} in the data at line {1}, position {2} could not be loaded because it threw the following exception during construction: {3}
+NotSerializableType=An item named '{0}' of type '{1}' cannot be added to the resource file because it is not serializable.
+NotSupported=The type {0} on line {1}, position {2} threw the following exception while being converted: {3}
+ResXResourceWriterSaved=Resource writer has been saved.  You may not edit it.
+SerializationException=The type {0} could not be read from the data in line {1}, position {2}.  The type's internal structure may have changed.  Either implement ISerializable on the type or provide a type converter that can provide a more reliable conversion format, such as text or an array of bytes.  The conversion exception was: {3}
+TypeLoadException=The type {0} in the data at line {1}, position {2} could not be located.
+TypeLoadExceptionShort=The type {0} could not be located.
 
 ;IIS sections related
 Config_collection_add_element_without_key=The element cannot be added to the collection because it has an empty key.

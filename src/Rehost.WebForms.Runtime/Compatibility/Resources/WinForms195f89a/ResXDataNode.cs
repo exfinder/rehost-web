@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if SYSTEM_WEB
+namespace System.PrivateResources {
+#else
 namespace System.Resources {
+#endif
 
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
@@ -25,6 +29,9 @@ namespace System.Resources {
     using System.Globalization;
     using System.Security.Permissions;
     using System.Runtime.Versioning;
+#if SYSTEM_WEB
+    using System.Web;
+#endif
 
     /// <include file='doc\ResXDataNode.uex' path='docs/doc[@for="ResXDataNode"]/*' />
     /// <devdoc>
@@ -32,7 +39,11 @@ namespace System.Resources {
     /// </devdoc>
     [Serializable]
     [PermissionSetAttribute(System.Security.Permissions.SecurityAction.LinkDemand, Name="FullTrust")]
+#if SYSTEM_WEB
+    internal sealed class ResXDataNode : ISerializable {
+#else
     public sealed class ResXDataNode : ISerializable {
+#endif
 
         private static readonly char[] SpecialChars = new char[]{' ', '\r', '\n'};
 

@@ -305,7 +305,9 @@ namespace System.Resources {
                         using (FileStream s = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
                             Debug.Assert(s != null, "Couldn't open " + fileName);
                             temp = new byte[s.Length];
+#pragma warning disable CA2022 // Preserve the imported reader's single-read behavior.
                             s.Read(temp, 0, (int)s.Length);
+#pragma warning restore CA2022
                         }
 
                         if(toCreate.Equals(typeof(byte[]))) {
@@ -331,5 +333,4 @@ namespace System.Resources {
         }
     }
 }
-
 

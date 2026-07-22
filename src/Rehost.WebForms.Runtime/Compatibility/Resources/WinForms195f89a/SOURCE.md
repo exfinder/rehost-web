@@ -9,5 +9,5 @@
   - `src/System.Windows.Forms/src/misc/MultitargetUtil.cs`
 - License: `LICENSE.TXT` in this directory
 
-These files are an exact, compilation-excluded baseline. Adaptation happens in
-later commits so source changes remain reviewable against this snapshot.
+These files were imported exactly in commit `516ed69`. Later commits adapt them
+in place; that commit remains the immutable comparison baseline.
