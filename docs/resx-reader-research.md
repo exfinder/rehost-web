@@ -1,20 +1,38 @@
 # Cross-platform ResX reader research
 
-## Recommendation
+## Implemented decision
 
-Build a project-owned internal `IResourceReader`, using the current WinForms reader/parser as the primary compatibility baseline and current MSBuild reader as the cross-platform/security baseline. Preserve string, `byte[]`, null, aliases, metadata, `ResXFileRef`, and `TypeConverter` behavior. Explicitly reject BinaryFormatter/Soap payloads and Windows-only values.
+Compatibility follows the .NET Framework-era WinForms implementation from
+`dotnet/winforms` commit
+`195f89af79d550c2da1711c45c379efd63519ac1`. This initial source import retains
+the `SYSTEM_WEB` profile used by the shared Framework implementation and is the
+behavioral baseline; later WinForms and MSBuild implementations are research
+references, not the semantic target.
 
-Do not take a runtime dependency on WinForms, MSBuild, or a third-party reader. Port/adapt only reader-side code; do not import the writer/public editing API. This gives materially higher compatibility than the earlier proposed narrow MSBuild-only parser without pulling the Windows desktop framework.
+The donor files were imported unchanged in `516ed69`, minimally adapted to
+build on .NET 10 in `62fb8e9`, moved under
+`Compatibility/Resources`, and connected to `ResXBuildProvider` in `8999fa6`.
+The complete donor reader closure was retained, including data nodes, file
+references, type conversion, writer/resource-set support, drawing integration,
+and legacy BinaryFormatter/Soap paths. `System.Drawing.Common` and
+`System.Runtime.Serialization.Formatters` provide required APIs; drawing
+operations can still be platform-limited. Serialized payloads are a trusted
+input compatibility feature, not a security boundary.
 
-## Decision and implementation
+One deliberate platform adaptation replaces the donor's
+`%SystemRoot%\Microsoft.NET\Framework` cache test with
+`RuntimeEnvironment.GetRuntimeDirectory()`. It changes only which resolved
+runtime types may be cached and works on every supported OS (`d09d5f7`).
 
-Approved maximum-compatible reader behavior: preserve application
-`TypeConverter`, public stream-constructor file references, and BinaryFormatter
-payloads. SOAP payloads and Windows graphics remain explicitly unsupported.
-The internal project-owned reader is adapted from WinForms initial import
-commit `195f89af79d550c2da1711c45c379efd63519ac1`, informed by current WinForms
-commit `d28310fdba71b603f53edf92907e7248a652fa06`. No WinForms runtime dependency
-or writer/editor surface is included.
+Twenty focused tests pin reader behavior. The full runtime suite passed 37/37
+on .NET 10 arm64 when this implementation was completed on 2026-07-22.
+
+## Earlier recommendation (superseded)
+
+The initial proposal favored a narrow reader informed by current WinForms and
+MSBuild, rejecting legacy serialization and Windows-only values. It was
+superseded by the decision to preserve the `195f89a` behavior wherever it can
+build on .NET 10.
 
 ## Evidence
 
@@ -52,30 +70,14 @@ or writer/editor surface is included.
 - `Curiosity.Resources` is another WinForms extraction, last ResX-specific release found: 2021, far lower adoption. No advantage over the above or current Microsoft source.
 - `System.Resources.Extensions` supports preserialized binary `.resources`; it does not supply a public cross-platform ResX XML reader. It solves a later runtime-resource format concern, not this `ResXBuildProvider` input seam.
 
-## Proposed compatibility boundary
+## Verified compatibility baseline
 
-Supported initially (maximum-compatible cross-platform profile):
+Focused tests cover strings and significant whitespace, primitive conversion,
+legacy `mscorlib` byte arrays, nulls, duplicate-name behavior, assembly aliases,
+metadata, data-node mode, relative file references, setting locks, disposal,
+malformed input, header validation, and the `SYSTEM_WEB` reader/writer-header
+rule. Binary/Soap payloads and drawing values retain donor behavior but are not
+yet covered by this focused suite.
 
-- standard headers/comments; ignore metadata not consumed by `BaseResourcesBuildProvider`;
-- string values, including `xml:space` behavior;
-- `System.Byte[]`, `ResXNullRef`, assembly aliases;
-- `ResXFileRef`: string (declared encoding), `byte[]`, `MemoryStream`; resolve relative to mapped `.resx` directory;
-- types resolvable in the application and convertible from invariant string/bytes via `TypeConverter`;
-- non-Windows `ResXFileRef` target types constructible from a stream, matching Framework behavior.
-
-Explicitly unsupported:
-
-- BinaryFormatter, SoapFormatter, and legacy serialized-object MIME payloads;
-- platform graphics/icons and unresolved types;
-- unresolved/nonphysical base path when a file reference is present;
-- unknown MIME/type forms.
-
-Each unsupported case should fail resource compilation with a descriptive exception naming resource and format. Never skip entries or return null silently.
-
-## Implementation order
-
-1. Inventory representative repository/POC `.resx` fixtures and Framework schema cases.
-2. Approve whether application `TypeConverter` and stream-constructor execution is accepted for Framework compatibility; define exception contract.
-3. Adapt the current WinForms read path, informed by MSBuild's simplified parser; retain MIT provenance, exact commits, and notices.
-4. Wire only `ResXBuildProvider`; preserve virtual-path mapping behavior.
-5. Later tests: each supported encoding plus every rejection/security boundary.
+Future changes should treat `195f89a` behavior as the default. Deviations should
+be limited to build or platform requirements and recorded explicitly.

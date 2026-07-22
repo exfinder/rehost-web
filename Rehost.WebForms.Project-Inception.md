@@ -713,7 +713,25 @@ For example, the core project may use:
 </PropertyGroup>
 ```
 
-Producing an assembly named `System.Web` improves source and reflection compatibility but does not reproduce Microsoft's strong-name identity. Binary compatibility remains a separately measured promise.
+The .NET 10 reference pack also supplies `System.Web` and
+`System.Web.HttpUtility`. A direct `Rehost.WebForms.Runtime` NuGet reference
+imports `build/Rehost.WebForms.Runtime.targets`, which removes those two
+`Microsoft.NETCore.App.Ref` compile references. Consumer source therefore binds
+`System.Web.*` types to `Rehost.WebForms.Runtime.dll`.
+
+The target is deliberately packaged under `build`, not `buildTransitive`, so it
+affects only projects that directly reference the runtime package. Project
+references do not consume packed build assets; repository tests import the
+target explicitly. Already-compiled dependencies remain bound to whichever
+assembly supplied their original type references, and reflection using
+unqualified type names can still be ambiguous.
+
+Naming the output `System.Web.dll` is rejected. It would introduce an assembly
+identity conflict during reference resolution plus runtime and deployment
+ambiguity. Rebuilt consumers are expected to reference
+`Rehost.WebForms.Runtime.dll` while retaining source-compatible `System.Web.*`
+namespaces. Binary compatibility with Microsoft's strong-named assembly remains
+a separate, limited promise.
 
 ### 17.5 Shared asset tooling
 
