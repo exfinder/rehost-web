@@ -14,6 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Compatibility/Resources/WinForms195f89a/**/*.cs" />
     <Compile Include="../System.Web.ReferenceSource/**/*.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs" />
