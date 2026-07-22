@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>Rehost.WebForms.Runtime</AssemblyName>
+    <AssemblyName>System.Web</AssemblyName>
     <RootNamespace>System.Web</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -40,10 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None
-      Update="build/Rehost.WebForms.Runtime.targets"
-      Pack="true"
-      PackagePath="build" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" />
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
@@ -55,6 +51,13 @@
     <PackageReference Include="System.Runtime.Serialization.Formatters" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="System.Security.Permissions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None
+      Update="build/Rehost.WebForms.Runtime.targets"
+      Pack="true"
+      PackagePath="build" />
   </ItemGroup>
 
   <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets" />
