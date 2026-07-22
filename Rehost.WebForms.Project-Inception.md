@@ -336,7 +336,7 @@ strong-name generation sources are excluded with their already-excluded sole
 caller. BinaryFormatter uses the unsupported compatibility package; a module
 initializer enables its process-wide switch before Runtime call sites.
 Windows-only platform diagnostics are temporarily treated as known imported
-debt.
+debt tracked in `docs/follow-ups/windows-platform-diagnostics.md`.
 
 The original `CONFIGPATHUTILITY_SYSTEMWEB` build symbol restores the
 System.Web-specific configuration-path branch without modifying imported source.
