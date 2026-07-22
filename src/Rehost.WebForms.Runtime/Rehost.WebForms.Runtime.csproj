@@ -41,9 +41,9 @@
 
   <ItemGroup>
     <None
-      Update="buildTransitive/Rehost.WebForms.Runtime.targets"
+      Update="build/Rehost.WebForms.Runtime.targets"
       Pack="true"
-      PackagePath="buildTransitive" />
+      PackagePath="build" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" />
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
