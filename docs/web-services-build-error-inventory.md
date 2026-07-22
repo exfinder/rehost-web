@@ -5,7 +5,7 @@
 
 ## Supported now
 
-- Separate `System.Web.Services.dll` sibling boundary.
+- Separate `Rehost.WebForms.WebServices.dll` sibling boundary.
 - `WebServicesSection`, `ProtocolElement`, `ProtocolElementCollection`, and `WebServiceProtocols`.
 - Configuration deserialization and enabled-protocol aggregation.
 

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>System.Web</AssemblyName>
+    <AssemblyName>Rehost.WebForms.Runtime</AssemblyName>
     <RootNamespace>System.Web</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -40,6 +40,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None
+      Update="buildTransitive/Rehost.WebForms.Runtime.targets"
+      Pack="true"
+      PackagePath="buildTransitive" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" />
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />

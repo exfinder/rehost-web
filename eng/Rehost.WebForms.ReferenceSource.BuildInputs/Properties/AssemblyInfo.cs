@@ -1,4 +1,4 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("System.Web")]
-[assembly: InternalsVisibleTo("System.Web.ApplicationServices")]
+[assembly: InternalsVisibleTo("Rehost.WebForms.Runtime")]
+[assembly: InternalsVisibleTo("Rehost.WebForms.ApplicationServices")]

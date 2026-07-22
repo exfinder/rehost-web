@@ -685,13 +685,15 @@ This prevents misleading names such as `Rehost.WebForms.WebApi.Client`.
 
 ### 17.4 Web Forms projects and packages
 
-Project names identify the Rehost implementation, while output assembly names preserve legacy compatibility where practical. NuGet package identity and assembly identity are deliberately separate concerns.
+Current output assembly names match their Rehost project names. Legacy namespaces
+remain source-compatible; NuGet package and assembly identity remain separate concerns.
 
 | Project and package | Intended output or responsibility |
 | --- | --- |
-| `Rehost.WebForms.Runtime` | `System.Web.dll` compatibility runtime |
+| `Rehost.WebForms.Runtime` | `Rehost.WebForms.Runtime.dll` compatibility runtime |
 | `Rehost.WebForms.Extensions` | `System.Web.Extensions.dll` compatibility library |
-| `Rehost.WebForms.ApplicationServices` | `System.Web.ApplicationServices.dll` compatibility library |
+| `Rehost.WebForms.ApplicationServices` | `Rehost.WebForms.ApplicationServices.dll` compatibility library |
+| `Rehost.WebForms.WebServices` | `Rehost.WebForms.WebServices.dll` compatibility library |
 | `Rehost.WebForms.AspNetCore` | ASP.NET Core and Kestrel hosting adapter |
 | `Rehost.WebForms.Compiler` | ASPX, ASCX, and related runtime compilation |
 | `Rehost.WebForms.Build` | MSBuild integration, targets, and packaging support |
@@ -705,7 +707,7 @@ For example, the core project may use:
 
 ```xml
 <PropertyGroup>
-  <AssemblyName>System.Web</AssemblyName>
+  <AssemblyName>Rehost.WebForms.Runtime</AssemblyName>
   <RootNamespace>System.Web</RootNamespace>
   <PackageId>Rehost.WebForms.Runtime</PackageId>
 </PropertyGroup>

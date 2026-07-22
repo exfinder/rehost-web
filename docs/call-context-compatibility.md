@@ -19,7 +19,7 @@ stores. Illogical state is cleared on execution-context transitions by an
 headers, principals, serialization, and internal context swapping are omitted:
 no scoped System.Web call site uses them.
 
-Both compatibility types are internal. Publishing them from `System.Web.dll`
+Both compatibility types are internal. Publishing them from `Rehost.WebForms.Runtime.dll`
 would create the wrong assembly identity and imply unsupported general-purpose
 remoting compatibility.
 

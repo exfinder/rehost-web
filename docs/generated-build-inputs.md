@@ -52,10 +52,11 @@ choice and makes the observable `Regex.Options` value differ from the original.
 
 ## Identity choices represented by this layer
 
-- Output assembly: `System.Web`, version `4.0.0.0`, neutral culture, unsigned.
+- Output assembly: `Rehost.WebForms.Runtime`, version `4.0.0.0`, neutral
+  culture, unsigned.
 - Neutral resource: base name `System.Web`, logical name
   `System.Web.resources`.
-- `AssemblyRef.SystemWeb`: `System.Web`, never `Portable.System.Web`.
+- `AssemblyRef.SystemWeb`: `Rehost.WebForms.Runtime`.
 - `AssemblyRef.SystemConfiguration`: original reflection string
   `System.Configuration`; package/reference mapping is deliberately deferred.
 - `AssemblyRef.MicrosoftPublicKey`: legacy Microsoft token

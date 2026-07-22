@@ -159,12 +159,12 @@ internal static class Program
         NativeNamesManifest nativeNames,
         RegularExpressionsManifest regularExpressions)
     {
-        Require(identities.OutputAssembly.Name == "System.Web", "The output assembly name must remain System.Web.");
+        Require(identities.OutputAssembly.Name == "Rehost.WebForms.Runtime", "Unexpected output assembly name.");
         Require(!identities.OutputAssembly.StrongNamed, "The generator must not claim Microsoft's strong-name identity.");
         Require(identities.OutputAssembly.PublicKeyToken is null, "An unsigned output must have a null public-key token.");
         Require(identities.Resource.BaseName == "System.Web", "The SR resource base name must be System.Web.");
         Require(identities.Resource.LogicalName == "System.Web.resources", "The neutral resource name must be System.Web.resources.");
-        Require(identities.AssemblyRefConstants["SystemWeb"] == "System.Web", "AssemblyRef.SystemWeb must not inherit the POC identity.");
+        Require(identities.AssemblyRefConstants["SystemWeb"] == "Rehost.WebForms.Runtime", "AssemblyRef.SystemWeb must match the runtime identity.");
         Require(!identities.AssemblyRefConstants.Values.Any(value => value.Contains("Portable.", StringComparison.Ordinal)),
             "Portable.* identities are not valid generator inputs.");
         Require(nativeNames.Include == "names.h", "Names.cspp must be resolved from the explicit names.h manifest.");
@@ -831,7 +831,7 @@ internal static class Program
             "ENGINE_FULL_NAME      = \"webengine4.dll\"",
             "ISAPI_FULL_NAME      = \"aspnet_isapi.dll\"",
             "STATE_FULL_NAME      = \"aspnet_state.exe\"",
-            "WEB_FULL_NAME        = \"System.Web.dll\"",
+            "WEB_FULL_NAME        = \"Rehost.WebForms.Runtime.dll\"",
             "MGDENG_FULL_NAME     = \"webengine4.dll\"",
             "REG_MACHINE_APP      = \"Software\\\\Microsoft\\\\ASP.NET\"",
         ];

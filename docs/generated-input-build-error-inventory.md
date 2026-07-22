@@ -113,8 +113,8 @@ The forwarded-assembly counts are exactly unchanged: ConfigurationManager
 
 ## Values deferred to explicit decisions
 
-- Public assembly and package identity beyond the provisional unsigned
-  `System.Web, Version=4.0.0.0` output.
+- Package identity beyond the unsigned
+  `Rehost.WebForms.Runtime, Version=4.0.0.0` output.
 - Strong-name and binary-compatibility policy; the Microsoft private key cannot
   be reproduced.
 - Whether original Microsoft-qualified reflection/configuration strings should

@@ -1,6 +1,6 @@
 {
   "outputAssembly": {
-    "name": "System.Web",
+    "name": "Rehost.WebForms.Runtime",
     "version": "4.0.0.0",
     "culture": "neutral",
     "publicKeyToken": null,
@@ -25,7 +25,7 @@
     "SystemConfiguration": "System.Configuration",
     "SystemDesign": "System.Design",
     "SystemDrawingDesign": "System.Drawing.Design",
-    "SystemWeb": "System.Web",
+    "SystemWeb": "Rehost.WebForms.Runtime",
     "SystemWebDynamicData": "System.Web.DynamicData",
     "SystemWebMobile": "System.Web.Mobile"
   }

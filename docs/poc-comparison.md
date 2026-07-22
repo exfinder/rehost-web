@@ -72,8 +72,8 @@ Important identity differences must be corrected from authoritative inputs:
 
 - the POC `SR` loads `Portable.System.Web` and the project embeds
   `Portable.System.Web.resources`;
-- POC `AssemblyRef.SystemWeb` is `Portable.System.Web`, while Rehost intends to
-  produce a `System.Web` assembly;
+- POC `AssemblyRef.SystemWeb` is `Portable.System.Web`, while Rehost produces
+  `Rehost.WebForms.Runtime`;
 - POC `ThisAssembly.Version` is hard-coded to `1.0.0.0`;
 - the POC `ModName` constants were extracted from .NET Framework 4.8 rather
   than generated from `Names.cspp` in the build.

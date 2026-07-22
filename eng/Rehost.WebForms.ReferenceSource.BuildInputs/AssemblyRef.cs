@@ -7,7 +7,7 @@ namespace System.Web {
         internal const string SystemConfiguration = "System.Configuration";
         internal const string SystemDesign = "System.Design";
         internal const string SystemDrawingDesign = "System.Drawing.Design";
-        internal const string SystemWeb = "System.Web";
+        internal const string SystemWeb = "Rehost.WebForms.Runtime";
         internal const string SystemWebDynamicData = "System.Web.DynamicData";
         internal const string SystemWebMobile = "System.Web.Mobile";
     }

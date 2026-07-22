@@ -4,7 +4,7 @@
 
 This pass restores `System.Web.ApplicationServices` as an authoritative sibling
 assembly. All 22 files from pinned Reference Source remain byte-identical. The
-SDK project emits `System.Web.ApplicationServices.dll`; `AssemblyRef` is one
+SDK project emits `Rehost.WebForms.ApplicationServices.dll`; `AssemblyRef` is one
 checked-in internal type in a compile-time-only BuildInputs assembly. An unsigned friend declaration permits the
 unsigned Rehost `System.Web` assembly to use the original internal membership
 adapter contract.

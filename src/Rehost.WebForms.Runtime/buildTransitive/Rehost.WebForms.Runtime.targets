@@ -1,0 +1,12 @@
+<Project>
+  <Target
+    Name="PreferRehostWebFormsRuntimeTypes"
+    AfterTargets="ResolveAssemblyReferences"
+    BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <ReferencePath
+        Remove="@(ReferencePath)"
+        Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
+    </ItemGroup>
+  </Target>
+</Project>
