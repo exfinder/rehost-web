@@ -527,7 +527,7 @@ namespace System.Web.SessionState {
             requestStream = request.InputStream;
             int bufferSize = (int)(requestStream.Length - requestStream.Position);
             buf = new byte[bufferSize];
-            requestStream.Read(buf, 0 , buf.Length);
+            requestStream.ReadExactly(buf, 0, buf.Length);
 
             fixed (byte * pBuf = buf) {
                 // The ctor of StateHttpWorkerRequest convert the native pointer address

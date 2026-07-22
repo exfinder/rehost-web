@@ -525,13 +525,7 @@ namespace System.Web.SessionState {
                             if (buffer == null || buffer.Length < position.DataLength) {
                                 buffer = new Byte[position.DataLength];
                             }
-#if DBG
-                            int read =
-#endif
-                            _stream.Read(buffer, 0, position.DataLength);
-#if DBG
-                            Debug.Assert(read == position.DataLength);
-#endif
+                            _stream.ReadExactly(buffer, 0, position.DataLength);
 
                             baseStream.Write(buffer, 0, position.DataLength);
                         }

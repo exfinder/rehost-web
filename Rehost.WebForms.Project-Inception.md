@@ -305,7 +305,7 @@ compile-time-only design-metadata marker outside Reference Source.
 | Fusion shadow-cache cleanup removed | 6 | 2,402 |
 | Full-trust CAS compatibility | 2 | 2,397 |
 | Modern dynamic assembly creation | 0 | 2,397 |
-| Runtime imported-warning audit | 0 | 14 |
+| Runtime imported-warning audit | 0 | 0 |
 
 All forwarded-assembly, membership/application-services, data-protection, and
 first-iteration Web Services, generated resource contract, and CallContext errors are
@@ -328,14 +328,15 @@ Only a successful emit establishes that no compile errors remain. The resolved
 79-error wave and its sequential checkpoints are recorded in
 `docs/exposed-build-error-inventory.md`.
 
-The Runtime warning audit centrally suppresses 2,383 diagnostics whose current
-occurrences are exclusively imported legacy compatibility noise. The remaining
-14 stay visible because they identify removed runtime APIs (thread abort,
-AppDomain unload, CLR runtime interfaces, and assembly CodeBase), potentially
-incomplete session-state reads, or URI corruption risk. BinaryFormatter uses the
-unsupported compatibility package; a module initializer enables its process-wide
-switch before Runtime call sites. Windows-only platform diagnostics are temporarily
-treated as known imported debt.
+The Runtime warning audit centrally suppresses imported legacy compatibility
+noise. Request termination/timeouts, AppDomain unload, route escaping, and
+assembly CodeBase warnings are temporarily suppressed with dedicated follow-up
+stories. Session-state reads now require exact completion. Dead internal
+strong-name generation sources are excluded with their already-excluded sole
+caller. BinaryFormatter uses the unsupported compatibility package; a module
+initializer enables its process-wide switch before Runtime call sites.
+Windows-only platform diagnostics are temporarily treated as known imported
+debt.
 
 The original `CONFIGPATHUTILITY_SYSTEMWEB` build symbol restores the
 System.Web-specific configuration-path branch without modifying imported source.
