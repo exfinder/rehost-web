@@ -28,6 +28,7 @@ namespace System.Resources {
     using System.ComponentModel.Design;
     using System.Globalization;
     using System.Security.Permissions;
+    using System.Runtime.InteropServices;
     using System.Runtime.Versioning;
 #if SYSTEM_WEB
     using System.Web;
@@ -899,12 +900,7 @@ namespace System.Resources {
         private Hashtable cachedAssemblies;
         private Hashtable cachedTypes;
 
-        private static string NetFrameworkPath = GetNetFrameworkPath();
-
-        private static string GetNetFrameworkPath() {
-            string systemRoot = Environment.GetEnvironmentVariable("SystemRoot");
-            return systemRoot == null ? null : Path.Combine(systemRoot, "Microsoft.Net\\Framework");
-        }
+        private static readonly string RuntimeDirectory = RuntimeEnvironment.GetRuntimeDirectory();
 
         internal AssemblyNamesTypeResolutionService(AssemblyName[] names) {
             this.names = names;
@@ -1053,9 +1049,9 @@ namespace System.Resources {
             }
 
             if(result != null) {
-                // Only cache types from .Net framework or GAC because they don't need to update.
+                // Only cache types from the runtime or GAC because they don't need to update.
                 // For simplicity, don't cache custom types
-                if (result.Assembly.GlobalAssemblyCache || IsNetFrameworkAssembly(result.Assembly.Location)) {
+                if (result.Assembly.GlobalAssemblyCache || IsRuntimeAssembly(result.Assembly.Location)) {
                     cachedTypes[name] = result;
                 }
             }
@@ -1064,11 +1060,13 @@ namespace System.Resources {
         }
 
         /// <devdoc>
-        /// This is matching %windir%\Microsoft.NET\Framework*, so both 32bit and 64bit framework will be covered.
+        /// This matches the active runtime directory on every supported platform.
         /// </devdoc>
-        private bool IsNetFrameworkAssembly(string assemblyPath)
+        private bool IsRuntimeAssembly(string assemblyPath)
         {
-            return assemblyPath != null && NetFrameworkPath != null && assemblyPath.StartsWith(NetFrameworkPath, StringComparison.OrdinalIgnoreCase);
+            return assemblyPath != null && assemblyPath.StartsWith(
+                RuntimeDirectory,
+                OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
         }
 
         public void ReferenceAssembly(AssemblyName name) {
