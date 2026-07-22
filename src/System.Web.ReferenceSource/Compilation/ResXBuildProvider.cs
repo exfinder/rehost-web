@@ -7,6 +7,7 @@
 namespace System.Web.Compilation {
 
 using System;
+using System.PrivateResources;
 using System.Resources;
 using System.IO;
 using System.Web.Hosting;

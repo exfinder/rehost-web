@@ -1,0 +1,10 @@
+# Preserve upstream whitespace in the imported source.
+ClientUtils.cs -whitespace
+IAliasResolver.cs -whitespace
+MultitargetUtil.cs -whitespace
+ResXDataNode.cs -whitespace
+ResXFileRef.cs -whitespace
+ResXNullRef.cs -whitespace
+ResXResourceReader.cs -whitespace
+ResXResourceSet.cs -whitespace
+ResXResourceWriter.cs -whitespace

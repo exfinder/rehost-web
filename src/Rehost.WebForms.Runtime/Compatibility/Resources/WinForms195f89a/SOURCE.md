@@ -9,5 +9,6 @@
   - `src/System.Windows.Forms/src/misc/MultitargetUtil.cs`
 - License: `LICENSE.TXT` in this directory
 
-These files were imported exactly in commit `516ed69`. Later commits adapt them
-in place; that commit remains the immutable comparison baseline.
+These files were imported exactly in commit `516ed69`. Later commits adapted
+them, then moved the source files to the parent `Compatibility/Resources`
+directory. That commit remains the immutable comparison baseline.

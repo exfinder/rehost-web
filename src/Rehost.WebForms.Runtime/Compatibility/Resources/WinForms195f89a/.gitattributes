@@ -1,2 +1,0 @@
-# Preserve upstream whitespace in the imported source.
-*.cs -whitespace
