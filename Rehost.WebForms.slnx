@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/eng/">
+    <Project Path="eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
+    <Project Path="eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <Project Path="src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <Project Path="src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />
+    <Project Path="tests/Rehost.WebForms.WebServices.Tests/Rehost.WebForms.WebServices.Tests.csproj" />
+  </Folder>
+</Solution>
