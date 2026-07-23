@@ -1,18 +1,17 @@
-# SMTP configuration contract
+# SMTP configuration compatibility
 
-Restored the public `System.Net.Configuration` SMTP configuration surface used
-by `RuntimeConfig` and `MailDefinition`:
+System.Web restores the public `System.Net.Configuration` SMTP surface used by
+`RuntimeConfig` and `MailDefinition`:
 
-- `SmtpSection`
-- `SmtpNetworkElement`
-- `SmtpSpecifiedPickupDirectoryElement`
+- `SmtpSection`;
+- `SmtpNetworkElement`;
+- `SmtpSpecifiedPickupDirectoryElement`.
 
-Source: local Microsoft Reference Source clone,
-`System/net/System/Net/Configuration`, corresponding files. Rehost keeps the
-public properties, defaults, validators, and converters. Framework-internal
-mail snapshots and the legacy CAS unrestricted-port demand were omitted: they
-are unused by System.Web and unsuitable for the cross-platform runtime.
+Properties, defaults, validators, and converters derive from Microsoft
+Reference Source `System/net/System/Net/Configuration`. Framework-internal mail
+snapshots and the legacy CAS unrestricted-port demand are omitted because
+System.Web does not use them and modern .NET cannot enforce CAS.
 
-Validation: focused xUnit v3 + Shouldly suite passes 3/3; mandated runtime
-build moves 28 errors to 27 with warnings unchanged at 1,083. Remaining errors
-are excluded remoting, EnterpriseServices, COM, XSD, and serialization groups.
+Implementation:
+`src/Rehost.WebForms.Runtime/Compatibility/Configuration/SmtpSection.cs`.
+Tests: `tests/Rehost.WebForms.Runtime.Tests/SmtpSectionTests.cs`.

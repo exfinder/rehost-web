@@ -1,43 +1,24 @@
 # WebResource assembly timestamps
 
-## Status
+Status: open. Priority: medium. Depends on supported publishing models.
 
-Follow-up required. `SYSLIB0044` is temporarily suppressed for the Runtime
-project to preserve imported `AssemblyResourceLoader` behavior.
+## Problem
 
-## Compatibility risk
+`AssemblyResourceLoader` uses obsolete `AssemblyName.CodeBase` and assumes a
+file-backed assembly when generating WebResource cache keys and
+`Last-Modified`. Bundled/in-memory assemblies may have no usable path.
 
-`AssemblyResourceLoader` reads `AssemblyName.CodeBase`, converts its URI to a
-local path, then uses the file modification time for:
+## Required contract
 
-- the `t` cache-busting value in generated `WebResource.axd` URLs;
-- the response `Last-Modified` value.
+Choose behavior for file-backed, bundled, and in-memory assemblies: file
+timestamp, deterministic content/identity version, process timestamp, or
+explicit rejection.
 
-Exact warning site: `Handlers/AssemblyResourceLoader.cs:152`. This path is live
-for embedded scripts, images, and other WebResources.
+The value must remain stable, invalidate after deployment, produce valid HTTP
+dates, and fit supported publishing models.
 
-`CodeBase` is obsolete on modern .NET. The imported implementation also assumes
-a file-backed assembly. Bundled, in-memory, or otherwise locationless assemblies
-may not provide a usable path, causing resource URL generation or serving to
-fail.
+## Done when
 
-## Required design
-
-Compare these policies:
-
-- use `Assembly.Location` and preserve file modification timestamps;
-- reject locationless assemblies with an actionable unsupported exception;
-- assign a process-lifetime timestamp to locationless assemblies;
-- derive a deterministic resource version from assembly identity or content.
-
-The chosen value must keep URL generation stable, invalidate caches after
-deployment, produce a valid HTTP date, and support the intended publishing
-models.
-
-## Completion criteria
-
-- Define supported file-backed, bundled, and in-memory assembly models.
-- Verify WebResource URL stability and cache invalidation across restarts and
-  deployments.
-- Replace `CodeBase` or explicitly reject unsupported publishing models.
-- Remove the temporary `SYSLIB0044` suppression.
+- Publishing models and timestamp/version behavior are documented and tested.
+- `CodeBase` is removed or unsupported models fail clearly.
+- Temporary `SYSLIB0044` suppression is removed.

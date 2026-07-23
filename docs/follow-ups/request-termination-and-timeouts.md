@@ -1,53 +1,31 @@
-# Request termination and timeout portability
+# Request termination and timeouts
 
-## Status
+Status: open. Priority: high. Depends on request pipeline cancellation design.
 
-Follow-up required. `SYSLIB0006` is temporarily suppressed for the Runtime
-project. Runtime behavior remains incompatible with modern .NET.
+## Problem
 
-## Broken behavior
+`Response.End`, terminating redirects, and request timeouts rely on
+`Thread.Abort`/`Thread.ResetAbort`, which modern .NET does not support. Failure
+to unwind can strand request completion. Modern .NET also cannot safely
+force-stop arbitrary synchronous user code.
 
-- `HttpResponse.End()` and redirects using `endResponse: true` call
-  `Thread.Abort`; modern .NET throws `PlatformNotSupportedException` instead of
-  unwinding the request.
-- Timeout processing calls `Thread.Abort` after changing the context timeout
-  state. Failure to abort can strand request completion and does not provide
-  Framework-compatible timeout termination.
-- Pipeline, page, legacy asynchronous-page, and ISAPI handlers call
-  `Thread.ResetAbort`; modern .NET does not support the abort state they expect.
+## Required contract
 
-Exact warning sites:
-
-- `RequestTimeoutManager.cs:177`
-- `HttpContext.cs:1864`
-- `HttpApplication.cs:2270`
-- `HttpResponse.cs:3115`
-- `Hosting/ISAPIRuntime.cs:192`
-- `UI/Page.cs:2571`
-- `UI/LegacyPageAsyncTask.cs:216`
-
-## Required design
-
-Define portable behavior jointly for:
+Define behavior for:
 
 - `Response.End` and terminating redirects;
-- synchronous and asynchronous request timeouts;
-- pipeline and page-lifecycle unwinding;
-- `Server.Execute` and `Server.Transfer` nesting;
-- user `catch` / `finally` blocks;
-- blocked I/O and CPU-bound synchronous handlers;
-- timeout response generation and connection abort.
+- sync/async timeouts and blocked or CPU-bound handlers;
+- pipeline/page unwinding and user `catch`/`finally`;
+- `Server.Execute`/`Server.Transfer` nesting;
+- timeout responses and connection abort.
 
-Candidate direction: an internal ordinary control-flow exception for immediate
-`Response.End` / redirect unwinding, plus cooperative cancellation and explicit
-pipeline checkpoints for timeouts. Modern .NET cannot safely force-stop
-arbitrary synchronous user code. Do not use `Thread.Interrupt` without a
-separate compatibility decision.
+Candidate: an internal control-flow exception for immediate termination plus
+cooperative cancellation and pipeline checkpoints for timeouts.
 
-## Completion criteria
+## Done when
 
-- Decide and document observable compatibility differences.
-- Add differential coverage for termination, redirect, timeout, nested
-  execution, modules, and asynchronous pages.
-- Replace all seven unsupported calls or prove a site unreachable.
-- Remove the temporary `SYSLIB0006` suppression.
+- Compatibility differences are explicit.
+- Differential tests cover termination, redirects, timeouts, nesting, modules,
+  and asynchronous pages.
+- Unsupported abort/reset calls are removed or unreachable.
+- Temporary `SYSLIB0006` suppression is removed.

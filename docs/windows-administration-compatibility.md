@@ -1,13 +1,13 @@
 # Windows administration compatibility
 
-`Management/regiisutil.cs` remains untouched but is excluded from the Runtime.
-It implements Windows-only `aspnet_regiis`, COM/MMC registration, IIS browser
-capability installation, and key-container administration—not request runtime
-behavior. Its public COM activation surface is intentionally absent. Revisit
-only if Windows administration tooling enters scope.
+Windows administration tooling is outside runtime scope.
 
-`BrowserCapabilitiesCodeGenerator.cs` and `BrowserCapabilitiesCompiler.cs`
-also remain untouched but are excluded. Built-in browser detection remains;
-application-level `App_Browsers` compilation throws
-`PlatformNotSupportedException` instead of being silently ignored. The public
-browser installation generator contract is intentionally absent.
+- `Management/regiisutil.cs` remains imported but excluded. Its
+  `aspnet_regiis`, COM/MMC, IIS browser installation, and key-container
+  contracts are absent.
+- Imported browser administration/compiler sources remain excluded.
+- Built-in browser detection remains.
+- Application-level `App_Browsers` compilation throws
+  `PlatformNotSupportedException`.
+
+Revisit only if administration tooling becomes an explicit product.

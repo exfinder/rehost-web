@@ -1,0 +1,61 @@
+# Documentation map
+
+Read [`../PROJECT.md`](../PROJECT.md) first. Load only documents relevant to the
+feature being changed. Code/tests are canonical for mechanics; these files
+record contracts and rationale.
+
+## Current contracts
+
+| Area | Document |
+| --- | --- |
+| AppDomain, remoting, full trust | [appdomain-remoting-cas-compatibility.md](appdomain-remoting-cas-compatibility.md) |
+| Application Services assembly/loader | [application-services-compatibility.md](application-services-compatibility.md) |
+| Async/thread call context | [call-context-compatibility.md](call-context-compatibility.md) |
+| Data protection base contract | [data-protector-compatibility.md](data-protector-compatibility.md) |
+| Enterprise Services/COM+ | [enterprise-services-compatibility.md](enterprise-services-compatibility.md) |
+| Generated System.Web inputs | [generated-build-inputs.md](generated-build-inputs.md) |
+| Generated resource API | [generated-resource-contracts.md](generated-resource-contracts.md) |
+| Remote IIS configuration | [remote-configuration-compatibility.md](remote-configuration-compatibility.md) |
+| ResX behavior | [resx-reader-compatibility.md](resx-reader-compatibility.md) |
+| SMTP configuration | [smtp-configuration-compatibility.md](smtp-configuration-compatibility.md) |
+| Web Services configuration/scope | [web-services-compatibility.md](web-services-compatibility.md) |
+| Windows administration/App_Browsers | [windows-administration-compatibility.md](windows-administration-compatibility.md) |
+| XSD build provider | [xsd-build-provider-compatibility.md](xsd-build-provider-compatibility.md) |
+
+Package rationale:
+[dependency-decisions.md](dependency-decisions.md).
+Source/licensing records:
+[`provenance/`](provenance/).
+
+## Active follow-ups
+
+| Priority | Work | Dependency |
+| --- | --- | --- |
+| High | [Data protection provider](follow-ups/data-protection-provider.md) | security/persistence ADR |
+| High | [Process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md) | host lifecycle |
+| High | [Request termination/timeouts](follow-ups/request-termination-and-timeouts.md) | pipeline cancellation |
+| High | [Runtime codegen/loading](follow-ups/runtime-codegen-and-loading.md) | host filesystem |
+| High | [Windows diagnostics](follow-ups/windows-platform-diagnostics.md) | reachability audit |
+| Medium | [ResX edge cases](follow-ups/resx-compatibility.md) | trust/platform policy |
+| Medium | [Route escaping](follow-ups/route-url-escaping.md) | Framework oracle |
+| Medium | [WebResource timestamps](follow-ups/web-resource-assembly-timestamps.md) | publishing model |
+| Low | [Enterprise Services scope](follow-ups/enterprise-services.md) | product profile |
+| Low | [Generated resources](follow-ups/generated-resource-compatibility.md) | Framework oracle |
+| Low | [Regex generation](follow-ups/regex-generation.md) | API/AOT policy |
+| Low | [Web Services scope](follow-ups/web-services.md) | ASMX/SOAP profile |
+
+## Build diagnostics
+
+Use the non-hanging local build:
+
+```text
+dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj --no-restore --disable-build-servers --nologo --verbosity:quiet --maxcpucount:1 /p:UseSharedCompilation=false /nodeReuse:false -clp:ErrorsOnly
+```
+
+When detailed diagnosis is needed, produce a temporary diagnostic log and run:
+
+```text
+python3 eng/analyze-build-diagnostics.py <log> <output-directory> --root .
+```
+
+Diagnostic TSV/JSON output is disposable. Do not commit build snapshots.

@@ -1,9 +1,0 @@
-count	category
-2162	configuration dependencies
-412	AppDomain, remoting, CAS, and serialization
-337	IIS, Windows, native, and design-time dependencies
-308	CodeDOM and runtime compilation
-178	missing assemblies or packages
-87	secondary/cascading compiler diagnostics
-2	source, preprocessing, and resource generation
-1	removed or inaccessible BCL/framework APIs

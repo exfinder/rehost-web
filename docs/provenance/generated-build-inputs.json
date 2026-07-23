@@ -83,7 +83,7 @@
       "sha256": "3a1652021615fcbfd701af82d3326a975205816cb52e609d3f5a1f9ab15516bc",
       "purpose": "Explicit unsigned Rehost output identity, neutral resource identity, legacy Microsoft identity strings, checked-in AssemblyRef constants, and product version policy.",
       "policySources": [
-        "Rehost.WebForms.Project-Inception.md section 17.4",
+        "docs/generated-build-inputs.md identity constraints",
         "AssemblyRef and ThisAssembly usages in the pinned imported tree",
         "Microsoft public-key token literals already present in the pinned System.Web sources"
       ],

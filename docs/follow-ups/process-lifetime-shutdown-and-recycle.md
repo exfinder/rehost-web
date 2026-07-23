@@ -1,51 +1,26 @@
-# Process-lifetime shutdown and recycle
+# Process lifetime, shutdown, and recycle
 
-## Status
+Status: open. Priority: high. Depends on host/runtime lifecycle boundary.
 
-Follow-up required. `SYSLIB0024` is temporarily suppressed for the Runtime
-project. AppDomain unload and in-process restart remain unsupported on modern
-.NET.
+## Problem
 
-## Broken behavior
+Modern .NET cannot unload the current AppDomain. Imported shutdown paths still
+expect AppDomain unload for configuration changes, explicit unload, and native
+host failures. Unhandled unload attempts can break shutdown.
 
-- `HttpRuntime` shutdown disposes runtime resources and then queues
-  `AppDomain.Unload(AppDomain.CurrentDomain)`. Modern .NET throws
-  `PlatformNotSupportedException`; configuration changes, hosted shutdown, and
-  `HttpRuntime.UnloadAppDomain()` cannot complete their Framework lifecycle.
-- `ProcessHost` unloads a custom-loader AppDomain while reporting a native-host
-  error. The modern application-services overlay creates the loader in the
-  current process and returns no newly created AppDomain, so there is no domain
-  to unload.
+## Required contract
 
-Exact warning sites:
+- Stop new dispatch and drain/terminate active requests under a defined policy.
+- Dispose runtime/hosting resources exactly once.
+- Report shutdown reason and desired restart to the host.
+- Replace the process when reload or static-state reset is required.
+- Define behavior without a restart-capable host.
+- Make `HttpRuntime.UnloadAppDomain()` process-scoped or explicitly unsupported.
 
-- `HttpRuntime.cs:1896`
-- `Hosting/ProcessHost.cs:1240`
+## Done when
 
-## Required design
-
-The approved architecture supports one Web Forms application per process.
-Define a process-lifetime boundary that:
-
-- stops new request dispatch;
-- drains or terminates outstanding requests under a documented policy;
-- disposes runtime and hosting resources once;
-- reports shutdown reason and desired restart to the host;
-- terminates and replaces the process when reload or static-state reset is
-  required;
-- defines behavior when no restart-capable host is attached;
-- makes `HttpRuntime.UnloadAppDomain()` explicitly process-scoped or explicitly
-  unsupported.
-
-The native `ProcessHost` custom-loader error path also needs a modern branch
-that performs no AppDomain unload and preserves the original reported error.
-
-## Completion criteria
-
-- Define the runtime-to-host lifetime contract.
-- Define configuration-change, explicit unload, graceful shutdown, and restart
-  behavior.
-- Remove both unsupported unload calls or prove the legacy native path
-  unreachable and suppress it narrowly.
-- Validate that shutdown cannot throw an unhandled ThreadPool exception.
-- Remove the temporary `SYSLIB0024` suppression.
+- Configuration change, explicit unload, graceful shutdown, and restart are
+  specified and tested.
+- Unsupported AppDomain unload calls are removed or unreachable.
+- Shutdown cannot produce an unhandled ThreadPool exception.
+- Temporary `SYSLIB0024` suppression is removed.
