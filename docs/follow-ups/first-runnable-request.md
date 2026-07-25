@@ -28,12 +28,9 @@ redirects, and async pages.
 
 ## Order
 
-1. Host adapter and completion contract.
-2. Bootstrap, configuration, paths, and filesystem behavior.
-3. Startup portability and minimal feature profile.
-4. Response output, compilation/loading, compiler policy, and ViewState keys.
-5. Process policy and portable diagnostics.
-6. Dynamic ASPX integration and compatibility-map update.
+The dependency-ordered execution waves live in
+[`docs/README.md`](../README.md). This story owns milestone scope and
+acceptance; the index owns current scheduling.
 
 ## Done when
 
