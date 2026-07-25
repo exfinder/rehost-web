@@ -2,29 +2,32 @@
 
 ## Host contract
 
-The host calls `Rehost.WebForms.Hosting.WebFormsApplication.Initialize` exactly
-once, before loading application code, creating a `HostingEnvironment`, or
-dispatching requests.
+The host creates one process-scoped `WebFormsApplication` from immutable
+options. Registration does not load application code, create a
+`HostingEnvironment`, or mutate legacy global state. The first routed request
+single-flights activation.
 
 Required options:
 
 - opaque, non-empty application ID;
 - absolute existing physical application root;
-- absolute virtual root (`/` or an application subpath).
+- absolute virtual root (`/` or an application subpath);
+- absolute writable application work root.
 
 The physical root is normalized with `Path.GetFullPath`, retains filesystem
 casing, and is stored with a trailing platform directory separator. The
 virtual root rejects relative paths, backslashes, query/fragment text, and
 literal traversal segments.
 
-Bootstrap does not resolve symlinks or establish descendant containment;
+Registration does not resolve symlinks or establish descendant containment;
 [portable path mapping](follow-ups/portable-path-mapping-and-containment.md)
 owns that boundary.
 
-Initialization has four process-wide states: uninitialized, initializing,
-initialized, and faulted. The first caller owns the only attempt. Concurrent
-or later calls fail immediately, including calls with identical options. Any
-failure is terminal until process replacement.
+Host registration validates without global mutation and may be retried after a
+validation failure. Once activation begins mutating legacy global state, only
+one attempt is allowed. An escaping activation failure is terminal for that
+generation; failures owned by the managed request pipeline retain their
+Framework scope and error processing.
 
 ## Configuration sources
 
@@ -36,44 +39,41 @@ configs/rehost-webforms.machine.config
 configs/rehost-webforms.web.config
 ```
 
-MSBuild copies newer baseline inputs with `PreserveNewest`. Defaults resolve
-from `AppContext.BaseDirectory/configs`, never the Runtime assembly location.
-Hosts may override either baseline with an absolute file path.
+Packaging publishes versioned baseline assets deterministically. The owning
+host passes their absolute paths during registration; runtime code does not
+discover them from `AppContext.BaseDirectory` or Runtime assembly location.
 
 The application configuration source is optional
 `<physical-root>/web.config`. Missing application configuration means baseline
 inheritance only. Arbitrary external application configuration paths are not
 supported in this iteration.
 
-The machine baseline declares the portable System.Web configuration
-vocabulary. The root-web baseline selects full trust, disables configuration
-file change notifications, and otherwise remains minimal. Pipeline
-handler/module defaults belong to the minimal-pipeline profile.
-
-These baselines are independently authored from pinned Reference Source
-configuration types and verified against Framework configuration hierarchy
-semantics. The earlier Portable.System.Web POC is not a source.
+The machine baseline adapts the pinned System.Web configuration vocabulary.
+Root-web defaults are derived structurally from pinned .NET Framework 4.8.1
+configuration. Every assembly-identity or portability delta is inventoried.
+First-slice fixtures clear inherited handlers and modules before registering
+their probe components. The earlier Portable.System.Web POC is not a source.
 
 ## Validation and commit
 
-Before global mutation, bootstrap:
+Before global mutation, registration:
 
 1. validates and opens each required file;
-2. uses `WebConfigurationManager.OpenMappedWebConfiguration` to load the
-   proposed machine → root-web → application hierarchy;
-3. resolves bootstrap-critical `httpRuntime`, `trust`, `compilation`, and
-   `hostingEnvironment` sections;
-4. rejects reload, partial trust, and legacy CAS.
+2. validates application identity and physical, virtual, and work roots; and
+3. verifies no conflicting process-wide application binding exists.
 
-`System.Configuration` owns XML, inheritance, `configSource`, and line/column
-diagnostics. Custom/unrelated sections retain lazy Framework evaluation.
-Bootstrap adds resolved source paths to configuration errors.
+Registration does not open mapped System.Web configuration or eagerly resolve
+application sections. The retained `HostingEnvironment` and
+`HttpRuntime.HostingInit` sequence owns configuration installation, parsing,
+inheritance, caching, and diagnostics. Portable policy checks occur where that
+sequence normally consumes the relevant section.
 
-After preflight, the immutable binding is mirrored into current-AppDomain data
-slots required by imported code. These values are explicit bootstrap output,
-not IIS/ambient identity. Binding failure restores every prior slot before the
-process becomes faulted. The host-neutral current-AppDomain overlay rejects
-conflicting host roots, IIS Express, native configuration tokens, and reload.
+During activation, the immutable binding is mirrored into current-AppDomain
+data slots required by imported code. These values are explicit owner output,
+not IIS/ambient identity. Binding failure restores prior slots where reliable;
+an escape after global mutation requests terminal host shutdown. The
+host-neutral current-AppDomain leaf rejects conflicting roots, IIS Express,
+native configuration tokens, and reload.
 
 ## Portability and lifecycle
 
@@ -87,18 +87,16 @@ conflicting host roots, IIS Express, native configuration tokens, and reload.
 Configuration reload/restart design:
 [configuration reload](follow-ups/configuration-reload-and-process-restart.md).
 
-## Deferred integration verification
+## Integration verification
 
-Bootstrap intentionally does not run application code.
-
-- ASP.NET Core host adapter must call `Initialize` before all System.Web use.
-- Request startup work must prove remaining hosting initialization reaches no
-  native IIS/Windows operations.
-- Runtime codegen integration must run and order
-  `PreApplicationStartMethodAttribute` and `App_Code` `AppInitialize` before
-  accepting a request.
-- Dynamic ASPX integration must verify `Global.asax` `Application_Start`
-  remains request-pipeline behavior.
+- ASP.NET Core uses the process-scoped application owner; middleware never
+  initializes `HostingEnvironment` directly.
+- Request startup must prove activation and the first request reach no native
+  IIS/Windows operations.
+- Runtime codegen later verifies
+  `PreApplicationStartMethodAttribute` and `App_Code.AppInitialize` order.
+- Dynamic startup later verifies classic `Global.asax.Application_Start`
+  request-pipeline behavior.
 
 Owning stories:
 [host adapter](follow-ups/aspnet-core-host-adapter.md),

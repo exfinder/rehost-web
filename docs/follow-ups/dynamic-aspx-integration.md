@@ -1,7 +1,6 @@
 # Dynamic ASPX integration
 
-Status: open. Priority: high. Depends on all first-runnable-request
-implementation stories.
+Status: open. Priority: high. Slice 3; depends on the dynamic-startup slice.
 
 ## Fixture
 
@@ -20,8 +19,9 @@ Start real Kestrel on Linux, request the page, and assert:
 - no native IIS/Windows dependency reached;
 - clean shutdown with no background failure.
 
-This test closes explicitly deferred verification from intermediary stories.
-It is not a .NET Framework differential test.
+This test closes explicitly deferred verification from intermediary stories
+and has a matching .NET Framework core differential fixture. Kestrel transport
+remains a separate integration assertion.
 
 ## Done when
 

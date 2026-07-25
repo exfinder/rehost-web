@@ -1,7 +1,7 @@
 # Request-startup portability
 
-Status: open. Priority: high. Depends on application bootstrap and
-supported-path reachability.
+Status: open. Priority: highest. Canonical execution:
+[managed runtime port plan](../core-runtime-port-plan.md).
 
 ## Problem
 
@@ -10,19 +10,18 @@ engine discovery, health initialization, request-queue tuning, processor and
 module version lookup, account lookup, file monitors, and native prefetch.
 Blanket native failure or scattered platform guards do not define behavior.
 
-Legacy state flow and phase postconditions:
-[IIS integrated initialization research](../research/aspnet-iis-integrated-initialization-pipeline.md).
-
-Proposed execution:
-[HttpRuntime portability plan](../http-runtime-porting-plan.md).
+Supported state flow and lifetimes:
+[classic managed runtime model](../classic-managed-runtime-model.md).
+Incremental classification:
+[portability ledger](../portability-ledger.md).
 
 ## Scope
 
 Own portable `HttpRuntime` initialization from its static constructor through
 `StaticInit`, instance `Init`, `HostingInit`, and first request dispatch.
-Consume application identity, roots, configuration, full-trust policy, and
-lifecycle state exclusively from the completed
-[application bootstrap](../application-bootstrap-and-configuration.md).
+Consume application identity, roots, work storage, configuration mapping,
+full-trust policy, and lifecycle state from the process-scoped application
+owner. The bootstrap commit is input to reshape, not a completed prerequisite.
 
 Split managed runtime initialization from optional IIS/native integration.
 Registry, IIS, assembly-location, Windows identity, native monitoring, and
@@ -35,12 +34,12 @@ unload behavior belongs to
 
 ## Required decisions
 
-Trace the exact first-request graph. Classify each dependency as:
+Trace only edges reached by the current executable slice. Classify each as:
 
 - portable semantic replacement;
 - host lifecycle/service responsibility;
 - explicitly unsupported feature with early diagnostic; or
-- proven unreachable imported code.
+- deferred or proven unreachable imported code.
 
 No supported path may select different capability merely because the OS is
 Windows.
@@ -52,7 +51,6 @@ IIS libraries unavailable and asserts no reachable P/Invoke.
 
 ## Done when
 
-The entire `HttpRuntime` initialization and first-request startup graph is
-classified, documented, and portable. Initialization consumes only the
-bootstrap contract, no supported path reaches native IIS/Windows facilities,
-and no no-op exists without an approved semantic contract.
+The bodyless precompiled-handler path is classified, documented, and portable.
+No supported edge reaches native IIS/Windows facilities, and no inactive
+behavior exists without an explicit postcondition and probe.

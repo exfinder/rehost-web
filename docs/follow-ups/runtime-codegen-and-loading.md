@@ -1,6 +1,6 @@
 # Runtime code generation and loading
 
-Status: open. Priority: high. Depends on host/runtime filesystem contract.
+Status: open. Priority: high. Slice 2 after the precompiled-handler gate.
 
 ## Problem
 
@@ -12,10 +12,12 @@ enumeration, Win32 resources, and IIS-owned temporary directories.
 
 ## Required decisions
 
-- Define host-supplied, application-scoped codegen and cache roots.
+- Use the host-supplied application work root and retained
+  `SetUpCodegenDirectory` sequence.
 - Define ownership, permissions, cleanup, restart, and concurrent compilation.
 - Preserve virtual-to-generated source diagnostics.
-- Define assembly probing/loading without Framework shadow-copy claims.
+- Extend the slice-1 application-bin resolver for generated assemblies without
+  Framework shadow-copy/unload claims.
 - Decide how long generated literals and resources are emitted portably.
 - Keep compiler/provider selection in
   [compiler-provider-and-target-framework-policy.md](compiler-provider-and-target-framework-policy.md).
@@ -32,6 +34,7 @@ missing test recorded here.
 
 ## Done when
 
-Runtime compilation uses explicit paths, cleanup cannot escape its disposable
-root, location/probing behavior is tested, compiler diagnostics retain useful
-locations, and unsupported shadow-copy expectations fail clearly.
+Pre-app-start, `App_Code`, `Global.asax`, and `Application_Start` pass their
+differential ordering/failure gate. Runtime compilation uses explicit paths,
+cleanup cannot escape its disposable root, diagnostics retain useful locations,
+and unsupported shadow-copy expectations fail clearly.

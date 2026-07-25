@@ -1,6 +1,6 @@
 # Request completion, failure, and cancellation
 
-Status: open. Priority: high. Depends on ASP.NET Core host adapter.
+Status: open. Priority: highest. Depends on ASP.NET Core host adapter.
 
 ## Problem
 
@@ -11,10 +11,10 @@ Moving processing to `Task.Run` can also change execution and call context.
 
 ## Required decisions
 
-- Single terminal state: success, handled failure, host cancellation, or fatal
-  adapter failure.
-- Ownership and propagation of pipeline versus transport exceptions.
-- Cancellation/disconnect behavior before timeout support exists.
+- System.Web-owned failures complete normally after error formatting.
+- Only exceptions escaping `HttpRuntime.ProcessRequest` fault completion.
+- Disconnect is observable but does not abandon a pipeline-owned request.
+- A pre-pipeline escape explicitly faults worker-request completion.
 - ExecutionContext and logical CallContext flow across the sync/async bridge.
 - Exactly-once final flush and completion.
 
@@ -26,5 +26,5 @@ Full-pipeline cases may defer to the integration story.
 
 ## Done when
 
-No request can wait indefinitely after a terminal event, exceptions remain
-observable, and completion/flush happen at most once.
+No request can wait indefinitely after a terminal event, an escaped exception
+is observed exactly once, and managed completion happens exactly once.

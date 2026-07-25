@@ -1,29 +1,29 @@
 # Managed response buffering and output
 
-Status: open. Priority: high. Depends on host adapter.
+Status: open. Priority: highest. First-slice contract:
+[spooled asynchronous commit](../adr/0036-spool-first-slice-responses-before-async-commit.md).
 
 ## Problem
 
-Classic `HttpWriter` allocates and transmits unmanaged response elements.
-Portable output must retain append, encoding, clone, recycle, ordering, header,
-status, file-send, flush, and finalization semantics. A pooled byte array
-introduces ownership and use-after-return risks.
+The first-slice worker request needs deterministic status, headers, memory body
+fragments, logical flush state, and final completion without synchronous
+Kestrel writes. Full `HttpWriter` portability remains broader work.
 
 ## Required decisions
 
-- Managed buffer ownership, growth, pooling, clearing, and recycling.
-- Character encoding and encoder flush behavior.
-- Fragment ordering across memory and file output.
-- Status/header mutation and first-flush rules.
-- Filename-based send; policy for native-handle send.
-- Write-failure and client-disconnect propagation.
+- Per-request memory-to-work-file spool ownership and cleanup.
+- Fragment ordering and logical first-flush/header state.
+- Seal on `EndOfRequest`, then asynchronous Kestrel commit.
+- Managed versus adapter failure propagation.
+- Explicit first-slice rejection for file send and client-visible streaming.
 
 ## Verification
 
-Focused tests cover split multibyte characters, multiple flushes, clone/recycle,
-buffer reuse, file ranges, empty output, header timing, and write failures.
+Focused tests cover memory and spill paths, multiple logical flushes, empty
+output, status/header ordering, disconnect, commit failure, and cleanup.
+Encoding, file ranges, and client-visible streaming belong to later gates.
 
 ## Done when
 
-The first page response is fully managed, deterministic, leak-free, and
-compatible with the worker-request contract.
+The first-slice response is deterministic, leak-free, completes exactly once,
+and commits without enabling Kestrel synchronous I/O.

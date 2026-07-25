@@ -1,39 +1,39 @@
 # First runnable request
 
-Status: open. Priority: high. Depends on the phase-one warning-free runtime
-build.
+Status: open. Priority: highest. Canonical scope:
+[managed runtime port plan, slice 1](../core-runtime-port-plan.md#slice-1-bodyless-precompiled-handler).
 
 ## Goal
 
-Serve `GET /Default.aspx` through Kestrel, `HttpWorkerRequest`, `HttpRuntime`,
-dynamic page parsing/compilation/loading, code-behind execution, and response
-output on every supported platform.
+Serve a bodyless request through Kestrel, public
+`HttpRuntime.ProcessRequest(HttpWorkerRequest)`, the complete classic managed
+pipeline, one configured module, one configuration-mapped precompiled handler,
+and normal System.Web completion on every supported platform.
 
-The fixture contains one `.aspx`, code-behind, and `web.config`. It may use a
-query string and deterministic request headers. It excludes `Global.asax`,
-resources, master pages, session, authentication, custom modules, POST,
-redirects, and async pages.
+The handler assembly exists only in fixture `<application>/bin`; the Kestrel
+host does not reference it.
 
-## Contract
+## Included
 
-- Cross-platform or explicitly unsupported everywhere; never Windows-only
-  partial behavior.
-- Preserve System.Web semantics where evidence exists.
-- POC history is a hazard map, never implementation authority.
-- Each technical decision and deviation is recorded in a current compatibility
-  document or ADR.
-- Intermediate work has focused tests where feasible. If pipeline completion
-  blocks testing, record the invariant, blocker, exact deferred test, and link
-  to the integration story.
+- first-request activation through `ApplicationManager`;
+- retained `HostingEnvironment`, `HttpRuntime`, `BuildManager`, and
+  `HttpApplicationFactory` sequencing;
+- configured `system.web/httpModules` and `system.web/httpHandlers`;
+- pooled `HttpApplication`, sync and async handlers, `CompleteRequest`, errors;
+- bodyless Kestrel worker request and asynchronously committed response spool;
+- initialization-error response and terminal shutdown notification;
+- .NET Framework differential traces.
 
-## Order
+## Deferred
 
-The dependency-ordered execution waves live in
-[`docs/README.md`](../README.md). This story owns milestone scope and
-acceptance; the index owns current scheduling.
+- dynamic `Global.asax`, `App_Code`, `.ashx`, and `.aspx` compilation;
+- request bodies, path info, streaming response, and file send;
+- session, authentication, cache, routing, and resources;
+- graceful drain/disposal.
 
 ## Done when
 
-A Linux integration test starts a real Kestrel host, requests the fixture, and
-asserts status, selected headers, rendered body, code-behind output, and clean
-request completion. macOS and Windows must use the same runtime contract.
+Every scenario in
+[the first-slice parity gate](../adr/0031-require-the-first-slice-parity-gate.md)
+passes, the fixture handler resolves without a host reference, and the
+supported path reaches no native IIS/Windows operation.

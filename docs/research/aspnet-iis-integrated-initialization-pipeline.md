@@ -1,7 +1,14 @@
 # ASP.NET on IIS integrated mode: managed initialization state flow
 
-Status: research note. Target: pinned .NET Framework Reference Source revision
+Status: background research; not the initial compatibility contract. Target:
+pinned .NET Framework Reference Source revision
 `ec9fa9ae770d522a5b5f0607898044b7478574a3`.
+
+The port targets the classic managed pipeline. See the
+[classic managed runtime model](../classic-managed-runtime-model.md) and
+[canonical port plan](../core-runtime-port-plan.md). Integrated-mode details
+below remain useful for identifying common managed initialization phases and
+excluded native dependencies.
 
 ## Conclusion
 

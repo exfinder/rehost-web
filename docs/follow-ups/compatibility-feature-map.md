@@ -22,11 +22,11 @@ contract/test.
 
 | Feature | Status | Platforms | Contract/failure |
 | --- | --- | --- | --- |
-| Explicit application identity and physical/virtual roots | supported | all | Single process binding; invalid inputs fail during `WebFormsApplication.Initialize`. [Contract](../application-bootstrap-and-configuration.md) |
-| Portable machine/root-web configuration baselines | supported | all | Versioned files copied to host `configs`; absolute overrides supported. Missing, inaccessible, or malformed inputs fail preflight. [Contract](../application-bootstrap-and-configuration.md) |
-| Multiple applications or repeated bootstrap per process | unsupported | all | Later/concurrent initialization throws `InvalidOperationException`; process replacement required. [Contract](../application-bootstrap-and-configuration.md) |
-| Partial trust and legacy CAS | unsupported | all | Bootstrap rejects non-`Full` trust or `legacyCasModel="true"`. [Contract](../appdomain-remoting-cas-compatibility.md) |
-| Configuration watching/in-process reload | unsupported | all | Bootstrap rejects enabled FCN; configuration immutable until restart. [Follow-up](configuration-reload-and-process-restart.md) |
+| Explicit application identity and physical/virtual/work roots | unassessed | all | Mutation-free registration and single process binding are slice-1 work. [Contract](../application-bootstrap-and-configuration.md) |
+| Framework-derived machine/root-web configuration baselines | unassessed | all | Versioned assets and every portable delta require provenance and tests. [Contract](../application-bootstrap-and-configuration.md) |
+| Multiple published applications per process | unsupported | all | One immutable generation per process; replacement is external. [Contract](../application-bootstrap-and-configuration.md) |
+| Partial trust and legacy CAS | unsupported | all | Normal runtime configuration consumption rejects non-`Full` trust or `legacyCasModel="true"`. [Contract](../appdomain-remoting-cas-compatibility.md) |
+| Configuration watching/in-process reload | unsupported | all | Hosting/configuration disables FCN; configuration remains immutable until process replacement. [Follow-up](configuration-reload-and-process-restart.md) |
 | Pre-application hooks during host startup | unassessed | all | `PreApplicationStartMethodAttribute` and `AppInitialize` verification deferred to runtime codegen/integration. |
 
 ## Done when

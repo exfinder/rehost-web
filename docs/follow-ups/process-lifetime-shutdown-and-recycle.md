@@ -1,6 +1,7 @@
 # Process lifetime, shutdown, and recycle
 
-Status: open. Priority: high. Depends on host/runtime lifecycle boundary.
+Status: partially decided; full drain/disposal is slice 6. Terminal notification
+is required in slice 1.
 
 ## Problem
 
@@ -12,10 +13,12 @@ host failures. Unhandled unload attempts can break shutdown.
 
 - Stop new dispatch and drain/terminate active requests under a defined policy.
 - Dispose runtime/hosting resources exactly once.
-- Report shutdown reason and desired restart to the host.
+- Emit one terminal shutdown notification to the application owner.
+- ASP.NET Core calls `IHostApplicationLifetime.StopApplication`.
 - Replace the process when reload or static-state reset is required.
 - Define behavior without a restart-capable host.
 - Make `HttpRuntime.UnloadAppDomain()` process-scoped or explicitly unsupported.
+- Never call `Environment.Exit` or attempt in-process reinitialization.
 
 ## Done when
 

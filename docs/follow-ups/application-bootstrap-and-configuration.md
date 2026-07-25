@@ -1,6 +1,7 @@
 # Application bootstrap and configuration
 
-Status: done. Priority: high. Depends on host lifecycle/configuration boundary.
+Status: reshape required in slice 1. Priority: highest. Canonical contract:
+[managed runtime port plan](../core-runtime-port-plan.md).
 
 ## Problem
 
@@ -25,10 +26,13 @@ before/after state mutation, retry policy, and configuration-source diagnostics.
 
 ## Done when
 
-Bootstrap has no ambient IIS, registry, assembly-location, or secondary
-AppDomain dependency and cannot expose partially initialized global state.
+Host registration is mutation-free and retryable after validation failure.
+First-request activation is single-flight, traverses `ApplicationManager`, and
+cannot expose partially initialized global state. Broad System.Web
+configuration preflight, static `Initialize`, and catch-all bootstrap faulting
+are removed.
 
-Implemented contract:
+Target contract:
 [application bootstrap and configuration](../application-bootstrap-and-configuration.md).
 
 Pipeline-native startup, pre-application hooks, and `Global.asax` verification

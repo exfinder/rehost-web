@@ -8,6 +8,9 @@ record contracts and rationale.
 
 | Area | Document |
 | --- | --- |
+| Managed runtime port plan | [core-runtime-port-plan.md](core-runtime-port-plan.md) |
+| Classic runtime graph/lifetimes | [classic-managed-runtime-model.md](classic-managed-runtime-model.md) |
+| Classic-path portability ledger | [portability-ledger.md](portability-ledger.md) |
 | Application bootstrap/configuration | [application-bootstrap-and-configuration.md](application-bootstrap-and-configuration.md) |
 | AppDomain, remoting, full trust | [appdomain-remoting-cas-compatibility.md](appdomain-remoting-cas-compatibility.md) |
 | Application Services assembly/loader | [application-services-compatibility.md](application-services-compatibility.md) |
@@ -30,30 +33,22 @@ Source/licensing records:
 
 ## Current milestone
 
-[First runnable request](follow-ups/first-runnable-request.md): serve one
-dynamically compiled `.aspx` page through Kestrel on every supported platform.
+[First runnable request](follow-ups/first-runnable-request.md): execute one
+configuration-mapped precompiled handler through the full classic managed
+pipeline and Kestrel on every supported platform.
 
-Order is dependency order. Work in the same wave may proceed in parallel after
-its own dependencies are complete.
+The [canonical port plan](core-runtime-port-plan.md) owns order and exit gates.
+Follow-up files are scoped work packets, not independent architecture.
 
-| Wave | Work | Depends on | Status |
-| ---: | --- | --- | --- |
-| 0 | [Compatibility feature map](follow-ups/compatibility-feature-map.md) | phase-one contracts | open; update continuously |
-| 0 | [Windows/platform diagnostics](follow-ups/windows-platform-diagnostics.md) | phase-one runtime build | open; audit continuously |
-| 1 | [Application bootstrap](follow-ups/application-bootstrap-and-configuration.md) | host lifecycle/configuration boundary | done |
-| 1 | [ASP.NET Core host adapter](follow-ups/aspnet-core-host-adapter.md) | host-neutral request boundary | open |
-| 2 | [Portable path mapping](follow-ups/portable-path-mapping-and-containment.md) | bootstrap and host-adapter contracts | open |
-| 2 | [Request completion](follow-ups/request-completion-failure-and-cancellation.md) | host adapter | open |
-| 2 | [Managed response output](follow-ups/managed-response-buffering-and-output.md) | host adapter | open |
-| 3 | [Portable filesystem semantics](follow-ups/portable-filesystem-and-config-path-semantics.md) | path mapping | open |
-| 4 | [Request-startup portability](follow-ups/request-startup-portability.md) | bootstrap and filesystem semantics | open |
-| 4 | [Minimal pipeline profile](follow-ups/minimal-pipeline-feature-profile.md) | bootstrap | open |
-| 4 | [Runtime process policy](follow-ups/runtime-process-policy.md) | bootstrap and host lifecycle | open |
-| 4 | [Portable request diagnostics](follow-ups/portable-request-diagnostics.md) | host adapter and bootstrap | open |
-| 5 | [Runtime codegen/loading](follow-ups/runtime-codegen-and-loading.md) | bootstrap and filesystem semantics | open |
-| 6 | [Compiler policy](follow-ups/compiler-provider-and-target-framework-policy.md) | runtime codegen/loading | open |
-| 6 | [Machine key/ViewState bootstrap](follow-ups/machine-key-and-viewstate-bootstrap.md) | bootstrap, minimal pipeline profile, security policy | open |
-| 7 | [Dynamic ASPX integration](follow-ups/dynamic-aspx-integration.md) | waves 1–6 | open |
+| Slice | Work | Status |
+| ---: | --- | --- |
+| 0 | [.NET Framework oracle](follow-ups/framework-differential-harness.md), root-config provenance, ledger | open |
+| 1 | [First runnable request](follow-ups/first-runnable-request.md), including bootstrap reshape, host adapter, completion, response spool, and request startup | open |
+| 2 | [Runtime codegen/loading](follow-ups/runtime-codegen-and-loading.md), `App_Code`, `Global.asax`, application start | open |
+| 3 | [Dynamic ASPX integration](follow-ups/dynamic-aspx-integration.md), GET lifecycle/rendering | open |
+| 4 | Request-body bridge, postback, view state, uploads | open |
+| 5 | Built-in modules and services | open |
+| 6 | Process drain/disposal and broader transport | open |
 
 ## Later backlog
 
@@ -63,7 +58,6 @@ its own dependencies are complete.
 | High | [Process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md) | host lifecycle |
 | High | [Request termination/timeouts](follow-ups/request-termination-and-timeouts.md) | pipeline cancellation |
 | Medium | [Deferred request surfaces](follow-ups/deferred-request-surfaces.md) | first runnable request |
-| Medium | [.NET Framework differential harness](follow-ups/framework-differential-harness.md) | runnable fixtures |
 | Medium | [ResX edge cases](follow-ups/resx-compatibility.md) | trust/platform policy |
 | Medium | [Route escaping](follow-ups/route-url-escaping.md) | Framework oracle |
 | Medium | [WebResource timestamps](follow-ups/web-resource-assembly-timestamps.md) | publishing model |

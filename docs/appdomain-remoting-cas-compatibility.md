@@ -3,8 +3,8 @@
 ## Contract
 
 - One Web Forms application and one `HostingEnvironment` per OS process.
-- The host calls `WebFormsApplication.Initialize` before application code,
-  `HostingEnvironment`, or first `HttpRuntime` access.
+- The host registers one process-scoped application owner before application
+  code or System.Web activation. First routed request activates it.
 - Execution is always full trust.
 - Current-AppDomain request processing, configuration, runtime compilation,
   local application inspection, and local object registration remain supported.
@@ -39,8 +39,8 @@ require unavailable boundaries. Relevant source is under
 `src/System.Web.ReferenceSource/Hosting`, `Compilation`, `HttpRuntime.cs`, and
 `src/Rehost.WebForms.Runtime/Compatibility`.
 
-Application identity, roots, configuration sources, and single-attempt process
-binding are defined by
+Application identity, roots, configuration sources, and process binding are
+defined by
 [application bootstrap](application-bootstrap-and-configuration.md).
 
 Authorities:
