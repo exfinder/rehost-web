@@ -55,9 +55,16 @@
 
   <ItemGroup>
     <None
+      Update="configs/*.config"
+      CopyToOutputDirectory="PreserveNewest"
+      CopyToPublishDirectory="PreserveNewest"
+      Pack="true"
+      PackagePath="contentFiles/any/any"
+      PackageCopyToOutput="true" />
+    <None
       Update="build/Rehost.WebForms.Runtime.targets"
       Pack="true"
-      PackagePath="build" />
+      PackagePath="build/Rehost.WebForms.Runtime.targets" />
   </ItemGroup>
 
   <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets" />

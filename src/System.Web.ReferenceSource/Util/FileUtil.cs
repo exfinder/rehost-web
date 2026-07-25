@@ -355,6 +355,7 @@ internal class FileUtil {
         if (String.IsNullOrEmpty(physicalPath))
             return;
 
+#if NETFRAMEWORK
         using (new ApplicationImpersonationContext()) {
             UnsafeNativeMethods.WIN32_FILE_ATTRIBUTE_DATA data;
             bool ok = UnsafeNativeMethods.GetFileAttributesEx(physicalPath, UnsafeNativeMethods.GetFileExInfoStandard, out data);
@@ -376,6 +377,26 @@ internal class FileUtil {
                 }
             }
         }
+#else
+        try {
+            FileAttributes attributes = File.GetAttributes(physicalPath);
+            exists = true;
+            isDirectory = (attributes & FileAttributes.Directory) == FileAttributes.Directory;
+            if (isDirectory && HasInvalidLastChar(physicalPath)) {
+                exists = false;
+            }
+        }
+        catch (FileNotFoundException) {
+        }
+        catch (DirectoryNotFoundException) {
+        }
+        catch {
+            if (directoryExistsOnError || fileExistsOnError) {
+                exists = true;
+                isDirectory = directoryExistsOnError;
+            }
+        }
+#endif
     }
 
     //

@@ -1,6 +1,6 @@
 # Application bootstrap and configuration
 
-Status: open. Priority: high. Depends on host lifecycle/configuration boundary.
+Status: done. Priority: high. Depends on host lifecycle/configuration boundary.
 
 ## Problem
 
@@ -27,3 +27,9 @@ before/after state mutation, retry policy, and configuration-source diagnostics.
 
 Bootstrap has no ambient IIS, registry, assembly-location, or secondary
 AppDomain dependency and cannot expose partially initialized global state.
+
+Implemented contract:
+[application bootstrap and configuration](../application-bootstrap-and-configuration.md).
+
+Pipeline-native startup, pre-application hooks, and `Global.asax` verification
+remain explicitly owned by the linked downstream stories in that contract.

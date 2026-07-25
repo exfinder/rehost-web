@@ -28,8 +28,8 @@ namespace System.Web.Configuration {
     using UrlPath = System.Web.Util.UrlPath;
 
     internal class HttpConfigurationSystem : IInternalConfigSystem {
-        private const string InternalConfigSettingsFactoryTypeString = "System.Configuration.Internal.InternalConfigSettingsFactory, " + AssemblyRef.SystemConfiguration;
-        internal const string ConfigSystemTypeString = "System.Configuration.Internal.ConfigSystem, " + AssemblyRef.SystemConfiguration;
+        private const string InternalConfigSettingsFactoryTypeString = "System.Configuration.Internal.InternalConfigSettingsFactory, " + AssemblyRef.SystemConfigurationManager;
+        internal const string ConfigSystemTypeString = "System.Configuration.Internal.ConfigSystem, " + AssemblyRef.SystemConfigurationManager;
 
 #if !PLATFORM_UNIX // File system paths must be lowercased in UNIX
         internal const string MachineConfigSubdirectory = "Config";

@@ -8,6 +8,7 @@ record contracts and rationale.
 
 | Area | Document |
 | --- | --- |
+| Application bootstrap/configuration | [application-bootstrap-and-configuration.md](application-bootstrap-and-configuration.md) |
 | AppDomain, remoting, full trust | [appdomain-remoting-cas-compatibility.md](appdomain-remoting-cas-compatibility.md) |
 | Application Services assembly/loader | [application-services-compatibility.md](application-services-compatibility.md) |
 | Async/thread call context | [call-context-compatibility.md](call-context-compatibility.md) |
@@ -39,7 +40,7 @@ its own dependencies are complete.
 | ---: | --- | --- | --- |
 | 0 | [Compatibility feature map](follow-ups/compatibility-feature-map.md) | phase-one contracts | open; update continuously |
 | 0 | [Windows/platform diagnostics](follow-ups/windows-platform-diagnostics.md) | phase-one runtime build | open; audit continuously |
-| 1 | [Application bootstrap](follow-ups/application-bootstrap-and-configuration.md) | host lifecycle/configuration boundary | open |
+| 1 | [Application bootstrap](follow-ups/application-bootstrap-and-configuration.md) | host lifecycle/configuration boundary | done |
 | 1 | [ASP.NET Core host adapter](follow-ups/aspnet-core-host-adapter.md) | host-neutral request boundary | open |
 | 2 | [Portable path mapping](follow-ups/portable-path-mapping-and-containment.md) | bootstrap and host-adapter contracts | open |
 | 2 | [Request completion](follow-ups/request-completion-failure-and-cancellation.md) | host adapter | open |
@@ -67,6 +68,7 @@ its own dependencies are complete.
 | Medium | [Route escaping](follow-ups/route-url-escaping.md) | Framework oracle |
 | Medium | [WebResource timestamps](follow-ups/web-resource-assembly-timestamps.md) | publishing model |
 | Low | [Enterprise Services scope](follow-ups/enterprise-services.md) | product profile |
+| Low | [Configuration reload](follow-ups/configuration-reload-and-process-restart.md) | process lifetime |
 | Low | [Generated resources](follow-ups/generated-resource-compatibility.md) | Framework oracle |
 | Low | [Regex generation](follow-ups/regex-generation.md) | API/AOT policy |
 | Low | [Web Services scope](follow-ups/web-services.md) | ASMX/SOAP profile |

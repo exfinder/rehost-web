@@ -5,6 +5,7 @@ namespace System.Web {
         internal const string Mscorlib = "mscorlib";
         internal const string System = "System";
         internal const string SystemConfiguration = "System.Configuration";
+        internal const string SystemConfigurationManager = "System.Configuration.ConfigurationManager";
         internal const string SystemDesign = "System.Design";
         internal const string SystemDrawingDesign = "System.Drawing.Design";
         internal const string SystemWeb = "Rehost.WebForms.Runtime";

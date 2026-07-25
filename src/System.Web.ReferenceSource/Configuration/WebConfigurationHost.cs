@@ -30,8 +30,8 @@ namespace System.Web.Configuration {
     // Configuration host for web applications.
     //
     internal sealed class WebConfigurationHost : DelegatingConfigHost, IInternalConfigWebHost {
-        const string InternalHostTypeName = "System.Configuration.Internal.InternalConfigHost, " + AssemblyRef.SystemConfiguration;
-        const string InternalConfigConfigurationFactoryTypeName = "System.Configuration.Internal.InternalConfigConfigurationFactory, " + AssemblyRef.SystemConfiguration;
+        const string InternalHostTypeName = "System.Configuration.Internal.InternalConfigHost, " + AssemblyRef.SystemConfigurationManager;
+        const string InternalConfigConfigurationFactoryTypeName = "System.Configuration.Internal.InternalConfigConfigurationFactory, " + AssemblyRef.SystemConfigurationManager;
 
         internal const string           MachineConfigName = "machine";
         internal const string           MachineConfigPath = "machine";
@@ -508,7 +508,13 @@ namespace System.Web.Configuration {
 
         // change notification support - runtime only
         public override bool SupportsChangeNotifications {
-            get {return true;}
+            get {
+#if NETFRAMEWORK
+                return true;
+#else
+                return false;
+#endif
+            }
         }
 
         private Hashtable FileChangeCallbacks {
@@ -714,11 +720,16 @@ namespace System.Web.Configuration {
         }
 
         internal static void StaticGetRestrictedPermissions(IInternalConfigRecord configRecord, out PermissionSet permissionSet, out bool isHostReady) {
+#if NETFRAMEWORK
             isHostReady = HttpRuntime.IsTrustLevelInitialized;
             permissionSet = null;
             if (isHostReady && IsVirtualPathConfigPath(configRecord.ConfigPath)) {
                 permissionSet = HttpRuntime.NamedPermissionSet;
             }
+#else
+            isHostReady = true;
+            permissionSet = null;
+#endif
         }
 
         // we trust root config files - admins settings do not have security restrictions.
@@ -740,7 +751,11 @@ namespace System.Web.Configuration {
         }
 
         public override IDisposable Impersonate() {
+#if NETFRAMEWORK
             return new ApplicationImpersonationContext();
+#else
+            return new ImpersonationContext();
+#endif
         }
 
         // prefetch support
