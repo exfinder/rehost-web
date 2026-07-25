@@ -66,6 +66,9 @@ Source revisions, licenses, and transformations live in
 where practical. Any imported-source deviation must be narrow, explained by a
 compatibility decision, and covered by tests.
 
+The Microsoft Reference Source and WinForms repositories are cloned locally at
+`../referencesource` and `../winforms`, alongside this repository.
+
 ## Documentation policy
 
 Code and tests are canonical for implementation mechanics. Documentation keeps
