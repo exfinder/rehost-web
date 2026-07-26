@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>FrameworkOracle.Contracts</AssemblyName>
+    <RootNamespace>FrameworkOracle.Contracts</RootNamespace>
+  </PropertyGroup>
+</Project>

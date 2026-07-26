@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>FrameworkOracle.Host</AssemblyName>
+    <RootNamespace>FrameworkOracle.Host</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../FrameworkOracle.Contracts/FrameworkOracle.Contracts.csproj" />
+    <ProjectReference Include="../FrameworkOracle.Runner/FrameworkOracle.Runner.csproj" />
+    <ProjectReference
+      Include="../FrameworkOracle.Probes/FrameworkOracle.Probes.csproj"
+      ReferenceOutputAssembly="false" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content
+      Include="../../fixture/web.config"
+      Link="fixture/app/web.config"
+      CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="../../metadata/*.json"
+      Link="metadata/%(Filename)%(Extension)"
+      CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <Target Name="StageOracleApplicationBin" AfterTargets="Build">
+    <PropertyGroup>
+      <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
+      <_ProbeAssembly>$(MSBuildProjectDirectory)/../FrameworkOracle.Probes/bin/$(Configuration)/net481/FrameworkOracle.Probes.dll</_ProbeAssembly>
+    </PropertyGroup>
+
+    <Error
+      Condition="!Exists('$(_ProbeAssembly)')"
+      Text="Probe build output missing: $(_ProbeAssembly)" />
+    <Error
+      Condition="Exists('$(TargetDir)FrameworkOracle.Probes.dll')"
+      Text="FrameworkOracle.Probes must not be copied beside the host." />
+
+    <MakeDir Directories="$(_FixtureBin)" />
+    <Copy
+      SourceFiles="$(TargetDir)FrameworkOracle.Contracts.dll;$(TargetDir)FrameworkOracle.Runner.dll;$(_ProbeAssembly)"
+      DestinationFolder="$(_FixtureBin)"
+      SkipUnchangedFiles="true" />
+  </Target>
+</Project>

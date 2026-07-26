@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/FrameworkOracle.Contracts/FrameworkOracle.Contracts.csproj" />
+    <Project Path="src/FrameworkOracle.Host/FrameworkOracle.Host.csproj" />
+    <Project Path="src/FrameworkOracle.Probes/FrameworkOracle.Probes.csproj" />
+    <Project Path="src/FrameworkOracle.Runner/FrameworkOracle.Runner.csproj" />
+  </Folder>
+</Solution>

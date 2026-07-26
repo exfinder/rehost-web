@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "rules": [],
+  "reason": "The cold-sync trace currently captures no host-specific paths, timestamps, runtime release keys, or transport-owned headers. Add only field-specific rules backed by a written justification."
+}

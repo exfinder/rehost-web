@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "oracle": "Microsoft .NET Framework",
+  "targetFramework": "net481",
+  "runtimeRequirement": "4.8.1",
+  "minimumReleaseKey": 533320,
+  "activationEntryPoint": "System.Web.Hosting.ApplicationManager.CreateObject",
+  "managedEntryPoint": "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
+  "fixture": "bodyless-precompiled-handler-v1",
+  "authority": "PROJECT.md: .NET Framework 4.8.1 observable behavior"
+}

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>FrameworkOracle.Probes</AssemblyName>
+    <RootNamespace>FrameworkOracle.Probes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../FrameworkOracle.Contracts/FrameworkOracle.Contracts.csproj" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+</Project>
