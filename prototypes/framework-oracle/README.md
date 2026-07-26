@@ -17,6 +17,10 @@ probe module and one precompiled handler. Framework's
 the host executable. Build staging places it only in the runnable fixture's
 `app/bin`. Host startup asserts both properties.
 
+Build staging also binds `compilation/tempDirectory` to an app-owned writable
+directory under `fixture/temp`. This retains Framework code-generation setup
+without requiring access to the machine-wide Temporary ASP.NET Files directory.
+
 ## Requirements
 
 - Windows;
@@ -59,7 +63,8 @@ JSON is written to standard output. Diagnostics go to standard error.
 
 Review the generated trace and provenance. Promote it to
 `artifacts/golden/cold-sync.json` only from the pinned Windows oracle
-environment. The draft deliberately contains no hand-authored golden trace.
+environment. The committed golden trace was produced this way; never hand-edit
+its behavioral observation.
 
 ## Verify
 

@@ -123,6 +123,7 @@ internal static class Program
     private static OracleTrace RunColdSynchronous(string applicationPath)
     {
         var manager = ApplicationManager.GetApplicationManager();
+        var applicationActivated = false;
         manager.Open();
 
         try
@@ -135,6 +136,7 @@ internal static class Program
                 EnsureTrailingDirectorySeparator(Path.GetFullPath(applicationPath)),
                 true,
                 true);
+            applicationActivated = true;
             Console.Error.WriteLine("Activated ASP.NET application AppDomain.");
 
             if (!(registered is IOracleRunner runner))
@@ -168,18 +170,26 @@ internal static class Program
         }
         finally
         {
-            try
+            if (applicationActivated)
             {
-                Console.Error.WriteLine("Stopping registered oracle runner.");
-                manager.StopObject(ApplicationId, typeof(OracleRunner));
-                Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
-                manager.ShutdownApplication(ApplicationId);
+                try
+                {
+                    Console.Error.WriteLine("Stopping registered oracle runner.");
+                    manager.StopObject(ApplicationId, typeof(OracleRunner));
+                    Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
+                    manager.ShutdownApplication(ApplicationId);
+                }
+                finally
+                {
+                    Console.Error.WriteLine("Closing ApplicationManager.");
+                    manager.Close();
+                    Console.Error.WriteLine("Closed ApplicationManager.");
+                }
             }
-            finally
+            else
             {
-                Console.Error.WriteLine("Closing ApplicationManager.");
-                manager.Close();
-                Console.Error.WriteLine("Closed ApplicationManager.");
+                Console.Error.WriteLine(
+                    "Skipping ApplicationManager cleanup after failed activation.");
             }
         }
     }
