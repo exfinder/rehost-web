@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace FrameworkOracle.Contracts;
+namespace CoreParity.Contracts;
 
-public interface IOracleRunner
+public interface IClassicPipelineRunner
 {
-    OracleObservation Run(RequestSpecification request);
+    PipelineObservation Run(RequestSpecification request);
 }
 
 [Serializable]
@@ -39,7 +39,7 @@ public sealed class RequestSpecification
 
 [Serializable]
 [DataContract]
-public sealed class OracleObservation
+public sealed class PipelineObservation
 {
     [DataMember(Order = 1)]
     public List<string> Events { get; set; } = new List<string>();
@@ -119,23 +119,23 @@ public sealed class ExceptionObservation
 }
 
 [DataContract]
-public sealed class OracleTrace
+public sealed class PipelineTrace
 {
     [DataMember(Order = 1)]
     public int SchemaVersion { get; set; }
 
     [DataMember(Order = 2)]
-    public OracleProvenance Provenance { get; set; } = new OracleProvenance();
+    public TraceProvenance Provenance { get; set; } = new TraceProvenance();
 
     [DataMember(Order = 3)]
     public string Scenario { get; set; } = "";
 
     [DataMember(Order = 4)]
-    public OracleObservation Observation { get; set; } = new OracleObservation();
+    public PipelineObservation Observation { get; set; } = new PipelineObservation();
 }
 
 [DataContract]
-public sealed class OracleProvenance
+public sealed class TraceProvenance
 {
     [DataMember(Order = 1)]
     public string Oracle { get; set; } = "";
@@ -156,7 +156,7 @@ public sealed class OracleProvenance
     public string Fixture { get; set; } = "";
 }
 
-public static class OracleEventJournal
+public static class PipelineEventJournal
 {
     private static readonly object Sync = new object();
     private static readonly List<string> Events = new List<string>();

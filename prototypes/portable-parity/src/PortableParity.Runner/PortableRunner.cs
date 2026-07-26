@@ -1,17 +1,11 @@
-using System;
 using System.Web.Hosting;
 using CoreParity.Contracts;
 using CoreParity.Recording;
 
-namespace FrameworkOracle.Runner;
+namespace PortableParity.Runner;
 
-public sealed class OracleRunner : MarshalByRefObject, IRegisteredObject, IClassicPipelineRunner
+public sealed class PortableRunner : IRegisteredObject, IClassicPipelineRunner
 {
-    public override object InitializeLifetimeService()
-    {
-        return null!;
-    }
-
     public PipelineObservation Run(RequestSpecification request)
     {
         return new RecordingRequestRunner().Run(request);

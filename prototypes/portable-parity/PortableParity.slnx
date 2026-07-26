@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/build/">
+    <Project Path="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
+    <Project Path="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj" />
+  </Folder>
+  <Folder Name="/runtime/">
+    <Project Path="../../src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <Project Path="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <Project Path="../../src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/PortableParity.Host/PortableParity.Host.csproj" />
+    <Project Path="src/PortableParity.Probes/PortableParity.Probes.csproj" />
+    <Project Path="src/PortableParity.Runner/PortableParity.Runner.csproj" />
+  </Folder>
+</Solution>

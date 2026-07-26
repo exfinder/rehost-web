@@ -13,9 +13,13 @@ probe module and one precompiled handler. Framework's
 `HttpModulesSection.CreateModules` still appends its implicit
 `DefaultAuthenticationModule`.
 
-`FrameworkOracle.Probes.dll` is not a host reference and is not copied beside
+`CoreParity.Probes.dll` is not a host reference and is not copied beside
 the host executable. Build staging places it only in the runnable fixture's
 `app/bin`. Host startup asserts both properties.
+
+The `netstandard2.0` request/observation contract and the probe/recording
+sources are shared with the portable parity adapter. Each runtime still
+compiles its own `System.Web`-bound runner and probe assemblies.
 
 Build staging also binds `compilation/tempDirectory` to an app-owned writable
 directory under `fixture/temp`. This retains Framework code-generation setup

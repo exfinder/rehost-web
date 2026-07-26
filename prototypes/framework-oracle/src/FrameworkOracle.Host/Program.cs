@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Web.Hosting;
-using FrameworkOracle.Contracts;
+using CoreParity.Contracts;
 using FrameworkOracle.Runner;
 using Microsoft.Win32;
 
@@ -84,10 +84,10 @@ internal static class Program
     {
         applicationPath = Path.GetFullPath(applicationPath);
         var binPath = Path.Combine(applicationPath, "bin");
-        var probePath = Path.Combine(binPath, "FrameworkOracle.Probes.dll");
+        var probePath = Path.Combine(binPath, "CoreParity.Probes.dll");
         var hostProbePath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
-            "FrameworkOracle.Probes.dll");
+            "CoreParity.Probes.dll");
 
         if (!File.Exists(Path.Combine(applicationPath, "web.config")))
         {
@@ -112,15 +112,15 @@ internal static class Program
         if (typeof(Program).Assembly.GetReferencedAssemblies().Any(
                 name => string.Equals(
                     name.Name,
-                    "FrameworkOracle.Probes",
+                    "CoreParity.Probes",
                     StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidOperationException(
-                "Host assembly must not reference FrameworkOracle.Probes.");
+                "Host assembly must not reference CoreParity.Probes.");
         }
     }
 
-    private static OracleTrace RunColdSynchronous(string applicationPath)
+    private static PipelineTrace RunColdSynchronous(string applicationPath)
     {
         var manager = ApplicationManager.GetApplicationManager();
         var applicationActivated = false;
@@ -139,10 +139,10 @@ internal static class Program
             applicationActivated = true;
             Console.Error.WriteLine("Activated ASP.NET application AppDomain.");
 
-            if (!(registered is IOracleRunner runner))
+            if (!(registered is IClassicPipelineRunner runner))
             {
                 throw new InvalidOperationException(
-                    "ApplicationManager did not return an IOracleRunner proxy.");
+                    "ApplicationManager did not return an IClassicPipelineRunner proxy.");
             }
 
             var request = RequestSpecification.ColdSynchronous();
@@ -150,10 +150,10 @@ internal static class Program
             var observation = runner.Run(request);
             Console.Error.WriteLine("Completed HttpRuntime.ProcessRequest.");
 
-            return new OracleTrace
+            return new PipelineTrace
             {
                 SchemaVersion = 1,
-                Provenance = new OracleProvenance
+                Provenance = new TraceProvenance
                 {
                     Oracle = "Microsoft .NET Framework",
                     TargetFramework = "net481",
@@ -194,9 +194,9 @@ internal static class Program
         }
     }
 
-    private static byte[] Serialize(OracleTrace trace)
+    private static byte[] Serialize(PipelineTrace trace)
     {
-        var serializer = new DataContractJsonSerializer(typeof(OracleTrace));
+        var serializer = new DataContractJsonSerializer(typeof(PipelineTrace));
 
         using (var stream = new MemoryStream())
         {

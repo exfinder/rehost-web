@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
-    <Reference Include="System.Web" />
+    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Compile
       Include="../../../core-parity/shared/ProbeModule.cs"
       Link="Shared/ProbeModule.cs" />

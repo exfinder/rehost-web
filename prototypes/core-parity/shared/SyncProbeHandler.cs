@@ -1,8 +1,8 @@
 using System.Text;
 using System.Web;
-using FrameworkOracle.Contracts;
+using CoreParity.Contracts;
 
-namespace FrameworkOracle.Probes;
+namespace CoreParity.Probes;
 
 public sealed class SyncProbeHandler : IHttpHandler
 {
@@ -10,7 +10,7 @@ public sealed class SyncProbeHandler : IHttpHandler
 
     public void ProcessRequest(HttpContext context)
     {
-        OracleEventJournal.Record("handler.process-request");
+        PipelineEventJournal.Record("handler.process-request");
 
         var body = Encoding.UTF8.GetBytes("oracle-ok");
         context.Response.StatusCode = 201;

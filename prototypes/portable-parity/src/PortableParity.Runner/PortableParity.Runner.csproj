@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <AssemblyName>FrameworkOracle.Runner</AssemblyName>
-    <RootNamespace>FrameworkOracle.Runner</RootNamespace>
+    <AssemblyName>PortableParity.Runner</AssemblyName>
+    <RootNamespace>PortableParity.Runner</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
-    <Reference Include="System.Web" />
+    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Compile
       Include="../../../core-parity/shared/RecordingRequestRunner.cs"
       Link="Shared/RecordingRequestRunner.cs" />
