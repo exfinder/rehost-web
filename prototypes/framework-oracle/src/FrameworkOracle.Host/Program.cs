@@ -127,6 +127,7 @@ internal static class Program
 
         try
         {
+            Console.Error.WriteLine("Activating ASP.NET application AppDomain.");
             var registered = manager.CreateObject(
                 ApplicationId,
                 typeof(OracleRunner),
@@ -134,6 +135,7 @@ internal static class Program
                 EnsureTrailingDirectorySeparator(Path.GetFullPath(applicationPath)),
                 true,
                 true);
+            Console.Error.WriteLine("Activated ASP.NET application AppDomain.");
 
             if (!(registered is IOracleRunner runner))
             {
@@ -142,7 +144,9 @@ internal static class Program
             }
 
             var request = RequestSpecification.ColdSynchronous();
+            Console.Error.WriteLine("Entering HttpRuntime.ProcessRequest.");
             var observation = runner.Run(request);
+            Console.Error.WriteLine("Completed HttpRuntime.ProcessRequest.");
 
             return new OracleTrace
             {
@@ -166,12 +170,16 @@ internal static class Program
         {
             try
             {
+                Console.Error.WriteLine("Stopping registered oracle runner.");
                 manager.StopObject(ApplicationId, typeof(OracleRunner));
+                Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
                 manager.ShutdownApplication(ApplicationId);
             }
             finally
             {
+                Console.Error.WriteLine("Closing ApplicationManager.");
                 manager.Close();
+                Console.Error.WriteLine("Closed ApplicationManager.");
             }
         }
     }
