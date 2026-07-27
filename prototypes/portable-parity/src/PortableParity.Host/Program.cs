@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -19,6 +20,8 @@ internal static class Program
 
     public static int Main(string[] args)
     {
+        using var diagnostics = new RuntimeDiagnosticListener();
+
         try
         {
             var command = CommandLine.Parse(args);
@@ -313,6 +316,35 @@ internal static class Program
         return Path.EndsInDirectorySeparator(path)
             ? path
             : path + Path.DirectorySeparatorChar;
+    }
+
+    private sealed class RuntimeDiagnosticListener : System.Diagnostics.Tracing.EventListener
+    {
+        protected override void OnEventSourceCreated(
+            System.Diagnostics.Tracing.EventSource eventSource)
+        {
+            if (eventSource.Name == "Rehost.WebForms.Runtime")
+            {
+                EnableEvents(
+                    eventSource,
+                    System.Diagnostics.Tracing.EventLevel.Error);
+            }
+        }
+
+        protected override void OnEventWritten(
+            System.Diagnostics.Tracing.EventWrittenEventArgs eventData)
+        {
+            if (eventData.EventSource.Name != "Rehost.WebForms.Runtime")
+            {
+                return;
+            }
+
+            Console.Error.WriteLine(
+                "runtime/"
+                + eventData.EventName
+                + ": "
+                + string.Join(" | ", eventData.Payload ?? (IEnumerable<object?>)Array.Empty<object?>()));
+        }
     }
 
     private sealed class FailureDiagnostic

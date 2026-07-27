@@ -14,5 +14,17 @@ namespace System.Web.Util {
         internal void UnhandledException(string eventInfo) {
             WriteEvent(1, eventInfo);
         }
+
+        // .NET Framework discards these exceptions with no record of any kind; the port reports
+        // them so that a failed request is diagnosable. The response is unaffected either way.
+        [Event(2, Level = EventLevel.Error, Message = "{0}: {1}")]
+        internal void SwallowedRequestException(string site, string exception) {
+            WriteEvent(2, site, exception);
+        }
+
+        [Event(3, Level = EventLevel.Informational, Message = "{0}: {1}")]
+        internal void BinAssemblyResolution(string outcome, string assemblyName) {
+            WriteEvent(3, outcome, assemblyName);
+        }
     }
 }

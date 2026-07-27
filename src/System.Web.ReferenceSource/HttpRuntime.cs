@@ -1019,6 +1019,7 @@ namespace System.Web {
                     DirectorySeparatorString);
             }
 
+#if NETFRAMEWORK
 #pragma warning disable 0618    // To avoid deprecation warning
             // Allow assemblies from 'bin' to be loaded
             appDomain.AppendPrivatePath(appDomainAppPath + BinDirectoryName);
@@ -1043,6 +1044,13 @@ namespace System.Web {
 #pragma warning disable 0618    // To avoid deprecation warning
             appDomain.SetCachePath(parentDir);
 #pragma warning restore 0618
+#else
+            // AppendPrivatePath, SetShadowCopyPath, and SetCachePath are no-ops outside the
+            // .NET Framework loader, so 'bin' reaches the loader through an explicit fallback
+            // resolver instead. Runtime-owned assemblies resolve first and win, reproducing the
+            // Framework precedence where the GAC beat 'bin'.
+            BinAssemblyResolver.Install(appDomainAppPath + BinDirectoryName);
+#endif
 
             _fusionInited = true;
         }
@@ -1322,7 +1330,14 @@ namespace System.Web {
             int deadLockInterval = (int)pmConfig.ResponseDeadlockInterval.TotalSeconds;
             int requestQueueLimit = pmConfig.RequestQueueLimit;
             Debug.Trace("HealthMonitor", "Initalizing: ResponseDeadlockInterval=" + deadLockInterval);
+#if NETFRAMEWORK
             UnsafeNativeMethods.InitializeHealthMonitor(deadLockInterval, requestQueueLimit);
+#else
+            // Deadlock detection and queue-limit enforcement live in the native engine, which
+            // cannot exist here. Reading the section is retained so its validation still runs.
+            _ = deadLockInterval;
+            _ = requestQueueLimit;
+#endif
 #endif // !FEATURE_PAL
         }
 
@@ -1811,7 +1826,11 @@ namespace System.Web {
 
                                 response.FinalFlushAtTheEndOfRequestProcessing();
                             }
-                            catch {
+                            catch (Exception eReportFailure) {
+                                WebFormsRuntimeEventSource.Log.SwallowedRequestException(
+                                    "HttpRuntime.FinishRequest",
+                                    "request: " + e + Environment.NewLine
+                                    + "reporting: " + eReportFailure);
                             }
                         }
                     }

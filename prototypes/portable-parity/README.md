@@ -42,33 +42,42 @@ the original exception chain.
 
 ## Current reachable state
 
-Activation completes and request ownership transfers. `run` exits zero and
-emits a `PipelineTrace` whose events include `runner.process-request.enter`.
-There is no longer an activation-phase `FailureDiagnostic`.
+The full classic pipeline runs. `verify` exits zero: the portable trace matches
+the Framework `cold-sync` golden exactly — nineteen ordered events, `201 Oracle
+Created`, five headers in order, `oracle-ok`, one final flush — against an empty
+normalization manifest.
 
-`HttpRuntime.ProcessRequest` currently returns without dispatching the
-configured module or precompiled handler, so the observed trace is:
+The configured `ProbeModule` and `SyncProbeHandler` resolve from
+`fixture/app/bin` through classic configuration, with no host reference and no
+preload. `DefaultAuthentication` appears after the cleared collection because
+`HttpModulesSection.CreateModules` appends it, not because anything registers it.
 
-```text
-runner.process-request.enter
-worker.end-of-request
-runner.process-request.return
-```
+This completes the first of the eight scenarios in
+[the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md).
+Concurrent cold, warm pooled, delayed asynchronous, `CompleteRequest`, module and
+handler exceptions, resolution failure, and terminal shutdown remain.
 
-against an empty `200`. The next blocker is therefore pipeline dispatch —
-module collection/initialization and handler selection — not activation.
+`PortableParityGateTests` in the main solution runs `verify` as a child process,
+because a parity run permanently mutates process-global state — the default
+`AssemblyLoadContext` resolver, the `HttpRuntime` singleton, and the activated
+application — and cannot share a process with other tests.
 
-`verify` still exits nonzero, because module, handler, and response parity
-against the Framework golden trace are not implemented. Do not add it as an
-always-passing CI test until that slice lands.
-
-Every platform dependency reached during activation is classified as P01–P25 in
-the [portability ledger](../../docs/portability-ledger.md). Six carry recorded
+Every platform dependency reached so far is classified as P01–P32 in the
+[portability ledger](../../docs/portability-ledger.md). Seven carry recorded
 deviations rather than parity: process-scoped auto-generated machine keys (P07);
-a codegen directory with no generation segment (P08); config map path selection narrowed to the hosting map for all paths (P09); cache
-size sampling permanently inactive (P12); a zero-seeded memory pressure history
-until the first collection (P21); and `IsHidden` classifying a different file set
-per OS (P23).
+a codegen directory with no generation segment (P08); config map path selection
+narrowed to the hosting map for all paths (P09); cache size sampling permanently
+inactive (P12); a zero-seeded memory pressure history until the first collection
+(P21); `IsHidden` classifying a different file set per OS (P23); and response
+buffers that copy on send instead of transferring refcounted native ownership
+(P28), with `bin` assemblies no longer shadow-copied (P30).
+
+## Diagnostics
+
+The runtime reports otherwise-discarded request exceptions on the
+`Rehost.WebForms.Runtime` `EventSource`. The host attaches an `EventListener` at
+`Error` level, so a passing run leaves standard error empty; raise the level from
+a listener or `dotnet-trace` to also observe `bin` assembly resolution.
 
 ## Verify
 
@@ -80,6 +89,10 @@ Verification requires exact scenario, schema, ordered events, response,
 escaped-exception shape, and completion counts against the committed Framework
 `cold-sync.json`. Adapter-specific provenance is excluded. The checked-in
 normalization manifest must exist and remain empty.
+
+This exits zero. It runs automatically as part of `dotnet test
+Rehost.WebForms.slnx`, which requires this prototype to have been built in
+`Release` first.
 
 Optional explicit inputs:
 

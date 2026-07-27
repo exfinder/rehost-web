@@ -17,6 +17,9 @@ P01–P24 were exercised by `PortableParity.Host run` on macOS `arm64` and Windo
 `x64`, both `net10.0`, with identical events, status, and empty stderr. Framework
 behavior remains under `NETFRAMEWORK`.
 
+P27–P32 were reached by `PortableParity.Host verify`, which now matches the
+Framework `cold-sync` golden trace exactly.
+
 ## Reached edges
 
 | ID | Edge | Treatment and contract |
@@ -28,7 +31,7 @@ behavior remains under `NETFRAMEWORK`.
 | P05 | `HttpRuntime.Init` platform gate | Remove the unconditional Win32 requirement. |
 | P06 | `HttpConfigurationSystem.EnsureInit` host cast | Retain the write-only Framework field only under `NETFRAMEWORK`. |
 | P07 | `ApplicationImpersonationContext` | A zero application identity token leaves impersonation inert; explicit impersonation policy remains deferred. |
-| P08 | `SetUpCodegenDirectory` | Set `_codegenDir` to configured `codegenBase`; generation isolation and reclamation remain [codegen work](follow-ups/runtime-codegen-and-loading.md). |
+| P08 | `SetUpCodegenDirectory` | Set `_codegenDir` to configured `codegenBase`. The pipeline slice writes `hash/hash.web`, `preStartInitList.web`, and `profileoptimization.prof` here; a clean run produces exactly those three and repeated runs add nothing, so the absent generation segment still cannot collide and `.delete` reclamation is never entered. Generation isolation remains [codegen work](follow-ups/runtime-codegen-and-loading.md), required before any slice emits a generated assembly. |
 | P09 | configuration map-path selection | The explicit hosting map is authoritative. No portable server authority exists for out-of-application paths. |
 | P10 | `IISMapPath.GetInstance` | Throw actionable `PlatformNotSupportedException`. |
 | P11 | `SystemInfo.GetNumProcessCPUs` | Use affinity-aware `Environment.ProcessorCount`. |
@@ -47,6 +50,12 @@ behavior remains under `NETFRAMEWORK`.
 | P24 | C++ CodeDOM provider exclusion | Provider is absent outside .NET Framework; the lookup is inactive. |
 | P25 | child configuration path combination | Use `Path.DirectorySeparatorChar`; `UserMapPathTests` covers the branch not reached by the harness. Other callers remain later-slice work. |
 | P26 | `ReleaseResourcesAndUnloadAppDomain` | Call guarded `HostingEnvironment.CompleteShutdown()` directly. The application cannot restart in place; replacement requires a new process. See [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md). |
+| P27 | `InitializeHealthMonitoring` | The native deadlock watchdog recycled the worker process; no portable consumer exists and process replacement is host-owned. The `ProcessModelSection` read is retained so its validation still runs. |
+| P28 | `HttpResponseUnmanagedBufferElement` | Replace the native buffer pool with an `ArrayPool<byte>`-backed managed element. The rented array never escapes: `Send` and `GetBytes` both surrender an exact-size copy, because `byte[]` recipients retain what they receive while `ClearBuffers` recycles on every flush. Framework avoided the copy through refcounted ownership transfer, which the `byte[]` overload cannot express. See [response buffer ownership](follow-ups/response-buffer-ownership.md). |
+| P29 | `SetMinRequestsExecutingToDetectDeadlock` | Same native watchdog as P27; the executing-request threshold has no consumer. |
+| P30 | `InitFusion` private-bin probing | `AppendPrivatePath`, `SetShadowCopyPath`, and `SetCachePath` are loader no-ops here. Resolve application `bin` through one immutable fallback on the default `AssemblyLoadContext`, so runtime-owned assemblies win first as the GAC did. Shadow copying is gone: `bin` assemblies stay file-locked while running. |
+| P31 | `HttpRuntime.FinishRequest` error reporting | Framework discards both the request exception and the reporting failure with no record. The port reports them on `WebFormsRuntimeEventSource`. No observable response difference. |
+| P32 | `BuildManager` preserved hash file path | `"hash\\hash.web"` produced one backslash-named file off Windows instead of nesting under the `hash` directory the cache creates. Use `Path.Combine` segments; same defect class as P25. |
 
 ## Open path
 
@@ -58,6 +67,8 @@ behavior remains under `NETFRAMEWORK`.
   [runtime codegen](follow-ups/runtime-codegen-and-loading.md).
 - Drain, disposal, unload, and recycle:
   [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md).
+- Remaining discarded exceptions in imported source:
+  [silent exception swallowing](follow-ups/silent-exception-swallowing.md).
 
 ## Update rule
 

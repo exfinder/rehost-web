@@ -397,7 +397,7 @@ namespace System.Web.Compilation {
             _globalAsaxVirtualPath = HttpRuntime.AppDomainAppVirtualPathObject.SimpleCombine(
                 HttpApplicationFactory.applicationFileName);
 
-            _webHashFilePath = Path.Combine(HttpRuntime.CodegenDirInternal, "hash\\hash.web");
+            _webHashFilePath = Path.Combine(HttpRuntime.CodegenDirInternal, "hash", "hash.web");
 
             // Indicate whether we should ignore the top level compilation exceptions.
             // In CBM case, we want to continue processing the page and return partial info even

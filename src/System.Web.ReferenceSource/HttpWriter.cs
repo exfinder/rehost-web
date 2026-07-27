@@ -11,6 +11,7 @@
  */
 
 namespace System.Web {
+    using System.Buffers;
     using System.Collections;
     using System.Globalization;
     using System.IO;
@@ -162,6 +163,99 @@ namespace System.Web {
             int n = _size - _free;
             if (n > 0)
                 wr.SendResponseFromMemory(_data, n);
+        }
+    }
+
+    /*
+     * Managed memory response buffer, replacing the native buffer pool in webengine4.dll.
+     * The rented array never leaves this element: HttpWorkerRequest implementations may retain
+     * what SendResponseFromMemory hands them (ISAPIWorkerRequest queues it), while ClearBuffers
+     * recycles elements on every flush, so both Send and GetBytes surrender a copy. The native
+     * pool avoided the copy by transferring refcounted ownership, which needs a handoff the
+     * byte[] overload cannot express; see follow-ups/response-buffer-ownership.md.
+     */
+    internal sealed class HttpResponseManagedBufferElement : HttpBaseMemoryResponseBufferElement, IHttpResponseElement {
+        private static readonly ArrayPool<byte> Pool = ArrayPool<byte>.Shared;
+
+        // OUTPUT_BUFFER_SIZE reserves room for the native pool's block header. ArrayPool buckets
+        // by powers of two, so requesting that returns a 32KB array whose reserved slack is
+        // simply unused.
+        private const int MANAGED_OUTPUT_BUFFER_SIZE = 32*1024;
+
+        private byte[] _buffer;
+
+        internal HttpResponseManagedBufferElement(int size) {
+            _buffer = Pool.Rent(size);
+            _size = _buffer.Length;
+            _free = _size;
+            _recycle = true;
+        }
+
+        internal HttpResponseManagedBufferElement()
+            : this(MANAGED_OUTPUT_BUFFER_SIZE) {
+        }
+
+        internal override int Append(byte[] data, int offset, int size) {
+            if (_free == 0 || size == 0)
+                return 0;
+            int n = (_free >= size) ? size : _free;
+            Buffer.BlockCopy(data, offset, _buffer, _size-_free, n);
+            _free -= n;
+            return n;
+        }
+
+        internal override int Append(IntPtr data, int offset, int size) {
+            if (_free == 0 || size == 0)
+                return 0;
+            int n = (_free >= size) ? size : _free;
+            Misc.CopyMemory(data, offset, _buffer, _size-_free, n);
+            _free -= n;
+            return n;
+        }
+
+        internal override void AppendEncodedChars(char[] data, int offset, int size, Encoder encoder, bool flushEncoder) {
+            int byteSize = encoder.GetBytes(data, offset, size, _buffer, _size-_free, flushEncoder);
+            _free -= byteSize;
+        }
+
+        internal override HttpResponseBufferElement Clone() {
+            int clonedSize = _size - _free;
+            byte[] clonedData = new byte[clonedSize];
+            Buffer.BlockCopy(_buffer, 0, clonedData, 0, clonedSize);
+            return new HttpResponseBufferElement(clonedData, clonedSize);
+        }
+
+        internal override void Recycle() {
+            if (_recycle) {
+                byte[] buffer = Interlocked.Exchange(ref _buffer, null);
+                if (buffer != null) {
+                    _free = 0;
+                    _recycle = false;
+                    Pool.Return(buffer);
+                }
+            }
+        }
+
+        long IHttpResponseElement.GetSize() {
+            return(_size - _free);
+        }
+
+        byte[] IHttpResponseElement.GetBytes() {
+            int size = _size - _free;
+            if (size == 0)
+                return null;
+            byte[] copy = new byte[size];
+            Buffer.BlockCopy(_buffer, 0, copy, 0, size);
+            return copy;
+        }
+
+        void IHttpResponseElement.Send(HttpWorkerRequest wr) {
+            int n = _size - _free;
+            if (n > 0) {
+                byte[] sent = new byte[n];
+                Buffer.BlockCopy(_buffer, 0, sent, 0, n);
+                wr.SendResponseFromMemory(sent, n);
+            }
         }
     }
 
@@ -898,7 +992,11 @@ namespace System.Web {
         }
 
         private HttpBaseMemoryResponseBufferElement CreateNewMemoryBufferElement() {
+#if NETFRAMEWORK
             return new HttpResponseUnmanagedBufferElement(); /* using unmanaged buffers */
+#else
+            return new HttpResponseManagedBufferElement();
+#endif
         }
 
     internal void DisposeIntegratedBuffers() {

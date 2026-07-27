@@ -84,7 +84,16 @@ public sealed class CallContextTests
     public async Task HostContext_flows_only_for_affinative_values()
     {
         CallContext.HostContext = "illogical";
-        (await Task.Run(() => CallContext.HostContext)).ShouldBeNull();
+        object? illogical = null;
+        // A pooled thread can both suspend and resume the same illogical state, which
+        // OnIllogicalContextChanged then reads as a resumption rather than inheritance. Only a
+        // thread that never suspended it observes non-inheritance deterministically.
+        var thread = new Thread(() => illogical = CallContext.HostContext);
+
+        thread.Start();
+        thread.Join();
+
+        illogical.ShouldBeNull();
 
         var logical = new LogicalValue();
         CallContext.HostContext = logical;
