@@ -214,6 +214,11 @@ namespace System.Web.Compilation {
 
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         private static Version GetInstalledTargetVersion(int majorVersion) {
+#if !NETFRAMEWORK
+            // There is no installed .NET Framework to discover. Rehost implements the 4.8.1
+            // surface, so that is the highest target this runtime can honour.
+            return majorVersion == 4 ? new Version(4, 8, 1) : null;
+#else
             // NOTE: This code is wrong to assume "Full", but it is left as is to avoid
             // introducing any breaking change. The mitigation is handled by IsSupportedVersion which
             // is more flexible with regards to framework profile.
@@ -234,10 +239,14 @@ namespace System.Web.Compilation {
             catch { // ignore exceptions
             }
             return null;
+#endif
         }
 
         [RegistryPermission(SecurityAction.Assert, Unrestricted = true)]
         private static bool IsSupportedVersion(FrameworkName frameworkName) {
+#if !NETFRAMEWORK
+            return false;
+#else
             // Look under the following registry to get the list of supported keys, and check for matching
             // identifier and version.
             // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\v4.0.30319\SKUs\[TFM]
@@ -263,6 +272,7 @@ namespace System.Web.Compilation {
             catch {
             }
             return false;
+#endif
         }
 
         /// <summary>

@@ -50,7 +50,9 @@ namespace System.Web.Configuration {
         static private IConfigSystem                    s_configSystem;
 
         static private IConfigMapPath                   s_configMapPath;
+#if NETFRAMEWORK
         static private WebConfigurationHost             s_configHost;
+#endif
         static private FileChangeEventHandler           s_fileChangeEventHandler;
         static private string                           s_MsCorLibDirectory;
         static private string                           s_MachineConfigurationDirectory;
@@ -96,7 +98,9 @@ namespace System.Web.Configuration {
                                 HostingEnvironment.SiteID);                 // app site ID
 
                         s_configRoot = s_configSystem.Root;
+#if NETFRAMEWORK
                         s_configHost = (WebConfigurationHost) s_configSystem.Host;
+#endif
 
                         // Register for config changed notifications
                         HttpConfigurationSystem configSystem = new HttpConfigurationSystem();

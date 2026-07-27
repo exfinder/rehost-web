@@ -57,7 +57,9 @@ Follow-up files are scoped work packets, not independent architecture.
 | High | [Data protection provider](follow-ups/data-protection-provider.md) | security/persistence ADR |
 | High | [Process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md) | host lifecycle |
 | High | [Request termination/timeouts](follow-ups/request-termination-and-timeouts.md) | pipeline cancellation |
+| Medium | [AppDomain unload sites/`SYSLIB0024`](follow-ups/appdomain-unload-call-sites.md) | process lifetime |
 | Medium | [Deferred request surfaces](follow-ups/deferred-request-surfaces.md) | first runnable request |
+| Medium | [Hidden-file content selection](follow-ups/portable-filesystem-and-config-path-semantics.md) | runtime codegen/loading |
 | Medium | [ResX edge cases](follow-ups/resx-compatibility.md) | trust/platform policy |
 | Medium | [Route escaping](follow-ups/route-url-escaping.md) | Framework oracle |
 | Medium | [WebResource timestamps](follow-ups/web-resource-assembly-timestamps.md) | publishing model |

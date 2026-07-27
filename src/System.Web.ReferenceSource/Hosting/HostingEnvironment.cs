@@ -126,6 +126,7 @@ namespace System.Web.Hosting {
         private bool _appDomainShutdownStarted;
         private bool _shutdownInitiated;
         private bool _shutdownInProgress;
+        private int  _shutdownCompleted;
         private String _shutDownStack;
 
         private static NameValueCollection _cacheProviderSettings;
@@ -231,6 +232,28 @@ namespace System.Web.Hosting {
 
         private void OnAppDomainUnload(Object unusedObject, EventArgs unusedEventArgs) {
             Debug.Trace("PipelineRuntime", "HE.OnAppDomainUnload");
+
+            CompleteShutdownOnce();
+        }
+
+        // Publishes hosting-environment shutdown completion to the application manager: the point
+        // at which ApplicationManager.ShutdownAll stops waiting on _activeHostingEnvCount.
+        //
+        // On .NET Framework the AppDomain unload that ends the application is the only trigger, so
+        // this ran solely from the DomainUnload notification. .NET 10 hosts one non-unloadable
+        // AppDomain, so HttpRuntime.ReleaseResourcesAndUnloadAppDomain calls it directly instead.
+        // Either caller must reach it exactly once, hence the interlocked guard.
+        internal static void CompleteShutdown() {
+            HostingEnvironment env = _theHostingEnvironment;
+            if (env != null) {
+                env.CompleteShutdownOnce();
+            }
+        }
+
+        private void CompleteShutdownOnce() {
+            if (Interlocked.Exchange(ref _shutdownCompleted, 1) != 0) {
+                return;
+            }
 
             Thread.GetDomain().DomainUnload -= _onAppDomainUnload;
 

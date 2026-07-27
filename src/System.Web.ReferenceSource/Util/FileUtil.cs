@@ -113,6 +113,25 @@ internal class FileUtil {
         return false;
     }
 
+#if !NETFRAMEWORK
+    internal static int TryGetFileSystemInfo(string path, out FileSystemInfo info) {
+        FileInfo fileInfo = new FileInfo(path);
+        if (fileInfo.Exists) {
+            info = fileInfo;
+            return HResults.S_OK;
+        }
+
+        DirectoryInfo directoryInfo = new DirectoryInfo(path);
+        if (directoryInfo.Exists) {
+            info = directoryInfo;
+            return HResults.S_OK;
+        }
+
+        info = null;
+        return HResults.E_PATHNOTFOUND;
+    }
+#endif
+
     // Remove the final backslash from a directory path, unless it's something like c:\
     internal static String RemoveTrailingDirectoryBackSlash(String path) {
 
@@ -410,6 +429,23 @@ internal class FileUtil {
             return false;
         }
 
+#if !NETFRAMEWORK
+        try {
+            FileAttributes attributes = File.GetAttributes(filename);
+            // The path exists. Return true if it is a directory, false if a file.
+            return (attributes & FileAttributes.Directory) == FileAttributes.Directory;
+        }
+        catch (FileNotFoundException) {
+            return false;
+        }
+        catch (DirectoryNotFoundException) {
+            return false;
+        }
+        catch {
+            // Return true if we cannot confirm that the file does NOT exist.
+            return trueOnError;
+        }
+#else
         UnsafeNativeMethods.WIN32_FILE_ATTRIBUTE_DATA data;
         bool ok = UnsafeNativeMethods.GetFileAttributesEx(filename, UnsafeNativeMethods.GetFileExInfoStandard, out data);
         if (ok) {
@@ -431,6 +467,7 @@ internal class FileUtil {
                 }
             }
         }
+#endif
     }
 }
 
@@ -448,8 +485,30 @@ sealed class FindFileData {
     internal string FileNameShort { get { return _fileNameShort; } }
     internal FileAttributesData FileAttributesData { get { return _fileAttributesData; } }
 
+#if !NETFRAMEWORK
+    // There are no 8.3 alternate names outside Windows, so both forms are the real name.
+    internal FindFileData(FileSystemInfo info) {
+        _fileNameLong = info.Name;
+        _fileNameShort = info.Name;
+        _fileAttributesData = new FileAttributesData(info);
+    }
+#endif
+
     // FindFile - given a file name, gets the file attributes and short form (8.3 format) of a file name.
     static internal int FindFile(string path, out FindFileData data) {
+#if !NETFRAMEWORK
+        data = null;
+
+        path = FileUtil.RemoveTrailingDirectoryBackSlash(path);
+
+        FileSystemInfo info;
+        int hr = FileUtil.TryGetFileSystemInfo(path, out info);
+        if (hr == HResults.S_OK) {
+            data = new FindFileData(info);
+        }
+
+        return hr;
+#else
         IntPtr hFindFile;
         UnsafeNativeMethods.WIN32_FIND_DATA wfd;
 
@@ -480,6 +539,7 @@ sealed class FindFileData {
 
         data = new FindFileData(ref wfd);
         return HResults.S_OK;
+#endif
     }
 
     // FindFile - takes a full-path and a root-directory-path, and is used to get the
@@ -603,6 +663,15 @@ sealed class FileAttributesData {
     static internal int GetFileAttributes(string path, out FileAttributesData fad) {
         fad = null;
 
+#if !NETFRAMEWORK
+        FileSystemInfo info;
+        int hr = FileUtil.TryGetFileSystemInfo(path, out info);
+        if (hr == HResults.S_OK) {
+            fad = new FileAttributesData(info);
+        }
+
+        return hr;
+#else
         UnsafeNativeMethods.WIN32_FILE_ATTRIBUTE_DATA  data;
         if (!UnsafeNativeMethods.GetFileAttributesEx(path, UnsafeNativeMethods.GetFileExInfoStandard, out data)) {
             return HttpException.HResultFromLastError(Marshal.GetLastWin32Error());
@@ -610,7 +679,20 @@ sealed class FileAttributesData {
 
         fad = new FileAttributesData(ref data);
         return HResults.S_OK;
+#endif
     }
+
+#if !NETFRAMEWORK
+    internal FileAttributesData(FileSystemInfo info) {
+        FileAttributes    = info.Attributes;
+        UtcCreationTime   = info.CreationTimeUtc;
+        UtcLastAccessTime = info.LastAccessTimeUtc;
+        UtcLastWriteTime  = info.LastWriteTimeUtc;
+
+        FileInfo fileInfo = info as FileInfo;
+        FileSize          = (fileInfo != null) ? fileInfo.Length : 0;
+    }
+#endif
 
     FileAttributesData() {
         FileSize = -1;

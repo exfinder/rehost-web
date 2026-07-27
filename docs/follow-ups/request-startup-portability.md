@@ -32,6 +32,30 @@ Process-wide tuning belongs to
 unload behavior belongs to
 [process lifetime](process-lifetime-shutdown-and-recycle.md).
 
+## Progress
+
+Request ownership now transfers. `PortableParity.Host run` completes the public
+sequence — `WebFormsApplication.Initialize`, `ApplicationManager.GetApplicationManager`,
+`Open`, `CreateObject`, `HostingEnvironment` initialization, portable runner —
+and enters `HttpRuntime.ProcessRequest(HttpWorkerRequest)`, emitting a
+`PipelineTrace` instead of an activation-phase `FailureDiagnostic`.
+
+`HttpRuntime` static construction, `Init`, `HostingInit`, and
+`BuildManager.InitializeBuildManager` all complete. Each edge reached is
+classified in the [portability ledger](../portability-ledger.md) as P01–P24.
+
+Still open:
+
+- module, handler, and response parity are **not** claimed; the trace currently
+  records only request entry, `EndOfRequest`, and return;
+- H03 (worker identity meaning) remains research;
+- H10 is only partially met — see
+  [runtime codegen and loading](runtime-codegen-and-loading.md);
+- H16 carries an explicit process-scoped key deviation — see
+  [machine key and ViewState bootstrap](machine-key-and-viewstate-bootstrap.md);
+- explicit rejection of `<identity impersonate="true"/>` is deferred to the
+  identity slice; the subsystem is currently inert.
+
 ## Required decisions
 
 Trace only edges reached by the current executable slice. Classify each as:

@@ -147,6 +147,7 @@ namespace System.Web.Hosting {
                 long memoryLimit = s_configuredProcessMemoryLimit;
 
                 if (memoryLimit == 0) {
+#if NETFRAMEWORK
                     // WorkerProcessMemoryLimit : per-process information
                     if (UnsafeNativeMethods.GetModuleHandle(ModName.WP_FULL_NAME) != IntPtr.Zero) {
                         memoryLimit = (long)UnsafeNativeMethods.PMGetMemoryLimitInMB() << 20;
@@ -155,6 +156,7 @@ namespace System.Web.Hosting {
                         IServerConfig serverConfig = ServerConfig.GetInstance();
                         memoryLimit = (long)serverConfig.GetW3WPMemoryLimitInKB() << 10;
                     }
+#endif
                     Interlocked.Exchange(ref s_configuredProcessMemoryLimit, memoryLimit);
                 }
 
@@ -247,12 +249,18 @@ namespace System.Web.Hosting {
         }
 
         static AspNetMemoryMonitor() {
+#if NETFRAMEWORK
             UnsafeNativeMethods.MEMORYSTATUSEX memoryStatusEx = new UnsafeNativeMethods.MEMORYSTATUSEX();
             memoryStatusEx.Init();
             if (UnsafeNativeMethods.GlobalMemoryStatusEx(ref memoryStatusEx) != 0) {
                 s_totalPhysical = memoryStatusEx.ullTotalPhys;
                 s_totalVirtual = memoryStatusEx.ullTotalVirtual;
             }
+#else
+            // s_totalVirtual is only consulted on 32-bit, where this runtime does not run,
+            // so leaving it unset matches the Framework 64-bit path.
+            s_totalPhysical = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+#endif
         }
 
         internal AspNetMemoryMonitor() {

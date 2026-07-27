@@ -8,17 +8,26 @@ using System.Web;
 
 namespace System.Web.Caching {
     internal class SRef {
+#if NETFRAMEWORK
         private static Type s_type = Type.GetType("System.SizedReference", true, false);
         private Object _sizedRef;
         private long _lastReportedSize; // This helps tremendously when looking at large dumps
-        
+#endif
+
         internal SRef(Object target) {
+#if NETFRAMEWORK
             _sizedRef = HttpRuntime.CreateNonPublicInstance(s_type, new object[] {target});
+#endif
         }
-        
+
         internal long ApproximateSize {
             [PermissionSet(SecurityAction.Assert, Unrestricted=true)]
             get {
+#if !NETFRAMEWORK
+                // System.SizedReference is a .NET Framework CLR internal type with no portable
+                // equivalent, so object-graph size sampling is inactive.
+                return 0;
+#else
                 object o = s_type.InvokeMember("ApproximateSize",
                                                BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty, 
                                                null, // binder
@@ -26,17 +35,20 @@ namespace System.Web.Caching {
                                                null, // args
                                                CultureInfo.InvariantCulture);
                 return _lastReportedSize = (long) o;
+#endif
             }
         }
-        
+
         [PermissionSet(SecurityAction.Assert, Unrestricted=true)]
         internal void Dispose() {
+#if NETFRAMEWORK
             s_type.InvokeMember("Dispose",
                                 BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, 
                                 null, // binder
                                 _sizedRef, // target
                                 null, // args
                                 CultureInfo.InvariantCulture);
+#endif
         }
     }
 

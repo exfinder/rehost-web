@@ -297,7 +297,13 @@ internal static class Util {
         // Get the path to a dummy file in that directory
         string dummyFile = Path.Combine(dir, "~AspAccessCheck_" +
             HostingEnvironment.AppDomainUniqueInteger.ToString(
-                "x", CultureInfo.InvariantCulture) + SafeNativeMethods.GetCurrentThreadId() + ".tmp");
+                "x", CultureInfo.InvariantCulture) +
+#if NETFRAMEWORK
+            SafeNativeMethods.GetCurrentThreadId()
+#else
+            Environment.CurrentManagedThreadId
+#endif
+            + ".tmp");
         FileStream fs = null;
 
         bool success = false;

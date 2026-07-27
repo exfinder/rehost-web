@@ -9,6 +9,21 @@ Imported code assumes registry policy, native hashing, DPAPI-backed auto-gen
 keys, and Windows identity/application isolation. Per-process random keys avoid
 startup failure but break restart and scale-out behavior.
 
+## Current state
+
+Reached by the request-ownership slice (ledger P15). `SetAutogenKeys` guards
+only the machine-persisted lookup, so the portable runtime takes Framework's own
+random-key fallback branch. Auto-generated keys are therefore **process-scoped**:
+
+- ViewState protected before a restart cannot be validated after it;
+- forms-authentication tickets do not survive a restart;
+- two processes serving one application cannot share tickets, so multi-process
+  deployment requires an explicit `<machineKey>`.
+
+Explicit `<machineKey>` configuration is unaffected and remains the supported
+way to obtain stable keys today. A system-wide or host-supplied `<machineKey>`
+source is the expected direction; it is not yet designed.
+
 ## Required decisions
 
 - Whether the first fixture emits protected ViewState.

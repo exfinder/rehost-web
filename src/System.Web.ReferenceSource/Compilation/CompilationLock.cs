@@ -31,7 +31,11 @@ internal sealed class CompilationMutex : IDisposable {
 
     // ROTORTODO: replace unmanaged aspnet_isapi mutex with managed implementation
 #if !FEATURE_PAL // No unmanaged aspnet_isapi mutex in Coriolis
+#if NETFRAMEWORK
     private HandleRef   _mutexHandle;
+#else
+    private System.Threading.Mutex _managedMutex;
+#endif
 
     // Lock Status is used to drain out all worker threads out of Mutex ownership on
     // app domain shutdown: -1 locked for good, 0 unlocked, N locked by a worker thread(s)
@@ -44,8 +48,14 @@ internal sealed class CompilationMutex : IDisposable {
 #if !FEATURE_PAL // No unmanaged aspnet_isapi mutex in Coriolis
 
         // Attempt to get the mutex string from the registry (VSWhidbey 415795)
-        string mutexRandomName = (string) Misc.GetAspNetRegValue("CompilationMutexName",
-            null /*valueName*/, null /*defaultValue*/);
+        string mutexRandomName =
+#if NETFRAMEWORK
+            (string) Misc.GetAspNetRegValue("CompilationMutexName",
+                null /*valueName*/, null /*defaultValue*/);
+#else
+            // No registry participates in the supported path; the session-local name is used.
+            null;
+#endif
 
         if (mutexRandomName != null) {
             // If we were able to use the registry value, use it.  Also, we need to prepend "Global\"
@@ -63,6 +73,7 @@ internal sealed class CompilationMutex : IDisposable {
 
         Debug.Trace("Mutex", "Creating Mutex " + MutexDebugName);
 
+#if NETFRAMEWORK
         _mutexHandle = new HandleRef(this, UnsafeNativeMethods.InstrumentedMutexCreate(_name));
 
         if (_mutexHandle.Handle == IntPtr.Zero) {
@@ -70,6 +81,17 @@ internal sealed class CompilationMutex : IDisposable {
 
             throw new InvalidOperationException(SR.GetString(SR.CompilationMutex_Create));
         }
+#else
+        try {
+            bool createdNew;
+            _managedMutex = new System.Threading.Mutex(false, _name, out createdNew);
+        }
+        catch (Exception e) {
+            Debug.Trace("Mutex", "Failed to create Mutex " + MutexDebugName);
+
+            throw new InvalidOperationException(SR.GetString(SR.CompilationMutex_Create), e);
+        }
+#endif
 
         Debug.Trace("Mutex", "Successfully created Mutex " + MutexDebugName);
 #endif // !FEATURE_PAL
@@ -88,10 +110,17 @@ internal sealed class CompilationMutex : IDisposable {
 
 #if !FEATURE_PAL // No unmanaged aspnet_isapi mutex in Coriolis
 
+#if NETFRAMEWORK
         if (_mutexHandle.Handle != IntPtr.Zero) {
             UnsafeNativeMethods.InstrumentedMutexDelete(_mutexHandle);
             _mutexHandle = new HandleRef(this, IntPtr.Zero);
         }
+#else
+        if (_managedMutex != null) {
+            _managedMutex.Dispose();
+            _managedMutex = null;
+        }
+#endif
 #endif // !FEATURE_PAL
     }
 
@@ -100,7 +129,11 @@ internal sealed class CompilationMutex : IDisposable {
 
 #if !FEATURE_PAL // No unmanaged aspnet_isapi mutex in Coriolis
 
+#if NETFRAMEWORK
         if (_mutexHandle.Handle == IntPtr.Zero)
+#else
+        if (_managedMutex == null)
+#endif
             throw new InvalidOperationException(SR.GetString(SR.CompilationMutex_Null));
 
         // check the lock status
@@ -116,7 +149,20 @@ internal sealed class CompilationMutex : IDisposable {
 
         Debug.Trace("Mutex", "Waiting for mutex " + MutexDebugName);
 
+#if NETFRAMEWORK
         if (UnsafeNativeMethods.InstrumentedMutexGetLock(_mutexHandle, -1) == -1) {
+#else
+        bool acquired;
+        try {
+            acquired = _managedMutex.WaitOne();
+        }
+        catch (System.Threading.AbandonedMutexException) {
+            // A previous owner terminated without releasing; ownership transfers to this thread.
+            acquired = true;
+        }
+
+        if (!acquired) {
+#endif
             // failed to get the lock
             Interlocked.Decrement(ref _lockStatus);
             throw new InvalidOperationException(SR.GetString(SR.CompilationMutex_Failed));
@@ -134,7 +180,11 @@ internal sealed class CompilationMutex : IDisposable {
     internal /*public*/ void ReleaseMutex() {
 
 #if !FEATURE_PAL // No unmanaged aspnet_isapi mutex in Coriolis
+#if NETFRAMEWORK
         if (_mutexHandle.Handle == IntPtr.Zero)
+#else
+        if (_managedMutex == null)
+#endif
             throw new InvalidOperationException(SR.GetString(SR.CompilationMutex_Null));
 
         Debug.Trace("Mutex", "Releasing mutex " + MutexDebugName);
@@ -144,8 +194,13 @@ internal sealed class CompilationMutex : IDisposable {
         _stackTrace = null;
 #endif
 
+#if NETFRAMEWORK
         if (UnsafeNativeMethods.InstrumentedMutexReleaseLock(_mutexHandle) != 0)
             Interlocked.Decrement(ref _lockStatus);
+#else
+        _managedMutex.ReleaseMutex();
+        Interlocked.Decrement(ref _lockStatus);
+#endif
 #endif // !FEATURE_PAL
     }
 

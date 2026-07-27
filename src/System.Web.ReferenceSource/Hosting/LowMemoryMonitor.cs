@@ -253,12 +253,23 @@ namespace System.Web.Hosting {
         }
 
         int GetCurrentPressure() {
+#if !NETFRAMEWORK
+            GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
+
+            // MemoryLoadBytes is only populated once a collection has occurred. Before the
+            // first one it reads zero, which must not be reported as "no memory pressure".
+            if (gcMemoryInfo.TotalAvailableMemoryBytes <= 0 || gcMemoryInfo.MemoryLoadBytes <= 0)
+                return 0;
+
+            int memoryLoad = (int)(gcMemoryInfo.MemoryLoadBytes * 100 / gcMemoryInfo.TotalAvailableMemoryBytes);
+#else
             UnsafeNativeMethods.MEMORYSTATUSEX memoryStatusEx = new UnsafeNativeMethods.MEMORYSTATUSEX();
             memoryStatusEx.Init();
             if (UnsafeNativeMethods.GlobalMemoryStatusEx(ref memoryStatusEx) == 0)
                 return 0;
 
             int memoryLoad = memoryStatusEx.dwMemoryLoad;
+#endif
             if (_pressureHigh != 0) {
                 // PerfCounter: Cache Percentage Machine Memory Limit Used
                 //    = total physical memory used / total physical memory used limit

@@ -20,6 +20,10 @@ namespace System.Web.Configuration {
     //
     static internal class IISMapPath {
         static internal IConfigMapPath GetInstance() {
+#if !NETFRAMEWORK
+            throw new PlatformNotSupportedException(
+                "IIS configuration mapping is unavailable. Supply explicit Rehost configuration paths through WebFormsApplication.Initialize.");
+#else
             // IIS 7 bits on <= IIS 6.x: use the metabase
             if (ServerConfig.UseMetabase) {
                 return (IConfigMapPath) MetabaseServerConfig.GetInstance();
@@ -41,6 +45,7 @@ namespace System.Web.Configuration {
             }
             
             return new ProcessHostMapPath(functions);
+#endif
         }
 
         // A site name might be an id if it is a number.

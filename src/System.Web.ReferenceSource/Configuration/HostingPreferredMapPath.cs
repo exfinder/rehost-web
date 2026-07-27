@@ -28,6 +28,15 @@ namespace System.Web.Configuration {
         IConfigMapPath  _hostingConfigMapPath;
 
         internal static IConfigMapPath GetInstance() {
+#if !NETFRAMEWORK
+            // No web server participates in the supported path, so the hosting environment's
+            // map path is authoritative for every mapping.
+            IConfigMapPath hostedConfigMapPath = HostingEnvironment.ConfigMapPath;
+            if (hostedConfigMapPath != null) {
+                return hostedConfigMapPath;
+            }
+#endif
+
             IConfigMapPath iisConfigMapPath = IISMapPath.GetInstance();
             IConfigMapPath hostingConfigMapPath = HostingEnvironment.ConfigMapPath;
 

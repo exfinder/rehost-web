@@ -11,6 +11,11 @@ namespace System.Web.Util {
 
         static internal int GetNumProcessCPUs() {
             if (_trueNumberOfProcessors == 0) {
+#if !NETFRAMEWORK
+                // Environment.ProcessorCount already reports the processors available to this
+                // process, honouring the affinity mask this method computes on Framework.
+                _trueNumberOfProcessors = Environment.ProcessorCount;
+#else
                 UnsafeNativeMethods.SYSTEM_INFO si;
                 UnsafeNativeMethods.GetSystemInfo(out si);
 
@@ -52,6 +57,7 @@ namespace System.Web.Util {
                         _trueNumberOfProcessors = numProcessors;
                     }
                 }
+#endif
             }
 
             Debug.Assert(_trueNumberOfProcessors > 0);

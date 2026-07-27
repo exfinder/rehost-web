@@ -19,6 +19,8 @@ State:
 
 - **decision** — architecture selected, implementation/probe pending;
 - **research** — exact treatment still requires evidence;
+- **reached** — implemented and exercised by a running slice on at least one
+  supported OS; remaining OS jobs still outstanding;
 - **verified** — implementation and required probe pass.
 
 ## Activation and hosting
@@ -31,7 +33,7 @@ State:
 | A04 | `ApplicationManager` per-app lock/context and object creation execute | default-domain manager/remoting | keep | activation trace includes manager/cache path | decision |
 | A05 | application environment exists without child AppDomain | `AppDomain.CreateDomain`, setup, remoting | portable leaf | one current-domain environment; secondary-domain API rejects | decision |
 | A06 | `HostingEnvironment.Initialize` receives explicit host/map/config inputs | IIS app host/config token | portable leaf | mapped configuration and path probe | decision |
-| A07 | lifecycle object is registered and receives `Stop` | cross-AppDomain registered object | portable leaf | exactly-once shutdown probe | decision |
+| A07 | lifecycle object is registered and receives `Stop`, and shutdown completes deterministically | cross-AppDomain registered object; AppDomain unload as the shutdown-completion signal | portable leaf | exactly-once shutdown probe; harness exits 0 in ~0.5s | reached |
 | A08 | normal classic hosting flags remain active | POC shortcut flags | keep | trace flags; AppInitialize eligibility | decision |
 | A09 | FCN and ACL-read capability are authoritatively inactive | Windows directory notifications/ACL reads | config-disable | inactive object/postcondition tests | decision |
 
@@ -94,6 +96,73 @@ State:
 | C08 | AppDomain shutdown request notifies owner once | AppDomain unload/recreate | portable leaf | concurrent/repeated shutdown test | decision |
 | C09 | owner requests Kestrel stop; replacement remains external | IIS/WAS recycle | portable leaf | fake host-lifetime probe | decision |
 | C10 | graceful drain, `Application_End`, disposal, and `Stopped` | AppDomain unload coordination | deferred | lifecycle-slice gate | decision |
+
+## Request-ownership slice (portable activation to `ProcessRequest`)
+
+Edges reached in order by `PortableParity.Host run` while transferring request
+ownership to `HttpRuntime.ProcessRequest`. Exercised on macOS `arm64` and Windows
+`x64`, both `net10.0`, with identical events, status, and empty stderr. Framework
+behavior is retained under `NETFRAMEWORK`, which this repository never defines.
+
+| ID | Reached edge | Legacy/platform dependency | Treatment | State |
+| --- | --- | --- | --- | --- |
+| P01 | `ApplicationManager` type initialization | `System.Security.Policy.StrongName` for legacy CAS full-trust assemblies | unreachable Framework-only code; the only consumer is the secondary-AppDomain block | reached |
+| P02 | `Misc.ReportUnhandledException` | native Windows event-log reporter in `webengine4.dll` | portable leaf: one seam writes `FormatExceptionMessage` output to an `EventSource`. Threw *out of* catch handlers and masked every activation failure until fixed | reached |
+| P03 | `SimpleApplicationHost` physical path | hardcoded `"\\"` separator | portable leaf: `Path.DirectorySeparatorChar`; removed the OS-conditional workaround it had forced into `CurrentAppDomainHosting` | reached |
+| P04 | `HttpRuntime.StaticInit` engine load | `webengine4.dll` load, `InitializeLibrary`, `PerfCounterInitialize` | optional IIS integration split from required managed init; `IsEngineLoaded` is deterministically false on every OS. On Windows `net10.0` the probe already computed false | reached |
+| P05 | `HttpRuntime.Init` platform gate | `Environment.OSVersion.Platform != Win32NT` throw | unconditional Win32 gate removed from the portable path; contradicts the cross-platform contract | reached |
+| P06 | `HttpConfigurationSystem.EnsureInit` | cast to `WebConfigurationHost`; modern `System.Configuration` wraps hosts in `ImplicitMachineConfigHost` | field is written once and never read (proven by CS0169); retained for Framework only | reached |
+| P07 | `ApplicationImpersonationContext` construction | `OpenThreadToken`/`SetThreadToken`/`RevertToSelf` | one seam at `GetCurrentToken`; with a zero application identity token the whole subsystem is inert. Explicit rejection of `<identity impersonate="true"/>` is deferred to the identity slice | reached |
+| P08 | `SetUpCodegenDirectory` | `AppDomain.SetDynamicBase` / `DynamicDirectory` (null on modern .NET) | portable leaf: `_codegenDir = codegenBase`, derived from the configured `compilation/tempDirectory` and the application name. No generation segment stands in for the one the CLR supplied. **Deferral:** a segment only matters once dynamic compilation writes here, and choosing one is a dynamic-compilation decision, so H10 stays partially met — see [runtime codegen and loading](follow-ups/runtime-codegen-and-loading.md) | reached |
+| P09 | config map path selection | `HostingPreferredMapPath` → `IISMapPath` → metabase/IIS Express probing | portable leaf: the hosting environment's map path is authoritative, since no web server participates. **Narrowing:** Framework delegates per path — hosting map for in-app paths, IIS for paths outside the app. Portable uses the hosting map for all paths; without a web server there is no authority for out-of-app paths anyway. Config files in subdirectories *inside* the application are unaffected, because `UserMapPath` walks the parent hierarchy | reached |
+| P10 | `IISMapPath.GetInstance` | IIS/metabase configuration | unsupported: actionable `PlatformNotSupportedException`, proving the supported path never reaches IIS configuration | reached |
+| P11 | `SystemInfo.GetNumProcessCPUs` | `GetSystemInfo`, `GetProcessAffinityMask` | portable leaf: `Environment.ProcessorCount` already reports affinity-limited processors | reached |
+| P12 | `SRef` cache size sampling | CLR-internal `System.SizedReference` | inactive: `ApproximateSize` returns 0, so `CacheSizeMonitor` is permanently blind to cache size and never trims on that signal. Memory-pressure trimming still functions. No portable API measures an object graph's retained size; deferred to a cache-memory slice | reached |
+| P13 | `FileUtil.DirectoryExists` | `GetFileAttributesEx` | portable leaf: `File.GetAttributes`, matching the file's existing portable branch | reached |
+| P14 | `Util.HasWriteAccessToDirectory` | `GetCurrentThreadId` for a scratch file name | portable leaf: `Environment.CurrentManagedThreadId` | reached |
+| P15 | `SetAutogenKeys` | `EcbCallISAPI(GetAutogenKeys)` machine-persisted key material | only the persisted lookup is guarded; portable takes Framework's own random-key fallback. **Deviation:** keys are process-scoped, so ViewState and forms-auth tickets do not survive restart and cannot be shared between processes. Explicit `<machineKey>` still applies. See [machine-key follow-up](follow-ups/machine-key-and-viewstate-bootstrap.md) | reached |
+| P16 | `MultiTargetingUtil` target validation | registry lookups for installed .NET Framework and supported SKUs | portable leaf: the implemented surface is reported as `4.8.1`, so higher targets still fail with the original actionable error | reached |
+| P17 | `AspNetMemoryMonitor` totals | `GlobalMemoryStatusEx` | portable leaf: `GC.GetGCMemoryInfo().TotalAvailableMemoryBytes`. `s_totalVirtual` is only consulted on 32-bit and stays unset | reached |
+| P18 | `ConfiguredProcessMemoryLimit` | `aspnet_wp.exe`/`w3wp.exe` module probes and IIS server config | inactive: neither worker process can exist, so the physical-memory heuristic applies | reached |
+| P19 | `SafeNativeMethods.GetCurrentProcessId` | `kernel32` | portable leaf at the declaration: `Environment.ProcessId`, covering all four call sites without call-site churn | reached |
+| P20 | `VersionInfo.GetLoadedModuleFileName` | `GetModuleHandle`/`GetModuleFileName` | portable leaf: `Environment.ProcessPath` for the main module, null otherwise; `ExeName` path stripping no longer assumes `\` | reached |
+| P21 | `LowPhysicalMemoryMonitor.GetCurrentPressure` | `GlobalMemoryStatusEx` memory-load percentage | portable leaf: derived from `GCMemoryInfo` load and total. **Accepted startup transient:** `MemoryLoadBytes` is only populated after the first collection, so `InitHistory` seeds the pressure history with zero. Framework returns zero the same way when the native call fails, and the history self-corrects on the first `Update`. No portable API reports machine memory load before the first GC | reached |
+| P22 | `CompilationLock` | native instrumented named mutex in `webengine4.dll` plus a registry-supplied mutex name | portable leaf: `System.Threading.Mutex` with the session-local name, satisfying the file's own `ROTORTODO`. Draining/lock-status logic is unchanged | reached |
+| P23 | `FileEnumerator`, `FindFileData`, `FileAttributesData` | `FindFirstFile`/`FindNextFile`/`FindClose` and `WIN32_FIND_DATA` | portable leaf: one `System.IO` seam over `DirectoryInfo.EnumerateFileSystemInfos` and `FileSystemInfo`. No 8.3 alternate names exist, so both name forms are the real name. **Platform semantic:** `FileAttributes.Hidden` covers dot-files on Unix but not on Windows, so `IsHidden` classifies a different file set per OS. Its sole consumer, `MapPathBasedVirtualPathProvider`, decides application *content*: batch compilation, `App_Code`/`App_Themes`/`App_Browsers`/`App_WebReferences`, and the precompile file copy. Unreached today. The attribute query is kept because filesystem convention is not the leaf's to invent, but the compilation slice must decide whether content selection uses a name-based exclusion list instead — the mechanism Framework already uses for `_vti_cnf`. Recorded in [portable filesystem and configuration-path semantics](follow-ups/portable-filesystem-and-config-path-semantics.md) | reached |
+| P24 | `CompilationUtil.GetRecompilationHash` | `CodeDomProvider.GetCompilerInfo("cpp")` | inactive: the lookup exists only to skip the C++ provider, which does not exist outside .NET Framework | reached |
+| P25 | `UserMapPath.GetPhysicalPathForPath` | hardcoded `'/'` → `'\'` when combining a subdirectory path onto a mapped physical directory | portable leaf: `Path.DirectorySeparatorChar`, byte-identical on Windows. Not reached by the harness — the fixture's only `web.config` sits at the application root, so the child-path branch never runs — but covered by `UserMapPathTests`, which maps `/child/grandchild` through a `WebConfigurationFileMap` and fails against the original `'\\'` on non-Windows, where it produced a single filename containing literal backslashes. Siblings in `TemplateParser` and `SimpleWorkerRequest` remain for later slices; those in `MetabaseServerConfig` and `ProcessHostMapPath` are IIS-only and unreachable | reached |
+| P26 | `HttpRuntime.ReleaseResourcesAndUnloadAppDomain` | `AppDomain.Unload` as the terminal shutdown step, and the `DomainUnload` notification it raises as the shutdown-completion signal | portable leaf: the unload is replaced by a direct `HostingEnvironment.CompleteShutdown()`, which runs the same completion sequence the `DomainUnload` handler ran, guarded to fire exactly once from either caller. **Deviation:** the application does not restart in place — the process must be recycled to host it again; see [process lifetime, shutdown, and recycle](follow-ups/process-lifetime-shutdown-and-recycle.md) | reached |
+
+Consequences recorded elsewhere:
+
+- H01 is satisfied by P04 and P05.
+- H03 resolves to a null `_wpUserId`, because `WindowsIdentity.GetCurrent()`
+  already fails into the existing `catch`. Whether that value has a supported
+  meaning remains **research**.
+- H04, H11, and H18 are inactive through P04 rather than through configuration:
+  `IsEngineLoaded` is false, so perf counters, native ETW, and IIS version
+  discovery early-out.
+- H10 is only partially met by P08; generation-specific work storage is still
+  outstanding and H10 must not be marked verified.
+- H16 is reached by P15 with an explicit deviation.
+- H12 is exercised: `trust level="Full"`, `legacyCasModel="false"`; partial trust
+  and legacy CAS raise an explicit unsupported error.
+- H17 executes; the fixture's precompiled handler means dynamic compilation is
+  never triggered during initialization.
+- R01 is reached — `HttpRuntime.ProcessRequest` receives request ownership.
+  Module, handler, and response parity are not claimed.
+- A07 is reached by P26. Before P26, `AppDomain.Unload` threw
+  `CannotUnloadAppDomainException` on every iteration of the method's `for (;;)`
+  loop, spinning a thread pool thread forever and leaving
+  `_activeHostingEnvCount` at 1, so `ApplicationManager.ShutdownAll` waited out
+  its full `3000 × 100ms` drain.
+
+A POC cross-check was performed against `../Portable.System.Web`. It is hazard
+evidence only, explicitly not a source ([core runtime port
+plan](core-runtime-port-plan.md):52): it renames `FEATURE_PAL` →
+`NET10_0_OR_GREATER` file-by-file, so its `UnsafeNativeMethods.cs` stubs are dead
+behind an unrenamed `FEATURE_PAL`, and its `GetNumProcessCPUs` equivalent returns
+0 rather than a real value.
 
 ## Ledger update rule
 

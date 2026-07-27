@@ -54,6 +54,7 @@ namespace System.Web.Util {
 
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 
 /*
  * This is a somewhat artificial base class for FileEnumerator.  The main reason
@@ -65,6 +66,7 @@ using System.Collections;
 internal abstract class FileData {
 
     protected string _path;
+#if NETFRAMEWORK
     protected UnsafeNativeMethods.WIN32_FIND_DATA _wfd;
 
     internal string Name {
@@ -86,10 +88,37 @@ internal abstract class FileData {
     internal FindFileData GetFindFileData() {
         return new FindFileData(ref _wfd);
     }
+#else
+    protected FileSystemInfo _current;
+
+    internal string Name {
+        get { return _current.Name; }
+    }
+
+    internal string FullName {
+        get { return _current.FullName; }
+    }
+
+    internal bool IsDirectory {
+        get { return (_current.Attributes & FileAttributes.Directory) != 0; }
+    }
+
+    internal bool IsHidden {
+        get { return (_current.Attributes & FileAttributes.Hidden) != 0; }
+    }
+
+    internal FindFileData GetFindFileData() {
+        return new FindFileData(_current);
+    }
+#endif
 }
 
 internal class FileEnumerator: FileData, IEnumerable, IEnumerator, IDisposable {
+#if NETFRAMEWORK
     private IntPtr _hFindFile = UnsafeNativeMethods.INVALID_HANDLE_VALUE;
+#else
+    private IEnumerator<FileSystemInfo> _entries;
+#endif
 
     internal static FileEnumerator Create(string path) {
         return new FileEnumerator(path);
@@ -105,11 +134,13 @@ internal class FileEnumerator: FileData, IEnumerable, IEnumerator, IDisposable {
 
     // Should the current file be excluded from the enumeration
     private bool SkipCurrent() {
-    
+
+#if NETFRAMEWORK
         // Skip false directories
         if (_wfd.cFileName == "." || _wfd.cFileName == "..")
             return true;
-
+#endif
+        // System.IO enumeration never yields the "." and ".." entries.
         return false;
     }
 
@@ -121,9 +152,10 @@ internal class FileEnumerator: FileData, IEnumerable, IEnumerator, IDisposable {
     bool IEnumerator.MoveNext() {
 
         for (;;) {
+#if NETFRAMEWORK
             if (_hFindFile == UnsafeNativeMethods.INVALID_HANDLE_VALUE) {
                 _hFindFile = UnsafeNativeMethods.FindFirstFile(_path + @"\*.*", out _wfd);
-                
+
                 // Empty enumeration case
                 if (_hFindFile == UnsafeNativeMethods.INVALID_HANDLE_VALUE)
                     return false;
@@ -133,7 +165,23 @@ internal class FileEnumerator: FileData, IEnumerable, IEnumerator, IDisposable {
                 if (!hasMoreFiles)
                     return false;
             }
-            
+#else
+            if (_entries == null) {
+                try {
+                    _entries = new DirectoryInfo(_path).EnumerateFileSystemInfos().GetEnumerator();
+                }
+                catch (DirectoryNotFoundException) {
+                    // Empty enumeration case
+                    return false;
+                }
+            }
+
+            if (!_entries.MoveNext())
+                return false;
+
+            _current = _entries.Current;
+#endif
+
             if (!SkipCurrent())
                 return true;
         }
@@ -150,10 +198,17 @@ internal class FileEnumerator: FileData, IEnumerable, IEnumerator, IDisposable {
     }
 
     void IDisposable.Dispose() {
+#if NETFRAMEWORK
         if (_hFindFile != UnsafeNativeMethods.INVALID_HANDLE_VALUE) {
             UnsafeNativeMethods.FindClose(_hFindFile);
             _hFindFile = UnsafeNativeMethods.INVALID_HANDLE_VALUE;
         }
+#else
+        if (_entries != null) {
+            _entries.Dispose();
+            _entries = null;
+        }
+#endif
         System.GC.SuppressFinalize(this);
     }
 }

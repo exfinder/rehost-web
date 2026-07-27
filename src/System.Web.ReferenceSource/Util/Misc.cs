@@ -64,7 +64,12 @@ namespace System.Web.Util {
         }
 
         internal static void ReportUnhandledException(Exception e, String[] strings) {
-            UnsafeNativeMethods.ReportUnhandledException(FormatExceptionMessage(e, strings));
+            string eventInfo = FormatExceptionMessage(e, strings);
+#if NETFRAMEWORK
+            UnsafeNativeMethods.ReportUnhandledException(eventInfo);
+#else
+            WebFormsRuntimeEventSource.Log.UnhandledException(eventInfo);
+#endif
         }
 
         internal static String FormatExceptionMessage(Exception e, String[] strings) {

@@ -131,7 +131,6 @@ namespace System.Web {
             }
 
             bool isEngineLoaded = false;
-            bool wasEngineLoadedHere = false;
             String installDir = null;
 
             // load webengine.dll if it is not loaded already
@@ -139,6 +138,9 @@ namespace System.Web {
 #if !FEATURE_PAL // FEATURE_PAL does not enable IIS-based hosting features
 
             installDir = RuntimeEnvironment.GetRuntimeDirectory();
+
+#if NETFRAMEWORK
+            bool wasEngineLoadedHere = false;
 
             if (UnsafeNativeMethods.GetModuleHandle(ModName.ENGINE_FULL_NAME) != IntPtr.Zero) {
                 isEngineLoaded = true;
@@ -162,6 +164,7 @@ namespace System.Web {
                     UnsafeNativeMethods.PerfCounterInitialize();
                 }
             }
+#endif
 
 #else // !FEATURE_PAL
             string p = typeof(object).Module.FullyQualifiedName;
@@ -296,13 +299,10 @@ namespace System.Web {
          */
         private void Init() {
             try {
-#if !FEATURE_PAL
+#if NETFRAMEWORK
                 if (Environment.OSVersion.Platform != PlatformID.Win32NT)
                     throw new PlatformNotSupportedException(SR.GetString(SR.RequiresNT));
-#else // !FEATURE_PAL
-                // ROTORTODO
-                // Do nothing: FEATURE_PAL environment will always support ASP.NET hosting
-#endif // !FEATURE_PAL
+#endif
 
                 _profiler = new Profiler();
                 _timeoutManager = new RequestTimeoutManager();
@@ -989,11 +989,19 @@ namespace System.Web {
 
             codegenBase = Path.Combine(tempDirectory, simpleAppName);
 
+#if NETFRAMEWORK
 #pragma warning disable 0618    // To avoid deprecation warning
             appDomain.SetDynamicBase(codegenBase);
 #pragma warning restore 0618
 
             _codegenDir = Thread.GetDomain().DynamicDirectory;
+#else
+            // SetDynamicBase is a no-op and DynamicDirectory is null on modern .NET, so no
+            // generation segment is appended and the codegen base is used directly. The segment
+            // the CLR supplied is a dynamic-compilation concern, and choosing a replacement is
+            // deferred to that slice; see follow-ups/runtime-codegen-and-loading.md.
+            _codegenDir = codegenBase;
+#endif
 
             // Create the codegen directory if needed
             Directory.CreateDirectory(_codegenDir);
@@ -1362,10 +1370,12 @@ namespace System.Web {
             // Gernerate random keys
             randgen.GetBytes(bKeysRandom);
 
+#if NETFRAMEWORK
             // If getting stored keys via WorkerRequest object failed, get it directly
             if (!fGetStoredKeys)
                 fGetStoredKeys = (UnsafeNativeMethods.EcbCallISAPI(IntPtr.Zero, UnsafeNativeMethods.CallISAPIFunc.GetAutogenKeys,
                                                                    bKeysRandom, bKeysRandom.Length, bKeysStored, bKeysStored.Length) == 1);
+#endif
 
             // If we managed to get stored keys, copy them in; else use random keys
             if (fGetStoredKeys)
@@ -1891,6 +1901,7 @@ namespace System.Web {
 
             AddAppDomainTraceMessage("before Unload");
 
+#if NETFRAMEWORK
             for (; ; ) {
                 try {
                     AppDomain.Unload(Thread.GetDomain());
@@ -1907,6 +1918,21 @@ namespace System.Web {
                     throw;
                 }
             }
+#else
+            // .NET 10 hosts a single, non-unloadable AppDomain: AppDomain.Unload always throws
+            // CannotUnloadAppDomainException ("Operation is not supported on this platform"), which
+            // the loop above swallows -- it would spin forever throwing on this thread pool thread.
+            //
+            // Resources are already released by the Dispose above. Framework publishes shutdown
+            // completion from the DomainUnload notification raised by the unload; with no unload to
+            // raise it, the runtime publishes it here, otherwise ApplicationManager.ShutdownAll
+            // waits out its full five-minute drain on _activeHostingEnvCount.
+            //
+            // The application does not restart in place: unlike Framework, the process must be
+            // recycled to host the application again.
+            // See docs/follow-ups/process-lifetime-shutdown-and-recycle.md.
+            HostingEnvironment.CompleteShutdown();
+#endif
         }
 
         private static void SetExecutionTimePerformanceCounter(HttpContext context) {

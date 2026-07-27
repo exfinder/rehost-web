@@ -40,16 +40,35 @@ Success emits a deterministic portable trace to standard output. Failure emits
 a deterministic JSON diagnostic to standard error with the failed phase and
 the original exception chain.
 
-Current diagnostic status is platform-specific:
+## Current reachable state
 
-- macOS activation fails during `ApplicationManager` static initialization;
-  the inner `PlatformNotSupportedException` reports unavailable Windows ACL
-  resource-management APIs;
-- Windows advances further, then activation fails loading native
-  `webengine4.dll`.
+Activation completes and request ownership transfers. `run` exits zero and
+emits a `PipelineTrace` whose events include `runner.process-request.enter`.
+There is no longer an activation-phase `FailureDiagnostic`.
 
-These are unresolved portability blockers, not accepted deviations or skipped
-tests.
+`HttpRuntime.ProcessRequest` currently returns without dispatching the
+configured module or precompiled handler, so the observed trace is:
+
+```text
+runner.process-request.enter
+worker.end-of-request
+runner.process-request.return
+```
+
+against an empty `200`. The next blocker is therefore pipeline dispatch —
+module collection/initialization and handler selection — not activation.
+
+`verify` still exits nonzero, because module, handler, and response parity
+against the Framework golden trace are not implemented. Do not add it as an
+always-passing CI test until that slice lands.
+
+Every platform dependency reached during activation is classified as P01–P25 in
+the [portability ledger](../../docs/portability-ledger.md). Six carry recorded
+deviations rather than parity: process-scoped auto-generated machine keys (P07);
+a codegen directory with no generation segment (P08); config map path selection narrowed to the hosting map for all paths (P09); cache
+size sampling permanently inactive (P12); a zero-seeded memory pressure history
+until the first collection (P21); and `IsHidden` classifying a different file set
+per OS (P23).
 
 ## Verify
 

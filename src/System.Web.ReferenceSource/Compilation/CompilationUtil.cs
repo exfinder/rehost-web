@@ -229,7 +229,12 @@ namespace System.Web.Compilation {
             // Make sure the <system.CodeDom> section is hashed properly.
             CompilerInfo[] compilerInfoArray = CodeDomProvider.GetAllCompilerInfo();
             if (compilerInfoArray != null) {
+#if NETFRAMEWORK
                 CompilerInfo cppCodeProvider = CodeDomProvider.GetCompilerInfo("cpp");
+#else
+                // No C++ CodeDom provider exists outside .NET Framework, so there is none to skip.
+                CompilerInfo cppCodeProvider = null;
+#endif
                 foreach (CompilerInfo info in compilerInfoArray) {
                     // Skip cpp code provider (Dev11 193323).
                     if (info == cppCodeProvider) {

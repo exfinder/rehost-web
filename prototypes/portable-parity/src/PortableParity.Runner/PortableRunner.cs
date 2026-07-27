@@ -16,5 +16,9 @@ public sealed class PortableRunner : IRegisteredObject, IClassicPipelineRunner
         PipelineEventJournal.Record(immediate
             ? "runner.stop.immediate"
             : "runner.stop");
+
+        // Releases the hosting environment's shutdown wait; without this the environment
+        // polls until its shutdown timeout expires before force-stopping.
+        HostingEnvironment.UnregisterObject(this);
     }
 }

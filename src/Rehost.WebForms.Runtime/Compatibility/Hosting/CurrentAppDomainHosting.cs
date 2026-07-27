@@ -45,7 +45,7 @@ internal static class CurrentAppDomainHosting
                 "Native configuration access tokens are unavailable. Use explicit Rehost configuration paths.");
         }
 
-        var physicalPath = NormalizeHostPhysicalPath(appHost.GetPhysicalPath(), configuration.PhysicalRootPath);
+        var physicalPath = NormalizeHostPhysicalPath(appHost.GetPhysicalPath());
         var virtualPath = VirtualPath.Create(appHost.GetVirtualPath()).VirtualPathString;
         ValidateBinding(configuration, appId, physicalPath, virtualPath);
 
@@ -70,18 +70,8 @@ internal static class CurrentAppDomainHosting
         return environment;
     }
 
-    private static string NormalizeHostPhysicalPath(string physicalPath, string configuredPhysicalPath)
+    private static string NormalizeHostPhysicalPath(string physicalPath)
     {
-        if (!OperatingSystem.IsWindows() &&
-            physicalPath.EndsWith('\\') &&
-            String.Equals(
-                physicalPath.Substring(0, physicalPath.Length - 1),
-                configuredPhysicalPath.TrimEnd(Path.DirectorySeparatorChar),
-                StringComparison.Ordinal))
-        {
-            return configuredPhysicalPath;
-        }
-
         return Path.EndsInDirectorySeparator(physicalPath)
             ? physicalPath
             : physicalPath + Path.DirectorySeparatorChar;

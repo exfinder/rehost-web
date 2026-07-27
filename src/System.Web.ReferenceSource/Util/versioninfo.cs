@@ -51,7 +51,11 @@ namespace System.Web.Util {
         }
 
         internal static string GetLoadedModuleFileName(string module) {
-#if !FEATURE_PAL // FEATURE_PAL does not fully support FileVersionInfo
+#if !NETFRAMEWORK
+            // Only the main module is meaningful without the Windows loader; any other module
+            // name identifies a Windows DLL that cannot be loaded here.
+            return module == null ? Environment.ProcessPath : null;
+#elif !FEATURE_PAL // FEATURE_PAL does not fully support FileVersionInfo
             IntPtr h = UnsafeNativeMethods.GetModuleHandle(module);
             if (h == IntPtr.Zero)
                 return null;
@@ -138,7 +142,7 @@ namespace System.Web.Util {
                                 s = String.Empty;
 
                             // strip path
-                            int i = s.LastIndexOf('\\');
+                            int i = s.LastIndexOfAny(new char[] { '\\', System.IO.Path.DirectorySeparatorChar });
                             if (i >= 0)
                                 s = s.Substring(i+1);
 

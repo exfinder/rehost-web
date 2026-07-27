@@ -105,6 +105,7 @@ namespace System.Web {
         private static IntPtr GetCurrentToken() {
             IntPtr token = IntPtr.Zero;
 
+#if NETFRAMEWORK
             if (UnsafeNativeMethods.OpenThreadToken(
                         UnsafeNativeMethods.GetCurrentThread(),
                         UnsafeNativeMethods.TOKEN_READ | UnsafeNativeMethods.TOKEN_IMPERSONATE,
@@ -116,6 +117,7 @@ namespace System.Web {
                     throw new HttpException(SR.GetString(SR.Cannot_impersonate));
                 }
             }
+#endif
 
             return token;
         }

@@ -20,8 +20,14 @@ namespace System.Web {
         
         private SafeNativeMethods() {}
 
+#if NETFRAMEWORK
         [DllImport(ModName.KERNEL32_FULL_NAME)]
         internal /*public*/ extern static int GetCurrentProcessId();
+#else
+        internal static int GetCurrentProcessId() {
+            return Environment.ProcessId;
+        }
+#endif
 
         [DllImport(ModName.KERNEL32_FULL_NAME)]
         internal /*public*/ extern static int GetCurrentThreadId();

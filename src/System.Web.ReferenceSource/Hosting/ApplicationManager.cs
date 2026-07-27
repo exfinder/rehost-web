@@ -62,7 +62,9 @@ namespace System.Web.Hosting {
         private const string _clrQuirkAppSettingsAppContextPrefix = "AppContext.SetSwitch:";
         private const string _regexMatchTimeoutKey = "REGEX_DEFAULT_MATCH_TIMEOUT";
         private const string _configBuildersIgnoreLoadFailuresSwitch = "ConfigurationBuilders.IgnoreLoadFailure";   // Keep in sync with System.Configuration
+#if NETFRAMEWORK
         private static readonly StrongName _mwiV1StrongName = GetMicrosoftWebInfrastructureV1StrongName();
+#endif
 
         private static Object _applicationManagerStaticLock = new Object();
 
@@ -1323,6 +1325,7 @@ setup,
 #endif
         }
 
+#if NETFRAMEWORK
         private static string NormalizePublicKeyBlob(string publicKey) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < publicKey.Length; i++) {
@@ -1368,6 +1371,7 @@ setup,
                 yield return new StrongName(publicKey, asmName, new Version(i, 0, 0, 0));
             }
         }
+#endif
 
 
          // devdiv 1038337: execution permission cannot be acquired under partial trust with ctrl-f5.
