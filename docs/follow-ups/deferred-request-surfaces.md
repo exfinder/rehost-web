@@ -16,5 +16,10 @@ After the GET fixture works, split this list into capability stories ordered by
 application demand and semantic risk. Each resulting story must update the
 compatibility map. Exclusion here does not authorize silent fallback.
 
+Existing stories:
+[request termination/timeouts](request-termination-and-timeouts.md),
+[route escaping](route-url-escaping.md), and
+[WebResource timestamps](web-resource-assembly-timestamps.md).
+
 Done when every item is either an owned story with acceptance criteria or an
 explicit product-scope rejection.

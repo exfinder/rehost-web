@@ -12,57 +12,20 @@ enumeration, Win32 resources, and IIS-owned temporary directories.
 
 ## Current state
 
-`SetUpCodegenDirectory` completes portably (ledger P08). `AppDomain.SetDynamicBase`
-is a no-op and `DynamicDirectory` is null on modern .NET, so no generation segment
-stands in for the one the CLR supplied:
+`SetUpCodegenDirectory` now uses configured `codegenBase` (ledger P08). The
+precompiled-handler slice writes nothing there.
 
-```csharp
-_codegenDir = codegenBase;
-```
-
-`codegenBase` is derived from the configured `compilation/tempDirectory` and the
-application name, as on Framework. The path is a pure function of configuration,
-so it is identical across runs and machines.
-
-The sibling POC instead appends `HashCode.Combine(Environment.ProcessId,
-AppDomain.CurrentDomain.Id)`. That was tried and rejected: `HashCode` seeds from
-`Interop.GetRandomBytes` once per process, so the segment is not a function of
-the pid at all — the same application produces a different directory on every
-run. Beyond violating the determinism contract, a per-run directory cannot be
-reused or reclaimed.
-
-The hazard the POC's segment was reaching for is real and is deferred with the
-rest of dynamic compilation:
-
-- Generated assemblies stay loaded for the life of the process on .NET 10, since
-  there is no AppDomain unload (ledger P26). Recompiling a changed page can
-  therefore collide with an older, locked assembly of the same name in a shared
-  directory.
-- Framework's answer is the `.delete`-marker design
-  (`BuildResultCache.TryDeleteFile` / `CheckAndRemoveDotDeleteFile`): when
-  deletion fails because the assembly is locked, it leaves a marker and reclaims
-  the file on a later pass over the *same* directory. Any generation segment that
-  changes per run defeats that reclamation outright.
-
-Nothing writes to this directory while the supported fixture uses a precompiled
-handler, so the collision cannot occur yet. It must be resolved before dynamic
-compilation is enabled; H10 stays partially met until then.
-
-Outstanding, low priority while the supported fixture uses a precompiled handler
-and writes nothing to this directory:
-
-- decide whether a generation segment is required at all, given one application
-  per process and the cross-process `CompilationLock` mutex that already
-  serializes access to a shared `tempDirectory`;
-- if it is, prefer an identity-derived deterministic segment plus an explicit
-  reclamation step that runs at startup, so that reuse, collision safety, and
-  cleanup all hold;
-- define the conflict and work-root probes H10 asks for before choosing.
+Before dynamic compilation, define deterministic generation isolation and
+reclamation. Generated assemblies cannot unload, while Framework `.delete`
+markers require later runs to revisit the same directory. Per-run randomized
+paths therefore violate both determinism and reclamation.
 
 ## Required decisions
 
 - Use the host-supplied application work root and retained
   `SetUpCodegenDirectory` sequence.
+- Decide whether cross-process `CompilationLock` makes a generation segment
+  unnecessary; otherwise derive it from stable identity.
 - Define ownership, permissions, cleanup, restart, and concurrent compilation.
 - Preserve virtual-to-generated source diagnostics.
 - Extend the slice-1 application-bin resolver for generated assemblies without
@@ -70,9 +33,6 @@ and writes nothing to this directory:
 - Decide how long generated literals and resources are emitted portably.
 - Keep compiler/provider selection in
   [compiler-provider-and-target-framework-policy.md](compiler-provider-and-target-framework-policy.md).
-
-POC implementations are hazard evidence only. Reanalyze every replacement
-against Rehost contracts.
 
 ## Verification
 

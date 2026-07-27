@@ -1,5 +1,8 @@
 # Application bootstrap and configuration
 
+Status: accepted target contract; implementation is tracked by the
+[first runnable request](follow-ups/first-runnable-request.md).
+
 ## Host contract
 
 The host creates one process-scoped `WebFormsApplication` from immutable
@@ -52,7 +55,7 @@ The machine baseline adapts the pinned System.Web configuration vocabulary.
 Root-web defaults are derived structurally from pinned .NET Framework 4.8.1
 configuration. Every assembly-identity or portability delta is inventoried.
 First-slice fixtures clear inherited handlers and modules before registering
-their probe components. The earlier Portable.System.Web POC is not a source.
+their probe components.
 
 ## Validation and commit
 
@@ -86,20 +89,3 @@ native configuration tokens, and reload.
 
 Configuration reload/restart design:
 [configuration reload](follow-ups/configuration-reload-and-process-restart.md).
-
-## Integration verification
-
-- ASP.NET Core uses the process-scoped application owner; middleware never
-  initializes `HostingEnvironment` directly.
-- Request startup must prove activation and the first request reach no native
-  IIS/Windows operations.
-- Runtime codegen later verifies
-  `PreApplicationStartMethodAttribute` and `App_Code.AppInitialize` order.
-- Dynamic startup later verifies classic `Global.asax.Application_Start`
-  request-pipeline behavior.
-
-Owning stories:
-[host adapter](follow-ups/aspnet-core-host-adapter.md),
-[request startup](follow-ups/request-startup-portability.md),
-[runtime codegen](follow-ups/runtime-codegen-and-loading.md), and
-[dynamic integration](follow-ups/dynamic-aspx-integration.md).

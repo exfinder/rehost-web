@@ -37,3 +37,19 @@ Default to writing no comments. Only add one when the WHY is non-obvious: a hidd
 - **Explicit scope boundaries** — defer uncertain behavior deliberately, document ownership, and avoid accidental partial support.
 
 - **Durable architectural records** — preserve contracts, motivations, compatibility limits, and follow-up work in repository documentation.
+
+## Build diagnostics
+
+Use the non-hanging local build:
+
+```text
+dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj --no-restore --disable-build-servers --nologo --verbosity:quiet --maxcpucount:1 /p:UseSharedCompilation=false /nodeReuse:false -clp:ErrorsOnly
+```
+
+For detailed diagnosis:
+
+```text
+python3 eng/analyze-build-diagnostics.py <log> <output-directory> --root .
+```
+
+Diagnostic TSV/JSON output is disposable. Do not commit build snapshots.

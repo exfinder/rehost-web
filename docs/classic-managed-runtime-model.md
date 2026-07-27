@@ -156,53 +156,19 @@ activation seam.
 These cycles are intentional. Preserve their ordering and break platform
 dependencies at leaves, not by replacing them with host orchestration.
 
-## State transitions
+## Related contracts
 
-### Application owner
-
-```text
-Registered
-  └─ first routed request → Activating
-       ├─ success → Accepting
-       └─ escaping post-mutation failure → StopRequested
-Accepting
-  └─ Framework shutdown request / host stop → StopRequested
-StopRequested
-  └─ later drain and disposal → Stopped
-```
-
-### Framework lazy state inside `Accepting`
-
-```text
-before first request
-→ FirstRequestInit complete
-→ HttpApplicationFactory initialized
-→ Application_Start called
-→ normal request processing
-```
-
-These are not additional host-visible readiness states.
-
-### Failure ownership
-
-| Failure | Owner/result |
-| --- | --- |
-| invalid host registration | `Create` fails; no publication; corrected retry safe |
-| activation escape after global mutation | terminal cause stored; host stop requested; no retry |
-| `HostingInit`/`FirstRequestInit` | cached System.Web initialization error; request error page where possible; shutdown requested |
-| `Application_Start`/module/handler | managed request failure unless Framework itself requests shutdown |
-| worker translation or final transport commit | adapter failure |
-| exception escaping `HttpRuntime.ProcessRequest` | propagated once through worker completion |
-
-### Restart/recycle/shutdown
-
-- FCN/reload is disabled; configuration and deployment changes do not mutate a
-  running generation.
-- Imported AppDomain shutdown becomes an idempotent terminal notification.
-- Kestrel host calls `StopApplication`; runtime does not terminate the process.
-- An external supervisor may start a replacement process/generation.
-- Graceful admission stop, drain, `Application_End`, disposal, and final
-  `Stopped` transition belong to the lifecycle slice.
+- Application state and bootstrap:
+  [application bootstrap](application-bootstrap-and-configuration.md) and
+  [ADR 0039](adr/0039-use-a-five-state-application-lifecycle.md).
+- Failure ownership:
+  [ADR 0038](adr/0038-classify-failures-by-ownership-and-mutation.md),
+  [ADR 0014](adr/0014-separate-managed-and-adapter-failures.md), and
+  [ADR 0016](adr/0016-propagate-only-escaped-request-exceptions.md).
+- Restart/shutdown:
+  [ADR 0021](adr/0021-use-immutable-application-generations.md),
+  [ADR 0027](adr/0027-translate-appdomain-shutdown-to-host-notification.md), and
+  [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md).
 
 ## Evidence anchors
 

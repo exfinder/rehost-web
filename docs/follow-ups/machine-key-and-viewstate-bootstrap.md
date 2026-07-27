@@ -11,18 +11,15 @@ startup failure but break restart and scale-out behavior.
 
 ## Current state
 
-Reached by the request-ownership slice (ledger P15). `SetAutogenKeys` guards
-only the machine-persisted lookup, so the portable runtime takes Framework's own
-random-key fallback branch. Auto-generated keys are therefore **process-scoped**:
+The portable runtime takes Framework's random-key fallback (ledger P15).
+Auto-generated keys are process-scoped:
 
 - ViewState protected before a restart cannot be validated after it;
 - forms-authentication tickets do not survive a restart;
-- two processes serving one application cannot share tickets, so multi-process
-  deployment requires an explicit `<machineKey>`.
+- multiple processes cannot share tickets.
 
-Explicit `<machineKey>` configuration is unaffected and remains the supported
-way to obtain stable keys today. A system-wide or host-supplied `<machineKey>`
-source is the expected direction; it is not yet designed.
+Explicit `<machineKey>` remains the stable restart/scale-out contract. A
+host-supplied key source is not yet designed.
 
 ## Required decisions
 

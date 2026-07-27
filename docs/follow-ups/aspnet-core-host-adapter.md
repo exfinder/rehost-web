@@ -1,7 +1,7 @@
 # ASP.NET Core host adapter
 
 Status: open. Priority: highest. Contract:
-[managed runtime port plan, slice 1D](../core-runtime-port-plan.md#1d-add-the-kestrel-adapter).
+[first runnable request](first-runnable-request.md).
 
 ## Problem
 

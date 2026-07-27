@@ -21,7 +21,8 @@ Own portable `HttpRuntime` initialization from its static constructor through
 `StaticInit`, instance `Init`, `HostingInit`, and first request dispatch.
 Consume application identity, roots, work storage, configuration mapping,
 full-trust policy, and lifecycle state from the process-scoped application
-owner. The bootstrap commit is input to reshape, not a completed prerequisite.
+owner. The accepted bootstrap contract is a target, not a completed
+prerequisite.
 
 Split managed runtime initialization from optional IIS/native integration.
 Registry, IIS, assembly-location, Windows identity, native monitoring, and
@@ -32,26 +33,19 @@ Process-wide tuning belongs to
 unload behavior belongs to
 [process lifetime](process-lifetime-shutdown-and-recycle.md).
 
-## Progress
+## Current boundary
 
-Request ownership now transfers. `PortableParity.Host run` completes the public
-sequence — `WebFormsApplication.Initialize`, `ApplicationManager.GetApplicationManager`,
-`Open`, `CreateObject`, `HostingEnvironment` initialization, portable runner —
-and enters `HttpRuntime.ProcessRequest(HttpWorkerRequest)`, emitting a
-`PipelineTrace` instead of an activation-phase `FailureDiagnostic`.
-
-`HttpRuntime` static construction, `Init`, `HostingInit`, and
-`BuildManager.InitializeBuildManager` all complete. Each edge reached is
-classified in the [portability ledger](../portability-ledger.md) as P01–P24.
+The portable harness reaches `HttpRuntime.ProcessRequest` on macOS and Windows;
+the [ledger](../portability-ledger.md) owns reached-edge evidence.
 
 Still open:
 
 - module, handler, and response parity are **not** claimed; the trace currently
   records only request entry, `EndOfRequest`, and return;
-- H03 (worker identity meaning) remains research;
-- H10 is only partially met — see
+- worker identity meaning remains research;
+- generation-specific work storage remains open — see
   [runtime codegen and loading](runtime-codegen-and-loading.md);
-- H16 carries an explicit process-scoped key deviation — see
+- machine keys carry a process-scoped deviation — see
   [machine key and ViewState bootstrap](machine-key-and-viewstate-bootstrap.md);
 - explicit rejection of `<identity impersonate="true"/>` is deferred to the
   identity slice; the subsystem is currently inert.

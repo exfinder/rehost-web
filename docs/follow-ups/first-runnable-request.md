@@ -1,7 +1,7 @@
 # First runnable request
 
 Status: open. Priority: highest. Canonical scope:
-[managed runtime port plan, slice 1](../core-runtime-port-plan.md#slice-1-bodyless-precompiled-handler).
+[managed runtime port plan, slice 1](../core-runtime-port-plan.md#vertical-slices).
 
 ## Goal
 
@@ -30,6 +30,18 @@ host does not reference it.
 - request bodies, path info, streaming response, and file send;
 - session, authentication, cache, routing, and resources;
 - graceful drain/disposal.
+
+## Work packets
+
+- [.NET Framework differential harness](framework-differential-harness.md)
+- [ASP.NET Core host adapter](aspnet-core-host-adapter.md)
+- [Request startup portability](request-startup-portability.md)
+- [Pipeline fixture profile](minimal-pipeline-feature-profile.md)
+- [Completion, failure, and cancellation](request-completion-failure-and-cancellation.md)
+- [Managed response output](managed-response-buffering-and-output.md)
+- [Portable request diagnostics](portable-request-diagnostics.md)
+- [Windows platform diagnostics](windows-platform-diagnostics.md)
+- [Compatibility feature map](compatibility-feature-map.md)
 
 ## Done when
 
