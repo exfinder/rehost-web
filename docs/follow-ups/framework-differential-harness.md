@@ -63,5 +63,27 @@ The normalization manifest stays empty: no recorded value is rewritten. The
 unordered instance-initialization collection is a comparison rule, not a
 normalization rule, and is stated in the contract rather than in the manifest.
 
+## The adapter column
+
+A third adapter replays the same manifest over Kestrel and compares against the
+same golden, which is neither regenerated nor branched. It observes a response
+after it has crossed a socket, so it compares what survives that: probe events in
+order, status, reason phrase, headers as a bag, and body bytes.
+
+The events named `worker.*` and `runner.*` are skipped there. They mark moments
+inside the caller and the worker request, which over HTTP happen in product code
+the rig deliberately does not instrument; every value they announce is compared
+as a field regardless, so only their interleaving is lost. `Date` and `Server`
+are excluded by name because the server adds them, and header order is not
+compared because the client does not preserve it — both comparison rules, not
+normalization, and both still enforced on the bench column.
+
+Asynchrony survives the skips because the asynchronous handler writes its body
+after the pipeline has released the request: a host that failed to await would
+deliver an empty one, so the bytes carry the claim. Facts no response can show —
+instance counts and the terminal shutdown notification — are reached through a
+registered object the rig creates in the running application, the same mechanism
+the bench uses.
+
 Done when first-slice fixtures prove capture, narrow normalization, replay,
 drift detection, and intentional-deviation documentation.

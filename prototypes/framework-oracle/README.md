@@ -39,6 +39,11 @@ The `netstandard2.0` session/observation contract, the session manifest, and the
 probe/recording sources are shared with the portable parity adapter. Each runtime still
 compiles its own `System.Web`-bound runner and probe assemblies.
 
+The golden this produces is also what
+[the adapter parity diagnostic](../adapter-parity/README.md) compares against.
+That column reads its observation off the wire, so it compares a subset; the
+excluded fields and the reason for each are listed there.
+
 Build staging also binds `compilation/tempDirectory` to an app-owned writable
 directory under `fixture/temp`. This retains Framework code-generation setup
 without requiring access to the machine-wide Temporary ASP.NET Files directory.

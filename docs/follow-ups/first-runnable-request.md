@@ -1,6 +1,7 @@
 # First runnable request
 
-Status: open. Priority: highest. Canonical scope:
+Status: both gate columns pass on macOS `arm64`; Windows `x64` not yet run for
+the adapter column. Canonical scope:
 [managed runtime port plan, slice 1](../core-runtime-port-plan.md#vertical-slices).
 
 ## Goal
@@ -49,3 +50,9 @@ Every scenario in
 [the first-slice parity gate](../adr/0031-require-the-first-slice-parity-gate.md)
 passes, the fixture handler resolves without a host reference, and the
 supported path reaches no native IIS/Windows operation.
+
+All three hold on macOS `arm64`, across both the
+[differential](../../prototypes/portable-parity/README.md) and
+[adapter](../../prototypes/adapter-parity/README.md) columns. Windows `x64` has
+run the differential column only; the adapter column is outstanding, and until
+it passes the slice is not finished.

@@ -88,10 +88,9 @@ preload. `DefaultAuthentication` appears after the cleared collection because
 
 This covers all eight scenarios in
 [the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md)
-on the differential side.
-
-The gate also requires adapter probes. No ASP.NET Core host exists yet, so the
-adapter side of every scenario is still open and the gate remains unmet.
+on the differential side. The adapter side is covered by
+[the adapter parity diagnostic](../adapter-parity/README.md), which replays the
+same sessions over Kestrel against the same golden.
 
 `PortableParityGateTests` in the main solution runs `verify` as a child process,
 because running a session permanently mutates process-global state and cannot
