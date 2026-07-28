@@ -24,8 +24,12 @@
       Link="metadata/normalization.json"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../../framework-oracle/artifacts/golden/cold-sync.json"
-      Link="oracle/cold-sync.json"
+      Include="../../../core-parity/sessions.json"
+      Link="metadata/sessions.json"
+      CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="../../../framework-oracle/artifacts/golden/sessions.json"
+      Link="oracle/sessions.json"
       CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

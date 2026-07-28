@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -12,7 +13,7 @@ namespace PortableParity.Host;
 
 internal static class Program
 {
-    private const string ApplicationId = "portable-parity:cold-sync";
+    private const int SchemaVersion = 2;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = false
@@ -26,28 +27,46 @@ internal static class Program
         {
             var command = CommandLine.Parse(args);
             var basePath = AppContext.BaseDirectory;
-            var applicationPath = command.ApplicationPath
-                ?? Path.Combine(basePath, "fixture", "app");
+            var manifestPath = command.ManifestPath
+                ?? Path.Combine(basePath, "metadata", "sessions.json");
+            var fixtureRoot = command.FixtureRoot ?? Path.Combine(basePath, "fixture");
+            var manifest = InPhase("manifest", () => LoadManifest(manifestPath));
 
-            InPhase("fixture-validation", () => ValidateFixture(applicationPath));
-            InPhase(
-                "host-registration",
-                () => WebFormsApplication.Initialize(new WebFormsApplicationOptions
+            if (command.Operation == Operation.RunSession)
+            {
+                var session = manifest.Sessions.FirstOrDefault(
+                        candidate => string.Equals(
+                            candidate.Name,
+                            command.SessionName,
+                            StringComparison.Ordinal))
+                    ?? throw new InvalidOperationException(
+                        "Manifest declares no session named '" + command.SessionName + "'.");
+
+                Console.Out.WriteLine(
+                    JsonSerializer.Serialize(RunSession(session, fixtureRoot), JsonOptions));
+                return 0;
+            }
+
+            var trace = new PipelineTrace
+            {
+                SchemaVersion = SchemaVersion,
+                Provenance = new TraceProvenance
                 {
-                    ApplicationId = ApplicationId,
-                    PhysicalRootPath = applicationPath,
-                    VirtualRootPath = "/",
-                    MachineConfigurationFilePath = Path.Combine(
-                        basePath,
-                        "configs",
-                        "rehost-webforms.machine.config"),
-                    RootWebConfigurationFilePath = Path.Combine(
-                        basePath,
-                        "configs",
-                        "rehost-webforms.web.config")
-                }));
-
-            var trace = RunColdSynchronous(applicationPath);
+                    Oracle = "Rehost WebForms portable runtime",
+                    TargetFramework = "net10.0",
+                    RuntimeRequirement = ".NET 10",
+                    ManagedEntryPoint =
+                        "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
+                    ActivationEntryPoint =
+                        "WebFormsApplication.Initialize + ApplicationManager.CreateObject",
+                    Fixture = "bodyless-precompiled-handler-v1"
+                },
+                Sessions = manifest.Sessions
+                    .Select(session => InPhase(
+                        "session:" + session.Name,
+                        () => RunSessionProcess(session, manifestPath, fixtureRoot)))
+                    .ToList()
+            };
 
             if (command.Operation == Operation.Verify)
             {
@@ -55,7 +74,7 @@ internal static class Program
                     "verification",
                     () => Verify(
                         command.ExpectedPath
-                            ?? Path.Combine(basePath, "oracle", "cold-sync.json"),
+                            ?? Path.Combine(basePath, "oracle", "sessions.json"),
                         command.NormalizationPath
                             ?? Path.Combine(basePath, "metadata", "normalization.json"),
                         trace));
@@ -79,8 +98,118 @@ internal static class Program
         }
     }
 
-    private static PipelineTrace RunColdSynchronous(string applicationPath)
+    private static SessionManifest LoadManifest(string path)
     {
+        path = Path.GetFullPath(path);
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Session manifest is absent.", path);
+        }
+
+        var manifest = JsonSerializer.Deserialize<SessionManifest>(
+            File.ReadAllText(path),
+            JsonOptions)
+            ?? throw new InvalidDataException("Session manifest deserialized to null.");
+
+        if (manifest.SchemaVersion != 1)
+        {
+            throw new InvalidDataException("Unsupported session manifest schema.");
+        }
+
+        if (manifest.Sessions.Count == 0)
+        {
+            throw new InvalidDataException("Session manifest declares no sessions.");
+        }
+
+        return manifest;
+    }
+
+    // Each session observes a cold runtime, so it needs a process whose HttpRuntime singleton,
+    // AssemblyLoadContext resolver, and activated application have never been touched.
+    private static SessionObservation RunSessionProcess(
+        SessionSpecification session,
+        string manifestPath,
+        string fixtureRoot)
+    {
+        var executablePath = Environment.ProcessPath
+            ?? throw new InvalidOperationException("The host process path is unavailable.");
+        var startInfo = new ProcessStartInfo(executablePath)
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+
+        var entryAssembly = typeof(Program).Assembly.Location;
+        if (!string.Equals(
+                Path.GetFileNameWithoutExtension(executablePath),
+                Path.GetFileNameWithoutExtension(entryAssembly),
+                StringComparison.OrdinalIgnoreCase))
+        {
+            startInfo.ArgumentList.Add(entryAssembly);
+        }
+
+        startInfo.ArgumentList.Add("run-session");
+        startInfo.ArgumentList.Add("--session");
+        startInfo.ArgumentList.Add(session.Name);
+        startInfo.ArgumentList.Add("--manifest");
+        startInfo.ArgumentList.Add(manifestPath);
+        startInfo.ArgumentList.Add("--fixtures");
+        startInfo.ArgumentList.Add(fixtureRoot);
+
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("The session process failed to start.");
+        var standardOutput = process.StandardOutput.ReadToEnd();
+        var standardError = process.StandardError.ReadToEnd();
+        process.WaitForExit();
+
+        if (standardError.Length > 0)
+        {
+            Console.Error.Write(standardError);
+        }
+
+        if (process.ExitCode != 0)
+        {
+            throw new InvalidOperationException(
+                "Session '"
+                + session.Name
+                + "' exited with code "
+                + process.ExitCode
+                + ".");
+        }
+
+        return JsonSerializer.Deserialize<SessionObservation>(standardOutput, JsonOptions)
+            ?? throw new InvalidDataException(
+                "Session '" + session.Name + "' produced no observation.");
+    }
+
+    private static SessionObservation RunSession(
+        SessionSpecification session,
+        string fixtureRoot)
+    {
+        var basePath = AppContext.BaseDirectory;
+        var applicationPath = Path.GetFullPath(
+            Path.Combine(fixtureRoot, session.Fixture));
+        var applicationId = "portable-parity:" + session.Name;
+
+        InPhase("fixture-validation", () => ValidateFixture(applicationPath));
+        InPhase(
+            "host-registration",
+            () => WebFormsApplication.Initialize(new WebFormsApplicationOptions
+            {
+                ApplicationId = applicationId,
+                PhysicalRootPath = applicationPath,
+                VirtualRootPath = "/",
+                MachineConfigurationFilePath = Path.Combine(
+                    basePath,
+                    "configs",
+                    "rehost-webforms.machine.config"),
+                RootWebConfigurationFilePath = Path.Combine(
+                    basePath,
+                    "configs",
+                    "rehost-webforms.web.config")
+            }));
+
         var manager = InPhase(
             "application-activation",
             ApplicationManager.GetApplicationManager);
@@ -92,10 +221,10 @@ internal static class Program
             var registered = InPhase(
                 "application-activation",
                 () => manager.CreateObject(
-                    ApplicationId,
+                    applicationId,
                     typeof(PortableRunner),
                     "/",
-                    EnsureTrailingDirectorySeparator(Path.GetFullPath(applicationPath)),
+                    EnsureTrailingDirectorySeparator(applicationPath),
                     true,
                     true));
             applicationActivated = true;
@@ -106,28 +235,39 @@ internal static class Program
                     "ApplicationManager did not return an IClassicPipelineRunner.");
             }
 
-            var request = RequestSpecification.ColdSynchronous();
-            var observation = InPhase(
-                "request-processing",
-                () => runner.Run(request));
-
-            return new PipelineTrace
+            var observation = new SessionObservation
             {
-                SchemaVersion = 1,
-                Provenance = new TraceProvenance
-                {
-                    Oracle = "Rehost WebForms portable runtime",
-                    TargetFramework = "net10.0",
-                    RuntimeRequirement = ".NET 10",
-                    ManagedEntryPoint =
-                        "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
-                    ActivationEntryPoint =
-                        "WebFormsApplication.Initialize + ApplicationManager.CreateObject",
-                    Fixture = "bodyless-precompiled-handler-v1"
-                },
-                Scenario = request.Scenario,
-                Observation = observation
+                Name = session.Name,
+                Requests = session.Requests
+                    .Select(request => new RequestObservation
+                    {
+                        Name = request.Name,
+                        Observation = InPhase(
+                            "request:" + request.Name,
+                            () => runner.Run(request))
+                    })
+                    .ToList()
             };
+
+            // StopObject runs the registered object's shutdown notification while the
+            // application is still callable; ShutdownApplication is what tears it down.
+            InPhase(
+                "application-cleanup",
+                () => manager.StopObject(applicationId, typeof(PortableRunner)));
+            observation.TrailingEvents = InPhase(
+                "application-cleanup",
+                runner.DrainEvents);
+            applicationActivated = false;
+
+            InPhase(
+                "application-cleanup",
+                () =>
+                {
+                    manager.ShutdownApplication(applicationId);
+                    manager.Close();
+                });
+
+            return observation;
         }
         finally
         {
@@ -137,8 +277,8 @@ internal static class Program
                     "application-cleanup",
                     () =>
                     {
-                        manager.StopObject(ApplicationId, typeof(PortableRunner));
-                        manager.ShutdownApplication(ApplicationId);
+                        manager.StopObject(applicationId, typeof(PortableRunner));
+                        manager.ShutdownApplication(applicationId);
                         manager.Close();
                     });
             }
@@ -225,14 +365,11 @@ internal static class Program
                 actual.SchemaVersion);
         }
 
-        if (!string.Equals(expected.Scenario, actual.Scenario, StringComparison.Ordinal))
-        {
-            throw Mismatch("$.Scenario", expected.Scenario, actual.Scenario);
-        }
-
-        ObservationComparer.Verify(expected.Observation, actual.Observation);
+        ObservationComparer.VerifySessions(expected.Sessions, actual.Sessions);
         Console.Error.WriteLine(
-            "Portable observation strictly matches the Framework cold-sync golden.");
+            "Portable observation strictly matches the Framework golden trace across "
+            + actual.Sessions.Count
+            + " session(s).");
     }
 
     private static void ValidateEmptyNormalizationManifest(string path)
@@ -257,7 +394,7 @@ internal static class Program
         if (rules.ValueKind != JsonValueKind.Array || rules.GetArrayLength() != 0)
         {
             throw new InvalidDataException(
-                "The cold-sync normalization manifest must remain empty.");
+                "The parity normalization manifest must remain empty.");
         }
     }
 
@@ -282,6 +419,10 @@ internal static class Program
         {
             action();
         }
+        catch (PhaseException)
+        {
+            throw;
+        }
         catch (Exception exception)
         {
             throw new PhaseException(phase, exception);
@@ -293,6 +434,10 @@ internal static class Program
         try
         {
             return action();
+        }
+        catch (PhaseException)
+        {
+            throw;
         }
         catch (Exception exception)
         {
@@ -369,59 +514,94 @@ internal static class Program
 
     private static class ObservationComparer
     {
-        internal static void Verify(
+        internal static void VerifySessions(
+            IReadOnlyList<SessionObservation> expected,
+            IReadOnlyList<SessionObservation> actual)
+        {
+            VerifyValue("$.Sessions.Count", expected.Count, actual.Count);
+
+            for (var index = 0; index < expected.Count; index++)
+            {
+                var path = "$.Sessions[" + expected[index].Name + "]";
+                VerifyValue(path + ".Name", expected[index].Name, actual[index].Name);
+                VerifyRequests(path, expected[index].Requests, actual[index].Requests);
+                VerifyList(
+                    path + ".TrailingEvents",
+                    expected[index].TrailingEvents,
+                    actual[index].TrailingEvents,
+                    VerifyValue);
+            }
+        }
+
+        private static void VerifyRequests(
+            string sessionPath,
+            IReadOnlyList<RequestObservation> expected,
+            IReadOnlyList<RequestObservation> actual)
+        {
+            VerifyValue(sessionPath + ".Requests.Count", expected.Count, actual.Count);
+
+            for (var index = 0; index < expected.Count; index++)
+            {
+                var path = sessionPath + ".Requests[" + expected[index].Name + "]";
+                VerifyValue(path + ".Name", expected[index].Name, actual[index].Name);
+                Verify(path, expected[index].Observation, actual[index].Observation);
+            }
+        }
+
+        private static void Verify(
+            string path,
             PipelineObservation expected,
             PipelineObservation actual)
         {
             VerifyList(
-                "$.Observation.Events",
+                path + ".Events",
                 expected.Events,
                 actual.Events,
-                (path, left, right) => VerifyValue(path, left, right));
+                VerifyValue);
             VerifyValue(
-                "$.Observation.Response.StatusCode",
+                path + ".Response.StatusCode",
                 expected.Response.StatusCode,
                 actual.Response.StatusCode);
             VerifyValue(
-                "$.Observation.Response.StatusDescription",
+                path + ".Response.StatusDescription",
                 expected.Response.StatusDescription,
                 actual.Response.StatusDescription);
             VerifyList(
-                "$.Observation.Response.Headers",
+                path + ".Response.Headers",
                 expected.Response.Headers,
                 actual.Response.Headers,
-                (path, left, right) =>
+                (headerPath, left, right) =>
                 {
-                    VerifyValue(path + ".Name", left.Name, right.Name);
-                    VerifyValue(path + ".Value", left.Value, right.Value);
+                    VerifyValue(headerPath + ".Name", left.Name, right.Name);
+                    VerifyValue(headerPath + ".Value", left.Value, right.Value);
                 });
             VerifyValue(
-                "$.Observation.Response.BodyBase64",
+                path + ".Response.BodyBase64",
                 expected.Response.BodyBase64,
                 actual.Response.BodyBase64);
             VerifyList(
-                "$.Observation.Response.Flushes",
+                path + ".Response.Flushes",
                 expected.Response.Flushes,
                 actual.Response.Flushes,
-                (path, left, right) => VerifyValue(path, left, right));
+                VerifyValue);
             VerifyException(
-                "$.Observation.EscapedException",
+                path + ".EscapedException",
                 expected.EscapedException,
                 actual.EscapedException);
             VerifyValue(
-                "$.Observation.EndOfRequestCount",
+                path + ".EndOfRequestCount",
                 expected.EndOfRequestCount,
                 actual.EndOfRequestCount);
             VerifyValue(
-                "$.Observation.CompletionCount",
+                path + ".CompletionCount",
                 expected.CompletionCount,
                 actual.CompletionCount);
         }
 
         private static void VerifyList<T>(
             string path,
-            System.Collections.Generic.IReadOnlyList<T> expected,
-            System.Collections.Generic.IReadOnlyList<T> actual,
+            IReadOnlyList<T> expected,
+            IReadOnlyList<T> actual,
             Action<string, T, T> verifyItem)
         {
             VerifyValue(path + ".Count", expected.Count, actual.Count);
@@ -455,9 +635,7 @@ internal static class Program
 
         private static void VerifyValue<T>(string path, T expected, T actual)
         {
-            if (!System.Collections.Generic.EqualityComparer<T>.Default.Equals(
-                    expected,
-                    actual))
+            if (!EqualityComparer<T>.Default.Equals(expected, actual))
             {
                 throw Mismatch(path, expected, actual);
             }
@@ -468,7 +646,8 @@ internal static class Program
 internal enum Operation
 {
     Run,
-    Verify
+    Verify,
+    RunSession
 }
 
 internal sealed class CommandLine
@@ -479,7 +658,11 @@ internal sealed class CommandLine
 
     internal string? NormalizationPath { get; private set; }
 
-    internal string? ApplicationPath { get; private set; }
+    internal string? ManifestPath { get; private set; }
+
+    internal string? FixtureRoot { get; private set; }
+
+    internal string? SessionName { get; private set; }
 
     internal static CommandLine Parse(string[] args)
     {
@@ -492,6 +675,7 @@ internal sealed class CommandLine
             {
                 "run" => Operation.Run,
                 "verify" => Operation.Verify,
+                "run-session" => Operation.RunSession,
                 _ => throw Usage("Unknown command '" + args[index] + "'.")
             };
             index++;
@@ -517,12 +701,29 @@ internal sealed class CommandLine
                     RequireVerify(result.Operation, option);
                     result.NormalizationPath = value;
                     break;
-                case "--app":
-                    result.ApplicationPath = value;
+                case "--manifest":
+                    result.ManifestPath = value;
+                    break;
+                case "--fixtures":
+                    result.FixtureRoot = value;
+                    break;
+                case "--session":
+                    if (result.Operation != Operation.RunSession)
+                    {
+                        throw Usage("'--session' is valid only for run-session.");
+                    }
+
+                    result.SessionName = value;
                     break;
                 default:
                     throw Usage("Unknown option '" + option + "'.");
             }
+        }
+
+        if (result.Operation == Operation.RunSession
+            && string.IsNullOrWhiteSpace(result.SessionName))
+        {
+            throw Usage("run-session requires --session <name>.");
         }
 
         return result;
@@ -543,9 +744,12 @@ internal sealed class CommandLine
             + Environment.NewLine
             + "Usage:"
             + Environment.NewLine
-            + "  dotnet PortableParity.Host.dll run [--app <path>]"
+            + "  dotnet PortableParity.Host.dll run [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
             + "  dotnet PortableParity.Host.dll verify [--expected <path>]"
-            + " [--normalization <path>] [--app <path>]");
+            + " [--normalization <path>] [--manifest <path>] [--fixtures <path>]"
+            + Environment.NewLine
+            + "  dotnet PortableParity.Host.dll run-session --session <name>"
+            + " [--manifest <path>] [--fixtures <path>]");
     }
 }

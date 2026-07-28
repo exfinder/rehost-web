@@ -17,7 +17,6 @@ internal sealed class RecordingRequestRunner
             throw new ArgumentNullException(nameof(request));
         }
 
-        PipelineEventJournal.Reset();
         var workerRequest = new RecordingWorkerRequest(request);
         ExceptionObservation? escapedException = null;
 
@@ -42,7 +41,7 @@ internal sealed class RecordingRequestRunner
         }
 
         return workerRequest.CreateObservation(
-            PipelineEventJournal.Snapshot(),
+            PipelineEventJournal.Drain(),
             escapedException);
     }
 }
@@ -240,7 +239,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     public override void SendResponseFromFile(IntPtr handle, long offset, long length)
     {
         throw new NotSupportedException(
-            "The cold synchronous oracle does not support native file handles.");
+            "The parity harness does not support native file handles.");
     }
 
     public override void FlushResponse(bool finalFlush)

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
@@ -13,7 +15,7 @@ namespace FrameworkOracle.Host;
 internal static class Program
 {
     private const int MinimumNet481Release = 533320;
-    private const string ApplicationId = "framework-oracle:cold-sync";
+    private const int SchemaVersion = 2;
 
     public static int Main(string[] args)
     {
@@ -24,12 +26,52 @@ internal static class Program
             Console.Error.WriteLine(
                 "Validated .NET Framework 4.8.1 release key " + release + ".");
 
-            var applicationPath = command.ApplicationPath
-                ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "fixture", "app");
+            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+            var manifestPath = command.ManifestPath
+                ?? Path.Combine(basePath, "metadata", "sessions.json");
+            var fixtureRoot = command.FixtureRoot ?? Path.Combine(basePath, "fixture");
+            var manifest = LoadManifest(manifestPath);
 
-            ValidateFixture(applicationPath);
-            var trace = RunColdSynchronous(applicationPath);
-            var bytes = Serialize(trace);
+            if (command.Operation == Operation.RunSession)
+            {
+                var session = manifest.Sessions.FirstOrDefault(
+                    candidate => string.Equals(
+                        candidate.Name,
+                        command.SessionName,
+                        StringComparison.Ordinal));
+
+                if (session == null)
+                {
+                    throw new InvalidOperationException(
+                        "Manifest declares no session named '" + command.SessionName + "'.");
+                }
+
+                Console.Out.Write(
+                    Encoding.UTF8.GetString(
+                        Serialize<SessionObservation>(RunSession(session, fixtureRoot))));
+                return 0;
+            }
+
+            var trace = new PipelineTrace
+            {
+                SchemaVersion = SchemaVersion,
+                Provenance = new TraceProvenance
+                {
+                    Oracle = "Microsoft .NET Framework",
+                    TargetFramework = "net481",
+                    RuntimeRequirement = "4.8.1",
+                    ManagedEntryPoint =
+                        "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
+                    ActivationEntryPoint =
+                        "System.Web.Hosting.ApplicationManager.CreateObject",
+                    Fixture = "bodyless-precompiled-handler-v1"
+                },
+                Sessions = manifest.Sessions
+                    .Select(session => RunSessionProcess(session, manifestPath, fixtureRoot))
+                    .ToList()
+            };
+
+            var bytes = Serialize<PipelineTrace>(trace);
 
             switch (command.Operation)
             {
@@ -80,6 +122,193 @@ internal static class Program
         return release;
     }
 
+    private static SessionManifest LoadManifest(string path)
+    {
+        path = Path.GetFullPath(path);
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("Session manifest is absent.", path);
+        }
+
+        SessionManifest manifest;
+        var serializer = new DataContractJsonSerializer(typeof(SessionManifest));
+
+        using (var stream = File.OpenRead(path))
+        {
+            manifest = (SessionManifest)serializer.ReadObject(stream);
+        }
+
+        if (manifest == null)
+        {
+            throw new InvalidDataException("Session manifest deserialized to null.");
+        }
+
+        if (manifest.SchemaVersion != 1)
+        {
+            throw new InvalidDataException("Unsupported session manifest schema.");
+        }
+
+        if (manifest.Sessions.Count == 0)
+        {
+            throw new InvalidDataException("Session manifest declares no sessions.");
+        }
+
+        return manifest;
+    }
+
+    // Each session observes a cold runtime, so it needs a process whose HttpRuntime singleton
+    // and activated application have never been touched.
+    private static SessionObservation RunSessionProcess(
+        SessionSpecification session,
+        string manifestPath,
+        string fixtureRoot)
+    {
+        var executablePath = new Uri(
+            typeof(Program).Assembly.GetName().CodeBase).LocalPath;
+        var startInfo = new ProcessStartInfo(executablePath)
+        {
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = new UTF8Encoding(false),
+            Arguments = string.Join(
+                " ",
+                "run-session",
+                "--session",
+                Quote(session.Name),
+                "--manifest",
+                Quote(manifestPath),
+                "--fixtures",
+                Quote(fixtureRoot))
+        };
+
+        Console.Error.WriteLine("Starting oracle session '" + session.Name + "'.");
+
+        using (var process = Process.Start(startInfo))
+        {
+            var standardOutput = process.StandardOutput.ReadToEnd();
+            var standardError = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (standardError.Length > 0)
+            {
+                Console.Error.Write(standardError);
+            }
+
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException(
+                    "Session '"
+                    + session.Name
+                    + "' exited with code "
+                    + process.ExitCode
+                    + ".");
+            }
+
+            var serializer = new DataContractJsonSerializer(typeof(SessionObservation));
+
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(standardOutput)))
+            {
+                var observation = (SessionObservation)serializer.ReadObject(stream);
+
+                if (observation == null)
+                {
+                    throw new InvalidDataException(
+                        "Session '" + session.Name + "' produced no observation.");
+                }
+
+                return observation;
+            }
+        }
+    }
+
+    private static SessionObservation RunSession(
+        SessionSpecification session,
+        string fixtureRoot)
+    {
+        var applicationPath = Path.GetFullPath(
+            Path.Combine(fixtureRoot, session.Fixture));
+        var applicationId = "framework-oracle:" + session.Name;
+
+        ValidateFixture(applicationPath);
+
+        var manager = ApplicationManager.GetApplicationManager();
+        var applicationActivated = false;
+        manager.Open();
+
+        try
+        {
+            Console.Error.WriteLine("Activating ASP.NET application AppDomain.");
+            var registered = manager.CreateObject(
+                applicationId,
+                typeof(OracleRunner),
+                "/",
+                EnsureTrailingDirectorySeparator(applicationPath),
+                true,
+                true);
+            applicationActivated = true;
+            Console.Error.WriteLine("Activated ASP.NET application AppDomain.");
+
+            var runner = registered as IClassicPipelineRunner;
+
+            if (runner == null)
+            {
+                throw new InvalidOperationException(
+                    "ApplicationManager did not return an IClassicPipelineRunner proxy.");
+            }
+
+            var observation = new SessionObservation { Name = session.Name };
+
+            foreach (var request in session.Requests)
+            {
+                Console.Error.WriteLine(
+                    "Entering HttpRuntime.ProcessRequest for '" + request.Name + "'.");
+                observation.Requests.Add(new RequestObservation
+                {
+                    Name = request.Name,
+                    Observation = runner.Run(request)
+                });
+                Console.Error.WriteLine(
+                    "Completed HttpRuntime.ProcessRequest for '" + request.Name + "'.");
+            }
+
+            // StopObject runs the registered object's shutdown notification while the
+            // application AppDomain is still callable; ShutdownApplication unloads it.
+            Console.Error.WriteLine("Stopping registered oracle runner.");
+            manager.StopObject(applicationId, typeof(OracleRunner));
+            observation.TrailingEvents = runner.DrainEvents();
+            applicationActivated = false;
+
+            Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
+            manager.ShutdownApplication(applicationId);
+            Console.Error.WriteLine("Closing ApplicationManager.");
+            manager.Close();
+            Console.Error.WriteLine("Closed ApplicationManager.");
+
+            return observation;
+        }
+        finally
+        {
+            if (applicationActivated)
+            {
+                try
+                {
+                    Console.Error.WriteLine("Stopping registered oracle runner.");
+                    manager.StopObject(applicationId, typeof(OracleRunner));
+                    Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
+                    manager.ShutdownApplication(applicationId);
+                }
+                finally
+                {
+                    Console.Error.WriteLine("Closing ApplicationManager.");
+                    manager.Close();
+                    Console.Error.WriteLine("Closed ApplicationManager.");
+                }
+            }
+        }
+    }
+
     private static void ValidateFixture(string applicationPath)
     {
         applicationPath = Path.GetFullPath(applicationPath);
@@ -120,87 +349,13 @@ internal static class Program
         }
     }
 
-    private static PipelineTrace RunColdSynchronous(string applicationPath)
+    private static byte[] Serialize<T>(T value)
     {
-        var manager = ApplicationManager.GetApplicationManager();
-        var applicationActivated = false;
-        manager.Open();
-
-        try
-        {
-            Console.Error.WriteLine("Activating ASP.NET application AppDomain.");
-            var registered = manager.CreateObject(
-                ApplicationId,
-                typeof(OracleRunner),
-                "/",
-                EnsureTrailingDirectorySeparator(Path.GetFullPath(applicationPath)),
-                true,
-                true);
-            applicationActivated = true;
-            Console.Error.WriteLine("Activated ASP.NET application AppDomain.");
-
-            if (!(registered is IClassicPipelineRunner runner))
-            {
-                throw new InvalidOperationException(
-                    "ApplicationManager did not return an IClassicPipelineRunner proxy.");
-            }
-
-            var request = RequestSpecification.ColdSynchronous();
-            Console.Error.WriteLine("Entering HttpRuntime.ProcessRequest.");
-            var observation = runner.Run(request);
-            Console.Error.WriteLine("Completed HttpRuntime.ProcessRequest.");
-
-            return new PipelineTrace
-            {
-                SchemaVersion = 1,
-                Provenance = new TraceProvenance
-                {
-                    Oracle = "Microsoft .NET Framework",
-                    TargetFramework = "net481",
-                    RuntimeRequirement = "4.8.1",
-                    ManagedEntryPoint =
-                        "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
-                    ActivationEntryPoint =
-                        "System.Web.Hosting.ApplicationManager.CreateObject",
-                    Fixture = "bodyless-precompiled-handler-v1"
-                },
-                Scenario = request.Scenario,
-                Observation = observation
-            };
-        }
-        finally
-        {
-            if (applicationActivated)
-            {
-                try
-                {
-                    Console.Error.WriteLine("Stopping registered oracle runner.");
-                    manager.StopObject(ApplicationId, typeof(OracleRunner));
-                    Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
-                    manager.ShutdownApplication(ApplicationId);
-                }
-                finally
-                {
-                    Console.Error.WriteLine("Closing ApplicationManager.");
-                    manager.Close();
-                    Console.Error.WriteLine("Closed ApplicationManager.");
-                }
-            }
-            else
-            {
-                Console.Error.WriteLine(
-                    "Skipping ApplicationManager cleanup after failed activation.");
-            }
-        }
-    }
-
-    private static byte[] Serialize(PipelineTrace trace)
-    {
-        var serializer = new DataContractJsonSerializer(typeof(PipelineTrace));
+        var serializer = new DataContractJsonSerializer(typeof(T));
 
         using (var stream = new MemoryStream())
         {
-            serializer.WriteObject(stream, trace);
+            serializer.WriteObject(stream, value);
             stream.WriteByte((byte)'\n');
             return stream.ToArray();
         }
@@ -242,6 +397,11 @@ internal static class Program
         Console.Error.WriteLine("Verified " + path);
     }
 
+    private static string Quote(string value)
+    {
+        return "\"" + value + "\"";
+    }
+
     private static string EnsureTrailingDirectorySeparator(string path)
     {
         if (path.EndsWith(
@@ -259,7 +419,8 @@ internal enum Operation
 {
     Run,
     Generate,
-    Verify
+    Verify,
+    RunSession
 }
 
 internal sealed class CommandLine
@@ -268,7 +429,11 @@ internal sealed class CommandLine
 
     internal string? ArtifactPath { get; private set; }
 
-    internal string? ApplicationPath { get; private set; }
+    internal string? ManifestPath { get; private set; }
+
+    internal string? FixtureRoot { get; private set; }
+
+    internal string? SessionName { get; private set; }
 
     internal static CommandLine Parse(string[] args)
     {
@@ -287,6 +452,9 @@ internal sealed class CommandLine
                     break;
                 case "verify":
                     result.Operation = Operation.Verify;
+                    break;
+                case "run-session":
+                    result.Operation = Operation.RunSession;
                     break;
                 default:
                     throw Usage("Unknown command '" + args[index] + "'.");
@@ -316,21 +484,34 @@ internal sealed class CommandLine
                     RequireOperation(result.Operation, Operation.Verify, option);
                     result.ArtifactPath = value;
                     break;
-                case "--app":
-                    result.ApplicationPath = value;
+                case "--manifest":
+                    result.ManifestPath = value;
+                    break;
+                case "--fixtures":
+                    result.FixtureRoot = value;
+                    break;
+                case "--session":
+                    RequireOperation(result.Operation, Operation.RunSession, option);
+                    result.SessionName = value;
                     break;
                 default:
                     throw Usage("Unknown option '" + option + "'.");
             }
         }
 
-        if (result.Operation != Operation.Run
+        if ((result.Operation == Operation.Generate || result.Operation == Operation.Verify)
             && string.IsNullOrWhiteSpace(result.ArtifactPath))
         {
             throw Usage(
                 result.Operation == Operation.Generate
                     ? "generate requires --output <path>."
                     : "verify requires --expected <path>.");
+        }
+
+        if (result.Operation == Operation.RunSession
+            && string.IsNullOrWhiteSpace(result.SessionName))
+        {
+            throw Usage("run-session requires --session <name>.");
         }
 
         return result;
@@ -354,10 +535,15 @@ internal sealed class CommandLine
             + Environment.NewLine
             + "Usage:"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe run [--app <path>]"
+            + "  FrameworkOracle.Host.exe run [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe generate --output <path> [--app <path>]"
+            + "  FrameworkOracle.Host.exe generate --output <path>"
+            + " [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe verify --expected <path> [--app <path>]");
+            + "  FrameworkOracle.Host.exe verify --expected <path>"
+            + " [--manifest <path>] [--fixtures <path>]"
+            + Environment.NewLine
+            + "  FrameworkOracle.Host.exe run-session --session <name>"
+            + " [--manifest <path>] [--fixtures <path>]");
     }
 }

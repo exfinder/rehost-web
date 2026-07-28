@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Web.Hosting;
 using CoreParity.Contracts;
 using CoreParity.Recording;
@@ -15,6 +16,11 @@ public sealed class OracleRunner : MarshalByRefObject, IRegisteredObject, IClass
     public PipelineObservation Run(RequestSpecification request)
     {
         return new RecordingRequestRunner().Run(request);
+    }
+
+    public List<string> DrainEvents()
+    {
+        return PipelineEventJournal.Drain();
     }
 
     public void Stop(bool immediate)

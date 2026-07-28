@@ -24,6 +24,10 @@
       Include="../../metadata/*.json"
       Link="metadata/%(Filename)%(Extension)"
       CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="../../../core-parity/sessions.json"
+      Link="metadata/sessions.json"
+      CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="StageOracleApplicationBin" AfterTargets="Build">

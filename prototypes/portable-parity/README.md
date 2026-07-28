@@ -5,19 +5,29 @@ the production solution and does not change runtime behavior.
 
 The portable and .NET Framework adapters share:
 
-- one `netstandard2.0` request/observation contract;
+- one `netstandard2.0` session/observation contract;
+- [`core-parity/sessions.json`](../core-parity/sessions.json), which declares
+  every session both adapters run;
 - the recording `HttpWorkerRequest` and request runner source;
 - module and precompiled-handler probe source;
 - the same application `web.config`;
 - the empty normalization manifest and generated Framework golden trace.
 
-The host calls the existing public sequence:
+A session is one process, one fixture, and an ordered list of named requests.
+The host spawns itself once per session and calls the existing public sequence
+in that child:
 
 ```text
 WebFormsApplication.Initialize
 → ApplicationManager.CreateObject
-→ HttpRuntime.ProcessRequest(HttpWorkerRequest)
+→ HttpRuntime.ProcessRequest(HttpWorkerRequest) per request
+→ StopObject, then drain the session's trailing events
 ```
+
+A fresh process per session is what makes "cold" mean cold: nothing has touched
+the `HttpRuntime` singleton, the default `AssemblyLoadContext` resolver, or the
+activated application. Requests after the first in a session are warm by
+construction.
 
 `CoreParity.Probes.dll` is staged only in `fixture/app/bin`. The host neither
 references nor preloads it.
@@ -43,9 +53,10 @@ the original exception chain.
 ## Current reachable state
 
 The full classic pipeline runs. `verify` exits zero: the portable trace matches
-the Framework `cold-sync` golden exactly — nineteen ordered events, `201 Oracle
-Created`, five headers in order, `oracle-ok`, one final flush — against an empty
-normalization manifest.
+the Framework golden exactly for the one declared session, `cold-sync` —
+nineteen ordered events, `201 Oracle Created`, five headers in order,
+`oracle-ok`, one final flush, and `runner.stop` as the session's single trailing
+event — against an empty normalization manifest.
 
 The configured `ProbeModule` and `SyncProbeHandler` resolve from
 `fixture/app/bin` through classic configuration, with no host reference and no
@@ -55,12 +66,14 @@ preload. `DefaultAuthentication` appears after the cleared collection because
 This completes the first of the eight scenarios in
 [the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md).
 Concurrent cold, warm pooled, delayed asynchronous, `CompleteRequest`, module and
-handler exceptions, resolution failure, and terminal shutdown remain.
+handler exceptions, resolution failure, and terminal shutdown remain. Each is a
+manifest entry plus a regenerated golden; the ones that need their own starting
+conditions get their own session, the rest extend an existing session's request
+list.
 
 `PortableParityGateTests` in the main solution runs `verify` as a child process,
-because a parity run permanently mutates process-global state — the default
-`AssemblyLoadContext` resolver, the `HttpRuntime` singleton, and the activated
-application — and cannot share a process with other tests.
+because running a session permanently mutates process-global state and cannot
+share a process with other tests.
 
 Every platform dependency reached so far is classified as P01–P32 in the
 [portability ledger](../../docs/portability-ledger.md). Seven carry recorded
@@ -85,10 +98,10 @@ a listener or `dotnet-trace` to also observe `bin` assembly resolution.
 dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll verify
 ```
 
-Verification requires exact scenario, schema, ordered events, response,
-escaped-exception shape, and completion counts against the committed Framework
-`cold-sync.json`. Adapter-specific provenance is excluded. The checked-in
-normalization manifest must exist and remain empty.
+Verification requires exact schema, session and request names, ordered events,
+response, escaped-exception shape, completion counts, and trailing events
+against the committed Framework `sessions.json`. Adapter-specific provenance is
+excluded. The checked-in normalization manifest must exist and remain empty.
 
 This exits zero. It runs automatically as part of `dotnet test
 Rehost.WebForms.slnx`, which requires this prototype to have been built in
@@ -98,9 +111,15 @@ Optional explicit inputs:
 
 ```shell
 dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll verify \
-  --expected ../framework-oracle/artifacts/golden/cold-sync.json \
-  --normalization ../framework-oracle/metadata/normalization.json
+  --expected ../framework-oracle/artifacts/golden/sessions.json \
+  --normalization ../framework-oracle/metadata/normalization.json \
+  --manifest ../core-parity/sessions.json
 ```
 
-The command intentionally exits nonzero at the current blocker. Do not add it
-as an always-failing normal CI test until the reachable runtime slice advances.
+A single session can be run alone, which is also how the parent drives each
+child:
+
+```shell
+dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll \
+  run-session --session cold-sync
+```

@@ -4,13 +4,14 @@ using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests;
 
-// The parity host permanently mutates process-global state (the default AssemblyLoadContext
+// Running a session permanently mutates process-global state (the default AssemblyLoadContext
 // resolver, the HttpRuntime singleton, the activated application), so it can never share a
-// process with other tests. It is driven as a child process instead.
+// process with other tests. The host is driven as a child process, and itself spawns one
+// process per session.
 public sealed class PortableParityGateTests
 {
     [Fact]
-    public void Cold_synchronous_request_matches_the_framework_golden_trace()
+    public void Declared_sessions_match_the_framework_golden_trace()
     {
         var (exitCode, standardError) = RunHost("verify");
 

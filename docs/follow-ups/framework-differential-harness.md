@@ -13,5 +13,23 @@ Commit provenance-stamped generated traces. A Windows job regenerates and
 verifies them; portable jobs compare on every supported OS. Oracle refresh must
 be explicit, reproducible, and reviewable.
 
+## Session model
+
+`prototypes/core-parity/sessions.json` declares what both adapters run, so the
+gate's required scenarios are data rather than host code. A session is one
+process, one fixture, and an ordered list of named requests; each adapter spawns
+itself once per session and emits one trace covering all of them.
+
+Process-per-session is the contract, not an implementation detail. Cold
+activation, single-initialization, and terminal-shutdown claims are only
+observable in a process whose `HttpRuntime` singleton and activated application
+have never been touched, so a scenario asserting any of them needs its own
+session. Warm and pooled claims require the opposite: a later request in a
+session that already served a cold one. Scenarios needing different
+configuration need their own fixture, and therefore their own session.
+
+Requests are keyed by name in the trace so a divergence reports the request that
+diverged instead of shifting every later comparison.
+
 Done when first-slice fixtures prove capture, narrow normalization, replay,
 drift detection, and intentional-deviation documentation.

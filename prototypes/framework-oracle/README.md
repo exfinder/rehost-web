@@ -3,10 +3,16 @@
 Isolated Slice 0 prototype. It targets `net481`; it is not referenced by the
 production solution or runtime.
 
-The host activates a child ASP.NET application through
-`ApplicationManager.CreateObject`. A marshal-by-reference runner in that
-application calls public `HttpRuntime.ProcessRequest(HttpWorkerRequest)` for one
-bodyless cold synchronous request.
+[`core-parity/sessions.json`](../core-parity/sessions.json) declares the
+sessions both adapters run. A session is one process, one fixture, and an
+ordered list of requests: the host spawns itself once per session, activates a
+child ASP.NET application through `ApplicationManager.CreateObject`, and a
+marshal-by-reference runner in that application calls public
+`HttpRuntime.ProcessRequest(HttpWorkerRequest)` for each request in turn.
+
+A fresh process per session is what makes "cold" mean cold. Requests after the
+first in a session are warm by construction, and the shutdown notification
+raised by `StopObject` is captured as the session's trailing events.
 
 The fixture clears inherited configurable handlers/modules and registers one
 probe module and one precompiled handler. Framework's
@@ -17,8 +23,8 @@ probe module and one precompiled handler. Framework's
 the host executable. Build staging places it only in the runnable fixture's
 `app/bin`. Host startup asserts both properties.
 
-The `netstandard2.0` request/observation contract and the probe/recording
-sources are shared with the portable parity adapter. Each runtime still
+The `netstandard2.0` session/observation contract, the session manifest, and the
+probe/recording sources are shared with the portable parity adapter. Each runtime still
 compiles its own `System.Web`-bound runner and probe assemblies.
 
 Build staging also binds `compilation/tempDirectory` to an app-owned writable
@@ -62,11 +68,11 @@ JSON is written to standard output. Diagnostics go to standard error.
 
 ```powershell
 .\src\FrameworkOracle.Host\bin\Release\net481\FrameworkOracle.Host.exe generate `
-  --output .\artifacts\generated\cold-sync.json
+  --output .\artifacts\generated\sessions.json
 ```
 
 Review the generated trace and provenance. Promote it to
-`artifacts/golden/cold-sync.json` only from the pinned Windows oracle
+`artifacts/golden/sessions.json` only from the pinned Windows oracle
 environment. The committed golden trace was produced this way; never hand-edit
 its behavioral observation.
 
@@ -74,15 +80,19 @@ its behavioral observation.
 
 ```powershell
 .\src\FrameworkOracle.Host\bin\Release\net481\FrameworkOracle.Host.exe verify `
-  --expected .\artifacts\golden\cold-sync.json
+  --expected .\artifacts\golden\sessions.json
 ```
 
 Verification is byte-exact. The checked-in normalization manifest currently
-contains no rules because this scenario captures no inherently host-specific
-values. Add only narrow, justified field rules when a later scenario proves one
-necessary; the current executable does not implement normalization transforms.
+contains no rules because no declared session captures an inherently
+host-specific value. Add only narrow, justified field rules when a later session
+proves one necessary; the current executable does not implement normalization
+transforms.
 
 ## Captured observation
+
+Per session: the session name, one named observation per request, and the
+trailing events drained after the shutdown notification. Per request:
 
 - ordered module collection/initialization, handler, worker-response, and
   request-entry events;

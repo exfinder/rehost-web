@@ -1,0 +1,17 @@
+{
+  "SchemaVersion": 1,
+  "Sessions": [
+    {
+      "Name": "cold-sync",
+      "Fixture": "app",
+      "Requests": [
+        {
+          "Name": "cold-sync",
+          "Method": "GET",
+          "Path": "/oracle",
+          "QueryString": ""
+        }
+      ]
+    }
+  ]
+}

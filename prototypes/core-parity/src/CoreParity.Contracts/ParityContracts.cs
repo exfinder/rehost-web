@@ -7,6 +7,8 @@ namespace CoreParity.Contracts;
 public interface IClassicPipelineRunner
 {
     PipelineObservation Run(RequestSpecification request);
+
+    List<string> DrainEvents();
 }
 
 [Serializable]
@@ -14,7 +16,7 @@ public interface IClassicPipelineRunner
 public sealed class RequestSpecification
 {
     [DataMember(Order = 1)]
-    public string Scenario { get; set; } = "";
+    public string Name { get; set; } = "";
 
     [DataMember(Order = 2)]
     public string Method { get; set; } = "GET";
@@ -24,17 +26,30 @@ public sealed class RequestSpecification
 
     [DataMember(Order = 4)]
     public string QueryString { get; set; } = "";
+}
 
-    public static RequestSpecification ColdSynchronous()
-    {
-        return new RequestSpecification
-        {
-            Scenario = "cold-sync",
-            Method = "GET",
-            Path = "/oracle",
-            QueryString = ""
-        };
-    }
+[Serializable]
+[DataContract]
+public sealed class SessionSpecification
+{
+    [DataMember(Order = 1)]
+    public string Name { get; set; } = "";
+
+    [DataMember(Order = 2)]
+    public string Fixture { get; set; } = "";
+
+    [DataMember(Order = 3)]
+    public List<RequestSpecification> Requests { get; set; } = new List<RequestSpecification>();
+}
+
+[DataContract]
+public sealed class SessionManifest
+{
+    [DataMember(Order = 1)]
+    public int SchemaVersion { get; set; }
+
+    [DataMember(Order = 2)]
+    public List<SessionSpecification> Sessions { get; set; } = new List<SessionSpecification>();
 }
 
 [Serializable]
@@ -118,6 +133,30 @@ public sealed class ExceptionObservation
     }
 }
 
+[Serializable]
+[DataContract]
+public sealed class RequestObservation
+{
+    [DataMember(Order = 1)]
+    public string Name { get; set; } = "";
+
+    [DataMember(Order = 2)]
+    public PipelineObservation Observation { get; set; } = new PipelineObservation();
+}
+
+[DataContract]
+public sealed class SessionObservation
+{
+    [DataMember(Order = 1)]
+    public string Name { get; set; } = "";
+
+    [DataMember(Order = 2)]
+    public List<RequestObservation> Requests { get; set; } = new List<RequestObservation>();
+
+    [DataMember(Order = 3)]
+    public List<string> TrailingEvents { get; set; } = new List<string>();
+}
+
 [DataContract]
 public sealed class PipelineTrace
 {
@@ -128,10 +167,7 @@ public sealed class PipelineTrace
     public TraceProvenance Provenance { get; set; } = new TraceProvenance();
 
     [DataMember(Order = 3)]
-    public string Scenario { get; set; } = "";
-
-    [DataMember(Order = 4)]
-    public PipelineObservation Observation { get; set; } = new PipelineObservation();
+    public List<SessionObservation> Sessions { get; set; } = new List<SessionObservation>();
 }
 
 [DataContract]
@@ -177,11 +213,13 @@ public static class PipelineEventJournal
         }
     }
 
-    public static List<string> Snapshot()
+    public static List<string> Drain()
     {
         lock (Sync)
         {
-            return new List<string>(Events);
+            var drained = new List<string>(Events);
+            Events.Clear();
+            return drained;
         }
     }
 }
