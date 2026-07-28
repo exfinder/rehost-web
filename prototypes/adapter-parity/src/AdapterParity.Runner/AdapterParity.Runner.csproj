@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AdapterParity.Runner</AssemblyName>
+    <RootNamespace>AdapterParity.Runner</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+  </ItemGroup>
+</Project>

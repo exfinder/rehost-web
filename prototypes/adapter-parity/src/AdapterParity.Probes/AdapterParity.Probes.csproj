@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>CoreParity.Probes</AssemblyName>
+    <RootNamespace>CoreParity.Probes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <Compile
+      Include="../../../core-parity/shared/ProbeJournal.cs"
+      Link="Shared/ProbeJournal.cs" />
+    <Compile
+      Include="../../../core-parity/shared/ProbeModule.cs"
+      Link="Shared/ProbeModule.cs" />
+    <Compile
+      Include="../../../core-parity/shared/AsyncProbeHandler.cs"
+      Link="Shared/AsyncProbeHandler.cs" />
+    <Compile
+      Include="../../../core-parity/shared/EchoProbeHandler.cs"
+      Link="Shared/EchoProbeHandler.cs" />
+    <Compile
+      Include="../../../core-parity/shared/ThrowProbeHandler.cs"
+      Link="Shared/ThrowProbeHandler.cs" />
+    <Compile
+      Include="../../../core-parity/shared/SyncProbeHandler.cs"
+      Link="Shared/SyncProbeHandler.cs" />
+  </ItemGroup>
+</Project>

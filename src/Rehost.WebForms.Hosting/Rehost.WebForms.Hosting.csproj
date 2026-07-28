@@ -15,4 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
+
+  <Import Project="../Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

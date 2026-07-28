@@ -4,13 +4,18 @@ using System.Runtime.Serialization;
 
 namespace CoreParity.Contracts;
 
-public interface IClassicPipelineRunner
+// Requests reach the adapter over HTTP rather than through a call into the application, so it
+// implements only the drain half.
+public interface IPipelineEventDrain
 {
-    List<RequestObservation> RunStep(List<RequestSpecification> requests);
-
     List<string> DrainApplicationEvents();
 
     List<string> DrainSessionEvents();
+}
+
+public interface IClassicPipelineRunner : IPipelineEventDrain
+{
+    List<RequestObservation> RunStep(List<RequestSpecification> requests);
 }
 
 [Serializable]

@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using HttpWorkerRequest = System.Web.HttpWorkerRequest;
 
-internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest
+internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 {
     private readonly HttpContext _context;
     private readonly string _virtualRootPath;
@@ -272,6 +272,11 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest
     internal void FailCompletion(Exception exception)
     {
         _completion.TrySetException(exception);
+    }
+
+    public void Dispose()
+    {
+        Response.Dispose();
     }
 
     private static bool HasEntityBody(HttpRequest request)
