@@ -1,7 +1,7 @@
 # First runnable request
 
-Status: both gate columns pass on macOS `arm64`; Windows `x64` not yet run for
-the adapter column. Canonical scope:
+Status: both gate columns pass on macOS `arm64` and Windows `x64`. Canonical
+scope:
 [managed runtime port plan, slice 1](../core-runtime-port-plan.md#vertical-slices).
 
 ## Goal
@@ -51,8 +51,11 @@ Every scenario in
 passes, the fixture handler resolves without a host reference, and the
 supported path reaches no native IIS/Windows operation.
 
-All three hold on macOS `arm64`, across both the
+All three hold on macOS `arm64` and Windows `x64`, across both the
 [differential](../../prototypes/portable-parity/README.md) and
-[adapter](../../prototypes/adapter-parity/README.md) columns. Windows `x64` has
-run the differential column only; the adapter column is outstanding, and until
-it passes the slice is not finished.
+[adapter](../../prototypes/adapter-parity/README.md) columns.
+
+What the slice does not cover is recorded under "Deferred" above and in
+[the adapter's open list](aspnet-core-host-adapter.md). Notably the response
+spill path and mid-request disconnect are implemented but unexercised, because no
+declared scenario reaches either.

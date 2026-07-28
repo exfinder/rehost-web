@@ -109,8 +109,8 @@ dotnet src/AdapterParity.Host/bin/Release/net10.0/AdapterParity.Host.dll \
 
 All eight scenarios in
 [the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md)
-match the Framework golden on the adapter side, verified on macOS `arm64`.
-Windows `x64` is not yet run.
+match the Framework golden on the adapter side, verified on macOS `arm64` and
+Windows `x64`.
 
 Driving the real pipeline from a real server reached one platform edge no
 differential probe had: `SafeNativeMethods.GetCurrentThreadId`, recorded as

@@ -20,10 +20,10 @@ behavior remains under `NETFRAMEWORK`.
 P27–P32 were reached by `PortableParity.Host verify`, which now matches the
 Framework `cold-sync` golden trace exactly.
 
-P33 was reached by `AdapterParity.Host verify`, which serves the same sessions
-over Kestrel. No differential probe reaches it: the bench calls
-`HttpRuntime.ProcessRequest` on a thread it owns, so nothing posts to the
-application's synchronization context.
+P33 was reached by `AdapterParity.Host verify` on macOS `arm64` and Windows
+`x64`, which serves the same sessions over Kestrel. No differential probe reaches
+it: the bench calls `HttpRuntime.ProcessRequest` on a thread it owns, so nothing
+posts to the application's synchronization context.
 
 ## Reached edges
 

@@ -2,7 +2,7 @@
 
 Status: first-slice envelope implemented in
 [`Rehost.WebForms.Hosting`](../../src/Rehost.WebForms.Hosting), verified on
-macOS `arm64`; Windows `x64` not yet run. Contract:
+macOS `arm64` and Windows `x64`. Contract:
 [first runnable request](first-runnable-request.md).
 
 ## Problem
@@ -67,7 +67,6 @@ probe had: `SafeNativeMethods.GetCurrentThreadId`, recorded as P33.
 
 ## Still open
 
-- Windows `x64` validation of the adapter column.
 - Disconnect is observable through `IsClientConnected`, but no scenario exercises
   a mid-request disconnect.
 - Response spill to disk is implemented and unexercised: no first-slice scenario

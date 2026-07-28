@@ -141,11 +141,13 @@ internal static class Program
             RedirectStandardError = true
         };
 
+        // A dotted assembly name defeats GetFileNameWithoutExtension, which would read
+        // "PortableParity.Host" as "PortableParity"; compare against the apphost path instead.
         var entryAssembly = typeof(Program).Assembly.Location;
-        if (!string.Equals(
-                Path.GetFileNameWithoutExtension(executablePath),
-                Path.GetFileNameWithoutExtension(entryAssembly),
-                StringComparison.OrdinalIgnoreCase))
+        var apphostPath = Path.ChangeExtension(
+            entryAssembly,
+            OperatingSystem.IsWindows() ? ".exe" : null);
+        if (!string.Equals(executablePath, apphostPath, StringComparison.OrdinalIgnoreCase))
         {
             startInfo.ArgumentList.Add(entryAssembly);
         }
