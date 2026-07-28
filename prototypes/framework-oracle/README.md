@@ -5,14 +5,15 @@ production solution or runtime.
 
 [`core-parity/sessions.json`](../core-parity/sessions.json) declares the
 sessions both adapters run. A session is one process, one fixture, and an
-ordered list of requests: the host spawns itself once per session, activates a
-child ASP.NET application through `ApplicationManager.CreateObject`, and a
-marshal-by-reference runner in that application calls public
-`HttpRuntime.ProcessRequest(HttpWorkerRequest)` for each request in turn.
+ordered list of steps, each holding one or more requests issued together: the
+host spawns itself once per session, activates a child ASP.NET application
+through `ApplicationManager.CreateObject`, and a marshal-by-reference runner in
+that application calls public
+`HttpRuntime.ProcessRequest(HttpWorkerRequest)` for each request.
 
 A fresh process per session is what makes "cold" mean cold. Requests after the
 first in a session are warm by construction, and the shutdown notification
-raised by `StopObject` is captured as the session's trailing events.
+raised by `StopObject` lands in the session notebook.
 
 The fixture clears inherited configurable handlers/modules and registers one
 probe module and one precompiled handler. Framework's
@@ -91,8 +92,9 @@ transforms.
 
 ## Captured observation
 
-Per session: the session name, one named observation per request, and the
-trailing events drained after the shutdown notification. Per request:
+Per session: the session name, the session notebook — module initialization, the
+shutdown notification, and how many application instances were created — and one
+named observation per request. Per request:
 
 - ordered module collection/initialization, handler, worker-response, and
   request-entry events;

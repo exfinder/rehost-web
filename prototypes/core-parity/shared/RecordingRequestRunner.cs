@@ -10,39 +10,107 @@ namespace CoreParity.Recording;
 
 internal sealed class RecordingRequestRunner
 {
-    internal PipelineObservation Run(RequestSpecification request)
+    internal List<RequestObservation> RunStep(List<RequestSpecification> requests)
     {
-        if (request == null)
+        if (requests == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ArgumentNullException(nameof(requests));
         }
 
+        if (requests.Count == 0)
+        {
+            throw new ArgumentException("A step declares no requests.", nameof(requests));
+        }
+
+        foreach (var request in requests)
+        {
+            PipelineEventJournal.OpenRequest(request.Name);
+        }
+
+        var observations = new RequestObservation[requests.Count];
+
+        if (requests.Count == 1)
+        {
+            observations[0] = Run(requests[0]);
+            return new List<RequestObservation>(observations);
+        }
+
+        var failures = new Exception?[requests.Count];
+        // Dedicated threads rather than the pool: a step exists to put requests in flight
+        // together, and pool scheduling is free to run them one after another.
+        var threads = new Thread[requests.Count];
+
+        for (var index = 0; index < requests.Count; index++)
+        {
+            var slot = index;
+            threads[slot] = new Thread(() =>
+            {
+                try
+                {
+                    observations[slot] = Run(requests[slot]);
+                }
+                catch (Exception exception)
+                {
+                    failures[slot] = exception;
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "parity:" + requests[slot].Name
+            };
+            threads[slot].Start();
+        }
+
+        foreach (var thread in threads)
+        {
+            thread.Join();
+        }
+
+        foreach (var failure in failures)
+        {
+            if (failure != null)
+            {
+                throw failure;
+            }
+        }
+
+        return new List<RequestObservation>(observations);
+    }
+
+    private static RequestObservation Run(RequestSpecification request)
+    {
         var workerRequest = new RecordingWorkerRequest(request);
         ExceptionObservation? escapedException = null;
 
-        PipelineEventJournal.Record("runner.process-request.enter");
+        PipelineEventJournal.Record(request.Name, "runner.process-request.enter");
 
         try
         {
             HttpRuntime.ProcessRequest(workerRequest);
-            PipelineEventJournal.Record("runner.process-request.return");
+            PipelineEventJournal.Record(request.Name, "runner.process-request.return");
         }
         catch (Exception exception)
         {
             escapedException = ExceptionObservation.FromException(exception);
-            PipelineEventJournal.Record("runner.process-request.escape");
+            PipelineEventJournal.Record(request.Name, "runner.process-request.escape");
         }
 
         if (escapedException == null
             && !workerRequest.WaitForCompletion(TimeSpan.FromSeconds(30)))
         {
             throw new TimeoutException(
-                "EndOfRequest did not complete within 30 seconds.");
+                "EndOfRequest for '"
+                + request.Name
+                + "' did not complete within 30 seconds.");
         }
 
-        return workerRequest.CreateObservation(
-            PipelineEventJournal.Drain(),
-            escapedException);
+        return new RequestObservation
+        {
+            Name = request.Name,
+            Observation = workerRequest.CreateObservation(
+                PipelineEventJournal.DrainRequest(request.Name),
+                escapedException)
+        };
     }
 }
 
@@ -146,6 +214,26 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
         return null;
     }
 
+    // Probes run on pipeline threads and identify their request from this header rather than
+    // from ambient context, which keeps them clear of unresolved CallContext behavior.
+    public override string? GetUnknownRequestHeader(string name)
+    {
+        return string.Equals(
+                name,
+                PipelineEventJournal.RequestHeaderName,
+                StringComparison.OrdinalIgnoreCase)
+            ? _request.Name
+            : null;
+    }
+
+    public override string[][] GetUnknownRequestHeaders()
+    {
+        return new[]
+        {
+            new[] { PipelineEventJournal.RequestHeaderName, _request.Name }
+        };
+    }
+
     public override string GetServerVariable(string name)
     {
         if (string.Equals(name, "SERVER_NAME", StringComparison.OrdinalIgnoreCase))
@@ -186,7 +274,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     {
         _statusCode = statusCode;
         _statusDescription = statusDescription;
-        PipelineEventJournal.Record("worker.status");
+        PipelineEventJournal.Record(_request.Name, "worker.status");
     }
 
     public override void SendKnownResponseHeader(int index, string value)
@@ -196,7 +284,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             Name = GetKnownResponseHeaderName(index),
             Value = value
         });
-        PipelineEventJournal.Record("worker.header.known");
+        PipelineEventJournal.Record(_request.Name, "worker.header.known");
     }
 
     public override void SendUnknownResponseHeader(string name, string value)
@@ -206,7 +294,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             Name = name,
             Value = value
         });
-        PipelineEventJournal.Record("worker.header.unknown");
+        PipelineEventJournal.Record(_request.Name, "worker.header.unknown");
     }
 
     public override void SendCalculatedContentLength(int contentLength)
@@ -216,13 +304,13 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             Name = GetKnownResponseHeaderName(HeaderContentLength),
             Value = contentLength.ToString(CultureInfo.InvariantCulture)
         });
-        PipelineEventJournal.Record("worker.header.content-length");
+        PipelineEventJournal.Record(_request.Name, "worker.header.content-length");
     }
 
     public override void SendResponseFromMemory(byte[] data, int length)
     {
         _body.Write(data, 0, length);
-        PipelineEventJournal.Record("worker.body");
+        PipelineEventJournal.Record(_request.Name, "worker.body");
     }
 
     public override void SendResponseFromFile(string filename, long offset, long length)
@@ -233,7 +321,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             CopyBytes(stream, length);
         }
 
-        PipelineEventJournal.Record("worker.file");
+        PipelineEventJournal.Record(_request.Name, "worker.file");
     }
 
     public override void SendResponseFromFile(IntPtr handle, long offset, long length)
@@ -245,15 +333,15 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     public override void FlushResponse(bool finalFlush)
     {
         _flushes.Add(finalFlush);
-        PipelineEventJournal.Record(finalFlush
-            ? "worker.flush.final"
-            : "worker.flush");
+        PipelineEventJournal.Record(
+            _request.Name,
+            finalFlush ? "worker.flush.final" : "worker.flush");
     }
 
     public override void EndOfRequest()
     {
         Interlocked.Increment(ref _endOfRequestCount);
-        PipelineEventJournal.Record("worker.end-of-request");
+        PipelineEventJournal.Record(_request.Name, "worker.end-of-request");
 
         if (Interlocked.CompareExchange(ref _completionCount, 1, 0) == 0)
         {

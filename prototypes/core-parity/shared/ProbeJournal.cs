@@ -1,0 +1,19 @@
+using System.Web;
+using CoreParity.Contracts;
+
+namespace CoreParity.Probes;
+
+// Probes run on whatever thread the pipeline gives them, so they identify their request from a
+// header the recording worker request carries rather than from ambient context.
+internal static class ProbeJournal
+{
+    internal static void Record(HttpContext context, string value)
+    {
+        PipelineEventJournal.Record(NameOf(context), value);
+    }
+
+    internal static string? NameOf(HttpContext context)
+    {
+        return context?.Request.Headers[PipelineEventJournal.RequestHeaderName];
+    }
+}

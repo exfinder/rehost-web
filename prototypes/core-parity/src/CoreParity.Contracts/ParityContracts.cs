@@ -6,9 +6,9 @@ namespace CoreParity.Contracts;
 
 public interface IClassicPipelineRunner
 {
-    PipelineObservation Run(RequestSpecification request);
+    List<RequestObservation> RunStep(List<RequestSpecification> requests);
 
-    List<string> DrainEvents();
+    List<string> DrainSessionEvents();
 }
 
 [Serializable]
@@ -38,8 +38,10 @@ public sealed class SessionSpecification
     [DataMember(Order = 2)]
     public string Fixture { get; set; } = "";
 
+    // Each step's requests are issued together; a step of one is sequential.
     [DataMember(Order = 3)]
-    public List<RequestSpecification> Requests { get; set; } = new List<RequestSpecification>();
+    public List<List<RequestSpecification>> Steps { get; set; }
+        = new List<List<RequestSpecification>>();
 }
 
 [DataContract]
@@ -151,10 +153,10 @@ public sealed class SessionObservation
     public string Name { get; set; } = "";
 
     [DataMember(Order = 2)]
-    public List<RequestObservation> Requests { get; set; } = new List<RequestObservation>();
+    public List<string> SessionEvents { get; set; } = new List<string>();
 
     [DataMember(Order = 3)]
-    public List<string> TrailingEvents { get; set; } = new List<string>();
+    public List<RequestObservation> Requests { get; set; } = new List<RequestObservation>();
 }
 
 [DataContract]
@@ -192,33 +194,88 @@ public sealed class TraceProvenance
     public string Fixture { get; set; } = "";
 }
 
+// Concurrent requests would interleave a single shared list, so each request owns a notebook
+// and anything belonging to the application rather than one request goes to the session
+// notebook. A session is always a fresh process, so the statics start empty.
 public static class PipelineEventJournal
 {
+    public const string RequestHeaderName = "X-Parity-Request";
+
     private static readonly object Sync = new object();
-    private static readonly List<string> Events = new List<string>();
+    private static readonly List<string> Session = new List<string>();
+    private static readonly Dictionary<string, List<string>> Requests
+        = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+    private static int _applicationsCreated;
 
-    public static void Reset()
+    public static int ApplicationsCreated
     {
-        lock (Sync)
+        get
         {
-            Events.Clear();
+            lock (Sync)
+            {
+                return _applicationsCreated;
+            }
         }
     }
 
-    public static void Record(string value)
+    public static void CountApplication()
     {
         lock (Sync)
         {
-            Events.Add(value);
+            _applicationsCreated++;
         }
     }
 
-    public static List<string> Drain()
+    public static void OpenRequest(string requestName)
     {
         lock (Sync)
         {
-            var drained = new List<string>(Events);
-            Events.Clear();
+            Requests[requestName] = new List<string>();
+        }
+    }
+
+    public static void RecordSession(string value)
+    {
+        lock (Sync)
+        {
+            Session.Add(value);
+        }
+    }
+
+    public static void Record(string? requestName, string value)
+    {
+        lock (Sync)
+        {
+            if (requestName != null && Requests.TryGetValue(requestName, out var events))
+            {
+                events.Add(value);
+                return;
+            }
+
+            Session.Add(value);
+        }
+    }
+
+    public static List<string> DrainRequest(string requestName)
+    {
+        lock (Sync)
+        {
+            if (!Requests.TryGetValue(requestName, out var events))
+            {
+                return new List<string>();
+            }
+
+            Requests.Remove(requestName);
+            return events;
+        }
+    }
+
+    public static List<string> DrainSession()
+    {
+        lock (Sync)
+        {
+            var drained = new List<string>(Session);
+            Session.Clear();
             return drained;
         }
     }

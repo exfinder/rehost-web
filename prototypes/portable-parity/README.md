@@ -13,16 +13,24 @@ The portable and .NET Framework adapters share:
 - the same application `web.config`;
 - the empty normalization manifest and generated Framework golden trace.
 
-A session is one process, one fixture, and an ordered list of named requests.
-The host spawns itself once per session and calls the existing public sequence
-in that child:
+A session is one process, one fixture, and an ordered list of steps. Each step
+holds one or more named requests issued together, so a step of one is
+sequential. The host spawns itself once per session and calls the existing
+public sequence in that child:
 
 ```text
 WebFormsApplication.Initialize
 → ApplicationManager.CreateObject
-→ HttpRuntime.ProcessRequest(HttpWorkerRequest) per request
-→ StopObject, then drain the session's trailing events
+→ HttpRuntime.ProcessRequest(HttpWorkerRequest) per request, per step
+→ StopObject, then drain the session notebook
 ```
+
+Each request owns a notebook; anything belonging to the application rather than
+to one request — module initialization, the shutdown notification, the count of
+application instances created — goes to the session notebook. Without that
+split, concurrent requests would interleave one shared list and no tape would
+reproduce. Probes find their own notebook from an `X-Parity-Request` header the
+recording worker request carries, not from ambient context.
 
 A fresh process per session is what makes "cold" mean cold: nothing has touched
 the `HttpRuntime` singleton, the default `AssemblyLoadContext` resolver, or the
@@ -54,9 +62,10 @@ the original exception chain.
 
 The full classic pipeline runs. `verify` exits zero: the portable trace matches
 the Framework golden exactly for the one declared session, `cold-sync` —
-nineteen ordered events, `201 Oracle Created`, five headers in order,
-`oracle-ok`, one final flush, and `runner.stop` as the session's single trailing
-event — against an empty normalization manifest.
+sixteen ordered request events, `201 Oracle Created`, five headers in order,
+`oracle-ok`, one final flush, and a session notebook of module initialization,
+`runner.stop`, and `applications-created:1` — against an empty normalization
+manifest.
 
 The configured `ProbeModule` and `SyncProbeHandler` resolve from
 `fixture/app/bin` through classic configuration, with no host reference and no
@@ -98,8 +107,8 @@ a listener or `dotnet-trace` to also observe `bin` assembly resolution.
 dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll verify
 ```
 
-Verification requires exact schema, session and request names, ordered events,
-response, escaped-exception shape, completion counts, and trailing events
+Verification requires exact schema, session and request names, session notebook,
+ordered request events, response, escaped-exception shape, and completion counts
 against the committed Framework `sessions.json`. Adapter-specific provenance is
 excluded. The checked-in normalization manifest must exist and remain empty.
 

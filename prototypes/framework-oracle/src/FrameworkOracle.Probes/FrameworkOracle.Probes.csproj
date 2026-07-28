@@ -8,6 +8,9 @@
     <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
     <Reference Include="System.Web" />
     <Compile
+      Include="../../../core-parity/shared/ProbeJournal.cs"
+      Link="Shared/ProbeJournal.cs" />
+    <Compile
       Include="../../../core-parity/shared/ProbeModule.cs"
       Link="Shared/ProbeModule.cs" />
     <Compile

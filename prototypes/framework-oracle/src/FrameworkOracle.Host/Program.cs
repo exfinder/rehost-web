@@ -260,24 +260,21 @@ internal static class Program
 
             var observation = new SessionObservation { Name = session.Name };
 
-            foreach (var request in session.Requests)
+            foreach (var step in session.Steps)
             {
-                Console.Error.WriteLine(
-                    "Entering HttpRuntime.ProcessRequest for '" + request.Name + "'.");
-                observation.Requests.Add(new RequestObservation
-                {
-                    Name = request.Name,
-                    Observation = runner.Run(request)
-                });
-                Console.Error.WriteLine(
-                    "Completed HttpRuntime.ProcessRequest for '" + request.Name + "'.");
+                var names = string.Join(
+                    ",",
+                    step.Select(request => request.Name).ToArray());
+                Console.Error.WriteLine("Entering step '" + names + "'.");
+                observation.Requests.AddRange(runner.RunStep(step));
+                Console.Error.WriteLine("Completed step '" + names + "'.");
             }
 
             // StopObject runs the registered object's shutdown notification while the
             // application AppDomain is still callable; ShutdownApplication unloads it.
             Console.Error.WriteLine("Stopping registered oracle runner.");
             manager.StopObject(applicationId, typeof(OracleRunner));
-            observation.TrailingEvents = runner.DrainEvents();
+            observation.SessionEvents = runner.DrainSessionEvents();
             applicationActivated = false;
 
             Console.Error.WriteLine("Requesting ASP.NET application shutdown.");

@@ -8,11 +8,12 @@ public sealed class ProbeModule : IHttpModule
 {
     public void Init(HttpApplication context)
     {
-        PipelineEventJournal.Record("module.init");
+        PipelineEventJournal.CountApplication();
+        PipelineEventJournal.RecordSession("module.init");
 
         foreach (var name in context.Modules.AllKeys)
         {
-            PipelineEventJournal.Record("module.collection:" + name);
+            PipelineEventJournal.RecordSession("module.collection:" + name);
         }
 
         context.BeginRequest += OnBeginRequest;
@@ -23,26 +24,31 @@ public sealed class ProbeModule : IHttpModule
 
     public void Dispose()
     {
-        PipelineEventJournal.Record("module.dispose");
+        PipelineEventJournal.RecordSession("module.dispose");
     }
 
     private static void OnBeginRequest(object? sender, EventArgs eventArgs)
     {
-        PipelineEventJournal.Record("module.begin-request");
+        Record(sender, "module.begin-request");
     }
 
     private static void OnPreRequestHandlerExecute(object? sender, EventArgs eventArgs)
     {
-        PipelineEventJournal.Record("module.pre-request-handler-execute");
+        Record(sender, "module.pre-request-handler-execute");
     }
 
     private static void OnPostRequestHandlerExecute(object? sender, EventArgs eventArgs)
     {
-        PipelineEventJournal.Record("module.post-request-handler-execute");
+        Record(sender, "module.post-request-handler-execute");
     }
 
     private static void OnEndRequest(object? sender, EventArgs eventArgs)
     {
-        PipelineEventJournal.Record("module.end-request");
+        Record(sender, "module.end-request");
+    }
+
+    private static void Record(object? sender, string value)
+    {
+        ProbeJournal.Record(((HttpApplication)sender!).Context, value);
     }
 }

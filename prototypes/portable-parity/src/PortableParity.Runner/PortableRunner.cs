@@ -7,19 +7,21 @@ namespace PortableParity.Runner;
 
 public sealed class PortableRunner : IRegisteredObject, IClassicPipelineRunner
 {
-    public PipelineObservation Run(RequestSpecification request)
+    public List<RequestObservation> RunStep(List<RequestSpecification> requests)
     {
-        return new RecordingRequestRunner().Run(request);
+        return new RecordingRequestRunner().RunStep(requests);
     }
 
-    public List<string> DrainEvents()
+    public List<string> DrainSessionEvents()
     {
-        return PipelineEventJournal.Drain();
+        var events = PipelineEventJournal.DrainSession();
+        events.Add("applications-created:" + PipelineEventJournal.ApplicationsCreated);
+        return events;
     }
 
     public void Stop(bool immediate)
     {
-        PipelineEventJournal.Record(immediate
+        PipelineEventJournal.RecordSession(immediate
             ? "runner.stop.immediate"
             : "runner.stop");
 

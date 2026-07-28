@@ -235,28 +235,24 @@ internal static class Program
                     "ApplicationManager did not return an IClassicPipelineRunner.");
             }
 
-            var observation = new SessionObservation
+            var observation = new SessionObservation { Name = session.Name };
+
+            foreach (var step in session.Steps)
             {
-                Name = session.Name,
-                Requests = session.Requests
-                    .Select(request => new RequestObservation
-                    {
-                        Name = request.Name,
-                        Observation = InPhase(
-                            "request:" + request.Name,
-                            () => runner.Run(request))
-                    })
-                    .ToList()
-            };
+                observation.Requests.AddRange(
+                    InPhase(
+                        "step:" + string.Join(",", step.Select(request => request.Name)),
+                        () => runner.RunStep(step)));
+            }
 
             // StopObject runs the registered object's shutdown notification while the
             // application is still callable; ShutdownApplication is what tears it down.
             InPhase(
                 "application-cleanup",
                 () => manager.StopObject(applicationId, typeof(PortableRunner)));
-            observation.TrailingEvents = InPhase(
+            observation.SessionEvents = InPhase(
                 "application-cleanup",
-                runner.DrainEvents);
+                runner.DrainSessionEvents);
             applicationActivated = false;
 
             InPhase(
@@ -524,12 +520,12 @@ internal static class Program
             {
                 var path = "$.Sessions[" + expected[index].Name + "]";
                 VerifyValue(path + ".Name", expected[index].Name, actual[index].Name);
-                VerifyRequests(path, expected[index].Requests, actual[index].Requests);
                 VerifyList(
-                    path + ".TrailingEvents",
-                    expected[index].TrailingEvents,
-                    actual[index].TrailingEvents,
+                    path + ".SessionEvents",
+                    expected[index].SessionEvents,
+                    actual[index].SessionEvents,
                     VerifyValue);
+                VerifyRequests(path, expected[index].Requests, actual[index].Requests);
             }
         }
 
