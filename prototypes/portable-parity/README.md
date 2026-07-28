@@ -69,26 +69,29 @@ the original exception chain.
 
 The full classic pipeline runs. `verify` exits zero against an empty
 normalization manifest: the portable trace matches the Framework golden exactly
-for the declared `cold-then-warm` session — a cold `201 Oracle Created`, a
-`CompleteRequest` that skips the handler and still reaches `EndRequest`, a `202`
-whose handler finishes after `ProcessRequest` returned, and three overlapping
-requests each echoing its own identity from its own application instance.
+across three sessions.
+
+`cold-then-warm` serves a cold `201 Oracle Created`, a `CompleteRequest` that
+skips the handler and still reaches `EndRequest`, a `202` whose handler finishes
+after `ProcessRequest` returned, and three overlapping requests each echoing its
+own identity from its own application instance. `concurrent-cold` starts two
+requests together in a fresh process. `errors` uses a second fixture where a
+module throws, a handler throws, and a handler type is absent; all three are
+owned by System.Web error processing and return the same 3500-byte generic
+error page, which carries no stack trace, exception type, or build footer and so
+compares byte-for-byte across runtimes.
 
 The configured `ProbeModule` and `SyncProbeHandler` resolve from
 `fixture/app/bin` through classic configuration, with no host reference and no
 preload. `DefaultAuthentication` appears after the cleared collection because
 `HttpModulesSection.CreateModules` appends it, not because anything registers it.
 
-This covers five of the eight scenarios in
+This covers all eight scenarios in
 [the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md)
-— cold synchronous, `CompleteRequest`, delayed asynchronous, warm concurrent
-with isolated context and pooled applications, and exactly one terminal shutdown
-notification. Concurrent cold, module and handler exceptions, and handler
-resolution failure remain, each needing its own session because it needs its own
-starting conditions.
+on the differential side.
 
-The gate also requires adapter probes. No ASP.NET Core host exists yet, so every
-scenario here is covered on the differential side only.
+The gate also requires adapter probes. No ASP.NET Core host exists yet, so the
+adapter side of every scenario is still open and the gate remains unmet.
 
 `PortableParityGateTests` in the main solution runs `verify` as a child process,
 because running a session permanently mutates process-global state and cannot

@@ -50,6 +50,56 @@
           }
         ]
       ]
+    },
+    {
+      "Name": "concurrent-cold",
+      "Fixture": "app",
+      "Steps": [
+        [
+          {
+            "Name": "cold-a",
+            "Method": "GET",
+            "Path": "/echo",
+            "QueryString": ""
+          },
+          {
+            "Name": "cold-b",
+            "Method": "GET",
+            "Path": "/echo",
+            "QueryString": ""
+          }
+        ]
+      ]
+    },
+    {
+      "Name": "errors",
+      "Fixture": "app-errors",
+      "Steps": [
+        [
+          {
+            "Name": "module-throws",
+            "Method": "GET",
+            "Path": "/throw-module",
+            "QueryString": ""
+          }
+        ],
+        [
+          {
+            "Name": "handler-throws",
+            "Method": "GET",
+            "Path": "/throw-handler",
+            "QueryString": ""
+          }
+        ],
+        [
+          {
+            "Name": "handler-missing",
+            "Method": "GET",
+            "Path": "/missing",
+            "QueryString": ""
+          }
+        ]
+      ]
     }
   ]
 }

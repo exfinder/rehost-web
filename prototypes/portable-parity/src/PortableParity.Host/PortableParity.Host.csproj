@@ -20,6 +20,10 @@
       Link="fixture/app/web.config"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
+      Include="../../../framework-oracle/fixture/errors.web.config"
+      Link="fixture/app-errors/web.config"
+      CopyToOutputDirectory="PreserveNewest" />
+    <Content
       Include="../../../framework-oracle/metadata/normalization.json"
       Link="metadata/normalization.json"
       CopyToOutputDirectory="PreserveNewest" />
@@ -36,6 +40,7 @@
   <Target Name="StagePortableParityApplication" AfterTargets="Build">
     <PropertyGroup>
       <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
+      <_ErrorFixtureBin>$(TargetDir)fixture/app-errors/bin</_ErrorFixtureBin>
       <_FixtureTemp>$(TargetDir)fixture/temp</_FixtureTemp>
       <_ProbeAssembly>$(MSBuildProjectDirectory)/../PortableParity.Probes/bin/$(Configuration)/net10.0/CoreParity.Probes.dll</_ProbeAssembly>
     </PropertyGroup>
@@ -47,14 +52,22 @@
       Condition="Exists('$(TargetDir)CoreParity.Probes.dll')"
       Text="CoreParity.Probes must not be copied beside the host." />
 
-    <MakeDir Directories="$(_FixtureBin);$(_FixtureTemp)" />
+    <MakeDir Directories="$(_FixtureBin);$(_ErrorFixtureBin);$(_FixtureTemp)" />
     <XmlPoke
       XmlInputPath="$(TargetDir)fixture/app/web.config"
+      Query="/configuration/system.web/compilation/@tempDirectory"
+      Value="$(_FixtureTemp)" />
+    <XmlPoke
+      XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
       Value="$(_FixtureTemp)" />
     <Copy
       SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
       DestinationFolder="$(_FixtureBin)"
+      SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
+      DestinationFolder="$(_ErrorFixtureBin)"
       SkipUnchangedFiles="true" />
   </Target>
 </Project>

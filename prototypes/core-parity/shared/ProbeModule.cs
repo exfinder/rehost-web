@@ -32,10 +32,19 @@ public sealed class ProbeModule : IHttpModule
         var application = (HttpApplication)sender!;
         ProbeJournal.Record(application.Context, "module.begin-request");
 
-        if (application.Context.Request.Path.EndsWith("/complete", StringComparison.Ordinal))
+        var path = application.Context.Request.Path;
+
+        if (path.EndsWith("/complete", StringComparison.Ordinal))
         {
             ProbeJournal.Record(application.Context, "module.complete-request");
             application.CompleteRequest();
+            return;
+        }
+
+        if (path.EndsWith("/throw-module", StringComparison.Ordinal))
+        {
+            ProbeJournal.Record(application.Context, "module.throw");
+            throw new InvalidOperationException("Probe module failed deliberately.");
         }
     }
 

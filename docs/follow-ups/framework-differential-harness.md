@@ -32,6 +32,13 @@ configuration need their own fixture, and therefore their own session.
 Requests are keyed by name in the trace so a divergence reports the request that
 diverged instead of shifting every later comparison.
 
+Failure scenarios run under `customErrors`, so the response is the generic error
+page rather than the detailed one. The detailed page carries a stack trace and a
+CLR/ASP.NET build footer, neither of which can agree across runtimes; the generic
+page is fixed wording from the same imported resources and compares byte-for-byte.
+The claim being tested is that System.Web owns the failure, which either page
+demonstrates.
+
 Each request owns an event notebook. Events belonging to the application rather
 than to one request are split by whether their order carries a claim: instance
 initialization is a bag, because instances are constructed on overlapping

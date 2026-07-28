@@ -15,10 +15,19 @@ A fresh process per session is what makes "cold" mean cold. Requests after the
 first in a session are warm by construction, and the shutdown notification
 raised by `StopObject` lands in the session notebook.
 
-The fixture clears inherited configurable handlers/modules and registers one
-probe module and precompiled handlers for the synchronous, asynchronous, and
-identity-echoing paths. The module short-circuits `/complete` with
-`CompleteRequest`, so reaching that path's handler at all is a failure signal. Framework's
+The fixtures clear inherited configurable handlers/modules and register one probe
+module and precompiled handlers. The default fixture serves the synchronous,
+asynchronous, and identity-echoing paths; the module short-circuits `/complete`
+with `CompleteRequest`, so reaching that path's handler at all is a failure
+signal.
+
+A second fixture covers failure. It switches `customErrors` on, so responses are
+the generic error page — fixed wording from the same imported resources, with no
+stack trace or build footer — rather than the detailed page, whose contents
+cannot agree across runtimes. Its paths throw from a module, throw from a
+handler, and name a handler type that does not exist. That last mapping sets
+`validate="false"` so resolution is deferred to the request and the application
+still starts; validating it would test startup failure instead. Framework's
 `HttpModulesSection.CreateModules` still appends its implicit
 `DefaultAuthenticationModule`.
 
