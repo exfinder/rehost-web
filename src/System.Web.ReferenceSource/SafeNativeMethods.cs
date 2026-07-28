@@ -29,8 +29,16 @@ namespace System.Web {
         }
 #endif
 
+#if NETFRAMEWORK
         [DllImport(ModName.KERNEL32_FULL_NAME)]
         internal /*public*/ extern static int GetCurrentThreadId();
+#else
+        // Callers compare this against a value they recorded on the same thread to detect lock
+        // re-entrancy, so identity is what matters rather than the operating system's numbering.
+        internal static int GetCurrentThreadId() {
+            return Environment.CurrentManagedThreadId;
+        }
+#endif
 
         [DllImport(ModName.KERNEL32_FULL_NAME)]
         internal static extern bool QueryPerformanceCounter( [System.Runtime.InteropServices.Out, In] ref long lpPerformanceCount);

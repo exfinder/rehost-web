@@ -20,6 +20,11 @@ behavior remains under `NETFRAMEWORK`.
 P27–P32 were reached by `PortableParity.Host verify`, which now matches the
 Framework `cold-sync` golden trace exactly.
 
+P33 was reached by `AdapterParity.Host verify`, which serves the same sessions
+over Kestrel. No differential probe reaches it: the bench calls
+`HttpRuntime.ProcessRequest` on a thread it owns, so nothing posts to the
+application's synchronization context.
+
 ## Reached edges
 
 | ID | Edge | Treatment and contract |
@@ -56,6 +61,7 @@ Framework `cold-sync` golden trace exactly.
 | P30 | `InitFusion` private-bin probing | `AppendPrivatePath`, `SetShadowCopyPath`, and `SetCachePath` are loader no-ops here. Resolve application `bin` through one immutable fallback on the default `AssemblyLoadContext`, so runtime-owned assemblies win first as the GAC did. Shadow copying is gone: `bin` assemblies stay file-locked while running. |
 | P31 | `HttpRuntime.FinishRequest` error reporting | Framework discards both the request exception and the reporting failure with no record. The port reports them on `WebFormsRuntimeEventSource`. No observable response difference. |
 | P32 | `BuildManager` preserved hash file path | `"hash\\hash.web"` produced one backslash-named file off Windows instead of nesting under the `hash` directory the cache creates. Use `Path.Combine` segments; same defect class as P25. |
+| P33 | `SafeNativeMethods.GetCurrentThreadId` | `kernel32!GetCurrentThreadId` threw `DllNotFoundException` off Windows out of `HttpApplicationStateLock`, whose recursive write lock compares the value against one it recorded on the same thread. Portable leaf: `Environment.CurrentManagedThreadId`. Only identity is required, and the managed id is the stabler identity — the native id was never guaranteed constant for a managed thread. The remaining call sites build diagnostic strings. |
 
 ## Open path
 
