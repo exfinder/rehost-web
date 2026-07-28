@@ -18,6 +18,11 @@ public sealed class OracleRunner : MarshalByRefObject, IRegisteredObject, IClass
         return new RecordingRequestRunner().RunStep(requests);
     }
 
+    public List<string> DrainApplicationEvents()
+    {
+        return PipelineEventJournal.DrainApplication();
+    }
+
     public List<string> DrainSessionEvents()
     {
         var events = PipelineEventJournal.DrainSession();

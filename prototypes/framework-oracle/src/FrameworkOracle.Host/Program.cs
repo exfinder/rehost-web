@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Hosting;
 using CoreParity.Contracts;
 using FrameworkOracle.Runner;
@@ -187,9 +188,16 @@ internal static class Program
 
         using (var process = Process.Start(startInfo))
         {
-            var standardOutput = process.StandardOutput.ReadToEnd();
-            var standardError = process.StandardError.ReadToEnd();
+            // Both streams must drain concurrently. A session observation larger than the 4 KB
+            // Windows pipe buffer blocks the child mid-write while a sequential reader waits on
+            // the stream it is not draining.
+            var outputReader = process.StandardOutput.ReadToEndAsync();
+            var errorReader = process.StandardError.ReadToEndAsync();
+            Task.WaitAll(outputReader, errorReader);
             process.WaitForExit();
+
+            var standardOutput = outputReader.Result;
+            var standardError = errorReader.Result;
 
             if (standardError.Length > 0)
             {
@@ -274,6 +282,7 @@ internal static class Program
             // application AppDomain is still callable; ShutdownApplication unloads it.
             Console.Error.WriteLine("Stopping registered oracle runner.");
             manager.StopObject(applicationId, typeof(OracleRunner));
+            observation.ApplicationEvents = runner.DrainApplicationEvents();
             observation.SessionEvents = runner.DrainSessionEvents();
             applicationActivated = false;
 

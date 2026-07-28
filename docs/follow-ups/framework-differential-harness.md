@@ -32,14 +32,29 @@ configuration need their own fixture, and therefore their own session.
 Requests are keyed by name in the trace so a divergence reports the request that
 diverged instead of shifting every later comparison.
 
-Each request owns an event notebook, and events belonging to the application
-rather than to one request — module initialization, the shutdown notification,
-the count of application instances created — go to a session notebook.
+Each request owns an event notebook. Events belonging to the application rather
+than to one request are split by whether their order carries a claim: instance
+initialization is a bag, because instances are constructed on overlapping
+threads and the recorded order is thread scheduling, so it is canonicalized by
+sorting and compared by content and count; the shutdown notification and the
+instance count stay an ordered sequence, so a notification raised before startup
+still fails.
 Concurrent requests would otherwise interleave one shared list and no trace
 would reproduce. Probes identify their request from an `X-Parity-Request` header
 the recording worker request carries, so recording does not depend on ambient
 context while [`CallContext` isolation](illogical-call-context-isolation.md)
 remains open.
+
+Concurrency is held, not hoped for. Every request in a step waits until the
+whole step has arrived before proceeding, and an asynchronous handler finishes
+only after the recorder reports that `ProcessRequest` returned. Both waits time
+out rather than block, so a runtime that serializes a step or completes an
+asynchronous handler synchronously fails with an extra recorded event instead of
+deadlocking.
+
+The normalization manifest stays empty: no recorded value is rewritten. The
+unordered instance-initialization collection is a comparison rule, not a
+normalization rule, and is stated in the contract rather than in the manifest.
 
 Done when first-slice fixtures prove capture, narrow normalization, replay,
 drift detection, and intentional-deviation documentation.

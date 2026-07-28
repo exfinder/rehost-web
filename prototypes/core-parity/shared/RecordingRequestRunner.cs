@@ -27,6 +27,8 @@ internal sealed class RecordingRequestRunner
             PipelineEventJournal.OpenRequest(request.Name);
         }
 
+        ParityBarrier.Begin(requests.Count);
+
         var observations = new RequestObservation[requests.Count];
 
         if (requests.Count == 1)
@@ -93,6 +95,10 @@ internal sealed class RecordingRequestRunner
         {
             escapedException = ExceptionObservation.FromException(exception);
             PipelineEventJournal.Record(request.Name, "runner.process-request.escape");
+        }
+        finally
+        {
+            ParityGate.Open(request.Name);
         }
 
         if (escapedException == null

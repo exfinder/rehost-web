@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Web.Hosting;
 using CoreParity.Contracts;
 using PortableParity.Runner;
@@ -159,9 +160,16 @@ internal static class Program
 
         using var process = Process.Start(startInfo)
             ?? throw new InvalidOperationException("The session process failed to start.");
-        var standardOutput = process.StandardOutput.ReadToEnd();
-        var standardError = process.StandardError.ReadToEnd();
+        // Both streams must drain concurrently. A session observation larger than the pipe
+        // buffer, which is 4 KB on Windows against 64 KB elsewhere, blocks the child mid-write
+        // while a sequential reader waits on the stream it is not draining.
+        var outputReader = process.StandardOutput.ReadToEndAsync();
+        var errorReader = process.StandardError.ReadToEndAsync();
+        Task.WaitAll(outputReader, errorReader);
         process.WaitForExit();
+
+        var standardOutput = outputReader.Result;
+        var standardError = errorReader.Result;
 
         if (standardError.Length > 0)
         {
@@ -250,6 +258,9 @@ internal static class Program
             InPhase(
                 "application-cleanup",
                 () => manager.StopObject(applicationId, typeof(PortableRunner)));
+            observation.ApplicationEvents = InPhase(
+                "application-cleanup",
+                runner.DrainApplicationEvents);
             observation.SessionEvents = InPhase(
                 "application-cleanup",
                 runner.DrainSessionEvents);
@@ -520,6 +531,11 @@ internal static class Program
             {
                 var path = "$.Sessions[" + expected[index].Name + "]";
                 VerifyValue(path + ".Name", expected[index].Name, actual[index].Name);
+                VerifyList(
+                    path + ".ApplicationEvents",
+                    expected[index].ApplicationEvents,
+                    actual[index].ApplicationEvents,
+                    VerifyValue);
                 VerifyList(
                     path + ".SessionEvents",
                     expected[index].SessionEvents,

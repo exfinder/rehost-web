@@ -14,6 +14,12 @@
       Include="../../../core-parity/shared/ProbeModule.cs"
       Link="Shared/ProbeModule.cs" />
     <Compile
+      Include="../../../core-parity/shared/AsyncProbeHandler.cs"
+      Link="Shared/AsyncProbeHandler.cs" />
+    <Compile
+      Include="../../../core-parity/shared/EchoProbeHandler.cs"
+      Link="Shared/EchoProbeHandler.cs" />
+    <Compile
       Include="../../../core-parity/shared/SyncProbeHandler.cs"
       Link="Shared/SyncProbeHandler.cs" />
   </ItemGroup>

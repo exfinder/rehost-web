@@ -16,7 +16,9 @@ first in a session are warm by construction, and the shutdown notification
 raised by `StopObject` lands in the session notebook.
 
 The fixture clears inherited configurable handlers/modules and registers one
-probe module and one precompiled handler. Framework's
+probe module and precompiled handlers for the synchronous, asynchronous, and
+identity-echoing paths. The module short-circuits `/complete` with
+`CompleteRequest`, so reaching that path's handler at all is a failure signal. Framework's
 `HttpModulesSection.CreateModules` still appends its implicit
 `DefaultAuthenticationModule`.
 
@@ -92,8 +94,8 @@ transforms.
 
 ## Captured observation
 
-Per session: the session name, the session notebook — module initialization, the
-shutdown notification, and how many application instances were created — and one
+Per session: the session name, application-instance initialization as an
+unordered bag, the ordered shutdown notification and instance count, and one
 named observation per request. Per request:
 
 - ordered module collection/initialization, handler, worker-response, and

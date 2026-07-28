@@ -12,6 +12,11 @@ public sealed class PortableRunner : IRegisteredObject, IClassicPipelineRunner
         return new RecordingRequestRunner().RunStep(requests);
     }
 
+    public List<string> DrainApplicationEvents()
+    {
+        return PipelineEventJournal.DrainApplication();
+    }
+
     public List<string> DrainSessionEvents()
     {
         var events = PipelineEventJournal.DrainSession();

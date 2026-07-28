@@ -25,12 +25,19 @@ WebFormsApplication.Initialize
 → StopObject, then drain the session notebook
 ```
 
-Each request owns a notebook; anything belonging to the application rather than
-to one request — module initialization, the shutdown notification, the count of
-application instances created — goes to the session notebook. Without that
-split, concurrent requests would interleave one shared list and no tape would
-reproduce. Probes find their own notebook from an `X-Parity-Request` header the
-recording worker request carries, not from ambient context.
+Each request owns a notebook. Application-instance initialization is recorded as
+an unordered bag, canonicalized by sorting, because instances are constructed on
+overlapping threads; the shutdown notification and the instance count stay
+ordered. Without that split, concurrent work would interleave one shared list
+and no tape would reproduce. Probes find their own notebook from an
+`X-Parity-Request` header the recording worker request carries, not from ambient
+context.
+
+Concurrency is held rather than hoped for: every request in a step waits until
+the whole step has arrived, and the asynchronous handler finishes only after the
+recorder reports that `ProcessRequest` returned. Both waits time out after five
+seconds, so a runtime that serializes a step or completes the asynchronous
+handler synchronously records an extra event instead of deadlocking.
 
 A fresh process per session is what makes "cold" mean cold: nothing has touched
 the `HttpRuntime` singleton, the default `AssemblyLoadContext` resolver, or the
@@ -60,25 +67,28 @@ the original exception chain.
 
 ## Current reachable state
 
-The full classic pipeline runs. `verify` exits zero: the portable trace matches
-the Framework golden exactly for the one declared session, `cold-sync` —
-sixteen ordered request events, `201 Oracle Created`, five headers in order,
-`oracle-ok`, one final flush, and a session notebook of module initialization,
-`runner.stop`, and `applications-created:1` — against an empty normalization
-manifest.
+The full classic pipeline runs. `verify` exits zero against an empty
+normalization manifest: the portable trace matches the Framework golden exactly
+for the declared `cold-then-warm` session — a cold `201 Oracle Created`, a
+`CompleteRequest` that skips the handler and still reaches `EndRequest`, a `202`
+whose handler finishes after `ProcessRequest` returned, and three overlapping
+requests each echoing its own identity from its own application instance.
 
 The configured `ProbeModule` and `SyncProbeHandler` resolve from
 `fixture/app/bin` through classic configuration, with no host reference and no
 preload. `DefaultAuthentication` appears after the cleared collection because
 `HttpModulesSection.CreateModules` appends it, not because anything registers it.
 
-This completes the first of the eight scenarios in
-[the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md).
-Concurrent cold, warm pooled, delayed asynchronous, `CompleteRequest`, module and
-handler exceptions, resolution failure, and terminal shutdown remain. Each is a
-manifest entry plus a regenerated golden; the ones that need their own starting
-conditions get their own session, the rest extend an existing session's request
-list.
+This covers five of the eight scenarios in
+[the first-slice parity gate](../../docs/adr/0031-require-the-first-slice-parity-gate.md)
+— cold synchronous, `CompleteRequest`, delayed asynchronous, warm concurrent
+with isolated context and pooled applications, and exactly one terminal shutdown
+notification. Concurrent cold, module and handler exceptions, and handler
+resolution failure remain, each needing its own session because it needs its own
+starting conditions.
+
+The gate also requires adapter probes. No ASP.NET Core host exists yet, so every
+scenario here is covered on the differential side only.
 
 `PortableParityGateTests` in the main solution runs `verify` as a child process,
 because running a session permanently mutates process-global state and cannot

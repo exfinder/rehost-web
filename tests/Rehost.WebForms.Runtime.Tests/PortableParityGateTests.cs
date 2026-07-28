@@ -69,11 +69,15 @@ public sealed class PortableParityGateTests
         startInfo.ArgumentList.Add(command);
 
         using var process = Process.Start(startInfo)!;
-        var standardError = process.StandardError.ReadToEnd();
-        process.StandardOutput.ReadToEnd();
+        // Both streams must drain concurrently. A trace larger than the pipe buffer, which is
+        // 4 KB on Windows against 64 KB elsewhere, blocks the host mid-write while a sequential
+        // reader waits on the stream it is not draining.
+        var standardOutput = process.StandardOutput.ReadToEndAsync();
+        var standardError = process.StandardError.ReadToEndAsync();
+        Task.WaitAll(standardOutput, standardError);
         process.WaitForExit();
 
-        return (process.ExitCode, standardError);
+        return (process.ExitCode, standardError.Result);
     }
 
     private static string FindRepositoryRoot()

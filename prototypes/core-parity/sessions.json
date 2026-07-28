@@ -2,7 +2,7 @@
   "SchemaVersion": 1,
   "Sessions": [
     {
-      "Name": "cold-sync",
+      "Name": "cold-then-warm",
       "Fixture": "app",
       "Steps": [
         [
@@ -10,6 +10,42 @@
             "Name": "cold-sync",
             "Method": "GET",
             "Path": "/oracle",
+            "QueryString": ""
+          }
+        ],
+        [
+          {
+            "Name": "complete-request",
+            "Method": "GET",
+            "Path": "/complete",
+            "QueryString": ""
+          }
+        ],
+        [
+          {
+            "Name": "delayed-async",
+            "Method": "GET",
+            "Path": "/async",
+            "QueryString": ""
+          }
+        ],
+        [
+          {
+            "Name": "warm-a",
+            "Method": "GET",
+            "Path": "/echo",
+            "QueryString": ""
+          },
+          {
+            "Name": "warm-b",
+            "Method": "GET",
+            "Path": "/echo",
+            "QueryString": ""
+          },
+          {
+            "Name": "warm-c",
+            "Method": "GET",
+            "Path": "/echo",
             "QueryString": ""
           }
         ]

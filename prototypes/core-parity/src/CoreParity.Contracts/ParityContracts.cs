@@ -8,6 +8,8 @@ public interface IClassicPipelineRunner
 {
     List<RequestObservation> RunStep(List<RequestSpecification> requests);
 
+    List<string> DrainApplicationEvents();
+
     List<string> DrainSessionEvents();
 }
 
@@ -152,10 +154,15 @@ public sealed class SessionObservation
     [DataMember(Order = 1)]
     public string Name { get; set; } = "";
 
+    // Application instances are constructed concurrently, so this collection is a bag: its
+    // order carries no claim and is canonicalized by sorting. Counts still compare exactly.
     [DataMember(Order = 2)]
-    public List<string> SessionEvents { get; set; } = new List<string>();
+    public List<string> ApplicationEvents { get; set; } = new List<string>();
 
     [DataMember(Order = 3)]
+    public List<string> SessionEvents { get; set; } = new List<string>();
+
+    [DataMember(Order = 4)]
     public List<RequestObservation> Requests { get; set; } = new List<RequestObservation>();
 }
 
@@ -202,6 +209,7 @@ public static class PipelineEventJournal
     public const string RequestHeaderName = "X-Parity-Request";
 
     private static readonly object Sync = new object();
+    private static readonly List<string> Application = new List<string>();
     private static readonly List<string> Session = new List<string>();
     private static readonly Dictionary<string, List<string>> Requests
         = new Dictionary<string, List<string>>(StringComparer.Ordinal);
@@ -231,6 +239,14 @@ public static class PipelineEventJournal
         lock (Sync)
         {
             Requests[requestName] = new List<string>();
+        }
+    }
+
+    public static void RecordApplication(string value)
+    {
+        lock (Sync)
+        {
+            Application.Add(value);
         }
     }
 
@@ -267,6 +283,20 @@ public static class PipelineEventJournal
 
             Requests.Remove(requestName);
             return events;
+        }
+    }
+
+    // Sorted, not chronological: instances initialize on overlapping threads, so the recorded
+    // order is thread scheduling rather than behavior. Sorting keeps every line and its count
+    // while making the collection reproducible.
+    public static List<string> DrainApplication()
+    {
+        lock (Sync)
+        {
+            var drained = new List<string>(Application);
+            Application.Clear();
+            drained.Sort(StringComparer.Ordinal);
+            return drained;
         }
     }
 
