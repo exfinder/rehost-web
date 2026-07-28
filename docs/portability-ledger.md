@@ -69,6 +69,9 @@ Framework `cold-sync` golden trace exactly.
   [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md).
 - Remaining discarded exceptions in imported source:
   [silent exception swallowing](follow-ups/silent-exception-swallowing.md).
+- Illogical `CallContext` isolation, and with it `HttpContext.Current` outside
+  the request thread:
+  [illogical call context isolation](follow-ups/illogical-call-context-isolation.md).
 
 ## Update rule
 

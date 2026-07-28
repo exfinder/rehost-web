@@ -6,6 +6,19 @@ System.Web restores its internal
 - Logical values flow with `ExecutionContext`.
 - Immutable snapshots prevent child-task writes leaking to parents.
 - Illogical values remain local and clear on execution-context transitions.
+- Illogical isolation is approximate, and fails open. A pooled thread that both
+  suspends and resumes the same illogical state reads the resumption as
+  inheritance, so a work item scheduled onto that thread can observe the values of
+  the one before it. The visible symptom is `HttpContext.Current` — it reaches
+  `CallContext.HostContext` through `ContextBase` — appearing non-null inside a
+  `Task.Run` where .NET Framework guarantees null. Framework kept illogical data in
+  the `ExecutionContext` and simply did not copy it on capture; `AsyncLocal` has no
+  such mode and reports no transition kind, so the suspended-state stack is the
+  only available approximation. Thread ownership is not a substitute: illogical
+  data is execution-context-scoped, not thread-scoped, and clears across
+  `ExecutionContext.Run` on the same thread. Tracked in
+  [illogical call context isolation](follow-ups/illogical-call-context-isolation.md),
+  required before the first asynchronous pipeline scenario.
 - `ILogicalThreadAffinative` values and host contexts flow.
 - Remoting headers, principals, serialization, and internal context swapping
   are omitted because retained System.Web paths do not use them.
