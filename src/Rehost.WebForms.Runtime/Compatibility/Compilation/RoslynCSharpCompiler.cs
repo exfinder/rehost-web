@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -297,17 +298,35 @@ internal sealed class RoslynCSharpCompiler : ICodeCompiler
         var references = new List<MetadataReference>();
         foreach (var path in Directory.EnumerateFiles(directory, "*.dll"))
         {
-            try
+            if (HasManagedMetadata(path))
             {
                 references.Add(MetadataReference.CreateFromFile(path));
-            }
-            catch (BadImageFormatException)
-            {
-                // The shared framework ships native libraries alongside managed ones.
             }
         }
 
         return [.. references];
+    }
+
+    // The shared framework ships native libraries beside managed assemblies, and only on Windows
+    // do they carry the .dll extension. MetadataReference.CreateFromFile defers reading the image,
+    // so an unmanaged file is rejected at compilation instead, as CS0009 against every reference.
+    private static bool HasManagedMetadata(string path)
+    {
+        try
+        {
+            using var stream = File.OpenRead(path);
+            using var peReader = new PEReader(stream);
+
+            return peReader.HasMetadata;
+        }
+        catch (BadImageFormatException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return false;
+        }
     }
 
     private static IEnumerable<ResourceDescription> CreateManifestResources(CompilerParameters options)
