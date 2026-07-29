@@ -30,9 +30,29 @@ paths therefore violate both determinism and reclamation.
 - Preserve virtual-to-generated source diagnostics.
 - Extend the slice-1 application-bin resolver for generated assemblies without
   Framework shadow-copy/unload claims.
-- Decide how long generated literals and resources are emitted portably.
 - Keep compiler/provider selection in
   [compiler-provider-and-target-framework-policy.md](compiler-provider-and-target-framework-policy.md).
+
+## Long literal strings
+
+Decided. Literal markup of 256 characters or more was emitted as a Win32
+resource blob and read back by `StringResourceManager.ReadSafeStringResource`
+through `GetModuleHandle`, `FindResource`, and `LockResource`, addressing the
+memory-mapped module image. That is Windows-only and has no portable equivalent,
+and it would have failed during rendering rather than compilation.
+
+`RoslynCSharpCodeProvider` reports `GeneratorSupport.Win32Resources` as absent,
+which is the capability check the generator already consults, so literals stay
+ordinary metadata strings and no resource file is produced. One branch in
+imported source changes behaviour, and none of it is edited.
+
+The accepted deviation is the lost optimization: Framework wrote UTF-8 bytes
+straight to the response for long ASCII markup, while metadata strings are UTF-16
+and are encoded per request. `StringResourceManager`, `SafeStringResource`, and
+`TemplateControl.ReadStringResource` become unreachable rather than portable.
+Record the ledger row with treatment **inactive** when a slice first compiles a
+page, and add the deferred test that a compiled page emits no
+`WriteUTF8ResourceString` call.
 
 ## Verification
 

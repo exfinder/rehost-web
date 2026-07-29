@@ -304,6 +304,24 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
+    public void Win32_resources_are_reported_unsupported_so_literals_stay_in_metadata()
+    {
+        var provider = new RoslynCSharpCodeProvider();
+
+        provider.Supports(GeneratorSupport.Win32Resources).ShouldBeFalse();
+
+        // Everything else the built-in provider offers must still be reported.
+        foreach (var capability in Enum.GetValues<GeneratorSupport>())
+        {
+            if (capability != GeneratorSupport.Win32Resources)
+            {
+                provider.Supports(capability)
+                    .ShouldBe(new Microsoft.CSharp.CSharpCodeProvider().Supports(capability), capability.ToString());
+            }
+        }
+    }
+
+    [Fact]
     public void Visual_basic_compilation_is_explicitly_unsupported()
     {
         var provider = new UnsupportedVBCodeProvider();
