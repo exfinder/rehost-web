@@ -9,6 +9,10 @@ New test files mirror the folder of the source they cover, so a test for
 `tests/Rehost.WebForms.Runtime.Tests/Compilation/`. Existing flat test files stay
 where they are.
 
+A test that a stub implementation would also satisfy is not covering the
+behavior. Prefer inputs that fail when the implementation degrades, and know
+what the test looks like when it fails, not only when it passes.
+
 ## Architecture design principles
 
 - **Explicit ownership over ambient discovery** — dependencies and lifecycle inputs come from the owning host/component, not process state, registry, environment quirks, or load location.
@@ -50,3 +54,22 @@ Use the non-hanging local build:
 ```text
 dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj --no-restore --disable-build-servers --nologo --verbosity:quiet --maxcpucount:1 /p:UseSharedCompilation=false /nodeReuse:false -clp:ErrorsOnly
 ```
+
+Run tests per project, without the build flags above:
+
+```text
+dotnet test tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj --no-build
+```
+
+The test projects run on Microsoft.Testing.Platform, which forwards unrecognized
+arguments to the test executable. Passing `--nologo` or `--disable-build-servers`
+reports `Zero tests ran` with exit code 5 rather than an argument error.
+
+## Cross-platform validation
+
+Both supported platforms must pass before work is reported as done. Defects so
+far have appeared on only one of them: path separators, hidden-file
+classification, and native libraries carrying the `.dll` extension off Unix.
+
+A branch that exists to handle a platform difference must be exercised on the
+platform that triggers it. A guard that has never executed is not a guard.

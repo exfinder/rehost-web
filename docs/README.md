@@ -39,6 +39,8 @@ Package rationale:
 [dependency-decisions.md](dependency-decisions.md).
 Source/licensing records:
 [`provenance/`](provenance/).
+Framework configuration baseline:
+[framework-config-reference.md](framework-config-reference.md).
 
 ## Current milestone
 
