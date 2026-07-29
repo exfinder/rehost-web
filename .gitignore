@@ -4,3 +4,6 @@ artifacts/build/**/*.binlog
 artifacts/build/**/*.log
 
 .DS_Store
+
+# Golden .NET Framework configuration, pulled locally; see docs/framework-config-reference.md
+third_party/microsoft/framework-config/
