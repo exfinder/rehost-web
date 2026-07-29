@@ -182,6 +182,62 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
+    public void Implicit_references_cover_the_framework_surface_a_page_uses()
+    {
+        using var scope = new CompilationScope();
+        scope.AddSource(
+            """
+            using System;
+            using System.Collections;
+            using System.Collections.Generic;
+            using System.Collections.Specialized;
+            using System.ComponentModel;
+            using System.ComponentModel.DataAnnotations;
+            using System.Data;
+            using System.Globalization;
+            using System.IO;
+            using System.Linq;
+            using System.Text;
+            using System.Text.RegularExpressions;
+            using System.Threading.Tasks;
+            using System.Xml;
+            using System.Xml.Linq;
+
+            public class Page
+            {
+                [Required] public string Name { get; set; }
+
+                public object Render()
+                {
+                    var table = new DataTable("t");
+                    table.Columns.Add("c", typeof(int));
+                    var values = new NameValueCollection { { "a", "b" } };
+                    var numbers = new List<int> { 1, 2, 3 }.Where(i => i > 1).ToArray();
+                    var document = XDocument.Parse("<r/>");
+                    var xml = new XmlDocument();
+                    var text = new StringBuilder().AppendFormat(
+                        CultureInfo.InvariantCulture, "{0}", numbers.Length).ToString();
+                    var matched = Regex.IsMatch(text, "[0-9]");
+                    var stream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+                    var task = Task.FromResult(table.TableName);
+                    var converter = TypeDescriptor.GetConverter(typeof(int));
+                    IEnumerable sequence = numbers;
+
+                    return new object[]
+                    {
+                        table, values, document, xml, matched, stream, task, converter, sequence, Name,
+                    };
+                }
+            }
+            """);
+
+        var results = scope.Compile();
+
+        results.Errors.HasErrors.ShouldBeFalse(
+            string.Join(Environment.NewLine, results.Output.Cast<string>()));
+    }
+
+    [Fact]
     public void Honours_referenced_assemblies()
     {
         using var scope = new CompilationScope();
