@@ -17,6 +17,21 @@ contracts. These packages are runtime architecture dependencies, not only build
 tools. Toolset selection, deployment, language providers, and precompilation
 remain separate compatibility decisions.
 
+## Roslyn
+
+`Microsoft.CodeAnalysis.CSharp` compiles generated pages in process, because
+`System.CodeDom` cannot: its providers throw `PlatformNotSupportedException`.
+See [ADR 0041](adr/0041-compile-pages-through-a-configured-roslyn-provider.md).
+
+The dependency is deployed, not merely built against, and costs roughly 10 MB.
+Nothing loads it until a compilation is requested. Compiling out of process
+would instead require shipping a compiler toolset, discovering an executable at
+runtime, and owning compiler-server lifetime.
+
+The pinned version determines the language surface an application compiles
+against whenever `compilerOptions` does not specify `/langversion:`, so bumping
+it is a compatibility change, not only a servicing one.
+
 ## Security compatibility packages
 
 `System.Security.Permissions` restores legacy type availability but not CAS

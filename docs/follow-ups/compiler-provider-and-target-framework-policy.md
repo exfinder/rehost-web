@@ -1,31 +1,48 @@
 # Compiler provider and target-framework policy
 
-Status: open. Priority: high. Depends on runtime codegen/loading.
+Status: partially resolved. Priority: medium. Depends on runtime codegen/loading.
 
-## Problem
+The provider contract is decided and implemented; see
+[ADR 0041](../adr/0041-compile-pages-through-a-configured-roslyn-provider.md).
+What remains is everything the first C# provider does not reach.
 
-Dynamic page compilation historically selects configured CodeDOM providers,
-Framework targets, imports, references, and compiler options. Hardcoding a C#
-provider or treating .NET Framework names as installed on non-Windows makes a
-demo run but changes the application contract. Registry discovery is not
-portable.
+## Resolved
 
-## Required decisions
+- Provider selection through `<system.web><compilation><compilers>`, with no
+  imported source change and therefore no ledger row.
+- Reference set: shared framework implicitly, `<compilation><assemblies>` and
+  `bin` through `CompilerParameters.ReferencedAssemblies`.
+- Compiler options parsed by Roslyn's command-line parser; ASP.NET's warning
+  policy reapplied in the provider.
+- Diagnostics mapped through `#line` pragmas to the originating virtual path.
+- C# only, `/langversion:7.3`, Visual Basic explicitly unsupported.
+- `targetFramework` requires no portable capability discovery: the downlevel
+  branches are design-time only, and ledger row P16 governs the upper bound.
 
-- Supported languages/providers for the first milestone and explicit rejection
-  for others.
-- Provider configuration, deployment, lifetime, and compiler-server policy.
-- Interpretation of `targetFramework`, legacy compiler versions, references,
-  imports, resources, debug settings, and warning options.
-- Portable target capability discovery without registry probes.
-- Diagnostic mapping back to source/page locations.
+## Open
+
+- Visual Basic support, or a decision that it stays unsupported permanently.
+- Custom and third-party `CodeDomProvider` implementations, including providers
+  that still expect `CompileAssemblyFromDom` and provider options. .NET's
+  `CompilerInfo` exposes no `ProviderOptions`, so `<providerOption>` elements are
+  inert.
+- Batch compilation behaviour: `batch`, `maxBatchSize`,
+  `maxBatchGeneratedFileSize`, `batchTimeout`, and `maxConcurrentCompilations`.
+- Linked resources, satellite culture assemblies, and
+  `assemblyPostProcessorType`.
+- Precompilation and the `ClientBuildManager` surface, which is the only consumer
+  of multi-targeting and reference-assembly resolution.
+- Cross-machine reproducible output, which needs `/pathmap` and deterministic
+  emission together.
 
 ## Verification
 
-The first C# fixture gets focused compiler-service tests. Record deferred tests
-for VB, custom providers, options, resources, batch compilation, and failures.
+Focused provider tests cover emission, mapped diagnostics, option passthrough,
+language version, references, debug symbols, and the unsupported language. Record
+deferred tests alongside the open items above.
 
 ## Done when
 
-C# page compilation works through an explicit extensible contract, not a
-hardcoded bypass, and unsupported configurations fail actionably.
+Every configuration an application can express either compiles or fails
+actionably, and no supported configuration depends on a provider the port
+selected implicitly.
