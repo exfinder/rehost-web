@@ -3,6 +3,12 @@
 Status: open. Priority: highest. It precedes the first portable request slice
 and requires a Windows .NET Framework 4.8.1 oracle.
 
+The harness gates the first slice and stays a standing regression gate. It is not
+applied per slice: by
+[ADR 0044](../adr/0044-gate-differentials-by-evidence-not-by-slice.md) a new
+fixture is proposed only where the port replaces native or host-owned code, or
+must match a format it cannot derive from its own inputs.
+
 Build a documented oracle workflow that runs equivalent fixtures on .NET
 Framework and captures normalized observable expectations. Normalization must
 exclude transport/host noise while retaining status, selected headers, body,

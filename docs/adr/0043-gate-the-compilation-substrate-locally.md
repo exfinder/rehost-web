@@ -4,9 +4,8 @@ status: accepted
 
 # Gate the compilation substrate locally
 
-[ADR 0040](0040-port-in-vertical-semantic-slices.md) requires a differential gate
-per slice. Slice 2 takes port-local tests instead, on both supported platforms,
-and its ordering is ratified by slice 3.
+[ADR 0040](0040-port-in-vertical-semantic-slices.md) required a differential gate
+per slice. Slice 2 takes port-local tests instead, on both supported platforms.
 
 Slice 1 replaced native and host-owned code, so only a Framework golden could
 establish that the replacement behaved identically. Slice 2's sequencing —
@@ -24,10 +23,13 @@ implementation details as contract, against
 [ADR 0029](0029-require-strict-differential-comparison.md), which keeps the
 normalization manifest empty.
 
-Detection is deferred, not abandoned. Slice 3's `.aspx` fixture cannot render
-without this machinery, so its differential ratifies the ordering one slice
-later. Port-local tests assert that ordering now, so a slice-3 mismatch has a
-known-good local expectation to compare against.
+Port-local tests assert that ordering now.
+
+The deferral to slice 3 named here is withdrawn by
+[ADR 0044](0044-gate-differentials-by-evidence-not-by-slice.md), which
+generalizes this ADR's reasoning: ordering decided by imported source running
+verbatim is not something a differential decides. Slice 3 is gated port-locally
+too, and the debt is closed as no longer owed rather than carried forward.
 
 The slice-1 golden remains a regression gate throughout: every change here must
 keep `PortableParity.Host verify` matching exactly.

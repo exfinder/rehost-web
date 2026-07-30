@@ -16,4 +16,6 @@ Port and prove the managed runtime in this order:
    resources, and routing; and
 7. graceful shutdown and broader transport features.
 
-Each slice requires a differential gate before work proceeds to the next.
+Each slice is gated before work proceeds to the next.
+[ADR 0044](0044-gate-differentials-by-evidence-not-by-slice.md) decides whether
+that gate is a Framework differential or port-local tests on both platforms.
