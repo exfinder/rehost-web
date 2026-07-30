@@ -1321,8 +1321,20 @@ setup,
             }
             return env;
 #else
-            PublishApplicationConfiguration(appHost, ref hostingParameters);
-            return CurrentAppDomainHosting.CreateHostingEnvironment(this, appId, appHost, hostingParameters);
+            AppDomain.CurrentDomain.SetData(_configBuildersIgnoreLoadFailuresSwitch, true);
+
+            // Framework caught every failure from this configuration read and handed it to
+            // HostingEnvironment.Initialize, which renders it per request rather than aborting.
+            Exception appDomainStartupConfigurationException = null;
+            try {
+                PublishApplicationConfiguration(appHost, ref hostingParameters);
+            }
+            catch (Exception e) {
+                appDomainStartupConfigurationException = e;
+            }
+
+            return CurrentAppDomainHosting.CreateHostingEnvironment(
+                this, appId, appHost, hostingParameters, appDomainStartupConfigurationException);
 #endif
         }
 

@@ -23,7 +23,8 @@ internal static class CurrentAppDomainHosting
         ApplicationManager applicationManager,
         string appId,
         IApplicationHost appHost,
-        HostingEnvironmentParameters hostingParameters)
+        HostingEnvironmentParameters hostingParameters,
+        Exception startupConfigurationException = null)
     {
         if (hostingParameters != null &&
             (hostingParameters.HostingFlags & HostingEnvironmentFlags.ClientBuildManager) != 0)
@@ -61,12 +62,26 @@ internal static class CurrentAppDomainHosting
         hostingParameters.FcnSkipReadAndCacheDacls = true;
 
         var environment = new HostingEnvironment();
-        environment.Initialize(
-            applicationManager,
-            appHost,
-            configuration.ConfigMapPathFactory,
-            hostingParameters,
-            policyLevel: null);
+        if (startupConfigurationException == null)
+        {
+            environment.Initialize(
+                applicationManager,
+                appHost,
+                configuration.ConfigMapPathFactory,
+                hostingParameters,
+                policyLevel: null);
+        }
+        else
+        {
+            environment.Initialize(
+                applicationManager,
+                appHost,
+                configuration.ConfigMapPathFactory,
+                hostingParameters,
+                policyLevel: null,
+                startupConfigurationException);
+        }
+
         return environment;
     }
 

@@ -17,14 +17,17 @@ public sealed class ApplicationConfigurationPublicationTests
         trace.ShouldContain("unobtrusive-validation:WebForms");
     }
 
+    // Framework hands a startup configuration failure to HostingEnvironment.Initialize rather than
+    // aborting, so activation completes and every request renders it.
     [Fact]
-    public void An_Application_Declaring_No_Target_Framework_Is_Refused()
+    public void An_Application_Declaring_No_Target_Framework_Is_Refused_Per_Request()
     {
-        var failure = RunExpectingFailure("legacy-target");
+        var trace = Run("legacy-target");
 
-        failure.ShouldContain("targetFramework");
-        failure.ShouldContain("4.5");
-        failure.ShouldContain("no target framework");
+        trace.ShouldContain("request:/quirks:500");
+        trace.ShouldContain(
+            entry => entry.StartsWith("error-body:") && entry.Contains("targetFramework"),
+            "The rendered error should name the missing targetFramework.");
     }
 
     private static List<string> Run(string fixture)
@@ -33,14 +36,6 @@ public sealed class ApplicationConfigurationPublicationTests
 
         exitCode.ShouldBe(0, standardError);
         return trace;
-    }
-
-    private static string RunExpectingFailure(string fixture)
-    {
-        var (exitCode, standardError, _) = Start(fixture);
-
-        exitCode.ShouldNotBe(0, "Activation was expected to be refused.");
-        return standardError;
     }
 
     private static (int ExitCode, string StandardError, List<string> Trace) Start(string fixture)
