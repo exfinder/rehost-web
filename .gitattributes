@@ -1,0 +1,15 @@
+* text=auto eol=lf
+
+# Fixture markup bytes reach a byte-compared rendered response, and the Windows
+# validation host has core.autocrlf=true at system level, so an unpinned .aspx
+# would render CRLF there and LF on macOS.
+
+# Verbatim imports are hash- and tree-verified against upstream; converting line
+# endings would break docs/provenance/*.json.
+third_party/** -text
+src/System.Web.ReferenceSource/** -text
+
+# Recorded response bytes, not source. HttpWriter.WriteLine emits a hardcoded CRLF
+# pair while markup literals carry the source's LF, so these files are a deliberate
+# mix that any normalization would corrupt.
+*.expected.html -text
