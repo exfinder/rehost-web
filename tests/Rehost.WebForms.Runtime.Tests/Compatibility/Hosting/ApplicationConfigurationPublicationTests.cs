@@ -17,17 +17,33 @@ public sealed class ApplicationConfigurationPublicationTests
         trace.ShouldContain("unobtrusive-validation:WebForms");
     }
 
-    // The same probe on an application declaring nothing, so the assertion above cannot pass by
-    // reporting a constant.
     [Fact]
-    public void An_Application_Declaring_No_Target_Framework_Keeps_The_Pre_45_Default()
+    public void An_Application_Declaring_No_Target_Framework_Is_Refused()
     {
-        var trace = Run("legacy-target");
+        var failure = RunExpectingFailure("legacy-target");
 
-        trace.ShouldContain("unobtrusive-validation:None");
+        failure.ShouldContain("targetFramework");
+        failure.ShouldContain("4.5");
+        failure.ShouldContain("no target framework");
     }
 
     private static List<string> Run(string fixture)
+    {
+        var (exitCode, standardError, trace) = Start(fixture);
+
+        exitCode.ShouldBe(0, standardError);
+        return trace;
+    }
+
+    private static string RunExpectingFailure(string fixture)
+    {
+        var (exitCode, standardError, _) = Start(fixture);
+
+        exitCode.ShouldNotBe(0, "Activation was expected to be refused.");
+        return standardError;
+    }
+
+    private static (int ExitCode, string StandardError, List<string> Trace) Start(string fixture)
     {
         var root = Directory.CreateTempSubdirectory("rehost-quirks-");
         try
@@ -58,9 +74,11 @@ public sealed class ApplicationConfigurationPublicationTests
             Task.WaitAll(standardError, standardOutput);
             process.WaitForExit();
 
-            process.ExitCode.ShouldBe(0, standardError.Result);
+            var trace = File.Exists(tracePath)
+                ? File.ReadAllLines(tracePath).ToList()
+                : new List<string>();
 
-            return File.ReadAllLines(tracePath).ToList();
+            return (process.ExitCode, standardError.Result, trace);
         }
         finally
         {

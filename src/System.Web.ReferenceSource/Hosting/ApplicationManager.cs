@@ -1350,9 +1350,18 @@ setup,
             }
 
             FrameworkName targetFrameworkName = httpRuntimeSection.GetTargetFrameworkName();
-            if (targetFrameworkName != null) {
-                AppDomain.CurrentDomain.SetData(BinaryCompatibility.TargetFrameworkKey, targetFrameworkName);
+            // Below 4.5 the quirks reach paths this port does not carry, view state crypto first.
+            // Compared by hand: touching BinaryCompatibility runs its static constructor, which
+            // captures Current from the slot published below and would freeze it at pre-4.5.
+            if (targetFrameworkName == null
+                || !String.Equals(targetFrameworkName.Identifier, ".NETFramework", StringComparison.Ordinal)
+                || targetFrameworkName.Version < VersionUtil.Framework45) {
+                throw new ConfigurationErrorsException(
+                    "Rehost.WebForms requires <httpRuntime targetFramework=\"4.5\" /> or later. This application declares "
+                    + (targetFrameworkName == null ? "no target framework" : targetFrameworkName.ToString()) + ".");
             }
+
+            AppDomain.CurrentDomain.SetData(BinaryCompatibility.TargetFrameworkKey, targetFrameworkName);
 
             if (httpRuntimeSection.DefaultRegexMatchTimeout != TimeSpan.Zero) {
                 AppDomain.CurrentDomain.SetData(_regexMatchTimeoutKey, httpRuntimeSection.DefaultRegexMatchTimeout);

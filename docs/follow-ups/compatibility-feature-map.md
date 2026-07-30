@@ -21,6 +21,14 @@ contract/test.
 Implemented behavior remains canonical in feature contracts until this aggregate
 map is complete.
 
+## Supported applications
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| `<httpRuntime targetFramework="4.5" />` or later | Required | Activation is refused otherwise, naming the fix. Below 4.5 the quirks switch selects pre-4.5 behavior at some thirty sites, including `machineKey compatibilityMode`, which routes view state through native cryptography this port refuses. The Visual Studio project template has emitted the attribute since 4.5 |
+| Native ASP.NET libraries | Unsupported | `UnsafeNativeMethods` refuses on type initialization, so an unported path names the contract rather than reporting a missing `webengine4.dll` (ledger P41) |
+| Legacy machine key cryptography | Unsupported | Reached by `machineKey compatibilityMode` below `Framework45`, which the gate above already refuses, and by the obsolete `MachineKey.Encode`/`Decode` on any application. `MachineKey.Protect`/`Unprotect` are unaffected |
+
 ## Compilation substrate
 
 Supported means portable tested behavior on macOS `arm64` and Windows `x64`,
