@@ -77,3 +77,10 @@ classification, and native libraries carrying the `.dll` extension off Unix.
 
 A branch that exists to handle a platform difference must be exercised on the
 platform that triggers it. A guard that has never executed is not a guard.
+
+Cross-process synchronization uses a named `Mutex`. It is the only named
+synchronization object supported on every target: named `EventWaitHandle` and
+`Semaphore` throw `PlatformNotSupportedException` off Windows. Names carry the
+`Local\` prefix, which is honored on both. A name derived from a string hash
+must use a stable hash, since `string.GetHashCode` is randomized per process and
+each process would otherwise take a different mutex (ledger P38).
