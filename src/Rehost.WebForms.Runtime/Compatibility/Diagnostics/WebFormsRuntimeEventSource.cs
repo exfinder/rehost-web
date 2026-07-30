@@ -23,8 +23,13 @@ namespace System.Web.Util {
         }
 
         [Event(3, Level = EventLevel.Informational, Message = "{0}: {1}")]
-        internal void BinAssemblyResolution(string outcome, string assemblyName) {
+        internal void AssemblyResolution(string outcome, string assemblyName) {
             WriteEvent(3, outcome, assemblyName);
+        }
+
+        [Event(4, Level = EventLevel.Error, Message = "{0}: {1}")]
+        internal void CompilationFailed(string outputAssembly, string diagnostics) {
+            WriteEvent(4, outputAssembly, diagnostics);
         }
     }
 }

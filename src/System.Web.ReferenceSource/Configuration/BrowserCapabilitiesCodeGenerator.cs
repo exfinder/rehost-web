@@ -833,7 +833,14 @@ namespace System.Web.Configuration {
                 throw new HttpCompileException(SR.GetString(SR.Browser_compile_error));
             }
 
+#if NETFRAMEWORK
             Assembly resultAssembly = results.CompiledAssembly;
+#else
+            // One load context for every generated assembly; see GeneratedAssemblyLoader. This
+            // file is excluded from the portable build, so the branch is inert until machine-level
+            // browser capability generation is supported.
+            Assembly resultAssembly = System.Web.Util.GeneratedAssemblyLoader.Load(results.PathToAssembly);
+#endif
 
             GacUtil gacutil = new GacUtil();
             gacutil.GacInstall(resultAssembly.Location);

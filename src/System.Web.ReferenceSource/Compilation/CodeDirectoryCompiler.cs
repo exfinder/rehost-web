@@ -173,6 +173,7 @@ internal class CodeDirectoryCompiler {
             Debug.Assert(result == null);
             Debug.Assert(resultAssembly == null);
 
+#if NETFRAMEWORK
             // If there is already a loaded module with the same path, try to wait for it to be unloaded.
             // Otherwise, we would end up loading this old assembly instead of the new one (VSWhidbey 554697)
             DateTime waitLimit = DateTime.UtcNow.AddMilliseconds(3000);
@@ -191,6 +192,18 @@ internal class CodeDirectoryCompiler {
                     throw new HttpException(SR.GetString(SR.Assembly_already_loaded, results.PathToAssembly));
                 }
             }
+#else
+            // GetModuleHandle is a Win32 import, and the wait it guards cannot succeed here:
+            // assemblies never unload, so a path loaded once stays loaded for the process. The
+            // same condition reports the same failure without the retry window.
+            if (GeneratedAssemblyLoader.IsLoadedFrom(results.PathToAssembly)) {
+                throw new HttpException(SR.GetString(SR.Assembly_already_loaded, results.PathToAssembly));
+            }
+
+            // This is the one path that does not reach BuildProvider.GetBuildResult, so the load
+            // door is taken here rather than through CompilerResults.CompiledAssembly.
+            results.CompiledAssembly = GeneratedAssemblyLoader.Load(results.PathToAssembly);
+#endif
 
             resultAssembly = results.CompiledAssembly;
         }

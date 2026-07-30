@@ -1054,10 +1054,10 @@ namespace System.Web {
 #pragma warning restore 0618
 #else
             // AppendPrivatePath, SetShadowCopyPath, and SetCachePath are no-ops outside the
-            // .NET Framework loader, so 'bin' reaches the loader through an explicit fallback
-            // resolver instead. Runtime-owned assemblies resolve first and win, reproducing the
-            // Framework precedence where the GAC beat 'bin'.
-            BinAssemblyResolver.Install(appDomainAppPath + BinDirectoryName);
+            // .NET Framework loader, so 'bin' and the codegen directory reach the loader through
+            // an explicit fallback resolver instead. Runtime-owned assemblies resolve first and
+            // win, reproducing the Framework precedence where the GAC beat both.
+            GeneratedAssemblyLoader.Install(appDomainAppPath + BinDirectoryName, _codegenDir);
 #endif
 
             _fusionInited = true;

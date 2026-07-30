@@ -326,6 +326,15 @@ public abstract class BuildProvider {
         if (flags[noBuildResult])
             return null;
 
+#if !NETFRAMEWORK
+        // CompilerResults.CompiledAssembly loads through Assembly.LoadFile, which creates a
+        // separate load context per assembly. Supplying the assembly keeps every generated
+        // assembly in the one context, so types compiled against each other share an identity.
+        if (results != null && !String.IsNullOrEmpty(results.PathToAssembly)) {
+            results.CompiledAssembly = GeneratedAssemblyLoader.Load(results.PathToAssembly);
+        }
+#endif
+
         // Access the CompiledAssembly property to make sure the assembly gets loaded
         // Otherwise, the user code in GetGeneratedType() will fail to load it in medium trust since
         // they don't have access to the codegen folder
