@@ -65,9 +65,11 @@ single-digit percent of its render, unmeasured here.
 
 `StringResourceManager`, `SafeStringResource`, and
 `TemplateControl.ReadStringResource` become unreachable rather than portable.
-Record the ledger row with treatment **inactive** when a slice first compiles a
-page, and add the deferred test that a compiled page emits no
-`WriteUTF8ResourceString` call.
+Recorded as ledger row P39 with treatment **inactive**, and asserted by
+`PageCompilationTests`: a compiled page carrying a literal run past the threshold
+references none of `WriteUTF8ResourceString`,
+`CreateResourceBasedLiteralControl`, or `SetStringResourcePointer`, and its
+assembly carries no Win32 resource directory.
 
 ### A portable reader is available if the saving is ever worth it
 
@@ -106,8 +108,9 @@ Page compilation and its build results remain
 
 ## Open
 
-- Page, user control, and master page build providers are registered but no
-  slice compiles them yet.
+- User control and master page build providers are registered but no slice
+  compiles them yet. Pages are covered by
+  [dynamic ASPX integration](dynamic-aspx-integration.md).
 - Batch compilation settings, satellite culture policy beyond the neutral and
   one-culture case, and `assemblyPostProcessorType` stay with
   [compiler policy](compiler-provider-and-target-framework-policy.md).

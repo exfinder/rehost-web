@@ -21,9 +21,35 @@ Auto-generated keys are process-scoped:
 Explicit `<machineKey>` remains the stable restart/scale-out contract. A
 host-supplied key source is not yet designed.
 
+## `__VIEWSTATEGENERATOR` cannot agree with Framework
+
+Found while scoping the page slice, and it decides one of the questions below.
+
+`Page.GetClientStateIdentifier` combines
+`StringUtil.GetNonRandomizedHashCode(TemplateSourceDirectory, ignoreCase:true)`
+with the same over the generated page class name, and `Page.EndFormRender` writes
+the result into the response as the `__VIEWSTATEGENERATOR` hidden field. So the
+value is part of the rendered body of any page carrying `<form runat="server">`.
+
+The two runtimes compute it differently **by design**. Ledger P38 removed the
+`#if NETFRAMEWORK` shortcut to `string.GetHashCode()` and
+`StringComparer.InvariantCultureIgnoreCase`, because .NET randomizes both per
+process and every identity derived from them — the `CompilationLock` mutex name
+among them — differed between processes. Framework keeps those branches and its
+non-randomized BCL algorithms; this port always uses the stable algorithm the
+method already carries. The two do not produce the same eight hex characters.
+
+The divergence is permanent and cannot be normalized away under
+[ADR 0029](../adr/0029-require-strict-differential-comparison.md). It is why the
+slice-3 fixture carries no server form, and it means any later Framework
+differential over a page with a form needs this recorded as an accepted
+compatibility deviation before it can pass.
+
 ## Required decisions
 
-- Whether the first fixture emits protected ViewState.
+- Whether the first fixture emits protected ViewState. The slice-3 page fixture
+  does not: it carries no server form, so no `__VIEWSTATE` or
+  `__VIEWSTATEGENERATOR` is rendered.
 - Portable MAC/encryption algorithms and compatibility requirements.
 - Key source, isolation, persistence, rotation, deployment sharing, and file
   permissions.

@@ -8,26 +8,34 @@ namespace Rehost.WebForms.ScenarioHost;
 // completed and to surface an error page when one is produced.
 internal sealed class ScenarioWorkerRequest : HttpWorkerRequest
 {
+    private readonly string _rawUrl;
     private readonly string _path;
+    private readonly string _queryString;
     private readonly MemoryStream _body = new();
     private readonly ManualResetEventSlim _completed = new(false);
 
-    internal ScenarioWorkerRequest(string path)
+    internal ScenarioWorkerRequest(string rawUrl)
     {
-        _path = path;
+        _rawUrl = rawUrl;
+
+        var separator = rawUrl.IndexOf('?');
+        _path = separator < 0 ? rawUrl : rawUrl[..separator];
+        _queryString = separator < 0 ? string.Empty : rawUrl[(separator + 1)..];
     }
 
     internal int StatusCode { get; private set; } = 200;
 
     internal string Body => Encoding.UTF8.GetString(_body.ToArray());
 
+    internal byte[] BodyBytes => _body.ToArray();
+
     internal bool WaitForCompletion(TimeSpan timeout) => _completed.Wait(timeout);
 
     public override string GetUriPath() => _path;
 
-    public override string GetQueryString() => string.Empty;
+    public override string GetQueryString() => _queryString;
 
-    public override string GetRawUrl() => _path;
+    public override string GetRawUrl() => _rawUrl;
 
     public override string GetHttpVerbName() => "GET";
 

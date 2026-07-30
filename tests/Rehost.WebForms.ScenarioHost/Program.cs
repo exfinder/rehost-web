@@ -1,6 +1,10 @@
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Rehost.WebForms.Hosting;
 
 namespace Rehost.WebForms.ScenarioHost;
@@ -55,6 +59,12 @@ public static class Program
     {
         Environment.SetEnvironmentVariable(HostJournal.TraceVariable, options.TracePath);
 
+        if (options.Serve)
+        {
+            ServeAsync(options).GetAwaiter().GetResult();
+            return;
+        }
+
         WebFormsApplication.Initialize(new WebFormsApplicationOptions
         {
             ApplicationId = options.ApplicationId,
@@ -87,9 +97,14 @@ public static class Program
         {
             HostJournal.Record("codegen-dir:" + HttpRuntime.CodegenDir);
 
-            foreach (var path in options.Requests)
+            for (var i = 0; i < options.Requests.Count; i++)
             {
-                var status = runner.Request(path);
+                var path = options.Requests[i];
+                var responsePath = options.ResponseDirectory == null
+                    ? null
+                    : Path.Combine(options.ResponseDirectory, i + ".body");
+
+                var status = runner.Request(path, responsePath);
                 HostJournal.Record("request:" + path + ":" + status);
             }
 
@@ -107,6 +122,67 @@ public static class Program
             manager.StopObject(options.ApplicationId, typeof(ScenarioRunner));
             manager.ShutdownApplication(options.ApplicationId);
             manager.Close();
+        }
+    }
+
+    // The same application, reached over a socket through the production adapter rather than by
+    // calling HttpRuntime.ProcessRequest directly.
+    private static async Task ServeAsync(ScenarioOptions options)
+    {
+        var builder = WebApplication.CreateSlimBuilder();
+        builder.Logging.ClearProviders();
+        builder.WebHost.ConfigureKestrel(kestrel => kestrel.AddServerHeader = false);
+        builder.WebHost.UseUrls("http://127.0.0.1:0");
+
+        builder.AddRehostWebForms(configured =>
+        {
+            configured.ApplicationId = options.ApplicationId;
+            configured.PhysicalRootPath = options.ApplicationPath;
+            configured.VirtualRootPath = "/";
+            configured.CompilationTempDirectory = options.CompilationTempDirectory;
+            configured.MachineConfigurationFilePath = Path.Combine(
+                AppContext.BaseDirectory,
+                "configs",
+                "rehost-webforms.machine.config");
+            configured.RootWebConfigurationFilePath = Path.Combine(
+                AppContext.BaseDirectory,
+                "configs",
+                "rehost-webforms.web.config");
+        });
+
+        var app = builder.Build();
+        app.UseRehostWebForms();
+
+        await app.StartAsync();
+
+        try
+        {
+            var address = app.Urls.FirstOrDefault()
+                ?? throw new InvalidOperationException("Kestrel reported no bound address.");
+
+            using var client = new HttpClient { BaseAddress = new Uri(address) };
+            client.Timeout = TimeSpan.FromSeconds(30);
+
+            for (var i = 0; i < options.Requests.Count; i++)
+            {
+                var path = options.Requests[i];
+                using var response = await client.GetAsync(path);
+                var body = await response.Content.ReadAsByteArrayAsync();
+
+                if (options.ResponseDirectory != null)
+                {
+                    await File.WriteAllBytesAsync(
+                        Path.Combine(options.ResponseDirectory, i + ".body"),
+                        body);
+                }
+
+                HostJournal.Record("request:" + path + ":" + (int)response.StatusCode);
+                HostJournal.Record("content-type:" + response.Content.Headers.ContentType);
+            }
+        }
+        finally
+        {
+            await app.StopAsync();
         }
     }
 
@@ -146,13 +222,17 @@ internal sealed class ScenarioOptions
         string compilationTempDirectory,
         string tracePath,
         string? holdGate,
+        string? responseDirectory,
+        bool serve,
         List<string> requests)
     {
+        Serve = serve;
         HoldGate = holdGate;
         ApplicationId = applicationId;
         ApplicationPath = applicationPath;
         CompilationTempDirectory = compilationTempDirectory;
         TracePath = tracePath;
+        ResponseDirectory = responseDirectory;
         Requests = requests;
     }
 
@@ -166,6 +246,10 @@ internal sealed class ScenarioOptions
 
     internal string? HoldGate { get; }
 
+    internal string? ResponseDirectory { get; }
+
+    internal bool Serve { get; }
+
     internal List<string> Requests { get; }
 
     internal static ScenarioOptions Parse(string[] args)
@@ -175,6 +259,8 @@ internal sealed class ScenarioOptions
         string? compilationTempDirectory = null;
         string? tracePath = null;
         string? holdGate = null;
+        string? responseDirectory = null;
+        var serve = false;
         var requests = new List<string>();
 
         for (var i = 0; i < args.Length; i++)
@@ -202,6 +288,13 @@ internal sealed class ScenarioOptions
                     holdGate = Require(value, "--hold-gate");
                     i++;
                     break;
+                case "--response-dir":
+                    responseDirectory = Path.GetFullPath(Require(value, "--response-dir"));
+                    i++;
+                    break;
+                case "--serve":
+                    serve = true;
+                    break;
                 case "--request":
                     requests.Add(Require(value, "--request"));
                     i++;
@@ -222,6 +315,8 @@ internal sealed class ScenarioOptions
             Path.GetFullPath(Require(compilationTempDirectory, "--temp")),
             Path.GetFullPath(Require(tracePath, "--trace")),
             holdGate,
+            responseDirectory,
+            serve,
             requests);
     }
 
@@ -240,7 +335,7 @@ internal sealed class ScenarioOptions
 // requests enter an activated application.
 public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
 {
-    public int Request(string path)
+    public int Request(string path, string? responsePath)
     {
         var request = new ScenarioWorkerRequest(path);
         HttpRuntime.ProcessRequest(request);
@@ -248,6 +343,11 @@ public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
         if (!request.WaitForCompletion(TimeSpan.FromSeconds(30)))
         {
             throw new TimeoutException("The request did not complete: " + path);
+        }
+
+        if (responsePath != null)
+        {
+            File.WriteAllBytes(responsePath, request.BodyBytes);
         }
 
         if (request.StatusCode >= 500)

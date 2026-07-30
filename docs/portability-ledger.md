@@ -20,6 +20,11 @@ behavior remains under `NETFRAMEWORK`.
 P27–P32 were reached by `PortableParity.Host verify`, which now matches the
 Framework `cold-sync` golden trace exactly.
 
+P39 is exercised by `PageCompilationTests`, which compiles a page carrying a
+literal run past the threshold and asserts the generated assembly references
+none of `WriteUTF8ResourceString`, `CreateResourceBasedLiteralControl`, or
+`SetStringResourcePointer`, and carries no Win32 resource directory.
+
 P22 and P34–P38 are exercised by `CodegenSubstrateTests`, which activates real
 applications in child processes on both platforms. No differential probe reaches
 them: the slice-2 gate is port-local by
@@ -72,6 +77,7 @@ posts to the application's synchronization context.
 | P36 | `MapPathActual` trailing separator | A virtual path with a trailing slash had a literal `"\\"` appended to its mapped physical path, and `UrlPath.PathEndsWithExtraSlash` recognized only that character. Off Windows every directory-existence check therefore ran against `.../name/\\` and reported absent, which made a configured `App_Code` subdirectory look missing. Use `Path.DirectorySeparatorChar` in both places; the Windows result is unchanged. Same defect class as P25 and P32. |
 | P37 | `HashCodeCombiner` encoding identity | `Encoding.GetHashCode()` folds in its fallback's hash, which hashes a string and is randomized per process, so the top-level file hash differed on every run and preserved build results could never be reused. Add a typed overload combining `CodePage` and `WebName`, which every call site selects by overload resolution. |
 | P38 | `StringUtil.GetNonRandomizedHashCode` | Both helpers shortcut to `string.GetHashCode()` and `StringComparer` when `UseRandomizedStringHashAlgorithm` is off, which .NET Framework left non-randomized but .NET randomizes per process. Every identity derived from them differed between processes: the `CompilationLock` mutex name, so no cross-process lock existed at all; `Page` hash codes; and auto-generated machine-key names. Always use the stable algorithm the method already carries. Framework keeps its branches. |
+| P39 | `StringResourceManager` | **inactive.** Literal markup of 256 characters or more was emitted as a Win32 resource blob and read back by `ReadSafeStringResource` through `GetModuleHandle`, `FindResource`, and `LockResource`, which address the memory-mapped module image and exist only on Windows. `RoslynCSharpCodeProvider` reports `GeneratorSupport.Win32Resources` as absent, which is the capability `BaseTemplateCodeDomTreeGenerator.UseResourceLiteralString` already consults, so the generator emits an ordinary `Write` of a metadata string and produces no resource file. No imported source is edited. `StringResourceManager`, `SafeStringResource`, `ResourceBasedLiteralControl`, and `TemplateControl.ReadStringResource` become unreachable rather than portable. The accepted deviation is the lost optimization: `HttpWriter.WriteUTF8ResourceString` copied resource bytes straight into the response buffer, and a UTF-16 metadata string is transcoded per request instead. Rendered bytes are unchanged. A portable `PEReader` reader is proven and costed in [runtime codegen](follow-ups/runtime-codegen-and-loading.md) if the saving is ever wanted. |
 
 ## Open path
 
