@@ -12,7 +12,7 @@ public sealed class AspNetCoreWorkerRequestTests
         Path.Combine(Path.GetTempPath(), "rehost-hosting-fixture");
 
     [Fact]
-    public void Uri_path_includes_the_path_base()
+    public void Uri_Path_Includes_The_Path_Base()
     {
         var request = Create(path: "/oracle", pathBase: "/app");
 
@@ -20,7 +20,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Uri_path_falls_back_to_root_when_the_request_carries_none()
+    public void Uri_Path_Falls_Back_To_Root_When_The_Request_Carries_None()
     {
         var request = Create(path: "");
 
@@ -28,7 +28,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Query_string_drops_the_leading_question_mark()
+    public void Query_String_Drops_The_Leading_Question_Mark()
     {
         var request = Create(query: "?a=1&b=2");
 
@@ -36,7 +36,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Raw_url_preserves_the_encoded_request_target()
+    public void Raw_Url_Preserves_The_Encoded_Request_Target()
     {
         var context = Context(path: "/a b/c");
         context.Features.Get<IHttpRequestFeature>()!.RawTarget = "/a%20b/c?x=%2F";
@@ -45,7 +45,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Raw_url_is_reconstructed_when_the_feature_reports_no_target()
+    public void Raw_Url_Is_Reconstructed_When_The_Feature_Reports_No_Target()
     {
         var context = Context(path: "/oracle", query: "?a=1");
         context.Features.Get<IHttpRequestFeature>()!.RawTarget = null!;
@@ -54,7 +54,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Repeated_request_headers_are_joined()
+    public void Repeated_Request_Headers_Are_Joined()
     {
         var context = Context();
         context.Request.Headers["X-Repeated"] = new[] { "one", "two" };
@@ -63,7 +63,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Known_headers_are_excluded_from_the_unknown_collection()
+    public void Known_Headers_Are_Excluded_From_The_Unknown_Collection()
     {
         var context = Context();
         context.Request.Headers.Host = "example.invalid";
@@ -79,13 +79,13 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Absent_headers_report_null()
+    public void Absent_Headers_Report_Null()
     {
         Create().GetUnknownRequestHeader("X-Missing").ShouldBeNull();
     }
 
     [Fact]
-    public void Missing_connection_data_reports_empty_rather_than_a_placeholder()
+    public void Missing_Connection_Data_Reports_Empty_Rather_Than_A_Placeholder()
     {
         var request = Create();
 
@@ -94,13 +94,13 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Server_variables_outside_the_supported_set_report_null()
+    public void Server_Variables_Outside_The_Supported_Set_Report_Null()
     {
         Create().GetServerVariable("APPL_MD_PATH").ShouldBeNull();
     }
 
     [Fact]
-    public void Http_prefixed_server_variables_read_request_headers()
+    public void Http_Prefixed_Server_Variables_Read_Request_Headers()
     {
         var context = Context();
         context.Request.Headers["X-Parity-Request"] = "cold-sync";
@@ -109,7 +109,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Supported_server_variables_describe_the_request()
+    public void Supported_Server_Variables_Describe_The_Request()
     {
         var context = Context(path: "/oracle", query: "?a=1");
         context.Request.Host = new HostString("example.invalid", 8080);
@@ -124,38 +124,38 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Map_path_resolves_beneath_the_application_root()
+    public void Map_Path_Resolves_Beneath_The_Application_Root()
     {
         Create().MapPath("/bin/CoreParity.Probes.dll")
             .ShouldBe(Path.Combine(PhysicalRoot, "bin", "CoreParity.Probes.dll"));
     }
 
     [Fact]
-    public void Map_path_returns_the_application_root_for_the_virtual_root()
+    public void Map_Path_Returns_The_Application_Root_For_The_Virtual_Root()
     {
         Create().MapPath("/").ShouldBe(PhysicalRoot);
     }
 
     [Fact]
-    public void Map_path_rejects_traversal_outside_the_application()
+    public void Map_Path_Rejects_Traversal_Outside_The_Application()
     {
         Create().MapPath("/../outside/secret.config").ShouldBeNull();
     }
 
     [Fact]
-    public void Map_path_rejects_backslashes()
+    public void Map_Path_Rejects_Backslashes()
     {
         Create().MapPath("/bin\\probes.dll").ShouldBeNull();
     }
 
     [Fact]
-    public void Map_path_rejects_relative_virtual_paths()
+    public void Map_Path_Rejects_Relative_Virtual_Paths()
     {
         Create().MapPath("bin/probes.dll").ShouldBeNull();
     }
 
     [Fact]
-    public void Map_path_honours_a_nested_virtual_root()
+    public void Map_Path_Honours_A_Nested_Virtual_Root()
     {
         var request = Create(virtualRoot: "/app");
 
@@ -165,7 +165,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Map_path_rejects_paths_outside_a_nested_virtual_root()
+    public void Map_Path_Rejects_Paths_Outside_A_Nested_Virtual_Root()
     {
         var request = Create(virtualRoot: "/app");
 
@@ -174,7 +174,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Requests_carrying_an_entity_body_are_rejected()
+    public void Requests_Carrying_An_Entity_Body_Are_Rejected()
     {
         var context = Context();
         context.Request.ContentLength = 5;
@@ -184,7 +184,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Chunked_requests_are_rejected()
+    public void Chunked_Requests_Are_Rejected()
     {
         var context = Context();
         context.Request.Headers.TransferEncoding = "chunked";
@@ -193,14 +193,14 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Sending_a_response_from_a_file_is_rejected()
+    public void Sending_A_Response_From_A_File_Is_Rejected()
     {
         Should.Throw<NotSupportedException>(
             () => Create().SendResponseFromFile("payload.bin", 0, 1));
     }
 
     [Fact]
-    public void End_of_request_completes_the_request_and_seals_the_response()
+    public void End_Of_Request_Completes_The_Request_And_Seals_The_Response()
     {
         var request = Create();
 
@@ -212,7 +212,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void A_second_end_of_request_throws()
+    public void A_Second_End_Of_Request_Throws()
     {
         var request = Create();
         request.EndOfRequest();
@@ -222,7 +222,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void A_sealed_response_rejects_further_output()
+    public void A_Sealed_Response_Rejects_Further_Output()
     {
         var request = Create();
         request.EndOfRequest();
@@ -233,7 +233,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Calculated_content_length_is_held_apart_from_the_header_list()
+    public void Calculated_Content_Length_Is_Held_Apart_From_The_Header_List()
     {
         var request = Create();
 
@@ -248,7 +248,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Client_disconnect_is_observable()
+    public void Client_Disconnect_Is_Observable()
     {
         var context = Context();
         var request = Create(context);
@@ -261,7 +261,7 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void A_response_cannot_be_committed_before_it_is_sealed()
+    public void A_Response_Cannot_Be_Committed_Before_It_Is_Sealed()
     {
         var request = Create();
 

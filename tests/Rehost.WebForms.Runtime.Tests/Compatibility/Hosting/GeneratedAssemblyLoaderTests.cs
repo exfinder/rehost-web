@@ -11,7 +11,7 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 public sealed class GeneratedAssemblyLoaderTests
 {
     [Fact]
-    public void Loads_generated_output_into_the_default_context()
+    public void Loads_Generated_Output_Into_The_Default_Context()
     {
         using var generated = GeneratedAssembly.Create("Loads_into_default");
 
@@ -26,7 +26,7 @@ public sealed class GeneratedAssemblyLoaderTests
     }
 
     [Fact]
-    public void Reports_a_path_it_has_already_loaded()
+    public void Reports_A_Path_It_Has_Already_Loaded()
     {
         using var generated = GeneratedAssembly.Create("Reports_loaded_path");
         using var other = GeneratedAssembly.Create("Reports_loaded_path_other");
@@ -41,7 +41,7 @@ public sealed class GeneratedAssemblyLoaderTests
     }
 
     [Fact]
-    public void Probes_the_codegen_directory_before_the_application_bin_directory()
+    public void Probes_The_Codegen_Directory_Before_The_Application_Bin_Directory()
     {
         var candidates = GeneratedAssemblyLoader
             .CandidatePaths("/app/bin", "/codegen", new AssemblyName("App_Code.abc12345"))
@@ -55,7 +55,7 @@ public sealed class GeneratedAssemblyLoaderTests
     }
 
     [Fact]
-    public void Probes_a_satellite_assembly_in_its_culture_subdirectory_only()
+    public void Probes_A_Satellite_Assembly_In_Its_Culture_Subdirectory_Only()
     {
         var name = new AssemblyName("App_GlobalResources.abc12345.resources")
         {
@@ -74,7 +74,7 @@ public sealed class GeneratedAssemblyLoaderTests
     }
 
     [Fact]
-    public void Refuses_an_assembly_marked_for_deletion()
+    public void Refuses_An_Assembly_Marked_For_Deletion()
     {
         using var generated = GeneratedAssembly.Create("Refuses_marked");
 

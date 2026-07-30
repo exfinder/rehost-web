@@ -12,7 +12,7 @@ public sealed class HttpApplicationStateLockTests
     private static readonly TimeSpan Generous = TimeSpan.FromSeconds(5);
 
     [Fact]
-    public void A_write_lock_is_recursive_on_the_owning_thread()
+    public void A_Write_Lock_Is_Recursive_On_The_Owning_Thread()
     {
         var stateLock = new HttpApplicationStateLock();
 
@@ -28,7 +28,7 @@ public sealed class HttpApplicationStateLockTests
     }
 
     [Fact]
-    public void Ensure_release_write_drops_every_recursive_hold()
+    public void Ensure_Release_Write_Drops_Every_Recursive_Hold()
     {
         var stateLock = new HttpApplicationStateLock();
 
@@ -40,7 +40,7 @@ public sealed class HttpApplicationStateLockTests
     }
 
     [Fact]
-    public void Reads_taken_by_the_writing_thread_do_not_deadlock()
+    public void Reads_Taken_By_The_Writing_Thread_Do_Not_Deadlock()
     {
         var stateLock = new HttpApplicationStateLock();
 
@@ -53,7 +53,7 @@ public sealed class HttpApplicationStateLockTests
     }
 
     [Fact]
-    public void Thread_identity_is_stable_within_a_thread_and_distinct_across_threads()
+    public void Thread_Identity_Is_Stable_Within_A_Thread_And_Distinct_Across_Threads()
     {
         var current = SafeNativeMethods.GetCurrentThreadId();
 

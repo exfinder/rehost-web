@@ -11,7 +11,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class PortableParityGateTests
 {
     [Fact]
-    public void Declared_sessions_match_the_framework_golden_trace()
+    public void Declared_Sessions_Match_The_Framework_Golden_Trace()
     {
         var (exitCode, standardError) = RunHost("verify");
 
@@ -24,7 +24,7 @@ public sealed class PortableParityGateTests
     // The generation segment is observable the same way: the two fixtures share one temp root and
     // must not share a segment.
     [Fact]
-    public void Generated_output_nests_under_one_segment_per_application()
+    public void Generated_Output_Nests_Under_One_Segment_Per_Application()
     {
         var codegenRoot = Path.Combine(HostDirectory, "fixture", "temp", "root");
 

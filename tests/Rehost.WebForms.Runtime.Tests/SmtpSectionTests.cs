@@ -8,7 +8,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class SmtpSectionTests
 {
     [Fact]
-    public void Defaults_and_public_configuration_values_match_framework()
+    public void Defaults_And_Public_Configuration_Values_Match_Framework()
     {
         var section = new SmtpSection();
 

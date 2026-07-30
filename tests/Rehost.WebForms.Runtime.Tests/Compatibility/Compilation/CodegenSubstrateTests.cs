@@ -10,7 +10,7 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 public sealed class CodegenSubstrateTests
 {
     [Fact]
-    public void Compiles_the_top_level_files_in_order_before_the_first_request()
+    public void Compiles_The_Top_Level_Files_In_Order_Before_The_First_Request()
     {
         using var application = ScenarioApplication.Create();
 
@@ -29,7 +29,7 @@ public sealed class CodegenSubstrateTests
     }
 
     [Fact]
-    public void Compiles_app_code_its_subdirectory_and_global_resources()
+    public void Compiles_App_Code_Its_Subdirectory_And_Global_Resources()
     {
         using var application = ScenarioApplication.Create();
 
@@ -52,7 +52,7 @@ public sealed class CodegenSubstrateTests
     }
 
     [Fact]
-    public void Reuses_the_previous_run_output_when_nothing_changed()
+    public void Reuses_The_Previous_Run_Output_When_Nothing_Changed()
     {
         using var application = ScenarioApplication.Create();
 
@@ -69,7 +69,7 @@ public sealed class CodegenSubstrateTests
     }
 
     [Fact]
-    public void Recompiles_after_application_code_changes()
+    public void Recompiles_After_Application_Code_Changes()
     {
         using var application = ScenarioApplication.Create();
 
@@ -86,7 +86,7 @@ public sealed class CodegenSubstrateTests
     }
 
     [Fact]
-    public void Serves_a_second_process_sharing_one_codegen_segment()
+    public void Serves_A_Second_Process_Sharing_One_Codegen_Segment()
     {
         using var first = ScenarioApplication.Create();
         using var second = first.CloneApplicationSharingCodegenRoot();
@@ -104,7 +104,7 @@ public sealed class CodegenSubstrateTests
     }
 
     [Fact]
-    public void Reclaims_an_invalidated_assembly_as_the_platform_allows()
+    public void Reclaims_An_Invalidated_Assembly_As_The_Platform_Allows()
     {
         using var application = ScenarioApplication.Create();
         application.Run();
@@ -136,7 +136,7 @@ public sealed class CodegenSubstrateTests
     }
 
     [Fact]
-    public void Reports_a_compile_error_on_every_request_without_failing_activation()
+    public void Reports_A_Compile_Error_On_Every_Request_Without_Failing_Activation()
     {
         using var application = ScenarioApplication.Create();
         application.BreakAppCode();

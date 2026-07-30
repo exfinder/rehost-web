@@ -16,7 +16,7 @@ public sealed class ResXResourceReaderTests
         """;
 
     [Fact]
-    public void Reads_string_value()
+    public void Reads_String_Value()
     {
         var value = ReadSingleValue(Data("message", "hello"));
 
@@ -24,7 +24,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Preserves_significant_string_whitespace()
+    public void Preserves_Significant_String_Whitespace()
     {
         var value = ReadSingleValue("""
             <data name="message" xml:space="preserve">
@@ -36,7 +36,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Converts_primitive_value_from_type_name()
+    public void Converts_Primitive_Value_From_Type_Name()
     {
         var value = ReadSingleValue(Data("answer", "42", typeof(int).AssemblyQualifiedName));
 
@@ -44,7 +44,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Reads_legacy_mscorlib_byte_array()
+    public void Reads_Legacy_Mscorlib_Byte_Array()
     {
         var value = ReadSingleValue(Data("bytes", "AQID", "System.Byte[], mscorlib"));
 
@@ -52,7 +52,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Reads_null_reference()
+    public void Reads_Null_Reference()
     {
         var value = ReadSingleValue(Data("nothing", string.Empty, typeof(ResXNullRef).AssemblyQualifiedName));
 
@@ -60,7 +60,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Duplicate_name_uses_last_value()
+    public void Duplicate_Name_Uses_Last_Value()
     {
         var value = ReadSingleValue(Data("message", "first") + Data("message", "second"));
 
@@ -68,7 +68,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Assembly_alias_resolves_type()
+    public void Assembly_Alias_Resolves_Type()
     {
         var assemblyName = SecurityElement.Escape(typeof(int).Assembly.FullName)!;
         var body = $"""
@@ -80,7 +80,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Metadata_is_enumerated_separately()
+    public void Metadata_Is_Enumerated_Separately()
     {
         using var reader = CreateReader("""
             <metadata name="design-time"><value>metadata</value></metadata>
@@ -101,7 +101,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Data_node_mode_preserves_node_information()
+    public void Data_Node_Mode_Preserves_Node_Information()
     {
         using var reader = CreateReader("""
             <data name="message">
@@ -122,7 +122,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Base_path_resolves_file_reference_value()
+    public void Base_Path_Resolves_File_Reference_Value()
     {
         var directory = Directory.CreateTempSubdirectory("rehost-resx-");
         try
@@ -142,7 +142,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Data_node_file_reference_uses_base_path()
+    public void Data_Node_File_Reference_Uses_Base_Path()
     {
         var basePath = Path.Combine(Path.GetTempPath(), "resx-base");
         using var reader = CreateReader(FileReferenceData("message.txt"));
@@ -157,7 +157,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Resource_enumeration_locks_reader_settings()
+    public void Resource_Enumeration_Locks_Reader_Settings()
     {
         using var reader = CreateReader(Data("message", "hello"));
         _ = reader.GetEnumerator();
@@ -167,7 +167,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Metadata_enumeration_does_not_lock_reader_settings()
+    public void Metadata_Enumeration_Does_Not_Lock_Reader_Settings()
     {
         using var reader = CreateReader("""<metadata name="value"><value>metadata</value></metadata>""");
         _ = reader.GetMetadataEnumerator();
@@ -177,7 +177,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Close_disposes_text_reader()
+    public void Close_Disposes_Text_Reader()
     {
         var textReader = new TrackingTextReader(Document(Data("message", "hello")));
         var reader = new ResXResourceReader(textReader);
@@ -188,7 +188,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Malformed_xml_is_wrapped_in_argument_exception()
+    public void Malformed_Xml_Is_Wrapped_In_Argument_Exception()
     {
         using var reader = ResXResourceReader.FromFileContents("<root>");
 
@@ -198,7 +198,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Data_without_name_is_rejected()
+    public void Data_Without_Name_Is_Rejected()
     {
         using var reader = CreateReader("<data><value>hello</value></data>");
 
@@ -206,7 +206,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Missing_mime_type_header_is_rejected()
+    public void Missing_Mime_Type_Header_Is_Rejected()
     {
         using var reader = ResXResourceReader.FromFileContents(Document(Data("message", "hello"), string.Empty));
 
@@ -214,7 +214,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Wrong_mime_type_header_is_rejected()
+    public void Wrong_Mime_Type_Header_Is_Rejected()
     {
         const string headers = """<resheader name="resmimetype"><value>text/plain</value></resheader>""";
         using var reader = ResXResourceReader.FromFileContents(Document(Data("message", "hello"), headers));
@@ -223,7 +223,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void Header_names_are_case_insensitive()
+    public void Header_Names_Are_Case_Insensitive()
     {
         const string headers = """<resheader name="ResMimeType"><value>text/microsoft-resx</value></resheader>""";
         using var reader = ResXResourceReader.FromFileContents(Document(Data("message", "hello"), headers));
@@ -235,7 +235,7 @@ public sealed class ResXResourceReaderTests
     }
 
     [Fact]
-    public void System_web_profile_accepts_mismatched_reader_writer_headers()
+    public void System_Web_Profile_Accepts_Mismatched_Reader_Writer_Headers()
     {
         const string headers = """
             <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>

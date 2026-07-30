@@ -10,7 +10,7 @@ public sealed class RootConfigurationCompilerTests
     private static readonly XElement[] Compilers = LoadCompilers();
 
     [Fact]
-    public void Declares_a_compiler_for_each_supported_language()
+    public void Declares_A_Compiler_For_Each_Supported_Language()
     {
         Compilers.Select(c => (string?)c.Attribute("extension")).ShouldBe([".cs", ".vb"]);
     }
@@ -18,7 +18,7 @@ public sealed class RootConfigurationCompilerTests
     [Theory]
     [InlineData(".cs")]
     [InlineData(".vb")]
-    public void Configured_provider_type_resolves_to_a_code_dom_provider(string extension)
+    public void Configured_Provider_Type_Resolves_To_A_Code_Dom_Provider(string extension)
     {
         var typeName = (string?)Compiler(extension).Attribute("type");
 
@@ -31,7 +31,7 @@ public sealed class RootConfigurationCompilerTests
     }
 
     [Fact]
-    public void Pins_the_language_version_for_csharp()
+    public void Pins_The_Language_Version_For_Csharp()
     {
         var compilerOptions = (string?)Compiler(".cs").Attribute("compilerOptions");
 

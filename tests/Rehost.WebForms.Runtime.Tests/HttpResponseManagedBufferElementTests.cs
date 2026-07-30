@@ -11,7 +11,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class HttpResponseManagedBufferElementTests
 {
     [Fact]
-    public void A_new_element_accepts_writes()
+    public void A_New_Element_Accepts_Writes()
     {
         var element = new HttpResponseManagedBufferElement();
 
@@ -20,7 +20,7 @@ public sealed class HttpResponseManagedBufferElementTests
     }
 
     [Fact]
-    public void Capacity_comes_from_the_rented_array_rather_than_the_requested_size()
+    public void Capacity_Comes_From_The_Rented_Array_Rather_Than_The_Requested_Size()
     {
         var element = new HttpResponseManagedBufferElement(100);
         var capacity = element.FreeBytes;
@@ -30,7 +30,7 @@ public sealed class HttpResponseManagedBufferElementTests
     }
 
     [Fact]
-    public void Send_surrenders_a_copy_sized_to_the_content_rather_than_the_rented_array()
+    public void Send_Surrenders_A_Copy_Sized_To_The_Content_Rather_Than_The_Rented_Array()
     {
         var element = new HttpResponseManagedBufferElement();
         var capacity = element.FreeBytes;
@@ -46,7 +46,7 @@ public sealed class HttpResponseManagedBufferElementTests
     }
 
     [Fact]
-    public void GetBytes_returns_a_content_sized_copy_and_null_while_empty()
+    public void GetBytes_Returns_A_Content_Sized_Copy_And_Null_While_Empty()
     {
         var element = new HttpResponseManagedBufferElement();
         ((IHttpResponseElement)element).GetBytes().ShouldBeNull();
@@ -58,7 +58,7 @@ public sealed class HttpResponseManagedBufferElementTests
 
     // HttpWriter.BufferData loops on the returned count to spill into further elements.
     [Fact]
-    public void Append_returns_the_accepted_count_and_zero_once_full()
+    public void Append_Returns_The_Accepted_Count_And_Zero_Once_Full()
     {
         var element = new HttpResponseManagedBufferElement();
         var capacity = element.FreeBytes;
@@ -72,7 +72,7 @@ public sealed class HttpResponseManagedBufferElementTests
     // Returning one array to ArrayPool twice hands it to two renters at once, which is the
     // corruption class this element exists to avoid.
     [Fact]
-    public void Recycle_returns_the_rented_array_at_most_once()
+    public void Recycle_Returns_The_Rented_Array_At_Most_Once()
     {
         var element = new HttpResponseManagedBufferElement();
         element.Append(new byte[] { 1 }, 0, 1);
@@ -90,7 +90,7 @@ public sealed class HttpResponseManagedBufferElementTests
     }
 
     [Fact]
-    public void Clone_is_independent_of_the_original_and_outlives_its_recycling()
+    public void Clone_Is_Independent_Of_The_Original_And_Outlives_Its_Recycling()
     {
         var element = new HttpResponseManagedBufferElement();
         element.Append(Encoding.ASCII.GetBytes("snapshot"), 0, 8);

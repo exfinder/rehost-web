@@ -9,7 +9,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class ApplicationBootstrapTests
 {
     [Fact]
-    public void Public_initialization_preflights_and_binds_process_application()
+    public void Public_Initialization_Preflights_And_Binds_Process_Application()
     {
         using var application = TemporaryApplication.Create();
 
@@ -23,7 +23,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Normalizes_identity_and_roots_and_selects_default_baselines()
+    public void Normalizes_Identity_And_Roots_And_Selects_Default_Baselines()
     {
         using var application = TemporaryApplication.Create();
         var configuration = ApplicationBootstrapConfiguration.Create(
@@ -47,7 +47,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Config_map_uses_explicit_baselines_and_application_root()
+    public void Config_Map_Uses_Explicit_Baselines_And_Application_Root()
     {
         using var application = TemporaryApplication.Create();
         var options = application.CreateOptions("/legacy");
@@ -79,7 +79,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_accepts_shipped_baselines_without_application_config()
+    public void Preflight_Accepts_Shipped_Baselines_Without_Application_Config()
     {
         using var application = TemporaryApplication.Create();
         var configuration = application.CreateConfiguration();
@@ -88,7 +88,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_reports_malformed_application_config()
+    public void Preflight_Reports_Malformed_Application_Config()
     {
         using var application = TemporaryApplication.Create();
         File.WriteAllText(
@@ -105,7 +105,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_reports_missing_explicit_baseline()
+    public void Preflight_Reports_Missing_Explicit_Baseline()
     {
         using var application = TemporaryApplication.Create();
         var options = application.CreateOptions();
@@ -124,7 +124,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_reports_inaccessible_baseline()
+    public void Preflight_Reports_Inaccessible_Baseline()
     {
         using var application = TemporaryApplication.Create();
         var configuration = application.CreateConfiguration();
@@ -142,7 +142,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Normalizes_the_compilation_temp_directory_and_defaults_it_to_absent()
+    public void Normalizes_The_Compilation_Temp_Directory_And_Defaults_It_To_Absent()
     {
         using var application = TemporaryApplication.Create();
         var options = application.CreateOptions();
@@ -160,7 +160,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Rejects_a_relative_compilation_temp_directory()
+    public void Rejects_A_Relative_Compilation_Temp_Directory()
     {
         using var application = TemporaryApplication.Create();
         var options = application.CreateOptions();
@@ -174,7 +174,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Rejects_a_compilation_temp_directory_that_is_a_file()
+    public void Rejects_A_Compilation_Temp_Directory_That_Is_A_File()
     {
         using var application = TemporaryApplication.Create();
         var path = Path.Combine(application.PhysicalRoot.FullName, "codegen");
@@ -189,7 +189,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_rejects_a_configured_temp_directory_that_disagrees_with_the_host()
+    public void Preflight_Rejects_A_Configured_Temp_Directory_That_Disagrees_With_The_Host()
     {
         using var application = TemporaryApplication.Create();
         var configured = Path.Combine(application.PhysicalRoot.FullName, "configured");
@@ -217,7 +217,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_accepts_a_configured_temp_directory_that_agrees_with_the_host()
+    public void Preflight_Accepts_A_Configured_Temp_Directory_That_Agrees_With_The_Host()
     {
         using var application = TemporaryApplication.Create();
         var shared = Path.Combine(application.PhysicalRoot.FullName, "codegen");
@@ -240,7 +240,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Preflight_rejects_configuration_reload()
+    public void Preflight_Rejects_Configuration_Reload()
     {
         using var application = TemporaryApplication.Create();
         File.WriteAllText(
@@ -262,7 +262,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Successful_initialization_publishes_immutable_configuration()
+    public void Successful_Initialization_Publishes_Immutable_Configuration()
     {
         using var application = TemporaryApplication.Create();
         var environment = new RecordingEnvironment(application.OutputDirectory);
@@ -277,7 +277,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Repeat_initialization_fails_even_when_options_match()
+    public void Repeat_Initialization_Fails_Even_When_Options_Match()
     {
         using var application = TemporaryApplication.Create();
         var bootstrap = new ApplicationBootstrap(
@@ -292,7 +292,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Conflicting_initialization_fails_with_same_single_call_contract()
+    public void Conflicting_Initialization_Fails_With_Same_Single_Call_Contract()
     {
         using var application = TemporaryApplication.Create();
         var bootstrap = new ApplicationBootstrap(
@@ -308,7 +308,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public async Task Concurrent_initialization_has_one_winner_and_fails_other_call()
+    public async Task Concurrent_Initialization_Has_One_Winner_And_Fails_Other_Call()
     {
         using var application = TemporaryApplication.Create();
         using var preflightStarted = new ManualResetEventSlim();
@@ -338,7 +338,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Initialization_failure_is_terminal_and_does_not_publish_configuration()
+    public void Initialization_Failure_Is_Terminal_And_Does_Not_Publish_Configuration()
     {
         using var application = TemporaryApplication.Create();
         var environment = new RecordingEnvironment(
@@ -357,7 +357,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Binding_failure_restores_every_legacy_appdomain_value()
+    public void Binding_Failure_Restores_Every_Legacy_Appdomain_Value()
     {
         using var application = TemporaryApplication.Create();
         var configuration = application.CreateConfiguration();
@@ -373,7 +373,7 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Binding_rejects_preexisting_appdomain_identity_without_mutation()
+    public void Binding_Rejects_Preexisting_Appdomain_Identity_Without_Mutation()
     {
         using var application = TemporaryApplication.Create();
         var configuration = application.CreateConfiguration();

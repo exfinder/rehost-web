@@ -7,7 +7,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class FileUtilTests
 {
     [Fact]
-    public void PhysicalPathStatus_reports_directories_files_and_missing_paths()
+    public void PhysicalPathStatus_Reports_Directories_Files_And_Missing_Paths()
     {
         var directory = Directory.CreateTempSubdirectory("rehost-file-status-");
         try

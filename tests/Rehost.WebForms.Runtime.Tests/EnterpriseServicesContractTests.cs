@@ -8,7 +8,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class EnterpriseServicesContractTests
 {
     [Fact]
-    public void Transaction_enums_match_framework_contract()
+    public void Transaction_Enums_Match_Framework_Contract()
     {
         typeof(TransactionOption).IsNotPublic.ShouldBeTrue();
         HasSerializableAttribute(typeof(TransactionOption)).ShouldBeTrue();
@@ -23,7 +23,7 @@ public sealed class EnterpriseServicesContractTests
     }
 
     [Fact]
-    public void ContextUtil_does_not_silently_claim_transaction_support()
+    public void ContextUtil_Does_Not_Silently_Claim_Transaction_Support()
     {
         Should.Throw<PlatformNotSupportedException>(() => _ = ContextUtil.IsInTransaction);
         Should.Throw<PlatformNotSupportedException>(() => _ = ContextUtil.MyTransactionVote);
@@ -32,7 +32,7 @@ public sealed class EnterpriseServicesContractTests
     [Theory]
     [InlineData((int)TransactionOption.Disabled)]
     [InlineData((int)TransactionOption.Required)]
-    public void InvokeTransacted_is_explicitly_unsupported_on_every_platform(int optionValue)
+    public void InvokeTransacted_Is_Explicitly_Unsupported_On_Every_Platform(int optionValue)
     {
         var option = (TransactionOption)optionValue;
         var invoked = false;
@@ -46,7 +46,7 @@ public sealed class EnterpriseServicesContractTests
     }
 
     [Fact]
-    public void Transaction_probes_fall_back_to_false_when_COM_plus_is_unavailable()
+    public void Transaction_Probes_Fall_Back_To_False_When_COM_Plus_Is_Unavailable()
     {
         Transactions.Utils.IsInTransaction.ShouldBeFalse();
         Transactions.Utils.AbortPending.ShouldBeFalse();

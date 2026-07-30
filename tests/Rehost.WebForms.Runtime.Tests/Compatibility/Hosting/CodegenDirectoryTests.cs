@@ -8,7 +8,7 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 public sealed class CodegenDirectoryTests
 {
     [Fact]
-    public void Host_supplied_root_wins_over_configured_temp_directory()
+    public void Host_Supplied_Root_Wins_Over_Configured_Temp_Directory()
     {
         var root = CodegenDirectory.SelectTempRoot(
             hostSupplied: Path.Combine(Path.GetTempPath(), "host-root"),
@@ -21,7 +21,7 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Configured_temp_directory_is_used_when_no_host_root_exists()
+    public void Configured_Temp_Directory_Is_Used_When_No_Host_Root_Exists()
     {
         var configured = Path.Combine(Path.GetTempPath(), "configured-root");
 
@@ -36,7 +36,7 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Absent_root_falls_back_to_the_portable_default()
+    public void Absent_Root_Falls_Back_To_The_Portable_Default()
     {
         var root = CodegenDirectory.SelectTempRoot(
             hostSupplied: null,
@@ -52,7 +52,7 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Relative_configured_temp_directory_fails_naming_its_configuration_source()
+    public void Relative_Configured_Temp_Directory_Fails_Naming_Its_Configuration_Source()
     {
         var exception = Should.Throw<ConfigurationErrorsException>(() => CodegenDirectory.SelectTempRoot(
             hostSupplied: null,
@@ -67,7 +67,7 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Generation_segment_is_eight_stable_hexadecimal_characters()
+    public void Generation_Segment_Is_Eight_Stable_Hexadecimal_Characters()
     {
         CodegenDirectory.GenerationSegment("/var/app").ShouldBe("c9d9badb");
         CodegenDirectory.GenerationSegment("/var/app").ShouldBe(
@@ -75,7 +75,7 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Generation_segment_separates_distinct_application_directories()
+    public void Generation_Segment_Separates_Distinct_Application_Directories()
     {
         CodegenDirectory.GenerationSegment("/var/app2").ShouldBe("b64d8089");
         CodegenDirectory.GenerationSegment("/var/app2")
@@ -83,14 +83,14 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Generation_segment_ignores_a_trailing_separator()
+    public void Generation_Segment_Ignores_A_Trailing_Separator()
     {
         CodegenDirectory.GenerationSegment("/var/app" + Path.DirectorySeparatorChar)
             .ShouldBe("c9d9badb");
     }
 
     [Fact]
-    public void Generation_segment_folds_case_only_where_the_filesystem_does()
+    public void Generation_Segment_Folds_Case_Only_Where_The_Filesystem_Does()
     {
         var upper = CodegenDirectory.GenerationSegment("/var/APP");
         var lower = CodegenDirectory.GenerationSegment("/var/app");

@@ -11,7 +11,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class StronglyTypedResourceBuilderTests
 {
     [Fact]
-    public void VerifyResourceName_matches_framework_identifier_fixup()
+    public void VerifyResourceName_Matches_Framework_Identifier_Fixup()
     {
         using var provider = new CSharpCodeProvider();
 
@@ -21,7 +21,7 @@ public sealed class StronglyTypedResourceBuilderTests
     }
 
     [Fact]
-    public void Create_preserves_framework_resource_contract()
+    public void Create_Preserves_Framework_Resource_Contract()
     {
         using var provider = new CSharpCodeProvider();
         var resources = new Hashtable

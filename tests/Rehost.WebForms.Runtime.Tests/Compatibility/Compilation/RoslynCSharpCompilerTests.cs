@@ -9,7 +9,7 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 public sealed class RoslynCSharpCompilerTests
 {
     [Fact]
-    public void Emits_an_assembly_to_the_requested_output_path()
+    public void Emits_An_Assembly_To_The_Requested_Output_Path()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { public int Value => 42; }");
@@ -23,7 +23,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Maps_diagnostics_through_line_pragmas_to_the_originating_page()
+    public void Maps_Diagnostics_Through_Line_Pragmas_To_The_Originating_Page()
     {
         using var scope = new CompilationScope();
         scope.AddSource(
@@ -49,7 +49,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Reports_unresolved_types_with_the_compiler_error_number()
+    public void Reports_Unresolved_Types_With_The_Compiler_Error_Number()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { public Nonexistent Value; }");
@@ -63,7 +63,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Reports_warnings_without_failing_and_without_informational_noise()
+    public void Reports_Warnings_Without_Failing_And_Without_Informational_Noise()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { public void Render() { int unused = 1; } }");
@@ -77,7 +77,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Configured_warning_level_does_not_make_warnings_fatal()
+    public void Configured_Warning_Level_Does_Not_Make_Warnings_Fatal()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { public void Render() { int unused = 1; } }");
@@ -93,7 +93,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Honours_warnaserror_from_compiler_options()
+    public void Honours_Warnaserror_From_Compiler_Options()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { public void Render() { int unused = 1; } }");
@@ -105,7 +105,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Writes_compiler_formatted_output_lines()
+    public void Writes_Compiler_Formatted_Output_Lines()
     {
         using var scope = new CompilationScope();
         scope.AddSource(
@@ -126,7 +126,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Honours_preprocessor_symbols_from_compiler_options()
+    public void Honours_Preprocessor_Symbols_From_Compiler_Options()
     {
         using var scope = new CompilationScope();
         scope.AddSource(
@@ -144,7 +144,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Honours_suppressed_warnings_from_compiler_options()
+    public void Honours_Suppressed_Warnings_From_Compiler_Options()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { public void Render() { int unused = 1; } }");
@@ -154,7 +154,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Honours_the_configured_language_version()
+    public void Honours_The_Configured_Language_Version()
     {
         const string switchExpression =
             """
@@ -182,7 +182,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Implicit_references_cover_the_framework_surface_a_page_uses()
+    public void Implicit_References_Cover_The_Framework_Surface_A_Page_Uses()
     {
         using var scope = new CompilationScope();
         scope.AddSource(
@@ -238,7 +238,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Honours_referenced_assemblies()
+    public void Honours_Referenced_Assemblies()
     {
         using var scope = new CompilationScope();
         scope.AddSource(
@@ -260,7 +260,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Reports_a_referenced_assembly_that_does_not_exist()
+    public void Reports_A_Referenced_Assembly_That_Does_Not_Exist()
     {
         using var scope = new CompilationScope();
         scope.AddSource("public class Page { }");
@@ -273,7 +273,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Debug_information_emits_symbols_and_defines_the_debug_symbol()
+    public void Debug_Information_Emits_Symbols_And_Defines_The_Debug_Symbol()
     {
         const string requiresDebug =
             """
@@ -304,7 +304,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Win32_resources_are_reported_unsupported_so_literals_stay_in_metadata()
+    public void Win32_Resources_Are_Reported_Unsupported_So_Literals_Stay_In_Metadata()
     {
         var provider = new RoslynCSharpCodeProvider();
 
@@ -322,7 +322,7 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
-    public void Visual_basic_compilation_is_explicitly_unsupported()
+    public void Visual_Basic_Compilation_Is_Explicitly_Unsupported()
     {
         var provider = new UnsupportedVBCodeProvider();
 

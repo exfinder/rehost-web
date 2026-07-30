@@ -7,7 +7,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class XsdBuildProviderTests
 {
     [Fact]
-    public void Typed_DataSet_generation_is_explicitly_unsupported()
+    public void Typed_DataSet_Generation_Is_Explicitly_Unsupported()
     {
         var provider = new XsdBuildProvider();
 

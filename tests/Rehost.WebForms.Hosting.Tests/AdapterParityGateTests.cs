@@ -9,7 +9,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 public sealed class AdapterParityGateTests
 {
     [Fact]
-    public void Declared_sessions_match_the_framework_golden_trace_over_kestrel()
+    public void Declared_Sessions_Match_The_Framework_Golden_Trace_Over_Kestrel()
     {
         var (exitCode, standardError) = RunHost("verify");
 

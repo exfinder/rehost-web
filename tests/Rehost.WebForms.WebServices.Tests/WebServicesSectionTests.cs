@@ -9,14 +9,14 @@ namespace Rehost.WebForms.WebServices.Tests;
 public sealed class WebServicesSectionTests
 {
     [Fact]
-    public void Compatibility_types_use_project_assembly_name()
+    public void Compatibility_Types_Use_Project_Assembly_Name()
     {
         typeof(WebServicesSection).Assembly.GetName().Name
             .ShouldBe("Rehost.WebForms.WebServices");
     }
 
     [Fact]
-    public void Configuration_materializes_enabled_protocols()
+    public void Configuration_Materializes_Enabled_Protocols()
     {
         string configurationPath = Path.Combine(Path.GetTempPath(), $"rehost-web-services-{Guid.NewGuid():N}.config");
         try
@@ -54,7 +54,7 @@ public sealed class WebServicesSectionTests
     }
 
     [Fact]
-    public void Empty_configuration_has_no_implicit_protocols_in_initial_profile()
+    public void Empty_Configuration_Has_No_Implicit_Protocols_In_Initial_Profile()
     {
         WebServicesSection section = new();
 

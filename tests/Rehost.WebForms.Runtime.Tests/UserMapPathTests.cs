@@ -10,7 +10,7 @@ public sealed class UserMapPathTests
     // directory by replacing '/' with a literal '\' (ledger P25). Off Windows that
     // produces one filename containing backslashes instead of nested directories.
     [Fact]
-    public void MapPath_maps_a_nested_virtual_path_to_nested_physical_directories()
+    public void MapPath_Maps_A_Nested_Virtual_Path_To_Nested_Physical_Directories()
     {
         var root = Directory.CreateTempSubdirectory("rehost-usermappath-");
         try

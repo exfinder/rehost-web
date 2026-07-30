@@ -7,7 +7,7 @@ namespace Rehost.WebForms.Runtime.Tests;
 public sealed class CallContextTests
 {
     [Fact]
-    public void Illogical_data_does_not_flow_to_new_thread()
+    public void Illogical_Data_Does_Not_Flow_To_New_Thread()
     {
         var name = Guid.NewGuid().ToString("N");
         CallContext.SetData(name, "parent");
@@ -22,7 +22,7 @@ public sealed class CallContextTests
     }
 
     [Fact]
-    public void Parent_illogical_data_is_restored_after_child_execution_context()
+    public void Parent_Illogical_Data_Is_Restored_After_Child_Execution_Context()
     {
         var childContext = ExecutionContext.Capture();
         var name = Guid.NewGuid().ToString("N");
@@ -37,7 +37,7 @@ public sealed class CallContextTests
     }
 
     [Fact]
-    public async Task Logical_data_flows_into_task_without_child_writes_leaking_back()
+    public async Task Logical_Data_Flows_Into_Task_Without_Child_Writes_Leaking_Back()
     {
         var name = Guid.NewGuid().ToString("N");
         CallContext.LogicalSetData(name, "parent");
@@ -55,7 +55,7 @@ public sealed class CallContextTests
     }
 
     [Fact]
-    public async Task SetData_uses_logical_storage_for_affinative_values()
+    public async Task SetData_Uses_Logical_Storage_For_Affinative_Values()
     {
         var name = Guid.NewGuid().ToString("N");
         var value = new LogicalValue();
@@ -68,7 +68,7 @@ public sealed class CallContextTests
     }
 
     [Fact]
-    public void FreeNamedDataSlot_clears_logical_and_illogical_storage()
+    public void FreeNamedDataSlot_Clears_Logical_And_Illogical_Storage()
     {
         var name = Guid.NewGuid().ToString("N");
         CallContext.LogicalSetData(name, "logical");
@@ -81,7 +81,7 @@ public sealed class CallContextTests
     }
 
     [Fact]
-    public async Task HostContext_flows_only_for_affinative_values()
+    public async Task HostContext_Flows_Only_For_Affinative_Values()
     {
         CallContext.HostContext = "illogical";
         object? illogical = null;
@@ -103,7 +103,7 @@ public sealed class CallContextTests
     }
 
     [Fact]
-    public void Logical_data_flows_to_new_thread_but_illogical_data_does_not()
+    public void Logical_Data_Flows_To_New_Thread_But_Illogical_Data_Does_Not()
     {
         var logicalName = Guid.NewGuid().ToString("N");
         var illogicalName = Guid.NewGuid().ToString("N");
