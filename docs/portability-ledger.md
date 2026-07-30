@@ -20,9 +20,9 @@ behavior remains under `NETFRAMEWORK`.
 P27–P32 were reached by `PortableParity.Host verify`, which now matches the
 Framework `cold-sync` golden trace exactly.
 
-P34 and P35 carry focused tests only. No differential probe reaches them yet:
-nothing compiles an `App_Code` assembly until the codegen fixture lands, and the
-slice-2 gate is port-local by
+P22 and P34–P38 are exercised by `CodegenSubstrateTests`, which activates real
+applications in child processes on both platforms. No differential probe reaches
+them: the slice-2 gate is port-local by
 [ADR 0043](adr/0043-gate-the-compilation-substrate-locally.md).
 
 P33 was reached by `AdapterParity.Host verify` on macOS `arm64` and Windows
@@ -55,7 +55,7 @@ posts to the application's synchronization context.
 | P19 | current process ID | Use `Environment.ProcessId` at the native declaration seam. |
 | P20 | loaded main-module filename | Use `Environment.ProcessPath`; other module lookups return null. |
 | P21 | low-memory pressure | Derive load from `GCMemoryInfo`. Before the first GC, zero matches the Framework native-failure fallback and self-corrects on update. |
-| P22 | `CompilationLock` | Use a session-local `System.Threading.Mutex`; existing drain/status behavior remains. |
+| P22 | `CompilationLock` | Use a session-local `System.Threading.Mutex`; existing drain/status behavior remains. The mutex name is derived from a string hash, so cross-process exclusion also depends on P38. |
 | P23 | file enumeration metadata | Use `DirectoryInfo`/`FileSystemInfo`. Unix dot-files and Windows hidden attributes differ; content-selection policy remains [filesystem work](follow-ups/portable-filesystem-and-config-path-semantics.md). |
 | P24 | C++ CodeDOM provider exclusion | Provider is absent outside .NET Framework; the lookup is inactive. |
 | P25 | child configuration path combination | Use `Path.DirectorySeparatorChar`; `UserMapPathTests` covers the branch not reached by the harness. Other callers remain later-slice work. |
@@ -69,6 +69,9 @@ posts to the application's synchronization context.
 | P33 | `SafeNativeMethods.GetCurrentThreadId` | `kernel32!GetCurrentThreadId` threw `DllNotFoundException` off Windows out of `HttpApplicationStateLock`, whose recursive write lock compares the value against one it recorded on the same thread. Portable leaf: `Environment.CurrentManagedThreadId`. Only identity is required, and the managed id is the stabler identity — the native id was never guaranteed constant for a managed thread. The remaining call sites build diagnostic strings. |
 | P34 | `CompilerResults.CompiledAssembly` | The .NET implementation loads through `Assembly.LoadFile`, which creates a load context per assembly, so `Global.asax` and `App_Code` would hold separate identities of the same type. Portable leaf: generated assemblies enter through `GeneratedAssemblyLoader` into the default context. Taken at `BuildProvider.CreateBuildResult`, which every build provider reaches, and at `CodeDirectoryCompiler`, which does not. The same edit in `BrowserCapabilitiesCodeGenerator` is inert while that file is excluded from the build. |
 | P35 | `CodeDirectoryCompiler` stale-module wait | `kernel32!GetModuleHandle` threw `DllNotFoundException` off Windows before every `App_Code` load. It guarded against loading an assembly already loaded from that path, which `LoadFromAssemblyPath` would silently return in place of the new file. Portable leaf: ask the default context, and report Framework's `Assembly_already_loaded` immediately. The 3-second retry window is dropped because nothing unloads here, so waiting cannot change the outcome. |
+| P36 | `MapPathActual` trailing separator | A virtual path with a trailing slash had a literal `"\\"` appended to its mapped physical path, and `UrlPath.PathEndsWithExtraSlash` recognized only that character. Off Windows every directory-existence check therefore ran against `.../name/\\` and reported absent, which made a configured `App_Code` subdirectory look missing. Use `Path.DirectorySeparatorChar` in both places; the Windows result is unchanged. Same defect class as P25 and P32. |
+| P37 | `HashCodeCombiner` encoding identity | `Encoding.GetHashCode()` folds in its fallback's hash, which hashes a string and is randomized per process, so the top-level file hash differed on every run and preserved build results could never be reused. Add a typed overload combining `CodePage` and `WebName`, which every call site selects by overload resolution. |
+| P38 | `StringUtil.GetNonRandomizedHashCode` | Both helpers shortcut to `string.GetHashCode()` and `StringComparer` when `UseRandomizedStringHashAlgorithm` is off, which .NET Framework left non-randomized but .NET randomizes per process. Every identity derived from them differed between processes: the `CompilationLock` mutex name, so no cross-process lock existed at all; `Page` hash codes; and auto-generated machine-key names. Always use the stable algorithm the method already carries. Framework keeps its branches. |
 
 ## Open path
 

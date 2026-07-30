@@ -278,10 +278,17 @@ internal static class StringUtil {
     }
 
     internal static int GetNonRandomizedHashCode(string s, bool ignoreCase = false) {
+#if NETFRAMEWORK
         // Preserve the default behavior when string hash randomization is off
         if (!AppSettings.UseRandomizedStringHashAlgorithm) {
             return ignoreCase ? StringComparer.InvariantCultureIgnoreCase.GetHashCode(s) : s.GetHashCode();
         }
+#else
+        // String hashing is always randomized per process here, so the shortcut below would
+        // return a different value in every process and break every identity built from it: the
+        // cross-process compilation mutex name, page hash codes, and auto-generated key names.
+        // The stable algorithm is what this method promises, so it is the only path.
+#endif
 
         if (ignoreCase) {
             s = s.ToLower(CultureInfo.InvariantCulture);
@@ -297,6 +304,7 @@ internal static class StringUtil {
     // PERF isn't optimal, so apply consideration!
     [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "We carefully control the callers.")]
     internal static int GetNonRandomizedStringComparerHashCode(string s) {
+#if NETFRAMEWORK
         // Preserve the default behavior when string hash randomization is off
         if (!AppSettings.UseRandomizedStringHashAlgorithm) {
             return StringComparer.InvariantCultureIgnoreCase.GetHashCode(s);
@@ -312,6 +320,10 @@ internal static class StringUtil {
 
             return hashCode;
         }
+#else
+        // No secondary AppDomain exists to borrow non-randomized hashing from, and the comparer
+        // itself is randomized per process, so the stable algorithm is the only portable answer.
+#endif
 
         // Fall back to non-compat result
         return GetStringHashCode(s.ToLower(CultureInfo.InvariantCulture));

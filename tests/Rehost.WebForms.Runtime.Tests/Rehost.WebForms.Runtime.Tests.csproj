@@ -20,4 +20,12 @@
   </ItemGroup>
 
   <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+  <ItemGroup>
+    <!-- Built, not referenced: scenarios run in their own process. -->
+    <ProjectReference
+      Include="../Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
 </Project>

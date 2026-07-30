@@ -91,6 +91,16 @@ internal class HashCodeCombiner {
             AddInt(StringUtil.GetStringHashCode(s));
     }
 
+    // Encoding.GetHashCode() folds in its fallback's hash, which hashes a string and is therefore
+    // randomized per process. Reaching AddObject(object) with an encoding made every restart
+    // recompute a different hash, so preserved build results could never be reused.
+    internal void AddObject(Encoding encoding) {
+        if (encoding != null) {
+            AddInt(encoding.CodePage);
+            AddObject(encoding.WebName);
+        }
+    }
+
     internal void AddObject(Type t) {
         if (t != null)
             AddObject(System.Web.UI.Util.GetAssemblyQualifiedTypeName(t));

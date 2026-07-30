@@ -1,0 +1,61 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Rehost.WebForms.ScenarioHost</AssemblyName>
+    <RootNamespace>Rehost.WebForms.ScenarioHost</RootNamespace>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!--
+    Fixture sources are application content, not host source. Without these removals the SDK
+    globs would compile App_Code into the host and embed the fixture's resx in it, so the
+    application would appear to work while nothing was generated at runtime.
+  -->
+  <ItemGroup>
+    <Compile Remove="fixtures/**" />
+    <EmbeddedResource Remove="fixtures/**" />
+    <None Remove="fixtures/**" />
+    <Content Include="fixtures/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <!--
+      Built but not referenced: the probe assembly must reach the application through the
+      fixture's own bin directory, as an application's binaries do. Loading it beside the host
+      would prove nothing about bin resolution.
+    -->
+    <ProjectReference
+      Include="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="StageScenarioProbes" AfterTargets="Build">
+    <PropertyGroup>
+      <_ProbeAssembly>$(MSBuildProjectDirectory)/../Rehost.WebForms.ScenarioProbes/bin/$(Configuration)/net10.0/Rehost.WebForms.ScenarioProbes.dll</_ProbeAssembly>
+    </PropertyGroup>
+
+    <Error
+      Condition="!Exists('$(_ProbeAssembly)')"
+      Text="Probe build output missing: $(_ProbeAssembly)" />
+    <Error
+      Condition="Exists('$(TargetDir)Rehost.WebForms.ScenarioProbes.dll')"
+      Text="Rehost.WebForms.ScenarioProbes must not be copied beside the host." />
+
+    <ItemGroup>
+      <_FixtureDirectory
+        Include="$([System.IO.Directory]::GetDirectories('$(TargetDir)fixtures'))"
+        Condition="Exists('$(TargetDir)fixtures')" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="$(_ProbeAssembly)"
+      DestinationFolder="%(_FixtureDirectory.Identity)/bin"
+      SkipUnchangedFiles="true" />
+  </Target>
+</Project>

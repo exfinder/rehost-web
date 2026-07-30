@@ -654,7 +654,8 @@ internal static class UrlPath {
         if (path == null)
             return false;
         int l = path.Length;
-        if (l == 0 || path[l-1] != '\\')
+        // The physical separator is the platform's; on Windows this is the original test.
+        if (l == 0 || (path[l-1] != '\\' && path[l-1] != Path.DirectorySeparatorChar))
             return false;
         if (l == 3 && path[1] == ':')   // c:\ case
             return false;

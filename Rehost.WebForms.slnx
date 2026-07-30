@@ -12,6 +12,8 @@
   <Folder Name="/tests/">
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />
+    <Project Path="tests/Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj" />
+    <Project Path="tests/Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj" />
     <Project Path="tests/Rehost.WebForms.WebServices.Tests/Rehost.WebForms.WebServices.Tests.csproj" />
   </Folder>
 </Solution>
