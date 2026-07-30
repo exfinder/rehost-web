@@ -93,9 +93,13 @@ public sealed class CodegenSubstrateTests
 
         // Both processes compile the same application from one segment at once, which is the
         // condition the cross-process compilation mutex exists for.
-        var firstRun = first.StartRun(holdMilliseconds: 4000);
+        using var gate = ScenarioGate.Take();
+        var firstRun = first.StartRun(gate.Name);
+        ScenarioApplication.WaitForEntry(first.TracePath, "holding", TimeSpan.FromSeconds(60));
+
         var secondTrace = second.Run();
 
+        gate.Release();
         firstRun.WaitForExit();
         firstRun.ExitCode.ShouldBe(0, firstRun.StandardError);
 
@@ -112,13 +116,15 @@ public sealed class CodegenSubstrateTests
 
         // The first process keeps its generated assemblies loaded while the second invalidates
         // them, which is the only way to reach the branch that cannot delete a file.
-        var holding = application.StartRun(holdMilliseconds: 6000);
-        ScenarioApplication.WaitForEntry(application.TracePath, "holding", TimeSpan.FromSeconds(30));
+        using var gate = ScenarioGate.Take();
+        var holding = application.StartRun(gate.Name);
+        ScenarioApplication.WaitForEntry(application.TracePath, "holding", TimeSpan.FromSeconds(60));
 
         using var editor = application.CloneApplicationSharingCodegenRoot();
         editor.EditAppCode();
         editor.Run();
 
+        gate.Release();
         holding.WaitForExit();
         holding.ExitCode.ShouldBe(0, holding.StandardError);
 
@@ -227,14 +233,14 @@ public sealed class CodegenSubstrateTests
 
         internal List<string> Run(params string[] requests)
         {
-            var process = StartRun(holdMilliseconds: 0, requests);
+            var process = StartRun(holdGate: null, requests);
             process.WaitForExit();
             process.ExitCode.ShouldBe(0, process.StandardError);
 
             return ReadTrace(TracePath);
         }
 
-        internal ScenarioProcess StartRun(int holdMilliseconds, params string[] requests)
+        internal ScenarioProcess StartRun(string? holdGate, params string[] requests)
         {
             _runs++;
             if (File.Exists(TracePath))
@@ -255,10 +261,10 @@ public sealed class CodegenSubstrateTests
             startInfo.ArgumentList.Add(CodegenRoot);
             startInfo.ArgumentList.Add("--trace");
             startInfo.ArgumentList.Add(TracePath);
-            if (holdMilliseconds > 0)
+            if (holdGate != null)
             {
-                startInfo.ArgumentList.Add("--hold-ms");
-                startInfo.ArgumentList.Add(holdMilliseconds.ToString());
+                startInfo.ArgumentList.Add("--hold-gate");
+                startInfo.ArgumentList.Add(holdGate);
             }
 
             foreach (var request in requests)
@@ -360,6 +366,47 @@ public sealed class CodegenSubstrateTests
                 "bin",
                 configuration,
                 "net10.0");
+        }
+    }
+
+    // A held mutex, rather than a sleep of a guessed length: the child stays alive exactly while
+    // the overlap under test lasts, and neither machine speed nor load can shorten it.
+    private sealed class ScenarioGate : IDisposable
+    {
+        private readonly Mutex _mutex;
+        private bool _held;
+
+        private ScenarioGate(Mutex mutex, string name)
+        {
+            _mutex = mutex;
+            _held = true;
+            Name = name;
+        }
+
+        internal string Name { get; }
+
+        internal static ScenarioGate Take()
+        {
+            var name = @"Localehost-scenario-" + Guid.NewGuid().ToString("n");
+            var mutex = new Mutex(false, name);
+            mutex.WaitOne();
+
+            return new ScenarioGate(mutex, name);
+        }
+
+        internal void Release()
+        {
+            if (_held)
+            {
+                _mutex.ReleaseMutex();
+                _held = false;
+            }
+        }
+
+        public void Dispose()
+        {
+            Release();
+            _mutex.Dispose();
         }
     }
 

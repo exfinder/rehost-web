@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
@@ -95,11 +94,12 @@ public static class Program
             }
 
             // Holding the process alive keeps its generated assemblies loaded, which is the only
-            // way a second process can meet a file it is not allowed to delete.
-            if (options.HoldMilliseconds > 0)
+            // way a second process can meet a file it is not allowed to delete. The caller owns
+            // the gate and releases it when it is done, so the hold lasts exactly as long as the
+            // overlap being tested rather than a guessed interval.
+            if (options.HoldGate != null)
             {
-                HostJournal.Record("holding");
-                Thread.Sleep(options.HoldMilliseconds);
+                HoldUntilReleased(options.HoldGate);
             }
         }
         finally
@@ -107,6 +107,30 @@ public static class Program
             manager.StopObject(options.ApplicationId, typeof(ScenarioRunner));
             manager.ShutdownApplication(options.ApplicationId);
             manager.Close();
+        }
+    }
+
+    private static void HoldUntilReleased(string gateName)
+    {
+        // A named mutex is the one named synchronization object supported on every platform here;
+        // named events and semaphores throw off Windows.
+        using var gate = new Mutex(false, gateName);
+        var acquired = false;
+
+        HostJournal.Record("holding");
+        try
+        {
+            acquired = gate.WaitOne(TimeSpan.FromMinutes(2));
+        }
+        catch (AbandonedMutexException)
+        {
+            // The caller died holding the gate; releasing this process is the useful response.
+            acquired = true;
+        }
+
+        if (acquired)
+        {
+            gate.ReleaseMutex();
         }
     }
 
@@ -121,10 +145,10 @@ internal sealed class ScenarioOptions
         string applicationPath,
         string compilationTempDirectory,
         string tracePath,
-        int holdMilliseconds,
+        string? holdGate,
         List<string> requests)
     {
-        HoldMilliseconds = holdMilliseconds;
+        HoldGate = holdGate;
         ApplicationId = applicationId;
         ApplicationPath = applicationPath;
         CompilationTempDirectory = compilationTempDirectory;
@@ -140,7 +164,7 @@ internal sealed class ScenarioOptions
 
     internal string TracePath { get; }
 
-    internal int HoldMilliseconds { get; }
+    internal string? HoldGate { get; }
 
     internal List<string> Requests { get; }
 
@@ -150,7 +174,7 @@ internal sealed class ScenarioOptions
         string? applicationPath = null;
         string? compilationTempDirectory = null;
         string? tracePath = null;
-        var holdMilliseconds = 0;
+        string? holdGate = null;
         var requests = new List<string>();
 
         for (var i = 0; i < args.Length; i++)
@@ -174,8 +198,8 @@ internal sealed class ScenarioOptions
                     applicationId = Require(value, "--id");
                     i++;
                     break;
-                case "--hold-ms":
-                    holdMilliseconds = int.Parse(Require(value, "--hold-ms"), CultureInfo.InvariantCulture);
+                case "--hold-gate":
+                    holdGate = Require(value, "--hold-gate");
                     i++;
                     break;
                 case "--request":
@@ -197,7 +221,7 @@ internal sealed class ScenarioOptions
             Path.GetFullPath(Require(applicationPath, "--app")),
             Path.GetFullPath(Require(compilationTempDirectory, "--temp")),
             Path.GetFullPath(Require(tracePath, "--trace")),
-            holdMilliseconds,
+            holdGate,
             requests);
     }
 
