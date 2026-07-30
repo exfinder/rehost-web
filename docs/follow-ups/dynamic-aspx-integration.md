@@ -2,6 +2,11 @@
 
 Status: open. Priority: high. Slice 3; depends on the dynamic-startup slice.
 
+This slice also carries slice 2's differential gate. Its fixture cannot render
+without pre-application start, `App_Code`, `Global.asax`, and
+`Application_Start`, so matching the Framework golden here ratifies the ordering
+that [ADR 0043](../adr/0043-gate-the-compilation-substrate-locally.md) deferred.
+
 ## Fixture
 
 One application with `Default.aspx`, C# code-behind, and `web.config`.

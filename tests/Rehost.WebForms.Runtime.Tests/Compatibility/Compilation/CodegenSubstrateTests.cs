@@ -135,6 +135,24 @@ public sealed class CodegenSubstrateTests
         }
     }
 
+    [Fact]
+    public void Reports_a_compile_error_on_every_request_without_failing_activation()
+    {
+        using var application = ScenarioApplication.Create();
+        application.BreakAppCode();
+
+        // Framework stashes an initialization failure and renders it per request rather than
+        // aborting activation, which is what CreateObject's throwOnError:false selects. Aborting
+        // instead would take the diagnostics away from whoever asked for the page.
+        var trace = application.Run("/default", "/default");
+
+        trace.FindAll(entry => entry == "request:/default:500").Count.ShouldBe(2);
+        var diagnostics = trace.FindAll(entry => entry.StartsWith("error-body:"));
+        diagnostics.Count.ShouldBe(2);
+        diagnostics[0].ShouldContain("Compilation Error");
+        diagnostics[1].ShouldBe(diagnostics[0]);
+    }
+
     private static string Value(List<string> trace, string prefix) =>
         trace.Find(entry => entry.StartsWith(prefix))?[prefix.Length..]
             ?? throw new InvalidOperationException(
@@ -200,16 +218,23 @@ public sealed class CodegenSubstrateTests
             File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddSeconds(_runs + 1));
         }
 
-        internal List<string> Run()
+        internal void BreakAppCode()
         {
-            var process = StartRun(holdMilliseconds: 0);
+            File.AppendAllText(
+                Path.Combine(ApplicationPath, "App_Code", "Probe.cs"),
+                Environment.NewLine + "public class Broken { this is not csharp }" + Environment.NewLine);
+        }
+
+        internal List<string> Run(params string[] requests)
+        {
+            var process = StartRun(holdMilliseconds: 0, requests);
             process.WaitForExit();
             process.ExitCode.ShouldBe(0, process.StandardError);
 
             return ReadTrace(TracePath);
         }
 
-        internal ScenarioProcess StartRun(int holdMilliseconds)
+        internal ScenarioProcess StartRun(int holdMilliseconds, params string[] requests)
         {
             _runs++;
             if (File.Exists(TracePath))
@@ -234,6 +259,12 @@ public sealed class CodegenSubstrateTests
             {
                 startInfo.ArgumentList.Add("--hold-ms");
                 startInfo.ArgumentList.Add(holdMilliseconds.ToString());
+            }
+
+            foreach (var request in requests)
+            {
+                startInfo.ArgumentList.Add("--request");
+                startInfo.ArgumentList.Add(request);
             }
 
             return new ScenarioProcess(Process.Start(startInfo)!);

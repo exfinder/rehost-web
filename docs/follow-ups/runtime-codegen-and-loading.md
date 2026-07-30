@@ -1,6 +1,7 @@
 # Runtime code generation and loading
 
-Status: open. Priority: high. Slice 2 after the precompiled-handler gate.
+Status: resolved for the compilation substrate. Priority: medium. Remaining
+items are page-level compilation, owned by slice 3.
 
 ## Problem
 
@@ -10,28 +11,37 @@ Modern AppDomain probing, dynamic-directory, and shadow-copy setters are
 ineffective. Imported paths also assume Windows separators, native file
 enumeration, Win32 resources, and IIS-owned temporary directories.
 
-## Current state
+## Decided
 
-`SetUpCodegenDirectory` now uses configured `codegenBase` (ledger P08). The
-precompiled-handler slice writes nothing there.
+The codegen directory, its generation segment, reuse, and reclamation are
+[ADR 0042](../adr/0042-derive-the-codegen-directory-from-the-application.md);
+ledger row P08 records the leaf. The gate for this work is port-local by
+[ADR 0043](../adr/0043-gate-the-compilation-substrate-locally.md).
 
-Before dynamic compilation, define deterministic generation isolation and
-reclamation. Generated assemblies cannot unload, while Framework `.delete`
-markers require later runs to revisit the same directory. Per-run randomized
-paths therefore violate both determinism and reclamation.
+- Root: host `CompilationTempDirectory`, then configured `tempDirectory`, then
+  `{Path.GetTempPath()}/rehost-webforms-tempfiles`. Disagreement between the
+  first two fails at preflight; an unwritable root fails naming its source.
+- Segment: eight hex characters derived from the application directory, so the
+  path is stable across restarts and distinct applications never collide.
+- Reuse: Framework's `hash/hash.web` comparison is retained unchanged. An
+  unchanged application restarts without recompiling, which required two
+  per-process randomized hashes to be replaced (P37, P38).
+- Cross-process: `CompilationLock` and `.delete` markers behave as Framework
+  defined them. Cross-process exclusion depended on P38, without which every
+  process derived a different mutex name.
+- Loading: generated assemblies enter through `GeneratedAssemblyLoader` into the
+  one load context (P34), which also serves the runtime's own binding for
+  generated and `bin` assemblies and refuses `.delete`-marked files.
+- Diagnostics: mapped spans resolve to the originating virtual path, and a
+  failed compilation is reported on `WebFormsRuntimeEventSource`.
+- Failure: top-level compilation runs inside `HostingEnvironment.Initialize`,
+  which stashes the exception in `HttpRuntime.InitializationException` and
+  renders it per request. The host selects that through `CreateObject`'s
+  `throwOnError`, which both hosts now pass as `false`, matching Framework.
 
-## Required decisions
-
-- Use the host-supplied application work root and retained
-  `SetUpCodegenDirectory` sequence.
-- Decide whether cross-process `CompilationLock` makes a generation segment
-  unnecessary; otherwise derive it from stable identity.
-- Define ownership, permissions, cleanup, restart, and concurrent compilation.
-- Preserve virtual-to-generated source diagnostics.
-- Extend the slice-1 application-bin resolver for generated assemblies without
-  Framework shadow-copy/unload claims.
-- Keep compiler/provider selection in
-  [compiler-provider-and-target-framework-policy.md](compiler-provider-and-target-framework-policy.md).
+Reclamation differs by operating system rather than by design. Windows locks a
+loaded assembly, so the marker path runs and a later start sweeps it; Unix
+unlinks the file and the marker is never written. Both are asserted.
 
 ## Long literal strings
 
@@ -85,14 +95,19 @@ adopting it later changes no contract.
 
 ## Verification
 
-Focused path, containment, cleanup, and loading tests should precede the full
-pipeline. Generated page compilation may remain deferred until
-[dynamic-aspx-integration.md](dynamic-aspx-integration.md), with the exact
-missing test recorded here.
+`CodegenSubstrateTests` activates real applications in child processes, because
+activation permanently mutates process-global state. It covers top-level
+ordering, the generated assembly set including culture satellites, reuse across
+restarts, recompilation after an edit, two processes sharing one segment, and
+per-platform reclamation. Both supported platforms pass.
 
-## Done when
+Page compilation and its build results remain
+[dynamic ASPX integration](dynamic-aspx-integration.md).
 
-Pre-app-start, `App_Code`, `Global.asax`, and `Application_Start` pass their
-differential ordering/failure gate. Runtime compilation uses explicit paths,
-cleanup cannot escape its disposable root, diagnostics retain useful locations,
-and unsupported shadow-copy expectations fail clearly.
+## Open
+
+- Page, user control, and master page build providers are registered but no
+  slice compiles them yet.
+- Batch compilation settings, satellite culture policy beyond the neutral and
+  one-culture case, and `assemblyPostProcessorType` stay with
+  [compiler policy](compiler-provider-and-target-framework-policy.md).

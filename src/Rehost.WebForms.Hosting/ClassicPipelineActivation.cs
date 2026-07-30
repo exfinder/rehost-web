@@ -66,8 +66,11 @@ internal sealed class ClassicPipelineActivation
             typeof(ClassicPipelineDispatcher),
             _options.VirtualRootPath,
             EnsureTrailingSeparator(_options.PhysicalRootPath),
-            true,
-            true);
+            failIfExists: true,
+            // Framework's default. An initialization failure, including a compile error in
+            // application code, is stashed and rendered on every request instead of aborting
+            // activation, so the diagnostics reach whoever asked for the page.
+            throwOnError: false);
 
         _manager = manager;
 

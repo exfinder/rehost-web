@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
 using Rehost.WebForms.Hosting;
@@ -79,8 +80,9 @@ public static class Program
             typeof(ScenarioRunner),
             "/",
             EnsureTrailingSeparator(options.ApplicationPath),
-            true,
-            true);
+            failIfExists: true,
+            // Mirrors the production adapter: initialization failures surface per request.
+            throwOnError: false);
 
         try
         {
@@ -241,8 +243,12 @@ public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
     // it are what a failing scenario needs to report.
     private static string Summarize(string body)
     {
-        var text = System.Text.RegularExpressions.Regex.Replace(body, "<[^>]+>", " ");
-        text = System.Text.RegularExpressions.Regex.Replace(text, @"\s+", " ").Trim();
-        return text.Length > 600 ? text.Substring(0, 600) : text;
+        // The style block alone is longer than anything worth recording, and it sits ahead of the
+        // compiler diagnostics that make a failing scenario diagnosable.
+        var text = Regex.Replace(body, "<(style|script)[^>]*>.*?</\\1>", " ", RegexOptions.Singleline);
+        text = Regex.Replace(text, "<[^>]+>", " ");
+        text = Regex.Replace(text, @"\s+", " ").Trim();
+
+        return text.Length > 600 ? text[..600] : text;
     }
 }

@@ -21,6 +21,26 @@ contract/test.
 Implemented behavior remains canonical in feature contracts until this aggregate
 map is complete.
 
+## Compilation substrate
+
+Supported means portable tested behavior on macOS `arm64` and Windows `x64`,
+covered by `CodegenSubstrateTests`.
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| `[PreApplicationStartMethod]` in `bin` assemblies | Supported | Runs before any generation, once per process |
+| `App_Code` (C#) | Supported | Includes the static `AppInitialize` entry point |
+| `<codeSubDirectories>` | Supported | Each named directory compiles into its own assembly first; the main assembly may reference it. Framework's mixed-language motivation does not apply, since Visual Basic is unsupported |
+| `App_GlobalResources` | Supported | Neutral resx plus culture satellites, reached through the generated strongly typed class |
+| `Global.asax` | Supported | Inline `<script runat="server">`; `Application_Start` and request events |
+| Reuse across restart | Supported | An unchanged application restarts without recompiling; an edited one recompiles |
+| Two processes, one codegen segment | Supported | Serialized by the cross-process compilation mutex |
+| Compile error in top-level code | Supported | Activation completes; every request renders the compilation error page with diagnostics, as Framework does. Recovery is a process restart, since file-change notification is disabled |
+| `App_WebReferences`, `.wsdl` | Unsupported | Fails naming the limitation |
+| `App_Browsers` | Unsupported | Fails naming the limitation |
+| Visual Basic | Unsupported | Registered provider fails naming the limitation and the fix |
+| `.aspx`, `.ascx`, `.master`, `.ashx`, `.asmx` | Unassessed | Providers registered, no slice compiles them yet |
+
 ## Shipped root configuration
 
 The portable root web configuration is derived from the pinned .NET Framework

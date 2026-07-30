@@ -18,6 +18,14 @@ What remains is everything the first C# provider does not reach.
 - C# only, `/langversion:7.3`, Visual Basic explicitly unsupported.
 - `targetFramework` requires no portable capability discovery: the downlevel
   branches are design-time only, and ledger row P16 governs the upper bound.
+- Build providers ship in the root web configuration, following the Framework
+  baseline except for four whose types this port does not carry; the
+  [compatibility feature map](compatibility-feature-map.md) records the
+  omissions. A registration resolves its type only when a file of that
+  extension compiles, so registering one claims nothing about slice support.
+- `App_GlobalResources` compiles, including one culture satellite per resx, and
+  `<codeSubDirectories>` compiles each named directory into its own assembly
+  ahead of the main `App_Code` assembly that references it.
 
 ## Open
 
@@ -28,6 +36,8 @@ What remains is everything the first C# provider does not reach.
   inert.
 - Batch compilation behaviour: `batch`, `maxBatchSize`,
   `maxBatchGeneratedFileSize`, `batchTimeout`, and `maxConcurrentCompilations`.
+  Satellite assemblies already compile through `Parallel.ForEach` under
+  `maxConcurrentCompilations`, but no test drives more than one culture.
 - Linked resources, satellite culture assemblies, and
   `assemblyPostProcessorType`.
 - Precompilation and the `ClientBuildManager` surface, which is the only consumer
