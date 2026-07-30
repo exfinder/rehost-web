@@ -57,10 +57,15 @@
       XmlInputPath="$(TargetDir)fixture/app/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
       Value="$(_FixtureTemp)" />
+    <!--
+      Cleared rather than set, so this fixture's codegen root can only come from the host
+      CompilationTempDirectory option. An ignored option would relocate its output to the
+      default temporary directory instead of failing quietly.
+    -->
     <XmlPoke
       XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
-      Value="$(_FixtureTemp)" />
+      Value="" />
     <Copy
       SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
       DestinationFolder="$(_FixtureBin)"

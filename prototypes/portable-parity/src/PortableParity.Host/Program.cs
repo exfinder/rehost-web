@@ -217,7 +217,12 @@ internal static class Program
                 RootWebConfigurationFilePath = Path.Combine(
                     basePath,
                     "configs",
-                    "rehost-webforms.web.config")
+                    "rehost-webforms.web.config"),
+                // The fixture also declares this path as <compilation tempDirectory>, which the
+                // Framework oracle needs because it has no host option. Supplying both exercises
+                // host precedence and the agreement branch of the conflict check.
+                CompilationTempDirectory = Path.GetFullPath(
+                    Path.Combine(fixtureRoot, "temp"))
             }));
 
         var manager = InPhase(
