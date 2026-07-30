@@ -1321,9 +1321,83 @@ setup,
             }
             return env;
 #else
+            PublishApplicationConfiguration(appHost, ref hostingParameters);
             return CurrentAppDomainHosting.CreateHostingEnvironment(this, appId, appHost, hostingParameters);
 #endif
         }
+
+#if !NETFRAMEWORK
+        // The AppDomain-creation path above published the application's configuration into AppDomain
+        // data before creating the child domain. There is no child domain here, so the same values
+        // are published to the current one. Trust, CAS, impersonation, IIS, and the AppDomain
+        // switches are omitted; the string hash randomization check is a Framework test vector that
+        // cannot hold on .NET.
+        private void PublishApplicationConfiguration(
+            IApplicationHost appHost,
+            ref HostingEnvironmentParameters hostingParameters) {
+
+            // Framework's own map points at the CLR's machine.config location; the host supplies
+            // that path explicitly here.
+            Rehost.WebForms.Hosting.ApplicationBootstrapConfiguration bootstrap =
+                Rehost.WebForms.Hosting.WebFormsApplication.RequireInitialized();
+            Configuration appConfig = WebConfigurationManager.OpenMappedWebConfiguration(
+                bootstrap.CreateFileMap(),
+                bootstrap.VirtualRootPath);
+
+            HttpRuntimeSection httpRuntimeSection = (HttpRuntimeSection)appConfig.GetSection("system.web/httpRuntime");
+            if (httpRuntimeSection == null) {
+                throw new ConfigurationErrorsException(SR.GetString(SR.Config_section_not_present, "httpRuntime"));
+            }
+
+            FrameworkName targetFrameworkName = httpRuntimeSection.GetTargetFrameworkName();
+            if (targetFrameworkName != null) {
+                AppDomain.CurrentDomain.SetData(BinaryCompatibility.TargetFrameworkKey, targetFrameworkName);
+            }
+
+            if (httpRuntimeSection.DefaultRegexMatchTimeout != TimeSpan.Zero) {
+                AppDomain.CurrentDomain.SetData(_regexMatchTimeoutKey, httpRuntimeSection.DefaultRegexMatchTimeout);
+            }
+
+            if (httpRuntimeSection.FcnMode != FcnMode.NotSet) {
+                hostingParameters ??= new HostingEnvironmentParameters();
+                hostingParameters.FcnMode = httpRuntimeSection.FcnMode;
+            }
+
+            AppSettingsSection appSettingsSection = appConfig.AppSettings;
+            KeyValueConfigurationElement disableFcnDaclReadElement = appSettingsSection.Settings["aspnet:DisableFcnDaclRead"];
+            if (disableFcnDaclReadElement != null) {
+                bool skipReadingAndCachingDacls;
+                Boolean.TryParse(disableFcnDaclReadElement.Value, out skipReadingAndCachingDacls);
+                if (skipReadingAndCachingDacls) {
+                    hostingParameters ??= new HostingEnvironmentParameters();
+                    hostingParameters.FcnSkipReadAndCacheDacls = true;
+                }
+            }
+
+            CacheSection cacheConfig = (CacheSection)appConfig.GetSection("system.web/caching/cache");
+            if (cacheConfig != null && !String.IsNullOrWhiteSpace(cacheConfig.DefaultProvider)) {
+                ProviderSettingsCollection cacheProviders = cacheConfig.Providers;
+                if (cacheProviders == null || cacheProviders.Count < 1) {
+                    throw new ProviderException(SR.GetString(SR.Def_provider_not_found));
+                }
+
+                ProviderSettings cacheProviderSettings = cacheProviders[cacheConfig.DefaultProvider];
+                if (cacheProviderSettings == null) {
+                    throw new ProviderException(SR.GetString(SR.Def_provider_not_found));
+                }
+
+                NameValueCollection settings = cacheProviderSettings.Parameters;
+                settings["name"] = cacheProviderSettings.Name;
+                settings["type"] = cacheProviderSettings.Type;
+                AppDomain.CurrentDomain.SetData(".defaultObjectCacheProvider", settings);
+            }
+
+            DeploymentSection deploymentSection = (DeploymentSection)appConfig.GetSection("system.web/deployment");
+            if (deploymentSection != null && !deploymentSection.Retail && EnvironmentInfo.WasLaunchedFromDevelopmentEnvironment) {
+                AppDomain.CurrentDomain.SetData(".devEnvironment", true);
+            }
+        }
+#endif
 
 #if NETFRAMEWORK
         private static string NormalizePublicKeyBlob(string publicKey) {
