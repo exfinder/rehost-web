@@ -142,6 +142,104 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Normalizes_the_compilation_temp_directory_and_defaults_it_to_absent()
+    {
+        using var application = TemporaryApplication.Create();
+        var options = application.CreateOptions();
+
+        ApplicationBootstrapConfiguration.Create(options, application.OutputDirectory)
+            .CompilationTempDirectory.ShouldBeNull();
+
+        options.CompilationTempDirectory =
+            Path.Combine(application.PhysicalRoot.FullName, "codegen") +
+            Path.DirectorySeparatorChar;
+
+        ApplicationBootstrapConfiguration.Create(options, application.OutputDirectory)
+            .CompilationTempDirectory.ShouldBe(
+                Path.Combine(application.PhysicalRoot.FullName, "codegen"));
+    }
+
+    [Fact]
+    public void Rejects_a_relative_compilation_temp_directory()
+    {
+        using var application = TemporaryApplication.Create();
+        var options = application.CreateOptions();
+        options.CompilationTempDirectory = "codegen";
+
+        var exception = Should.Throw<ArgumentException>(
+            () => ApplicationBootstrapConfiguration.Create(options, application.OutputDirectory));
+
+        exception.ParamName.ShouldBe(nameof(WebFormsApplicationOptions.CompilationTempDirectory));
+        exception.Message.ShouldContain("must be absolute");
+    }
+
+    [Fact]
+    public void Rejects_a_compilation_temp_directory_that_is_a_file()
+    {
+        using var application = TemporaryApplication.Create();
+        var path = Path.Combine(application.PhysicalRoot.FullName, "codegen");
+        File.WriteAllText(path, string.Empty);
+        var options = application.CreateOptions();
+        options.CompilationTempDirectory = path;
+
+        var exception = Should.Throw<ArgumentException>(
+            () => ApplicationBootstrapConfiguration.Create(options, application.OutputDirectory));
+
+        exception.Message.ShouldContain("is a file, not a directory");
+    }
+
+    [Fact]
+    public void Preflight_rejects_a_configured_temp_directory_that_disagrees_with_the_host()
+    {
+        using var application = TemporaryApplication.Create();
+        var configured = Path.Combine(application.PhysicalRoot.FullName, "configured");
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            $"""
+            <configuration>
+              <system.web>
+                <compilation tempDirectory="{configured}" />
+              </system.web>
+            </configuration>
+            """);
+        var options = application.CreateOptions();
+        options.CompilationTempDirectory = Path.Combine(application.PhysicalRoot.FullName, "host");
+        var configuration = ApplicationBootstrapConfiguration.Create(
+            options,
+            application.OutputDirectory);
+
+        var exception = Should.Throw<InvalidOperationException>(
+            () => ApplicationConfigurationPreflight.Validate(configuration));
+
+        exception.Message.ShouldContain("conflicts with the host");
+        exception.Message.ShouldContain(configured);
+        exception.Message.ShouldContain(configuration.CompilationTempDirectory);
+    }
+
+    [Fact]
+    public void Preflight_accepts_a_configured_temp_directory_that_agrees_with_the_host()
+    {
+        using var application = TemporaryApplication.Create();
+        var shared = Path.Combine(application.PhysicalRoot.FullName, "codegen");
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            $"""
+            <configuration>
+              <system.web>
+                <compilation tempDirectory="{shared + Path.DirectorySeparatorChar}" />
+              </system.web>
+            </configuration>
+            """);
+        var options = application.CreateOptions();
+        options.CompilationTempDirectory = shared;
+        var configuration = ApplicationBootstrapConfiguration.Create(
+            options,
+            application.OutputDirectory);
+
+        Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+    }
+
+    [Fact]
     public void Preflight_rejects_configuration_reload()
     {
         using var application = TemporaryApplication.Create();

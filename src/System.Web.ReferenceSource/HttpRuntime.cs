@@ -882,6 +882,13 @@ namespace System.Web {
 
             string tempDirectory = null;
 
+#if !NETFRAMEWORK
+            // The CLR install directory holds no ASP.NET codegen root and is not writable, and the
+            // %TEMP% fallback below would silently relocate generated output. Resolution is the
+            // host option, then configured tempDirectory, then a portable default, and an
+            // unwritable result fails naming the path and its source.
+            tempDirectory = CodegenDirectory.ResolveTempRoot(compilationSection);
+#else
             // These variables are used for error handling
             string tempDirAttribName = null;
             string configFileName = null;
@@ -984,6 +991,7 @@ namespace System.Web {
                 Debug.Assert(System.Web.UI.Util.HasWriteAccessToDirectory(tempDirectory));
                 tempDirectory = Path.Combine(tempDirectory, codegenDirName);
             }
+#endif // !NETFRAMEWORK
 
             _tempDir = tempDirectory;
 
@@ -996,11 +1004,11 @@ namespace System.Web {
 
             _codegenDir = Thread.GetDomain().DynamicDirectory;
 #else
-            // SetDynamicBase is a no-op and DynamicDirectory is null on modern .NET, so no
-            // generation segment is appended and the codegen base is used directly. The segment
-            // the CLR supplied is a dynamic-compilation concern, and choosing a replacement is
-            // deferred to that slice; see follow-ups/runtime-codegen-and-loading.md.
-            _codegenDir = codegenBase;
+            // SetDynamicBase is a no-op and DynamicDirectory is null on modern .NET. The segment
+            // the CLR derived from AppDomain identity is replaced by one derived from the
+            // application directory, so distinct applications never share a directory and the
+            // same application finds its previous run's output.
+            _codegenDir = Path.Combine(codegenBase, CodegenDirectory.GenerationSegment(_appDomainAppPath));
 #endif
 
             // Create the codegen directory if needed

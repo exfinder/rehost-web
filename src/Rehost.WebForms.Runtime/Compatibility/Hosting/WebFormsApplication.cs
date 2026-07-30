@@ -13,6 +13,8 @@ public sealed class WebFormsApplicationOptions
     public string MachineConfigurationFilePath { get; set; }
 
     public string RootWebConfigurationFilePath { get; set; }
+
+    public string CompilationTempDirectory { get; set; }
 }
 
 public static class WebFormsApplication

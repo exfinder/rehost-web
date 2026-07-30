@@ -69,13 +69,15 @@ internal sealed class ApplicationBootstrapConfiguration
         string physicalRootPath,
         string virtualRootPath,
         string machineConfigurationFilePath,
-        string rootWebConfigurationFilePath)
+        string rootWebConfigurationFilePath,
+        string compilationTempDirectory)
     {
         ApplicationId = applicationId;
         PhysicalRootPath = physicalRootPath;
         VirtualRootPath = virtualRootPath;
         MachineConfigurationFilePath = machineConfigurationFilePath;
         RootWebConfigurationFilePath = rootWebConfigurationFilePath;
+        CompilationTempDirectory = compilationTempDirectory;
     }
 
     internal string ApplicationId { get; }
@@ -87,6 +89,10 @@ internal sealed class ApplicationBootstrapConfiguration
     internal string MachineConfigurationFilePath { get; }
 
     internal string RootWebConfigurationFilePath { get; }
+
+    // Null means no host-supplied root; resolution then falls to configured tempDirectory and to
+    // the portable default. See CodegenDirectory.
+    internal string CompilationTempDirectory { get; }
 
     internal string ApplicationConfigurationFilePath =>
         Path.Combine(PhysicalRootPath, HttpConfigurationSystem.WebConfigFileName);
@@ -119,7 +125,8 @@ internal sealed class ApplicationBootstrapConfiguration
             physicalRootPath,
             virtualRootPath,
             machineConfigurationFilePath,
-            rootWebConfigurationFilePath);
+            rootWebConfigurationFilePath,
+            NormalizeCompilationTempDirectory(options.CompilationTempDirectory));
     }
 
     internal WebConfigurationFileMap CreateFileMap()
@@ -237,6 +244,46 @@ internal sealed class ApplicationBootstrapConfiguration
         }
     }
 
+    private static string NormalizeCompilationTempDirectory(string path)
+    {
+        if (String.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        if (!Path.IsPathFullyQualified(path))
+        {
+            throw new ArgumentException(
+                $"The compilation temporary directory must be absolute: '{path}'.",
+                nameof(WebFormsApplicationOptions.CompilationTempDirectory));
+        }
+
+        var fullPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+
+        FileAttributes attributes;
+        try
+        {
+            attributes = File.GetAttributes(fullPath);
+        }
+        catch (FileNotFoundException)
+        {
+            return fullPath;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return fullPath;
+        }
+
+        if ((attributes & FileAttributes.Directory) == 0)
+        {
+            throw new ArgumentException(
+                $"The compilation temporary directory is a file, not a directory: '{fullPath}'.",
+                nameof(WebFormsApplicationOptions.CompilationTempDirectory));
+        }
+
+        return fullPath;
+    }
+
     private static string NormalizeConfigurationFilePath(
         string configuredPath,
         string defaultPath,
@@ -306,7 +353,7 @@ internal static class ApplicationConfigurationPreflight
             var trust = RequireSection<TrustSection>(
                 mappedConfiguration,
                 "system.web/trust");
-            RequireSection<CompilationSection>(
+            var compilation = RequireSection<CompilationSection>(
                 mappedConfiguration,
                 "system.web/compilation");
             RequireSection<HostingEnvironmentSection>(
@@ -325,6 +372,8 @@ internal static class ApplicationConfigurationPreflight
                 throw new PlatformNotSupportedException(
                     "Rehost supports only trust level=\"Full\" with legacyCasModel=\"false\".");
             }
+
+            ValidateCompilationTempDirectory(configuration, compilation);
         }
         catch (ConfigurationErrorsException exception)
         {
@@ -337,6 +386,36 @@ internal static class ApplicationConfigurationPreflight
                 exception,
                 exception.Filename,
                 exception.Line);
+        }
+    }
+
+    // Two owners of one directory is a configuration mistake, not a precedence question, so a
+    // configured value that disagrees with the host-supplied one fails instead of losing silently.
+    internal static void ValidateCompilationTempDirectory(
+        ApplicationBootstrapConfiguration configuration,
+        CompilationSection compilation)
+    {
+        var configured = compilation?.TempDirectory;
+        if (configuration.CompilationTempDirectory == null ||
+            String.IsNullOrWhiteSpace(configured))
+        {
+            return;
+        }
+
+        configured = configured.Trim();
+        var normalized = Path.IsPathFullyQualified(configured)
+            ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(configured))
+            : configured;
+
+        if (!String.Equals(
+                normalized,
+                configuration.CompilationTempDirectory,
+                OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "The configured system.web/compilation tempDirectory conflicts with the host " +
+                $"CompilationTempDirectory option. Configured='{configured}', " +
+                $"Host='{configuration.CompilationTempDirectory}'. Remove one of them.");
         }
     }
 

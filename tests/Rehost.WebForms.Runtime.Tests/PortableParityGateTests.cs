@@ -21,8 +21,10 @@ public sealed class PortableParityGateTests
     // BuildManager combined the preserved hash file path with an embedded backslash, which off
     // Windows produced one file named "hash\hash.web" beside the codegen root instead of a file
     // inside it. Nothing observable in the response changes, so only the artifact detects it.
+    // The generation segment is observable the same way: the two fixtures share one temp root and
+    // must not share a segment.
     [Fact]
-    public void Preserved_hash_file_nests_under_the_codegen_hash_directory()
+    public void Generated_output_nests_under_one_segment_per_application()
     {
         var codegenRoot = Path.Combine(HostDirectory, "fixture", "temp", "root");
 
@@ -34,7 +36,17 @@ public sealed class PortableParityGateTests
         var (exitCode, standardError) = RunHost("run");
         exitCode.ShouldBe(0, standardError);
 
-        File.Exists(Path.Combine(codegenRoot, "hash", "hash.web")).ShouldBeTrue();
+        Directory.EnumerateFiles(codegenRoot).ShouldBeEmpty();
+
+        var segments = Directory.GetDirectories(codegenRoot);
+        segments.Length.ShouldBe(2, "the app and app-errors fixtures each own a segment");
+
+        foreach (var segment in segments)
+        {
+            Path.GetFileName(segment).ShouldMatch("^[0-9a-f]{8}$");
+            File.Exists(Path.Combine(segment, "hash", "hash.web")).ShouldBeTrue();
+        }
+
         Directory
             .EnumerateFileSystemEntries(codegenRoot, "*", SearchOption.AllDirectories)
             .ShouldNotContain(entry => Path.GetFileName(entry).Contains('\\'));

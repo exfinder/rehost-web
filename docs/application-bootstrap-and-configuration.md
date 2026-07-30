@@ -14,13 +14,20 @@ Required options:
 
 - opaque, non-empty application ID;
 - absolute existing physical application root;
-- absolute virtual root (`/` or an application subpath);
-- absolute writable application work root.
+- absolute virtual root (`/` or an application subpath).
+
+Optional `CompilationTempDirectory` supplies the writable root for generated
+output. It is the same level as `<compilation tempDirectory>`, which it
+overrides; a configured value that disagrees fails preflight as conflicting
+ownership. Absent both, the root is
+`{Path.GetTempPath()}/rehost-webforms-tempfiles`. A read-only or ephemeral
+container filesystem is the case the option exists for.
 
 The physical root is normalized with `Path.GetFullPath`, retains filesystem
 casing, and is stored with a trailing platform directory separator. The
 virtual root rejects relative paths, backslashes, query/fragment text, and
-literal traversal segments.
+literal traversal segments. The compilation temp directory is normalized with
+`Path.GetFullPath` without a trailing separator, and must not name a file.
 
 Registration does not resolve symlinks or establish descendant containment;
 [portable path mapping](follow-ups/portable-path-mapping-and-containment.md)
@@ -62,7 +69,8 @@ their probe components.
 Before global mutation, registration:
 
 1. validates and opens each required file;
-2. validates application identity and physical, virtual, and work roots; and
+2. validates application identity, physical and virtual roots, and any supplied
+   compilation temp directory; and
 3. verifies no conflicting process-wide application binding exists.
 
 Registration does not open mapped System.Web configuration or eagerly resolve
