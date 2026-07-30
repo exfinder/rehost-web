@@ -114,3 +114,23 @@ Page compilation and its build results remain
 - Batch compilation settings, satellite culture policy beyond the neutral and
   one-culture case, and `assemblyPostProcessorType` stay with
   [compiler policy](compiler-provider-and-target-framework-policy.md).
+
+## Page compilation resolves framework assemblies over app-local copies
+
+Open. Found while compiling a page that used `ObjectStateFormatter`.
+
+`System.Runtime.Serialization.Formatters` ships in the .NET shared framework at
+assembly version `8.1.0.0`, where `BinaryFormatter` throws. The out-of-band
+package advances the same assembly to `10.0.0.0` with a working implementation,
+and this port references it because `ResXDataNode` and `ResXResourceWriter` need
+it for `App_GlobalResources`.
+
+The runtime therefore compiles against and loads `10.0.0.0`, but the reference
+set handed to page compilation resolves the framework's `8.1.0.0`, and the page
+fails with `CS1705`. Any application page referencing a type from an out-of-band
+package that shadows a framework assembly hits this; eleven other package
+references have the same shape.
+
+Reproduction: a page calling `new ObjectStateFormatter()`. The fix belongs in
+how the reference set is assembled — it must prefer what the runtime actually
+loaded.

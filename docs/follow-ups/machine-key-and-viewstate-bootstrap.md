@@ -45,6 +45,32 @@ slice-3 fixture carries no server form, and it means any later Framework
 differential over a page with a form needs this recorded as an accepted
 compatibility deviation before it can pass.
 
+## The legacy path selects its hash algorithm by output-buffer size
+
+`ObjectStateFormatter` protects view state through `AspNetCryptoServiceProvider`,
+which is pure managed BCL, whenever `machineKey compatibilityMode` is
+`Framework45` or later — which `<httpRuntime targetFramework="4.5" />` or later
+sets, and which the Visual Studio project template has emitted for years. Below
+that it takes `MachineKeySection.EncryptOrDecryptData`, whose hashes are native.
+The obsolete `MachineKey.Encode`/`Decode` reach the same native hashes on any
+application, regardless of compatibility mode.
+
+Those hashes carry a trap worth recording before anyone ports them. Native
+`GetSHA1Hash` and `GetHMACSHA1Hash` selected the algorithm from the **output
+buffer length** they were handed, which is `_HashSize`, not from the SHA1 the
+names claim. `_HashSize` follows `validation`: 16 for `MD5`, 20 for `SHA1`,
+`AES` and `3DES`, then 32, 48, and 64 for `HMACSHA256`, `HMACSHA384`, and
+`HMACSHA512`. A mechanical port to `SHA1.HashData` and `HMACSHA1.HashData`
+compiles, runs, and computes the wrong MAC — on the default path, since 4.5
+defaults `validation` to `HMACSHA256`.
+
+The sibling `Portable.System.Web` POC hit exactly this and spent hours on a view
+state decryption mismatch. Its first test suite passed while the code was wrong,
+because it validated SHA1 against RFC 2202 and NIST SHA1 vectors: the right
+answer to the wrong question. Only baselines taken from `webengine4.dll` itself
+exposed it. Ledger P41 refuses the native path outright, so this is a cost to
+weigh if pre-4.5 support is ever wanted, not a live defect.
+
 ## Required decisions
 
 - Whether the first fixture emits protected ViewState. The slice-3 page fixture

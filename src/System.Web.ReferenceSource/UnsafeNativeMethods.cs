@@ -22,6 +22,14 @@ namespace System.Web {
     System.Security.SuppressUnmanagedCodeSecurityAttribute()
     ]
     internal static class UnsafeNativeMethods {
+#if !NETFRAMEWORK
+        // Constants inline at compile time, so this fires only on an actual native call.
+        static UnsafeNativeMethods() {
+            throw new PlatformNotSupportedException(
+                "Rehost.WebForms does not call into native ASP.NET libraries.");
+        }
+#endif
+
         static internal readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
 
         /*
