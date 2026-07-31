@@ -143,3 +143,17 @@ The substitution matches on file name and does not consult `deps.json`, so an
 application deploying an *older* copy of a framework assembly would be compiled
 against that copy. Nothing does; revisit if the host resolution rules ever matter
 more than the version collision.
+
+## Known flake: stale App_Code assembly on Windows
+
+Open. `CodegenSubstrateTests.Recompiles_After_Application_Code_Changes` failed
+once in roughly a dozen full-suite Windows runs, on its third assertion only: the
+edit was detected and a new `App_Code` assembly was produced, but the previous one
+was still in the segment. Deliberate repeats — eight isolated runs and five full
+suites, before and after the reference-set change — did not reproduce it, so it is
+neither attributed to that change nor established as older than it.
+
+The suspected cause is Windows file locking: a loaded assembly cannot be deleted,
+which is why P30 marks such files `.delete` rather than removing them, and the
+assertion expects removal. If it recurs, decide whether the contract is "removed"
+or "not served" before changing the test.
