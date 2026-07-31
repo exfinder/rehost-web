@@ -48,10 +48,7 @@
     <PackageReference Include="System.DirectoryServices.Protocols" />
     <PackageReference Include="System.Drawing.Common" />
     <PackageReference Include="System.Runtime.Caching" />
-    <!-- Compile against the in-box 8.1.0.0 reference. Page compilation builds its reference set
-         from the shared framework, so a 10.0.0.0 typeref here fails every page with CS1705.
-         The package still ships and still wins at bind time. -->
-    <PackageReference Include="System.Runtime.Serialization.Formatters" ExcludeAssets="compile" />
+    <PackageReference Include="System.Runtime.Serialization.Formatters" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
     <PackageReference Include="System.Security.Permissions" />
   </ItemGroup>

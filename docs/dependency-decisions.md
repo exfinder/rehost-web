@@ -51,8 +51,11 @@ port's deserialization exposure equals .NET Framework's — by design, since the
 port exists to run existing applications unchanged. It is neither safer nor less
 safe than the framework it replaces, and it does not narrow that surface.
 
-`ExcludeAssets="compile"` keeps the typerefs on the in-box 8.1.0.0 reference while
-the package supplies the 10.0.0.0 implementation at run time.
+The package advances an assembly the shared framework also ships, which is the one
+case of that shape in this repository. Page compilation resolves it from the
+application's deployment directory rather than the shared framework, so the port
+compiles against the same version it runs on; see
+[runtime codegen](follow-ups/runtime-codegen-and-loading.md).
 
 Two mechanisms turn the runtime switch on, and neither subsumes the other. The
 shipped `build/Rehost.WebForms.Runtime.targets` writes it into the consuming

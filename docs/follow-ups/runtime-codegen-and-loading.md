@@ -117,22 +117,29 @@ Page compilation and its build results remain
 
 ## Page compilation resolves framework assemblies over app-local copies
 
-Open for the general case. Found while compiling a page that used
-`ObjectStateFormatter`.
+Closed. Found while compiling a page that used `ObjectStateFormatter`.
 
 `RoslynCSharpCompiler` builds the reference set by enumerating the shared
-framework directory, so it hands page compilation whatever version ships there.
-When an out-of-band package advances the same assembly, the runtime compiles
-against and loads the higher version while pages see the lower one, and any page
-touching an affected type fails with `CS1705`.
+framework directory, standing in for the machine `<compilation><assemblies>` list
+a Framework application inherited. When an out-of-band package advances one of
+those assemblies, the application loads the higher version while pages saw the
+lower one, and any page touching an affected type failed with `CS1705` before it
+ran. `System.Runtime.Serialization.Formatters` triggered it: the framework ships
+`8.1.0.0`, the package supplies `10.0.0.0`, and `ObjectStateFormatter` carries
+`IFormatter` in its public surface.
 
-`System.Runtime.Serialization.Formatters` triggered it: the framework ships
-`8.1.0.0`, the package supplies `10.0.0.0`, and `ObjectStateFormatter` exposes
-`IFormatter` in its public surface. That instance is closed by
-`ExcludeAssets="compile"`, which keeps the port's typerefs on the framework
-version while the package still wins at run time. See
-[dependency decisions](../dependency-decisions.md).
+Framework assembled the set from the assemblies the application had loaded, so
+each entry now resolves from the application's deployment directory when a copy
+of that name is present there, and from the shared framework otherwise. Only the
+version is substituted; the set of visible assemblies is unchanged, so a page
+gains no reference it did not already have.
 
-Eleven other package references have the same shape and are not closed. The real
-fix belongs in how the reference set is assembled — it must prefer what the
-runtime actually loaded, not what the shared framework directory holds.
+`Formatter.aspx` in the page fixture reproduces it: the assertion is the rendered
+`ObjectStateFormatter` output, so the page must compile and run rather than merely
+resolve. It is the only assembly of that shape in the repository today — no other
+package reference shadows a shared framework assembly.
+
+The substitution matches on file name and does not consult `deps.json`, so an
+application deploying an *older* copy of a framework assembly would be compiled
+against that copy. Nothing does; revisit if the host resolution rules ever matter
+more than the version collision.

@@ -304,9 +304,15 @@ internal sealed class RoslynCSharpCompiler : ICodeCompiler
         var references = new List<MetadataReference>();
         foreach (var path in Directory.EnumerateFiles(directory, "*.dll"))
         {
-            if (HasManagedMetadata(path))
+            // An out-of-band package advances an assembly the shared framework also ships, and the
+            // copy deployed with the application is the one that loads. Compiling against the
+            // framework's older copy instead fails every page referencing it with CS1705.
+            var deployed = Path.Combine(AppContext.BaseDirectory, Path.GetFileName(path));
+            var selected = File.Exists(deployed) ? deployed : path;
+
+            if (HasManagedMetadata(selected))
             {
-                references.Add(MetadataReference.CreateFromFile(path));
+                references.Add(MetadataReference.CreateFromFile(selected));
             }
         }
 
