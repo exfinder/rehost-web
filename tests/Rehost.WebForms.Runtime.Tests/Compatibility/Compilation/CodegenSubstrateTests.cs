@@ -80,9 +80,9 @@ public sealed class CodegenSubstrateTests
 
         Value(second, "app-code:").ShouldNotBe(Value(first, "app-code:"));
         Value(second, "resource:").ShouldBe("neutral-greeting");
-        Directory.EnumerateFiles(application.Segment, "App_Code.*.dll")
-            .Select(Path.GetFileName)
-            .ShouldNotContain(Path.GetFileName(Value(first, "app-code:")) + ".dll");
+        IsLogicallyDeleted(Path.Combine(
+            application.Segment,
+            Path.GetFileName(Value(first, "app-code:")) + ".dll")).ShouldBeTrue();
     }
 
     [Fact]
@@ -128,17 +128,7 @@ public sealed class CodegenSubstrateTests
         holding.WaitForExit();
         holding.ExitCode.ShouldBe(0, holding.StandardError);
 
-        if (OperatingSystem.IsWindows())
-        {
-            // The loaded file is locked, so the cache leaves a marker for a later run to sweep.
-            File.Exists(stale + ".delete").ShouldBeTrue();
-        }
-        else
-        {
-            // Unix unlinks a loaded file, so the marker path is never entered.
-            File.Exists(stale).ShouldBeFalse();
-            File.Exists(stale + ".delete").ShouldBeFalse();
-        }
+        IsLogicallyDeleted(stale).ShouldBeTrue();
     }
 
     [Fact]
@@ -163,6 +153,9 @@ public sealed class CodegenSubstrateTests
         trace.Find(entry => entry.StartsWith(prefix))?[prefix.Length..]
             ?? throw new InvalidOperationException(
                 $"No '{prefix}' entry in trace:{Environment.NewLine}{string.Join(Environment.NewLine, trace)}");
+
+    private static bool IsLogicallyDeleted(string path) =>
+        !File.Exists(path) || File.Exists(path + ".delete");
 
     private sealed class ScenarioApplication : IDisposable
     {

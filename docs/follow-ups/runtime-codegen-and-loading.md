@@ -38,9 +38,8 @@ ledger row P08 records the leaf. The gate for this work is port-local by
   renders it per request. The host selects that through `CreateObject`'s
   `throwOnError`, which both hosts now pass as `false`, matching Framework.
 
-Reclamation differs by operating system rather than by design. Windows locks a
-loaded assembly, so the marker path runs and a later start sweeps it; Unix
-unlinks the file and the marker is never written. Both are asserted.
+Reclamation's contract is logical deletion. Immediate unlink is best-effort;
+`.delete` marks an assembly unusable until a later start can sweep it.
 
 ## Long literal strings
 
@@ -141,17 +140,3 @@ The substitution matches on file name and does not consult `deps.json`, so an
 application deploying an *older* copy of a framework assembly would be compiled
 against that copy. Nothing does; revisit if the host resolution rules ever matter
 more than the version collision.
-
-## Known flake: stale App_Code assembly on Windows
-
-Open. `CodegenSubstrateTests.Recompiles_After_Application_Code_Changes` failed
-once in roughly a dozen full-suite Windows runs, on its third assertion only: the
-edit was detected and a new `App_Code` assembly was produced, but the previous one
-was still in the segment. Deliberate repeats — eight isolated runs and five full
-suites, before and after the reference-set change — did not reproduce it, so it is
-neither attributed to that change nor established as older than it.
-
-The suspected cause is Windows file locking: a loaded assembly cannot be deleted,
-which is why P30 marks such files `.delete` rather than removing them, and the
-assertion expects removal. If it recurs, decide whether the contract is "removed"
-or "not served" before changing the test.
