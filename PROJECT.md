@@ -7,6 +7,15 @@ application-source changes. Preserve observable `System.Web` behavior while
 replacing dependencies on IIS, .NET Framework hosting, remoting, CAS, and
 Windows-only services.
 
+Behavioral compatibility is the primary goal: semantics and observable
+behavior matter more than matching source shape for its own sake. A future
+consumer must never be surprised by behavior the port introduced that legacy
+`System.Web` did not have. Where the target platform cannot preserve some
+original behavior or logic, first recover the original intent—from Reference
+Source, documented rationale, or observed .NET Framework 4.8.1 behavior—and
+replicate that intent as closely as the portability contract allows, rather
+than substituting new logic.
+
 Compatibility claims are separate:
 
 - source/API compatibility;
@@ -14,8 +23,9 @@ Compatibility claims are separate:
 - third-party control compatibility after recompilation;
 - binary identity compatibility.
 
-Source compatibility is the primary goal. Binary interchangeability with
-Microsoft's strong-named `System.Web` is not promised.
+Source compatibility is necessary but not sufficient; behavioral fidelity
+takes precedence over it. Binary interchangeability with Microsoft's
+strong-named `System.Web` is not promised.
 
 ## Architecture
 
@@ -44,6 +54,9 @@ silent no-op.
 
 - Preserve public shape and observable behavior only where supported by tests.
 - Treat unsupported behavior as an explicit contract.
+- When original behavior cannot be reproduced, replicate the recovered
+  intent as closely as the portability contract permits; document the
+  residual gap instead of silently diverging.
 - Separate source compatibility from assembly/binary identity.
 - Require differential tests for intentional behavior changes.
 - Keep security-sensitive compatibility opt-ins explicit. Legacy serialization

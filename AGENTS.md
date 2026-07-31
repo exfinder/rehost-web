@@ -1,3 +1,5 @@
+@PROJECT.md
+
 When reporting information to me, be extremely concise and sacrifice grammar for sake of concision.
 
 Keep commit messages very concise. A subject line, and a body only where the
