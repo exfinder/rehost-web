@@ -64,4 +64,6 @@
       DestinationFolder="%(_FixtureDirectory.Identity)/bin"
       SkipUnchangedFiles="true" />
   </Target>
+
+  <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

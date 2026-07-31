@@ -75,4 +75,6 @@
       DestinationFolder="$(_ErrorFixtureBin)"
       SkipUnchangedFiles="true" />
   </Target>
+
+  <Import Project="../../../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

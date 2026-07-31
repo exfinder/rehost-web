@@ -58,8 +58,10 @@ Two mechanisms turn the runtime switch on, and neither subsumes the other. The
 shipped `build/Rehost.WebForms.Runtime.targets` writes it into the consuming
 application's runtimeconfig, which is correct from process start and independent
 of load order, but reaches only consumers that take the package or import the
-targets. `UnsafeBinaryFormatterModuleInitializer` covers a `ProjectReference`
-consumer that imports neither. Its limit is that `BinaryFormatter` caches the
+targets. Every executable in this repository that consumes the port imports them,
+so the test and prototype processes run the shape that ships.
+`UnsafeBinaryFormatterModuleInitializer` covers a `ProjectReference` consumer that
+imports neither. Its limit is that `BinaryFormatter` caches the
 switch on first read: a process whose host code serialized before it first
 touched System.Web keeps the SDK default of `false`, and the initializer, though
 it runs and does set the switch, cannot undo that. Measured both ways.

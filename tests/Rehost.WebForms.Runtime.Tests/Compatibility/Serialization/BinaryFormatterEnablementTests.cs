@@ -8,15 +8,23 @@ public sealed class BinaryFormatterEnablementTests
 {
     private const string Switch = "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization";
 
-    // The runtime reads this switch once and latches it, so a host that touched BinaryFormatter
-    // before the module initializer ran would be stuck with the SDK's false. The shipped targets
-    // put it in the consuming application's runtimeconfig instead.
-    [Fact]
-    public void The_Host_Runtime_Configuration_Enables_Binary_Formatter_Serialization()
+    // BinaryFormatter caches the switch on first read, so an application that serialized before
+    // it first touched System.Web would keep the SDK's false whatever the module initializer did
+    // afterwards. Every executable consuming the port imports the shipped targets, which write
+    // the switch into its own runtimeconfig. Dropping that import is silent without this.
+    [Theory]
+    [InlineData("Rehost.WebForms.Runtime.Tests")]
+    [InlineData("Rehost.WebForms.ScenarioHost")]
+    public void A_Consuming_Application_Enables_Binary_Formatter_Serialization(string application)
     {
         var path = Path.Combine(
-            AppContext.BaseDirectory,
-            "Rehost.WebForms.Runtime.Tests.runtimeconfig.json");
+            RepositoryRoot,
+            "tests",
+            application,
+            "bin",
+            "Debug",
+            "net10.0",
+            application + ".runtimeconfig.json");
 
         File.Exists(path).ShouldBeTrue(path);
 
@@ -27,7 +35,23 @@ public sealed class BinaryFormatterEnablementTests
             .GetProperty("configProperties")
             .GetProperty(Switch)
             .GetBoolean()
-            .ShouldBeTrue();
+            .ShouldBeTrue(path);
+    }
+
+    private static string RepositoryRoot { get; } = FindRepositoryRoot();
+
+    private static string FindRepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+        while (directory != null
+            && !File.Exists(Path.Combine(directory.FullName, "Rehost.WebForms.slnx")))
+        {
+            directory = directory.Parent;
+        }
+
+        return directory?.FullName
+            ?? throw new InvalidOperationException("Repository root was not found.");
     }
 
     // The out-of-band package must win over the shared framework's throwing stub.
