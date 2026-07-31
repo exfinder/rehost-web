@@ -52,7 +52,14 @@ port exists to run existing applications unchanged. It is neither safer nor less
 safe than the framework it replaces, and it does not narrow that surface.
 
 `ExcludeAssets="compile"` keeps the typerefs on the in-box 8.1.0.0 reference while
-the package supplies the 10.0.0.0 implementation at run time. The shipped
-`build/Rehost.WebForms.Runtime.targets` writes the runtime switch into consuming
-applications, because the SDK default is `false` and the switch latches on first
-read. A `ProjectReference` consumer gets it from the module initializer instead.
+the package supplies the 10.0.0.0 implementation at run time.
+
+Two mechanisms turn the runtime switch on, and neither subsumes the other. The
+shipped `build/Rehost.WebForms.Runtime.targets` writes it into the consuming
+application's runtimeconfig, which is correct from process start and independent
+of load order, but reaches only consumers that take the package or import the
+targets. `UnsafeBinaryFormatterModuleInitializer` covers a `ProjectReference`
+consumer that imports neither. Its limit is that `BinaryFormatter` caches the
+switch on first read: a process whose host code serialized before it first
+touched System.Web keeps the SDK default of `false`, and the initializer, though
+it runs and does set the switch, cannot undo that. Measured both ways.
