@@ -1,6 +1,6 @@
 # First-slice pipeline fixture profile
 
-Status: open. Priority: high. Depends on bootstrap/configuration.
+Status: resolved for slice 1.
 
 ## Problem
 
@@ -8,15 +8,14 @@ The product root baseline remains structurally Framework-derived. The
 first-slice fixture needs isolation from unproven built-ins without redefining
 product defaults.
 
-## Required decisions
+## Settled boundary
 
-- Fixture-level `<clear/>` plus one probe module and precompiled handler;
-  retain/probe the implicit `DefaultAuthenticationModule`.
-- Which inherited Framework defaults are portable, disabled, deferred, or
-  explicitly rejected in later slices.
-- Failure timing and diagnostics for Windows authentication, impersonation,
-  integrated pipeline, native health providers, and other excluded features.
-- How the profile feeds the public compatibility map.
+- Fixtures clear inherited handlers and modules, register one probe module and
+  precompiled handler, and retain the implicit `DefaultAuthenticationModule`.
+- Product defaults remain Framework-derived; reached defaults are classified in
+  the portability ledger and compatibility map.
+- Windows authentication, impersonation, integrated pipeline, native health
+  providers, and other excluded features remain later feature boundaries.
 
 ## Verification
 
@@ -24,7 +23,7 @@ Configuration tests prove the fixture clears inheritance and resolves its
 handler/module through normal classic configuration. Product-baseline deltas
 are tracked separately in the portability ledger.
 
-## Done when
+## Result
 
 The fixture is deterministic without presenting its minimal registrations as
 the product compatibility baseline.

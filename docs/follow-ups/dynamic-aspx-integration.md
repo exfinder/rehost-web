@@ -1,6 +1,6 @@
 # Dynamic ASPX integration
 
-Status: open. Priority: high. Slice 3; depends on the dynamic-startup slice.
+Status: resolved. Slice 3 gate passes on macOS `arm64` and Windows `x64`.
 
 The gate is port-local on both supported platforms, by
 [ADR 0044](../adr/0044-gate-differentials-by-evidence-not-by-slice.md). Nothing
@@ -22,7 +22,7 @@ an expression, and `Label`, `Repeater`, `HyperLink`, `Image`, and `Panel`.
 Values come from `App_Code` and `Global.asax`, so rendering also proves the
 generated page assembly resolves both in one load context (P34).
 
-## Test
+## Verification
 
 - runtime: cold request compiles and renders byte-for-byte as
   `Default.expected.html`; a warm request reuses the assembly rather than
@@ -37,7 +37,8 @@ generated page assembly resolves both in one load context (P34).
 Activation mutates process-global state, so every one of these runs through
 `ScenarioHost` in a child process.
 
-## Done when
+## Result
 
-The test passes repeatedly from disposable application/codegen roots and every
-remaining exclusion is represented in the compatibility feature map.
+The tests pass from disposable application/codegen roots on both supported
+platforms. Remaining exclusions are recorded in the
+[compatibility feature map](compatibility-feature-map.md).

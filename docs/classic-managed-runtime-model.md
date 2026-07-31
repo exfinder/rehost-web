@@ -1,6 +1,6 @@
 # Classic managed runtime model
 
-Status: accepted planning model. Executable probes remain authoritative.
+Status: implemented through slice 3. Executable probes remain authoritative.
 
 This document describes only the supported classic managed path and its
 portable host analogy. IIS integrated mode is background material, not the
@@ -87,7 +87,7 @@ initialization.
 ## Request sequence
 
 1. Adapter decides whether the request belongs to Web Forms.
-2. Adapter validates the first-slice transport envelope and creates one worker
+2. Adapter validates the supported transport envelope and creates one worker
    request.
 3. Application owner activates if still `Registered`.
 4. Adapter calls `HttpRuntime.ProcessRequest` directly.
@@ -97,7 +97,7 @@ initialization.
 7. `EnsureFirstRequestInit` single-flights request-dependent initialization
    using the first real context.
 8. `HttpApplicationFactory.GetApplicationInstance` lazily initializes
-   `Global.asax` metadata and calls `Application_Start` when that slice exists.
+   `Global.asax` metadata and calls `Application_Start`.
 9. Factory takes or creates a pooled `HttpApplication`.
 10. A newly created application instance constructs and initializes its
     configured `IHttpModule` instances.

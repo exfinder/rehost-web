@@ -25,9 +25,10 @@ host does not reference it.
 - initialization-error response and terminal shutdown notification;
 - .NET Framework differential traces.
 
-## Deferred
+## Deferred from slice 1
 
-- dynamic `Global.asax`, `App_Code`, `.ashx`, and `.aspx` compilation;
+- dynamic `Global.asax`, `App_Code`, and `.aspx` compilation, implemented by
+  slices 2 and 3; `.ashx` remains unassessed;
 - request bodies, path info, streaming response, and file send;
 - session, authentication, cache, routing, and resources;
 - graceful drain/disposal.
@@ -55,7 +56,8 @@ All three hold on macOS `arm64` and Windows `x64`, across both the
 [differential](../../prototypes/portable-parity/README.md) and
 [adapter](../../prototypes/adapter-parity/README.md) columns.
 
-What the slice does not cover is recorded under "Deferred" above and in
+Later support and remaining gaps are recorded above, in the
+[compatibility feature map](compatibility-feature-map.md), and in
 [the adapter's open list](aspnet-core-host-adapter.md). Notably the response
-spill path and mid-request disconnect are implemented but unexercised, because no
-declared scenario reaches either.
+spill path and mid-request disconnect are implemented but unexercised, because
+no declared scenario reaches either.

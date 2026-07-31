@@ -1,20 +1,20 @@
 # Deferred request surfaces
 
-Status: open. Priority: medium. Depends on first runnable request.
+Status: current. Priority: high. Slice 4; depends on completed slices 0–3.
 
-The first milestone intentionally excludes:
+The completed slices still exclude or only partially cover:
 
 - POST bodies, forms, multipart uploads, and client certificates;
 - cookies, session, authentication, authorization, and impersonation;
 - redirects, `Response.End`, transfer/execute, and timeouts;
-- async pages/handlers and disconnect cancellation;
-- `Global.asax`, custom modules, resources, master pages, and application
+- async pages and cancellation/termination beyond the verified handler cases;
+- user controls, master pages, `.ashx`, resource handlers, and application
   restart;
 - streaming, large/file responses, compression, and protocol upgrades.
 
-After the GET fixture works, split this list into capability stories ordered by
-application demand and semantic risk. Each resulting story must update the
-compatibility map. Exclusion here does not authorize silent fallback.
+Split this list into capability stories ordered by application demand and
+semantic risk. Each resulting story must update the compatibility map.
+Exclusion here does not authorize silent fallback.
 
 Existing stories:
 [request termination/timeouts](request-termination-and-timeouts.md),

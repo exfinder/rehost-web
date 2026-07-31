@@ -1,7 +1,7 @@
 # Application bootstrap and configuration
 
-Status: accepted target contract; implementation is tracked by the
-[first runnable request](follow-ups/first-runnable-request.md).
+Status: implemented through slice 3. Later transport and lifecycle extensions
+remain under [`follow-ups`](follow-ups/).
 
 ## Host contract
 

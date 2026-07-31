@@ -1,7 +1,6 @@
 # Runtime code generation and loading
 
-Status: resolved for the compilation substrate. Priority: medium. Remaining
-items are page-level compilation, owned by slice 3.
+Status: resolved for slice 2. Dynamic page compilation is resolved by slice 3.
 
 ## Problem
 
@@ -103,14 +102,13 @@ ordering, the generated assembly set including culture satellites, reuse across
 restarts, recompilation after an edit, two processes sharing one segment, and
 per-platform reclamation. Both supported platforms pass.
 
-Page compilation and its build results remain
-[dynamic ASPX integration](dynamic-aspx-integration.md).
+Page compilation and its build results pass the
+[dynamic ASPX integration](dynamic-aspx-integration.md) gate.
 
 ## Open
 
 - User control and master page build providers are registered but no slice
-  compiles them yet. Pages are covered by
-  [dynamic ASPX integration](dynamic-aspx-integration.md).
+  compiles them yet.
 - Batch compilation settings, satellite culture policy beyond the neutral and
   one-culture case, and `assemblyPostProcessorType` stay with
   [compiler policy](compiler-provider-and-target-framework-policy.md).

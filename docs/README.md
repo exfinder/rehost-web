@@ -12,14 +12,18 @@ These documents describe accepted direction; implementation may lag:
 | Area | Document |
 | --- | --- |
 | Slice order and gates | [core-runtime-port-plan.md](core-runtime-port-plan.md) |
-| Runtime graph, sequencing, and lifetimes | [classic-managed-runtime-model.md](classic-managed-runtime-model.md) |
-| Application bootstrap/configuration | [application-bootstrap-and-configuration.md](application-bootstrap-and-configuration.md) |
 | Decision rationale | [`adr/`](adr/) |
 
 ## Implemented contracts
 
 | Area | Document |
 | --- | --- |
+| Runtime graph, sequencing, and lifetimes | [classic-managed-runtime-model.md](classic-managed-runtime-model.md) |
+| Application bootstrap/configuration | [application-bootstrap-and-configuration.md](application-bootstrap-and-configuration.md) |
+| First runnable request | [follow-ups/first-runnable-request.md](follow-ups/first-runnable-request.md) |
+| Runtime code generation/loading | [follow-ups/runtime-codegen-and-loading.md](follow-ups/runtime-codegen-and-loading.md) |
+| Dynamic `.aspx` GET | [follow-ups/dynamic-aspx-integration.md](follow-ups/dynamic-aspx-integration.md) |
+| Supported feature boundaries | [follow-ups/compatibility-feature-map.md](follow-ups/compatibility-feature-map.md) |
 | Reached classic-path evidence | [portability-ledger.md](portability-ledger.md) |
 | AppDomain, remoting, full trust | [appdomain-remoting-cas-compatibility.md](appdomain-remoting-cas-compatibility.md) |
 | Application Services assembly/loader | [application-services-compatibility.md](application-services-compatibility.md) |
@@ -44,9 +48,10 @@ Framework configuration baseline:
 
 ## Current milestone
 
-[First runnable request](follow-ups/first-runnable-request.md): execute one
-configuration-mapped precompiled handler through the full classic managed
-pipeline and Kestrel on every supported platform.
+[Deferred request surfaces](follow-ups/deferred-request-surfaces.md), slice 4:
+bridge request bodies, then add server forms, postback, view state, and uploads.
+Slices 0–3 pass their gates on macOS `arm64` and Windows `x64`; the latest
+completed slice compiles and renders a dynamic `.aspx` GET through Kestrel.
 
 The [port plan](core-runtime-port-plan.md) owns ordering and cross-slice gates.
 Each follow-up owns its status, dependencies, remaining decisions, and

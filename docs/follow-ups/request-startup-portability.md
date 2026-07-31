@@ -1,7 +1,6 @@
 # Request-startup portability
 
-Status: open. Priority: highest. Canonical execution:
-[managed runtime port plan](../core-runtime-port-plan.md).
+Status: resolved for the bodyless request path. Later feature edges remain open.
 
 ## Problem
 
@@ -35,16 +34,14 @@ unload behavior belongs to
 
 ## Current boundary
 
-The portable harness reaches `HttpRuntime.ProcessRequest` on macOS and Windows;
-the [ledger](../portability-ledger.md) owns reached-edge evidence.
+The portable harness reaches `HttpRuntime.ProcessRequest`, configured modules
+and handlers, response completion, and Kestrel on macOS and Windows. The
+[ledger](../portability-ledger.md) owns reached-edge evidence. Slice 2 resolved
+generation-specific work storage.
 
 Still open:
 
-- module, handler, and response parity are **not** claimed; the trace currently
-  records only request entry, `EndOfRequest`, and return;
 - worker identity meaning remains research;
-- generation-specific work storage remains open — see
-  [runtime codegen and loading](runtime-codegen-and-loading.md);
 - machine keys carry a process-scoped deviation — see
   [machine key and ViewState bootstrap](machine-key-and-viewstate-bootstrap.md);
 - explicit rejection of `<identity impersonate="true"/>` is deferred to the
@@ -67,8 +64,8 @@ Windows.
 Add focused tests at each new seam. The final integration test runs with native
 IIS libraries unavailable and asserts no reachable P/Invoke.
 
-## Done when
+## Result
 
 The bodyless precompiled-handler path is classified, documented, and portable.
-No supported edge reaches native IIS/Windows facilities, and no inactive
-behavior exists without an explicit postcondition and probe.
+No reached supported edge uses native IIS/Windows facilities; inactive behavior
+has an explicit postcondition and probe.

@@ -1,7 +1,6 @@
 # .NET Framework differential harness
 
-Status: open. Priority: highest. It precedes the first portable request slice
-and requires a Windows .NET Framework 4.8.1 oracle.
+Status: first-slice gate implemented and passing. CI automation remains open.
 
 The harness gates the first slice and stays a standing regression gate. It is not
 applied per slice: by
@@ -9,15 +8,15 @@ applied per slice: by
 fixture is proposed only where the port replaces native or host-owned code, or
 must match a format it cannot derive from its own inputs.
 
-Build a documented oracle workflow that runs equivalent fixtures on .NET
+The documented oracle workflow runs equivalent fixtures on .NET
 Framework and captures normalized observable expectations. Normalization must
 exclude transport/host noise while retaining status, selected headers, body,
 lifecycle events, exception shape, and generated-code behavior relevant to the
 case.
 
-Commit provenance-stamped generated traces. A Windows job regenerates and
-verifies them; portable jobs compare on every supported OS. Oracle refresh must
-be explicit, reproducible, and reviewable.
+Provenance-stamped generated traces are committed. The local Windows workflow
+regenerates and verifies them; portable verification compares them on each
+supported OS. Oracle refresh is explicit, reproducible, and reviewable.
 
 ## Session model
 
@@ -91,5 +90,6 @@ instance counts and the terminal shutdown notification — are reached through a
 registered object the rig creates in the running application, the same mechanism
 the bench uses.
 
-Done when first-slice fixtures prove capture, narrow normalization, replay,
-drift detection, and intentional-deviation documentation.
+The first-slice fixtures prove capture, narrow normalization, replay, drift
+detection, and intentional-deviation documentation. The golden remains a
+standing regression gate; repository CI automation remains open.
