@@ -41,5 +41,18 @@ enforcement. Runtime remains full trust.
 because the MSBuild task dependency graph previously selected a vulnerable
 transitive version. Audit every dependency change for advisories.
 
-`System.Runtime.Serialization.Formatters` supports trusted legacy state/resource
-compatibility only. It is not safe for untrusted payloads.
+`System.Runtime.Serialization.Formatters` restores `BinaryFormatter`, which .NET 9
+removed. Microsoft ships it unsupported; the in-box implementation throws, and no
+feature switch revives it. Web Forms reaches `BinaryFormatter` from view state
+(`ObjectStateFormatter`), out-of-process session state, the roles cookie,
+out-of-process output cache, preserved compilation results, `LosFormatter`, and
+binary-serialized `.resx` nodes. Several of those carry untrusted input, so the
+port's deserialization exposure equals .NET Framework's — by design, since the
+port exists to run existing applications unchanged. It is neither safer nor less
+safe than the framework it replaces, and it does not narrow that surface.
+
+`ExcludeAssets="compile"` keeps the typerefs on the in-box 8.1.0.0 reference while
+the package supplies the 10.0.0.0 implementation at run time. The shipped
+`build/Rehost.WebForms.Runtime.targets` writes the runtime switch into consuming
+applications, because the SDK default is `false` and the switch latches on first
+read. A `ProjectReference` consumer gets it from the module initializer instead.

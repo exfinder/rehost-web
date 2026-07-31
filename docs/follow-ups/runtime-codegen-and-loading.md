@@ -117,20 +117,22 @@ Page compilation and its build results remain
 
 ## Page compilation resolves framework assemblies over app-local copies
 
-Open. Found while compiling a page that used `ObjectStateFormatter`.
+Open for the general case. Found while compiling a page that used
+`ObjectStateFormatter`.
 
-`System.Runtime.Serialization.Formatters` ships in the .NET shared framework at
-assembly version `8.1.0.0`, where `BinaryFormatter` throws. The out-of-band
-package advances the same assembly to `10.0.0.0` with a working implementation,
-and this port references it because `ResXDataNode` and `ResXResourceWriter` need
-it for `App_GlobalResources`.
+`RoslynCSharpCompiler` builds the reference set by enumerating the shared
+framework directory, so it hands page compilation whatever version ships there.
+When an out-of-band package advances the same assembly, the runtime compiles
+against and loads the higher version while pages see the lower one, and any page
+touching an affected type fails with `CS1705`.
 
-The runtime therefore compiles against and loads `10.0.0.0`, but the reference
-set handed to page compilation resolves the framework's `8.1.0.0`, and the page
-fails with `CS1705`. Any application page referencing a type from an out-of-band
-package that shadows a framework assembly hits this; eleven other package
-references have the same shape.
+`System.Runtime.Serialization.Formatters` triggered it: the framework ships
+`8.1.0.0`, the package supplies `10.0.0.0`, and `ObjectStateFormatter` exposes
+`IFormatter` in its public surface. That instance is closed by
+`ExcludeAssets="compile"`, which keeps the port's typerefs on the framework
+version while the package still wins at run time. See
+[dependency decisions](../dependency-decisions.md).
 
-Reproduction: a page calling `new ObjectStateFormatter()`. The fix belongs in
-how the reference set is assembled — it must prefer what the runtime actually
-loaded.
+Eleven other package references have the same shape and are not closed. The real
+fix belongs in how the reference set is assembled — it must prefer what the
+runtime actually loaded, not what the shared framework directory holds.

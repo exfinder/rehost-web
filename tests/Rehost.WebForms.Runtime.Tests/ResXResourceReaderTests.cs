@@ -250,6 +250,30 @@ public sealed class ResXResourceReaderTests
         enumerator.Value.ShouldBe("hello");
     }
 
+    // The only .resx shape reaching BinaryFormatter. Strings, primitives, null, byte arrays,
+    // file references, and TypeConverter values are all read without it.
+    [Fact]
+    public void Reads_Binary_Serialized_Value()
+    {
+        var table = new System.Collections.Hashtable { ["key"] = "value" };
+
+        var value = ReadSingleValue(BinaryData("table", table))
+            .ShouldBeOfType<System.Collections.Hashtable>();
+
+        value["key"].ShouldBe("value");
+    }
+
+    private static string BinaryData(string name, object value)
+    {
+        using var stream = new MemoryStream();
+#pragma warning disable SYSLIB0011
+        new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter().Serialize(stream, value);
+#pragma warning restore SYSLIB0011
+
+        return $"<data name=\"{name}\" mimetype=\"{ResXResourceWriter.BinSerializedObjectMimeType}\">"
+            + $"<value>{Convert.ToBase64String(stream.ToArray())}</value></data>";
+    }
+
     private static ResXResourceReader CreateReader(string body) =>
         ResXResourceReader.FromFileContents(Document(body));
 

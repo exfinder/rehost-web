@@ -28,6 +28,7 @@ map is complete.
 | `<httpRuntime targetFramework="4.5" />` or later | Required | Every request renders the refusal naming the fix, which is how Framework reports a startup configuration failure. Below 4.5 the quirks switch selects pre-4.5 behavior at some thirty sites, including `machineKey compatibilityMode`, which routes view state through native cryptography this port refuses. The Visual Studio project template has emitted the attribute since 4.5 |
 | Native ASP.NET libraries | Unsupported | `UnsafeNativeMethods` refuses on type initialization, so an unported path names the contract rather than reporting a missing `webengine4.dll` (ledger P41) |
 | Legacy machine key cryptography | Unsupported | Reached by `machineKey compatibilityMode` below `Framework45`, which the gate above already refuses, and by the obsolete `MachineKey.Encode`/`Decode` on any application. `MachineKey.Protect`/`Unprotect` are unaffected |
+| `BinaryFormatter` serialization | Supported | .NET 9 removed the implementation, so the port carries the out-of-band package and turns the runtime switch on for consuming applications. Reached from view state, out-of-process session state, the roles cookie, out-of-process output cache, preserved compilation results, `LosFormatter`, and binary-serialized `.resx` nodes. Deserialization exposure equals .NET Framework's — neither narrowed nor widened (ledger P42, P43) |
 
 ## Compilation substrate
 

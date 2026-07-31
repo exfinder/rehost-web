@@ -9,4 +9,25 @@
         Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
     </ItemGroup>
   </Target>
+
+  <!-- The SDK writes this switch as false, and it latches on first read, so a consuming
+       application must carry it in its own runtimeconfig rather than rely on load order.
+       The property covers imports evaluated before the SDK targets; the target covers the
+       package import, which lands after the SDK has already read the property. -->
+  <PropertyGroup>
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
+  <Target
+    Name="RehostWebFormsEnableUnsafeBinaryFormatterSerialization"
+    BeforeTargets="_GenerateRuntimeConfigurationFilesInputCache">
+    <ItemGroup>
+      <RuntimeHostConfigurationOption
+        Remove="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization" />
+      <RuntimeHostConfigurationOption
+        Include="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"
+        Value="true"
+        Trim="true" />
+    </ItemGroup>
+  </Target>
 </Project>
