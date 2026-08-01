@@ -17,7 +17,7 @@ public sealed class CodegenReclaimTests
         // them, which is the only way to reach the branch that cannot delete a file.
         using var gate = ScenarioGate.Take();
         var holding = application.StartRun(gate.Name);
-        ScenarioApplication.WaitForEntry(application.TracePath, "holding", TimeSpan.FromSeconds(60));
+        ScenarioApplication.WaitForEntry(application.TracePath, "holding", TimeSpan.FromSeconds(60), holding);
 
         using var editor = application.CloneApplicationSharingCodegenRoot();
         editor.EditAppCode();

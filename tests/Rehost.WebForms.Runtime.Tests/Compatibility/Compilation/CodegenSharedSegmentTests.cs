@@ -15,7 +15,7 @@ public sealed class CodegenSharedSegmentTests
         // condition the cross-process compilation mutex exists for.
         using var gate = ScenarioGate.Take();
         var firstRun = first.StartRun(gate.Name);
-        ScenarioApplication.WaitForEntry(first.TracePath, "holding", TimeSpan.FromSeconds(60));
+        ScenarioApplication.WaitForEntry(first.TracePath, "holding", TimeSpan.FromSeconds(60), firstRun);
 
         var secondTrace = second.Run();
 

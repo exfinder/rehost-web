@@ -132,7 +132,7 @@ internal sealed class ScenarioApplication : IDisposable
             .ToList();
     }
 
-    internal static void WaitForEntry(string path, string entry, TimeSpan timeout)
+    internal static void WaitForEntry(string path, string entry, TimeSpan timeout, ScenarioProcess process)
     {
         var deadline = DateTime.UtcNow + timeout;
         while (DateTime.UtcNow < deadline)
@@ -140,6 +140,12 @@ internal sealed class ScenarioApplication : IDisposable
             if (File.Exists(path) && ReadTrace(path).Contains(entry))
             {
                 return;
+            }
+
+            if (process.HasExited)
+            {
+                throw new InvalidOperationException(
+                    $"Process exited with code {process.ExitCode} before '{entry}' appeared in {path}.{Environment.NewLine}{process.StandardError}");
             }
 
             Thread.Sleep(50);
@@ -258,6 +264,8 @@ internal sealed class ScenarioProcess(Process process)
     private readonly Task<string> _standardError = process.StandardError.ReadToEndAsync();
 
     internal int ExitCode => process.ExitCode;
+
+    internal bool HasExited => process.HasExited;
 
     internal string StandardError => _standardError.Result;
 
