@@ -1,0 +1,71 @@
+# Windows validation host
+
+Windows x64 validation runs on `sshuser@192.168.1.7` (ssh alias `winbox`, defined
+in `~/.ssh/config` with ControlMaster/ControlPersist so connections are reused),
+in a dedicated persistent clone at `C:\Users\sshuser\source\repos\rehost-webforms`.
+This is the only Windows machine available for validation; the clone may be reset
+freely.
+
+Cross-platform validation requires both macOS arm64 and Windows x64 to pass.
+Defects found so far — path separators, hidden-file classification, native
+libraries keeping the `.dll` extension off Unix — have each appeared on only one
+platform. See the cross-platform validation policy in `AGENTS.md`.
+
+## Sync workflow
+
+Push straight to the host over the LAN — no GitHub round-trip, no `git bundle`,
+no `scp`. Batch the whole remote round (checkout, build, test) into one ssh call;
+each round trip costs roughly 0.5s.
+
+`git push -f` is blocked by the permission classifier. Push to a fresh ref name
+each round instead, and delete it on the remote at the end of the same ssh call:
+
+```bash
+git add -A                       # separate call — do not combine with the push
+REF=$(git commit-tree $(git write-tree) -p HEAD -m wip)
+git push "winbox:C:/Users/sshuser/source/repos/rehost-webforms" \
+  "${REF}:refs/heads/wip/win-<topic>"     # quote it: zsh eats $REF:refs as a :r modifier
+# remote, one call: git checkout -f -B wintest wip/win-<topic>; git clean -fd;
+#                   build; test; git branch -D wip/win-<topic>
+```
+
+`commit-tree` publishes the index without creating a local commit or moving
+`HEAD`, so a Windows validation round never forces a premature commit on the
+working checkout.
+
+Do not put `git add -A` in the same compound command as the push: if the
+permission classifier denies the compound, the `add` never runs and
+`write-tree` silently publishes a stale index — a tree missing files can pass
+validation against the wrong source.
+
+Leave the remote checkout on `wintest` between rounds; do not restore it to
+`main`. Remote `main` drifts behind and is never used by this workflow.
+
+`checkout -f` leaves unrelated untracked files from earlier rounds. Run
+`git clean -fd` immediately after checkout so the tested tree matches the pushed
+tree. Do not add `-x`: ignored `obj/`, `bin/`, and package caches must survive.
+
+## Build cache
+
+Never `git clean -xdf` on the host. Measured 88s cold vs. 6.8s warm — keeping
+`obj/`, `bin/`, and the NuGet cache between rounds is the entire speed win.
+
+A failed remote build leaves the previous binaries in place, and
+`dotnet test --no-build` then runs the stale assemblies and reports a passing
+suite at the old test count. Always print the build result and compare the test
+total against the macOS run before trusting a green Windows round. A dropped ssh
+connection surfaces as build errors, not as a connection error — retry the build
+before investigating the code.
+
+## Auth and shell
+
+`origin` is `git@github.com:exfinder/rehost-webforms.git` over SSH keys and
+works non-interactively. HTTPS does not — the `wincredman` credential store
+needs an interactive desktop session.
+
+Drive PowerShell Core with `pwsh -NoProfile -EncodedCommand <base64 UTF-16LE>`;
+plain quoting is mangled by the ssh shell before `pwsh` sees it. `pwsh` is Core
+7.6.3 (not `powershell.exe` 5.1); the dotnet SDK is 10.0.302.
+
+The scp-style URL matters for the push: `ssh://host/C:/...` fails to parse,
+`host:C:/...` works.

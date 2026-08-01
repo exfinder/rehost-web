@@ -39,6 +39,8 @@ These documents describe accepted direction; implementation may lag:
 | Windows administration/App_Browsers | [windows-administration-compatibility.md](windows-administration-compatibility.md) |
 | XSD build provider | [xsd-build-provider-compatibility.md](xsd-build-provider-compatibility.md) |
 
+Windows x64 validation host and sync workflow:
+[windows-validation-host.md](windows-validation-host.md).
 Package rationale:
 [dependency-decisions.md](dependency-decisions.md).
 Source/licensing records:
