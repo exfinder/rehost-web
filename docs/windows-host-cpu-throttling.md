@@ -44,16 +44,13 @@ pwsh -NoProfile -File eng\Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.We
 A copy lives at `C:\Users\sshuser\bin\Invoke-Unthrottled.ps1` so the wrapper
 survives a checkout reset. It exits with the wrapped command's exit code.
 
-From a one-shot `ssh` call, append `; exit $LASTEXITCODE`:
+From a one-shot `ssh` call the trailing `; exit $LASTEXITCODE` is required, for
+the reason given in
+[windows-validation-host.md](windows-validation-host.md#exit-codes-over-ssh):
 
 ```bash
 ssh winbox 'pwsh -NoProfile -File C:\Users\sshuser\bin\Invoke-Unthrottled.ps1 -WorkingDirectory C:\Users\sshuser\source\repos\rehost-webforms -Command "dotnet test Rehost.WebForms.slnx --no-build"; exit $LASTEXITCODE'
 ```
-
-**The suffix is not optional.** The `pwsh` that sshd invokes reports its own
-success or failure rather than the child's, so without it a failing round comes
-back as exit 1 whatever the real code was — exit 7 was observed arriving as 1.
-A round batched into one ssh call would then read as green.
 
 ## What does not work
 

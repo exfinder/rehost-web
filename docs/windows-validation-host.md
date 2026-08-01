@@ -74,3 +74,23 @@ plain quoting is mangled by the ssh shell before `pwsh` sees it. `pwsh` is Core
 
 The scp-style URL matters for the push: `ssh://host/C:/...` fails to parse,
 `host:C:/...` works.
+
+`sshd` is configured with `pwsh` as its `DefaultShell`, so `ssh winbox` lands in
+PowerShell Core directly and needs no wrapper shell.
+
+## Exit codes over ssh
+
+End every one-shot `ssh` command with `; exit $LASTEXITCODE`:
+
+```bash
+ssh winbox 'dotnet test Rehost.WebForms.slnx --no-build; exit $LASTEXITCODE'
+```
+
+The `pwsh` that sshd invokes reports its own success or failure, not the wrapped
+command's, so without the suffix a failing round arrives as exit 1 whatever the
+real code was — exit 7 was observed arriving as 1. Since a round is batched into
+a single ssh call, that turns a real failure into an ambiguous one, and an
+ambiguous one is easy to read as a dropped connection.
+
+Use single quotes on the macOS side so the local shell leaves `$LASTEXITCODE`
+alone, and double quotes for any nested argument.
