@@ -40,7 +40,9 @@ These documents describe accepted direction; implementation may lag:
 | XSD build provider | [xsd-build-provider-compatibility.md](xsd-build-provider-compatibility.md) |
 
 Windows x64 validation host and sync workflow:
-[windows-validation-host.md](windows-validation-host.md).
+[windows-validation-host.md](windows-validation-host.md);
+CPU throttling of SSH-launched builds:
+[windows-host-cpu-throttling.md](windows-host-cpu-throttling.md).
 Package rationale:
 [dependency-decisions.md](dependency-decisions.md).
 Source/licensing records:

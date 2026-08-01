@@ -50,6 +50,11 @@ tree. Do not add `-x`: ignored `obj/`, `bin/`, and package caches must survive.
 Never `git clean -xdf` on the host. Measured 88s cold vs. 6.8s warm — keeping
 `obj/`, `bin/`, and the NuGet cache between rounds is the entire speed win.
 
+Run the remote build and test through `eng/Invoke-Unthrottled.ps1`, or the round
+takes about 60s instead of 15s. Windows throttles SSH-launched processes; the
+mechanism and the host setup it depends on are in
+[windows-host-cpu-throttling.md](windows-host-cpu-throttling.md).
+
 A failed remote build leaves the previous binaries in place, and
 `dotnet test --no-build` then runs the stale assemblies and reports a passing
 suite at the old test count. Always print the build result and compare the test
