@@ -13,7 +13,7 @@ Measured on `winbox`, full suite, 163 tests:
 | --- | --- | --- |
 | untreated | 61–69s | 8–11 |
 | machine-wide registry setting only | 25.5–26.3s | 0 |
-| registry setting + per-process exemption | 14.9–15.2s | 0 |
+| registry setting + per-process High QoS | 14.9–15.2s | 0 |
 
 An interactive desktop session runs the same suite in about 15s, so the treated
 SSH path is no longer the slower one.
@@ -29,13 +29,23 @@ different Windows host without it is roughly 2.5x slower with nothing in the
 repository to explain why. `power-throttling-off.reg` and
 `power-throttling-default.reg` sit in `C:\Users\sshuser\`.
 
-## The E-core confinement: a per-process exemption
+## The E-core confinement: pinning each process at High QoS
 
 The registry setting does not affect placement — threads stay on E-cores. That
-needs a per-process exemption, and the exemption attribute is **not inherited by
+needs each process pinned at High QoS, and the attribute is **not inherited by
 child processes**, so every descendant has to be caught individually after it
 starts. `eng/Invoke-Unthrottled.ps1` polls the process tree and does this; a
-suite run exempts about 40 processes, mostly scenario hosts.
+suite run pins about 40 processes, mostly scenario hosts.
+
+Windows names the levels High, Medium, Low, Eco, Multimedia and Deadline. The
+policy being disabled is execution speed throttling, hence the API constant
+`PROCESS_POWER_THROTTLING_EXECUTION_SPEED`:
+
+| ControlMask | StateMask | result |
+| --- | --- | --- |
+| `EXECUTION_SPEED` | `EXECUTION_SPEED` | forced EcoQoS |
+| `EXECUTION_SPEED` | `0` | pinned at High QoS — what the wrapper sets |
+| `0` | `0` | system-managed, the throttled default over SSH |
 
 ```powershell
 pwsh -NoProfile -File eng\Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.WebForms.slnx --no-build'
@@ -58,7 +68,7 @@ Do not reach for CPU affinity or priority class. Both were measured and neither
 works: affinity is inherited but strictly loses, because pinning to P-cores gives
 up the 16 E-cores that the registry setting has already restored to full clock;
 priority class made no measurable difference; CPU sets are not inherited at all.
-The only mechanism that moves the number is the per-process exemption.
+The only mechanism that moves the number is pinning each process at High QoS.
 
 Nor is this SSH server configuration. Win32-OpenSSH exposes no relevant knob, and
 the QoS assignment is not its doing — the scheduler applies it to any process

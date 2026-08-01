@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-Runs a command with its whole process tree exempted from Windows EcoQoS.
+Runs a command with its whole process tree pinned at Windows High QoS.
 
 .DESCRIPTION
 Processes launched over SSH have no foreground presence, so Windows assigns them
-EcoQoS: confined to E-cores and frequency-clamped. The exemption is a per-process
-attribute that is NOT inherited by children, so a build or test run has to have
-every descendant opted out individually as it appears.
+EcoQoS: confined to E-cores and frequency-clamped. Pinning a process at High QoS
+is a per-process attribute that is NOT inherited by children, so a build or test
+run has to have every descendant pinned individually as it appears.
 
-See docs/windows-validation-host.md for the measurements and for the machine-wide
-registry setting this pairs with.
+See docs/windows-host-cpu-throttling.md for the measurements and for the
+machine-wide registry setting this pairs with.
 
 .EXAMPLE
 pwsh -NoProfile -File eng/Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.WebForms.slnx --no-build'
@@ -25,7 +25,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 if (-not $IsWindows) {
-    throw "Invoke-Unthrottled.ps1 is Windows-only: EcoQoS exemption has no equivalent on this platform. Run the command directly."
+    throw "Invoke-Unthrottled.ps1 is Windows-only: QoS levels have no equivalent on this platform. Run the command directly."
 }
 
 if (-not ('Rehost.Unthrottle' -as [type])) {
@@ -76,9 +76,9 @@ namespace Rehost
             finally { Marshal.FreeHGlobal(buf); CloseHandle(h); }
         }
 
-        // ControlMask=EXECUTION_SPEED with StateMask=0 is the documented "always
-        // high QoS" opt-out. ControlMask=0 would hand the decision back to the
-        // scheduler, which is the throttled default.
+        // ControlMask=EXECUTION_SPEED with StateMask=0 pins the process at High
+        // QoS. ControlMask=0 would hand the decision back to the scheduler,
+        // which is the throttled default.
         static bool OptOut(uint pid)
         {
             IntPtr h = OpenProcess(SetInformation | QueryLimited, false, pid);
@@ -196,7 +196,7 @@ finally {
 if (-not $Quiet) {
     $grouped = ([Rehost.Unthrottle]::Names | Group-Object | Sort-Object Count -Descending |
         ForEach-Object { "$($_.Name) x$($_.Count)" }) -join ', '
-    Write-Host ("[unthrottled] {0:N1}s, exit {1}, {2} processes exempted: {3}" -f `
+    Write-Host ("[High QoS] {0:N1}s, exit {1}, {2} processes pinned: {3}" -f `
             $sw.Elapsed.TotalSeconds, $proc.ExitCode, [Rehost.Unthrottle]::Applied, $grouped)
 }
 
