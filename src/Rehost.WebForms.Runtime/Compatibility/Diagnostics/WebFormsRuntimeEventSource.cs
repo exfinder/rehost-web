@@ -31,5 +31,15 @@ namespace System.Web.Util {
         internal void CompilationFailed(string outputAssembly, string diagnostics) {
             WriteEvent(4, outputAssembly, diagnostics);
         }
+
+        [Event(5, Level = EventLevel.Warning, Message = "{0} sampling failed: {1}")]
+        internal void MonitorSampleFailed(string monitor, string exception) {
+            WriteEvent(5, monitor, exception);
+        }
+
+        [Event(6, Level = EventLevel.Error, Message = "{0} disabled after repeated failures: {1}")]
+        internal void MonitorDisabled(string monitor, string exception) {
+            WriteEvent(6, monitor, exception);
+        }
     }
 }

@@ -71,7 +71,7 @@ public static class Program
             PhysicalRootPath = options.ApplicationPath,
             VirtualRootPath = "/",
             CompilationTempDirectory = options.CompilationTempDirectory,
-            MachineConfigurationFilePath = Path.Combine(
+            MachineConfigurationFilePath = options.MachineConfigurationPath ?? Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",
                 "rehost-webforms.machine.config"),
@@ -96,6 +96,7 @@ public static class Program
         try
         {
             HostJournal.Record("codegen-dir:" + HttpRuntime.CodegenDir);
+            HostJournal.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
 
             for (var i = 0; i < options.Requests.Count; i++)
             {
@@ -223,9 +224,11 @@ internal sealed class ScenarioOptions
         string tracePath,
         string? holdGate,
         string? responseDirectory,
+        string? machineConfigurationPath,
         bool serve,
         List<string> requests)
     {
+        MachineConfigurationPath = machineConfigurationPath;
         Serve = serve;
         HoldGate = holdGate;
         ApplicationId = applicationId;
@@ -248,6 +251,8 @@ internal sealed class ScenarioOptions
 
     internal string? ResponseDirectory { get; }
 
+    internal string? MachineConfigurationPath { get; }
+
     internal bool Serve { get; }
 
     internal List<string> Requests { get; }
@@ -260,6 +265,7 @@ internal sealed class ScenarioOptions
         string? tracePath = null;
         string? holdGate = null;
         string? responseDirectory = null;
+        string? machineConfigurationPath = null;
         var serve = false;
         var requests = new List<string>();
 
@@ -292,6 +298,10 @@ internal sealed class ScenarioOptions
                     responseDirectory = Path.GetFullPath(Require(value, "--response-dir"));
                     i++;
                     break;
+                case "--machine-config":
+                    machineConfigurationPath = Path.GetFullPath(Require(value, "--machine-config"));
+                    i++;
+                    break;
                 case "--serve":
                     serve = true;
                     break;
@@ -316,6 +326,7 @@ internal sealed class ScenarioOptions
             Path.GetFullPath(Require(tracePath, "--trace")),
             holdGate,
             responseDirectory,
+            machineConfigurationPath,
             serve,
             requests);
     }

@@ -27,9 +27,13 @@ namespace System.Web.Util {
         /// </devdoc>
         internal static long Value {
             get {
+#if NETFRAMEWORK
                 long count = 0;
                 SafeNativeMethods.QueryPerformanceCounter(ref count);
                 return count;
+#else
+                return System.Diagnostics.Stopwatch.GetTimestamp();
+#endif
             }
         }
 
@@ -39,9 +43,15 @@ namespace System.Web.Util {
         /// </devdoc>
         internal static long Frequency {
             get {
+#if NETFRAMEWORK
                 long freq = 0;
                 SafeNativeMethods.QueryPerformanceFrequency(ref freq);
                 return freq;
+#else
+                // Stopwatch is QueryPerformanceCounter on Windows; the only caller divides one by
+                // the other, so the unit matters only for consistency between them.
+                return System.Diagnostics.Stopwatch.Frequency;
+#endif
             }
         }
     }

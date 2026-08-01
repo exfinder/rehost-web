@@ -87,6 +87,7 @@ namespace System.Web.Hosting {
         private int _currentPollInterval = Timeout.Infinite;
         private int _inMonitorThread = 0;
         private ApplicationManager _appManager;
+        private readonly MonitorFailurePolicy _failurePolicy = new MonitorFailurePolicy("LowPhysicalMemoryMonitor");
 
         private List<IObserver<LowPhysicalMemoryInfo>> _observers;
 
@@ -155,6 +156,7 @@ namespace System.Web.Hosting {
               5120	  64	  99%
             */
 
+#if NETFRAMEWORK
             long memory = AspNetMemoryMonitor.s_totalPhysical;
             Debug.Assert(memory != 0, "memory != 0");
             if (memory >= 0x100000000) {
@@ -172,6 +174,14 @@ namespace System.Web.Hosting {
             else {
                 _pressureHigh = 95;
             }
+#else
+            // The table above tracks Windows' low-memory notification, which fires while a pagefile
+            // still absorbs the overshoot. Containers run without swap, so 99% of a 4 GiB limit
+            // leaves 41 MB to trim and compact in before the kernel kills the process. The
+            // collector's own high-memory threshold is the same signal, drawn where it can be acted
+            // on.
+            _pressureHigh = MemoryLimits.HighMemoryPercent;
+#endif
 
             _pressureLow = _pressureHigh - 9;
 
@@ -254,14 +264,10 @@ namespace System.Web.Hosting {
 
         int GetCurrentPressure() {
 #if !NETFRAMEWORK
-            GCMemoryInfo gcMemoryInfo = GC.GetGCMemoryInfo();
-
             // MemoryLoadBytes is only populated once a collection has occurred. Before the
             // first one it reads zero, which must not be reported as "no memory pressure".
-            if (gcMemoryInfo.TotalAvailableMemoryBytes <= 0 || gcMemoryInfo.MemoryLoadBytes <= 0)
-                return 0;
-
-            int memoryLoad = (int)(gcMemoryInfo.MemoryLoadBytes * 100 / gcMemoryInfo.TotalAvailableMemoryBytes);
+            MemoryReading reading = RuntimeMemorySampler.Sample();
+            int memoryLoad = MemoryLimits.ComputeLoadPercent(reading.LoadBytes, reading.TotalLimitBytes);
 #else
             UnsafeNativeMethods.MEMORYSTATUSEX memoryStatusEx = new UnsafeNativeMethods.MEMORYSTATUSEX();
             memoryStatusEx.Init();
@@ -334,6 +340,7 @@ namespace System.Web.Hosting {
                 // knows the size of the cache.
                 Update();
                 AdjustTimer();
+                _failurePolicy.RecordSuccess();
 
                 if (PressureLast >= PressureHigh) {
 
@@ -361,8 +368,17 @@ namespace System.Web.Hosting {
 
                     // collect and record statistics
                     Stopwatch sw2 = Stopwatch.StartNew();
+#if NETFRAMEWORK
                     GC.Collect();
+#else
+                    MemoryCollection.Induce();
+#endif
                     sw2.Stop();
+                }
+            }
+            catch (Exception e) {
+                if (_failurePolicy.RecordFailure(e)) {
+                    AdjustTimer(disable: true);
                 }
             }
             finally {

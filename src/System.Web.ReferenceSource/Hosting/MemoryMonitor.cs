@@ -156,6 +156,10 @@ namespace System.Web.Hosting {
                         IServerConfig serverConfig = ServerConfig.GetInstance();
                         memoryLimit = (long)serverConfig.GetW3WPMemoryLimitInKB() << 10;
                     }
+#else
+                    // Both Framework sources were the hosting worker process, which cannot exist
+                    // here. <processModel memoryLimit> states the same quantity.
+                    memoryLimit = MemoryLimits.ComputeTrimLimit(ReadConfiguredMemoryPercent(), s_totalPhysical);
 #endif
                     Interlocked.Exchange(ref s_configuredProcessMemoryLimit, memoryLimit);
                 }
@@ -164,12 +168,26 @@ namespace System.Web.Hosting {
             }
         }
 
+#if !NETFRAMEWORK
+        private static int ReadConfiguredMemoryPercent() {
+            try {
+                return RuntimeConfig.GetMachineConfig().ProcessModel.MemoryLimit;
+            }
+            catch (Exception) {
+                // Unreadable only when activation is already failing. The section's own declared
+                // default keeps the process protected rather than displacing that diagnostic.
+                return 60;
+            }
+        }
+#endif
+
         internal static long ProcessPrivateBytesLimit {
             get {
                 long memoryLimit = s_processPrivateBytesLimit;
                 if (memoryLimit == -1) {
                     memoryLimit = ConfiguredProcessMemoryLimit;
 
+#if NETFRAMEWORK
                     // AutoPrivateBytesLimit
                     if (memoryLimit == 0) {
                         bool is64bit = (IntPtr.Size == 8);
@@ -197,6 +215,8 @@ namespace System.Web.Hosting {
                             memoryLimit = is64bit ? PRIVATE_BYTES_LIMIT_64BIT : PRIVATE_BYTES_LIMIT_2GB;
                         }
                     }
+#endif
+                    // Zero means what Framework's terabyte ceiling meant on 64-bit: nothing to act on.
                     Interlocked.Exchange(ref s_processPrivateBytesLimit, memoryLimit);
                 }
                 return memoryLimit;
@@ -259,7 +279,7 @@ namespace System.Web.Hosting {
 #else
             // s_totalVirtual is only consulted on 32-bit, where this runtime does not run,
             // so leaving it unset matches the Framework 64-bit path.
-            s_totalPhysical = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+            s_totalPhysical = RuntimeMemorySampler.Sample().TotalLimitBytes;
 #endif
         }
 

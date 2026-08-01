@@ -172,8 +172,10 @@ namespace System.Web.Hosting {
 
             private int _currentPollInterval = MEDIUM_FREQ_INTERVAL_MS;
             private int _inPBytesMonitorThread;
+            // Read only by NextSample's Framework branch.
             private bool _useGetProcessMemoryInfo;
             private uint _pid;
+            private readonly MonitorFailurePolicy _failurePolicy = new MonitorFailurePolicy("RecycleLimitMonitor");
             private bool _disposed;
             private Timer _timer;
             private Object _timerLock = new object();
@@ -325,11 +327,17 @@ namespace System.Web.Hosting {
                     }
 
 #if DBG
-                Debug.Trace("RecycleLimitMonitorSingleton", "**END** PBytesMonitorThread " 
+                Debug.Trace("RecycleLimitMonitorSingleton", "**END** PBytesMonitorThread "
                             + "privateBytes=" + privateBytes
                             + ", _highPressureMark=" + _highPressureMark);
 #endif
 
+                    _failurePolicy.RecordSuccess();
+                }
+                catch (Exception e) {
+                    if (_failurePolicy.RecordFailure(e)) {
+                        StopTimer();
+                    }
                 }
                 finally {
                     Interlocked.Exchange(ref _inPBytesMonitorThread, 0);
@@ -340,10 +348,11 @@ namespace System.Web.Hosting {
                 // not thread-safe, only invoke from timer callback
                 Debug.Assert(_inPBytesMonitorThread == 1);
 
-                // NtQuerySystemInformation is a very expensive call. A new function 
-                // exists on XP Pro and later versions of the OS and it performs much 
+#if NETFRAMEWORK
+                // NtQuerySystemInformation is a very expensive call. A new function
+                // exists on XP Pro and later versions of the OS and it performs much
                 // better. The name of that function is GetProcessMemoryInfo. For hosting
-                // scenarios where a larger number of w3wp.exe instances are running, we 
+                // scenarios where a larger number of w3wp.exe instances are running, we
                 // want to use the new API (VSWhidbey 417366).
                 long privateBytes;
                 if (_useGetProcessMemoryInfo) {
@@ -358,6 +367,11 @@ namespace System.Web.Hosting {
                     UnsafeNativeMethods.GetProcessMemoryInformation(_pid, out privatePageCount, out dummy, true /*nocache*/);
                     privateBytes = (long)privatePageCount << 20; // MEGABYTE_SHIFT
                 }
+#else
+                // No portable API reports private bytes: Process.PrivateMemorySize64 is zero on
+                // macOS and virtual address space on Linux. Resident memory is what a cgroup counts.
+                long privateBytes = RuntimeMemorySampler.Sample().ProcessFootprintBytes;
+#endif
 
                 // increment the index (it's either 1 or 0)
                 Debug.Assert(SAMPLE_COUNT == 2);
@@ -418,7 +432,11 @@ namespace System.Web.Hosting {
 
                     // collect and record statistics
                     Stopwatch sw2 = Stopwatch.StartNew();
+#if NETFRAMEWORK
                     GC.Collect();
+#else
+                    MemoryCollection.Induce();
+#endif
                     sw2.Stop();
 
                     _inducedGCCount++; // only used for debugging

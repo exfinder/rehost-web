@@ -165,6 +165,11 @@ namespace System.Web.Caching {
             long    privateBytesLimit;
             privateBytesLimit = cacheSection.PrivateBytesLimit;
 
+#if !NETFRAMEWORK
+            // Bounds the cache's own object graph, which only System.SizedReference could measure.
+            UnsupportedCacheOptions.RejectPrivateBytesLimit(privateBytesLimit);
+#endif
+
             // per-process information
             _memoryLimit = AspNetMemoryMonitor.ConfiguredProcessMemoryLimit;
             
