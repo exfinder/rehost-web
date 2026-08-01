@@ -1,3 +1,5 @@
+@PROJECT.md
+
 Before answering or taking any action, read `PROJECT.md` completely
 
 When reporting information to me, be extremely concise and sacrifice grammar for sake of concision.
