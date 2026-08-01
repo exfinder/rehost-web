@@ -196,8 +196,14 @@ finally {
 if (-not $Quiet) {
     $grouped = ([Rehost.Unthrottle]::Names | Group-Object | Sort-Object Count -Descending |
         ForEach-Object { "$($_.Name) x$($_.Count)" }) -join ', '
-    Write-Host ("[High QoS] {0:N1}s, exit {1}, {2} processes pinned: {3}" -f `
-            $sw.Elapsed.TotalSeconds, $proc.ExitCode, [Rehost.Unthrottle]::Applied, $grouped)
+    # Straight to stderr, not Write-Host: PowerShell's information stream comes
+    # back wrapped in CLIXML when a caller pipes this over ssh. The wrapped
+    # command inherits the console rather than being redirected, so its output
+    # streams live and never passes through here.
+    # The inner parentheses are load-bearing: without them the commas bind to
+    # WriteLine's argument list instead of the -f operand array.
+    [Console]::Error.WriteLine(("[High QoS] {0:N1}s, exit {1}, {2} processes pinned: {3}" -f `
+                $sw.Elapsed.TotalSeconds, $proc.ExitCode, [Rehost.Unthrottle]::Applied, $grouped))
 }
 
 exit $proc.ExitCode
