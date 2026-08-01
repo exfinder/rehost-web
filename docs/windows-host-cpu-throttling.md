@@ -54,6 +54,14 @@ pwsh -NoProfile -File eng\Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.We
 A copy lives at `C:\Users\sshuser\bin\Invoke-Unthrottled.ps1` so the wrapper
 survives a checkout reset. It exits with the wrapped command's exit code.
 
+Invoke it as a child process — `pwsh -NoProfile -File ...`, as above — whenever
+the output has to be captured or filtered. The wrapped command inherits the
+console instead of being redirected, so calling the script in-process
+(`& Invoke-Unthrottled.ps1 ...`) prints normally but assigns nothing:
+`$out = & Invoke-Unthrottled.ps1 ...; $out | Select-String 'failed:'` finds
+nothing and reads as a clean run. Reading the ssh call's own output is always
+safe, since over ssh the inherited console is the connection.
+
 From a one-shot `ssh` call the trailing `; exit $LASTEXITCODE` is required, for
 the reason given in
 [windows-validation-host.md](windows-validation-host.md#exit-codes-over-ssh):
