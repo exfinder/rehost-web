@@ -74,7 +74,7 @@ internal static class Program
                         "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
                     ActivationEntryPoint =
                         "AddRehostWebForms + UseRehostWebForms over Kestrel",
-                    Fixture = "bodyless-precompiled-handler-v1"
+                    Fixture = "precompiled-handler-and-request-body-v2"
                 },
                 Sessions = manifest.Sessions
                     .Select(session => InPhase(
@@ -309,6 +309,18 @@ internal static class Program
             PipelineEventJournal.RequestHeaderName,
             request.Name);
 
+        if (!string.IsNullOrEmpty(request.BodyFraming))
+        {
+            var requestBody = Convert.FromBase64String(request.BodyBase64);
+            message.Content = string.Equals(
+                request.BodyFraming,
+                "chunked",
+                StringComparison.Ordinal)
+                ? new ChunkedContent(requestBody)
+                : new ByteArrayContent(requestBody);
+            message.Content.Headers.ContentType = new("application/octet-stream");
+        }
+
         using var response = await client.SendAsync(
             message,
             HttpCompletionOption.ResponseContentRead);
@@ -357,6 +369,22 @@ internal static class Program
 
         client.DefaultRequestHeaders.Clear();
         return client;
+    }
+
+    private sealed class ChunkedContent(byte[] body) : HttpContent
+    {
+        protected override Task SerializeToStreamAsync(
+            Stream stream,
+            TransportContext? context)
+        {
+            return stream.WriteAsync(body).AsTask();
+        }
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = 0;
+            return false;
+        }
     }
 
     private static IPipelineEventDrain CreateDrain(

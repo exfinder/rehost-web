@@ -72,6 +72,73 @@
       ]
     },
     {
+      "Name": "request-bodies",
+      "Fixture": "app",
+      "Steps": [
+        [
+          {
+            "Name": "body-input-known",
+            "Method": "POST",
+            "Path": "/body",
+            "QueryString": "mode=input",
+            "BodyBase64": "YWJjZGVm",
+            "BodyFraming": "content-length"
+          }
+        ],
+        [
+          {
+            "Name": "body-input-chunked",
+            "Method": "POST",
+            "Path": "/body",
+            "QueryString": "mode=input",
+            "BodyBase64": "YWJjZGVm",
+            "BodyFraming": "chunked"
+          }
+        ],
+        [
+          {
+            "Name": "body-binary",
+            "Method": "POST",
+            "Path": "/body",
+            "QueryString": "mode=binary",
+            "BodyBase64": "YWJjZGVm",
+            "BodyFraming": "content-length"
+          }
+        ],
+        [
+          {
+            "Name": "body-buffered-preloaded",
+            "Method": "POST",
+            "Path": "/body",
+            "QueryString": "mode=buffered",
+            "BodyBase64": "YWJjZGVm",
+            "BodyFraming": "content-length",
+            "PreloadedBodyLength": 2
+          }
+        ],
+        [
+          {
+            "Name": "body-bufferless",
+            "Method": "POST",
+            "Path": "/body",
+            "QueryString": "mode=bufferless",
+            "BodyBase64": "YWJjZGVm",
+            "BodyFraming": "content-length"
+          }
+        ],
+        [
+          {
+            "Name": "body-bufferless-apm",
+            "Method": "POST",
+            "Path": "/body",
+            "QueryString": "mode=bufferless-apm",
+            "BodyBase64": "YWJjZGVm",
+            "BodyFraming": "chunked"
+          }
+        ]
+      ]
+    },
+    {
       "Name": "errors",
       "Fixture": "app-errors",
       "Steps": [

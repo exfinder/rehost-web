@@ -18,6 +18,14 @@ internal sealed class RehostWebFormsMiddleware
 
     internal async Task InvokeAsync(HttpContext context)
     {
+        // Kestrel's limit fires on a read, so whether the handler already ran would otherwise
+        // depend on when the application first touches the entity.
+        if (ExceedsHostBodyLimit(context))
+        {
+            context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge;
+            return;
+        }
+
         var dispatcher = _activation.Dispatcher;
 
         using var workerRequest = new AspNetCoreWorkerRequest(
@@ -40,6 +48,13 @@ internal sealed class RehostWebFormsMiddleware
 
         await workerRequest.Completion;
         await CommitAsync(context, workerRequest.Response);
+    }
+
+    private static bool ExceedsHostBodyLimit(HttpContext context)
+    {
+        return context.Request.ContentLength is long declared
+            && context.Features.Get<IHttpMaxRequestBodySizeFeature>()?.MaxRequestBodySize is long limit
+            && declared > limit;
     }
 
     private static async Task CommitAsync(HttpContext context, ResponseSpool spool)

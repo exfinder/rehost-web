@@ -16,10 +16,10 @@ first in a session are warm by construction, and the shutdown notification
 raised by `StopObject` lands in the session notebook.
 
 The fixtures clear inherited configurable handlers/modules and register one probe
-module and precompiled handlers. The default fixture serves the synchronous,
-asynchronous, and identity-echoing paths; the module short-circuits `/complete`
-with `CompleteRequest`, so reaching that path's handler at all is a failure
-signal.
+module and precompiled handlers. The default fixture serves synchronous,
+asynchronous, identity-echoing, and deterministic request-body paths; the module
+short-circuits `/complete` with `CompleteRequest`, so reaching that path's handler
+at all is a failure signal.
 
 A second fixture covers failure. It switches `customErrors` on, so responses are
 the generic error page — fixed wording from the same imported resources, with no
@@ -120,6 +120,9 @@ named observation per request. Per request:
 - logical flush sequence;
 - escaped exception type/message/HResult/inner shape;
 - `EndOfRequest` and completion counts.
+
+The request-body session compares known-length, chunked-equivalent, preloaded,
+classic, binary, buffered, bufferless, and bufferless APM managed outcomes.
 
 No IIS site is required. Use IIS classic-mode probes separately only for
 behavior this managed harness cannot reproduce.

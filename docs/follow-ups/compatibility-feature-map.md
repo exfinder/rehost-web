@@ -65,6 +65,13 @@ covered by `PageCompilationTests` and `PageOverKestrelTests`.
 | `<form runat="server">`, postback, view state | Unassessed | Deferred to the request-body slice. `__VIEWSTATEGENERATOR` carries a permanent divergence recorded in [machine key and view state](machine-key-and-viewstate-bootstrap.md) |
 | Controls requiring a server form | Unsupported here | `GridView`, `TextBox` and other controls calling `VerifyRenderingInServerForm` cannot render until the form slice lands |
 
+## Request bodies
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| Raw request bodies | Supported | Real Kestrel HTTP/1.1 fixed-length and delayed chunked bodies pass on macOS `arm64` and Windows `x64` through `InputStream`, `BinaryRead`, buffered input, bufferless sync/APM, and enabled async preload. The Framework deterministic matrix, `Expect: 100-continue`, mid-read abort, and unread-body drain are covered. HTTP/2 and HTTP/3 are slice 6 gates. `Request.Filter`, forms, postback, view state, and uploads remain unassessed |
+| Request-body size limits | Supported | Kestrel `MaxRequestBodySize` remains host-owned and `httpRuntime.maxRequestLength` remains System.Web-owned; the smaller effective limit wins. The adapter changes neither and rejects no mismatch. Kestrel rejection remains host-owned; System.Web rejection remains pipeline-owned. Known and unknown lengths pass on both supported platforms. Legacy `system.webServer` `maxAllowedContentLength` mapping belongs to its dedicated follow-up |
+
 ## Shipped root configuration
 
 The portable root web configuration is derived from the pinned .NET Framework

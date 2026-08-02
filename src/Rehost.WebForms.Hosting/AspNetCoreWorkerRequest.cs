@@ -15,6 +15,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     private readonly HttpContext _context;
     private readonly string _virtualRootPath;
     private readonly string _physicalRootPath;
+    private readonly RequestBodyCoordinator _body;
+    private readonly bool _canHaveBody;
     private readonly TaskCompletionSource _completion =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -28,16 +30,11 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         ArgumentException.ThrowIfNullOrWhiteSpace(virtualRootPath);
         ArgumentException.ThrowIfNullOrWhiteSpace(physicalRootPath);
 
-        if (HasEntityBody(context.Request))
-        {
-            throw new NotSupportedException(
-                "Request bodies are outside the first-slice transport envelope. "
-                    + $"'{context.Request.Method} {context.Request.Path}' carries one.");
-        }
-
         _context = context;
         _virtualRootPath = NormalizeVirtualRoot(virtualRootPath);
         _physicalRootPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalRootPath));
+        _body = new RequestBodyCoordinator(context.Request.BodyReader, context.RequestAborted);
+        _canHaveBody = context.Features.Get<IHttpRequestBodyDetectionFeature>()?.CanHaveBody == true;
         Response = new ResponseSpool(temporaryDirectoryAccessor);
     }
 
@@ -210,6 +207,53 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return !_context.RequestAborted.IsCancellationRequested;
     }
 
+    public override byte[]? GetPreloadedEntityBody()
+    {
+        return null;
+    }
+
+    public override int GetPreloadedEntityBodyLength()
+    {
+        return 0;
+    }
+
+    public override int GetPreloadedEntityBody(byte[] buffer, int offset)
+    {
+        return 0;
+    }
+
+    public override bool IsEntireEntityBodyIsPreloaded()
+    {
+        return !_canHaveBody;
+    }
+
+    public override int ReadEntityBody(byte[] buffer, int size)
+    {
+        return _body.Read(buffer, 0, size);
+    }
+
+    public override int ReadEntityBody(byte[] buffer, int offset, int size)
+    {
+        return _body.Read(buffer, offset, size);
+    }
+
+    public override bool SupportsAsyncRead => true;
+
+    public override IAsyncResult BeginRead(
+        byte[] buffer,
+        int offset,
+        int count,
+        AsyncCallback callback,
+        object state)
+    {
+        return _body.BeginRead(buffer, offset, count, callback, state);
+    }
+
+    public override int EndRead(IAsyncResult asyncResult)
+    {
+        return _body.EndRead(asyncResult);
+    }
+
     public override void SendStatus(int statusCode, string statusDescription)
     {
         Response.SetStatus(statusCode, statusDescription);
@@ -260,6 +304,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override void EndOfRequest()
     {
+        _body.Stop();
         Response.Seal();
 
         if (!_completion.TrySetResult())
@@ -276,13 +321,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public void Dispose()
     {
+        _body.Stop();
         Response.Dispose();
-    }
-
-    private static bool HasEntityBody(HttpRequest request)
-    {
-        return request.ContentLength > 0
-            || !StringValues.IsNullOrEmpty(request.Headers.TransferEncoding);
     }
 
     private static string NormalizeVirtualRoot(string virtualRootPath)

@@ -25,5 +25,8 @@
     <Compile
       Include="../../../core-parity/shared/SyncProbeHandler.cs"
       Link="Shared/SyncProbeHandler.cs" />
+    <Compile
+      Include="../../../core-parity/shared/BodyProbeHandler.cs"
+      Link="Shared/BodyProbeHandler.cs" />
   </ItemGroup>
 </Project>

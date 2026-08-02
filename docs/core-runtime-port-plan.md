@@ -19,7 +19,7 @@ application contract, [ADRs](adr/) for rationale, and the
 | 3 | Complete | [Dynamic ASPX integration](follow-ups/dynamic-aspx-integration.md) | deterministic `.aspx` GET lifecycle and output passes port-local gates by [ADR 0044](adr/0044-gate-differentials-by-evidence-not-by-slice.md) |
 | 4 | Current | [Deferred request surfaces](follow-ups/deferred-request-surfaces.md): body bridge, forms, postback, view state, uploads | sync/async entity-body parity without assumed Kestrel synchronous I/O |
 | 5 | Queued | [Deferred request surfaces](follow-ups/deferred-request-surfaces.md): session, cache, authentication, resources, routing | feature-specific configuration and request parity |
-| 6 | Queued | [Process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md) and broader transport | graceful lifecycle plus transport-specific gates |
+| 6 | Queued | [Process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md) and broader transport, including real Kestrel HTTP/2 and HTTP/3 integration | graceful lifecycle plus transport-specific gates |
 
 Do not begin a slice until its predecessor's principal gate passes.
 

@@ -24,7 +24,20 @@ internal sealed class ScenarioRun : IDisposable
     internal byte[] Response(int index) =>
         File.ReadAllBytes(Path.Combine(_root.FullName, "responses", index + ".body"));
 
+    internal string ResponseText(int index) =>
+        File.ReadAllText(Path.Combine(_root.FullName, "responses", index + ".body"));
+
     internal static ScenarioRun Serve(params string[] requests)
+    {
+        return Run("page", "--request", requests);
+    }
+
+    internal static ScenarioRun ServeBody(string fixture, params string[] probes)
+    {
+        return Run(fixture, "--body-probe", probes);
+    }
+
+    private static ScenarioRun Run(string fixture, string argument, string[] values)
     {
         var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
         var applicationPath = Path.Combine(root.FullName, "app");
@@ -32,7 +45,7 @@ internal sealed class ScenarioRun : IDisposable
         var temp = Path.Combine(root.FullName, "temp");
         var tracePath = Path.Combine(root.FullName, "trace.txt");
 
-        CopyDirectory(Path.Combine(HostDirectory, "fixtures", "page"), applicationPath);
+        CopyDirectory(Path.Combine(HostDirectory, "fixtures", fixture), applicationPath);
         Directory.CreateDirectory(responses);
         Directory.CreateDirectory(temp);
 
@@ -57,10 +70,10 @@ internal sealed class ScenarioRun : IDisposable
         startInfo.ArgumentList.Add("--response-dir");
         startInfo.ArgumentList.Add(responses);
 
-        foreach (var request in requests)
+        foreach (var value in values)
         {
-            startInfo.ArgumentList.Add("--request");
-            startInfo.ArgumentList.Add(request);
+            startInfo.ArgumentList.Add(argument);
+            startInfo.ArgumentList.Add(value);
         }
 
         using var process = Process.Start(startInfo)!;
@@ -127,4 +140,3 @@ internal sealed class ScenarioRun : IDisposable
             "net10.0");
     }
 }
-

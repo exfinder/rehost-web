@@ -47,8 +47,7 @@ assumptions or owning application lifecycle.
   reads as "the server does not provide this". Missing connection data answers
   empty, because a request without peer information is genuinely missing a value
   rather than being handed a fabricated one.
-- **Explicit rejection.** Requests carrying an entity body are refused at
-  construction; file send throws. Deriving from `HttpWorkerRequest` directly
+- **Explicit rejection.** File send throws. Deriving from `HttpWorkerRequest` directly
   rather than from `SimpleWorkerRequest` is what makes this enforceable — every
   output-side member is abstract, so the compiler refuses a missed override.
   `SimpleWorkerRequest` empties all of them, including `EndOfRequest`, and would
@@ -67,8 +66,6 @@ probe had: `SafeNativeMethods.GetCurrentThreadId`, recorded as P33.
 
 ## Still open
 
-- Disconnect is observable through `IsClientConnected`, but no scenario exercises
-  a mid-request disconnect.
 - Response spill to disk is implemented and unexercised: no first-slice scenario
   produces a body over the memory threshold.
 - Server-variable coverage is the minimum the fixture needs; IIS-only variables

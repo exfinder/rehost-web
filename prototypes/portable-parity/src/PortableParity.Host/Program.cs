@@ -60,7 +60,7 @@ internal static class Program
                         "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
                     ActivationEntryPoint =
                         "WebFormsApplication.Initialize + ApplicationManager.CreateObject",
-                    Fixture = "bodyless-precompiled-handler-v1"
+                    Fixture = "precompiled-handler-and-request-body-v2"
                 },
                 Sessions = manifest.Sessions
                     .Select(session => InPhase(

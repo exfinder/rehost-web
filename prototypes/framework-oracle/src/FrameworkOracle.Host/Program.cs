@@ -65,7 +65,7 @@ internal static class Program
                         "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
                     ActivationEntryPoint =
                         "System.Web.Hosting.ApplicationManager.CreateObject",
-                    Fixture = "bodyless-precompiled-handler-v1"
+                    Fixture = "precompiled-handler-and-request-body-v2"
                 },
                 Sessions = manifest.Sessions
                     .Select(session => RunSessionProcess(session, manifestPath, fixtureRoot))

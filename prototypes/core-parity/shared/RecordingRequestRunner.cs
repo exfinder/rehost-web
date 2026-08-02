@@ -127,14 +127,38 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     private readonly ManualResetEvent _completed = new ManualResetEvent(false);
     private readonly List<HeaderObservation> _headers = new List<HeaderObservation>();
     private readonly List<bool> _flushes = new List<bool>();
+    private readonly byte[] _entityBody;
+    private readonly byte[]? _preloadedEntityBody;
     private int _statusCode = 200;
     private string _statusDescription = "OK";
     private int _endOfRequestCount;
     private int _completionCount;
+    private int _entityOffset;
 
     internal RecordingWorkerRequest(RequestSpecification request)
     {
         _request = request;
+        _entityBody = string.IsNullOrEmpty(request.BodyBase64)
+            ? Array.Empty<byte>()
+            : Convert.FromBase64String(request.BodyBase64);
+
+        if (request.PreloadedBodyLength < 0
+            || request.PreloadedBodyLength > _entityBody.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(request.PreloadedBodyLength));
+        }
+
+        if (request.PreloadedBodyLength != 0)
+        {
+            _preloadedEntityBody = new byte[request.PreloadedBodyLength];
+            Buffer.BlockCopy(
+                _entityBody,
+                0,
+                _preloadedEntityBody,
+                0,
+                _preloadedEntityBody.Length);
+            _entityOffset = _preloadedEntityBody.Length;
+        }
     }
 
     public override string GetUriPath()
@@ -217,7 +241,98 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             return "oracle.invalid";
         }
 
+        if (index == HeaderContentLength
+            && string.Equals(
+                _request.BodyFraming,
+                "content-length",
+                StringComparison.Ordinal))
+        {
+            return _entityBody.Length.ToString(CultureInfo.InvariantCulture);
+        }
+
+        if (index == HeaderTransferEncoding
+            && string.Equals(
+                _request.BodyFraming,
+                "chunked",
+                StringComparison.Ordinal))
+        {
+            return "chunked";
+        }
+
+        if (index == HeaderContentType && !string.IsNullOrEmpty(_request.BodyFraming))
+        {
+            return "application/octet-stream";
+        }
+
         return null;
+    }
+
+    public override byte[]? GetPreloadedEntityBody()
+    {
+        if (_preloadedEntityBody != null)
+        {
+            PipelineEventJournal.Record(_request.Name, "worker.body.preloaded");
+        }
+
+        return _preloadedEntityBody;
+    }
+
+    public override bool IsEntireEntityBodyIsPreloaded()
+    {
+        return _entityBody.Length != 0 && _entityOffset == _entityBody.Length;
+    }
+
+    public override int ReadEntityBody(byte[] buffer, int offset, int size)
+    {
+        if (buffer == null)
+        {
+            throw new ArgumentNullException(nameof(buffer));
+        }
+        if (offset < 0 || size < 0 || buffer.Length - offset < size)
+        {
+            throw new ArgumentOutOfRangeException(nameof(offset));
+        }
+
+        var count = Math.Min(size, _entityBody.Length - _entityOffset);
+        if (count != 0)
+        {
+            Buffer.BlockCopy(_entityBody, _entityOffset, buffer, offset, count);
+            _entityOffset += count;
+            PipelineEventJournal.Record(_request.Name, "worker.body.read");
+        }
+
+        return count;
+    }
+
+    public override int ReadEntityBody(byte[] buffer, int size)
+    {
+        return ReadEntityBody(buffer, 0, size);
+    }
+
+    public override bool SupportsAsyncRead => !string.IsNullOrEmpty(_request.BodyFraming);
+
+    public override IAsyncResult BeginRead(
+        byte[] buffer,
+        int offset,
+        int count,
+        AsyncCallback callback,
+        object state)
+    {
+        var result = new CompletedReadAsyncResult(
+            state,
+            ReadEntityBody(buffer, offset, count));
+        callback?.Invoke(result);
+        return result;
+    }
+
+    public override int EndRead(IAsyncResult asyncResult)
+    {
+        if (asyncResult is not CompletedReadAsyncResult result)
+        {
+            throw new ArgumentException(null, nameof(asyncResult));
+        }
+
+        return result.BytesRead;
     }
 
     // Probes run on pipeline threads and identify their request from this header rather than
@@ -358,6 +473,27 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     internal bool WaitForCompletion(TimeSpan timeout)
     {
         return _completed.WaitOne(timeout);
+    }
+
+    private sealed class CompletedReadAsyncResult : IAsyncResult
+    {
+        private static readonly WaitHandle CompletedWaitHandle = new ManualResetEvent(true);
+
+        internal CompletedReadAsyncResult(object? state, int bytesRead)
+        {
+            AsyncState = state;
+            BytesRead = bytesRead;
+        }
+
+        internal int BytesRead { get; }
+
+        public object? AsyncState { get; }
+
+        public WaitHandle AsyncWaitHandle => CompletedWaitHandle;
+
+        public bool CompletedSynchronously => true;
+
+        public bool IsCompleted => true;
     }
 
     internal PipelineObservation CreateObservation(

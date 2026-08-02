@@ -19,7 +19,9 @@ Exclusion here does not authorize silent fallback.
 Existing stories:
 [request termination/timeouts](request-termination-and-timeouts.md),
 [route escaping](route-url-escaping.md), and
-[WebResource timestamps](web-resource-assembly-timestamps.md).
+[WebResource timestamps](web-resource-assembly-timestamps.md). Portable treatment
+of IIS-hosted application settings belongs to
+[`system.webServer` configuration compatibility](system-webserver-configuration-compatibility.md).
 
 Done when every item is either an owned story with acceptance criteria or an
 explicit product-scope rejection.

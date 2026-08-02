@@ -33,6 +33,15 @@ public sealed class RequestSpecification
 
     [DataMember(Order = 4)]
     public string QueryString { get; set; } = "";
+
+    [DataMember(Order = 5)]
+    public string BodyBase64 { get; set; } = "";
+
+    [DataMember(Order = 6)]
+    public string BodyFraming { get; set; } = "";
+
+    [DataMember(Order = 7)]
+    public int PreloadedBodyLength { get; set; }
 }
 
 [Serializable]

@@ -112,6 +112,9 @@ All eight scenarios in
 match the Framework golden on the adapter side, verified on macOS `arm64` and
 Windows `x64`.
 
+The request-body session matches the regenerated Framework golden on macOS
+`arm64` and Windows `x64`.
+
 Driving the real pipeline from a real server reached one platform edge no
 differential probe had: `SafeNativeMethods.GetCurrentThreadId`, recorded as
 [P33](../../docs/portability-ledger.md). The bench calls
@@ -120,8 +123,6 @@ application's synchronization context.
 
 ## Outside this prototype
 
-The transport envelope is deliberately narrow. Requests carrying an entity body
-are rejected at construction, file send throws, `PathInfo` is always empty, and
-client-visible streaming is not attempted. Those belong to
-[deferred request surfaces](../../docs/follow-ups/deferred-request-surfaces.md)
-and later slices.
+Request-body timing, abort, and preload transport behavior has dedicated Kestrel
+gates. File send, `PathInfo`, and client-visible streaming remain outside this
+prototype.
