@@ -14,6 +14,16 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
+    <!--
+      Built but not referenced: the scenario tests launch this host as a child process from
+      its own output directory, which carries its own copy of the hosting assembly. Without
+      this, building only the test project leaves that copy stale and the scenario tests
+      silently exercise the previous build.
+    -->
+    <ProjectReference
+      Include="../Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
