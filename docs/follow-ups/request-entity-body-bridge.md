@@ -1,8 +1,10 @@
 # Request entity-body bridge research
 
 Status: implemented and verified on macOS `arm64` and Windows `x64`. Scope:
-transport bytes through `HttpWorkerRequest`; form parsing, postback, view state,
-and uploads remain later sub-slices.
+transport bytes through `HttpWorkerRequest`. Form parsing, postback, view state,
+control state, and read-only multipart now sit on top of it — see
+[postback and form parsing](postback-and-form-parsing.md). `HttpPostedFile.SaveAs`
+is still out.
 
 ## Current seam
 

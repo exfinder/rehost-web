@@ -10,5 +10,13 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <Compile
+      Include="../../prototypes/core-parity/shared/Counter.cs"
+      Link="Shared/Counter.cs" />
+    <Compile
+      Include="../../prototypes/core-parity/shared/PostbackFormClient.cs"
+      Link="Shared/PostbackFormClient.cs" />
   </ItemGroup>
+
+  <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

@@ -27,6 +27,13 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <!-- Linked rather than referenced: the probe assembly must not be copied beside the host. -->
+  <ItemGroup>
+    <Compile
+      Include="../../prototypes/core-parity/shared/PostbackFormClient.cs"
+      Link="Shared/PostbackFormClient.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />

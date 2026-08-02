@@ -23,6 +23,7 @@ These documents describe accepted direction; implementation may lag:
 | First runnable request | [follow-ups/first-runnable-request.md](follow-ups/first-runnable-request.md) |
 | Runtime code generation/loading | [follow-ups/runtime-codegen-and-loading.md](follow-ups/runtime-codegen-and-loading.md) |
 | Dynamic `.aspx` GET | [follow-ups/dynamic-aspx-integration.md](follow-ups/dynamic-aspx-integration.md) |
+| Postback, forms, view state | [follow-ups/postback-and-form-parsing.md](follow-ups/postback-and-form-parsing.md) |
 | Supported feature boundaries | [follow-ups/compatibility-feature-map.md](follow-ups/compatibility-feature-map.md) |
 | Reached classic-path evidence | [portability-ledger.md](portability-ledger.md) |
 | AppDomain, remoting, full trust | [appdomain-remoting-cas-compatibility.md](appdomain-remoting-cas-compatibility.md) |
@@ -54,8 +55,10 @@ Framework configuration baseline:
 
 [Deferred request surfaces](follow-ups/deferred-request-surfaces.md), slice 4:
 bridge request bodies, then add server forms, postback, view state, and uploads.
-Slices 0–3 pass their gates on macOS `arm64` and Windows `x64`; the latest
-completed slice compiles and renders a dynamic `.aspx` GET through Kestrel.
+Slices 0–3 pass their gates on macOS `arm64` and Windows `x64`. The entity-body
+bridge is verified on both; postback, forms, view state, control state, and
+read-only multipart pass on macOS `arm64` and await the Windows round and one
+Framework oracle session.
 
 The [port plan](core-runtime-port-plan.md) owns ordering and cross-slice gates.
 Each follow-up owns its status, dependencies, remaining decisions, and

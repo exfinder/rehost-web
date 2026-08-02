@@ -1,6 +1,50 @@
 # Machine key and ViewState bootstrap
 
-Status: open. Priority: high. Depends on security/persistence policy.
+Status: open, narrowed by the postback slice. Priority: high. Depends on
+security/persistence policy.
+
+## Settled by the postback slice
+
+- **Portable algorithms are not a decision.** P40 refuses any application below
+  `targetFramework` 4.5, so `MachineKeySection.CompatibilityMode` is always at
+  least `Framework45` and `AspNetCryptoServiceProvider.IsDefaultProvider` is
+  always true. That path is pure managed BCL — SP800-108, `HMACSHA256`, `AES` —
+  and nothing under `Security/Cryptography` carries a registry, DPAPI, or
+  `NETFRAMEWORK` branch. The output-buffer-size hash trap recorded below sits in
+  `MachineKeySection.EncryptOrDecryptData`, reachable only below `Framework45`
+  or through the obsolete `MachineKey` API, and is therefore unreachable rather
+  than merely unported.
+- **The first fixture does emit protected view state.** The postback fixture
+  carries a server form and declares an explicit `<machineKey>`.
+- **Auto-generated keys are now reported.** Preflight raises one
+  `WebFormsRuntimeEventSource` event naming the process-scoped consequence
+  (ledger P15). It is a diagnostic only; nothing observable to a client changes,
+  and the host-supplied key source below remains the actual fix.
+
+Storage, rotation, deployment sharing, file permissions, and fail-closed
+behavior remain open and stay coordinated with
+[data-protection-provider.md](data-protection-provider.md).
+
+## `,IsolateApps` desynchronizes even an explicit key
+
+Not yet a ledger row: no slice executes the branch, so by the ledger's own rule
+it stays here until one does.
+
+`MachineKeySection.RuntimeDataInitialize` strips a `,IsolateApps` or
+`,IsolateByAppId` suffix and then overwrites the first four bytes of the
+resulting key with `StringUtil.GetNonRandomizedStringComparerHashCode(appName)`.
+It does this for a **literal hex key**, not only for `AutoGenerate`. That helper
+is the same P38 divergence as `__VIEWSTATEGENERATOR`: Framework computes
+`StringComparer.InvariantCultureIgnoreCase.GetHashCode`, this port computes
+`GetStringHashCode(s.ToLower(InvariantCulture))`. Both are stable; they are not
+equal.
+
+So two runtimes given byte-identical configuration derive different keys, and
+neither can read view state or forms-authentication tickets the other produced —
+silently, with no diagnostic, for a suffix that is part of the shipped default
+value of both `validationKey` and `decryptionKey`. Any deployment that must
+interoperate with .NET Framework has to drop the suffix, which is why the
+postback fixture declares bare keys.
 
 ## Problem
 
@@ -41,9 +85,9 @@ method already carries. The two do not produce the same eight hex characters.
 
 The divergence is permanent and cannot be normalized away under
 [ADR 0029](../adr/0029-require-strict-differential-comparison.md). It is why the
-slice-3 fixture carries no server form, and it means any later Framework
-differential over a page with a form needs this recorded as an accepted
-compatibility deviation before it can pass.
+slice-3 fixture carries no server form. It is now recorded as ledger P48, and a
+Framework differential over a page with a form compares the field's shape rather
+than its value.
 
 ## The legacy path selects its hash algorithm by output-buffer size
 
@@ -73,10 +117,6 @@ weigh if pre-4.5 support is ever wanted, not a live defect.
 
 ## Required decisions
 
-- Whether the first fixture emits protected ViewState. The slice-3 page fixture
-  does not: it carries no server form, so no `__VIEWSTATE` or
-  `__VIEWSTATEGENERATOR` is rendered.
-- Portable MAC/encryption algorithms and compatibility requirements.
 - Key source, isolation, persistence, rotation, deployment sharing, and file
   permissions.
 - Registry policy defaults replaced by explicit Rehost configuration.

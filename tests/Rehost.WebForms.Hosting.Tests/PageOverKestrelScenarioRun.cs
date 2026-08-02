@@ -37,6 +37,12 @@ internal sealed class ScenarioRun : IDisposable
         return Run(fixture, "--body-probe", probes);
     }
 
+    // Responses are numbered in order across probes: one render, then one per postback round.
+    internal static ScenarioRun Postback(params string[] probes)
+    {
+        return Run("postback", "--postback", probes);
+    }
+
     private static ScenarioRun Run(string fixture, string argument, string[] values)
     {
         var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
