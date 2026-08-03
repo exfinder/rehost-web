@@ -482,7 +482,12 @@ cmd_provision() {
   local encoded
   # -EncodedCommand sidesteps quoting entirely across bash -> ssh -> pwsh.
   encoded=$(provision_script | iconv -f UTF-8 -t UTF-16LE | base64 | tr -d '\n')
-  cmd_ssh "pwsh -NoProfile -EncodedCommand $encoded"
+  # cmd_ssh execs, so run it in a subshell to keep control after it returns.
+  ( cmd_ssh "pwsh -NoProfile -EncodedCommand $encoded" )
+  # sshd restarts moments from now to pick up the installed tools' PATH. A
+  # surviving ControlMaster would keep multiplexing new sessions onto the old
+  # daemon, so they would still miss git-receive-pack and dotnet.
+  ssh -O exit "$SSH_ALIAS" 2>/dev/null || true
 }
 
 cmd_alias() {
