@@ -5,7 +5,7 @@ set -euo pipefail
 
 REGION="${WIN_ORACLE_REGION:-$(aws configure get region 2>/dev/null || echo us-east-1)}"
 NAME="${WIN_ORACLE_NAME:-rehost-win-oracle}"
-INSTANCE_TYPE="${WIN_ORACLE_TYPE:-t3a.medium}"
+INSTANCE_TYPE="${WIN_ORACLE_TYPE:-t3a.xlarge}"
 VOLUME_GB="${WIN_ORACLE_VOLUME_GB:-40}"
 SSH_KEY="${WIN_ORACLE_SSH_KEY:-$HOME/.ssh/id_ed25519}"
 SSH_ALIAS="${WIN_ORACLE_SSH_ALIAS:-win-oracle}"
