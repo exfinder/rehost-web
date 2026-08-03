@@ -406,6 +406,20 @@ if ((Test-Path $refAsm) -and (Test-Path $webTargets)) {
   if ($p.ExitCode -notin 0,3010) { throw "vs_BuildTools failed with exit code $($p.ExitCode)" }
 }
 
+if (Get-Command git -ErrorAction SilentlyContinue) {
+  'git: already present'
+} else {
+  $rel = Invoke-RestMethod https://api.github.com/repos/git-for-windows/git/releases/latest
+  $url = ($rel.assets | Where-Object { $_.name -like '*-64-bit.exe' } | Select-Object -First 1).browser_download_url
+  if (-not $url) { throw 'could not resolve a Git for Windows installer' }
+  Invoke-WebRequest $url -OutFile "$env:TEMP\git-setup.exe"
+  $p = Start-Process -Wait -PassThru -FilePath "$env:TEMP\git-setup.exe" `
+    -ArgumentList @('/VERYSILENT','/NORESTART','/NOCANCEL','/SP-','/SUPPRESSMSGBOXES')
+  if ($p.ExitCode -ne 0) { throw "git installer failed with exit code $($p.ExitCode)" }
+  $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine')
+  'git: installed'
+}
+
 $idleDir = 'C:\ProgramData\win-oracle'
 New-Item -ItemType Directory -Force $idleDir | Out-Null
 $watchdog = Join-Path $idleDir 'idle-stop.ps1'
@@ -440,6 +454,17 @@ $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) `
 Register-ScheduledTask -TaskName 'win-oracle-idle-stop' -Action $action -Trigger $trigger `
   -User 'SYSTEM' -RunLevel Highest -Force | Out-Null
 
+# sshd caches its environment at service start, so sessions keep the PATH from
+# before dotnet and git were installed -- which breaks `git push` to this host,
+# since git-receive-pack then resolves against the stale PATH. Restarting from
+# inside this session would kill it before the summary prints, so hand the
+# restart to a one-shot task that fires after the session closes.
+$refresh = New-ScheduledTaskAction -Execute 'powershell.exe' `
+  -Argument '-NoProfile -NonInteractive -Command "Restart-Service sshd"'
+Register-ScheduledTask -TaskName 'win-oracle-sshd-refresh' `
+  -Action $refresh -Trigger (New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(20)) `
+  -User 'SYSTEM' -RunLevel Highest -Force | Out-Null
+
 '--- provisioned ---'
 "pwsh              : $($PSVersionTable.PSVersion)"
 "dotnet sdk        : $(& dotnet --version)"
@@ -447,6 +472,7 @@ Register-ScheduledTask -TaskName 'win-oracle-idle-stop' -Action $action -Trigger
 "4.8.1 ref asm     : $(Test-Path $refAsm)"
 "aspnet_compiler   : $(Test-Path 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe')"
 "WebApplication    : $(Test-Path $webTargets)"
+"git               : $((& git --version) -replace '^git version ')"
 "idle-stop task    : $((Get-ScheduledTask -TaskName 'win-oracle-idle-stop' -ErrorAction SilentlyContinue).State) (@IDLE_MINUTES@ min)"
 PS1
 }
