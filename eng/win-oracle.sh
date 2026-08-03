@@ -14,8 +14,9 @@ KNOWN_HOSTS="${WIN_ORACLE_KNOWN_HOSTS:-$HOME/.ssh/known_hosts.win-oracle}"
 AMI_PARAM="${WIN_ORACLE_AMI_PARAM:-/aws/service/ami-windows-latest/Windows_Server-2025-English-Core-Base}"
 DOTNET_CHANNEL="${WIN_ORACLE_DOTNET_CHANNEL:-10.0}"
 IDLE_MINUTES="${WIN_ORACLE_IDLE_MINUTES:-60}"
-# T3 defaults to unlimited, which bills surplus credits instead of throttling.
-CREDIT_MODE="${WIN_ORACLE_CREDIT_MODE:-standard}"
+# standard throttles to the 20-30%% baseline once credits run out, which a build
+# exhausts within minutes of a wake; unlimited bills the surplus instead.
+CREDIT_MODE="${WIN_ORACLE_CREDIT_MODE:-unlimited}"
 STOP_CRON="${WIN_ORACLE_STOP_CRON:-cron(0 22 * * ? *)}"
 CACHE_TTL="${WIN_ORACLE_CACHE_TTL:-3600}"
 ENDPOINT_CACHE="${WIN_ORACLE_ENDPOINT_CACHE:-$HOME/.cache/win-oracle/$NAME}"
