@@ -112,6 +112,13 @@ internal sealed class RequestBodyCoordinator
         return result.End();
     }
 
+    // RequestAborted is raised after the read that observed the reset, and System.Web decides
+    // between end of body and HttpException by asking IsClientConnected at exactly that moment
+    // (HttpBufferlessInputStream.Read). Reporting the latched terminal keeps that decision off
+    // the token's timing.
+    internal bool ClientDisconnected =>
+        Volatile.Read(ref _terminal) is { } terminal && terminal.IsClientDisconnect;
+
     internal void Stop()
     {
         if (Interlocked.Exchange(ref _stopped, 1) == 0)
@@ -307,6 +314,8 @@ internal sealed class RequestBodyCoordinator
         internal static TerminalState EndOfBody { get; } = new(TerminalKind.EndOfBody);
 
         internal int? StatusCode { get; }
+
+        internal bool IsClientDisconnect => _kind == TerminalKind.Disconnected;
 
         internal static TerminalState Disconnected(Exception error) =>
             new(TerminalKind.Disconnected, error);

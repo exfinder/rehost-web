@@ -422,6 +422,41 @@ public sealed class AspNetCoreWorkerRequestTests
             .InnerException.ShouldBeOfType<ConnectionResetException>();
     }
 
+    // System.Web asks this the moment a body read returns zero, and turns the answer into either
+    // end of body or HttpException (HttpBufferlessInputStream.Read). RequestAborted is raised after
+    // the read that saw the reset, so answering from the token alone reports a vanished client as
+    // still connected and a truncated body as a complete one.
+    [Fact]
+    public async Task A_Reset_Reports_The_Client_Gone_Before_Request_Aborted_Is_Raised()
+    {
+        var pipe = new Pipe();
+        var context = BodyContext(pipe.Reader, contentLength: null);
+        context.RequestAborted = CancellationToken.None;
+        await pipe.Writer.CompleteAsync(new ConnectionResetException("reset by peer"));
+
+        var request = Create(context);
+
+        request.IsClientConnected().ShouldBeTrue();
+        request.ReadEntityBody(new byte[1], 1).ShouldBe(0);
+        request.IsClientConnected().ShouldBeFalse();
+    }
+
+    // A host rejection is not a disconnect: the client is still there to receive the status.
+    [Fact]
+    public async Task A_Host_Rejected_Body_Leaves_The_Client_Connected()
+    {
+        var pipe = new Pipe();
+        var context = BodyContext(pipe.Reader, contentLength: null);
+        context.RequestAborted = CancellationToken.None;
+        await pipe.Writer.CompleteAsync(
+            new BadHttpRequestException("Request body too large.", StatusCodes.Status413PayloadTooLarge));
+
+        var request = Create(context);
+
+        Should.Throw<System.Web.HttpException>(() => request.ReadEntityBody(new byte[1], 1));
+        request.IsClientConnected().ShouldBeTrue();
+    }
+
     [Fact]
     public async Task A_Host_Rejected_Body_Throws_With_The_Host_Status_Code()
     {

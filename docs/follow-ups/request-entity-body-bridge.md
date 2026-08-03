@@ -87,6 +87,14 @@ Source revision `ec9fa9ae770d522a5b5f0607898044b7478574a3`.
   bufferless disconnect => `HttpException`, async failure => `HttpException`,
   other synchronous transport failure => exception.
   [`RequestAborted` guidance](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/use-http-context?view=aspnetcore-10.0#requestaborted)
+- The distinction above is not the worker's to make. Both outcomes begin with a
+  synchronous read of zero, and `HttpBufferlessInputStream.Read` chooses between
+  them by asking `IsClientConnected` at that moment. Answering from
+  `RequestAborted` alone is wrong: Kestrel raises that token after the read that
+  observed the reset, so a client that vanished mid-body reports as connected and
+  a truncated entity reaches the application as a complete one. The answer must
+  come from the terminal state the read already latched.
+  [`HttpBufferlessInputStream.cs`](../../src/System.Web.ReferenceSource/HttpBufferlessInputStream.cs#L235)
 - Completion must stop any pending producer and prevent use of a recycled
   `HttpContext`; a handler is allowed to finish without consuming the whole
   request body.

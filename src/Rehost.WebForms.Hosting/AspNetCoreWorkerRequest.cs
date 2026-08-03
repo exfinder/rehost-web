@@ -204,7 +204,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override bool IsClientConnected()
     {
-        return !_context.RequestAborted.IsCancellationRequested;
+        return !_context.RequestAborted.IsCancellationRequested && !_body.ClientDisconnected;
     }
 
     public override byte[]? GetPreloadedEntityBody()
