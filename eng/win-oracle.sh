@@ -11,7 +11,9 @@ SSH_KEY="${WIN_ORACLE_SSH_KEY:-$HOME/.ssh/id_ed25519}"
 SSH_ALIAS="${WIN_ORACLE_SSH_ALIAS:-win-oracle}"
 SSH_CONFIG_FRAGMENT="${WIN_ORACLE_SSH_CONFIG:-$HOME/.ssh/config.d/$SSH_ALIAS}"
 KNOWN_HOSTS="${WIN_ORACLE_KNOWN_HOSTS:-$HOME/.ssh/known_hosts.win-oracle}"
-AMI_PARAM="${WIN_ORACLE_AMI_PARAM:-/aws/service/ami-windows-latest/Windows_Server-2025-English-Core-Base}"
+AMI_PARAM="${WIN_ORACLE_AMI_PARAM:-/win-oracle/ami}"
+BASE_AMI_PARAM="${WIN_ORACLE_BASE_AMI_PARAM:-/aws/service/ami-windows-latest/Windows_Server-2025-English-Core-Base}"
+MARKET_TYPE="${WIN_ORACLE_MARKET:-spot}"
 DOTNET_CHANNEL="${WIN_ORACLE_DOTNET_CHANNEL:-10.0}"
 IDLE_MINUTES="${WIN_ORACLE_IDLE_MINUTES:-60}"
 # standard throttles to the 20-30%% baseline once credits run out, which a build
@@ -45,10 +47,18 @@ my_ip() {
   echo "$ip"
 }
 
+# Prefers a baked image, which arrives fully provisioned, and falls back to the
+# stock Microsoft one so a first-time setup still works with nothing baked yet.
 resolve_ami() {
   local ami
-  if ! ami=$(aws_ ssm get-parameter --name "$AMI_PARAM" --query Parameter.Value --output text 2>/dev/null); then
-    echo "AMI parameter not found: $AMI_PARAM" >&2
+  if ami=$(aws_ ssm get-parameter --name "$AMI_PARAM" --query Parameter.Value --output text 2>/dev/null); then
+    echo "using baked image $ami from $AMI_PARAM" >&2
+    echo "$ami"
+    return
+  fi
+  echo "no baked image at $AMI_PARAM; using $BASE_AMI_PARAM -- run '$0 provision' after launch" >&2
+  if ! ami=$(aws_ ssm get-parameter --name "$BASE_AMI_PARAM" --query Parameter.Value --output text 2>/dev/null); then
+    echo "base AMI parameter not found either: $BASE_AMI_PARAM" >&2
     echo "available Core images:" >&2
     aws_ ssm get-parameters-by-path \
       --path /aws/service/ami-windows-latest --query 'Parameters[].Name' --output text 2>/dev/null \
@@ -237,7 +247,15 @@ cmd_launch() {
   pubkey=$(<"$SSH_KEY.pub")
   udata=$(user_data "$pubkey")
 
-  echo "launching $INSTANCE_TYPE from $ami (${VOLUME_GB}GB gp3) in $REGION"
+  # A persistent request survives an interruption and keeps the volume, so the
+  # box comes back where it left off instead of being rebuilt.
+  local market=()
+  if [ "$MARKET_TYPE" = "spot" ]; then
+    market=(--instance-market-options
+      '{"MarketType":"spot","SpotOptions":{"SpotInstanceType":"persistent","InstanceInterruptionBehavior":"stop"}}')
+  fi
+
+  echo "launching $MARKET_TYPE $INSTANCE_TYPE from $ami (${VOLUME_GB}GB gp3) in $REGION"
 
   local id attempt=0
   # The instance profile is not immediately visible to EC2 after creation.
@@ -249,6 +267,7 @@ cmd_launch() {
       --iam-instance-profile "Name=$profile" \
       --credit-specification "CpuCredits=$CREDIT_MODE" \
       --metadata-options "HttpTokens=required" \
+      ${market[@]+"${market[@]}"} \
       --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$VOLUME_GB,\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]" \
       --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME}]" \
       --user-data "$udata" \
@@ -269,9 +288,9 @@ cmd_launch() {
 
   echo
   echo "next:"
-  echo "  $0 provision   # toolchain + idle-stop watchdog"
   echo "  $0 schedule    # nightly stop safety net"
   echo "  ssh $SSH_ALIAS # wakes it on demand from now on"
+  echo "  $0 provision   # only if this came from the base image, or to update the toolchain"
 }
 
 cmd_status() {
@@ -591,6 +610,17 @@ cmd_destroy() {
   echo "this terminates $id and deletes its ${size}GB volume. everything on it is lost."
   read -r -p "type the instance id to confirm: " confirm
   [ "$confirm" = "$id" ] || die "not confirmed"
+
+  # A persistent spot request outlives its instance and would immediately
+  # provision a replacement, so cancel it before terminating.
+  local sir
+  sir=$(aws_ ec2 describe-spot-instance-requests --filters "Name=instance-id,Values=$id" \
+    --query 'SpotInstanceRequests[0].SpotInstanceRequestId' --output text 2>/dev/null || true)
+  if [ -n "$sir" ] && [ "$sir" != "None" ]; then
+    aws_ ec2 cancel-spot-instance-requests --spot-instance-request-ids "$sir" >/dev/null
+    echo "cancelled spot request $sir"
+  fi
+
   aws_ ec2 terminate-instances --instance-ids "$id" >/dev/null
   rm -f "$ENDPOINT_CACHE"
   echo "$id terminating; IAM role and security group left in place for reuse"
@@ -639,6 +669,7 @@ env overrides: WIN_ORACLE_REGION($REGION) WIN_ORACLE_NAME($NAME)
                WIN_ORACLE_STOP_CRON($STOP_CRON)
                WIN_ORACLE_CREDIT_MODE($CREDIT_MODE)
                WIN_ORACLE_CACHE_TTL($CACHE_TTL) WIN_ORACLE_ENDPOINT_CACHE($ENDPOINT_CACHE)
+               WIN_ORACLE_MARKET($MARKET_TYPE) WIN_ORACLE_AMI_PARAM($AMI_PARAM)
 USAGE
     exit 1 ;;
 esac
