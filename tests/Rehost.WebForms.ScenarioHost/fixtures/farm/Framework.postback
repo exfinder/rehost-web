@@ -1,0 +1,20 @@
+# A postback captured from a .NET Framework 4.8.1 node, replayed against this port to prove a
+# load-balanced farm may span both. See docs/follow-ups/mixed-farm-incremental-migration.md.
+#
+# Runtime:   .NET Framework 4.8.1, release key 533509 (Windows Server 2025, x64)
+# Activated: System.Web.Hosting.ApplicationManager.CreateObject
+# Page:      /Default.aspx of this fixture, rendered fresh, then its form submitted by its button
+# Key:       the <machineKey> in this fixture's web.config
+#
+# The fields are what a browser posts when the button is clicked, in render order. They are inert
+# without that key, and are bound to this page at this application-relative path: the view state
+# key derives from "TemplateSourceDirectory: /" and the generated type name, so moving or renaming
+# the page invalidates this capture rather than merely changing it.
+#
+# Recapture by rendering the same page on a Framework node with the same key and copying the three
+# hidden fields plus the button's own name=value.
+__VIEWSTATE=vXGZrmtdZSUDOXPBAu8lNSL1Yd3/k8VM78IFc79bYjRovqHjoEJkuyFbpqoMI/s6PZZVjILUtu4dwnrhXwwDU/hdJhz3/JJi6+zLqns9UNYunfhtiJtyMAaqQQe1MbyvIZte961jt/US6Ek9rzXQbA==
+__VIEWSTATEGENERATOR=CA0B0334
+__EVENTVALIDATION=3jv1+eTLdyLj7Q09PrTWJkf/fYVkZFVmWF+GM/sLKirX+XGV+R1CDUid2i6f1ofF3FJgIRnQ5bkiBCaG8OsswneyQVxR24AmPYu2rib1f92XVDGX5vTK//GD/H0K26/tCGJWj6QU0U7Z27TVGb3Hhg==
+Message=
+Apply=Apply

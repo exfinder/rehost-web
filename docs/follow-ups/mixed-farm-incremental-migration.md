@@ -1,8 +1,10 @@
 # Mixed farm and incremental migration
 
-Status: observed on macOS `arm64` against a .NET Framework 4.8.1 oracle, not
-gated. Priority: high — this is a deployment capability future consumers depend
-on, and it is currently evidence rather than a standing test.
+Status: the Framework-to-port direction is gated by
+`MixedFarmOverKestrelTests` against a payload captured from .NET Framework
+4.8.1. The reverse direction is measured but not gated: replaying a port-rendered
+payload needs a Framework node, so it belongs to the oracle prototype. Priority:
+high — this is a deployment capability future consumers depend on.
 
 ## The scenario
 
@@ -46,6 +48,13 @@ The removal controls matter for the same reason: they show event validation was
 being enforced on both sides, so the handler running cannot be explained by
 validation having been off. `__EVENTVALIDATION` is therefore interchangeable too,
 which is what makes this a real postback rather than a bare payload.
+
+The Framework-to-port row and its control are now
+`MixedFarmOverKestrelTests`, replaying
+[`fixtures/farm/Framework.postback`](../../tests/Rehost.WebForms.ScenarioHost/fixtures/farm/Framework.postback)
+over a real socket. Giving the fixture a key the capture was not made under
+fails it, which is the assertion that the *shared key* — not merely a
+well-formed payload — is what makes the farm work.
 
 Content crosses too, not merely the signature. The fixture's `Page_Load` assigns
 its label only when `!IsPostBack`, so the value present after a cross-runtime
@@ -97,10 +106,8 @@ unaffected; the residual gap is in error reporting.
 
 ## Done when
 
-- A committed fixture holds the Framework-captured payload with all three fields
-  and the button value, and a test asserts the port raises the button's event.
-  The measurement exists; nothing in CI would notice if it regressed.
 - The reverse direction runs from the oracle prototype rather than from
-  throwaway scaffolding, so it survives as a regression gate.
+  throwaway scaffolding, so it survives as a regression gate. Only the
+  Framework-to-port direction is gated today.
 - The error-path divergence above is either covered by a differential or
   recorded as an accepted deviation with its consumer-visible shape stated.

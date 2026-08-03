@@ -221,6 +221,11 @@ public static class Program
             return await RunCrossPagePostbackAsync(client, options, index);
         }
 
+        if (probe.StartsWith("captured", StringComparison.Ordinal))
+        {
+            return await RunCapturedPostbackAsync(client, options, probe, index);
+        }
+
         if (probe.StartsWith("upload", StringComparison.Ordinal))
         {
             return await RunUploadAsync(client, options, probe, index);
@@ -337,6 +342,52 @@ public static class Program
             PostbackFormClient.FormAction(html),
             PostbackFormClient.Encode(fields));
         await RecordResponseAsync(options, "cross-page:postback", response, index++);
+
+        return index;
+    }
+
+    // Replays a postback another runtime rendered, which is what a load-balanced farm spanning
+    // both does on every request that lands on the node that did not render the page. The payload
+    // ships with the fixture because it is only valid for that page under that key.
+    private static async Task<int> RunCapturedPostbackAsync(
+        HttpClient client,
+        ScenarioOptions options,
+        string probe,
+        int index)
+    {
+        var fields = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var line in File.ReadAllLines(
+            Path.Combine(options.ApplicationPath, "Framework.postback")))
+        {
+            if (line.Length == 0 || line[0] == '#')
+            {
+                continue;
+            }
+
+            var split = line.IndexOf('=');
+            fields[line[..split]] = line[(split + 1)..];
+        }
+
+        if (probe == "captured-without-event-validation")
+        {
+            fields.Remove("__EVENTVALIDATION");
+        }
+
+        // The render is not the subject, but it proves the page this payload names still serves,
+        // so a failure below cannot be blamed on the fixture being broken.
+        string html;
+        using (var rendered = await client.GetAsync("/Default.aspx"))
+        {
+            html = await rendered.Content.ReadAsStringAsync();
+            await RecordResponseAsync(options, probe + ":render", rendered, index++);
+        }
+
+        using var response = await PostFormAsync(
+            client,
+            PostbackFormClient.FormAction(html),
+            PostbackFormClient.Encode(fields));
+        await RecordResponseAsync(options, probe + ":postback", response, index++);
 
         return index;
     }

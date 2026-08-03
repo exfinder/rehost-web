@@ -84,6 +84,11 @@ internal sealed class ScenarioRun : IDisposable
         return Run("postback", "--postback", probes);
     }
 
+    internal static ScenarioRun Farm(params string[] probes)
+    {
+        return Run("farm", "--postback", probes);
+    }
+
     private static ScenarioRun Run(string fixture, string argument, string[] values)
     {
         var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
