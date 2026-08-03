@@ -17,10 +17,15 @@ observed, not what it turns into.
 
 ## The remaining problem
 
-`AbortScenario` fails roughly one suite round in ten on the 4-vCPU Windows host,
-timing out against the harness's 10s budget in `AbortBodyAsync`. It is a
+`AbortScenario` fails roughly one suite round in eight on the 4-vCPU Windows
+host, timing out against the harness's 10s budget in `AbortBodyAsync`. It is a
 harness deadline, not a behavioral assertion: the probe polls the trace until the
 handler records its outcome.
+
+Adding a fourth concurrent scenario-host class left that rate unchanged — one
+failure in eight rounds both with and without it, on the same binaries. So the
+trigger is not simply the number of hosts running at once, and a theory resting
+on that alone does not fit.
 
 Measured time from client reset to the application observing it:
 
