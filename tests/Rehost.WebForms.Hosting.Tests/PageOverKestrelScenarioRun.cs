@@ -27,6 +27,35 @@ internal sealed class ScenarioRun : IDisposable
     internal string ResponseText(int index) =>
         File.ReadAllText(Path.Combine(_root.FullName, "responses", index + ".body"));
 
+    // Responses are numbered in the order they were recorded, and so are the trace's request
+    // lines, so a label locates one without the caller counting positions. A label repeats when a
+    // probe posts back more than once, hence the occurrence.
+    internal string ResponseText(string label, int occurrence = 0)
+    {
+        var seen = 0;
+        var index = 0;
+
+        foreach (var entry in Trace)
+        {
+            if (!entry.StartsWith("request:", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            var status = entry.LastIndexOf(':');
+            if (entry[8..status] == label && seen++ == occurrence)
+            {
+                return ResponseText(index);
+            }
+
+            index++;
+        }
+
+        throw new InvalidOperationException(
+            $"The trace has no request '{label}' at occurrence {occurrence}: "
+                + string.Join(", ", Trace));
+    }
+
     internal static ScenarioRun Serve(params string[] requests)
     {
         return Run("page", "--request", requests);

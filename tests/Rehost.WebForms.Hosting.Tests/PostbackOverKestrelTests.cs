@@ -3,16 +3,36 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
+// All the probes share one host process: they share one fixture, so they are one application, and
+// none of them claims anything about cold activation. Spawning per test paid a full activation and
+// page compilation — about 1.7s — to serve two requests that cost nothing.
+public sealed class PostbackScenario : IDisposable
+{
+    internal ScenarioRun Run { get; } = ScenarioRun.Postback(
+        "apply",
+        "apply-twice",
+        "bump",
+        "tamper",
+        "cross-page",
+        "unsafe-input");
+
+    public void Dispose()
+    {
+        Run.Dispose();
+    }
+}
+
 // The client renders the page, scrapes the form it rendered, and posts that back over a real
 // socket, so nothing here replays a recorded body.
-public sealed class PostbackOverKestrelTests
+public sealed class PostbackOverKestrelTests(PostbackScenario scenario)
+    : IClassFixture<PostbackScenario>
 {
+    private ScenarioRun Run => scenario.Run;
+
     [Fact]
     public void Renders_A_Server_Form_Carrying_Protected_State_Fields()
     {
-        using var run = ScenarioRun.Postback("apply");
-
-        var render = run.ResponseText(0);
+        var render = Run.ResponseText("apply:render");
 
         render.ShouldContain("name=\"__VIEWSTATE\"");
         render.ShouldContain("name=\"__EVENTVALIDATION\"");
@@ -31,10 +51,8 @@ public sealed class PostbackOverKestrelTests
     [Fact]
     public void Round_Trips_Form_Values_And_View_State_Across_A_Postback()
     {
-        using var run = ScenarioRun.Postback("apply");
-
-        run.Trace.ShouldContain("request:apply:postback:200");
-        run.ResponseText(1).ShouldContain(
+        Run.Trace.ShouldContain("request:apply:postback:200");
+        Run.ResponseText("apply:postback").ShouldContain(
             "<p id=\"restored\">postback=True|posted-viewstate=True|clicks=1|note="
             + "|carried=carried-from-initial|message=typed by the client"
             + "|form=typed by the client|echo=applied:typed by the client</p>");
@@ -45,20 +63,20 @@ public sealed class PostbackOverKestrelTests
     [Fact]
     public void Control_State_Survives_A_Control_Whose_View_State_Is_Disabled()
     {
-        using var run = ScenarioRun.Postback("apply-twice");
-
-        run.ResponseText(0).ShouldContain("<span id=\"Ticker\">clicks=0 note=note-from-initial</span>");
-        run.ResponseText(1).ShouldContain("<span id=\"Ticker\">clicks=1 note=</span>");
-        run.ResponseText(2).ShouldContain("<span id=\"Ticker\">clicks=2 note=</span>");
+        Run.ResponseText("apply-twice:render")
+            .ShouldContain("<span id=\"Ticker\">clicks=0 note=note-from-initial</span>");
+        Run.ResponseText("apply-twice:postback")
+            .ShouldContain("<span id=\"Ticker\">clicks=1 note=</span>");
+        Run.ResponseText("apply-twice:postback", occurrence: 1)
+            .ShouldContain("<span id=\"Ticker\">clicks=2 note=</span>");
     }
 
     [Fact]
     public void A_Postback_Changes_The_Rendered_Output()
     {
-        using var run = ScenarioRun.Postback("apply");
-
-        run.ResponseText(0).ShouldContain("<span id=\"Echo\"></span>");
-        run.ResponseText(1).ShouldContain("<span id=\"Echo\">applied:typed by the client</span>");
+        Run.ResponseText("apply:render").ShouldContain("<span id=\"Echo\"></span>");
+        Run.ResponseText("apply:postback")
+            .ShouldContain("<span id=\"Echo\">applied:typed by the client</span>");
     }
 
     // A LinkButton posts through __EVENTTARGET rather than by submitting its own name, so it
@@ -66,10 +84,8 @@ public sealed class PostbackOverKestrelTests
     [Fact]
     public void An_Event_Target_Postback_Raises_The_Link_Button_Event()
     {
-        using var run = ScenarioRun.Postback("bump");
-
-        run.ResponseText(1).ShouldContain("<span id=\"Echo\">bumped</span>");
-        run.ResponseText(1).ShouldContain("|clicks=1|");
+        Run.ResponseText("bump:postback").ShouldContain("<span id=\"Echo\">bumped</span>");
+        Run.ResponseText("bump:postback").ShouldContain("|clicks=1|");
     }
 
     // Changed events run after Load, not before it, which is the ordering ProcessRequestMain
@@ -77,9 +93,7 @@ public sealed class PostbackOverKestrelTests
     [Fact]
     public void Postback_Events_Run_In_The_Framework_Order()
     {
-        using var run = ScenarioRun.Postback("apply");
-
-        run.ResponseText(1).ShouldContain(
+        Run.ResponseText("apply:postback").ShouldContain(
             "<p id=\"trace\">page.init>counter.load-control-state>page.load.postback"
             + ">message.text-changed>apply.click>page.prerender"
             + ">counter.save-control-state</p>");
@@ -88,10 +102,8 @@ public sealed class PostbackOverKestrelTests
     [Fact]
     public void A_Tampered_View_State_Fails_Mac_Validation()
     {
-        using var run = ScenarioRun.Postback("tamper");
-
-        run.Trace.ShouldContain("request:tamper:postback:500");
-        run.ResponseText(1).ShouldContain("Validation of viewstate MAC failed");
+        Run.Trace.ShouldContain("request:tamper:postback:500");
+        Run.ResponseText("tamper:postback").ShouldContain("Validation of viewstate MAC failed");
     }
 
     // The same corrupt-payload class as the tampered case, distinguished only by the generator
@@ -101,19 +113,17 @@ public sealed class PostbackOverKestrelTests
     [Fact]
     public void A_View_State_From_Another_Page_Is_Suppressed_Rather_Than_Thrown()
     {
-        using var run = ScenarioRun.Postback("cross-page");
-
-        run.Trace.ShouldContain("request:cross-page:postback:200");
-        run.ResponseText(2).ShouldContain("<p id=\"restored\">postback=False|posted-viewstate=True|");
+        Run.Trace.ShouldContain("request:cross-page:postback:200");
+        Run.ResponseText("cross-page:postback")
+            .ShouldContain("<p id=\"restored\">postback=False|posted-viewstate=True|");
     }
 
     [Fact]
     public void Request_Validation_Rejects_Dangerous_Form_Input()
     {
-        using var run = ScenarioRun.Postback("unsafe-input");
-
-        run.Trace.ShouldContain("request:unsafe-input:postback:500");
-        run.ResponseText(1).ShouldContain("HttpRequestValidationException");
-        run.ResponseText(1).ShouldContain("A potentially dangerous Request.Form value was detected");
+        Run.Trace.ShouldContain("request:unsafe-input:postback:500");
+        Run.ResponseText("unsafe-input:postback").ShouldContain("HttpRequestValidationException");
+        Run.ResponseText("unsafe-input:postback")
+            .ShouldContain("A potentially dangerous Request.Form value was detected");
     }
 }
