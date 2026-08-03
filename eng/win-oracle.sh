@@ -111,6 +111,7 @@ CONFIG
 }
 
 ensure_instance_profile() {
+  local acct
   if ! aws iam get-instance-profile --instance-profile-name "$PROFILE_NAME" >/dev/null 2>&1; then
     aws iam create-role --role-name "$ROLE_NAME" \
       --assume-role-policy-document '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"ec2.amazonaws.com"},"Action":"sts:AssumeRole"}]}' >/dev/null
@@ -119,6 +120,13 @@ ensure_instance_profile() {
     aws iam create-instance-profile --instance-profile-name "$PROFILE_NAME" >/dev/null
     aws iam add-role-to-instance-profile --instance-profile-name "$PROFILE_NAME" --role-name "$ROLE_NAME" >/dev/null
   fi
+  # The idle watchdog stops the box through the EC2 API rather than shutting the
+  # OS down, because a Spot instance forces InstanceInitiatedShutdownBehavior to
+  # terminate and would delete itself. Applied unconditionally so an instance
+  # profile created before this existed picks the permission up.
+  acct=$(aws sts get-caller-identity --query Account --output text)
+  aws iam put-role-policy --role-name "$ROLE_NAME" --policy-name stop-self \
+    --policy-document "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"ec2:StopInstances\",\"Resource\":\"arn:aws:ec2:$REGION:$acct:instance/*\",\"Condition\":{\"StringEquals\":{\"ec2:ResourceTag/Name\":\"$NAME\"}}}]}" >/dev/null
   echo "$PROFILE_NAME"
 }
 
@@ -342,7 +350,15 @@ cmd_connect() {
 
   if [ "$state" != "running" ]; then
     echo "$SSH_ALIAS: instance is $state, starting it" >&2
-    aws_ ec2 start-instances --instance-ids "$id" >/dev/null
+    # A Spot request rejects StartInstances with IncorrectSpotRequestState for a
+    # minute or two after a stop, while it settles from marked-for-stop.
+    local tries=0
+    until aws_ ec2 start-instances --instance-ids "$id" >/dev/null 2>&1; do
+      tries=$((tries + 1))
+      [ "$tries" -lt 12 ] || die "$SSH_ALIAS: could not start $id after 3 minutes"
+      [ "$tries" -gt 1 ] || echo "$SSH_ALIAS: start rejected, waiting for the spot request to settle" >&2
+      sleep 15
+    done
     aws_ ec2 wait instance-running --instance-ids "$id"
     authorize_my_ip "$(ensure_security_group)" >&2
     ip=$(public_ip "$id")
@@ -420,13 +436,26 @@ if (Get-Command git -ErrorAction SilentlyContinue) {
   'git: installed'
 }
 
+$awsCli = 'C:\Program Files\Amazon\AWSCLIV2\aws.exe'
+if (Test-Path $awsCli) {
+  'aws cli: already present'
+} else {
+  Invoke-WebRequest https://awscli.amazonaws.com/AWSCLIV2.msi -OutFile "$env:TEMP\awscli.msi"
+  $p = Start-Process -Wait -PassThru msiexec.exe -ArgumentList @('/i',"$env:TEMP\awscli.msi",'/quiet','/norestart')
+  if ($p.ExitCode -notin 0,3010) { throw "aws cli installer failed with exit code $($p.ExitCode)" }
+  'aws cli: installed'
+}
+
 $idleDir = 'C:\ProgramData\win-oracle'
 New-Item -ItemType Directory -Force $idleDir | Out-Null
 $watchdog = Join-Path $idleDir 'idle-stop.ps1'
 
-# An EBS-backed instance defaults to InstanceInitiatedShutdownBehavior=stop, so
-# a guest shutdown lands in the stopped state and ends compute billing without
-# needing any AWS credentials on the box.
+# Stops through the EC2 API, not Stop-Computer: a Spot instance forces
+# InstanceInitiatedShutdownBehavior=terminate, so an OS shutdown would delete
+# the instance and its volume instead of stopping it. The API path behaves the
+# same way on on-demand, so there is only one branch to reason about. If the
+# call fails the box keeps running and retries on the next tick; the nightly
+# EventBridge stop is the backstop.
 Set-Content $watchdog @"
 `$stamp = '$idleDir\last-active'
 `$idleMinutes = @IDLE_MINUTES@
@@ -441,8 +470,18 @@ if (`$busy -or -not (Test-Path `$stamp) -or ([datetime](Get-Content `$stamp -Raw
   Set-Content `$stamp (Get-Date).ToString('o')
   return
 }
-if (((Get-Date) - [datetime](Get-Content `$stamp -Raw)).TotalMinutes -ge `$idleMinutes) {
-  Stop-Computer -Force
+if (((Get-Date) - [datetime](Get-Content `$stamp -Raw)).TotalMinutes -lt `$idleMinutes) { return }
+
+try {
+  `$hdr = @{'X-aws-ec2-metadata-token-ttl-seconds'='60'}
+  `$tok = Invoke-RestMethod -Method PUT -Uri http://169.254.169.254/latest/api/token -Headers `$hdr -TimeoutSec 5
+  `$auth = @{'X-aws-ec2-metadata-token'=`$tok}
+  `$iid = Invoke-RestMethod -Uri http://169.254.169.254/latest/meta-data/instance-id -Headers `$auth -TimeoutSec 5
+  `$doc = Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document -Headers `$auth -TimeoutSec 5
+  `$out = & '$awsCli' ec2 stop-instances --instance-ids `$iid --region `$doc.region 2>&1
+  if (`$LASTEXITCODE -ne 0) { throw "stop-instances exited `$LASTEXITCODE : `$out" }
+} catch {
+  Add-Content '$idleDir\idle-stop.log' "`$((Get-Date).ToString('o')) `$_"
 }
 "@
 
@@ -473,6 +512,7 @@ Register-ScheduledTask -TaskName 'win-oracle-sshd-refresh' `
 "aspnet_compiler   : $(Test-Path 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe')"
 "WebApplication    : $(Test-Path $webTargets)"
 "git               : $((& git --version) -replace '^git version ')"
+"aws cli           : $((& $awsCli --version) -split ' ' | Select-Object -First 1)"
 "idle-stop task    : $((Get-ScheduledTask -TaskName 'win-oracle-idle-stop' -ErrorAction SilentlyContinue).State) (@IDLE_MINUTES@ min)"
 PS1
 }
