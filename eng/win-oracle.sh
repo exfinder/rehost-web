@@ -346,7 +346,11 @@ if (Test-Path "$dotnetDir\sdk") {
   'dotnet sdk: already present'
 } else {
   Invoke-RestMethod https://dot.net/v1/dotnet-install.ps1 -OutFile "$env:TEMP\dotnet-install.ps1"
-  & "$env:TEMP\dotnet-install.ps1" -Channel '@DOTNET_CHANNEL@' -InstallDir $dotnetDir
+  # dotnet-install reports progress on the information stream, which pwsh
+  # serializes to CLIXML over a non-interactive ssh session and floods the
+  # output with markup. The version is reported by the summary block below.
+  & "$env:TEMP\dotnet-install.ps1" -Channel '@DOTNET_CHANNEL@' -InstallDir $dotnetDir 6>$null
+  'dotnet sdk: installed'
 }
 
 $machinePath = [Environment]::GetEnvironmentVariable('Path','Machine')
