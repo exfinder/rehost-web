@@ -189,16 +189,24 @@ Restart-Service sshd
 POWERSHELL
 }
 
+# Gates on an authenticated command, not on port 22 answering: sshd starts
+# early in user-data but administrators_authorized_keys is written last, so the
+# port accepts connections for a minute or so before any login can succeed.
+# DefaultShell is set before the key file, so a successful auth also means pwsh
+# is already wired up.
 wait_for_ssh() {
-  local ip="$1" waited=0
+  local waited=0
   echo -n "waiting for sshd (user-data installs it on first boot)"
-  until nc -z -G 5 "$ip" 22 2>/dev/null; do
-    [ "$waited" -lt 900 ] || { echo; die "sshd did not come up within 15 minutes; check the console output"; }
+  until ssh -i "$SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes \
+      -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new \
+      -o UserKnownHostsFile="$KNOWN_HOSTS" -o "ProxyCommand=$SCRIPT_PATH connect" \
+      "Administrator@$SSH_ALIAS" exit >/dev/null 2>&1; do
+    [ "$waited" -lt 900 ] || { echo; die "no usable ssh login within 15 minutes; check user-data via ssm send-command"; }
     echo -n "."
     sleep 15
     waited=$((waited + 15))
   done
-  echo " up"
+  echo " ready"
 }
 
 cmd_launch() {
@@ -238,10 +246,12 @@ cmd_launch() {
 
   echo "instance $id"
   aws_ ec2 wait instance-running --instance-ids "$id"
-  local ip
-  ip=$(public_ip "$id")
+  # A new instance always presents a new host key, but known_hosts pins the key
+  # to the alias, so a relaunch under the same name reads as a changed key and
+  # ssh refuses with a MITM warning that points nowhere near the real cause.
+  ssh-keygen -R "$SSH_ALIAS" -f "$KNOWN_HOSTS" >/dev/null 2>&1 || true
   write_ssh_alias
-  wait_for_ssh "$ip"
+  wait_for_ssh
 
   echo
   echo "next:"
@@ -269,7 +279,7 @@ cmd_start() {
   echo "$id running at $ip"
   authorize_my_ip "$(find_security_group)"
   write_ssh_alias
-  wait_for_ssh "$ip"
+  wait_for_ssh
 }
 
 cmd_stop() {
@@ -346,10 +356,11 @@ if ($machinePath -notlike "*$dotnetDir*") {
 $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine')
 
 $refAsm = 'C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8.1\System.Web.dll'
-$webTargets = Get-ChildItem 'C:\Program Files (x86)\Microsoft Visual Studio' -Recurse `
-  -Filter 'Microsoft.WebApplication.targets' -ErrorAction SilentlyContinue | Select-Object -First 1
+# Wildcards cover the year, edition and toolset segments (2022\BuildTools\...\v17.0)
+# without walking the whole VS tree, which takes minutes once WebBuildTools is in.
+$webTargets = 'C:\Program Files (x86)\Microsoft Visual Studio\*\*\MSBuild\Microsoft\VisualStudio\v*\WebApplications\Microsoft.WebApplication.targets'
 
-if ((Test-Path $refAsm) -and $webTargets) {
+if ((Test-Path $refAsm) -and (Test-Path $webTargets)) {
   'build tools: already provisioned'
 } else {
   Invoke-RestMethod https://aka.ms/vs/17/release/vs_BuildTools.exe -OutFile "$env:TEMP\vs_BuildTools.exe"
@@ -407,7 +418,7 @@ Register-ScheduledTask -TaskName 'win-oracle-idle-stop' -Action $action -Trigger
 "NDP v4 Release    : $((Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full').Release)"
 "4.8.1 ref asm     : $(Test-Path $refAsm)"
 "aspnet_compiler   : $(Test-Path 'C:\Windows\Microsoft.NET\Framework64\v4.0.30319\aspnet_compiler.exe')"
-"WebApplication    : $([bool](Get-ChildItem 'C:\Program Files (x86)\Microsoft Visual Studio' -Recurse -Filter 'Microsoft.WebApplication.targets' -ErrorAction SilentlyContinue | Select-Object -First 1))"
+"WebApplication    : $(Test-Path $webTargets)"
 "idle-stop task    : $((Get-ScheduledTask -TaskName 'win-oracle-idle-stop' -ErrorAction SilentlyContinue).State) (@IDLE_MINUTES@ min)"
 PS1
 }
