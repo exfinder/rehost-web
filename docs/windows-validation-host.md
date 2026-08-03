@@ -3,13 +3,25 @@
 Windows x64 validation runs on `sshuser@192.168.1.7` (ssh alias `winbox`, defined
 in `~/.ssh/config` with ControlMaster/ControlPersist so connections are reused),
 in a dedicated persistent clone at `C:\Users\sshuser\source\repos\rehost-webforms`.
-This is the only Windows machine available for validation; the clone may be reset
-freely.
+The clone may be reset freely. `winbox` is LAN-only; see the EC2 alternative
+below when it is unreachable.
 
 Cross-platform validation requires both macOS arm64 and Windows x64 to pass.
 Defects found so far — path separators, hidden-file classification, native
 libraries keeping the `.dll` extension off Unix — have each appeared on only one
 platform. See the cross-platform validation policy in `AGENTS.md`.
+
+## EC2 alternative: `win-oracle`
+
+Reachable off the LAN. Windows Server 2025 Core, same toolchain, managed by
+[`eng/win-oracle.sh`](../eng/win-oracle.sh); run it with no arguments for the
+subcommands and tunables.
+
+`ssh win-oracle` wakes a stopped instance through a `ProxyCommand`, so no `start`
+is needed. It stops itself after an idle hour, so expect a ~30s first connection.
+Prefer `winbox` on the LAN — it is faster and always on.
+
+Ingress is pinned to one address; from a new network run `win-oracle.sh allow-ip`.
 
 ## Sync workflow
 
