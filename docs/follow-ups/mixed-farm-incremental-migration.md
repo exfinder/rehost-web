@@ -32,10 +32,27 @@ The tamper controls are what give the positives meaning: a payload that fails
 MAC validation renders the page as if freshly requested, so acceptance can only
 mean validation passed and the payload decrypted.
 
+A full button postback — all three hidden fields plus the button's own
+`name=value`, as a browser sends them — behaves the same way:
+
+| direction | result |
+|---|---|
+| Framework payload posted to the port | 200, the button's `Click` handler ran |
+| the same payload with `__EVENTVALIDATION` removed | 500, invalid postback argument |
+| port payload posted to Framework | 200, the button's `Click` handler ran |
+| the same payload with `__EVENTVALIDATION` removed | 500, invalid postback argument |
+
+The removal controls matter for the same reason: they show event validation was
+being enforced on both sides, so the handler running cannot be explained by
+validation having been off. `__EVENTVALIDATION` is therefore interchangeable too,
+which is what makes this a real postback rather than a bare payload.
+
 Content crosses too, not merely the signature. The fixture's `Page_Load` assigns
 its label only when `!IsPostBack`, so the value present after a cross-runtime
 postback can only have been restored from the other runtime's serialized view
-state.
+state. `__EVENTVALIDATION` is bound to the exact `__VIEWSTATE` string it was
+issued with, which is why a payload has to travel whole.
+[`ClientScriptManager.cs`](../../src/System.Web.ReferenceSource/UI/ClientScriptManager.cs#L1295)
 
 Separately, the same page rendered on both runtimes is byte-identical once
 `__VIEWSTATE`, `__VIEWSTATEGENERATOR`, and `__EVENTVALIDATION` are redacted.
@@ -60,14 +77,6 @@ unaffected; the residual gap is in error reporting.
 
 ## What is not proven
 
-- **`__EVENTVALIDATION` interchange.** The cross-post deliberately sent a bare
-  payload with an empty `__EVENTTARGET`, to keep `ValidateEvent` off the path
-  while MAC behavior was isolated. A real postback carrying a button also carries
-  this field. It is bound to the exact `__VIEWSTATE` string it was issued with,
-  so carrying both from one render is the case to test.
-  [`ClientScriptManager.cs`](../../src/System.Web.ReferenceSource/UI/ClientScriptManager.cs#L1295)
-  Until this passes, the proven claim is "view state interchanges", not "a mixed
-  farm serves real postbacks".
 - Forms authentication cookies, which ride the same key.
 - Session state, which is in-process here and would need an out-of-process
   provider before a farm of any kind is coherent.
@@ -88,8 +97,9 @@ unaffected; the residual gap is in error reporting.
 
 ## Done when
 
-- A committed fixture holds a Framework-captured payload with all three fields
-  and a control value, and a test asserts the port raises the control's event.
+- A committed fixture holds the Framework-captured payload with all three fields
+  and the button value, and a test asserts the port raises the button's event.
+  The measurement exists; nothing in CI would notice if it regressed.
 - The reverse direction runs from the oracle prototype rather than from
   throwaway scaffolding, so it survives as a regression gate.
 - The error-path divergence above is either covered by a differential or
