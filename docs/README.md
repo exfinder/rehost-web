@@ -58,8 +58,11 @@ Framework configuration baseline:
 bridge request bodies, then add server forms, postback, view state, and uploads.
 Slices 0–3 pass their gates on macOS `arm64` and Windows `x64`. The entity-body
 bridge, postback, forms, view state, control state, and read-only multipart are
-verified on both, and await one Framework oracle session. The scenario harness's
-abort budget remains an open decision:
+verified on both, and await one Framework oracle session. A postback captured
+from a Framework node replays here, so a load-balanced farm may span both
+runtimes and an application can move a node at a time:
+[mixed farm and incremental migration](follow-ups/mixed-farm-incremental-migration.md).
+The scenario harness's abort budget remains an open decision:
 [client-reset detection latency](follow-ups/client-reset-detection-latency.md).
 
 The [port plan](core-runtime-port-plan.md) owns ordering and cross-slice gates.
