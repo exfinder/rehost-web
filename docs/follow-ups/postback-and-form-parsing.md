@@ -81,7 +81,10 @@ Every test was confirmed to fail with the behavior removed, by failing test name
 
 ## Outstanding
 
-Both need the Windows `x64` host.
+Both need the Windows `x64` host. The cross-runtime payload half of the first
+item now has measured answers recorded in
+[mixed farm and incremental migration](mixed-farm-incremental-migration.md);
+what remains is making them a standing gate rather than an observation.
 
 - One oracle session comparing status, headers, markup excluding the three crypto
   fields, and the postback event sequence, plus a Framework-captured `__VIEWSTATE`

@@ -21,6 +21,13 @@ security/persistence policy.
   (ledger P15). It is a diagnostic only; nothing observable to a client changes,
   and the host-supplied key source below remains the actual fix.
 
+- **A shared literal key interchanges view state with Framework.** Payloads
+  rendered on either runtime are accepted by the other, which is what a farm
+  spanning both requires. The scope and the untested edges are in
+  [mixed farm and incremental migration](mixed-farm-incremental-migration.md);
+  the requirement it places here is that key sharing has a consumer depending on
+  it, not only a fixture.
+
 Storage, rotation, deployment sharing, file permissions, and fail-closed
 behavior remain open and stay coordinated with
 [data-protection-provider.md](data-protection-provider.md).

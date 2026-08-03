@@ -37,8 +37,15 @@ P48 is exercised by `PostbackOverKestrelTests`, which pins the rendered
 `ClientStateIdentifierTests`, which recomputes that value from the two inputs
 `GetClientStateIdentifier` combines. The rendered constant alone would only show
 the value is stable, since it was taken from this port's own output; recomputing
-it shows the stable algorithm produced it. The comparison rule for the Framework
-differential arrives with the oracle session.
+it shows the stable algorithm produced it. Framework's value for the same page
+was since measured on 4.8.1 as `CA0B0334`, confirming the divergence rather than
+merely predicting it, and a payload rendered on either runtime was accepted by
+the other under a shared literal key — so the divergence does not reach the view
+state key. The scope of that reading, and the error path where the field does
+become observable, are in
+[mixed farm and incremental migration](follow-ups/mixed-farm-incremental-migration.md).
+The comparison rule for the Framework differential arrives with the oracle
+session.
 
 P42 is exercised by `ViewStateSerializationTests`. Its Framework reading was
 taken by reflecting over the GAC `System.Web` on the Windows host:
