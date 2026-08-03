@@ -5,60 +5,92 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-public sealed class RequestBodyOverKestrelTests
+// Probes that neither change a host-level limit nor assert over the whole trace. Everything else
+// in this file keeps its own process, and says why.
+public sealed class BodyScenario : IDisposable
 {
+    internal ScenarioRun Run { get; } = ScenarioRun.ServeBody(
+        "body",
+        "fixed-input",
+        "fixed-binary",
+        "fixed-buffered",
+        "fixed-bufferless",
+        "chunked-bufferless",
+        "chunked-apm",
+        "expect-continue",
+        "spill",
+        "too-large",
+        "chunked-too-large");
+
+    public void Dispose()
+    {
+        Run.Dispose();
+    }
+}
+
+// Both aborts kill their socket mid-read, so they never share a connection with anything and can
+// share a process with each other.
+public sealed class AbortScenario : IDisposable
+{
+    internal ScenarioRun Run { get; } = ScenarioRun.ServeBody("body", "abort", "abort-apm");
+
+    public void Dispose()
+    {
+        Run.Dispose();
+    }
+}
+
+public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScenario aborts)
+    : IClassFixture<BodyScenario>, IClassFixture<AbortScenario>
+{
+    private static readonly string[] RawSurfaces =
+    [
+        "fixed-input",
+        "fixed-binary",
+        "fixed-buffered",
+        "fixed-bufferless",
+        "chunked-bufferless",
+        "chunked-apm",
+        "expect-continue",
+    ];
+
+    private ScenarioRun Run => scenario.Run;
+
     [Fact]
     public void Fixed_And_Chunked_Bodies_Reach_All_Raw_Request_Surfaces()
     {
-        var probes = new[]
+        foreach (var probe in RawSurfaces)
         {
-            "fixed-input",
-            "fixed-binary",
-            "fixed-buffered",
-            "fixed-bufferless",
-            "chunked-bufferless",
-            "chunked-apm",
-            "expect-continue",
-        };
-        using var run = ScenarioRun.ServeBody("body", probes);
-
-        for (var i = 0; i < probes.Length; i++)
-        {
-            run.Trace.ShouldContain("request:" + probes[i] + ":200");
-            run.ResponseText(i).ShouldBe(Describe("body:" + probes[i]));
+            Run.Trace.ShouldContain("request:" + probe + ":200");
+            Run.ResponseText(probe).ShouldBe(Describe("body:" + probe));
         }
 
-        run.Trace.ShouldContain("expect-interim:100");
+        Run.Trace.ShouldContain("expect-interim:100");
     }
 
     [Fact]
     public void Buffered_Input_Spills_Above_The_Configured_Threshold()
     {
-        using var run = ScenarioRun.ServeBody("body", "spill");
-
-        run.Trace.ShouldContain("request:spill:200");
-        run.Trace.ShouldContain("x-spilled:True");
-        run.ResponseText(0).ShouldBe(Describe(new string('s', 2048)));
+        Run.Trace.ShouldContain("request:spill:200");
+        Run.Trace.ShouldContain("x-spilled:True");
+        Run.ResponseText("spill").ShouldBe(Describe(new string('s', 2048)));
     }
 
     [Fact]
     public void SystemWeb_Rejects_A_Body_Above_MaxRequestLength()
     {
-        using var run = ScenarioRun.ServeBody("body", "too-large");
-
-        run.Trace.ShouldContain("request:too-large:500");
-        run.ResponseText(0).ShouldContain("Maximum request length exceeded");
+        Run.Trace.ShouldContain("request:too-large:500");
+        Run.ResponseText("too-large").ShouldContain("Maximum request length exceeded");
     }
 
     [Fact]
     public void SystemWeb_Rejects_An_Unknown_Length_Body_Above_MaxRequestLength()
     {
-        using var run = ScenarioRun.ServeBody("body", "chunked-too-large");
-
-        run.Trace.ShouldContain("request:chunked-too-large:500");
-        run.ResponseText(0).ShouldContain("Maximum request length exceeded");
+        Run.Trace.ShouldContain("request:chunked-too-large:500");
+        Run.ResponseText("chunked-too-large").ShouldContain("Maximum request length exceeded");
     }
 
+    // Its own fixture: asyncPreloadMode="All" is a different application.
     [Fact]
     public void Async_Preload_Buffers_A_Delayed_Chunked_Body_Before_The_Handler()
     {
@@ -69,6 +101,8 @@ public sealed class RequestBodyOverKestrelTests
         run.ResponseText(0).ShouldBe(Describe("body:preload-delayed"));
     }
 
+    // Its own process: the claim is that both requests crossed one connection, and a probe that
+    // opens its own socket — expect-continue, either abort — would add a second port.
     [Fact]
     public void Kestrel_Drains_An_Unread_Body_Before_The_Next_Request_On_The_Connection()
     {
@@ -85,23 +119,22 @@ public sealed class RequestBodyOverKestrelTests
     [Fact]
     public void A_Client_Abort_During_A_Synchronous_Bufferless_Read_Becomes_HttpException()
     {
-        using var run = ScenarioRun.ServeBody("body", "abort");
-
-        run.Trace.ShouldContain("body-abort-interim:100");
-        run.Trace.ShouldContain("body-abort:System.Web.HttpException");
-        run.Trace.ShouldContain("request:abort:client-closed");
+        aborts.Run.Trace.ShouldContain("body-abort-interim:100");
+        aborts.Run.Trace.ShouldContain("body-abort:System.Web.HttpException");
+        aborts.Run.Trace.ShouldContain("request:abort:client-closed");
     }
 
     [Fact]
     public void A_Client_Abort_During_A_Worker_Apm_Read_Becomes_HttpException()
     {
-        using var run = ScenarioRun.ServeBody("body", "abort-apm");
-
-        run.Trace.ShouldContain("body-apm-abort-interim:100");
-        run.Trace.ShouldContain("body-apm-abort:System.Web.HttpException");
-        run.Trace.ShouldContain("request:abort-apm:client-closed");
+        aborts.Run.Trace.ShouldContain("body-apm-abort-interim:100");
+        aborts.Run.Trace.ShouldContain("body-apm-abort:System.Web.HttpException");
+        aborts.Run.Trace.ShouldContain("request:abort-apm:client-closed");
     }
 
+    // Its own process for two reasons. The Kestrel limit is process-wide, so sharing it with an
+    // ordinary probe would reject that probe's body too; and the claim below is a negative over
+    // the whole trace, which the chunked case satisfies, so the two cannot share either.
     [Fact]
     public void Kestrel_Refuses_A_Declared_Length_Over_Its_Own_Limit_Before_The_Pipeline()
     {

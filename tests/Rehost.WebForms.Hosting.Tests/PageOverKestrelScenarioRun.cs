@@ -27,10 +27,15 @@ internal sealed class ScenarioRun : IDisposable
     internal string ResponseText(int index) =>
         File.ReadAllText(Path.Combine(_root.FullName, "responses", index + ".body"));
 
+    internal byte[] Response(string label, int occurrence = 0) => Response(IndexOf(label, occurrence));
+
+    internal string ResponseText(string label, int occurrence = 0) =>
+        ResponseText(IndexOf(label, occurrence));
+
     // Responses are numbered in the order they were recorded, and so are the trace's request
     // lines, so a label locates one without the caller counting positions. A label repeats when a
-    // probe posts back more than once, hence the occurrence.
-    internal string ResponseText(string label, int occurrence = 0)
+    // probe issues more than one request, hence the occurrence.
+    private int IndexOf(string label, int occurrence)
     {
         var seen = 0;
         var index = 0;
@@ -42,10 +47,17 @@ internal sealed class ScenarioRun : IDisposable
                 continue;
             }
 
+            // An aborted probe records a request line but no response, so it must not advance the
+            // ordinal. Its status is a word rather than a code.
             var status = entry.LastIndexOf(':');
+            if (!int.TryParse(entry[(status + 1)..], out _))
+            {
+                continue;
+            }
+
             if (entry[8..status] == label && seen++ == occurrence)
             {
-                return ResponseText(index);
+                return index;
             }
 
             index++;
