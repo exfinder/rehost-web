@@ -14,6 +14,8 @@ KNOWN_HOSTS="${WIN_ORACLE_KNOWN_HOSTS:-$HOME/.ssh/known_hosts.win-oracle}"
 AMI_PARAM="${WIN_ORACLE_AMI_PARAM:-/aws/service/ami-windows-latest/Windows_Server-2025-English-Core-Base}"
 DOTNET_CHANNEL="${WIN_ORACLE_DOTNET_CHANNEL:-10.0}"
 IDLE_MINUTES="${WIN_ORACLE_IDLE_MINUTES:-60}"
+# T3 defaults to unlimited, which bills surplus credits instead of throttling.
+CREDIT_MODE="${WIN_ORACLE_CREDIT_MODE:-standard}"
 STOP_CRON="${WIN_ORACLE_STOP_CRON:-cron(0 22 * * ? *)}"
 
 ROLE_NAME="$NAME-ssm"
@@ -234,6 +236,7 @@ cmd_launch() {
       --security-group-ids "$sg" \
       --associate-public-ip-address \
       --iam-instance-profile "Name=$profile" \
+      --credit-specification "CpuCredits=$CREDIT_MODE" \
       --metadata-options "HttpTokens=required" \
       --block-device-mappings "[{\"DeviceName\":\"/dev/sda1\",\"Ebs\":{\"VolumeSize\":$VOLUME_GB,\"VolumeType\":\"gp3\",\"DeleteOnTermination\":true}}]" \
       --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$NAME}]" \
@@ -537,6 +540,7 @@ env overrides: WIN_ORACLE_REGION($REGION) WIN_ORACLE_NAME($NAME)
                WIN_ORACLE_DOTNET_CHANNEL($DOTNET_CHANNEL)
                WIN_ORACLE_IDLE_MINUTES($IDLE_MINUTES)
                WIN_ORACLE_STOP_CRON($STOP_CRON)
+               WIN_ORACLE_CREDIT_MODE($CREDIT_MODE)
 USAGE
     exit 1 ;;
 esac
