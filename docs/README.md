@@ -56,9 +56,10 @@ Framework configuration baseline:
 [Deferred request surfaces](follow-ups/deferred-request-surfaces.md), slice 4:
 bridge request bodies, then add server forms, postback, view state, and uploads.
 Slices 0–3 pass their gates on macOS `arm64` and Windows `x64`. The entity-body
-bridge is verified on both; postback, forms, view state, control state, and
-read-only multipart pass on macOS `arm64` and await the Windows round and one
-Framework oracle session.
+bridge, postback, forms, view state, control state, and read-only multipart are
+verified on both, and await one Framework oracle session. The scenario harness's
+abort budget remains an open decision:
+[client-reset detection latency](follow-ups/client-reset-detection-latency.md).
 
 The [port plan](core-runtime-port-plan.md) owns ordering and cross-slice gates.
 Each follow-up owns its status, dependencies, remaining decisions, and

@@ -1,7 +1,7 @@
 # Postback and form parsing
 
-Status: implemented and verified on macOS `arm64`; the Windows `x64` round and
-the Framework oracle session are outstanding. Scope: urlencoded form parsing,
+Status: implemented and verified on macOS `arm64` and Windows `x64`; the
+Framework oracle session is outstanding. Scope: urlencoded form parsing,
 view state, control state, a postback that changes rendered output, and
 read-only multipart. Sits on the
 [entity-body bridge](request-entity-body-bridge.md).
@@ -81,10 +81,8 @@ Every test was confirmed to fail with the behavior removed, by failing test name
 
 ## Outstanding
 
-Postponed: all three need the Windows `x64` host, which was unreachable when this
-slice was written.
+Both need the Windows `x64` host.
 
-- The Windows `x64` round. Everything here passes on macOS `arm64` only.
 - One oracle session comparing status, headers, markup excluding the three crypto
   fields, and the postback event sequence, plus a Framework-captured `__VIEWSTATE`
   posted to the port and the reverse.
