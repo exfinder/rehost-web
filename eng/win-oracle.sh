@@ -17,6 +17,8 @@ IDLE_MINUTES="${WIN_ORACLE_IDLE_MINUTES:-60}"
 # T3 defaults to unlimited, which bills surplus credits instead of throttling.
 CREDIT_MODE="${WIN_ORACLE_CREDIT_MODE:-standard}"
 STOP_CRON="${WIN_ORACLE_STOP_CRON:-cron(0 22 * * ? *)}"
+CACHE_TTL="${WIN_ORACLE_CACHE_TTL:-3600}"
+ENDPOINT_CACHE="${WIN_ORACLE_ENDPOINT_CACHE:-$HOME/.cache/win-oracle/$NAME}"
 
 ROLE_NAME="$NAME-ssm"
 PROFILE_NAME="$NAME-ssm"
@@ -290,6 +292,7 @@ cmd_stop() {
   local id
   id=$(require_instance)
   aws_ ec2 stop-instances --instance-ids "$id" >/dev/null
+  rm -f "$ENDPOINT_CACHE"
   echo "$id stopping; compute billing ends once it is stopped"
 }
 
@@ -315,7 +318,22 @@ cmd_revoke_ips() {
 
 # ssh ProxyCommand: stdout is the tunnel, so every message goes to stderr.
 cmd_connect() {
-  local id state ip waited=0
+  local id state ip waited=0 cached age
+
+  # The cached address is only a hint: it is proven by connecting to it, so a
+  # stale entry costs one refused connection rather than a broken session.
+  # Without that proof no TTL would be safe, since the idle watchdog can stop
+  # the instance at any time and each start assigns a new address.
+  if [ -f "$ENDPOINT_CACHE" ]; then
+    age=$(( $(date +%s) - $(stat -f %m "$ENDPOINT_CACHE" 2>/dev/null || echo 0) ))
+    if [ "$age" -lt "$CACHE_TTL" ]; then
+      cached=$(<"$ENDPOINT_CACHE")
+      if [ -n "$cached" ] && nc -z -G 2 "$cached" 22 2>/dev/null; then
+        exec nc "$cached" 22
+      fi
+    fi
+  fi
+
   read -r id state ip <<<"$(aws_ ec2 describe-instances \
     --filters "Name=tag:Name,Values=$NAME" "Name=instance-state-name,Values=pending,running,stopping,stopped" \
     --query 'Reservations[].Instances[0].[InstanceId,State.Name,PublicIpAddress]' --output text 2>/dev/null)"
@@ -336,6 +354,8 @@ cmd_connect() {
     sleep 5
     waited=$((waited + 5))
   done
+  mkdir -p "$(dirname "$ENDPOINT_CACHE")"
+  printf '%s' "$ip" >"$ENDPOINT_CACHE"
   exec nc "$ip" 22
 }
 
@@ -490,12 +510,17 @@ cmd_ssh() {
 
 cmd_destroy() {
   require_tools
-  local id
+  local id size
   id=$(require_instance)
-  echo "this terminates $id and deletes its ${VOLUME_GB}GB volume. everything on it is lost."
+  # Report the volume actually attached, not the size a future launch would use.
+  size=$(aws_ ec2 describe-volumes --filters "Name=attachment.instance-id,Values=$id" \
+    --query 'Volumes[0].Size' --output text 2>/dev/null)
+  [ -n "$size" ] && [ "$size" != "None" ] || size="?"
+  echo "this terminates $id and deletes its ${size}GB volume. everything on it is lost."
   read -r -p "type the instance id to confirm: " confirm
   [ "$confirm" = "$id" ] || die "not confirmed"
   aws_ ec2 terminate-instances --instance-ids "$id" >/dev/null
+  rm -f "$ENDPOINT_CACHE"
   echo "$id terminating; IAM role and security group left in place for reuse"
 }
 
@@ -541,6 +566,7 @@ env overrides: WIN_ORACLE_REGION($REGION) WIN_ORACLE_NAME($NAME)
                WIN_ORACLE_IDLE_MINUTES($IDLE_MINUTES)
                WIN_ORACLE_STOP_CRON($STOP_CRON)
                WIN_ORACLE_CREDIT_MODE($CREDIT_MODE)
+               WIN_ORACLE_CACHE_TTL($CACHE_TTL) WIN_ORACLE_ENDPOINT_CACHE($ENDPOINT_CACHE)
 USAGE
     exit 1 ;;
 esac
