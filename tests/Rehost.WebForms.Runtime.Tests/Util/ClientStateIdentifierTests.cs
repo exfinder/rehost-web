@@ -2,7 +2,7 @@ using System.Web.Util;
 using Shouldly;
 using Xunit;
 
-namespace Rehost.WebForms.Runtime.Tests.UI;
+namespace Rehost.WebForms.Runtime.Tests.Util;
 
 // PostbackOverKestrelTests pins the rendered __VIEWSTATEGENERATOR to 72DAA2F9, but that constant
 // came from this port's own output, so on its own it proves stability rather than correctness.

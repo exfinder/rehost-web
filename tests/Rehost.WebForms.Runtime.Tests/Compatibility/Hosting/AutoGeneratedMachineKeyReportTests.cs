@@ -3,7 +3,7 @@ using Rehost.WebForms.Hosting;
 using Shouldly;
 using Xunit;
 
-namespace Rehost.WebForms.Runtime.Tests.Hosting;
+namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 
 // Framework raises nothing here. The port reports because its auto-generated keys are per-process
 // (ledger P15), so a restart silently invalidates every payload protected with them.

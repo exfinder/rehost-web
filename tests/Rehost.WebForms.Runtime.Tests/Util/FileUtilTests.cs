@@ -2,7 +2,7 @@ using System.Web.Util;
 using Shouldly;
 using Xunit;
 
-namespace Rehost.WebForms.Runtime.Tests;
+namespace Rehost.WebForms.Runtime.Tests.Util;
 
 public sealed class FileUtilTests
 {

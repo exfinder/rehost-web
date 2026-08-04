@@ -3,7 +3,7 @@ using System.Web.Util;
 using Shouldly;
 using Xunit;
 
-namespace Rehost.WebForms.Runtime.Tests.Compatibility.Util;
+namespace Rehost.WebForms.Runtime.Tests.Util;
 
 // Counter reached kernel32!QueryPerformanceCounter through SafeNativeMethods, which carries no
 // platform guard, so page tracing threw DllNotFoundException off Windows.

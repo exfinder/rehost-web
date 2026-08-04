@@ -3,7 +3,7 @@ using System.Web.Hosting;
 using Shouldly;
 using Xunit;
 
-namespace Rehost.WebForms.Runtime.Tests.Compatibility.Caching;
+namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 
 // <cache privateBytesLimit> bounds the cache's own object graph, which only System.SizedReference
 // could measure. Accepting it silently would leave an application believing it had a bound.
