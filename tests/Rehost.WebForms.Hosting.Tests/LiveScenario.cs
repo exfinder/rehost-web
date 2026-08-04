@@ -14,7 +14,7 @@ public class LiveScenario : IDisposable
     private readonly Task<string> _standardOutput;
     private readonly string _tracePath;
 
-    internal LiveScenario(ScenarioFixture fixture)
+    internal LiveScenario(ScenarioFixture fixture, params string[] extraHostArgs)
     {
         _root = Directory.CreateTempSubdirectory("rehost-live-kestrel-");
         ApplicationPath = Path.Combine(_root.FullName, "app");
@@ -44,17 +44,26 @@ public class LiveScenario : IDisposable
         startInfo.ArgumentList.Add(_tracePath);
         startInfo.ArgumentList.Add("--response-dir");
         startInfo.ArgumentList.Add(responses);
+        foreach (var argument in extraHostArgs)
+        {
+            startInfo.ArgumentList.Add(argument);
+        }
 
         _process = Process.Start(startInfo)!;
         _standardError = _process.StandardError.ReadToEndAsync();
         _standardOutput = _process.StandardOutput.ReadToEndAsync();
 
-        Client = new ScenarioClient(new Uri(WaitForAddress()));
+        Address = new Uri(WaitForAddress());
+        Client = new ScenarioClient(Address);
     }
 
     internal string ApplicationPath { get; }
 
+    internal Uri Address { get; }
+
     internal ScenarioClient Client { get; }
+
+    internal WitnessReader Witness => new(Client);
 
     internal ScenarioJournalReader Journal => ScenarioJournalReader.Parse(ReadTrace());
 

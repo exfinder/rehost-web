@@ -8,7 +8,7 @@ internal sealed class ScenarioClient : IDisposable
 {
     private readonly HttpClient _client;
 
-    internal ScenarioClient(Uri baseAddress)
+    internal ScenarioClient(Uri baseAddress, int? maxConnectionsPerServer = null)
     {
         var handler = new SocketsHttpHandler
         {
@@ -17,6 +17,10 @@ internal sealed class ScenarioClient : IDisposable
             UseProxy = false,
             AutomaticDecompression = DecompressionMethods.None,
         };
+        if (maxConnectionsPerServer is { } cap)
+        {
+            handler.MaxConnectionsPerServer = cap;
+        }
 
         _client = new HttpClient(handler)
         {
@@ -37,6 +41,24 @@ internal sealed class ScenarioClient : IDisposable
             Content = new ByteArrayContent(body),
         };
         request.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+        return SendAsync(request);
+    }
+
+    internal Task<ScenarioResponse> PostBodyAsync(
+        string path,
+        byte[] body,
+        bool chunked = false,
+        bool expectContinue = false)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = chunked ? new DelayedChunkedContent(body) : new ByteArrayContent(body),
+        };
+        if (expectContinue)
+        {
+            request.Headers.ExpectContinue = true;
+        }
+
         return SendAsync(request);
     }
 

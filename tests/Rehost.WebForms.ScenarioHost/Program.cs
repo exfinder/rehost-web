@@ -115,6 +115,10 @@ public static class Program
         builder.WebHost.ConfigureKestrel(kestrel =>
         {
             kestrel.AddServerHeader = false;
+            if (options.KestrelMaxBodyBytes is { } maxBody)
+            {
+                kestrel.Limits.MaxRequestBodySize = maxBody;
+            }
             if (options.BodyProbes.Any(probe => probe.EndsWith("kestrel-too-large", StringComparison.Ordinal)))
             {
                 kestrel.Limits.MaxRequestBodySize = 1024;
@@ -812,10 +816,12 @@ internal sealed class ScenarioOptions
         string? responseDirectory,
         string? machineConfigurationPath,
         bool serve,
+        long? kestrelMaxBodyBytes,
         List<string> requests,
         List<string> bodyProbes,
         List<string> postbacks)
     {
+        KestrelMaxBodyBytes = kestrelMaxBodyBytes;
         MachineConfigurationPath = machineConfigurationPath;
         Serve = serve;
         HoldGate = holdGate;
@@ -845,6 +851,8 @@ internal sealed class ScenarioOptions
 
     internal bool Serve { get; }
 
+    internal long? KestrelMaxBodyBytes { get; }
+
     internal List<string> Requests { get; }
 
     internal List<string> BodyProbes { get; }
@@ -861,6 +869,7 @@ internal sealed class ScenarioOptions
         string? responseDirectory = null;
         string? machineConfigurationPath = null;
         var serve = false;
+        long? kestrelMaxBodyBytes = null;
         var requests = new List<string>();
         var bodyProbes = new List<string>();
         var postbacks = new List<string>();
@@ -901,6 +910,10 @@ internal sealed class ScenarioOptions
                 case "--serve":
                     serve = true;
                     break;
+                case "--kestrel-max-body":
+                    kestrelMaxBodyBytes = long.Parse(Require(value, "--kestrel-max-body"));
+                    i++;
+                    break;
                 case "--request":
                     requests.Add(Require(value, "--request"));
                     i++;
@@ -934,6 +947,7 @@ internal sealed class ScenarioOptions
             responseDirectory,
             machineConfigurationPath,
             serve,
+            kestrelMaxBodyBytes,
             requests,
             bodyProbes,
             postbacks);

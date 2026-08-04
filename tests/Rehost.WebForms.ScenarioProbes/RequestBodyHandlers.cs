@@ -13,6 +13,7 @@ public sealed class RequestBodyHandler : IHttpHandler
         var mode = context.Request.QueryString["mode"];
         byte[] body;
 
+        WitnessJournal.Record("handler-entered:" + mode);
         ScenarioJournal.Record("handler-entered:" + mode);
 
         switch (mode)
@@ -27,6 +28,7 @@ public sealed class RequestBodyHandler : IHttpHandler
                 }
                 catch (HttpException exception)
                 {
+                    WitnessJournal.Record("body-abort:" + exception.GetType().FullName);
                     ScenarioJournal.Record("body-abort:" + exception.GetType().FullName);
                 }
                 return;
@@ -114,6 +116,7 @@ public sealed class RequestBodyHandler : IHttpHandler
         }
         catch (HttpException exception)
         {
+            WitnessJournal.Record("body-apm-abort:" + exception.GetType().FullName);
             ScenarioJournal.Record("body-apm-abort:" + exception.GetType().FullName);
         }
     }
