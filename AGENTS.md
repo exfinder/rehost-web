@@ -66,7 +66,8 @@ Use the non-hanging local build:
 dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj --no-restore --disable-build-servers --nologo --verbosity:quiet --maxcpucount:1 /p:UseSharedCompilation=false /nodeReuse:false -clp:ErrorsOnly
 ```
 
-Run tests per project, without the build flags above:
+Run tests per project (or solution-wide — both are supported), without the
+build flags above:
 
 ```text
 dotnet test tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj --no-build

@@ -1,8 +1,17 @@
 # Test-suite refactoring plan
 
-Status: P1–P5 complete (2026-08-04); P6 next. Each phase lands on `main`,
-green on both platforms, before the next begins. Windows validation once per
-phase.
+Status: P1–P6 complete (2026-08-04) — the refactoring is done; only the
+trailing act→assert migration remains, per the P5 checklist.
+
+P6 outcome: [ADR 0045](../adr/0045-test-architecture-after-the-suite-refactoring.md)
+records the operative test architecture; ADRs 0006/0028/0040/0043 carry
+supersession notes and PROJECT.md follows the 0044 evidence rule.
+[docs/writing-tests.md](../writing-tests.md) is the single authoring entry
+point (linked from AGENTS.md); the three per-column parity READMEs collapsed
+into `tests/parity/README.md` with a verified inventory. Solution-wide
+acceptance: three consecutive clean `dotnet test Rehost.WebForms.slnx` runs on
+the 4-vCPU Windows host, 243/243 each, no parallelism capping — the
+per-project prescription is lifted in AGENTS.md and eng/win-oracle.md.
 
 P5 outcome: the act-in-test standard is live. The scenario host gained a
 passive serve mode (publishes its bound address in the trace, stays up until

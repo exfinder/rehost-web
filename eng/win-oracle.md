@@ -57,11 +57,12 @@ so every wake throttles to baseline within minutes.
 
 ## Test suite
 
-`dotnet test Rehost.WebForms.slnx` (whole solution) flakes the `*OverKestrel*`
-tests in `Hosting.Tests` — 1-2 failures at 2 vCPU, 3-4 at 4, 7 at 8. That project
-passes 69/69 alone at every size. More cores makes it worse, so the cause is
-concurrency between test projects, not CPU starvation. AGENTS.md already
-prescribes per-project runs; do that.
+`dotnet test Rehost.WebForms.slnx` (whole solution) is supported: after the
+2026-08 suite refactoring it passed three consecutive clean runs (243/243) on
+this 4-vCPU host with no parallelism capping. The historical `*OverKestrel*`
+cross-project flake predated the process consolidation. The abort scenario
+remains load-sensitive (`docs/follow-ups/client-reset-detection-latency.md`);
+if its signature reappears, re-run before investigating.
 
 The parity hosts are ordinary members of the main solution; building it (in
 any configuration) is all the parity gates need.

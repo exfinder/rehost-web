@@ -56,9 +56,8 @@ response.Text.ShouldContain("...");
 - One type per file; xUnit `[CollectionDefinition]` markers may co-locate with
   their fixture.
 - Both supported platforms must pass before work is reported done; the loop is
-  in [windows-validation-host.md](windows-validation-host.md). Run tests per
-  project (`dotnet test tests/<p>/<p>.csproj --no-build`) after one solution
-  build.
+  in [windows-validation-host.md](windows-validation-host.md). One solution
+  build, then `dotnet test` per project or solution-wide — both are supported.
 
 ## Why not WebApplicationFactory
 
