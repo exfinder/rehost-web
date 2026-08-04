@@ -51,18 +51,36 @@ differ — `CopyTo` asks for 81920 bytes, the APM probe for 3.
 
 ## The budget decision
 
-The 10s budget is what exposed the original defect, so loosening it costs real
-signal. Three options, in the order they were considered:
-
-- Raise it to ~60s. Cheapest; makes the suite green; stops the harness noticing
-  a future regression that makes this path slow rather than broken.
-- Split the claim: assert the behavior under a generous deadline, and record the
-  latency without failing on it. Keeps the signal, costs the most work, and needs
-  somewhere for the recorded numbers to go.
-- Leave it, and accept a one-in-ten flake on constrained hosts.
+Decided (2026-08-04): the split-claim option. `AbortBodyAsync` asserts the
+behavior under a 60s deadline and records the observed detection latency in the
+trace as `body[-apm]-abort-latency-ms`, never asserting on it.
 
 Nothing here should serialize the scenario classes. That was tried, and it
 converted a genuine defect into what looked like a scheduling artifact.
+
+## win-oracle findings (2026-08-04)
+
+On the 4-vCPU EC2 host the failure is no longer a tail — under the full
+Hosting.Tests suite the reset is **never observed within 60s**, deterministically
+(three consecutive rounds, pre- and post-P1-restructure binaries, so the test
+suite refactoring is exonerated by bisect). Every reduced configuration on the
+same box passes in milliseconds:
+
+| configuration | result |
+|---|---|
+| single host, one abort probe (either path) | 21-32ms |
+| single host, both probes (the `AbortScenario` shape) | 26-32ms |
+| `RequestBodyOverKestrelTests` class alone (7 hosts) | 11/11 pass |
+| full Hosting.Tests suite (all scenario classes) | never detected, 60s timeout |
+
+A 60s+ non-detection is not latency; it looks like the reset notification being
+lost outright under cross-class host concurrency and only a later stimulus would
+surface it. This narrows "where the synchronous tail comes from" above: the
+mechanism must be able to lose the event entirely, not merely delay it. Both
+sync and APM probes fail together in the suite context, unlike the earlier
+tail data where APM stayed uniform — establish which probe actually times out
+first in that context (the first probe's failure aborts the host before the
+second runs).
 
 ## Reproducing
 
