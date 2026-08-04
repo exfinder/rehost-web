@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Web.Hosting;
 using Rehost.WebForms.Parity.Contracts;
 
-namespace Rehost.WebForms.Parity.AdapterRunner;
+namespace Rehost.WebForms.Parity.Runner;
 
 // Requests arrive over HTTP, so this object exists only to observe what no response can show:
 // the application-wide journal and the terminal shutdown notification.

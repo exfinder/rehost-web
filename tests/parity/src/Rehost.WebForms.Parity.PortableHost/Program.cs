@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using Rehost.WebForms.Parity.Contracts;
-using Rehost.WebForms.Parity.PortableRunner;
+using Rehost.WebForms.Parity.Runner;
 using Rehost.WebForms.Hosting;
 
 namespace Rehost.WebForms.Parity.PortableHost;

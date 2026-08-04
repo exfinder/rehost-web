@@ -6,7 +6,7 @@ using System.Threading;
 using System.Web;
 using Rehost.WebForms.Parity.Contracts;
 
-namespace CoreParity.Recording;
+namespace Rehost.WebForms.Parity.Runner;
 
 internal sealed class RecordingRequestRunner
 {

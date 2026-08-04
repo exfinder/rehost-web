@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using Rehost.WebForms.Parity.Contracts;
-using Rehost.WebForms.Parity.OracleRunner;
+using Rehost.WebForms.Parity.Runner;
 using Microsoft.Win32;
 
 namespace Rehost.WebForms.Parity.OracleHost;

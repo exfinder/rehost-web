@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Hosting;
-using Rehost.WebForms.Parity.AdapterRunner;
+using Rehost.WebForms.Parity.Runner;
 using Rehost.WebForms.Parity.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

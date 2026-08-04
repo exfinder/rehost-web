@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Web.Hosting;
 using Rehost.WebForms.Parity.Contracts;
-using CoreParity.Recording;
 
-namespace Rehost.WebForms.Parity.OracleRunner;
+namespace Rehost.WebForms.Parity.Runner;
 
 public sealed class OracleSessionRunner : MarshalByRefObject, IRegisteredObject, IClassicPipelineRunner
 {
