@@ -23,8 +23,43 @@ public static class SessionChildProcess
         string fixtureRoot,
         TimeSpan? timeout = null)
     {
-        var startInfo = CreateStartInfo(hostAssembly, session.Name, manifestPath, fixtureRoot);
+        return Execute(
+            CreateStartInfo(hostAssembly, session.Name, manifestPath, fixtureRoot),
+            session,
+            timeout);
+    }
 
+#if NET
+    public static SessionObservation Run(
+        string hostAssemblyPath,
+        SessionSpecification session,
+        string manifestPath,
+        string fixtureRoot,
+        TimeSpan? timeout = null)
+    {
+        var startInfo = new ProcessStartInfo("dotnet")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        startInfo.ArgumentList.Add(hostAssemblyPath);
+        startInfo.ArgumentList.Add("run-session");
+        startInfo.ArgumentList.Add("--session");
+        startInfo.ArgumentList.Add(session.Name);
+        startInfo.ArgumentList.Add("--manifest");
+        startInfo.ArgumentList.Add(manifestPath);
+        startInfo.ArgumentList.Add("--fixtures");
+        startInfo.ArgumentList.Add(fixtureRoot);
+
+        return Execute(startInfo, session, timeout);
+    }
+#endif
+
+    private static SessionObservation Execute(
+        ProcessStartInfo startInfo,
+        SessionSpecification session,
+        TimeSpan? timeout)
+    {
         using var process = Process.Start(startInfo)
             ?? throw new InvalidOperationException("The session process failed to start.");
         // Both streams must drain concurrently. A session observation larger than the pipe
