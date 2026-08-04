@@ -1,8 +1,20 @@
 # Test-suite refactoring plan
 
-Status: P1–P3 complete (2026-08-04); P4 next. Each phase lands on `main`,
+Status: P1–P4 complete (2026-08-04); P5 next. Each phase lands on `main`,
 green on both platforms, before the next begins. Windows validation once per
 phase.
+
+P4 outcome: 248 → 243 tests (SmtpSectionTests, AssemblyIdentityTests, the
+EnterpriseServices shape fact, the WebServices assembly-name fact, and the
+MemoryLimits range check deleted; the CodegenDirectory tautological assertion
+dropped from its kept fact; the two unsupported-feature messages now assert
+independent fragments instead of the implementation's own constant). Five
+files moved to mirrored folders with namespaces following; the ledger's
+class-name references stay valid. CodegenSubstrateHarness split into its
+three types; the Kestrel fixture classes own their files; MemorySamplerTests
+joined the serialized memory collection. The planned PortableParityGateTests
+parallelization guard is obsolete: the P2 rewrite runs the codegen assertions
+in an isolated fixture copy. Both platforms 243/243.
 
 P3 outcome: consolidation was driven by a per-test timing inventory (TRX).
 Multipart postbacks share the postback host; the reuse tests take their first
