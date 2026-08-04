@@ -9,15 +9,15 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Hosting;
-using AdapterParity.Runner;
-using CoreParity.Contracts;
+using Rehost.WebForms.Parity.AdapterRunner;
+using Rehost.WebForms.Parity.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rehost.WebForms.Hosting;
 
-namespace AdapterParity.Host;
+namespace Rehost.WebForms.Parity.AdapterHost;
 
 internal static class Program
 {
@@ -156,7 +156,7 @@ internal static class Program
         };
 
         // A dotted assembly name defeats GetFileNameWithoutExtension, which would read
-        // "AdapterParity.Host" as "AdapterParity"; compare against the apphost path instead.
+        // "Rehost.WebForms.Parity.AdapterHost" as "AdapterParity"; compare against the apphost path instead.
         var entryAssembly = typeof(Program).Assembly.Location;
         var apphostPath = Path.ChangeExtension(
             entryAssembly,
@@ -258,7 +258,7 @@ internal static class Program
 
             InPhase(
                 "event-drain",
-                () => manager.StopObject(applicationId, typeof(AdapterRunner)));
+                () => manager.StopObject(applicationId, typeof(AdapterSessionRunner)));
             observation.ApplicationEvents = drain.DrainApplicationEvents();
             observation.SessionEvents = drain.DrainSessionEvents();
 
@@ -396,7 +396,7 @@ internal static class Program
         // HttpApplication instances, and a registered object is not one.
         var registered = manager.CreateObject(
             applicationId,
-            typeof(AdapterRunner),
+            typeof(AdapterSessionRunner),
             "/",
             EnsureTrailingDirectorySeparator(applicationPath),
             true,
@@ -410,8 +410,8 @@ internal static class Program
     private static void ValidateFixture(string applicationPath)
     {
         applicationPath = Path.GetFullPath(applicationPath);
-        var probePath = Path.Combine(applicationPath, "bin", "CoreParity.Probes.dll");
-        var hostProbePath = Path.Combine(AppContext.BaseDirectory, "CoreParity.Probes.dll");
+        var probePath = Path.Combine(applicationPath, "bin", "Rehost.WebForms.Parity.Probes.dll");
+        var hostProbePath = Path.Combine(AppContext.BaseDirectory, "Rehost.WebForms.Parity.Probes.dll");
 
         if (!File.Exists(Path.Combine(applicationPath, "web.config")))
         {

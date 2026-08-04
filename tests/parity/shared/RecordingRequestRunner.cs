@@ -4,7 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Web;
-using CoreParity.Contracts;
+using Rehost.WebForms.Parity.Contracts;
 
 namespace CoreParity.Recording;
 

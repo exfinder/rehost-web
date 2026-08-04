@@ -64,14 +64,14 @@ public sealed class PortableParityGateTests
         "tests",
         "parity",
         "src",
-        "PortableParity.Host",
+        "Rehost.WebForms.Parity.PortableHost",
         "bin",
         Configuration,
         "net10.0");
 
     private static (int ExitCode, string StandardError) RunHost(string command)
     {
-        var hostAssembly = Path.Combine(HostDirectory, "PortableParity.Host.dll");
+        var hostAssembly = Path.Combine(HostDirectory, "Rehost.WebForms.Parity.PortableHost.dll");
 
         File.Exists(hostAssembly).ShouldBeTrue(
             "Build the parity host first: dotnet build Rehost.WebForms.slnx");

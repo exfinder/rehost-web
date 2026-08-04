@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Web.Hosting;
-using CoreParity.Contracts;
+using Rehost.WebForms.Parity.Contracts;
 using CoreParity.Recording;
 
-namespace PortableParity.Runner;
+namespace Rehost.WebForms.Parity.PortableRunner;
 
-public sealed class PortableRunner : IRegisteredObject, IClassicPipelineRunner
+public sealed class PortableSessionRunner : IRegisteredObject, IClassicPipelineRunner
 {
     public List<RequestObservation> RunStep(List<RequestSpecification> requests)
     {

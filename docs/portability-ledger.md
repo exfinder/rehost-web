@@ -13,11 +13,11 @@ Treatments:
 - **portable leaf** — replace only the platform operation;
 - **unsupported** — fail explicitly when selected.
 
-P01–P24 were exercised by `PortableParity.Host run` on macOS `arm64` and Windows
+P01–P24 were exercised by `Rehost.WebForms.Parity.PortableHost run` on macOS `arm64` and Windows
 `x64`, both `net10.0`, with identical events, status, and empty stderr. Framework
 behavior remains under `NETFRAMEWORK`.
 
-P27–P32 were reached by `PortableParity.Host verify`, which now matches the
+P27–P32 were reached by `Rehost.WebForms.Parity.PortableHost verify`, which now matches the
 Framework `cold-sync` golden trace exactly.
 
 P40 is exercised by `ApplicationConfigurationPublicationTests`, which activates
@@ -62,7 +62,7 @@ applications in child processes on both platforms. No differential probe reaches
 them: the slice-2 gate is port-local by
 [ADR 0043](adr/0043-gate-the-compilation-substrate-locally.md).
 
-P33 was reached by `AdapterParity.Host verify` on macOS `arm64` and Windows
+P33 was reached by `Rehost.WebForms.Parity.AdapterHost verify` on macOS `arm64` and Windows
 `x64`, which serves the same sessions over Kestrel. No differential probe reaches
 it: the bench calls `HttpRuntime.ProcessRequest` on a thread it owns, so nothing
 posts to the application's synchronization context.

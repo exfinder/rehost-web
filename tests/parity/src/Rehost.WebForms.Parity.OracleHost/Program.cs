@@ -7,11 +7,11 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Hosting;
-using CoreParity.Contracts;
-using FrameworkOracle.Runner;
+using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.Parity.OracleRunner;
 using Microsoft.Win32;
 
-namespace FrameworkOracle.Host;
+namespace Rehost.WebForms.Parity.OracleHost;
 
 internal static class Program
 {
@@ -250,7 +250,7 @@ internal static class Program
             Console.Error.WriteLine("Activating ASP.NET application AppDomain.");
             var registered = manager.CreateObject(
                 applicationId,
-                typeof(OracleRunner),
+                typeof(OracleSessionRunner),
                 "/",
                 EnsureTrailingDirectorySeparator(applicationPath),
                 true,
@@ -281,7 +281,7 @@ internal static class Program
             // StopObject runs the registered object's shutdown notification while the
             // application AppDomain is still callable; ShutdownApplication unloads it.
             Console.Error.WriteLine("Stopping registered oracle runner.");
-            manager.StopObject(applicationId, typeof(OracleRunner));
+            manager.StopObject(applicationId, typeof(OracleSessionRunner));
             observation.ApplicationEvents = runner.DrainApplicationEvents();
             observation.SessionEvents = runner.DrainSessionEvents();
             applicationActivated = false;
@@ -301,7 +301,7 @@ internal static class Program
                 try
                 {
                     Console.Error.WriteLine("Stopping registered oracle runner.");
-                    manager.StopObject(applicationId, typeof(OracleRunner));
+                    manager.StopObject(applicationId, typeof(OracleSessionRunner));
                     Console.Error.WriteLine("Requesting ASP.NET application shutdown.");
                     manager.ShutdownApplication(applicationId);
                 }
@@ -319,10 +319,10 @@ internal static class Program
     {
         applicationPath = Path.GetFullPath(applicationPath);
         var binPath = Path.Combine(applicationPath, "bin");
-        var probePath = Path.Combine(binPath, "CoreParity.Probes.dll");
+        var probePath = Path.Combine(binPath, "Rehost.WebForms.Parity.Probes.dll");
         var hostProbePath = Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory,
-            "CoreParity.Probes.dll");
+            "Rehost.WebForms.Parity.Probes.dll");
 
         if (!File.Exists(Path.Combine(applicationPath, "web.config")))
         {
@@ -541,15 +541,15 @@ internal sealed class CommandLine
             + Environment.NewLine
             + "Usage:"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe run [--manifest <path>] [--fixtures <path>]"
+            + "  Rehost.WebForms.Parity.OracleHost.exe run [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe generate --output <path>"
+            + "  Rehost.WebForms.Parity.OracleHost.exe generate --output <path>"
             + " [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe verify --expected <path>"
+            + "  Rehost.WebForms.Parity.OracleHost.exe verify --expected <path>"
             + " [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  FrameworkOracle.Host.exe run-session --session <name>"
+            + "  Rehost.WebForms.Parity.OracleHost.exe run-session --session <name>"
             + " [--manifest <path>] [--fixtures <path>]");
     }
 }

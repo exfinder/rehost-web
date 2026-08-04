@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Web.Hosting;
-using CoreParity.Contracts;
+using Rehost.WebForms.Parity.Contracts;
 
-namespace AdapterParity.Runner;
+namespace Rehost.WebForms.Parity.AdapterRunner;
 
 // Requests arrive over HTTP, so this object exists only to observe what no response can show:
 // the application-wide journal and the terminal shutdown notification.
-public sealed class AdapterRunner : MarshalByRefObject, IRegisteredObject, IPipelineEventDrain
+public sealed class AdapterSessionRunner : MarshalByRefObject, IRegisteredObject, IPipelineEventDrain
 {
     public List<string> DrainApplicationEvents()
     {

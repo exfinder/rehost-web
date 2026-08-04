@@ -44,7 +44,7 @@ the `HttpRuntime` singleton, the default `AssemblyLoadContext` resolver, or the
 activated application. Requests after the first in a session are warm by
 construction.
 
-`CoreParity.Probes.dll` is staged only in `fixture/app/bin`. The host neither
+`Rehost.WebForms.Parity.Probes.dll` is staged only in `fixture/app/bin`. The host neither
 references nor preloads it.
 
 ## Build
@@ -58,7 +58,7 @@ dotnet build PortableParity.slnx -c Release
 ## Run
 
 ```shell
-dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll run
+dotnet src/Rehost.WebForms.Parity.PortableHost/bin/Release/net10.0/Rehost.WebForms.Parity.PortableHost.dll run
 ```
 
 Success emits a deterministic portable trace to standard output. Failure emits
@@ -116,7 +116,7 @@ a listener or `dotnet-trace` to also observe `bin` assembly resolution.
 ## Verify
 
 ```shell
-dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll verify
+dotnet src/Rehost.WebForms.Parity.PortableHost/bin/Release/net10.0/Rehost.WebForms.Parity.PortableHost.dll verify
 ```
 
 Verification requires exact schema, session and request names, session notebook,
@@ -131,7 +131,7 @@ Rehost.WebForms.slnx`, which requires this prototype to have been built in
 Optional explicit inputs:
 
 ```shell
-dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll verify \
+dotnet src/Rehost.WebForms.Parity.PortableHost/bin/Release/net10.0/Rehost.WebForms.Parity.PortableHost.dll verify \
   --expected ../framework-oracle/artifacts/golden/sessions.json \
   --normalization ../framework-oracle/metadata/normalization.json \
   --manifest ../core-parity/sessions.json
@@ -141,6 +141,6 @@ A single session can be run alone, which is also how the parent drives each
 child:
 
 ```shell
-dotnet src/PortableParity.Host/bin/Release/net10.0/PortableParity.Host.dll \
+dotnet src/Rehost.WebForms.Parity.PortableHost/bin/Release/net10.0/Rehost.WebForms.Parity.PortableHost.dll \
   run-session --session cold-sync
 ```

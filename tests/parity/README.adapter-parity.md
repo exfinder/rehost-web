@@ -70,7 +70,7 @@ until the whole step arrives. The asynchronous handler parks on `ParityGate`
 until the rig opens it, after the request is in flight. Both waits time out
 after five seconds and record an extra event rather than deadlocking.
 
-`CoreParity.Probes.dll` is staged only in `fixture/app/bin`. The host neither
+`Rehost.WebForms.Parity.Probes.dll` is staged only in `fixture/app/bin`. The host neither
 references nor preloads it, and startup asserts both.
 
 ## Build
@@ -84,13 +84,13 @@ dotnet build AdapterParity.slnx -c Release
 ## Run
 
 ```shell
-dotnet src/AdapterParity.Host/bin/Release/net10.0/AdapterParity.Host.dll run
+dotnet src/Rehost.WebForms.Parity.AdapterHost/bin/Release/net10.0/Rehost.WebForms.Parity.AdapterHost.dll run
 ```
 
 ## Verify
 
 ```shell
-dotnet src/AdapterParity.Host/bin/Release/net10.0/AdapterParity.Host.dll verify
+dotnet src/Rehost.WebForms.Parity.AdapterHost/bin/Release/net10.0/Rehost.WebForms.Parity.AdapterHost.dll verify
 ```
 
 This exits zero. It runs automatically as part of `dotnet test
@@ -101,7 +101,7 @@ A single session can be run alone, which is also how the parent drives each
 child:
 
 ```shell
-dotnet src/AdapterParity.Host/bin/Release/net10.0/AdapterParity.Host.dll \
+dotnet src/Rehost.WebForms.Parity.AdapterHost/bin/Release/net10.0/Rehost.WebForms.Parity.AdapterHost.dll \
   run-session --session cold-then-warm
 ```
 

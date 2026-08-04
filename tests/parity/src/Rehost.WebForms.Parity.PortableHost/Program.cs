@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Hosting;
-using CoreParity.Contracts;
-using PortableParity.Runner;
+using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.Parity.PortableRunner;
 using Rehost.WebForms.Hosting;
 
-namespace PortableParity.Host;
+namespace Rehost.WebForms.Parity.PortableHost;
 
 internal static class Program
 {
@@ -142,7 +142,7 @@ internal static class Program
         };
 
         // A dotted assembly name defeats GetFileNameWithoutExtension, which would read
-        // "PortableParity.Host" as "PortableParity"; compare against the apphost path instead.
+        // "Rehost.WebForms.Parity.PortableHost" as "PortableParity"; compare against the apphost path instead.
         var entryAssembly = typeof(Program).Assembly.Location;
         var apphostPath = Path.ChangeExtension(
             entryAssembly,
@@ -237,7 +237,7 @@ internal static class Program
                 "application-activation",
                 () => manager.CreateObject(
                     applicationId,
-                    typeof(PortableRunner),
+                    typeof(PortableSessionRunner),
                     "/",
                     EnsureTrailingDirectorySeparator(applicationPath),
                     true,
@@ -264,7 +264,7 @@ internal static class Program
             // application is still callable; ShutdownApplication is what tears it down.
             InPhase(
                 "application-cleanup",
-                () => manager.StopObject(applicationId, typeof(PortableRunner)));
+                () => manager.StopObject(applicationId, typeof(PortableSessionRunner)));
             observation.ApplicationEvents = InPhase(
                 "application-cleanup",
                 runner.DrainApplicationEvents);
@@ -291,7 +291,7 @@ internal static class Program
                     "application-cleanup",
                     () =>
                     {
-                        manager.StopObject(applicationId, typeof(PortableRunner));
+                        manager.StopObject(applicationId, typeof(PortableSessionRunner));
                         manager.ShutdownApplication(applicationId);
                         manager.Close();
                     });
@@ -302,10 +302,10 @@ internal static class Program
     private static void ValidateFixture(string applicationPath)
     {
         applicationPath = Path.GetFullPath(applicationPath);
-        var probePath = Path.Combine(applicationPath, "bin", "CoreParity.Probes.dll");
+        var probePath = Path.Combine(applicationPath, "bin", "Rehost.WebForms.Parity.Probes.dll");
         var hostProbePath = Path.Combine(
             AppContext.BaseDirectory,
-            "CoreParity.Probes.dll");
+            "Rehost.WebForms.Parity.Probes.dll");
 
         if (!File.Exists(Path.Combine(applicationPath, "web.config")))
         {
@@ -763,12 +763,12 @@ internal sealed class CommandLine
             + Environment.NewLine
             + "Usage:"
             + Environment.NewLine
-            + "  dotnet PortableParity.Host.dll run [--manifest <path>] [--fixtures <path>]"
+            + "  dotnet Rehost.WebForms.Parity.PortableHost.dll run [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  dotnet PortableParity.Host.dll verify [--expected <path>]"
+            + "  dotnet Rehost.WebForms.Parity.PortableHost.dll verify [--expected <path>]"
             + " [--normalization <path>] [--manifest <path>] [--fixtures <path>]"
             + Environment.NewLine
-            + "  dotnet PortableParity.Host.dll run-session --session <name>"
+            + "  dotnet Rehost.WebForms.Parity.PortableHost.dll run-session --session <name>"
             + " [--manifest <path>] [--fixtures <path>]");
     }
 }

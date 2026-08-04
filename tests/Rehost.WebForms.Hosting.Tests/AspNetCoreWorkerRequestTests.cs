@@ -129,8 +129,8 @@ public sealed class AspNetCoreWorkerRequestTests
     [Fact]
     public void Map_Path_Resolves_Beneath_The_Application_Root()
     {
-        Create().MapPath("/bin/CoreParity.Probes.dll")
-            .ShouldBe(Path.Combine(PhysicalRoot, "bin", "CoreParity.Probes.dll"));
+        Create().MapPath("/bin/Rehost.WebForms.Parity.Probes.dll")
+            .ShouldBe(Path.Combine(PhysicalRoot, "bin", "Rehost.WebForms.Parity.Probes.dll"));
     }
 
     [Fact]

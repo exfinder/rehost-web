@@ -3,7 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <AssemblyName>CoreParity.Contracts</AssemblyName>
-    <RootNamespace>CoreParity.Contracts</RootNamespace>
+    <AssemblyName>Rehost.WebForms.Parity.Contracts</AssemblyName>
+    <RootNamespace>Rehost.WebForms.Parity.Contracts</RootNamespace>
   </PropertyGroup>
 </Project>

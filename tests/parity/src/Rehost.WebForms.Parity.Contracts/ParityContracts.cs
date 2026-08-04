@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace CoreParity.Contracts;
+namespace Rehost.WebForms.Parity.Contracts;
 
 // Requests reach the adapter over HTTP rather than through a call into the application, so it
 // implements only the drain half.

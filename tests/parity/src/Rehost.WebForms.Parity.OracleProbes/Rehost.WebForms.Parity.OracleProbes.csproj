@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>CoreParity.Probes</AssemblyName>
-    <RootNamespace>CoreParity.Probes</RootNamespace>
+    <TargetFramework>net481</TargetFramework>
+    <AssemblyName>Rehost.WebForms.Parity.Probes</AssemblyName>
+    <RootNamespace>Rehost.WebForms.Parity.Probes</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../CoreParity.Contracts/CoreParity.Contracts.csproj" />
-    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <Reference Include="System.Web" />
     <Compile
       Include="../../shared/ProbeJournal.cs"
       Link="Shared/ProbeJournal.cs" />

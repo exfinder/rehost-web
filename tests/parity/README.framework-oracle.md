@@ -31,7 +31,7 @@ still starts; validating it would test startup failure instead. Framework's
 `HttpModulesSection.CreateModules` still appends its implicit
 `DefaultAuthenticationModule`.
 
-`CoreParity.Probes.dll` is not a host reference and is not copied beside
+`Rehost.WebForms.Parity.Probes.dll` is not a host reference and is not copied beside
 the host executable. Build staging places it only in the runnable fixture's
 `app/bin`. Host startup asserts both properties.
 
@@ -70,13 +70,13 @@ dotnet build FrameworkOracle.slnx -c Release
 The staged application is:
 
 ```text
-src/FrameworkOracle.Host/bin/Release/net481/fixture/app
+src/Rehost.WebForms.Parity.OracleHost/bin/Release/net481/fixture/app
 ```
 
 ## Run
 
 ```powershell
-.\src\FrameworkOracle.Host\bin\Release\net481\FrameworkOracle.Host.exe run
+.\src\Rehost.WebForms.Parity.OracleHost\bin\Release\net481\Rehost.WebForms.Parity.OracleHost.exe run
 ```
 
 JSON is written to standard output. Diagnostics go to standard error.
@@ -84,7 +84,7 @@ JSON is written to standard output. Diagnostics go to standard error.
 ## Generate
 
 ```powershell
-.\src\FrameworkOracle.Host\bin\Release\net481\FrameworkOracle.Host.exe generate `
+.\src\Rehost.WebForms.Parity.OracleHost\bin\Release\net481\Rehost.WebForms.Parity.OracleHost.exe generate `
   --output .\artifacts\generated\sessions.json
 ```
 
@@ -96,7 +96,7 @@ its behavioral observation.
 ## Verify
 
 ```powershell
-.\src\FrameworkOracle.Host\bin\Release\net481\FrameworkOracle.Host.exe verify `
+.\src\Rehost.WebForms.Parity.OracleHost\bin\Release\net481\Rehost.WebForms.Parity.OracleHost.exe verify `
   --expected .\artifacts\golden\sessions.json
 ```
 

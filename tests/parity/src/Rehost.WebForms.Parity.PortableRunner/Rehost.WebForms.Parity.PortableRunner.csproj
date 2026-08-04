@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>PortableParity.Runner</AssemblyName>
-    <RootNamespace>PortableParity.Runner</RootNamespace>
+    <AssemblyName>Rehost.WebForms.Parity.PortableRunner</AssemblyName>
+    <RootNamespace>Rehost.WebForms.Parity.PortableRunner</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Compile
       Include="../../shared/RecordingRequestRunner.cs"

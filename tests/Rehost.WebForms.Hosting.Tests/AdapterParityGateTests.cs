@@ -28,14 +28,14 @@ public sealed class AdapterParityGateTests
         "tests",
         "parity",
         "src",
-        "AdapterParity.Host",
+        "Rehost.WebForms.Parity.AdapterHost",
         "bin",
         Configuration,
         "net10.0");
 
     private static (int ExitCode, string StandardError) RunHost(string command)
     {
-        var hostAssembly = Path.Combine(HostDirectory, "AdapterParity.Host.dll");
+        var hostAssembly = Path.Combine(HostDirectory, "Rehost.WebForms.Parity.AdapterHost.dll");
 
         File.Exists(hostAssembly).ShouldBeTrue(
             "Build the parity host first: dotnet build Rehost.WebForms.slnx");

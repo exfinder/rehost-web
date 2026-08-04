@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace CoreParity.Contracts;
+namespace Rehost.WebForms.Parity.Contracts;
 
 // The recorder opens a request's gate once ProcessRequest has returned, so an asynchronous
 // handler can be made to finish strictly afterwards without sleeping. Waits time out rather

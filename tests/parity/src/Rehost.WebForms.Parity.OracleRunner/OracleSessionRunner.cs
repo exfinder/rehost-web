@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Web.Hosting;
-using CoreParity.Contracts;
+using Rehost.WebForms.Parity.Contracts;
 using CoreParity.Recording;
 
-namespace FrameworkOracle.Runner;
+namespace Rehost.WebForms.Parity.OracleRunner;
 
-public sealed class OracleRunner : MarshalByRefObject, IRegisteredObject, IClassicPipelineRunner
+public sealed class OracleSessionRunner : MarshalByRefObject, IRegisteredObject, IClassicPipelineRunner
 {
     public override object InitializeLifetimeService()
     {

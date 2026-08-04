@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using CoreParity.Contracts;
+using Rehost.WebForms.Parity.Contracts;
 
-namespace AdapterParity.Host;
+namespace Rehost.WebForms.Parity.AdapterHost;
 
 // The adapter observes a response after it has crossed a socket, so it can only compare what
 // survives the transport. Events named worker.* and runner.* are raised where the bench records

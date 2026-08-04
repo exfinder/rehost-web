@@ -1,6 +1,6 @@
 using System;
 
-namespace AdapterParity.Host;
+namespace Rehost.WebForms.Parity.AdapterHost;
 
 internal enum Operation
 {
