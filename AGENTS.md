@@ -21,6 +21,9 @@ A test that a stub implementation would also satisfy is not covering the
 behavior. Prefer inputs that fail when the implementation degrades, and know
 what the test looks like when it fails, not only when it passes.
 
+How to choose the kind of test, the scenario act→assert shape, and the rest of
+the test-authoring rules: [`docs/writing-tests.md`](docs/writing-tests.md).
+
 ## Architecture design principles
 
 - **Explicit ownership over ambient discovery** — dependencies and lifecycle inputs come from the owning host/component, not process state, registry, environment quirks, or load location.
