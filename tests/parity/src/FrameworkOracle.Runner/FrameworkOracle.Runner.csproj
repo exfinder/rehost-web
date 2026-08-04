@@ -1,14 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
     <AssemblyName>FrameworkOracle.Runner</AssemblyName>
     <RootNamespace>FrameworkOracle.Runner</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <ProjectReference Include="../CoreParity.Contracts/CoreParity.Contracts.csproj" />
     <Reference Include="System.Web" />
     <Compile
-      Include="../../../core-parity/shared/RecordingRequestRunner.cs"
+      Include="../../shared/RecordingRequestRunner.cs"
       Link="Shared/RecordingRequestRunner.cs" />
   </ItemGroup>
 </Project>

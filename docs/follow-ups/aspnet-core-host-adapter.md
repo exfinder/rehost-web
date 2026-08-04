@@ -55,7 +55,7 @@ assumptions or owning application lifecycle.
 
 ## Verification
 
-[`prototypes/adapter-parity`](../../prototypes/adapter-parity/README.md) replays
+[`tests/parity`](../../tests/parity/README.adapter-parity.md) replays
 `sessions.json` over loopback HTTP, one process per session, and compares against
 the same Framework golden. Unit coverage of the request mapping — encoded paths,
 repeated headers, missing connection data, virtual-root containment, unsupported

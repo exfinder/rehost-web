@@ -18,14 +18,19 @@ public sealed class AdapterParityGateTests
 
     private static string RepositoryRoot { get; } = FindRepositoryRoot();
 
+    // .../bin/<configuration>/net10.0/ — the host is built in whatever configuration this test
+    // assembly was, so the gate can never run a stale configuration's binaries.
+    private static string Configuration { get; } = Path.GetFileName(
+        Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
+
     private static string HostDirectory { get; } = Path.Combine(
         RepositoryRoot,
-        "prototypes",
-        "adapter-parity",
+        "tests",
+        "parity",
         "src",
         "AdapterParity.Host",
         "bin",
-        "Release",
+        Configuration,
         "net10.0");
 
     private static (int ExitCode, string StandardError) RunHost(string command)
@@ -33,7 +38,7 @@ public sealed class AdapterParityGateTests
         var hostAssembly = Path.Combine(HostDirectory, "AdapterParity.Host.dll");
 
         File.Exists(hostAssembly).ShouldBeTrue(
-            "Build the adapter prototype first: dotnet build prototypes/adapter-parity/AdapterParity.slnx -c Release");
+            "Build the parity host first: dotnet build Rehost.WebForms.slnx");
 
         var startInfo = new ProcessStartInfo("dotnet")
         {

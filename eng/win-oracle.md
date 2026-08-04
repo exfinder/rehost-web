@@ -63,9 +63,8 @@ passes 69/69 alone at every size. More cores makes it worse, so the cause is
 concurrency between test projects, not CPU starvation. AGENTS.md already
 prescribes per-project runs; do that.
 
-`PortableParityGateTests` needs `dotnet build
-prototypes/portable-parity/PortableParity.slnx -c Release` first — the main
-solution does not build that prototype.
+The parity hosts are ordinary members of the main solution; building it (in
+any configuration) is all the parity gates need.
 
 ## AMI
 

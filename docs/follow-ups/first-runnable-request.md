@@ -53,8 +53,8 @@ passes, the fixture handler resolves without a host reference, and the
 supported path reaches no native IIS/Windows operation.
 
 All three hold on macOS `arm64` and Windows `x64`, across both the
-[differential](../../prototypes/portable-parity/README.md) and
-[adapter](../../prototypes/adapter-parity/README.md) columns.
+[differential](../../tests/parity/README.portable-parity.md) and
+[adapter](../../tests/parity/README.adapter-parity.md) columns.
 
 Later support and remaining gaps are recorded above, in the
 [compatibility feature map](compatibility-feature-map.md), and in

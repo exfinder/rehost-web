@@ -20,7 +20,7 @@ supported OS. Oracle refresh is explicit, reproducible, and reviewable.
 
 ## Session model
 
-`prototypes/core-parity/sessions.json` declares what both adapters run, so the
+`tests/parity/sessions.json` declares what both adapters run, so the
 gate's required scenarios are data rather than host code. A session is one
 process, one fixture, and an ordered list of steps; a step holds one or more
 named requests issued together, so a step of one is sequential. Each adapter

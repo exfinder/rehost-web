@@ -30,7 +30,7 @@
   <!-- Linked rather than referenced: the probe assembly must not be copied beside the host. -->
   <ItemGroup>
     <Compile
-      Include="../../prototypes/core-parity/shared/PostbackFormClient.cs"
+      Include="../parity/shared/PostbackFormClient.cs"
       Link="Shared/PostbackFormClient.cs" />
   </ItemGroup>
 

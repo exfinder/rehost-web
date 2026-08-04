@@ -26,6 +26,11 @@
       Include="../Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj"
       ReferenceOutputAssembly="false"
       PrivateAssets="all" />
+    <!-- Built but not referenced: the parity gate launches this host as a child process. -->
+    <ProjectReference
+      Include="../parity/src/PortableParity.Host/PortableParity.Host.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

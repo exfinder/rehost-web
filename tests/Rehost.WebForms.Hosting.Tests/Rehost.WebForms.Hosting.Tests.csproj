@@ -24,23 +24,17 @@
       Include="../Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj"
       ReferenceOutputAssembly="false"
       PrivateAssets="all" />
+    <!-- Built but not referenced: the adapter gate launches this host as a child process. -->
+    <ProjectReference
+      Include="../parity/src/AdapterParity.Host/AdapterParity.Host.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
     <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
-
-  <!--
-    The adapter gate launches this prototype's Release output as a child process, so the same
-    staleness applies. It carries its own solution and Directory.Build.props, which an Exec
-    keeps isolated from this build; a ProjectReference would import them and would build the
-    wrong configuration.
-  -->
-  <Target Name="BuildAdapterParityPrototype" AfterTargets="Build">
-    <Exec
-      Command="dotnet build &quot;$(MSBuildThisFileDirectory)../../prototypes/adapter-parity/AdapterParity.slnx&quot; -c Release --nologo -v:quiet -clp:ErrorsOnly /p:UseSharedCompilation=false /nodeReuse:false" />
-  </Target>
 
   <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

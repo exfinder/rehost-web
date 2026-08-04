@@ -1,18 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <AssemblyName>FrameworkOracle.Host</AssemblyName>
-    <RootNamespace>FrameworkOracle.Host</RootNamespace>
+    <AssemblyName>PortableParity.Host</AssemblyName>
+    <RootNamespace>PortableParity.Host</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
-    <ProjectReference Include="../FrameworkOracle.Runner/FrameworkOracle.Runner.csproj" />
+    <ProjectReference Include="../CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <ProjectReference Include="../PortableParity.Runner/PortableParity.Runner.csproj" />
     <ProjectReference
-      Include="../FrameworkOracle.Probes/FrameworkOracle.Probes.csproj"
+      Include="../PortableParity.Probes/PortableParity.Probes.csproj"
       ReferenceOutputAssembly="false" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Web" />
+    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,21 +25,25 @@
       Link="fixture/app-errors/web.config"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../metadata/*.json"
-      Link="metadata/%(Filename)%(Extension)"
+      Include="../../metadata/normalization.json"
+      Link="metadata/normalization.json"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../../core-parity/sessions.json"
+      Include="../../sessions.json"
       Link="metadata/sessions.json"
+      CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="../../artifacts/golden/sessions.json"
+      Link="oracle/sessions.json"
       CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="StageOracleApplicationBin" AfterTargets="Build">
+  <Target Name="StagePortableParityApplication" AfterTargets="Build">
     <PropertyGroup>
       <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
       <_ErrorFixtureBin>$(TargetDir)fixture/app-errors/bin</_ErrorFixtureBin>
       <_FixtureTemp>$(TargetDir)fixture/temp</_FixtureTemp>
-      <_ProbeAssembly>$(MSBuildProjectDirectory)/../FrameworkOracle.Probes/bin/$(Configuration)/net481/CoreParity.Probes.dll</_ProbeAssembly>
+      <_ProbeAssembly>$(MSBuildProjectDirectory)/../PortableParity.Probes/bin/$(Configuration)/net10.0/CoreParity.Probes.dll</_ProbeAssembly>
     </PropertyGroup>
 
     <Error
@@ -50,23 +54,28 @@
       Text="CoreParity.Probes must not be copied beside the host." />
 
     <MakeDir Directories="$(_FixtureBin);$(_ErrorFixtureBin);$(_FixtureTemp)" />
-    <Delete
-      Files="$(_FixtureBin)/FrameworkOracle.Contracts.dll;$(_FixtureBin)/FrameworkOracle.Probes.dll" />
     <XmlPoke
       XmlInputPath="$(TargetDir)fixture/app/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
       Value="$(_FixtureTemp)" />
+    <!--
+      Cleared rather than set, so this fixture's codegen root can only come from the host
+      CompilationTempDirectory option. An ignored option would relocate its output to the
+      default temporary directory instead of failing quietly.
+    -->
     <XmlPoke
       XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
-      Value="$(_FixtureTemp)" />
+      Value="" />
     <Copy
-      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)FrameworkOracle.Runner.dll;$(_ProbeAssembly)"
+      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
       DestinationFolder="$(_FixtureBin)"
       SkipUnchangedFiles="true" />
     <Copy
-      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)FrameworkOracle.Runner.dll;$(_ProbeAssembly)"
+      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
       DestinationFolder="$(_ErrorFixtureBin)"
       SkipUnchangedFiles="true" />
   </Target>
+
+  <Import Project="../../../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

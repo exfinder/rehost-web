@@ -54,14 +54,19 @@ public sealed class PortableParityGateTests
 
     private static string RepositoryRoot { get; } = FindRepositoryRoot();
 
+    // .../bin/<configuration>/net10.0/ — the host is built in whatever configuration this test
+    // assembly was, so the gate can never run a stale configuration's binaries.
+    private static string Configuration { get; } = Path.GetFileName(
+        Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
+
     private static string HostDirectory { get; } = Path.Combine(
         RepositoryRoot,
-        "prototypes",
-        "portable-parity",
+        "tests",
+        "parity",
         "src",
         "PortableParity.Host",
         "bin",
-        "Release",
+        Configuration,
         "net10.0");
 
     private static (int ExitCode, string StandardError) RunHost(string command)
@@ -69,7 +74,7 @@ public sealed class PortableParityGateTests
         var hostAssembly = Path.Combine(HostDirectory, "PortableParity.Host.dll");
 
         File.Exists(hostAssembly).ShouldBeTrue(
-            "Build the parity prototype first: dotnet build prototypes/portable-parity/PortableParity.slnx -c Release");
+            "Build the parity host first: dotnet build Rehost.WebForms.slnx");
 
         var startInfo = new ProcessStartInfo("dotnet")
         {

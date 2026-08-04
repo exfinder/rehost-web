@@ -1,48 +1,53 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
-    <AssemblyName>PortableParity.Host</AssemblyName>
-    <RootNamespace>PortableParity.Host</RootNamespace>
+    <AssemblyName>AdapterParity.Host</AssemblyName>
+    <RootNamespace>AdapterParity.Host</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../core-parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
-    <ProjectReference Include="../PortableParity.Runner/PortableParity.Runner.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <ProjectReference Include="../AdapterParity.Runner/AdapterParity.Runner.csproj" />
     <ProjectReference
-      Include="../PortableParity.Probes/PortableParity.Probes.csproj"
+      Include="../AdapterParity.Probes/AdapterParity.Probes.csproj"
       ReferenceOutputAssembly="false" />
-    <ProjectReference Include="../../../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../../../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Content
-      Include="../../../framework-oracle/fixture/web.config"
+      Include="../../fixture/web.config"
       Link="fixture/app/web.config"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../../framework-oracle/fixture/errors.web.config"
+      Include="../../fixture/errors.web.config"
       Link="fixture/app-errors/web.config"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../../framework-oracle/metadata/normalization.json"
+      Include="../../metadata/normalization.json"
       Link="metadata/normalization.json"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../../core-parity/sessions.json"
+      Include="../../sessions.json"
       Link="metadata/sessions.json"
       CopyToOutputDirectory="PreserveNewest" />
     <Content
-      Include="../../../framework-oracle/artifacts/golden/sessions.json"
+      Include="../../artifacts/golden/sessions.json"
       Link="oracle/sessions.json"
       CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <Target Name="StagePortableParityApplication" AfterTargets="Build">
+  <Target Name="StageAdapterParityApplication" AfterTargets="Build">
     <PropertyGroup>
       <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
       <_ErrorFixtureBin>$(TargetDir)fixture/app-errors/bin</_ErrorFixtureBin>
       <_FixtureTemp>$(TargetDir)fixture/temp</_FixtureTemp>
-      <_ProbeAssembly>$(MSBuildProjectDirectory)/../PortableParity.Probes/bin/$(Configuration)/net10.0/CoreParity.Probes.dll</_ProbeAssembly>
+      <_ProbeAssembly>$(MSBuildProjectDirectory)/../AdapterParity.Probes/bin/$(Configuration)/net10.0/CoreParity.Probes.dll</_ProbeAssembly>
     </PropertyGroup>
 
     <Error
@@ -57,21 +62,16 @@
       XmlInputPath="$(TargetDir)fixture/app/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
       Value="$(_FixtureTemp)" />
-    <!--
-      Cleared rather than set, so this fixture's codegen root can only come from the host
-      CompilationTempDirectory option. An ignored option would relocate its output to the
-      default temporary directory instead of failing quietly.
-    -->
     <XmlPoke
       XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
-      Value="" />
+      Value="$(_FixtureTemp)" />
     <Copy
-      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
+      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)AdapterParity.Runner.dll;$(_ProbeAssembly)"
       DestinationFolder="$(_FixtureBin)"
       SkipUnchangedFiles="true" />
     <Copy
-      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)PortableParity.Runner.dll;$(_ProbeAssembly)"
+      SourceFiles="$(TargetDir)CoreParity.Contracts.dll;$(TargetDir)AdapterParity.Runner.dll;$(_ProbeAssembly)"
       DestinationFolder="$(_ErrorFixtureBin)"
       SkipUnchangedFiles="true" />
   </Target>

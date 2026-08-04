@@ -9,6 +9,18 @@
     <Project Path="src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Project Path="src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
   </Folder>
+  <Folder Name="/tests/parity/">
+    <Project Path="tests/parity/src/CoreParity.Contracts/CoreParity.Contracts.csproj" />
+    <Project Path="tests/parity/src/FrameworkOracle.Host/FrameworkOracle.Host.csproj" />
+    <Project Path="tests/parity/src/FrameworkOracle.Probes/FrameworkOracle.Probes.csproj" />
+    <Project Path="tests/parity/src/FrameworkOracle.Runner/FrameworkOracle.Runner.csproj" />
+    <Project Path="tests/parity/src/AdapterParity.Host/AdapterParity.Host.csproj" />
+    <Project Path="tests/parity/src/AdapterParity.Probes/AdapterParity.Probes.csproj" />
+    <Project Path="tests/parity/src/AdapterParity.Runner/AdapterParity.Runner.csproj" />
+    <Project Path="tests/parity/src/PortableParity.Host/PortableParity.Host.csproj" />
+    <Project Path="tests/parity/src/PortableParity.Probes/PortableParity.Probes.csproj" />
+    <Project Path="tests/parity/src/PortableParity.Runner/PortableParity.Runner.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />
