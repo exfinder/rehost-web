@@ -119,10 +119,6 @@ public static class Program
             {
                 kestrel.Limits.MaxRequestBodySize = maxBody;
             }
-            if (options.BodyProbes.Any(probe => probe.EndsWith("kestrel-too-large", StringComparison.Ordinal)))
-            {
-                kestrel.Limits.MaxRequestBodySize = 1024;
-            }
         });
         builder.WebHost.UseUrls("http://127.0.0.1:0");
 
@@ -155,7 +151,6 @@ public static class Program
             // Passive mode: the test owns the client; the address line is the handoff, and the
             // host stays up until the test kills it.
             if (options.Postbacks.Count == 0
-                && options.BodyProbes.Count == 0
                 && options.Requests.Count == 0)
             {
                 TraceJournal.Record("address:" + address);
@@ -176,13 +171,6 @@ public static class Program
                 foreach (var probe in options.Postbacks)
                 {
                     index = await RunPostbackAsync(client, options, probe, index);
-                }
-            }
-            else if (options.BodyProbes.Count != 0)
-            {
-                for (var i = 0; i < options.BodyProbes.Count; i++)
-                {
-                    await RunBodyProbeAsync(client, options, options.BodyProbes[i], i);
                 }
             }
             else
@@ -456,230 +444,6 @@ public static class Program
         return new string(characters);
     }
 
-    private static async Task RunBodyProbeAsync(
-        HttpClient client,
-        ScenarioOptions options,
-        string probe,
-        int index)
-    {
-        if (probe == "abort")
-        {
-            await AbortBodyAsync(client.BaseAddress!, useApm: false);
-            TraceJournal.Record("request:abort:client-closed");
-            return;
-        }
-
-        if (probe == "abort-apm")
-        {
-            await AbortBodyAsync(client.BaseAddress!, useApm: true);
-            TraceJournal.Record("request:abort-apm:client-closed");
-            return;
-        }
-
-        var mode = probe switch
-        {
-            "fixed-input" => "input",
-            "fixed-binary" => "binary",
-            "fixed-buffered" => "buffered",
-            "fixed-bufferless" => "bufferless",
-            "spill" => "spill",
-            "too-large" => "input",
-            "chunked-too-large" => "input",
-            "kestrel-too-large" => "input",
-            "chunked-kestrel-too-large" => "input",
-            "chunked-customerrors-kestrel-too-large" => "input",
-            "preload-delayed" => "preload",
-            "unread" => "unread",
-            "chunked-apm" => "apm",
-            _ => "bufferless",
-        };
-        var path = "/body?mode=" + mode;
-        var payload = probe switch
-        {
-            "spill" => Enumerable.Repeat((byte)'s', 2048).ToArray(),
-            "too-large" => Enumerable.Repeat((byte)'l', 5000).ToArray(),
-            "chunked-too-large" => Enumerable.Repeat((byte)'c', 5000).ToArray(),
-            "kestrel-too-large" => Enumerable.Repeat((byte)'k', 2048).ToArray(),
-            "chunked-kestrel-too-large" => Enumerable.Repeat((byte)'K', 2048).ToArray(),
-            "chunked-customerrors-kestrel-too-large" => Enumerable.Repeat((byte)'C', 2048).ToArray(),
-            _ => Encoding.UTF8.GetBytes("body:" + probe),
-        };
-
-        if (probe == "expect-continue")
-        {
-            await ExpectContinueAsync(client.BaseAddress!, options, payload, index);
-            return;
-        }
-
-        using var request = new HttpRequestMessage(HttpMethod.Post, path)
-        {
-            Version = HttpVersion.Version11,
-            VersionPolicy = HttpVersionPolicy.RequestVersionExact,
-            Content = probe.StartsWith("chunked-", StringComparison.Ordinal)
-                || probe == "preload-delayed"
-                    ? new DelayedChunkedContent(payload)
-                    : new ByteArrayContent(payload),
-        };
-
-        using var response = await client.SendAsync(request);
-        await RecordResponseAsync(options, probe, response, index);
-    }
-
-    // The deadline is deliberately generous: reset-detection latency is load-dependent (observed
-    // 0.8s-8.1s under suite load on 4 vCPUs) and is recorded in the trace, never asserted.
-    private static async Task AbortBodyAsync(Uri address, bool useApm)
-    {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
-        using var client = new System.Net.Sockets.TcpClient();
-        await client.ConnectAsync(address.Host, address.Port, timeout.Token);
-        await using var stream = client.GetStream();
-        var headers = EncodeHttpHeaders(
-            $$"""
-            POST /body?mode={{(useApm ? "abort-apm" : "abort")}} HTTP/1.1
-            Host: {{address.Authority}}
-            Content-Length: 100
-            Expect: 100-continue
-            """);
-        await stream.WriteAsync(headers, timeout.Token);
-        await stream.FlushAsync(timeout.Token);
-
-        var interim = await ReadResponseHeadAsync(stream, timeout.Token);
-        if (interim.StatusCode != 100)
-        {
-            throw new InvalidDataException(
-                "Expected HTTP 100 Continue, received " + interim.StatusCode + ".");
-        }
-
-        TraceJournal.Record((useApm ? "body-apm" : "body") + "-abort-interim:100");
-        await stream.WriteAsync("partial"u8.ToArray(), timeout.Token);
-        await stream.FlushAsync(timeout.Token);
-        client.Client.LingerState = new System.Net.Sockets.LingerOption(true, 0);
-        client.Close();
-
-        var detection = System.Diagnostics.Stopwatch.StartNew();
-
-        while (!timeout.IsCancellationRequested)
-        {
-            var tracePath = Environment.GetEnvironmentVariable(TraceJournal.TraceVariable)!;
-            var marker = useApm ? "body-apm-abort:" : "body-abort:";
-            if (TraceJournal.ReadAll(tracePath).Contains(marker, StringComparison.Ordinal))
-            {
-                TraceJournal.Record(
-                    (useApm ? "body-apm" : "body")
-                    + "-abort-latency-ms:"
-                    + detection.ElapsedMilliseconds);
-                return;
-            }
-
-            await Task.Delay(20);
-        }
-
-        throw new TimeoutException("The aborted request-body read did not complete.");
-    }
-
-    private static async Task ExpectContinueAsync(
-        Uri address,
-        ScenarioOptions options,
-        byte[] body,
-        int index)
-    {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        using var client = new System.Net.Sockets.TcpClient();
-        await client.ConnectAsync(address.Host, address.Port, timeout.Token);
-        await using var stream = client.GetStream();
-        var headers = EncodeHttpHeaders(
-            $$"""
-            POST /body?mode=bufferless HTTP/1.1
-            Host: {{address.Authority}}
-            Content-Length: {{body.Length}}
-            Expect: 100-continue
-            """);
-
-        await stream.WriteAsync(headers, timeout.Token);
-        await stream.FlushAsync(timeout.Token);
-
-        var interim = await ReadResponseHeadAsync(stream, timeout.Token);
-        if (interim.StatusCode != 100)
-        {
-            throw new InvalidDataException(
-                "Expected HTTP 100 Continue, received " + interim.StatusCode + ".");
-        }
-
-        TraceJournal.Record("expect-interim:100");
-        await stream.WriteAsync(body, timeout.Token);
-        await stream.FlushAsync(timeout.Token);
-
-        var final = await ReadResponseHeadAsync(stream, timeout.Token);
-        var contentLength = final.ContentLength
-            ?? throw new InvalidDataException("The final response has no Content-Length.");
-        var responseBody = new byte[contentLength];
-        await ReadExactlyAsync(stream, responseBody, timeout.Token);
-
-        if (options.ResponseDirectory != null)
-        {
-            await File.WriteAllBytesAsync(
-                Path.Combine(options.ResponseDirectory, index + ".body"),
-                responseBody);
-        }
-
-        TraceJournal.Record("request:expect-continue:" + final.StatusCode);
-        final.RecordHeader("Content-Type", "content-type");
-        final.RecordHeader("X-Remote-Port", "x-remote-port");
-    }
-
-    private static async Task<RawResponseHead> ReadResponseHeadAsync(
-        Stream stream,
-        CancellationToken cancellationToken)
-    {
-        var bytes = new List<byte>();
-        var current = new byte[1];
-
-        while (bytes.Count < 64 * 1024)
-        {
-            if (await stream.ReadAsync(current, cancellationToken) == 0)
-            {
-                throw new EndOfStreamException("The HTTP response ended before its headers.");
-            }
-
-            bytes.Add(current[0]);
-            var count = bytes.Count;
-            if (count >= 4
-                && bytes[count - 4] == '\r'
-                && bytes[count - 3] == '\n'
-                && bytes[count - 2] == '\r'
-                && bytes[count - 1] == '\n')
-            {
-                return RawResponseHead.Parse(Encoding.ASCII.GetString(bytes.ToArray()));
-            }
-        }
-
-        throw new InvalidDataException("The HTTP response headers exceeded 64 KB.");
-    }
-
-    private static byte[] EncodeHttpHeaders(string headers)
-    {
-        var terminated = headers.ReplaceLineEndings("\r\n") + "\r\n\r\n";
-        return Encoding.ASCII.GetBytes(terminated);
-    }
-
-    private static async Task ReadExactlyAsync(
-        Stream stream,
-        byte[] buffer,
-        CancellationToken cancellationToken)
-    {
-        var offset = 0;
-        while (offset < buffer.Length)
-        {
-            var count = await stream.ReadAsync(buffer.AsMemory(offset), cancellationToken);
-            if (count == 0)
-            {
-                throw new EndOfStreamException("The HTTP response body ended early.");
-            }
-
-            offset += count;
-        }
-    }
-
     private static async Task RecordResponseAsync(
         ScenarioOptions options,
         string label,
@@ -742,67 +506,6 @@ public static class Program
     private static string EnsureTrailingSeparator(string path) =>
         Path.EndsInDirectorySeparator(path) ? path : path + Path.DirectorySeparatorChar;
 
-    private sealed class DelayedChunkedContent(byte[] payload) : HttpContent
-    {
-        protected override async Task SerializeToStreamAsync(
-            Stream stream,
-            TransportContext? context)
-        {
-            var first = payload.Length / 2;
-            await stream.WriteAsync(payload.AsMemory(0, first));
-            await stream.FlushAsync();
-            await Task.Delay(50);
-            await stream.WriteAsync(payload.AsMemory(first));
-        }
-
-        protected override bool TryComputeLength(out long length)
-        {
-            length = 0;
-            return false;
-        }
-    }
-
-    private sealed class RawResponseHead(
-        int statusCode,
-        Dictionary<string, string> headers)
-    {
-        internal int StatusCode { get; } = statusCode;
-
-        internal int? ContentLength =>
-            headers.TryGetValue("Content-Length", out var value)
-                ? int.Parse(value, System.Globalization.CultureInfo.InvariantCulture)
-                : null;
-
-        internal static RawResponseHead Parse(string value)
-        {
-            var lines = value.Split(new[] { "\r\n" }, StringSplitOptions.None);
-            var status = lines[0].Split(' ');
-            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            for (var i = 1; i < lines.Length && lines[i].Length != 0; i++)
-            {
-                var separator = lines[i].IndexOf(':');
-                if (separator > 0)
-                {
-                    headers[lines[i].Substring(0, separator)] = lines[i]
-                        .Substring(separator + 1)
-                        .Trim();
-                }
-            }
-
-            return new RawResponseHead(
-                int.Parse(status[1], System.Globalization.CultureInfo.InvariantCulture),
-                headers);
-        }
-
-        internal void RecordHeader(string name, string traceName)
-        {
-            if (headers.TryGetValue(name, out var value))
-            {
-                TraceJournal.Record(traceName + ":" + value);
-            }
-        }
-    }
 }
 
 internal sealed class ScenarioOptions
@@ -818,7 +521,6 @@ internal sealed class ScenarioOptions
         bool serve,
         long? kestrelMaxBodyBytes,
         List<string> requests,
-        List<string> bodyProbes,
         List<string> postbacks)
     {
         KestrelMaxBodyBytes = kestrelMaxBodyBytes;
@@ -831,7 +533,6 @@ internal sealed class ScenarioOptions
         TracePath = tracePath;
         ResponseDirectory = responseDirectory;
         Requests = requests;
-        BodyProbes = bodyProbes;
         Postbacks = postbacks;
     }
 
@@ -855,8 +556,6 @@ internal sealed class ScenarioOptions
 
     internal List<string> Requests { get; }
 
-    internal List<string> BodyProbes { get; }
-
     internal List<string> Postbacks { get; }
 
     internal static ScenarioOptions Parse(string[] args)
@@ -871,7 +570,6 @@ internal sealed class ScenarioOptions
         var serve = false;
         long? kestrelMaxBodyBytes = null;
         var requests = new List<string>();
-        var bodyProbes = new List<string>();
         var postbacks = new List<string>();
 
         for (var i = 0; i < args.Length; i++)
@@ -918,10 +616,6 @@ internal sealed class ScenarioOptions
                     requests.Add(Require(value, "--request"));
                     i++;
                     break;
-                case "--body-probe":
-                    bodyProbes.Add(Require(value, "--body-probe"));
-                    i++;
-                    break;
                 case "--postback":
                     postbacks.Add(Require(value, "--postback"));
                     i++;
@@ -949,7 +643,6 @@ internal sealed class ScenarioOptions
             serve,
             kestrelMaxBodyBytes,
             requests,
-            bodyProbes,
             postbacks);
     }
 

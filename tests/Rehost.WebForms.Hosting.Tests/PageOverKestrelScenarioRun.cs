@@ -68,11 +68,6 @@ internal sealed class ScenarioRun : IDisposable
 
     internal ScenarioJournalReader Journal => ScenarioJournalReader.Parse(Trace);
 
-    internal static ScenarioRun ServeBody(ScenarioFixture fixture, params string[] probes)
-    {
-        return Run(fixture, "--body-probe", probes);
-    }
-
     // Responses are numbered in order across probes: one render, then one per postback round.
     internal static ScenarioRun Postback(params string[] probes)
     {
