@@ -19,9 +19,6 @@ internal sealed class ScenarioRun : IDisposable
 
     internal List<string> Trace { get; }
 
-    internal byte[] ExpectedResponse =>
-        File.ReadAllBytes(Path.Combine(ApplicationPath, "Default.expected.html"));
-
     internal byte[] Response(int index) =>
         File.ReadAllBytes(Path.Combine(_root.FullName, "responses", index + ".body"));
 
@@ -70,11 +67,6 @@ internal sealed class ScenarioRun : IDisposable
     }
 
     internal ScenarioJournalReader Journal => ScenarioJournalReader.Parse(Trace);
-
-    internal static ScenarioRun Serve(params string[] requests)
-    {
-        return Run(Fixtures.Page, "--request", requests);
-    }
 
     internal static ScenarioRun ServeBody(ScenarioFixture fixture, params string[] probes)
     {

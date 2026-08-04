@@ -919,7 +919,9 @@ internal sealed class ScenarioOptions
             }
         }
 
-        if (requests.Count == 0)
+        // The run mode always issues at least one request; a serve mode with nothing declared is
+        // passive and driven by the test's own client.
+        if (!serve && requests.Count == 0)
         {
             requests.Add("/default");
         }

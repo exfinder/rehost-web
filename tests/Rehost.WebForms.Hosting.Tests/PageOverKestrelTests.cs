@@ -10,23 +10,28 @@ namespace Rehost.WebForms.Hosting.Tests;
 //
 // Both requests share that process. The fixture is written for it: Default.aspx.cs never appends
 // to PageProbe.Stages, so a second request renders the same body as the first.
-public sealed class PageOverKestrelTests(PageScenario scenario) : IClassFixture<PageScenario>
+public sealed class PageOverKestrelTests(PageLiveScenario scenario) : IClassFixture<PageLiveScenario>
 {
-    private ScenarioRun Run => scenario.Run;
+    private const string PageRequest = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
 
     [Fact]
-    public void Serves_A_Dynamically_Compiled_Page_Over_Kestrel()
+    public async Task Serves_A_Dynamically_Compiled_Page_Over_Kestrel()
     {
-        Run.Trace.ShouldContain("request:" + PageScenario.PageRequest + ":200");
-        Run.Trace.ShouldContain("content-type:text/html; charset=utf-8");
-        Run.Response(PageScenario.PageRequest).ShouldBe(Run.ExpectedResponse);
+        var response = await scenario.Client.GetAsync(PageRequest);
+
+        response.StatusCode.ShouldBe(200);
+        response.ContentType.ShouldBe("text/html; charset=utf-8");
+        response.Bytes.ShouldBe(File.ReadAllBytes(
+            Path.Combine(scenario.ApplicationPath, "Default.expected.html")));
     }
 
     [Fact]
-    public void Refuses_A_Path_Framework_Maps_To_The_Forbidden_Handler()
+    public async Task Refuses_A_Path_Framework_Maps_To_The_Forbidden_Handler()
     {
         // The page is routed by the shipped root configuration, so this also covers the *.aspx
         // httpHandlers mapping reaching PageHandlerFactory.
-        Run.Trace.ShouldContain("request:/Default.aspx.cs:403");
+        var response = await scenario.Client.GetAsync("/Default.aspx.cs");
+
+        response.StatusCode.ShouldBe(403);
     }
 }

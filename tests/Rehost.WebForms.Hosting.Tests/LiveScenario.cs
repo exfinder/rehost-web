@@ -4,7 +4,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // One passively-serving host process for a fixture; tests act through the client and assert on
 // the response, reaching for the journal only for server-side facts.
-internal sealed class LiveScenario : IDisposable
+public class LiveScenario : IDisposable
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
 
