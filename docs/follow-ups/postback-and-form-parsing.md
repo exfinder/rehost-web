@@ -1,7 +1,7 @@
 # Postback and form parsing
 
-Status: implemented and verified on macOS `arm64` and Windows `x64`; the
-Framework oracle session is outstanding. Scope: urlencoded form parsing,
+Status: implemented and verified on macOS `arm64` and Windows `x64`. The
+oracle-session commitment is resolved below (2026-08-05) under ADR 0044/0045. Scope: urlencoded form parsing,
 view state, control state, a postback that changes rendered output, and
 read-only multipart. Sits on the
 [entity-body bridge](request-entity-body-bridge.md).
@@ -79,22 +79,33 @@ and request validation rejecting markup.
 
 Every test was confirmed to fail with the behavior removed, by failing test name.
 
-## Outstanding
+## Oracle-session resolution (2026-08-05)
 
-Both need the Windows `x64` host. The cross-runtime payload half of the first
-item now has measured answers recorded in
-[mixed farm and incremental migration](mixed-farm-incremental-migration.md);
-what remains is making them a standing gate rather than an observation.
+The pre-demotion commitment to a full golden oracle session is retired, judged
+under ADR 0044's evidence rule and ADR 0045's capture-over-golden policy:
 
-- One oracle session comparing status, headers, markup excluding the three crypto
-  fields, and the postback event sequence, plus a Framework-captured `__VIEWSTATE`
-  posted to the port and the reverse.
-- Confirm ledger P43's narrowed claim against .NET Framework 4.8.1 rather than
-  against Reference Source. Two readings settle it: whether
-  `HKLM\SOFTWARE\Microsoft\.NETFramework\v4.0.30319\AspNetEnforceViewStateMac`
-  is set on that host, and whether a page with a server form renders
-  `__VIEWSTATEGENERATOR` there. It also decides which case the oracle would run
-  under if a fixture ever stopped pinning `aspnet:AllowInsecureDeserialization`.
+- Markup comparison "excluding the three crypto fields" would require a
+  redaction layer — exactly the normalization the parity comparison forbids.
+  The golden-session instrument is architecturally wrong for pages carrying a
+  server form; captures and pinned rendered output are the right one, and both
+  exist (`Framework.postback` is a standing gate; redacted-markup byte
+  identity is a recorded measurement in
+  [mixed farm and incremental migration](mixed-farm-incremental-migration.md)).
+- Postback event sequencing is decided by verbatim imported source — no
+  imported file changed in this slice — so port-local tests gate it, per the
+  ADR 0043 reasoning ADR 0044 generalizes.
+- The reverse payload direction (port-rendered `__VIEWSTATE` accepted by a
+  Framework node) is the one genuinely Framework-execution-only claim; its
+  disposition is owned by the mixed-farm follow-up.
+
+Ledger P43's two readings were taken on .NET Framework 4.8.1 (release 533509,
+`win-oracle`, 2026-08-05): `AspNetEnforceViewStateMac` is present and set
+to 1, and a page with a server form renders `__VIEWSTATEGENERATOR` there
+(the `CA0B0334` measurement). The port's fail-safe — enforcement always on,
+generator field always rendered — matches the observed machine state. The
+key-absent case stays recovered-from-source; the fixture keeps pinning
+`aspnet:AllowInsecureDeserialization` so no test inherits patch state from a
+host.
 
 ## Explicitly out
 

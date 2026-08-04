@@ -2,9 +2,9 @@
 
 Status: the Framework-to-port direction is gated by
 `MixedFarmOverKestrelTests` against a payload captured from .NET Framework
-4.8.1. The reverse direction is measured but not gated: replaying a port-rendered
-payload needs a Framework node, so it belongs to the oracle prototype. Priority:
-high — this is a deployment capability future consumers depend on.
+4.8.1. The reverse direction is measured, with an on-demand verification
+procedure decided under ADR 0045 (see "Done when"). Priority: high — this is a
+deployment capability future consumers depend on.
 
 ## The scenario
 
@@ -106,8 +106,17 @@ unaffected; the residual gap is in error reporting.
 
 ## Done when
 
-- The reverse direction runs from the oracle prototype rather than from
-  throwaway scaffolding, so it survives as a regression gate. Only the
-  Framework-to-port direction is gated today.
-- The error-path divergence above is either covered by a differential or
-  recorded as an accepted deviation with its consumer-visible shape stated.
+- Resolved (2026-08-05, ADR 0045 policy): the reverse direction does not get a
+  standing golden gate. The Framework-to-port direction stays gated by the
+  captured payload; port-to-Framework acceptance is verified by an on-demand
+  Windows procedure — render the page here, post the payload to a Framework
+  node sharing the fixture's `<machineKey>` — to be re-run when anything in
+  the derivation chain changes: `ObjectStateFormatter.GetSpecificPurposes`
+  inputs, machine-key material handling, or `StringUtil` hashing. A future
+  capture of a port-rendered payload replayed on Framework may promote this
+  to a fixture if regressions ever demand it.
+- The error-path divergence above is an accepted deviation, recorded in ledger
+  P48: a corrupt or expired payload posted across runtimes takes this
+  runtime's invalid-view-state branch rather than the branch a matching farm
+  would take; the success path is unaffected, and the field is otherwise only
+  compared against values this runtime produced.
