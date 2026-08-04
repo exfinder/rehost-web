@@ -5,7 +5,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace CoreParity.Probes;
+namespace Rehost.WebForms.ScenarioProbes;
 
 // The page renders these into its own body, so event ordering needs no side channel.
 public static class PostbackTrace

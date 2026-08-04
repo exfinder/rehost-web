@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace CoreParity.Probes;
+namespace Rehost.WebForms.ScenarioHost;
 
 public sealed class MultipartFile
 {

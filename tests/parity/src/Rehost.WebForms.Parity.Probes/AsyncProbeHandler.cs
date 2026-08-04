@@ -4,7 +4,7 @@ using System.Threading;
 using System.Web;
 using Rehost.WebForms.Parity.Contracts;
 
-namespace CoreParity.Probes;
+namespace Rehost.WebForms.Parity.Probes;
 
 public sealed class AsyncProbeHandler : IHttpAsyncHandler
 {

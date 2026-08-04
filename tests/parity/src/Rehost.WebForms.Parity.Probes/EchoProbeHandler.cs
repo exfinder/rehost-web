@@ -3,7 +3,7 @@ using System.Text;
 using System.Web;
 using Rehost.WebForms.Parity.Contracts;
 
-namespace CoreParity.Probes;
+namespace Rehost.WebForms.Parity.Probes;
 
 // Concurrent requests that are indistinguishable cannot detect a crossed context, so each one
 // writes back the identity it was given. A response carrying someone else's name is a mismatch.

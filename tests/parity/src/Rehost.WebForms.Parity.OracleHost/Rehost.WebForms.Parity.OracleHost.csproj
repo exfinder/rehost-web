@@ -10,7 +10,7 @@
     <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <ProjectReference Include="../Rehost.WebForms.Parity.OracleRunner/Rehost.WebForms.Parity.OracleRunner.csproj" />
     <ProjectReference
-      Include="../Rehost.WebForms.Parity.OracleProbes/Rehost.WebForms.Parity.OracleProbes.csproj"
+      Include="../Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
       ReferenceOutputAssembly="false" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
@@ -28,7 +28,7 @@
       <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
       <_ErrorFixtureBin>$(TargetDir)fixture/app-errors/bin</_ErrorFixtureBin>
       <_FixtureTemp>$(TargetDir)fixture/temp</_FixtureTemp>
-      <_ProbeAssembly>$(MSBuildProjectDirectory)/../Rehost.WebForms.Parity.OracleProbes/bin/$(Configuration)/net481/Rehost.WebForms.Parity.Probes.dll</_ProbeAssembly>
+      <_ProbeAssembly>$(MSBuildProjectDirectory)/../Rehost.WebForms.Parity.Probes/bin/$(Configuration)/net481/Rehost.WebForms.Parity.Probes.dll</_ProbeAssembly>
     </PropertyGroup>
 
     <Error

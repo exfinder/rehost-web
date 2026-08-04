@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using CoreParity.Probes;
 using Rehost.WebForms.Hosting;
 
 namespace Rehost.WebForms.ScenarioHost;

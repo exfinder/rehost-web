@@ -347,11 +347,11 @@ internal static class Program
         if (typeof(Program).Assembly.GetReferencedAssemblies().Any(
                 name => string.Equals(
                     name.Name,
-                    "CoreParity.Probes",
+                    "Rehost.WebForms.Parity.Probes",
                     StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidOperationException(
-                "Host assembly must not reference CoreParity.Probes.");
+                "Host assembly must not reference Rehost.WebForms.Parity.Probes.");
         }
     }
 

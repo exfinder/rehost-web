@@ -1,7 +1,7 @@
 using System;
 using System.Web;
 
-namespace CoreParity.Probes;
+namespace Rehost.WebForms.Parity.Probes;
 
 public sealed class ThrowProbeHandler : IHttpHandler
 {

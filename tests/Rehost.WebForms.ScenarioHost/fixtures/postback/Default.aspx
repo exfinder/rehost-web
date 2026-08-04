@@ -1,5 +1,5 @@
 <%@ Page Language="C#" %>
-<%@ Register TagPrefix="p" Namespace="CoreParity.Probes" Assembly="Rehost.WebForms.ScenarioProbes" %>
+<%@ Register TagPrefix="p" Namespace="Rehost.WebForms.ScenarioProbes" Assembly="Rehost.WebForms.ScenarioProbes" %>
 <script runat="server">
 
     // Carried is written only here, so on a postback its value can only come from view state.

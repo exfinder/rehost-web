@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Web;
 
-namespace CoreParity.Probes;
+namespace Rehost.WebForms.Parity.Probes;
 
 public sealed class BodyProbeHandler : IHttpHandler
 {
