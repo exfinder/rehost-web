@@ -3,29 +3,10 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// All the probes share one host process: they share one fixture, so they are one application, and
-// none of them claims anything about cold activation. Spawning per test paid a full activation and
-// page compilation — about 1.7s — to serve two requests that cost nothing.
-public sealed class PostbackScenario : IDisposable
-{
-    internal ScenarioRun Run { get; } = ScenarioRun.Postback(
-        "apply",
-        "apply-twice",
-        "bump",
-        "tamper",
-        "cross-page",
-        "unsafe-input");
-
-    public void Dispose()
-    {
-        Run.Dispose();
-    }
-}
-
 // The client renders the page, scrapes the form it rendered, and posts that back over a real
 // socket, so nothing here replays a recorded body.
+[Collection(nameof(PostbackCollection))]
 public sealed class PostbackOverKestrelTests(PostbackScenario scenario)
-    : IClassFixture<PostbackScenario>
 {
     private ScenarioRun Run => scenario.Run;
 

@@ -3,8 +3,8 @@ using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
+[Collection(nameof(PageCompilationCollection))]
 public sealed class PageCompilationTests(PageCompilationFixture fixture)
-    : IClassFixture<PageCompilationFixture>
 {
     private const string Request = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
 

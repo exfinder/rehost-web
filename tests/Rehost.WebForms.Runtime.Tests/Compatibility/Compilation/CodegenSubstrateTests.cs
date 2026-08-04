@@ -4,8 +4,8 @@ using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.ScenarioTra
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
+[Collection(nameof(CodegenSubstrateCollection))]
 public sealed class CodegenSubstrateTests(CodegenSubstrateFixture fixture)
-    : IClassFixture<CodegenSubstrateFixture>
 {
     [Fact]
     public void Compiles_The_Top_Level_Files_In_Order_Before_The_First_Request()

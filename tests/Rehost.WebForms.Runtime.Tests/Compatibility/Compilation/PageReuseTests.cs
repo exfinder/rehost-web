@@ -3,15 +3,16 @@ using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
-public sealed class PageReuseTests
+// The first run is the shared page fixture's; only the restart run is paid for here.
+[Collection(nameof(PageCompilationCollection))]
+public sealed class PageReuseTests(PageCompilationFixture fixture)
 {
     private const string Request = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
 
     [Fact]
     public void Reuses_The_Page_Assembly_Across_A_Restart()
     {
-        using var application = PageApplication.Create();
-        application.Run(Request);
+        var application = fixture.Application;
         var first = application.PageAssemblies();
 
         application.Run(Request);

@@ -3,23 +3,10 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-public sealed class MultipartScenario : IDisposable
-{
-    internal ScenarioRun Run { get; } = ScenarioRun.Postback(
-        "upload",
-        "upload-empty",
-        "upload-none");
-
-    public void Dispose()
-    {
-        Run.Dispose();
-    }
-}
-
 // Reading only. HttpPostedFile.SaveAs and its RequireRootedSaveAsPath check are a separate story:
 // Path.IsPathRooted disagrees across operating systems, so that branch needs its own coverage.
-public sealed class MultipartPostbackOverKestrelTests(MultipartScenario scenario)
-    : IClassFixture<MultipartScenario>
+[Collection(nameof(PostbackCollection))]
+public sealed class MultipartPostbackOverKestrelTests(PostbackScenario scenario)
 {
     private ScenarioRun Run => scenario.Run;
 

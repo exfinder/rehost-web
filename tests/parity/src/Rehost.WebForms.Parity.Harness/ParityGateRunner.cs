@@ -45,6 +45,8 @@ public sealed class ParityGateRunner
     public IReadOnlyList<string> SessionNames =>
         manifest.Value.Sessions.Select(session => session.Name).ToList();
 
+    public IReadOnlyList<Contracts.SessionSpecification> Sessions => manifest.Value.Sessions;
+
     public int GoldenSchemaVersion => golden.Value.SchemaVersion;
 
     public Contracts.SessionObservation RunSession(string name, string? fixtureRoot = null)

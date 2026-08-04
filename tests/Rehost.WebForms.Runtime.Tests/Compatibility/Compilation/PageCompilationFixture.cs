@@ -20,6 +20,8 @@ public sealed class PageCompilationFixture : IDisposable
         AssemblyEvidence = ReadAssemblyEvidence(_application.PageAssemblyPath());
     }
 
+    internal PageApplication Application => _application;
+
     internal ImmutableArray<string> FirstTrace { get; }
     internal ImmutableArray<byte> FirstResponse { get; }
     internal string FirstResponseText { get; }

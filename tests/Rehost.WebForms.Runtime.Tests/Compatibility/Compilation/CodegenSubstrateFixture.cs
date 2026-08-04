@@ -16,6 +16,8 @@ public sealed class CodegenSubstrateFixture : IDisposable
         SatelliteCount = Directory.GetFiles(Path.Combine(segment, "fr"), "*.resources.dll").Length;
     }
 
+    internal ScenarioApplication Application => _application;
+
     internal ImmutableArray<string> FirstTrace { get; }
     internal int AppCodeCount { get; }
     internal int SubCodeCount { get; }

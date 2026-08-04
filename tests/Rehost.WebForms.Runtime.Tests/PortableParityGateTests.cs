@@ -71,9 +71,11 @@ public sealed class PortableParityGateTests
                 Path.Combine(root.FullName, "app", "web.config"),
                 temp);
 
-            foreach (var session in Gate.SessionNames)
+            // One session per fixture is enough: the claim is about segment layout, not about
+            // which sessions ran.
+            foreach (var group in Gate.Sessions.GroupBy(session => session.Fixture))
             {
-                Gate.RunSession(session, root.FullName);
+                Gate.RunSession(group.First().Name, root.FullName);
             }
 
             var codegenRoot = Path.Combine(temp, "root");
