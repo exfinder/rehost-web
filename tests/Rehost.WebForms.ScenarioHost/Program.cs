@@ -534,9 +534,11 @@ public static class Program
         await RecordResponseAsync(options, probe, response, index);
     }
 
+    // The deadline is deliberately generous: reset-detection latency is load-dependent (observed
+    // 0.8s-8.1s under suite load on 4 vCPUs) and is recorded in the trace, never asserted.
     private static async Task AbortBodyAsync(Uri address, bool useApm)
     {
-        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
         using var client = new System.Net.Sockets.TcpClient();
         await client.ConnectAsync(address.Host, address.Port, timeout.Token);
         await using var stream = client.GetStream();
@@ -563,6 +565,8 @@ public static class Program
         client.Client.LingerState = new System.Net.Sockets.LingerOption(true, 0);
         client.Close();
 
+        var detection = System.Diagnostics.Stopwatch.StartNew();
+
         while (!timeout.IsCancellationRequested)
         {
             var tracePath = Environment.GetEnvironmentVariable(HostJournal.TraceVariable)!;
@@ -570,6 +574,10 @@ public static class Program
             if (File.Exists(tracePath)
                 && File.ReadAllText(tracePath).Contains(marker, StringComparison.Ordinal))
             {
+                HostJournal.Record(
+                    (useApm ? "body-apm" : "body")
+                    + "-abort-latency-ms:"
+                    + detection.ElapsedMilliseconds);
                 return;
             }
 
