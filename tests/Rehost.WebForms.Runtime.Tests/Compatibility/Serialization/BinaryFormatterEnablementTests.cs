@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Shouldly;
 using Xunit;
+using Rehost.WebForms.Parity.Harness;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Serialization;
 
@@ -17,17 +18,8 @@ public sealed class BinaryFormatterEnablementTests
     [InlineData("Rehost.WebForms.ScenarioHost")]
     public void A_Consuming_Application_Enables_Binary_Formatter_Serialization(string application)
     {
-        var configuration = Path.GetFileName(
-            Path.GetDirectoryName(
-                Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
-
         var path = Path.Combine(
-            RepositoryRoot,
-            "tests",
-            application,
-            "bin",
-            configuration,
-            "net10.0",
+            TestOutputPaths.TestProjectOutput(application),
             application + ".runtimeconfig.json");
 
         File.Exists(path).ShouldBeTrue(path);
@@ -40,22 +32,6 @@ public sealed class BinaryFormatterEnablementTests
             .GetProperty(Switch)
             .GetBoolean()
             .ShouldBeTrue(path);
-    }
-
-    private static string RepositoryRoot { get; } = FindRepositoryRoot();
-
-    private static string FindRepositoryRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory != null
-            && !File.Exists(Path.Combine(directory.FullName, "Rehost.WebForms.slnx")))
-        {
-            directory = directory.Parent;
-        }
-
-        return directory?.FullName
-            ?? throw new InvalidOperationException("Repository root was not found.");
     }
 
     // The out-of-band package must win over the shared framework's throwing stub.

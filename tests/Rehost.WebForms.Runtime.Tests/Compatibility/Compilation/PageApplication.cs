@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Shouldly;
+using Rehost.WebForms.Parity.Harness;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
@@ -154,23 +155,6 @@ internal sealed class PageApplication : IDisposable
 
     private static string FindHostDirectory()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory != null
-            && !File.Exists(Path.Combine(directory.FullName, "Rehost.WebForms.slnx")))
-        {
-            directory = directory.Parent;
-        }
-
-        var root = directory?.FullName
-            ?? throw new InvalidOperationException("Repository root was not found.");
-
-        return Path.Combine(
-            root,
-            "tests",
-            "Rehost.WebForms.ScenarioHost",
-            "bin",
-            "Debug",
-            "net10.0");
+        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
     }
 }

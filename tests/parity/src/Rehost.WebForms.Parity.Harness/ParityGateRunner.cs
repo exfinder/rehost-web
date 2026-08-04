@@ -17,14 +17,9 @@ public sealed class ParityGateRunner
     {
         RepositoryRoot = RepositoryLocator.FindRoot(AppContext.BaseDirectory);
 
-        // .../bin/<configuration>/net10.0/ — the host is built in whatever configuration the
-        // test assembly was, so the gate can never run a stale configuration's binaries.
-        var configuration = Path.GetFileName(
-            Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
-
         HostDirectory = Path.Combine(
             RepositoryRoot, "tests", "parity", "src", hostProjectName,
-            "bin", configuration, "net10.0");
+            "bin", TestOutputPaths.Configuration(), "net10.0");
         HostAssemblyPath = Path.Combine(HostDirectory, hostProjectName + ".dll");
         ManifestPath = Path.Combine(RepositoryRoot, "tests", "parity", "sessions.json");
         GoldenPath = Path.Combine(

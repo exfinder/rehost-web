@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Shouldly;
+using Rehost.WebForms.Parity.Harness;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
@@ -172,29 +173,6 @@ internal sealed class ScenarioRun : IDisposable
 
     private static string FindHostDirectory()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory != null
-            && !File.Exists(Path.Combine(directory.FullName, "Rehost.WebForms.slnx")))
-        {
-            directory = directory.Parent;
-        }
-
-        var repositoryRoot = directory?.FullName
-            ?? throw new InvalidOperationException("Repository root was not found.");
-
-        // .../bin/<configuration>/net10.0/ — the host is built in whatever configuration this
-        // test assembly was, so the scenario can never run a stale configuration's binaries.
-        var configuration = Path.GetFileName(
-            Path.GetDirectoryName(
-                Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
-
-        return Path.Combine(
-            repositoryRoot,
-            "tests",
-            "Rehost.WebForms.ScenarioHost",
-            "bin",
-            configuration,
-            "net10.0");
+        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
     }
 }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Shouldly;
+using Rehost.WebForms.Parity.Harness;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
@@ -190,30 +191,7 @@ internal sealed class ScenarioApplication : IDisposable
 
     private static string FindHostDirectory()
     {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory != null
-            && !File.Exists(Path.Combine(directory.FullName, "Rehost.WebForms.slnx")))
-        {
-            directory = directory.Parent;
-        }
-
-        if (directory == null)
-        {
-            throw new InvalidOperationException("Repository root was not found.");
-        }
-
-        // .../bin/<configuration>/net10.0/
-        var configuration = Path.GetFileName(
-            Path.GetDirectoryName(
-                Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
-
-        return Path.Combine(
-            directory.FullName,
-            "tests",
-            "Rehost.WebForms.ScenarioHost",
-            "bin",
-            configuration,
-            "net10.0");
+        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
     }
 }
 
@@ -235,7 +213,8 @@ internal sealed class ScenarioGate : IDisposable
 
     internal static ScenarioGate Take()
     {
-        var name = @"Localehost-scenario-" + Guid.NewGuid().ToString("n");
+        var name = @"Local
+ehost-scenario-" + Guid.NewGuid().ToString("n");
         var mutex = new Mutex(false, name);
         mutex.WaitOne();
 
