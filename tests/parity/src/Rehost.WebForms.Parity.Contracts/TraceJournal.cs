@@ -1,5 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Threading;
 
 namespace Rehost.WebForms.Parity.Contracts;
 
@@ -20,9 +23,47 @@ public static class TraceJournal
             return;
         }
 
+        var payload = Encoding.UTF8.GetBytes(entry + Environment.NewLine);
+
         lock (Gate)
         {
-            File.AppendAllText(path, entry + Environment.NewLine);
+            // Writers and readers must both share the file: on Windows an overlapping open with
+            // a narrower share mode throws, and a journal write that throws loses the entry and
+            // fails whatever recorded it. Retry rides out readers that do not share for write.
+            var attempt = Stopwatch.StartNew();
+            while (true)
+            {
+                try
+                {
+                    using var stream = new FileStream(
+                        path,
+                        FileMode.Append,
+                        FileAccess.Write,
+                        FileShare.ReadWrite | FileShare.Delete);
+                    stream.Write(payload, 0, payload.Length);
+                    return;
+                }
+                catch (IOException) when (attempt.ElapsedMilliseconds < 5000)
+                {
+                    Thread.Sleep(1);
+                }
+            }
         }
+    }
+
+    public static string ReadAll(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return "";
+        }
+
+        using var stream = new FileStream(
+            path,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete);
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 }

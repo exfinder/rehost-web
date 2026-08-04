@@ -1,96 +1,47 @@
 # Client-reset detection latency
 
-Status: open. Scope: how long a client reset takes to reach the application, and
-the fixed wall-clock budget in the scenario harness that turns that latency into
-an intermittent Windows failure. Sits on the
-[entity-body bridge](request-entity-body-bridge.md).
+Status: resolved (2026-08-05). The "lost reset" was never a runtime defect;
+reset detection worked throughout. The failure lived in the scenario harness's
+trace-file channel.
 
-## What is already settled
+## Root cause
 
-A reset used to reach the application as a clean, empty body. `IsClientConnected`
-answered from `RequestAborted`, which Kestrel raises *after* the read that
-observed the reset, so `HttpBufferlessInputStream.Read` saw a zero-byte read from
-a still-connected client and returned end of body. It now answers from the
-terminal state the read latched. That is fixed and covered by
-`AspNetCoreWorkerRequestTests`; this follow-up is only about *when* the reset is
-observed, not what it turns into.
+All scenario evidence meets in one trace file. Probe handlers append to it;
+the abort probe's client polled it with `File.ReadAllText`, which on Windows
+opens the file sharing reads but not writes. For the duration of each poll, a
+concurrent journal append threw `IOException` ("being used by another
+process"). When the collision hit the probe's outcome marker, three things
+cascaded: the marker was lost (no retry), the `IOException` escaped the
+probe's `HttpException`-only catch and turned the observed request into a 500,
+and the client polled for a marker that could never arrive until its budget
+expired — indistinguishable from "the server never observed the abort".
 
-## The remaining problem
+Every earlier observation follows: load-dependence (more journal traffic and
+slower polls, more collisions), the bimodal shape (detection was always
+~30 ms; the coin-flip was the marker write), the kernel connection being gone
+during "hangs" (the request had already 500'd), and instrumentation vanishing
+on failing runs (debug writes used the same file). Kestrel's own logs confirm
+the healthy path end to end: the client's linger-RST arrives as a FIN on
+Windows loopback, the pending body read completes with
+`BadHttpRequestException`, and the coordinator latches it into `HttpException`
+in 21–62 ms, every run.
 
-`AbortScenario` fails roughly one suite round in eight on the 4-vCPU Windows
-host, timing out against the harness's 10s budget in `AbortBodyAsync`. It is a
-harness deadline, not a behavioral assertion: the probe polls the trace until the
-handler records its outcome.
+## The fix
 
-Adding a fourth concurrent scenario-host class left that rate unchanged — one
-failure in eight rounds both with and without it, on the same binaries. So the
-trigger is not simply the number of hosts running at once, and a theory resting
-on that alone does not fit.
+`TraceJournal.Record` opens for append with `FileShare.ReadWrite | Delete` and
+retries briefly on `IOException`; pollers read through `TraceJournal.ReadAll`
+with the same sharing. `TraceJournalTests` hammers a concurrent reader/writer
+pair. Confirmed on the 4-vCPU Windows host with a load harness that
+reproduced the failure at 40–75% before the fix: 0/24 afterwards, all
+detections 7–117 ms.
 
-Measured time from client reset to the application observing it:
+## Residual notes
 
-| | idle | macOS under load | Windows under suite load |
-|---|---|---|---|
-| synchronous bufferless read | ~47ms | 21ms median, 0.75-3s tail | 0.8s-8.1s |
-| worker APM read | ~23ms | 23ms, no spread | 34-50ms |
-
-The APM path is uniform everywhere. The synchronous path is not, and its Windows
-tail lands close enough to 10s to decide the round. Whatever the cause, it is
-below this port: both paths reach the same `PipeReader`, and only the read sizes
-differ — `CopyTo` asks for 81920 bytes, the APM probe for 3.
-
-## What to establish
-
-- Where the synchronous tail comes from. The read-size difference and Kestrel's
-  minimum request-body data rate are the two candidates worth eliminating first;
-  neither has been tested.
-- Whether the tail exists off the test harness at all, or is an artifact of five
-  scenario hosts each activating an application on four cores.
-- Whether Framework shows comparable spread. The oracle can hold a request open
-  after a reset, so this is answerable rather than merely arguable.
-
-## The budget decision
-
-Decided (2026-08-04): the split-claim option. `AbortBodyAsync` asserts the
-behavior under a 60s deadline and records the observed detection latency in the
-trace as `body[-apm]-abort-latency-ms`, never asserting on it.
-
-Nothing here should serialize the scenario classes. That was tried, and it
-converted a genuine defect into what looked like a scheduling artifact.
-
-## win-oracle findings (2026-08-04)
-
-On the 4-vCPU EC2 host the failure is no longer a tail — under the full
-Hosting.Tests suite the reset is **never observed within 60s**, deterministically
-(three consecutive rounds, pre- and post-P1-restructure binaries, so the test
-suite refactoring is exonerated by bisect). Every reduced configuration on the
-same box passes in milliseconds:
-
-| configuration | result |
-|---|---|
-| single host, one abort probe (either path) | 21-32ms |
-| single host, both probes (the `AbortScenario` shape) | 26-32ms |
-| `RequestBodyOverKestrelTests` class alone (7 hosts) | 11/11 pass |
-| full Hosting.Tests suite (all scenario classes) | never detected, 60s timeout |
-
-A 60s+ non-detection is not latency; it looks like the reset notification being
-lost outright under cross-class host concurrency and only a later stimulus would
-surface it. This narrows "where the synchronous tail comes from" above: the
-mechanism must be able to lose the event entirely, not merely delay it. Both
-sync and APM probes fail together in the suite context, unlike the earlier
-tail data where APM stayed uniform — establish which probe actually times out
-first in that context (the first probe's failure aborts the host before the
-second runs).
-
-## Reproducing
-
-Five concurrent scenario hosts are enough; the failure needs process contention,
-not a small CPU count. `DOTNET_PROCESSOR_COUNT=2` alone reproduces nothing.
-
-```text
-6 hosts x 200 aborts, alternating --body-probe abort / abort-apm
-```
-
-On a hung host, `dotnet-stack report --process-id <pid>` distinguishes a blocked
-read from a request that already returned; that distinction is what disproved
-thread-pool starvation as the cause of the original defect.
+- The 60 s abort deadline and the recorded `abort-latency-ms` lines stay: the
+  deadline is harmless and the latency lines are what made the diagnosis
+  possible.
+- The old "0.8–8.1 s sync tail" table conflated genuine scheduling latency
+  with marker-write collisions; treat it as superseded by the figures above.
+- The witness pattern (plan P5) retires file-based evidence for in-lifetime
+  facts entirely, which removes this failure class by construction — one more
+  reason to migrate the remaining journal consumers.

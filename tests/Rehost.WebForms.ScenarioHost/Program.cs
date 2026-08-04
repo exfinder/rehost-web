@@ -558,8 +558,7 @@ public static class Program
         {
             var tracePath = Environment.GetEnvironmentVariable(TraceJournal.TraceVariable)!;
             var marker = useApm ? "body-apm-abort:" : "body-abort:";
-            if (File.Exists(tracePath)
-                && File.ReadAllText(tracePath).Contains(marker, StringComparison.Ordinal))
+            if (TraceJournal.ReadAll(tracePath).Contains(marker, StringComparison.Ordinal))
             {
                 TraceJournal.Record(
                     (useApm ? "body-apm" : "body")

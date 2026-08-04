@@ -60,9 +60,9 @@ so every wake throttles to baseline within minutes.
 `dotnet test Rehost.WebForms.slnx` (whole solution) is supported: after the
 2026-08 suite refactoring it passed three consecutive clean runs (243/243) on
 this 4-vCPU host with no parallelism capping. The historical `*OverKestrel*`
-cross-project flake predated the process consolidation. The abort scenario
-remains load-sensitive (`docs/follow-ups/client-reset-detection-latency.md`);
-if its signature reappears, re-run before investigating.
+cross-project flake predated the process consolidation, and the abort-scenario
+flake is resolved — it was a trace-journal file-sharing race in the harness
+(`docs/follow-ups/client-reset-detection-latency.md`).
 
 The parity hosts are ordinary members of the main solution; building it (in
 any configuration) is all the parity gates need.

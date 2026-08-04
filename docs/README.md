@@ -64,8 +64,8 @@ verified on both, and await one Framework oracle session. A postback captured
 from a Framework node replays here, so a load-balanced farm may span both
 runtimes and an application can move a node at a time:
 [mixed farm and incremental migration](follow-ups/mixed-farm-incremental-migration.md).
-The abort budget is decided (generous deadline, latency recorded not
-asserted); the lost-reset-under-concurrency investigation remains open:
+The abort flake is resolved — a trace-journal file-sharing race in the
+harness, not a runtime defect; reset detection was correct throughout:
 [client-reset detection latency](follow-ups/client-reset-detection-latency.md).
 
 The [port plan](core-runtime-port-plan.md) owns ordering and cross-slice gates.
