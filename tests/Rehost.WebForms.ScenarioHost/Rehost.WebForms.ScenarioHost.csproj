@@ -10,18 +10,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!--
-    Fixture sources are application content, not host source. Without these removals the SDK
-    globs would compile App_Code into the host and embed the fixture's resx in it, so the
-    application would appear to work while nothing was generated at runtime.
-  -->
-  <ItemGroup>
-    <Compile Remove="fixtures/**" />
-    <EmbeddedResource Remove="fixtures/**" />
-    <None Remove="fixtures/**" />
-    <Content Include="fixtures/**" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
   <!-- The serve scenario drives the production adapter over real Kestrel. -->
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
@@ -47,6 +35,17 @@
       ReferenceOutputAssembly="false"
       PrivateAssets="all" />
   </ItemGroup>
+
+  <Target Name="StageScenarioFixtures" AfterTargets="Build" BeforeTargets="StageScenarioProbes">
+    <ItemGroup>
+      <_FixtureFile Include="fixtures/**" />
+    </ItemGroup>
+
+    <Copy
+      SourceFiles="@(_FixtureFile)"
+      DestinationFiles="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
 
   <Target Name="StageScenarioProbes" AfterTargets="Build">
     <PropertyGroup>

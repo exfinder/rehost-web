@@ -19,30 +19,15 @@
     <ProjectReference Include="../../../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content
-      Include="../../fixture/web.config"
-      Link="fixture/app/web.config"
-      CopyToOutputDirectory="PreserveNewest" />
-    <Content
-      Include="../../fixture/errors.web.config"
-      Link="fixture/app-errors/web.config"
-      CopyToOutputDirectory="PreserveNewest" />
-    <Content
-      Include="../../metadata/normalization.json"
-      Link="metadata/normalization.json"
-      CopyToOutputDirectory="PreserveNewest" />
-    <Content
-      Include="../../sessions.json"
-      Link="metadata/sessions.json"
-      CopyToOutputDirectory="PreserveNewest" />
-    <Content
-      Include="../../artifacts/golden/sessions.json"
-      Link="oracle/sessions.json"
-      CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
 
   <Target Name="StageAdapterParityApplication" AfterTargets="Build">
+    <!-- Staged, not Content: the payload must not flow into consumers' output. -->
+    <Copy SourceFiles="../../fixture/web.config" DestinationFiles="$(TargetDir)fixture/app/web.config" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="../../fixture/errors.web.config" DestinationFiles="$(TargetDir)fixture/app-errors/web.config" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="../../metadata/normalization.json" DestinationFiles="$(TargetDir)metadata/normalization.json" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="../../sessions.json" DestinationFiles="$(TargetDir)metadata/sessions.json" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="../../artifacts/golden/sessions.json" DestinationFiles="$(TargetDir)oracle/sessions.json" SkipUnchangedFiles="true" />
+
     <PropertyGroup>
       <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
       <_ErrorFixtureBin>$(TargetDir)fixture/app-errors/bin</_ErrorFixtureBin>

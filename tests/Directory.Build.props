@@ -1,0 +1,12 @@
+<Project>
+  <!--
+    Fixture folders are application payload for scenario hosts, never project sources.
+    Without this exclusion the SDK globs would compile fixture App_Code into the host and
+    embed fixture resx files, so the application would appear to work while nothing was
+    generated at runtime. Hosts copy their fixtures to output with a staging target rather
+    than Content items, so the payload does not flow transitively into consumers' bins.
+  -->
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);fixtures/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
