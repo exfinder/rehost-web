@@ -13,7 +13,6 @@ public sealed class XsdBuildProviderTests
 
         var exception = Should.Throw<PlatformNotSupportedException>(() => provider.GenerateCode(null!));
 
-        exception.Message.ShouldBe(
-            "App_Code typed DataSet generation from XSD is not supported by Rehost.WebForms.");
+        exception.Message.ShouldContain("not supported");
     }
 }

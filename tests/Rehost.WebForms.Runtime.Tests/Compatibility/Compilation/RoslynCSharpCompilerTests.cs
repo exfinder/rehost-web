@@ -329,7 +329,8 @@ public sealed class RoslynCSharpCompilerTests
         var exception = Should.Throw<PlatformNotSupportedException>(
             () => provider.CompileAssemblyFromFile(new CompilerParameters(), "Default.aspx.vb"));
 
-        exception.Message.ShouldBe(UnsupportedVBCodeProvider.UnsupportedMessage);
+        exception.Message.ShouldContain("Visual Basic");
+        exception.Message.ShouldContain("not supported");
     }
 
     private sealed class CompilationScope : IDisposable

@@ -70,8 +70,6 @@ public sealed class CodegenDirectoryTests
     public void Generation_Segment_Is_Eight_Stable_Hexadecimal_Characters()
     {
         CodegenDirectory.GenerationSegment("/var/app").ShouldBe("c9d9badb");
-        CodegenDirectory.GenerationSegment("/var/app").ShouldBe(
-            CodegenDirectory.GenerationSegment("/var/app"));
     }
 
     [Fact]

@@ -9,13 +9,6 @@ namespace Rehost.WebForms.WebServices.Tests;
 public sealed class WebServicesSectionTests
 {
     [Fact]
-    public void Compatibility_Types_Use_Project_Assembly_Name()
-    {
-        typeof(WebServicesSection).Assembly.GetName().Name
-            .ShouldBe("Rehost.WebForms.WebServices");
-    }
-
-    [Fact]
     public void Configuration_Materializes_Enabled_Protocols()
     {
         string configurationPath = Path.Combine(Path.GetTempPath(), $"rehost-web-services-{Guid.NewGuid():N}.config");

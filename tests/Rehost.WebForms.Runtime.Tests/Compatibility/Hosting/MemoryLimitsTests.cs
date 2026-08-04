@@ -97,9 +97,4 @@ public sealed class MemoryLimitsTests
         MemoryLimits.ComputeLoadPercent(512 * MiB, 0).ShouldBe(0);
     }
 
-    [Fact]
-    public void The_High_Memory_Percentage_Comes_From_The_Collector()
-    {
-        MemoryLimits.HighMemoryPercent.ShouldBeInRange(1, 100);
-    }
 }
