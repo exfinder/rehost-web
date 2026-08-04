@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
   </ItemGroup>
 
   <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />

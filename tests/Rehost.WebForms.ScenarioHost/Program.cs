@@ -8,31 +8,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rehost.WebForms.Hosting;
+using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.ScenarioHost;
-
-// The probe assembly reaches the process only through the fixture's bin directory, so the host
-// writes its own entries to the same file rather than referencing it.
-internal static class HostJournal
-{
-    internal const string TraceVariable = "REHOST_SCENARIO_TRACE";
-
-    private static readonly Lock Gate = new();
-
-    internal static void Record(string entry)
-    {
-        var path = Environment.GetEnvironmentVariable(TraceVariable);
-        if (string.IsNullOrEmpty(path))
-        {
-            return;
-        }
-
-        lock (Gate)
-        {
-            File.AppendAllText(path, entry + Environment.NewLine);
-        }
-    }
-}
 
 // One application per process is a hard constraint of the runtime, so any test that activates an
 // application needs its own process. This host runs one named scenario against one fixture and
@@ -59,7 +37,7 @@ public static class Program
 
     private static void Run(ScenarioOptions options)
     {
-        Environment.SetEnvironmentVariable(HostJournal.TraceVariable, options.TracePath);
+        Environment.SetEnvironmentVariable(TraceJournal.TraceVariable, options.TracePath);
 
         if (options.Serve)
         {
@@ -97,8 +75,8 @@ public static class Program
 
         try
         {
-            HostJournal.Record("codegen-dir:" + HttpRuntime.CodegenDir);
-            HostJournal.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
+            TraceJournal.Record("codegen-dir:" + HttpRuntime.CodegenDir);
+            TraceJournal.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
 
             for (var i = 0; i < options.Requests.Count; i++)
             {
@@ -108,7 +86,7 @@ public static class Program
                     : Path.Combine(options.ResponseDirectory, i + ".body");
 
                 var status = runner.Request(path, responsePath);
-                HostJournal.Record("request:" + path + ":" + status);
+                TraceJournal.Record("request:" + path + ":" + status);
             }
 
             // Holding the process alive keeps its generated assemblies loaded, which is the only
@@ -473,14 +451,14 @@ public static class Program
         if (probe == "abort")
         {
             await AbortBodyAsync(client.BaseAddress!, useApm: false);
-            HostJournal.Record("request:abort:client-closed");
+            TraceJournal.Record("request:abort:client-closed");
             return;
         }
 
         if (probe == "abort-apm")
         {
             await AbortBodyAsync(client.BaseAddress!, useApm: true);
-            HostJournal.Record("request:abort-apm:client-closed");
+            TraceJournal.Record("request:abort-apm:client-closed");
             return;
         }
 
@@ -558,7 +536,7 @@ public static class Program
                 "Expected HTTP 100 Continue, received " + interim.StatusCode + ".");
         }
 
-        HostJournal.Record((useApm ? "body-apm" : "body") + "-abort-interim:100");
+        TraceJournal.Record((useApm ? "body-apm" : "body") + "-abort-interim:100");
         await stream.WriteAsync("partial"u8.ToArray(), timeout.Token);
         await stream.FlushAsync(timeout.Token);
         client.Client.LingerState = new System.Net.Sockets.LingerOption(true, 0);
@@ -568,12 +546,12 @@ public static class Program
 
         while (!timeout.IsCancellationRequested)
         {
-            var tracePath = Environment.GetEnvironmentVariable(HostJournal.TraceVariable)!;
+            var tracePath = Environment.GetEnvironmentVariable(TraceJournal.TraceVariable)!;
             var marker = useApm ? "body-apm-abort:" : "body-abort:";
             if (File.Exists(tracePath)
                 && File.ReadAllText(tracePath).Contains(marker, StringComparison.Ordinal))
             {
-                HostJournal.Record(
+                TraceJournal.Record(
                     (useApm ? "body-apm" : "body")
                     + "-abort-latency-ms:"
                     + detection.ElapsedMilliseconds);
@@ -614,7 +592,7 @@ public static class Program
                 "Expected HTTP 100 Continue, received " + interim.StatusCode + ".");
         }
 
-        HostJournal.Record("expect-interim:100");
+        TraceJournal.Record("expect-interim:100");
         await stream.WriteAsync(body, timeout.Token);
         await stream.FlushAsync(timeout.Token);
 
@@ -631,7 +609,7 @@ public static class Program
                 responseBody);
         }
 
-        HostJournal.Record("request:expect-continue:" + final.StatusCode);
+        TraceJournal.Record("request:expect-continue:" + final.StatusCode);
         final.RecordHeader("Content-Type", "content-type");
         final.RecordHeader("X-Remote-Port", "x-remote-port");
     }
@@ -703,12 +681,12 @@ public static class Program
                 body);
         }
 
-        HostJournal.Record("request:" + label + ":" + (int)response.StatusCode);
-        HostJournal.Record("content-type:" + response.Content.Headers.ContentType);
+        TraceJournal.Record("request:" + label + ":" + (int)response.StatusCode);
+        TraceJournal.Record("content-type:" + response.Content.Headers.ContentType);
         if ((int)response.StatusCode >= 500)
         {
             var error = Regex.Replace(Encoding.UTF8.GetString(body), @"\s+", " ");
-            HostJournal.Record(
+            TraceJournal.Record(
                 "error-body:" + error.Substring(0, Math.Min(1000, error.Length)));
         }
         RecordHeader(response, "X-Remote-Port");
@@ -720,7 +698,7 @@ public static class Program
     {
         if (response.Headers.TryGetValues(name, out var values))
         {
-            HostJournal.Record(name.ToLowerInvariant() + ":" + string.Join(",", values));
+            TraceJournal.Record(name.ToLowerInvariant() + ":" + string.Join(",", values));
         }
     }
 
@@ -731,7 +709,7 @@ public static class Program
         using var gate = new Mutex(false, gateName);
         var acquired = false;
 
-        HostJournal.Record("holding");
+        TraceJournal.Record("holding");
         try
         {
             acquired = gate.WaitOne(TimeSpan.FromMinutes(2));
@@ -808,7 +786,7 @@ public static class Program
         {
             if (headers.TryGetValue(name, out var value))
             {
-                HostJournal.Record(traceName + ":" + value);
+                TraceJournal.Record(traceName + ":" + value);
             }
         }
     }
@@ -982,7 +960,7 @@ public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
 
         if (request.StatusCode >= 500)
         {
-            HostJournal.Record("error-body:" + Summarize(request.Body));
+            TraceJournal.Record("error-body:" + Summarize(request.Body));
         }
 
         return request.StatusCode;

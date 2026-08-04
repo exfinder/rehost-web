@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
+    <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <!--
       Built but not referenced: the probe assembly must reach the application through the
       fixture's own bin directory, as an application's binaries do. Loading it beside the host
@@ -58,8 +59,9 @@
         Condition="Exists('$(TargetDir)fixtures')" />
     </ItemGroup>
 
+    <!-- The probe assembly now leans on the shared journal, so its dependency ships too. -->
     <Copy
-      SourceFiles="$(_ProbeAssembly)"
+      SourceFiles="$(_ProbeAssembly);$(MSBuildProjectDirectory)/../Rehost.WebForms.ScenarioProbes/bin/$(Configuration)/net10.0/Rehost.WebForms.Parity.Contracts.dll"
       DestinationFolder="%(_FixtureDirectory.Identity)/bin"
       SkipUnchangedFiles="true" />
   </Target>
