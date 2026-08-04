@@ -17,12 +17,16 @@ public sealed class BinaryFormatterEnablementTests
     [InlineData("Rehost.WebForms.ScenarioHost")]
     public void A_Consuming_Application_Enables_Binary_Formatter_Serialization(string application)
     {
+        var configuration = Path.GetFileName(
+            Path.GetDirectoryName(
+                Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
+
         var path = Path.Combine(
             RepositoryRoot,
             "tests",
             application,
             "bin",
-            "Debug",
+            configuration,
             "net10.0",
             application + ".runtimeconfig.json");
 
