@@ -69,12 +69,14 @@ internal sealed class ScenarioRun : IDisposable
                 + string.Join(", ", Trace));
     }
 
+    internal ScenarioJournalReader Journal => ScenarioJournalReader.Parse(Trace);
+
     internal static ScenarioRun Serve(params string[] requests)
     {
-        return Run("page", "--request", requests);
+        return Run(Fixtures.Page, "--request", requests);
     }
 
-    internal static ScenarioRun ServeBody(string fixture, params string[] probes)
+    internal static ScenarioRun ServeBody(ScenarioFixture fixture, params string[] probes)
     {
         return Run(fixture, "--body-probe", probes);
     }
@@ -82,15 +84,15 @@ internal sealed class ScenarioRun : IDisposable
     // Responses are numbered in order across probes: one render, then one per postback round.
     internal static ScenarioRun Postback(params string[] probes)
     {
-        return Run("postback", "--postback", probes);
+        return Run(Fixtures.Postback, "--postback", probes);
     }
 
     internal static ScenarioRun Farm(params string[] probes)
     {
-        return Run("farm", "--postback", probes);
+        return Run(Fixtures.Farm, "--postback", probes);
     }
 
-    private static ScenarioRun Run(string fixture, string argument, string[] values)
+    private static ScenarioRun Run(ScenarioFixture fixture, string argument, string[] values)
     {
         var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
         var applicationPath = Path.Combine(root.FullName, "app");
@@ -98,11 +100,11 @@ internal sealed class ScenarioRun : IDisposable
         var temp = Path.Combine(root.FullName, "temp");
         var tracePath = Path.Combine(root.FullName, "trace.txt");
 
-        CopyDirectory(Path.Combine(HostDirectory, "fixtures", fixture), applicationPath);
+        CopyDirectory(Path.Combine(HostDirectory, "fixtures", fixture.Name), applicationPath);
         Directory.CreateDirectory(responses);
         Directory.CreateDirectory(temp);
 
-        var hostAssembly = Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll");
+        var hostAssembly = HostAssemblyPath;
         File.Exists(hostAssembly).ShouldBeTrue(
             "Build the scenario host first: dotnet build tests/Rehost.WebForms.ScenarioHost");
 
@@ -154,9 +156,12 @@ internal sealed class ScenarioRun : IDisposable
         }
     }
 
-    private static string HostDirectory { get; } = FindHostDirectory();
+    internal static string HostDirectory { get; } = FindHostDirectory();
 
-    private static void CopyDirectory(string source, string destination)
+    internal static string HostAssemblyPath =>
+        Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll");
+
+    internal static void CopyDirectory(string source, string destination)
     {
         Directory.CreateDirectory(destination);
 

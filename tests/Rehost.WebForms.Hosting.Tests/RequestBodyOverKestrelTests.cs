@@ -59,7 +59,7 @@ public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScen
     [Fact]
     public void Async_Preload_Buffers_A_Delayed_Chunked_Body_Before_The_Handler()
     {
-        using var run = ScenarioRun.ServeBody("body-preload", "preload-delayed");
+        using var run = ScenarioRun.ServeBody(Fixtures.BodyPreload, "preload-delayed");
 
         run.Trace.ShouldContain("request:preload-delayed:200");
         run.Trace.ShouldContain("x-read-mode:Buffered");
@@ -71,7 +71,7 @@ public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScen
     [Fact]
     public void Kestrel_Drains_An_Unread_Body_Before_The_Next_Request_On_The_Connection()
     {
-        using var run = ScenarioRun.ServeBody("body", "unread", "fixed-input");
+        using var run = ScenarioRun.ServeBody(Fixtures.Body, "unread", "fixed-input");
 
         run.ResponseText(0).ShouldBe("unread");
         run.ResponseText(1).ShouldBe(Describe("body:fixed-input"));
@@ -103,7 +103,7 @@ public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScen
     [Fact]
     public void Kestrel_Refuses_A_Declared_Length_Over_Its_Own_Limit_Before_The_Pipeline()
     {
-        using var run = ScenarioRun.ServeBody("body", "kestrel-too-large");
+        using var run = ScenarioRun.ServeBody(Fixtures.Body, "kestrel-too-large");
 
         run.Trace.ShouldContain("request:kestrel-too-large:413");
         run.Trace.ShouldNotContain("handler-entered:input");
@@ -115,7 +115,7 @@ public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScen
     [Fact]
     public void An_Undeclared_Length_Over_The_Host_Limit_Fails_The_Handler_Mid_Read()
     {
-        using var run = ScenarioRun.ServeBody("body", "chunked-kestrel-too-large");
+        using var run = ScenarioRun.ServeBody(Fixtures.Body, "chunked-kestrel-too-large");
 
         run.Trace.ShouldContain("handler-entered:input");
         run.Trace.ShouldContain("request:chunked-kestrel-too-large:413");
@@ -126,7 +126,7 @@ public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScen
     public void Custom_Errors_Convert_A_Host_Rejection_Into_The_Application_Response()
     {
         using var run = ScenarioRun.ServeBody(
-            "body-customerrors",
+            Fixtures.BodyCustomErrors,
             "chunked-customerrors-kestrel-too-large");
 
         run.Trace.ShouldContain("handler-entered:input");

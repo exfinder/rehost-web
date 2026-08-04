@@ -4,7 +4,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 // share a process with each other.
 public sealed class AbortScenario : IDisposable
 {
-    internal ScenarioRun Run { get; } = ScenarioRun.ServeBody("body", "abort", "abort-apm");
+    internal ScenarioRun Run { get; } = ScenarioRun.ServeBody(Fixtures.Body, "abort", "abort-apm");
 
     public void Dispose()
     {

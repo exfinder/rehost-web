@@ -5,7 +5,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 public sealed class BodyScenario : IDisposable
 {
     internal ScenarioRun Run { get; } = ScenarioRun.ServeBody(
-        "body",
+        Fixtures.Body,
         "fixed-input",
         "fixed-binary",
         "fixed-buffered",

@@ -148,6 +148,16 @@ public static class Program
             var address = app.Urls.FirstOrDefault()
                 ?? throw new InvalidOperationException("Kestrel reported no bound address.");
 
+            // Passive mode: the test owns the client; the address line is the handoff, and the
+            // host stays up until the test kills it.
+            if (options.Postbacks.Count == 0
+                && options.BodyProbes.Count == 0
+                && options.Requests.Count == 0)
+            {
+                TraceJournal.Record("address:" + address);
+                await Task.Delay(Timeout.Infinite);
+            }
+
             using var handler = new SocketsHttpHandler
             {
                 MaxConnectionsPerServer = 1,
