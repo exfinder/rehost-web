@@ -1,8 +1,12 @@
 ---
-status: accepted
+status: accepted; generalized by 0044
 ---
 
 # Gate the compilation substrate locally
+
+> Generalized by
+> [ADR 0044](0044-gate-differentials-by-evidence-not-by-slice.md); the
+> slice-3 deferral this ADR created is withdrawn by 0044.
 
 [ADR 0040](0040-port-in-vertical-semantic-slices.md) required a differential gate
 per slice. Slice 2 takes port-local tests instead, on both supported platforms.

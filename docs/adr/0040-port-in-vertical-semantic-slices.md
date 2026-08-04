@@ -1,8 +1,13 @@
 ---
-status: accepted
+status: superseded in part by 0043 and 0044
 ---
 
 # Port in vertical semantic slices
+
+> Superseded in part: the per-slice differential gate cadence is replaced by
+> [ADR 0043](0043-gate-the-compilation-substrate-locally.md) and
+> [ADR 0044](0044-gate-differentials-by-evidence-not-by-slice.md). The slice
+> ordering itself is historical record.
 
 Port and prove the managed runtime in this order:
 

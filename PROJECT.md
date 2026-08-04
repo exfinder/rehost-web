@@ -58,7 +58,9 @@ silent no-op.
   intent as closely as the portability contract permits; document the
   residual gap instead of silently diverging.
 - Separate source compatibility from assembly/binary identity.
-- Require differential tests for intentional behavior changes.
+- Require differential evidence where only Framework can decide the outcome;
+  port-local tests on both supported platforms are the gate everywhere else
+  (ADR 0044).
 - Keep security-sensitive compatibility opt-ins explicit. Legacy serialization
   and resource payloads are trusted-input features, not security boundaries.
 - Never run compatibility tests or generated-output cleanup against a source
