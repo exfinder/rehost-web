@@ -1,8 +1,20 @@
 # Test-suite refactoring plan
 
-Status: P1 and P2 complete (2026-08-04); P3 next. Each phase lands on `main`,
+Status: P1–P3 complete (2026-08-04); P4 next. Each phase lands on `main`,
 green on both platforms, before the next begins. Windows validation once per
 phase.
+
+P3 outcome: consolidation was driven by a per-test timing inventory (TRX).
+Multipart postbacks share the postback host; the reuse tests take their first
+run from the shared substrate/page collection fixtures and pay only for the
+second; the codegen-artifact gate runs one session per fixture. Serial test
+time fell 87.9s → 66.1s on macOS; Windows Runtime.Tests 61s → 51s; 248/248 on
+both platforms. The fixture-folding pass found nothing foldable — every
+fixture carries a structural justification, now recorded in
+`tests/Rehost.WebForms.ScenarioHost/fixtures/README.md`, which sets the bar
+for additions. Two plan items adjusted by agreement: the obsolete
+"one host run feeding both facts" gate item became the one-session-per-fixture
+trim, and the fold item became the justification table.
 
 P2 outcome: seven commits. One multi-target probes project and one runner
 project compile against both runtimes; no `<Compile Include>` links remain.
