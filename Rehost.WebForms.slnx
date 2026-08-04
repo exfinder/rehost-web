@@ -11,6 +11,7 @@
   </Folder>
   <Folder Name="/tests/parity/">
     <Project Path="tests/parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <Project Path="tests/parity/src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
     <Project Path="tests/parity/src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj" />
     <Project Path="tests/parity/src/Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
     <Project Path="tests/parity/src/Rehost.WebForms.Parity.OracleHost/Rehost.WebForms.Parity.OracleHost.csproj" />

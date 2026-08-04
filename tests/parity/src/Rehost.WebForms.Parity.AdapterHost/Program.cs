@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Hosting;
-using Rehost.WebForms.Parity.Runner;
 using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.Parity.Runner;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -29,9 +27,11 @@ internal static class Program
     private static readonly TimeSpan GateReleaseDelay = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan ClientTimeout = TimeSpan.FromSeconds(30);
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private static readonly ParityOperation[] SupportedOperations =
     {
-        WriteIndented = false
+        ParityOperation.Run,
+        ParityOperation.Verify,
+        ParityOperation.RunSession
     };
 
     public static async Task<int> Main(string[] args)
@@ -40,31 +40,30 @@ internal static class Program
 
         try
         {
-            var command = CommandLine.Parse(args);
+            var command = ParityCommandLine.Parse(
+                args,
+                SupportedOperations,
+                "dotnet Rehost.WebForms.Parity.AdapterHost.dll");
             var basePath = AppContext.BaseDirectory;
             var manifestPath = command.ManifestPath
                 ?? Path.Combine(basePath, "metadata", "sessions.json");
             var fixtureRoot = command.FixtureRoot ?? Path.Combine(basePath, "fixture");
-            var manifest = InPhase("manifest", () => LoadManifest(manifestPath));
+            var manifest = PhaseRunner.InPhase(
+                "manifest",
+                () => ManifestLoader.Load(manifestPath));
 
-            if (command.Operation == Operation.RunSession)
+            if (command.Operation == ParityOperation.RunSession)
             {
-                var session = manifest.Sessions.FirstOrDefault(
-                        candidate => string.Equals(
-                            candidate.Name,
-                            command.SessionName,
-                            StringComparison.Ordinal))
-                    ?? throw new InvalidOperationException(
-                        "Manifest declares no session named '" + command.SessionName + "'.");
-
+                var session = ManifestLoader.FindSession(manifest, command.SessionName!);
                 var sessionObservation = await RunSessionAsync(session, fixtureRoot);
-                Console.Out.WriteLine(JsonSerializer.Serialize(sessionObservation, JsonOptions));
+                Console.Out.WriteLine(ParityJson.Serialize(sessionObservation));
                 return 0;
             }
 
             var trace = new PipelineTrace
             {
                 SchemaVersion = SchemaVersion,
+                // Frozen: compared against the committed golden.
                 Provenance = new TraceProvenance
                 {
                     Oracle = "Rehost WebForms ASP.NET Core adapter",
@@ -77,127 +76,50 @@ internal static class Program
                     Fixture = "precompiled-handler-and-request-body-v2"
                 },
                 Sessions = manifest.Sessions
-                    .Select(session => InPhase(
+                    .Select(session => PhaseRunner.InPhase(
                         "session:" + session.Name,
-                        () => RunSessionProcess(session, manifestPath, fixtureRoot)))
+                        () => SessionChildProcess.Run(
+                            typeof(Program).Assembly,
+                            session,
+                            manifestPath,
+                            fixtureRoot)))
                     .ToList()
             };
 
-            if (command.Operation == Operation.Verify)
+            if (command.Operation == ParityOperation.Verify)
             {
-                InPhase(
+                PhaseRunner.InPhase(
                     "verification",
-                    () => Verify(
-                        command.ExpectedPath
-                            ?? Path.Combine(basePath, "oracle", "sessions.json"),
-                        command.NormalizationPath
-                            ?? Path.Combine(basePath, "metadata", "normalization.json"),
-                        trace));
+                    () =>
+                    {
+                        GoldenTrace.Verify(
+                            command.ExpectedPath
+                                ?? Path.Combine(basePath, "oracle", "sessions.json"),
+                            trace,
+                            TraceComparison.Adapter);
+                        Console.Error.WriteLine(
+                            "Adapter observation matches the Framework golden trace across "
+                            + trace.Sessions.Count
+                            + " session(s).");
+                    });
             }
             else
             {
-                Console.Out.WriteLine(JsonSerializer.Serialize(trace, JsonOptions));
+                Console.Out.WriteLine(ParityJson.Serialize(trace));
             }
 
             return 0;
         }
         catch (PhaseException exception)
         {
-            WriteDiagnostic(exception.Phase, exception.InnerException!);
+            DiagnosticWriter.Write(exception.Phase, exception.InnerException!);
             return 1;
         }
         catch (Exception exception)
         {
-            WriteDiagnostic("command-line", exception);
+            DiagnosticWriter.Write("command-line", exception);
             return 1;
         }
-    }
-
-    private static SessionManifest LoadManifest(string path)
-    {
-        path = Path.GetFullPath(path);
-
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("Session manifest is absent.", path);
-        }
-
-        var manifest = JsonSerializer.Deserialize<SessionManifest>(
-            File.ReadAllText(path),
-            JsonOptions)
-            ?? throw new InvalidDataException("Session manifest deserialized to null.");
-
-        if (manifest.SchemaVersion != 1)
-        {
-            throw new InvalidDataException("Unsupported session manifest schema.");
-        }
-
-        if (manifest.Sessions.Count == 0)
-        {
-            throw new InvalidDataException("Session manifest declares no sessions.");
-        }
-
-        return manifest;
-    }
-
-    // A session observes a cold application, so it needs a process whose HttpRuntime singleton
-    // and activated application have never been touched.
-    private static SessionObservation RunSessionProcess(
-        SessionSpecification session,
-        string manifestPath,
-        string fixtureRoot)
-    {
-        var executablePath = Environment.ProcessPath
-            ?? throw new InvalidOperationException("The host process path is unavailable.");
-        var startInfo = new ProcessStartInfo(executablePath)
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
-
-        // A dotted assembly name defeats GetFileNameWithoutExtension, which would read
-        // "Rehost.WebForms.Parity.AdapterHost" as "AdapterParity"; compare against the apphost path instead.
-        var entryAssembly = typeof(Program).Assembly.Location;
-        var apphostPath = Path.ChangeExtension(
-            entryAssembly,
-            OperatingSystem.IsWindows() ? ".exe" : null);
-        if (!string.Equals(executablePath, apphostPath, StringComparison.OrdinalIgnoreCase))
-        {
-            startInfo.ArgumentList.Add(entryAssembly);
-        }
-
-        startInfo.ArgumentList.Add("run-session");
-        startInfo.ArgumentList.Add("--session");
-        startInfo.ArgumentList.Add(session.Name);
-        startInfo.ArgumentList.Add("--manifest");
-        startInfo.ArgumentList.Add(manifestPath);
-        startInfo.ArgumentList.Add("--fixtures");
-        startInfo.ArgumentList.Add(fixtureRoot);
-
-        using var process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException("The session process failed to start.");
-        // Both streams must drain concurrently. An observation larger than the pipe buffer,
-        // which is 4 KB on Windows against 64 KB elsewhere, blocks the child mid-write while a
-        // sequential reader waits on the stream it is not draining.
-        var outputReader = process.StandardOutput.ReadToEndAsync();
-        var errorReader = process.StandardError.ReadToEndAsync();
-        Task.WaitAll(outputReader, errorReader);
-        process.WaitForExit();
-
-        if (errorReader.Result.Length > 0)
-        {
-            Console.Error.Write(errorReader.Result);
-        }
-
-        if (process.ExitCode != 0)
-        {
-            throw new InvalidOperationException(
-                "Session '" + session.Name + "' exited with code " + process.ExitCode + ".");
-        }
-
-        return JsonSerializer.Deserialize<SessionObservation>(outputReader.Result, JsonOptions)
-            ?? throw new InvalidDataException(
-                "Session '" + session.Name + "' produced no observation.");
     }
 
     private static async Task<SessionObservation> RunSessionAsync(
@@ -209,14 +131,16 @@ internal static class Program
             Path.Combine(fixtureRoot, session.Fixture));
         var applicationId = "adapter-parity:" + session.Name;
 
-        InPhase("fixture-validation", () => ValidateFixture(applicationPath));
+        PhaseRunner.InPhase(
+            "fixture-validation",
+            () => FixtureValidator.Validate(applicationPath, typeof(Program).Assembly));
 
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
         builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
         builder.WebHost.UseUrls("http://127.0.0.1:0");
 
-        InPhase(
+        PhaseRunner.InPhase(
             "host-registration",
             () => builder.AddRehostWebForms(options =>
             {
@@ -252,11 +176,11 @@ internal static class Program
             }
 
             var manager = ApplicationManager.GetApplicationManager();
-            var drain = InPhase(
+            var drain = PhaseRunner.InPhase(
                 "event-drain",
                 () => CreateDrain(manager, applicationId, applicationPath));
 
-            InPhase(
+            PhaseRunner.InPhase(
                 "event-drain",
                 () => manager.StopObject(applicationId, typeof(AdapterSessionRunner)));
             observation.ApplicationEvents = drain.DrainApplicationEvents();
@@ -371,6 +295,26 @@ internal static class Program
         return client;
     }
 
+    private static IPipelineEventDrain CreateDrain(
+        ApplicationManager manager,
+        string applicationId,
+        string applicationPath)
+    {
+        // Registering a second object cannot skew applications-created: that counts
+        // HttpApplication instances, and a registered object is not one.
+        var registered = manager.CreateObject(
+            applicationId,
+            typeof(AdapterSessionRunner),
+            "/",
+            PathUtilities.EnsureTrailingDirectorySeparator(applicationPath),
+            true,
+            true);
+
+        return registered as IPipelineEventDrain
+            ?? throw new InvalidOperationException(
+                "ApplicationManager did not return an IPipelineEventDrain.");
+    }
+
     private sealed class ChunkedContent(byte[] body) : HttpContent
     {
         protected override Task SerializeToStreamAsync(
@@ -385,229 +329,5 @@ internal static class Program
             length = 0;
             return false;
         }
-    }
-
-    private static IPipelineEventDrain CreateDrain(
-        ApplicationManager manager,
-        string applicationId,
-        string applicationPath)
-    {
-        // Registering a second object cannot skew applications-created: that counts
-        // HttpApplication instances, and a registered object is not one.
-        var registered = manager.CreateObject(
-            applicationId,
-            typeof(AdapterSessionRunner),
-            "/",
-            EnsureTrailingDirectorySeparator(applicationPath),
-            true,
-            true);
-
-        return registered as IPipelineEventDrain
-            ?? throw new InvalidOperationException(
-                "ApplicationManager did not return an IPipelineEventDrain.");
-    }
-
-    private static void ValidateFixture(string applicationPath)
-    {
-        applicationPath = Path.GetFullPath(applicationPath);
-        var probePath = Path.Combine(applicationPath, "bin", "Rehost.WebForms.Parity.Probes.dll");
-        var hostProbePath = Path.Combine(AppContext.BaseDirectory, "Rehost.WebForms.Parity.Probes.dll");
-
-        if (!File.Exists(Path.Combine(applicationPath, "web.config")))
-        {
-            throw new FileNotFoundException(
-                "Fixture web.config is missing.",
-                Path.Combine(applicationPath, "web.config"));
-        }
-
-        if (!File.Exists(probePath))
-        {
-            throw new FileNotFoundException(
-                "Probe handler/module assembly must exist only in fixture app/bin.",
-                probePath);
-        }
-
-        if (File.Exists(hostProbePath))
-        {
-            throw new InvalidOperationException(
-                "Probe assembly must not exist beside the host executable.");
-        }
-
-        if (typeof(Program).Assembly.GetReferencedAssemblies().Any(
-                name => string.Equals(
-                    name.Name,
-                    "Rehost.WebForms.Parity.Probes",
-                    StringComparison.OrdinalIgnoreCase)))
-        {
-            throw new InvalidOperationException(
-                "Host assembly must not reference Rehost.WebForms.Parity.Probes.");
-        }
-
-        if (AppDomain.CurrentDomain.GetAssemblies().Any(
-                assembly => string.Equals(
-                    assembly.GetName().Name,
-                    "Rehost.WebForms.Parity.Probes",
-                    StringComparison.OrdinalIgnoreCase)))
-        {
-            throw new InvalidOperationException(
-                "Probe assembly was loaded before application activation.");
-        }
-    }
-
-    private static void Verify(
-        string expectedPath,
-        string normalizationPath,
-        PipelineTrace actual)
-    {
-        expectedPath = Path.GetFullPath(expectedPath);
-        normalizationPath = Path.GetFullPath(normalizationPath);
-
-        ValidateEmptyNormalizationManifest(normalizationPath);
-
-        if (!File.Exists(expectedPath))
-        {
-            throw new FileNotFoundException("Framework golden trace is absent.", expectedPath);
-        }
-
-        var expected = JsonSerializer.Deserialize<PipelineTrace>(
-            File.ReadAllText(expectedPath),
-            JsonOptions)
-            ?? throw new InvalidDataException("Framework golden trace deserialized to null.");
-
-        if (expected.SchemaVersion != actual.SchemaVersion)
-        {
-            throw new InvalidOperationException(
-                "Parity mismatch at $.SchemaVersion: expected "
-                + expected.SchemaVersion
-                + ", actual "
-                + actual.SchemaVersion
-                + ".");
-        }
-
-        AdapterObservationComparer.VerifySessions(expected.Sessions, actual.Sessions);
-        Console.Error.WriteLine(
-            "Adapter observation matches the Framework golden trace across "
-            + actual.Sessions.Count
-            + " session(s).");
-    }
-
-    private static void ValidateEmptyNormalizationManifest(string path)
-    {
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("Normalization manifest is absent.", path);
-        }
-
-        using var document = JsonDocument.Parse(File.ReadAllText(path));
-        var root = document.RootElement;
-
-        if (root.GetProperty("schemaVersion").GetInt32() != 1)
-        {
-            throw new InvalidDataException("Unsupported normalization manifest schema.");
-        }
-
-        var rules = root.GetProperty("rules");
-        if (rules.ValueKind != JsonValueKind.Array || rules.GetArrayLength() != 0)
-        {
-            throw new InvalidDataException(
-                "The parity normalization manifest must remain empty.");
-        }
-    }
-
-    private static void InPhase(string phase, Action action)
-    {
-        try
-        {
-            action();
-        }
-        catch (PhaseException)
-        {
-            throw;
-        }
-        catch (Exception exception)
-        {
-            throw new PhaseException(phase, exception);
-        }
-    }
-
-    private static T InPhase<T>(string phase, Func<T> action)
-    {
-        try
-        {
-            return action();
-        }
-        catch (PhaseException)
-        {
-            throw;
-        }
-        catch (Exception exception)
-        {
-            throw new PhaseException(phase, exception);
-        }
-    }
-
-    private static void WriteDiagnostic(string phase, Exception exception)
-    {
-        var diagnostic = new FailureDiagnostic
-        {
-            SchemaVersion = 1,
-            Phase = phase,
-            Exception = ExceptionObservation.FromException(exception)
-        };
-        Console.Error.WriteLine(JsonSerializer.Serialize(diagnostic, JsonOptions));
-    }
-
-    private static string EnsureTrailingDirectorySeparator(string path)
-    {
-        return Path.EndsInDirectorySeparator(path)
-            ? path
-            : path + Path.DirectorySeparatorChar;
-    }
-
-    private sealed class RuntimeDiagnosticListener : EventListener
-    {
-        protected override void OnEventSourceCreated(EventSource eventSource)
-        {
-            if (eventSource.Name == "Rehost.WebForms.Runtime")
-            {
-                EnableEvents(eventSource, EventLevel.Error);
-            }
-        }
-
-        protected override void OnEventWritten(EventWrittenEventArgs eventData)
-        {
-            if (eventData.EventSource.Name != "Rehost.WebForms.Runtime")
-            {
-                return;
-            }
-
-            Console.Error.WriteLine(
-                "runtime/"
-                + eventData.EventName
-                + ": "
-                + string.Join(
-                    " | ",
-                    eventData.Payload ?? (IEnumerable<object?>)Array.Empty<object?>()));
-        }
-    }
-
-    private sealed class FailureDiagnostic
-    {
-        public int SchemaVersion { get; set; }
-
-        public string Phase { get; set; } = "";
-
-        public ExceptionObservation Exception { get; set; } = new();
-    }
-
-    private sealed class PhaseException : Exception
-    {
-        internal PhaseException(string phase, Exception innerException)
-            : base("Adapter parity phase failed: " + phase + ".", innerException)
-        {
-            Phase = phase;
-        }
-
-        internal string Phase { get; }
     }
 }

@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <ProjectReference Include="../Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
     <ProjectReference
       Include="../Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
       ReferenceOutputAssembly="false" />
@@ -21,7 +22,6 @@
     <!-- Staged, not Content: the payload must not flow into consumers' output. -->
     <Copy SourceFiles="../../fixture/web.config" DestinationFiles="$(TargetDir)fixture/app/web.config" SkipUnchangedFiles="true" />
     <Copy SourceFiles="../../fixture/errors.web.config" DestinationFiles="$(TargetDir)fixture/app-errors/web.config" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="../../metadata/normalization.json;../../metadata/provenance.json" DestinationFolder="$(TargetDir)metadata" SkipUnchangedFiles="true" />
     <Copy SourceFiles="../../sessions.json" DestinationFiles="$(TargetDir)metadata/sessions.json" SkipUnchangedFiles="true" />
 
     <PropertyGroup>
