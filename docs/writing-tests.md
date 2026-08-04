@@ -38,8 +38,12 @@ response.Text.ShouldContain("...");
 - `LiveScenario` starts the host for a `ScenarioFixture`; `ScenarioClient` is
   the deterministic client (no redirects, no cookies, exact HTTP/1.1).
 - Assertion hierarchy: the typed response first; server-side facts through the
-  typed journal (`scenario.Journal`, a `ScenarioJournalReader`) or, as probes
-  grow them, a witness endpoint. Raw trace strings never appear in tests —
+  typed journal (`scenario.Journal`, a `ScenarioJournalReader`) or the
+  fixture's witness endpoint (`scenario.Witness`). Live facts go through the
+  witness; nothing new may poll the file journal — a polled shared file once
+  lost an abort marker to Windows sharing semantics (see
+  follow-ups/client-reset-detection-latency.md). Raw trace strings never
+  appear in tests —
   string negatives over a trace can pass vacuously.
 - Tests spawn at most one level of child processes, and only because a child
   is one application activation. Orchestration stays in the test process.

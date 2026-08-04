@@ -260,12 +260,15 @@ sharing (each exception carries its why-comment, as today).
    now, witness endpoint as probes are added. Typed fixture descriptors
    replace fixture-name strings.
 3. Trailing migration tracked here:
-   - [ ] `RequestBodyOverKestrelTests` shared-fixture facts → act/assert
+   - [x] `RequestBodyOverKestrelTests` shared-fixture facts → act/assert
+         (witness endpoint + `RawSocketProbe`; the host's body-probe client
+         and its trace-polling loop are deleted)
    - [ ] `PostbackOverKestrelTests` probes → act/assert
    - [x] `PageOverKestrelTests` → act/assert (P5 exemplar)
    - [ ] `MixedFarmOverKestrelTests` → act/assert
-   - [ ] journal file → in-memory witness (journal stays for process-death
-         and cross-process codegen evidence)
+   - [x] journal file → in-memory witness for live facts (the file journal
+         stays for process-death and cross-process codegen evidence; nothing
+         polls it anymore)
    - [ ] `ScenarioWorkerRequest` → kit worker request (deferred from P2:
          `RecordingWorkerRequest` records `worker.*` events in every
          override; a recording-off mode costs more than the 101-line class

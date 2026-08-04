@@ -37,9 +37,10 @@ detections 7–117 ms.
 
 ## Residual notes
 
-- The 60 s abort deadline and the recorded `abort-latency-ms` lines stay: the
-  deadline is harmless and the latency lines are what made the diagnosis
-  possible.
+- The abort scenarios now act in the test over a raw socket and observe the
+  outcome through the fixture's in-memory witness endpoint; detection latency
+  is written to test output, never asserted. The trace-polling loop that
+  carried this bug is deleted.
 - The old "0.8–8.1 s sync tail" table conflated genuine scheduling latency
   with marker-write collisions; treat it as superseded by the figures above.
 - The witness pattern (plan P5) retires file-based evidence for in-lifetime
