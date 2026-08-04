@@ -1,8 +1,22 @@
 # Test-suite refactoring plan
 
-Status: P1–P4 complete (2026-08-04); P5 next. Each phase lands on `main`,
+Status: P1–P5 complete (2026-08-04); P6 next. Each phase lands on `main`,
 green on both platforms, before the next begins. Windows validation once per
 phase.
+
+P5 outcome: the act-in-test standard is live. The scenario host gained a
+passive serve mode (publishes its bound address in the trace, stays up until
+killed; the run-mode default request no longer leaks into serve mode). New
+Hosting.Tests infrastructure: typed fixture descriptors (`Fixtures`), a
+`LiveScenario` shared host fixture, a deterministic `ScenarioClient` with a
+typed `ScenarioResponse`, and `ScenarioJournalReader` — the only place that
+knows the trace grammar. `PageOverKestrelTests` is the migrated exemplar:
+each test performs its own request and asserts response-first. Totals stay
+243 on both platforms; the Windows full-suite round hit the known abort
+signature once (11, RequestBodyOverKestrelTests) and the project passed
+78/78 on an immediate re-run — consistent with
+[client-reset-detection-latency.md](client-reset-detection-latency.md).
+The raw-socket client helper arrives with the abort-probe migration.
 
 P4 outcome: 248 → 243 tests (SmtpSectionTests, AssemblyIdentityTests, the
 EnterpriseServices shape fact, the WebServices assembly-name fact, and the
@@ -239,7 +253,7 @@ sharing (each exception carries its why-comment, as today).
 3. Trailing migration tracked here:
    - [ ] `RequestBodyOverKestrelTests` shared-fixture facts → act/assert
    - [ ] `PostbackOverKestrelTests` probes → act/assert
-   - [ ] `PageOverKestrelTests` → act/assert
+   - [x] `PageOverKestrelTests` → act/assert (P5 exemplar)
    - [ ] `MixedFarmOverKestrelTests` → act/assert
    - [ ] journal file → in-memory witness (journal stays for process-death
          and cross-process codegen evidence)
