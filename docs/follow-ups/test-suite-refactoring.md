@@ -1,7 +1,26 @@
 # Test-suite refactoring plan
 
-Status: P1 complete (2026-08-04); P2 next. Each phase lands on `main`, green on
-both platforms, before the next begins. Windows validation once per phase.
+Status: P1 and P2 complete (2026-08-04); P3 next. Each phase lands on `main`,
+green on both platforms, before the next begins. Windows validation once per
+phase.
+
+P2 outcome: seven commits. One multi-target probes project and one runner
+project compile against both runtimes; no `<Compile Include>` links remain.
+The harness kit (`Rehost.WebForms.Parity.Harness`, 18 single-type files) owns
+the launcher (120 s timeout, tree kill), manifest loading, fixture validation,
+CLI, tree-based comparer, diagnostics, repository locator, and gate runner;
+the three host programs shrank to thin columns (net ~-500 LOC before the kit's
+new capabilities). Gates run each golden session as its own theory case with
+one child per session — the process tree from tests is one level deep — and
+the codegen-artifact test uses an isolated fixture copy. The golden is 939
+indented lines (value-equality proven before reformatting); comparison is
+tree-based everywhere; `normalization.json`/`provenance.json` and their
+validators are gone. The journal has one definition (`TraceJournal` in
+Contracts). Windows round: 248/248 — the abort scenario passed under the new
+60 s budget this round; the lost-reset investigation stays open in
+[client-reset-detection-latency.md](client-reset-detection-latency.md). The
+`ScenarioWorkerRequest` merge was evaluated and deferred to the P5 checklist:
+a recording-off mode costs more than the class it would replace.
 
 P1 outcome: acceptance met in both configurations on macOS; on Windows 229/240
 pass — the 11 failures are the pre-existing abort-detection issue (bisect-proven
@@ -200,6 +219,10 @@ sharing (each exception carries its why-comment, as today).
    - [ ] `MixedFarmOverKestrelTests` → act/assert
    - [ ] journal file → in-memory witness (journal stays for process-death
          and cross-process codegen evidence)
+   - [ ] `ScenarioWorkerRequest` → kit worker request (deferred from P2:
+         `RecordingWorkerRequest` records `worker.*` events in every
+         override; a recording-off mode costs more than the 101-line class
+         it would replace)
    - [ ] ScenarioHost client half deleted as probes migrate
 
 ## P6 — Docs and acceptance
