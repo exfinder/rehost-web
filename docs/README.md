@@ -12,6 +12,7 @@ These documents describe accepted direction; implementation may lag:
 | Area | Document |
 | --- | --- |
 | Slice order and gates | [core-runtime-port-plan.md](core-runtime-port-plan.md) |
+| Test-suite refactoring | [follow-ups/test-suite-refactoring.md](follow-ups/test-suite-refactoring.md) |
 | Decision rationale | [`adr/`](adr/) |
 
 ## Implemented contracts
