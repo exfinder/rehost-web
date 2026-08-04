@@ -3,7 +3,6 @@ using Shouldly;
 using Rehost.WebForms.Parity.Harness;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
-
 // Activating an application permanently mutates process-global state, so every scenario driven from
 // here runs in its own child process through Rehost.WebForms.ScenarioHost. The slice-2 gate is
 // port-local; see ADR 0043.
@@ -192,67 +191,5 @@ internal sealed class ScenarioApplication : IDisposable
     private static string FindHostDirectory()
     {
         return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
-    }
-}
-
-// A held mutex, rather than a sleep of a guessed length: the child stays alive exactly while
-// the overlap under test lasts, and neither machine speed nor load can shorten it.
-internal sealed class ScenarioGate : IDisposable
-{
-    private readonly Mutex _mutex;
-    private bool _held;
-
-    private ScenarioGate(Mutex mutex, string name)
-    {
-        _mutex = mutex;
-        _held = true;
-        Name = name;
-    }
-
-    internal string Name { get; }
-
-    internal static ScenarioGate Take()
-    {
-        var name = @"Local
-ehost-scenario-" + Guid.NewGuid().ToString("n");
-        var mutex = new Mutex(false, name);
-        mutex.WaitOne();
-
-        return new ScenarioGate(mutex, name);
-    }
-
-    internal void Release()
-    {
-        if (_held)
-        {
-            _mutex.ReleaseMutex();
-            _held = false;
-        }
-    }
-
-    public void Dispose()
-    {
-        Release();
-        _mutex.Dispose();
-    }
-}
-
-internal sealed class ScenarioProcess(Process process)
-{
-    private readonly Task<string> _standardOutput = process.StandardOutput.ReadToEndAsync();
-    private readonly Task<string> _standardError = process.StandardError.ReadToEndAsync();
-
-    internal int ExitCode => process.ExitCode;
-
-    internal bool HasExited => process.HasExited;
-
-    internal string StandardError => _standardError.Result;
-
-    internal void WaitForExit()
-    {
-        // Both streams must drain concurrently, or a child writing more than the pipe buffer
-        // blocks while a sequential reader waits on the stream it is not draining.
-        Task.WaitAll(_standardOutput, _standardError);
-        process.WaitForExit();
     }
 }

@@ -4,6 +4,9 @@ using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 
+// Footprint assertions are perturbed by parallel tests' allocations, so this joins the
+// serialized memory collection.
+[Collection(nameof(MemoryCollectionTests))]
 public sealed class MemorySamplerTests
 {
     // Framework read private bytes from webengine4.dll. The type carrying that entry point refuses

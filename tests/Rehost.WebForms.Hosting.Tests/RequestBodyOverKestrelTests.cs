@@ -5,41 +5,6 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// Probes that neither change a host-level limit nor assert over the whole trace. Everything else
-// in this file keeps its own process, and says why.
-public sealed class BodyScenario : IDisposable
-{
-    internal ScenarioRun Run { get; } = ScenarioRun.ServeBody(
-        "body",
-        "fixed-input",
-        "fixed-binary",
-        "fixed-buffered",
-        "fixed-bufferless",
-        "chunked-bufferless",
-        "chunked-apm",
-        "expect-continue",
-        "spill",
-        "too-large",
-        "chunked-too-large");
-
-    public void Dispose()
-    {
-        Run.Dispose();
-    }
-}
-
-// Both aborts kill their socket mid-read, so they never share a connection with anything and can
-// share a process with each other.
-public sealed class AbortScenario : IDisposable
-{
-    internal ScenarioRun Run { get; } = ScenarioRun.ServeBody("body", "abort", "abort-apm");
-
-    public void Dispose()
-    {
-        Run.Dispose();
-    }
-}
-
 public sealed class RequestBodyOverKestrelTests(BodyScenario scenario, AbortScenario aborts)
     : IClassFixture<BodyScenario>, IClassFixture<AbortScenario>
 {

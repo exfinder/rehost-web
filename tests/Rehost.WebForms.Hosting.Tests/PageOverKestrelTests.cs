@@ -3,18 +3,6 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-public sealed class PageScenario : IDisposable
-{
-    internal const string PageRequest = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
-
-    internal ScenarioRun Run { get; } = ScenarioRun.Serve(PageRequest, "/Default.aspx.cs");
-
-    public void Dispose()
-    {
-        Run.Dispose();
-    }
-}
-
 // Activating an application permanently mutates process-global state, so the application is served
 // from a child process. This is the only coverage of a dynamically compiled page crossing the
 // adapter and a real socket; every other Kestrel assertion here runs precompiled handlers whose

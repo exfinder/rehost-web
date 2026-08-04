@@ -3,18 +3,6 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-public sealed class FarmScenario : IDisposable
-{
-    internal ScenarioRun Run { get; } = ScenarioRun.Farm(
-        "captured",
-        "captured-without-event-validation");
-
-    public void Dispose()
-    {
-        Run.Dispose();
-    }
-}
-
 // A postback captured from a .NET Framework 4.8.1 node, replayed here over a real socket. Passing
 // means a load-balanced farm may span both runtimes, so an application can be migrated a node at a
 // time rather than all at once. The payload and its provenance ship with the fixture.
