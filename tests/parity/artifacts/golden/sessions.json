@@ -1,1 +1,939 @@
-{"SchemaVersion":2,"Provenance":{"Oracle":"Microsoft .NET Framework","TargetFramework":"net481","RuntimeRequirement":"4.8.1","ManagedEntryPoint":"System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)","ActivationEntryPoint":"System.Web.Hosting.ApplicationManager.CreateObject","Fixture":"precompiled-handler-and-request-body-v2"},"Sessions":[{"Name":"cold-then-warm","ApplicationEvents":["module.collection:DefaultAuthentication","module.collection:DefaultAuthentication","module.collection:DefaultAuthentication","module.collection:FrameworkOracleProbe","module.collection:FrameworkOracleProbe","module.collection:FrameworkOracleProbe","module.init","module.init","module.init"],"SessionEvents":["runner.stop","applications-created:3"],"Requests":[{"Name":"cold-sync","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.process-request","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":201,"StatusDescription":"Oracle Created","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"X-Framework-Oracle","Value":"cold-sync"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"9"}],"BodyBase64":"b3JhY2xlLW9r","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"complete-request","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.complete-request","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.content-length","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Length","Value":"0"}],"BodyBase64":"","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"delayed-async","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.begin-process-request","runner.process-request.return","handler.end-process-request","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request"],"Response":{"StatusCode":202,"StatusDescription":"Oracle Accepted","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"8"}],"BodyBase64":"YXN5bmMtb2s=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"warm-a","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.echo","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"11"}],"BodyBase64":"ZWNobzp3YXJtLWE=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"warm-b","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.echo","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"11"}],"BodyBase64":"ZWNobzp3YXJtLWI=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"warm-c","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.echo","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"11"}],"BodyBase64":"ZWNobzp3YXJtLWM=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}}]},{"Name":"concurrent-cold","ApplicationEvents":["module.collection:DefaultAuthentication","module.collection:DefaultAuthentication","module.collection:FrameworkOracleProbe","module.collection:FrameworkOracleProbe","module.init","module.init"],"SessionEvents":["runner.stop","applications-created:2"],"Requests":[{"Name":"cold-a","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.echo","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"11"}],"BodyBase64":"ZWNobzpjb2xkLWE=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"cold-b","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.echo","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"11"}],"BodyBase64":"ZWNobzpjb2xkLWI=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}}]},{"Name":"request-bodies","ApplicationEvents":["module.collection:DefaultAuthentication","module.collection:FrameworkOracleProbe","module.init"],"SessionEvents":["runner.stop","applications-created:1"],"Requests":[{"Name":"body-input-known","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","worker.body.read","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"16"}],"BodyBase64":"Q2xhc3NpYzpZV0pqWkdWbQ==","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"body-input-chunked","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","worker.body.read","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"16"}],"BodyBase64":"Q2xhc3NpYzpZV0pqWkdWbQ==","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"body-binary","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","worker.body.read","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"16"}],"BodyBase64":"Q2xhc3NpYzpZV0pqWkdWbQ==","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"body-buffered-preloaded","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","worker.body.preloaded","worker.body.read","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"17"}],"BodyBase64":"QnVmZmVyZWQ6WVdKalpHVm0=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"body-bufferless","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","worker.body.read","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"19"}],"BodyBase64":"QnVmZmVybGVzczpZV0pqWkdWbQ==","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"body-bufferless-apm","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","worker.body.read","worker.body.read","module.post-request-handler-execute","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":200,"StatusDescription":"OK","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/plain; charset=utf-8"},{"Name":"Content-Length","Value":"19"}],"BodyBase64":"QnVmZmVybGVzczpZV0pqWkdWbQ==","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}}]},{"Name":"errors","ApplicationEvents":["module.collection:DefaultAuthentication","module.collection:FrameworkOracleProbe","module.init"],"SessionEvents":["runner.stop","applications-created:1"],"Requests":[{"Name":"module-throws","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.throw","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":500,"StatusDescription":"Internal Server Error","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/html; charset=utf-8"},{"Name":"Content-Length","Value":"3500"}],"BodyBase64":"PCFET0NUWVBFIGh0bWw+DQo8aHRtbD4NCiAgICA8aGVhZD4NCiAgICAgICAgPHRpdGxlPlJ1bnRpbWUgRXJyb3I8L3RpdGxlPg0KICAgICAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoIiAvPg0KICAgICAgICA8c3R5bGU+DQogICAgICAgICBib2R5IHtmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTogLjdlbTtjb2xvcjpibGFjazt9IA0KICAgICAgICAgcCB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtjb2xvcjpibGFjazttYXJnaW4tdG9wOiAtNXB4fQ0KICAgICAgICAgYiB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6YmxhY2s7bWFyZ2luLXRvcDogLTVweH0NCiAgICAgICAgIEgxIHsgZm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MThwdDtjb2xvcjpyZWQgfQ0KICAgICAgICAgSDIgeyBmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxNHB0O2NvbG9yOm1hcm9vbiB9DQogICAgICAgICBwcmUge2ZvbnQtZmFtaWx5OiJDb25zb2xhcyIsIkx1Y2lkYSBDb25zb2xlIixNb25vc3BhY2U7Zm9udC1zaXplOjExcHQ7bWFyZ2luOjA7cGFkZGluZzowLjVlbTtsaW5lLWhlaWdodDoxNHB0fQ0KICAgICAgICAgLm1hcmtlciB7Zm9udC13ZWlnaHQ6IGJvbGQ7IGNvbG9yOiBibGFjazt0ZXh0LWRlY29yYXRpb246IG5vbmU7fQ0KICAgICAgICAgLnZlcnNpb24ge2NvbG9yOiBncmF5O30NCiAgICAgICAgIC5lcnJvciB7bWFyZ2luLWJvdHRvbTogMTBweDt9DQogICAgICAgICAuZXhwYW5kYWJsZSB7IHRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7IGZvbnQtd2VpZ2h0OmJvbGQ7IGNvbG9yOm5hdnk7IGN1cnNvcjpwb2ludGVyOyB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA2MzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiA0NDBweDsgb3ZlcmZsb3c6IGF1dG87IHdoaXRlLXNwYWNlOiBwcmUtd3JhcDsgd29yZC13cmFwOiBicmVhay13b3JkOyB9DQogICAgICAgICB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA0NzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiAyODBweDsgfQ0KICAgICAgICAgfQ0KICAgICAgICA8L3N0eWxlPg0KICAgIDwvaGVhZD4NCg0KICAgIDxib2R5IGJnY29sb3I9IndoaXRlIj4NCg0KICAgICAgICAgICAgPHNwYW4+PEgxPlNlcnZlciBFcnJvciBpbiAnLycgQXBwbGljYXRpb24uPGhyIHdpZHRoPTEwMCUgc2l6ZT0xIGNvbG9yPXNpbHZlcj48L0gxPg0KDQogICAgICAgICAgICA8aDI+IDxpPlJ1bnRpbWUgRXJyb3I8L2k+IDwvaDI+PC9zcGFuPg0KDQogICAgICAgICAgICA8Zm9udCBmYWNlPSJBcmlhbCwgSGVsdmV0aWNhLCBHZW5ldmEsIFN1blNhbnMtUmVndWxhciwgc2Fucy1zZXJpZiAiPg0KDQogICAgICAgICAgICA8Yj4gRGVzY3JpcHRpb246IDwvYj5BbiBhcHBsaWNhdGlvbiBlcnJvciBvY2N1cnJlZCBvbiB0aGUgc2VydmVyLiBUaGUgY3VycmVudCBjdXN0b20gZXJyb3Igc2V0dGluZ3MgZm9yIHRoaXMgYXBwbGljYXRpb24gcHJldmVudCB0aGUgZGV0YWlscyBvZiB0aGUgYXBwbGljYXRpb24gZXJyb3IgZnJvbSBiZWluZyB2aWV3ZWQuDQogICAgICAgICAgICA8YnI+PGJyPg0KDQogICAgICAgICAgICA8Yj5EZXRhaWxzOjwvYj4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIG9mIHRoaXMgc3BlY2lmaWMgZXJyb3IgbWVzc2FnZSB0byBiZSB2aWV3YWJsZSBvbiB0aGUgbG9jYWwgc2VydmVyIG1hY2hpbmUsIHBsZWFzZSBjcmVhdGUgYSAmbHQ7Y3VzdG9tRXJyb3JzJmd0OyB0YWcgd2l0aGluIGEgJnF1b3Q7d2ViLmNvbmZpZyZxdW90OyBjb25maWd1cmF0aW9uIGZpbGUgbG9jYXRlZCBpbiB0aGUgcm9vdCBkaXJlY3Rvcnkgb2YgdGhlIGN1cnJlbnQgd2ViIGFwcGxpY2F0aW9uLiBUaGlzICZsdDtjdXN0b21FcnJvcnMmZ3Q7IHRhZyBzaG91bGQgdGhlbiBoYXZlIGl0cyAmcXVvdDttb2RlJnF1b3Q7IGF0dHJpYnV0ZSBzZXQgdG8gJnF1b3Q7UmVtb3RlT25seSZxdW90Oy4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIHRvIGJlIHZpZXdhYmxlIG9uIHJlbW90ZSBtYWNoaW5lcywgcGxlYXNlIHNldCAmcXVvdDttb2RlJnF1b3Q7IHRvICZxdW90O09mZiZxdW90Oy48YnI+PGJyPg0KDQogICAgICAgICAgICA8dGFibGUgd2lkdGg9MTAwJSBiZ2NvbG9yPSIjZmZmZmNjIj4NCiAgICAgICAgICAgICAgIDx0cj4NCiAgICAgICAgICAgICAgICAgIDx0ZD4NCiAgICAgICAgICAgICAgICAgICAgICA8Y29kZT48cHJlPg0KDQombHQ7IS0tIFdlYi5Db25maWcgQ29uZmlndXJhdGlvbiBGaWxlIC0tJmd0Ow0KDQombHQ7Y29uZmlndXJhdGlvbiZndDsNCiAgICAmbHQ7c3lzdGVtLndlYiZndDsNCiAgICAgICAgJmx0O2N1c3RvbUVycm9ycyBtb2RlPSZxdW90O1JlbW90ZU9ubHkmcXVvdDsvJmd0Ow0KICAgICZsdDsvc3lzdGVtLndlYiZndDsNCiZsdDsvY29uZmlndXJhdGlvbiZndDs8L3ByZT4gICAgICAgICAgICAgICAgICAgICAgPC9jb2RlPg0KDQogICAgICAgICAgICAgICAgICA8L3RkPg0KICAgICAgICAgICAgICAgPC90cj4NCiAgICAgICAgICAgIDwvdGFibGU+DQoNCiAgICAgICAgICAgIDxicj4NCg0KICAgICAgICAgICAgPGI+Tm90ZXM6PC9iPiBUaGUgY3VycmVudCBlcnJvciBwYWdlIHlvdSBhcmUgc2VlaW5nIGNhbiBiZSByZXBsYWNlZCBieSBhIGN1c3RvbSBlcnJvciBwYWdlIGJ5IG1vZGlmeWluZyB0aGUgJnF1b3Q7ZGVmYXVsdFJlZGlyZWN0JnF1b3Q7IGF0dHJpYnV0ZSBvZiB0aGUgYXBwbGljYXRpb24mIzM5O3MgJmx0O2N1c3RvbUVycm9ycyZndDsgY29uZmlndXJhdGlvbiB0YWcgdG8gcG9pbnQgdG8gYSBjdXN0b20gZXJyb3IgcGFnZSBVUkwuPGJyPjxicj4NCg0KICAgICAgICAgICAgPHRhYmxlIHdpZHRoPTEwMCUgYmdjb2xvcj0iI2ZmZmZjYyI+DQogICAgICAgICAgICAgICA8dHI+DQogICAgICAgICAgICAgICAgICA8dGQ+DQogICAgICAgICAgICAgICAgICAgICAgPGNvZGU+PHByZT4NCg0KJmx0OyEtLSBXZWIuQ29uZmlnIENvbmZpZ3VyYXRpb24gRmlsZSAtLSZndDsNCg0KJmx0O2NvbmZpZ3VyYXRpb24mZ3Q7DQogICAgJmx0O3N5c3RlbS53ZWImZ3Q7DQogICAgICAgICZsdDtjdXN0b21FcnJvcnMgbW9kZT0mcXVvdDtPbiZxdW90OyBkZWZhdWx0UmVkaXJlY3Q9JnF1b3Q7bXljdXN0b21wYWdlLmh0bSZxdW90Oy8mZ3Q7DQogICAgJmx0Oy9zeXN0ZW0ud2ViJmd0Ow0KJmx0Oy9jb25maWd1cmF0aW9uJmd0OzwvcHJlPiAgICAgICAgICAgICAgICAgICAgICA8L2NvZGU+DQoNCiAgICAgICAgICAgICAgICAgIDwvdGQ+DQogICAgICAgICAgICAgICA8L3RyPg0KICAgICAgICAgICAgPC90YWJsZT4NCg0KICAgICAgICAgICAgPGJyPg0KDQogICAgICAgICAgICA8L2ZvbnQ+DQoNCiAgICA8L2JvZHk+DQo8L2h0bWw+DQo=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"handler-throws","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.pre-request-handler-execute","handler.throw","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":500,"StatusDescription":"Internal Server Error","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/html; charset=utf-8"},{"Name":"Content-Length","Value":"3500"}],"BodyBase64":"PCFET0NUWVBFIGh0bWw+DQo8aHRtbD4NCiAgICA8aGVhZD4NCiAgICAgICAgPHRpdGxlPlJ1bnRpbWUgRXJyb3I8L3RpdGxlPg0KICAgICAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoIiAvPg0KICAgICAgICA8c3R5bGU+DQogICAgICAgICBib2R5IHtmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTogLjdlbTtjb2xvcjpibGFjazt9IA0KICAgICAgICAgcCB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtjb2xvcjpibGFjazttYXJnaW4tdG9wOiAtNXB4fQ0KICAgICAgICAgYiB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6YmxhY2s7bWFyZ2luLXRvcDogLTVweH0NCiAgICAgICAgIEgxIHsgZm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MThwdDtjb2xvcjpyZWQgfQ0KICAgICAgICAgSDIgeyBmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxNHB0O2NvbG9yOm1hcm9vbiB9DQogICAgICAgICBwcmUge2ZvbnQtZmFtaWx5OiJDb25zb2xhcyIsIkx1Y2lkYSBDb25zb2xlIixNb25vc3BhY2U7Zm9udC1zaXplOjExcHQ7bWFyZ2luOjA7cGFkZGluZzowLjVlbTtsaW5lLWhlaWdodDoxNHB0fQ0KICAgICAgICAgLm1hcmtlciB7Zm9udC13ZWlnaHQ6IGJvbGQ7IGNvbG9yOiBibGFjazt0ZXh0LWRlY29yYXRpb246IG5vbmU7fQ0KICAgICAgICAgLnZlcnNpb24ge2NvbG9yOiBncmF5O30NCiAgICAgICAgIC5lcnJvciB7bWFyZ2luLWJvdHRvbTogMTBweDt9DQogICAgICAgICAuZXhwYW5kYWJsZSB7IHRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7IGZvbnQtd2VpZ2h0OmJvbGQ7IGNvbG9yOm5hdnk7IGN1cnNvcjpwb2ludGVyOyB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA2MzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiA0NDBweDsgb3ZlcmZsb3c6IGF1dG87IHdoaXRlLXNwYWNlOiBwcmUtd3JhcDsgd29yZC13cmFwOiBicmVhay13b3JkOyB9DQogICAgICAgICB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA0NzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiAyODBweDsgfQ0KICAgICAgICAgfQ0KICAgICAgICA8L3N0eWxlPg0KICAgIDwvaGVhZD4NCg0KICAgIDxib2R5IGJnY29sb3I9IndoaXRlIj4NCg0KICAgICAgICAgICAgPHNwYW4+PEgxPlNlcnZlciBFcnJvciBpbiAnLycgQXBwbGljYXRpb24uPGhyIHdpZHRoPTEwMCUgc2l6ZT0xIGNvbG9yPXNpbHZlcj48L0gxPg0KDQogICAgICAgICAgICA8aDI+IDxpPlJ1bnRpbWUgRXJyb3I8L2k+IDwvaDI+PC9zcGFuPg0KDQogICAgICAgICAgICA8Zm9udCBmYWNlPSJBcmlhbCwgSGVsdmV0aWNhLCBHZW5ldmEsIFN1blNhbnMtUmVndWxhciwgc2Fucy1zZXJpZiAiPg0KDQogICAgICAgICAgICA8Yj4gRGVzY3JpcHRpb246IDwvYj5BbiBhcHBsaWNhdGlvbiBlcnJvciBvY2N1cnJlZCBvbiB0aGUgc2VydmVyLiBUaGUgY3VycmVudCBjdXN0b20gZXJyb3Igc2V0dGluZ3MgZm9yIHRoaXMgYXBwbGljYXRpb24gcHJldmVudCB0aGUgZGV0YWlscyBvZiB0aGUgYXBwbGljYXRpb24gZXJyb3IgZnJvbSBiZWluZyB2aWV3ZWQuDQogICAgICAgICAgICA8YnI+PGJyPg0KDQogICAgICAgICAgICA8Yj5EZXRhaWxzOjwvYj4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIG9mIHRoaXMgc3BlY2lmaWMgZXJyb3IgbWVzc2FnZSB0byBiZSB2aWV3YWJsZSBvbiB0aGUgbG9jYWwgc2VydmVyIG1hY2hpbmUsIHBsZWFzZSBjcmVhdGUgYSAmbHQ7Y3VzdG9tRXJyb3JzJmd0OyB0YWcgd2l0aGluIGEgJnF1b3Q7d2ViLmNvbmZpZyZxdW90OyBjb25maWd1cmF0aW9uIGZpbGUgbG9jYXRlZCBpbiB0aGUgcm9vdCBkaXJlY3Rvcnkgb2YgdGhlIGN1cnJlbnQgd2ViIGFwcGxpY2F0aW9uLiBUaGlzICZsdDtjdXN0b21FcnJvcnMmZ3Q7IHRhZyBzaG91bGQgdGhlbiBoYXZlIGl0cyAmcXVvdDttb2RlJnF1b3Q7IGF0dHJpYnV0ZSBzZXQgdG8gJnF1b3Q7UmVtb3RlT25seSZxdW90Oy4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIHRvIGJlIHZpZXdhYmxlIG9uIHJlbW90ZSBtYWNoaW5lcywgcGxlYXNlIHNldCAmcXVvdDttb2RlJnF1b3Q7IHRvICZxdW90O09mZiZxdW90Oy48YnI+PGJyPg0KDQogICAgICAgICAgICA8dGFibGUgd2lkdGg9MTAwJSBiZ2NvbG9yPSIjZmZmZmNjIj4NCiAgICAgICAgICAgICAgIDx0cj4NCiAgICAgICAgICAgICAgICAgIDx0ZD4NCiAgICAgICAgICAgICAgICAgICAgICA8Y29kZT48cHJlPg0KDQombHQ7IS0tIFdlYi5Db25maWcgQ29uZmlndXJhdGlvbiBGaWxlIC0tJmd0Ow0KDQombHQ7Y29uZmlndXJhdGlvbiZndDsNCiAgICAmbHQ7c3lzdGVtLndlYiZndDsNCiAgICAgICAgJmx0O2N1c3RvbUVycm9ycyBtb2RlPSZxdW90O1JlbW90ZU9ubHkmcXVvdDsvJmd0Ow0KICAgICZsdDsvc3lzdGVtLndlYiZndDsNCiZsdDsvY29uZmlndXJhdGlvbiZndDs8L3ByZT4gICAgICAgICAgICAgICAgICAgICAgPC9jb2RlPg0KDQogICAgICAgICAgICAgICAgICA8L3RkPg0KICAgICAgICAgICAgICAgPC90cj4NCiAgICAgICAgICAgIDwvdGFibGU+DQoNCiAgICAgICAgICAgIDxicj4NCg0KICAgICAgICAgICAgPGI+Tm90ZXM6PC9iPiBUaGUgY3VycmVudCBlcnJvciBwYWdlIHlvdSBhcmUgc2VlaW5nIGNhbiBiZSByZXBsYWNlZCBieSBhIGN1c3RvbSBlcnJvciBwYWdlIGJ5IG1vZGlmeWluZyB0aGUgJnF1b3Q7ZGVmYXVsdFJlZGlyZWN0JnF1b3Q7IGF0dHJpYnV0ZSBvZiB0aGUgYXBwbGljYXRpb24mIzM5O3MgJmx0O2N1c3RvbUVycm9ycyZndDsgY29uZmlndXJhdGlvbiB0YWcgdG8gcG9pbnQgdG8gYSBjdXN0b20gZXJyb3IgcGFnZSBVUkwuPGJyPjxicj4NCg0KICAgICAgICAgICAgPHRhYmxlIHdpZHRoPTEwMCUgYmdjb2xvcj0iI2ZmZmZjYyI+DQogICAgICAgICAgICAgICA8dHI+DQogICAgICAgICAgICAgICAgICA8dGQ+DQogICAgICAgICAgICAgICAgICAgICAgPGNvZGU+PHByZT4NCg0KJmx0OyEtLSBXZWIuQ29uZmlnIENvbmZpZ3VyYXRpb24gRmlsZSAtLSZndDsNCg0KJmx0O2NvbmZpZ3VyYXRpb24mZ3Q7DQogICAgJmx0O3N5c3RlbS53ZWImZ3Q7DQogICAgICAgICZsdDtjdXN0b21FcnJvcnMgbW9kZT0mcXVvdDtPbiZxdW90OyBkZWZhdWx0UmVkaXJlY3Q9JnF1b3Q7bXljdXN0b21wYWdlLmh0bSZxdW90Oy8mZ3Q7DQogICAgJmx0Oy9zeXN0ZW0ud2ViJmd0Ow0KJmx0Oy9jb25maWd1cmF0aW9uJmd0OzwvcHJlPiAgICAgICAgICAgICAgICAgICAgICA8L2NvZGU+DQoNCiAgICAgICAgICAgICAgICAgIDwvdGQ+DQogICAgICAgICAgICAgICA8L3RyPg0KICAgICAgICAgICAgPC90YWJsZT4NCg0KICAgICAgICAgICAgPGJyPg0KDQogICAgICAgICAgICA8L2ZvbnQ+DQoNCiAgICA8L2JvZHk+DQo8L2h0bWw+DQo=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}},{"Name":"handler-missing","Observation":{"Events":["runner.process-request.enter","module.begin-request","module.end-request","worker.status","worker.header.unknown","worker.header.known","worker.header.known","worker.header.content-length","worker.body","worker.flush.final","worker.end-of-request","runner.process-request.return"],"Response":{"StatusCode":500,"StatusDescription":"Internal Server Error","Headers":[{"Name":"X-AspNet-Version","Value":"4.0.30319"},{"Name":"Cache-Control","Value":"private"},{"Name":"Content-Type","Value":"text\/html; charset=utf-8"},{"Name":"Content-Length","Value":"3500"}],"BodyBase64":"PCFET0NUWVBFIGh0bWw+DQo8aHRtbD4NCiAgICA8aGVhZD4NCiAgICAgICAgPHRpdGxlPlJ1bnRpbWUgRXJyb3I8L3RpdGxlPg0KICAgICAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoIiAvPg0KICAgICAgICA8c3R5bGU+DQogICAgICAgICBib2R5IHtmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTogLjdlbTtjb2xvcjpibGFjazt9IA0KICAgICAgICAgcCB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtjb2xvcjpibGFjazttYXJnaW4tdG9wOiAtNXB4fQ0KICAgICAgICAgYiB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6YmxhY2s7bWFyZ2luLXRvcDogLTVweH0NCiAgICAgICAgIEgxIHsgZm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MThwdDtjb2xvcjpyZWQgfQ0KICAgICAgICAgSDIgeyBmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxNHB0O2NvbG9yOm1hcm9vbiB9DQogICAgICAgICBwcmUge2ZvbnQtZmFtaWx5OiJDb25zb2xhcyIsIkx1Y2lkYSBDb25zb2xlIixNb25vc3BhY2U7Zm9udC1zaXplOjExcHQ7bWFyZ2luOjA7cGFkZGluZzowLjVlbTtsaW5lLWhlaWdodDoxNHB0fQ0KICAgICAgICAgLm1hcmtlciB7Zm9udC13ZWlnaHQ6IGJvbGQ7IGNvbG9yOiBibGFjazt0ZXh0LWRlY29yYXRpb246IG5vbmU7fQ0KICAgICAgICAgLnZlcnNpb24ge2NvbG9yOiBncmF5O30NCiAgICAgICAgIC5lcnJvciB7bWFyZ2luLWJvdHRvbTogMTBweDt9DQogICAgICAgICAuZXhwYW5kYWJsZSB7IHRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7IGZvbnQtd2VpZ2h0OmJvbGQ7IGNvbG9yOm5hdnk7IGN1cnNvcjpwb2ludGVyOyB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA2MzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiA0NDBweDsgb3ZlcmZsb3c6IGF1dG87IHdoaXRlLXNwYWNlOiBwcmUtd3JhcDsgd29yZC13cmFwOiBicmVhay13b3JkOyB9DQogICAgICAgICB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA0NzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiAyODBweDsgfQ0KICAgICAgICAgfQ0KICAgICAgICA8L3N0eWxlPg0KICAgIDwvaGVhZD4NCg0KICAgIDxib2R5IGJnY29sb3I9IndoaXRlIj4NCg0KICAgICAgICAgICAgPHNwYW4+PEgxPlNlcnZlciBFcnJvciBpbiAnLycgQXBwbGljYXRpb24uPGhyIHdpZHRoPTEwMCUgc2l6ZT0xIGNvbG9yPXNpbHZlcj48L0gxPg0KDQogICAgICAgICAgICA8aDI+IDxpPlJ1bnRpbWUgRXJyb3I8L2k+IDwvaDI+PC9zcGFuPg0KDQogICAgICAgICAgICA8Zm9udCBmYWNlPSJBcmlhbCwgSGVsdmV0aWNhLCBHZW5ldmEsIFN1blNhbnMtUmVndWxhciwgc2Fucy1zZXJpZiAiPg0KDQogICAgICAgICAgICA8Yj4gRGVzY3JpcHRpb246IDwvYj5BbiBhcHBsaWNhdGlvbiBlcnJvciBvY2N1cnJlZCBvbiB0aGUgc2VydmVyLiBUaGUgY3VycmVudCBjdXN0b20gZXJyb3Igc2V0dGluZ3MgZm9yIHRoaXMgYXBwbGljYXRpb24gcHJldmVudCB0aGUgZGV0YWlscyBvZiB0aGUgYXBwbGljYXRpb24gZXJyb3IgZnJvbSBiZWluZyB2aWV3ZWQuDQogICAgICAgICAgICA8YnI+PGJyPg0KDQogICAgICAgICAgICA8Yj5EZXRhaWxzOjwvYj4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIG9mIHRoaXMgc3BlY2lmaWMgZXJyb3IgbWVzc2FnZSB0byBiZSB2aWV3YWJsZSBvbiB0aGUgbG9jYWwgc2VydmVyIG1hY2hpbmUsIHBsZWFzZSBjcmVhdGUgYSAmbHQ7Y3VzdG9tRXJyb3JzJmd0OyB0YWcgd2l0aGluIGEgJnF1b3Q7d2ViLmNvbmZpZyZxdW90OyBjb25maWd1cmF0aW9uIGZpbGUgbG9jYXRlZCBpbiB0aGUgcm9vdCBkaXJlY3Rvcnkgb2YgdGhlIGN1cnJlbnQgd2ViIGFwcGxpY2F0aW9uLiBUaGlzICZsdDtjdXN0b21FcnJvcnMmZ3Q7IHRhZyBzaG91bGQgdGhlbiBoYXZlIGl0cyAmcXVvdDttb2RlJnF1b3Q7IGF0dHJpYnV0ZSBzZXQgdG8gJnF1b3Q7UmVtb3RlT25seSZxdW90Oy4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIHRvIGJlIHZpZXdhYmxlIG9uIHJlbW90ZSBtYWNoaW5lcywgcGxlYXNlIHNldCAmcXVvdDttb2RlJnF1b3Q7IHRvICZxdW90O09mZiZxdW90Oy48YnI+PGJyPg0KDQogICAgICAgICAgICA8dGFibGUgd2lkdGg9MTAwJSBiZ2NvbG9yPSIjZmZmZmNjIj4NCiAgICAgICAgICAgICAgIDx0cj4NCiAgICAgICAgICAgICAgICAgIDx0ZD4NCiAgICAgICAgICAgICAgICAgICAgICA8Y29kZT48cHJlPg0KDQombHQ7IS0tIFdlYi5Db25maWcgQ29uZmlndXJhdGlvbiBGaWxlIC0tJmd0Ow0KDQombHQ7Y29uZmlndXJhdGlvbiZndDsNCiAgICAmbHQ7c3lzdGVtLndlYiZndDsNCiAgICAgICAgJmx0O2N1c3RvbUVycm9ycyBtb2RlPSZxdW90O1JlbW90ZU9ubHkmcXVvdDsvJmd0Ow0KICAgICZsdDsvc3lzdGVtLndlYiZndDsNCiZsdDsvY29uZmlndXJhdGlvbiZndDs8L3ByZT4gICAgICAgICAgICAgICAgICAgICAgPC9jb2RlPg0KDQogICAgICAgICAgICAgICAgICA8L3RkPg0KICAgICAgICAgICAgICAgPC90cj4NCiAgICAgICAgICAgIDwvdGFibGU+DQoNCiAgICAgICAgICAgIDxicj4NCg0KICAgICAgICAgICAgPGI+Tm90ZXM6PC9iPiBUaGUgY3VycmVudCBlcnJvciBwYWdlIHlvdSBhcmUgc2VlaW5nIGNhbiBiZSByZXBsYWNlZCBieSBhIGN1c3RvbSBlcnJvciBwYWdlIGJ5IG1vZGlmeWluZyB0aGUgJnF1b3Q7ZGVmYXVsdFJlZGlyZWN0JnF1b3Q7IGF0dHJpYnV0ZSBvZiB0aGUgYXBwbGljYXRpb24mIzM5O3MgJmx0O2N1c3RvbUVycm9ycyZndDsgY29uZmlndXJhdGlvbiB0YWcgdG8gcG9pbnQgdG8gYSBjdXN0b20gZXJyb3IgcGFnZSBVUkwuPGJyPjxicj4NCg0KICAgICAgICAgICAgPHRhYmxlIHdpZHRoPTEwMCUgYmdjb2xvcj0iI2ZmZmZjYyI+DQogICAgICAgICAgICAgICA8dHI+DQogICAgICAgICAgICAgICAgICA8dGQ+DQogICAgICAgICAgICAgICAgICAgICAgPGNvZGU+PHByZT4NCg0KJmx0OyEtLSBXZWIuQ29uZmlnIENvbmZpZ3VyYXRpb24gRmlsZSAtLSZndDsNCg0KJmx0O2NvbmZpZ3VyYXRpb24mZ3Q7DQogICAgJmx0O3N5c3RlbS53ZWImZ3Q7DQogICAgICAgICZsdDtjdXN0b21FcnJvcnMgbW9kZT0mcXVvdDtPbiZxdW90OyBkZWZhdWx0UmVkaXJlY3Q9JnF1b3Q7bXljdXN0b21wYWdlLmh0bSZxdW90Oy8mZ3Q7DQogICAgJmx0Oy9zeXN0ZW0ud2ViJmd0Ow0KJmx0Oy9jb25maWd1cmF0aW9uJmd0OzwvcHJlPiAgICAgICAgICAgICAgICAgICAgICA8L2NvZGU+DQoNCiAgICAgICAgICAgICAgICAgIDwvdGQ+DQogICAgICAgICAgICAgICA8L3RyPg0KICAgICAgICAgICAgPC90YWJsZT4NCg0KICAgICAgICAgICAgPGJyPg0KDQogICAgICAgICAgICA8L2ZvbnQ+DQoNCiAgICA8L2JvZHk+DQo8L2h0bWw+DQo=","Flushes":[true]},"EscapedException":null,"EndOfRequestCount":1,"CompletionCount":1}}]}]}
+{
+  "SchemaVersion": 2,
+  "Provenance": {
+    "Oracle": "Microsoft .NET Framework",
+    "TargetFramework": "net481",
+    "RuntimeRequirement": "4.8.1",
+    "ManagedEntryPoint": "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
+    "ActivationEntryPoint": "System.Web.Hosting.ApplicationManager.CreateObject",
+    "Fixture": "precompiled-handler-and-request-body-v2"
+  },
+  "Sessions": [
+    {
+      "Name": "cold-then-warm",
+      "ApplicationEvents": [
+        "module.collection:DefaultAuthentication",
+        "module.collection:DefaultAuthentication",
+        "module.collection:DefaultAuthentication",
+        "module.collection:FrameworkOracleProbe",
+        "module.collection:FrameworkOracleProbe",
+        "module.collection:FrameworkOracleProbe",
+        "module.init",
+        "module.init",
+        "module.init"
+      ],
+      "SessionEvents": [
+        "runner.stop",
+        "applications-created:3"
+      ],
+      "Requests": [
+        {
+          "Name": "cold-sync",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.process-request",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 201,
+              "StatusDescription": "Oracle Created",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "X-Framework-Oracle",
+                  "Value": "cold-sync"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "9"
+                }
+              ],
+              "BodyBase64": "b3JhY2xlLW9r",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "complete-request",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.complete-request",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "0"
+                }
+              ],
+              "BodyBase64": "",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "delayed-async",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.begin-process-request",
+              "runner.process-request.return",
+              "handler.end-process-request",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request"
+            ],
+            "Response": {
+              "StatusCode": 202,
+              "StatusDescription": "Oracle Accepted",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "8"
+                }
+              ],
+              "BodyBase64": "YXN5bmMtb2s=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "warm-a",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.echo",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "11"
+                }
+              ],
+              "BodyBase64": "ZWNobzp3YXJtLWE=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "warm-b",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.echo",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "11"
+                }
+              ],
+              "BodyBase64": "ZWNobzp3YXJtLWI=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "warm-c",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.echo",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "11"
+                }
+              ],
+              "BodyBase64": "ZWNobzp3YXJtLWM=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        }
+      ]
+    },
+    {
+      "Name": "concurrent-cold",
+      "ApplicationEvents": [
+        "module.collection:DefaultAuthentication",
+        "module.collection:DefaultAuthentication",
+        "module.collection:FrameworkOracleProbe",
+        "module.collection:FrameworkOracleProbe",
+        "module.init",
+        "module.init"
+      ],
+      "SessionEvents": [
+        "runner.stop",
+        "applications-created:2"
+      ],
+      "Requests": [
+        {
+          "Name": "cold-a",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.echo",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "11"
+                }
+              ],
+              "BodyBase64": "ZWNobzpjb2xkLWE=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "cold-b",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.echo",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "11"
+                }
+              ],
+              "BodyBase64": "ZWNobzpjb2xkLWI=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        }
+      ]
+    },
+    {
+      "Name": "request-bodies",
+      "ApplicationEvents": [
+        "module.collection:DefaultAuthentication",
+        "module.collection:FrameworkOracleProbe",
+        "module.init"
+      ],
+      "SessionEvents": [
+        "runner.stop",
+        "applications-created:1"
+      ],
+      "Requests": [
+        {
+          "Name": "body-input-known",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "worker.body.read",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "16"
+                }
+              ],
+              "BodyBase64": "Q2xhc3NpYzpZV0pqWkdWbQ==",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "body-input-chunked",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "worker.body.read",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "16"
+                }
+              ],
+              "BodyBase64": "Q2xhc3NpYzpZV0pqWkdWbQ==",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "body-binary",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "worker.body.read",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "16"
+                }
+              ],
+              "BodyBase64": "Q2xhc3NpYzpZV0pqWkdWbQ==",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "body-buffered-preloaded",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "worker.body.preloaded",
+              "worker.body.read",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "17"
+                }
+              ],
+              "BodyBase64": "QnVmZmVyZWQ6WVdKalpHVm0=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "body-bufferless",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "worker.body.read",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "19"
+                }
+              ],
+              "BodyBase64": "QnVmZmVybGVzczpZV0pqWkdWbQ==",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "body-bufferless-apm",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "worker.body.read",
+              "worker.body.read",
+              "module.post-request-handler-execute",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 200,
+              "StatusDescription": "OK",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/plain; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "19"
+                }
+              ],
+              "BodyBase64": "QnVmZmVybGVzczpZV0pqWkdWbQ==",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        }
+      ]
+    },
+    {
+      "Name": "errors",
+      "ApplicationEvents": [
+        "module.collection:DefaultAuthentication",
+        "module.collection:FrameworkOracleProbe",
+        "module.init"
+      ],
+      "SessionEvents": [
+        "runner.stop",
+        "applications-created:1"
+      ],
+      "Requests": [
+        {
+          "Name": "module-throws",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.throw",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 500,
+              "StatusDescription": "Internal Server Error",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/html; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "3500"
+                }
+              ],
+              "BodyBase64": "PCFET0NUWVBFIGh0bWw\u002BDQo8aHRtbD4NCiAgICA8aGVhZD4NCiAgICAgICAgPHRpdGxlPlJ1bnRpbWUgRXJyb3I8L3RpdGxlPg0KICAgICAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoIiAvPg0KICAgICAgICA8c3R5bGU\u002BDQogICAgICAgICBib2R5IHtmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTogLjdlbTtjb2xvcjpibGFjazt9IA0KICAgICAgICAgcCB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtjb2xvcjpibGFjazttYXJnaW4tdG9wOiAtNXB4fQ0KICAgICAgICAgYiB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6YmxhY2s7bWFyZ2luLXRvcDogLTVweH0NCiAgICAgICAgIEgxIHsgZm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MThwdDtjb2xvcjpyZWQgfQ0KICAgICAgICAgSDIgeyBmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxNHB0O2NvbG9yOm1hcm9vbiB9DQogICAgICAgICBwcmUge2ZvbnQtZmFtaWx5OiJDb25zb2xhcyIsIkx1Y2lkYSBDb25zb2xlIixNb25vc3BhY2U7Zm9udC1zaXplOjExcHQ7bWFyZ2luOjA7cGFkZGluZzowLjVlbTtsaW5lLWhlaWdodDoxNHB0fQ0KICAgICAgICAgLm1hcmtlciB7Zm9udC13ZWlnaHQ6IGJvbGQ7IGNvbG9yOiBibGFjazt0ZXh0LWRlY29yYXRpb246IG5vbmU7fQ0KICAgICAgICAgLnZlcnNpb24ge2NvbG9yOiBncmF5O30NCiAgICAgICAgIC5lcnJvciB7bWFyZ2luLWJvdHRvbTogMTBweDt9DQogICAgICAgICAuZXhwYW5kYWJsZSB7IHRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7IGZvbnQtd2VpZ2h0OmJvbGQ7IGNvbG9yOm5hdnk7IGN1cnNvcjpwb2ludGVyOyB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA2MzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiA0NDBweDsgb3ZlcmZsb3c6IGF1dG87IHdoaXRlLXNwYWNlOiBwcmUtd3JhcDsgd29yZC13cmFwOiBicmVhay13b3JkOyB9DQogICAgICAgICB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA0NzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiAyODBweDsgfQ0KICAgICAgICAgfQ0KICAgICAgICA8L3N0eWxlPg0KICAgIDwvaGVhZD4NCg0KICAgIDxib2R5IGJnY29sb3I9IndoaXRlIj4NCg0KICAgICAgICAgICAgPHNwYW4\u002BPEgxPlNlcnZlciBFcnJvciBpbiAnLycgQXBwbGljYXRpb24uPGhyIHdpZHRoPTEwMCUgc2l6ZT0xIGNvbG9yPXNpbHZlcj48L0gxPg0KDQogICAgICAgICAgICA8aDI\u002BIDxpPlJ1bnRpbWUgRXJyb3I8L2k\u002BIDwvaDI\u002BPC9zcGFuPg0KDQogICAgICAgICAgICA8Zm9udCBmYWNlPSJBcmlhbCwgSGVsdmV0aWNhLCBHZW5ldmEsIFN1blNhbnMtUmVndWxhciwgc2Fucy1zZXJpZiAiPg0KDQogICAgICAgICAgICA8Yj4gRGVzY3JpcHRpb246IDwvYj5BbiBhcHBsaWNhdGlvbiBlcnJvciBvY2N1cnJlZCBvbiB0aGUgc2VydmVyLiBUaGUgY3VycmVudCBjdXN0b20gZXJyb3Igc2V0dGluZ3MgZm9yIHRoaXMgYXBwbGljYXRpb24gcHJldmVudCB0aGUgZGV0YWlscyBvZiB0aGUgYXBwbGljYXRpb24gZXJyb3IgZnJvbSBiZWluZyB2aWV3ZWQuDQogICAgICAgICAgICA8YnI\u002BPGJyPg0KDQogICAgICAgICAgICA8Yj5EZXRhaWxzOjwvYj4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIG9mIHRoaXMgc3BlY2lmaWMgZXJyb3IgbWVzc2FnZSB0byBiZSB2aWV3YWJsZSBvbiB0aGUgbG9jYWwgc2VydmVyIG1hY2hpbmUsIHBsZWFzZSBjcmVhdGUgYSAmbHQ7Y3VzdG9tRXJyb3JzJmd0OyB0YWcgd2l0aGluIGEgJnF1b3Q7d2ViLmNvbmZpZyZxdW90OyBjb25maWd1cmF0aW9uIGZpbGUgbG9jYXRlZCBpbiB0aGUgcm9vdCBkaXJlY3Rvcnkgb2YgdGhlIGN1cnJlbnQgd2ViIGFwcGxpY2F0aW9uLiBUaGlzICZsdDtjdXN0b21FcnJvcnMmZ3Q7IHRhZyBzaG91bGQgdGhlbiBoYXZlIGl0cyAmcXVvdDttb2RlJnF1b3Q7IGF0dHJpYnV0ZSBzZXQgdG8gJnF1b3Q7UmVtb3RlT25seSZxdW90Oy4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIHRvIGJlIHZpZXdhYmxlIG9uIHJlbW90ZSBtYWNoaW5lcywgcGxlYXNlIHNldCAmcXVvdDttb2RlJnF1b3Q7IHRvICZxdW90O09mZiZxdW90Oy48YnI\u002BPGJyPg0KDQogICAgICAgICAgICA8dGFibGUgd2lkdGg9MTAwJSBiZ2NvbG9yPSIjZmZmZmNjIj4NCiAgICAgICAgICAgICAgIDx0cj4NCiAgICAgICAgICAgICAgICAgIDx0ZD4NCiAgICAgICAgICAgICAgICAgICAgICA8Y29kZT48cHJlPg0KDQombHQ7IS0tIFdlYi5Db25maWcgQ29uZmlndXJhdGlvbiBGaWxlIC0tJmd0Ow0KDQombHQ7Y29uZmlndXJhdGlvbiZndDsNCiAgICAmbHQ7c3lzdGVtLndlYiZndDsNCiAgICAgICAgJmx0O2N1c3RvbUVycm9ycyBtb2RlPSZxdW90O1JlbW90ZU9ubHkmcXVvdDsvJmd0Ow0KICAgICZsdDsvc3lzdGVtLndlYiZndDsNCiZsdDsvY29uZmlndXJhdGlvbiZndDs8L3ByZT4gICAgICAgICAgICAgICAgICAgICAgPC9jb2RlPg0KDQogICAgICAgICAgICAgICAgICA8L3RkPg0KICAgICAgICAgICAgICAgPC90cj4NCiAgICAgICAgICAgIDwvdGFibGU\u002BDQoNCiAgICAgICAgICAgIDxicj4NCg0KICAgICAgICAgICAgPGI\u002BTm90ZXM6PC9iPiBUaGUgY3VycmVudCBlcnJvciBwYWdlIHlvdSBhcmUgc2VlaW5nIGNhbiBiZSByZXBsYWNlZCBieSBhIGN1c3RvbSBlcnJvciBwYWdlIGJ5IG1vZGlmeWluZyB0aGUgJnF1b3Q7ZGVmYXVsdFJlZGlyZWN0JnF1b3Q7IGF0dHJpYnV0ZSBvZiB0aGUgYXBwbGljYXRpb24mIzM5O3MgJmx0O2N1c3RvbUVycm9ycyZndDsgY29uZmlndXJhdGlvbiB0YWcgdG8gcG9pbnQgdG8gYSBjdXN0b20gZXJyb3IgcGFnZSBVUkwuPGJyPjxicj4NCg0KICAgICAgICAgICAgPHRhYmxlIHdpZHRoPTEwMCUgYmdjb2xvcj0iI2ZmZmZjYyI\u002BDQogICAgICAgICAgICAgICA8dHI\u002BDQogICAgICAgICAgICAgICAgICA8dGQ\u002BDQogICAgICAgICAgICAgICAgICAgICAgPGNvZGU\u002BPHByZT4NCg0KJmx0OyEtLSBXZWIuQ29uZmlnIENvbmZpZ3VyYXRpb24gRmlsZSAtLSZndDsNCg0KJmx0O2NvbmZpZ3VyYXRpb24mZ3Q7DQogICAgJmx0O3N5c3RlbS53ZWImZ3Q7DQogICAgICAgICZsdDtjdXN0b21FcnJvcnMgbW9kZT0mcXVvdDtPbiZxdW90OyBkZWZhdWx0UmVkaXJlY3Q9JnF1b3Q7bXljdXN0b21wYWdlLmh0bSZxdW90Oy8mZ3Q7DQogICAgJmx0Oy9zeXN0ZW0ud2ViJmd0Ow0KJmx0Oy9jb25maWd1cmF0aW9uJmd0OzwvcHJlPiAgICAgICAgICAgICAgICAgICAgICA8L2NvZGU\u002BDQoNCiAgICAgICAgICAgICAgICAgIDwvdGQ\u002BDQogICAgICAgICAgICAgICA8L3RyPg0KICAgICAgICAgICAgPC90YWJsZT4NCg0KICAgICAgICAgICAgPGJyPg0KDQogICAgICAgICAgICA8L2ZvbnQ\u002BDQoNCiAgICA8L2JvZHk\u002BDQo8L2h0bWw\u002BDQo=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "handler-throws",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.pre-request-handler-execute",
+              "handler.throw",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 500,
+              "StatusDescription": "Internal Server Error",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/html; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "3500"
+                }
+              ],
+              "BodyBase64": "PCFET0NUWVBFIGh0bWw\u002BDQo8aHRtbD4NCiAgICA8aGVhZD4NCiAgICAgICAgPHRpdGxlPlJ1bnRpbWUgRXJyb3I8L3RpdGxlPg0KICAgICAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoIiAvPg0KICAgICAgICA8c3R5bGU\u002BDQogICAgICAgICBib2R5IHtmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTogLjdlbTtjb2xvcjpibGFjazt9IA0KICAgICAgICAgcCB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtjb2xvcjpibGFjazttYXJnaW4tdG9wOiAtNXB4fQ0KICAgICAgICAgYiB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6YmxhY2s7bWFyZ2luLXRvcDogLTVweH0NCiAgICAgICAgIEgxIHsgZm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MThwdDtjb2xvcjpyZWQgfQ0KICAgICAgICAgSDIgeyBmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxNHB0O2NvbG9yOm1hcm9vbiB9DQogICAgICAgICBwcmUge2ZvbnQtZmFtaWx5OiJDb25zb2xhcyIsIkx1Y2lkYSBDb25zb2xlIixNb25vc3BhY2U7Zm9udC1zaXplOjExcHQ7bWFyZ2luOjA7cGFkZGluZzowLjVlbTtsaW5lLWhlaWdodDoxNHB0fQ0KICAgICAgICAgLm1hcmtlciB7Zm9udC13ZWlnaHQ6IGJvbGQ7IGNvbG9yOiBibGFjazt0ZXh0LWRlY29yYXRpb246IG5vbmU7fQ0KICAgICAgICAgLnZlcnNpb24ge2NvbG9yOiBncmF5O30NCiAgICAgICAgIC5lcnJvciB7bWFyZ2luLWJvdHRvbTogMTBweDt9DQogICAgICAgICAuZXhwYW5kYWJsZSB7IHRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7IGZvbnQtd2VpZ2h0OmJvbGQ7IGNvbG9yOm5hdnk7IGN1cnNvcjpwb2ludGVyOyB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA2MzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiA0NDBweDsgb3ZlcmZsb3c6IGF1dG87IHdoaXRlLXNwYWNlOiBwcmUtd3JhcDsgd29yZC13cmFwOiBicmVhay13b3JkOyB9DQogICAgICAgICB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA0NzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiAyODBweDsgfQ0KICAgICAgICAgfQ0KICAgICAgICA8L3N0eWxlPg0KICAgIDwvaGVhZD4NCg0KICAgIDxib2R5IGJnY29sb3I9IndoaXRlIj4NCg0KICAgICAgICAgICAgPHNwYW4\u002BPEgxPlNlcnZlciBFcnJvciBpbiAnLycgQXBwbGljYXRpb24uPGhyIHdpZHRoPTEwMCUgc2l6ZT0xIGNvbG9yPXNpbHZlcj48L0gxPg0KDQogICAgICAgICAgICA8aDI\u002BIDxpPlJ1bnRpbWUgRXJyb3I8L2k\u002BIDwvaDI\u002BPC9zcGFuPg0KDQogICAgICAgICAgICA8Zm9udCBmYWNlPSJBcmlhbCwgSGVsdmV0aWNhLCBHZW5ldmEsIFN1blNhbnMtUmVndWxhciwgc2Fucy1zZXJpZiAiPg0KDQogICAgICAgICAgICA8Yj4gRGVzY3JpcHRpb246IDwvYj5BbiBhcHBsaWNhdGlvbiBlcnJvciBvY2N1cnJlZCBvbiB0aGUgc2VydmVyLiBUaGUgY3VycmVudCBjdXN0b20gZXJyb3Igc2V0dGluZ3MgZm9yIHRoaXMgYXBwbGljYXRpb24gcHJldmVudCB0aGUgZGV0YWlscyBvZiB0aGUgYXBwbGljYXRpb24gZXJyb3IgZnJvbSBiZWluZyB2aWV3ZWQuDQogICAgICAgICAgICA8YnI\u002BPGJyPg0KDQogICAgICAgICAgICA8Yj5EZXRhaWxzOjwvYj4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIG9mIHRoaXMgc3BlY2lmaWMgZXJyb3IgbWVzc2FnZSB0byBiZSB2aWV3YWJsZSBvbiB0aGUgbG9jYWwgc2VydmVyIG1hY2hpbmUsIHBsZWFzZSBjcmVhdGUgYSAmbHQ7Y3VzdG9tRXJyb3JzJmd0OyB0YWcgd2l0aGluIGEgJnF1b3Q7d2ViLmNvbmZpZyZxdW90OyBjb25maWd1cmF0aW9uIGZpbGUgbG9jYXRlZCBpbiB0aGUgcm9vdCBkaXJlY3Rvcnkgb2YgdGhlIGN1cnJlbnQgd2ViIGFwcGxpY2F0aW9uLiBUaGlzICZsdDtjdXN0b21FcnJvcnMmZ3Q7IHRhZyBzaG91bGQgdGhlbiBoYXZlIGl0cyAmcXVvdDttb2RlJnF1b3Q7IGF0dHJpYnV0ZSBzZXQgdG8gJnF1b3Q7UmVtb3RlT25seSZxdW90Oy4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIHRvIGJlIHZpZXdhYmxlIG9uIHJlbW90ZSBtYWNoaW5lcywgcGxlYXNlIHNldCAmcXVvdDttb2RlJnF1b3Q7IHRvICZxdW90O09mZiZxdW90Oy48YnI\u002BPGJyPg0KDQogICAgICAgICAgICA8dGFibGUgd2lkdGg9MTAwJSBiZ2NvbG9yPSIjZmZmZmNjIj4NCiAgICAgICAgICAgICAgIDx0cj4NCiAgICAgICAgICAgICAgICAgIDx0ZD4NCiAgICAgICAgICAgICAgICAgICAgICA8Y29kZT48cHJlPg0KDQombHQ7IS0tIFdlYi5Db25maWcgQ29uZmlndXJhdGlvbiBGaWxlIC0tJmd0Ow0KDQombHQ7Y29uZmlndXJhdGlvbiZndDsNCiAgICAmbHQ7c3lzdGVtLndlYiZndDsNCiAgICAgICAgJmx0O2N1c3RvbUVycm9ycyBtb2RlPSZxdW90O1JlbW90ZU9ubHkmcXVvdDsvJmd0Ow0KICAgICZsdDsvc3lzdGVtLndlYiZndDsNCiZsdDsvY29uZmlndXJhdGlvbiZndDs8L3ByZT4gICAgICAgICAgICAgICAgICAgICAgPC9jb2RlPg0KDQogICAgICAgICAgICAgICAgICA8L3RkPg0KICAgICAgICAgICAgICAgPC90cj4NCiAgICAgICAgICAgIDwvdGFibGU\u002BDQoNCiAgICAgICAgICAgIDxicj4NCg0KICAgICAgICAgICAgPGI\u002BTm90ZXM6PC9iPiBUaGUgY3VycmVudCBlcnJvciBwYWdlIHlvdSBhcmUgc2VlaW5nIGNhbiBiZSByZXBsYWNlZCBieSBhIGN1c3RvbSBlcnJvciBwYWdlIGJ5IG1vZGlmeWluZyB0aGUgJnF1b3Q7ZGVmYXVsdFJlZGlyZWN0JnF1b3Q7IGF0dHJpYnV0ZSBvZiB0aGUgYXBwbGljYXRpb24mIzM5O3MgJmx0O2N1c3RvbUVycm9ycyZndDsgY29uZmlndXJhdGlvbiB0YWcgdG8gcG9pbnQgdG8gYSBjdXN0b20gZXJyb3IgcGFnZSBVUkwuPGJyPjxicj4NCg0KICAgICAgICAgICAgPHRhYmxlIHdpZHRoPTEwMCUgYmdjb2xvcj0iI2ZmZmZjYyI\u002BDQogICAgICAgICAgICAgICA8dHI\u002BDQogICAgICAgICAgICAgICAgICA8dGQ\u002BDQogICAgICAgICAgICAgICAgICAgICAgPGNvZGU\u002BPHByZT4NCg0KJmx0OyEtLSBXZWIuQ29uZmlnIENvbmZpZ3VyYXRpb24gRmlsZSAtLSZndDsNCg0KJmx0O2NvbmZpZ3VyYXRpb24mZ3Q7DQogICAgJmx0O3N5c3RlbS53ZWImZ3Q7DQogICAgICAgICZsdDtjdXN0b21FcnJvcnMgbW9kZT0mcXVvdDtPbiZxdW90OyBkZWZhdWx0UmVkaXJlY3Q9JnF1b3Q7bXljdXN0b21wYWdlLmh0bSZxdW90Oy8mZ3Q7DQogICAgJmx0Oy9zeXN0ZW0ud2ViJmd0Ow0KJmx0Oy9jb25maWd1cmF0aW9uJmd0OzwvcHJlPiAgICAgICAgICAgICAgICAgICAgICA8L2NvZGU\u002BDQoNCiAgICAgICAgICAgICAgICAgIDwvdGQ\u002BDQogICAgICAgICAgICAgICA8L3RyPg0KICAgICAgICAgICAgPC90YWJsZT4NCg0KICAgICAgICAgICAgPGJyPg0KDQogICAgICAgICAgICA8L2ZvbnQ\u002BDQoNCiAgICA8L2JvZHk\u002BDQo8L2h0bWw\u002BDQo=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        },
+        {
+          "Name": "handler-missing",
+          "Observation": {
+            "Events": [
+              "runner.process-request.enter",
+              "module.begin-request",
+              "module.end-request",
+              "worker.status",
+              "worker.header.unknown",
+              "worker.header.known",
+              "worker.header.known",
+              "worker.header.content-length",
+              "worker.body",
+              "worker.flush.final",
+              "worker.end-of-request",
+              "runner.process-request.return"
+            ],
+            "Response": {
+              "StatusCode": 500,
+              "StatusDescription": "Internal Server Error",
+              "Headers": [
+                {
+                  "Name": "X-AspNet-Version",
+                  "Value": "4.0.30319"
+                },
+                {
+                  "Name": "Cache-Control",
+                  "Value": "private"
+                },
+                {
+                  "Name": "Content-Type",
+                  "Value": "text/html; charset=utf-8"
+                },
+                {
+                  "Name": "Content-Length",
+                  "Value": "3500"
+                }
+              ],
+              "BodyBase64": "PCFET0NUWVBFIGh0bWw\u002BDQo8aHRtbD4NCiAgICA8aGVhZD4NCiAgICAgICAgPHRpdGxlPlJ1bnRpbWUgRXJyb3I8L3RpdGxlPg0KICAgICAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoIiAvPg0KICAgICAgICA8c3R5bGU\u002BDQogICAgICAgICBib2R5IHtmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZTogLjdlbTtjb2xvcjpibGFjazt9IA0KICAgICAgICAgcCB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtjb2xvcjpibGFjazttYXJnaW4tdG9wOiAtNXB4fQ0KICAgICAgICAgYiB7Zm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0OmJvbGQ7Y29sb3I6YmxhY2s7bWFyZ2luLXRvcDogLTVweH0NCiAgICAgICAgIEgxIHsgZm9udC1mYW1pbHk6IlZlcmRhbmEiO2ZvbnQtd2VpZ2h0Om5vcm1hbDtmb250LXNpemU6MThwdDtjb2xvcjpyZWQgfQ0KICAgICAgICAgSDIgeyBmb250LWZhbWlseToiVmVyZGFuYSI7Zm9udC13ZWlnaHQ6bm9ybWFsO2ZvbnQtc2l6ZToxNHB0O2NvbG9yOm1hcm9vbiB9DQogICAgICAgICBwcmUge2ZvbnQtZmFtaWx5OiJDb25zb2xhcyIsIkx1Y2lkYSBDb25zb2xlIixNb25vc3BhY2U7Zm9udC1zaXplOjExcHQ7bWFyZ2luOjA7cGFkZGluZzowLjVlbTtsaW5lLWhlaWdodDoxNHB0fQ0KICAgICAgICAgLm1hcmtlciB7Zm9udC13ZWlnaHQ6IGJvbGQ7IGNvbG9yOiBibGFjazt0ZXh0LWRlY29yYXRpb246IG5vbmU7fQ0KICAgICAgICAgLnZlcnNpb24ge2NvbG9yOiBncmF5O30NCiAgICAgICAgIC5lcnJvciB7bWFyZ2luLWJvdHRvbTogMTBweDt9DQogICAgICAgICAuZXhwYW5kYWJsZSB7IHRleHQtZGVjb3JhdGlvbjp1bmRlcmxpbmU7IGZvbnQtd2VpZ2h0OmJvbGQ7IGNvbG9yOm5hdnk7IGN1cnNvcjpwb2ludGVyOyB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA2MzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiA0NDBweDsgb3ZlcmZsb3c6IGF1dG87IHdoaXRlLXNwYWNlOiBwcmUtd3JhcDsgd29yZC13cmFwOiBicmVhay13b3JkOyB9DQogICAgICAgICB9DQogICAgICAgICBAbWVkaWEgc2NyZWVuIGFuZCAobWF4LXdpZHRoOiA0NzlweCkgew0KICAgICAgICAgIHByZSB7IHdpZHRoOiAyODBweDsgfQ0KICAgICAgICAgfQ0KICAgICAgICA8L3N0eWxlPg0KICAgIDwvaGVhZD4NCg0KICAgIDxib2R5IGJnY29sb3I9IndoaXRlIj4NCg0KICAgICAgICAgICAgPHNwYW4\u002BPEgxPlNlcnZlciBFcnJvciBpbiAnLycgQXBwbGljYXRpb24uPGhyIHdpZHRoPTEwMCUgc2l6ZT0xIGNvbG9yPXNpbHZlcj48L0gxPg0KDQogICAgICAgICAgICA8aDI\u002BIDxpPlJ1bnRpbWUgRXJyb3I8L2k\u002BIDwvaDI\u002BPC9zcGFuPg0KDQogICAgICAgICAgICA8Zm9udCBmYWNlPSJBcmlhbCwgSGVsdmV0aWNhLCBHZW5ldmEsIFN1blNhbnMtUmVndWxhciwgc2Fucy1zZXJpZiAiPg0KDQogICAgICAgICAgICA8Yj4gRGVzY3JpcHRpb246IDwvYj5BbiBhcHBsaWNhdGlvbiBlcnJvciBvY2N1cnJlZCBvbiB0aGUgc2VydmVyLiBUaGUgY3VycmVudCBjdXN0b20gZXJyb3Igc2V0dGluZ3MgZm9yIHRoaXMgYXBwbGljYXRpb24gcHJldmVudCB0aGUgZGV0YWlscyBvZiB0aGUgYXBwbGljYXRpb24gZXJyb3IgZnJvbSBiZWluZyB2aWV3ZWQuDQogICAgICAgICAgICA8YnI\u002BPGJyPg0KDQogICAgICAgICAgICA8Yj5EZXRhaWxzOjwvYj4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIG9mIHRoaXMgc3BlY2lmaWMgZXJyb3IgbWVzc2FnZSB0byBiZSB2aWV3YWJsZSBvbiB0aGUgbG9jYWwgc2VydmVyIG1hY2hpbmUsIHBsZWFzZSBjcmVhdGUgYSAmbHQ7Y3VzdG9tRXJyb3JzJmd0OyB0YWcgd2l0aGluIGEgJnF1b3Q7d2ViLmNvbmZpZyZxdW90OyBjb25maWd1cmF0aW9uIGZpbGUgbG9jYXRlZCBpbiB0aGUgcm9vdCBkaXJlY3Rvcnkgb2YgdGhlIGN1cnJlbnQgd2ViIGFwcGxpY2F0aW9uLiBUaGlzICZsdDtjdXN0b21FcnJvcnMmZ3Q7IHRhZyBzaG91bGQgdGhlbiBoYXZlIGl0cyAmcXVvdDttb2RlJnF1b3Q7IGF0dHJpYnV0ZSBzZXQgdG8gJnF1b3Q7UmVtb3RlT25seSZxdW90Oy4gVG8gZW5hYmxlIHRoZSBkZXRhaWxzIHRvIGJlIHZpZXdhYmxlIG9uIHJlbW90ZSBtYWNoaW5lcywgcGxlYXNlIHNldCAmcXVvdDttb2RlJnF1b3Q7IHRvICZxdW90O09mZiZxdW90Oy48YnI\u002BPGJyPg0KDQogICAgICAgICAgICA8dGFibGUgd2lkdGg9MTAwJSBiZ2NvbG9yPSIjZmZmZmNjIj4NCiAgICAgICAgICAgICAgIDx0cj4NCiAgICAgICAgICAgICAgICAgIDx0ZD4NCiAgICAgICAgICAgICAgICAgICAgICA8Y29kZT48cHJlPg0KDQombHQ7IS0tIFdlYi5Db25maWcgQ29uZmlndXJhdGlvbiBGaWxlIC0tJmd0Ow0KDQombHQ7Y29uZmlndXJhdGlvbiZndDsNCiAgICAmbHQ7c3lzdGVtLndlYiZndDsNCiAgICAgICAgJmx0O2N1c3RvbUVycm9ycyBtb2RlPSZxdW90O1JlbW90ZU9ubHkmcXVvdDsvJmd0Ow0KICAgICZsdDsvc3lzdGVtLndlYiZndDsNCiZsdDsvY29uZmlndXJhdGlvbiZndDs8L3ByZT4gICAgICAgICAgICAgICAgICAgICAgPC9jb2RlPg0KDQogICAgICAgICAgICAgICAgICA8L3RkPg0KICAgICAgICAgICAgICAgPC90cj4NCiAgICAgICAgICAgIDwvdGFibGU\u002BDQoNCiAgICAgICAgICAgIDxicj4NCg0KICAgICAgICAgICAgPGI\u002BTm90ZXM6PC9iPiBUaGUgY3VycmVudCBlcnJvciBwYWdlIHlvdSBhcmUgc2VlaW5nIGNhbiBiZSByZXBsYWNlZCBieSBhIGN1c3RvbSBlcnJvciBwYWdlIGJ5IG1vZGlmeWluZyB0aGUgJnF1b3Q7ZGVmYXVsdFJlZGlyZWN0JnF1b3Q7IGF0dHJpYnV0ZSBvZiB0aGUgYXBwbGljYXRpb24mIzM5O3MgJmx0O2N1c3RvbUVycm9ycyZndDsgY29uZmlndXJhdGlvbiB0YWcgdG8gcG9pbnQgdG8gYSBjdXN0b20gZXJyb3IgcGFnZSBVUkwuPGJyPjxicj4NCg0KICAgICAgICAgICAgPHRhYmxlIHdpZHRoPTEwMCUgYmdjb2xvcj0iI2ZmZmZjYyI\u002BDQogICAgICAgICAgICAgICA8dHI\u002BDQogICAgICAgICAgICAgICAgICA8dGQ\u002BDQogICAgICAgICAgICAgICAgICAgICAgPGNvZGU\u002BPHByZT4NCg0KJmx0OyEtLSBXZWIuQ29uZmlnIENvbmZpZ3VyYXRpb24gRmlsZSAtLSZndDsNCg0KJmx0O2NvbmZpZ3VyYXRpb24mZ3Q7DQogICAgJmx0O3N5c3RlbS53ZWImZ3Q7DQogICAgICAgICZsdDtjdXN0b21FcnJvcnMgbW9kZT0mcXVvdDtPbiZxdW90OyBkZWZhdWx0UmVkaXJlY3Q9JnF1b3Q7bXljdXN0b21wYWdlLmh0bSZxdW90Oy8mZ3Q7DQogICAgJmx0Oy9zeXN0ZW0ud2ViJmd0Ow0KJmx0Oy9jb25maWd1cmF0aW9uJmd0OzwvcHJlPiAgICAgICAgICAgICAgICAgICAgICA8L2NvZGU\u002BDQoNCiAgICAgICAgICAgICAgICAgIDwvdGQ\u002BDQogICAgICAgICAgICAgICA8L3RyPg0KICAgICAgICAgICAgPC90YWJsZT4NCg0KICAgICAgICAgICAgPGJyPg0KDQogICAgICAgICAgICA8L2ZvbnQ\u002BDQoNCiAgICA8L2JvZHk\u002BDQo8L2h0bWw\u002BDQo=",
+              "Flushes": [
+                true
+              ]
+            },
+            "EscapedException": null,
+            "EndOfRequestCount": 1,
+            "CompletionCount": 1
+          }
+        }
+      ]
+    }
+  ]
+}

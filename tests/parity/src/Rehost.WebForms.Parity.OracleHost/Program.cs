@@ -229,7 +229,7 @@ internal static class Program
             Directory.CreateDirectory(directory);
         }
 
-        File.WriteAllText(path, ParityJson.Serialize(trace) + "\n");
+        File.WriteAllText(path, ParityJson.SerializeIndented(trace) + "\n");
         Console.Error.WriteLine("Generated " + path);
     }
 }

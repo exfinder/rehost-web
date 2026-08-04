@@ -10,4 +10,7 @@ those traces against the pinned Framework environment.
 
 Portable jobs compare observations with the committed oracle traces on every
 supported operating system. Oracle traces are generated evidence, never
-hand-authored expectations.
+hand-authored expectations. Mechanical reformatting of a committed trace
+(whitespace and indentation, proven value-identical) is not hand-authoring;
+the values themselves remain generated-only, and comparison is by parsed
+tree, not bytes.
