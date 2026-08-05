@@ -1,35 +1,34 @@
 # Request termination and timeouts
 
-Status: open. Priority: high. Depends on request pipeline cancellation design.
-The termination half is owned by
-[Response.End and request termination](response-end-and-termination-plan.md).
-Timeout enforcement is currently neutralized (ledger P51): `executionTimeout`
-is not enforced and a slow request runs to completion.
+Status: done 2026-08-05, except the connection-abort follow-up below. The
+termination half is owned by
+[Response.End and request termination](response-end-and-termination-plan.md)
+(ledger P52); the timeout half is delivered cooperatively (ledger P53) with
+its boundaries in the
+[compatibility map](compatibility-feature-map.md#request-termination).
 
-## Problem
+## Delivered policy
 
-`Response.End`, terminating redirects, and request timeouts rely on
-`Thread.Abort`/`Thread.ResetAbort`, which modern .NET does not support. Failure
-to unwind can strand request completion. Modern .NET also cannot safely
-force-stop arbitrary synchronous user code.
+Modern .NET cannot force-stop arbitrary synchronous user code, so
+`executionTimeout` is enforced cooperatively. The 15-second scan (period
+configurable via the port-owned `rehost:RequestTimeoutScanSeconds` appSettings
+key) keeps Framework's guards — cancellable period, `ThreadAbortOnTimeout`,
+`debug`/debugger suppression — cancels `Request.TimedOutToken` at budget, and
+flags the request; the step-boundary checkpoint consumes the flag once and
+unwinds through the termination recovery, producing Framework's
+*"Request timed out."* `Application_Error` and 500.
 
-## Required contract
+Named boundary: a running step is never interrupted. The 500 arrives when the
+current step returns — late for a single slow call, never for a step that never
+returns. Async steps are not flagged; deferred with async pages.
 
-Define behavior for:
+## Follow-up: connection abort at budget
 
-- `Response.End` and terminating redirects;
-- sync/async timeouts and blocked or CPU-bound handlers;
-- pipeline/page unwinding and user `catch`/`finally`;
-- `Server.Execute`/`Server.Transfer` nesting;
-- timeout responses and connection abort.
-
-Candidate: an internal control-flow exception for immediate termination plus
-cooperative cancellation and pipeline checkpoints for timeouts.
-
-## Done when
-
-- Compatibility differences are explicit.
-- Differential tests cover termination, redirects, timeouts, nesting, modules,
-  and asynchronous pages.
-- Unsupported abort/reset calls are removed or unreachable.
-- Temporary `SYSLIB0006` suppression is removed.
+Owned here, not yet scheduled. Bounding the *client's* wait for a blocked step
+requires the hosting layer to abort the connection when the budget expires —
+the response never arrives, while the server-side step still runs to wherever
+it runs. Framework precedent: it aborts the connection itself when a timed-out
+thread is blocked in a synchronous entity-body read
+(`HttpContext.MustTimeout`'s former `IsInReadEntitySync` arm, removed with the
+abort handshake). Requires adapter machinery and abort-vs-flush race coverage;
+take it up if the late 500 bites a real application.

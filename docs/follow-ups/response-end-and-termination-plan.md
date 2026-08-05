@@ -1,7 +1,7 @@
 # Response.End, Redirect, and request termination
 
 Status: done 2026-08-05 (ledger P51, P52; `ResponseEndOverKestrelTests`). The
-timeout policy stays open with
+timeout policy is delivered cooperatively (ledger P53) under
 [request termination and timeouts](request-termination-and-timeouts.md), and
 `Server.Transfer`/`Execute` termination is recorded unassessed in the
 compatibility map. Slice 4 capability story split from
