@@ -153,7 +153,9 @@ no configuration file on the machine — every `*.config` under the framework's
 config directory was searched (measured on `win-oracle`,
 `System.Web` 4.8.9319.0, by reflection over `AppSettings.MaxHttpCollectionKeys`).
 This port carries the same constant and ships no key, so it matches without
-having decided anything.
+having decided anything. Nor does the Visual Studio Web Forms template emit it:
+the generated 4.8.1 sample application beside this checkout declares no
+`appSettings` at all, so a newly created application is uncapped too.
 
 Staying uncapped is deliberate. The attack the counter was a stopgap for depends
 on predictable string hashing, and .NET randomizes it per process with no opt-out
