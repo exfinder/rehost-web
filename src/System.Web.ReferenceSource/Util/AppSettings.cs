@@ -151,6 +151,9 @@ namespace System.Web.Util {
                             if (settings == null || !Boolean.TryParse(settings["aspnet:SuppressSameSiteNone"], out _suppressSameSiteNone))
                                 _suppressSameSiteNone = false; // Use the new stricter behavior by default, as the old behavior is likely to cause problems with newer browsers.
 
+                            if (settings == null || !Boolean.TryParse(settings["aspnet:EnsureCookieDefaults"], out _fixCookieDefaults))
+                                _fixCookieDefaults = true;
+
                             _settingsInitialized = true;
                         }
                     }
@@ -589,6 +592,22 @@ namespace System.Web.Util {
             {
                 EnsureSettingsLoaded();
                 return _suppressSameSiteNone;
+            }
+        }
+
+        // true [default] - A cookie parsed from the request header is born with the <httpCookies>
+        // defaults, as a cookie the application constructs is.
+        // false - It is born with the field defaults, whose SameSite is None rather than
+        // Unspecified.
+        // Ships in .NET Framework 4.8.1 and postdates the pinned Reference Source; see
+        // follow-ups/cookies.md.
+        private static bool _fixCookieDefaults;
+        internal static bool FixCookieDefaults
+        {
+            get
+            {
+                EnsureSettingsLoaded();
+                return _fixCookieDefaults;
             }
         }
     }

@@ -645,7 +645,19 @@ namespace System.Web {
         //
 
         internal static HttpCookie CreateCookieFromString(String s) {
+            return CreateCookieFromString(s, useConfiguredDefaults: false);
+        }
+
+        // .NET Framework 4.8.1 carries the second parameter and applies the <httpCookies> defaults
+        // to request cookies by default; the pinned Reference Source predates that fix. Without it
+        // a cookie parsed from the request is born with SameSite None rather than Unspecified, and
+        // an application that re-issues the cookie it received emits an attribute Framework does
+        // not. See follow-ups/cookies.md.
+        internal static HttpCookie CreateCookieFromString(String s, bool useConfiguredDefaults) {
             HttpCookie c = new HttpCookie();
+
+            if (useConfiguredDefaults)
+                c.SetDefaultsFromConfig();
 
             int l = (s != null) ? s.Length : 0;
             int i = 0;
@@ -735,7 +747,7 @@ namespace System.Web {
                 if (cookieString.Length == 0)
                     continue;
 
-                HttpCookie cookie = CreateCookieFromString(cookieString);
+                HttpCookie cookie = CreateCookieFromString(cookieString, AppSettings.FixCookieDefaults);
 
                 // some cookies starting with '$' are really attributes of the last cookie
                 if (lastCookie != null) {

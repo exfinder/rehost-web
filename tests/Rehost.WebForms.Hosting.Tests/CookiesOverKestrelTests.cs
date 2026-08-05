@@ -48,4 +48,16 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
             + "; path=/scoped; secure; HttpOnly; SameSite=Lax",
         ]);
     }
+
+    // Re-issuing the cookie that arrived is a common way to extend one, and it is the only path on
+    // which the defaults a request cookie is born with become visible. A cookie born with the field
+    // defaults instead of the configured ones carries SameSite None, which .NET Framework 4.8.1
+    // does not emit here — and which a browser drops outright without Secure.
+    [Fact]
+    public async Task Re_Issuing_A_Received_Cookie_Adds_No_Same_Site_Attribute()
+    {
+        var response = await scenario.Client.GetWithCookiesAsync("/cookies?mode=reissue", "a=1");
+
+        response.SetCookies.ShouldBe(["a=1; path=/"]);
+    }
 }

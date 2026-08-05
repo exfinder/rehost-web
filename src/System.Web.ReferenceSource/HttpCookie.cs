@@ -81,7 +81,7 @@ namespace System.Web {
             _changed = true;
         }
 
-        private void SetDefaultsFromConfig() {
+        internal void SetDefaultsFromConfig() {
             HttpCookiesSection config = RuntimeConfig.GetConfig().HttpCookies;
             _secure = config.RequireSSL;
             _httpOnly = config.HttpOnlyCookies;
