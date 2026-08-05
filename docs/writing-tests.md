@@ -47,6 +47,9 @@ response.Text.ShouldContain("...");
   string negatives over a trace can pass vacuously.
 - Tests spawn at most one level of child processes, and only because a child
   is one application activation. Orchestration stays in the test process.
+- Test-side helpers run in an unactivated process, so a System.Web API that
+  reads configuration throws there — `HttpUtility`'s encoder is one. Use the
+  BCL (`WebUtility`, `Uri`) in anything the test process itself runs.
 
 ## Rules that keep tests honest
 
