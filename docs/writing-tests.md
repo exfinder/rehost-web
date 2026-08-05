@@ -47,6 +47,9 @@ response.Text.ShouldContain("...");
 
 - `LiveScenario` starts the host for a `ScenarioFixture`; `ScenarioClient` is
   the deterministic client (no redirects, no cookies, exact HTTP/1.1).
+- Evidence recording must never be able to fail the request being observed:
+  a probe that throws from its own journaling turns the evidence channel into
+  the failure (the lost-reset post-mortem).
 - Assertion hierarchy: the typed response first; server-side facts through the
   typed journal (`scenario.Journal`, a `ScenarioJournalReader`) or the
   fixture's witness endpoint (`scenario.Witness`). Live facts go through the

@@ -37,6 +37,10 @@ detections 7–117 ms.
 
 ## Residual notes
 
+- Diagnostic instrumentation must not ride the channel under suspicion: the
+  first debug probes here wrote through the same racy journal, so the debug
+  lines vanished on exactly the failing runs and misdirected a full round.
+
 - The abort scenarios now act in the test over a raw socket and observe the
   outcome through the fixture's in-memory witness endpoint; detection latency
   is written to test output, never asserted. The trace-polling loop that
