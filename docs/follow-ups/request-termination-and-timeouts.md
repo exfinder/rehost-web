@@ -1,6 +1,10 @@
 # Request termination and timeouts
 
 Status: open. Priority: high. Depends on request pipeline cancellation design.
+The termination half is owned by
+[Response.End and request termination](response-end-and-termination-plan.md).
+Timeout enforcement is currently neutralized (ledger P51): `executionTimeout`
+is not enforced and a slow request runs to completion.
 
 ## Problem
 

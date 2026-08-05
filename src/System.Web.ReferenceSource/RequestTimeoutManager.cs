@@ -171,11 +171,8 @@ namespace System.Web {
             }
 
             internal void TimeoutIfNeeded(DateTime now) {
-                Thread thread = _context.MustTimeout(now);
-                if (thread != null) {
-                    RemoveFromList();
-                    thread.Abort(new HttpApplication.CancelModuleException(true));
-                }
+                // Thread.Abort throws on this runtime, and MustTimeout's state flip would leave
+                // WaitForExceptionIfCancelled spinning; timeout enforcement is deferred (ledger P51).
             }
 
             internal void IncrementCount() {

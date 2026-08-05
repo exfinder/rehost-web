@@ -298,9 +298,9 @@ is an unhandled `PlatformNotSupportedException` on a thread-pool thread, which
 ends the process — taking every in-flight request and the single hosted
 application with it. `MustTimeout` has already CASed `_timeoutState` to `-1` by
 then, so a request that reaches `WaitForExceptionIfCancelled` would spin
-forever. **This is reachable today by any slow request and should be neutralized
-ahead of the rest of the story**, independently of what the eventual timeout
-policy turns out to be.
+forever. **This was reachable by any slow request and has been neutralized
+ahead of the rest of the story (ledger P51)**, independently of what the
+eventual timeout policy turns out to be.
 
 ## Consumer-visible behavior inventory
 
@@ -503,7 +503,7 @@ throws at the first call. The edit set is narrow and each item is forced:
 | `HttpResponse.cs` | `AbortCurrentThread` throws instead of aborting; `End()`'s cancellable arm also sets `_ended` and calls `CompleteRequest()` |
 | `HttpApplication.cs` | `CancelModuleException : Exception`; `ExecuteStep` matches it directly and drops `Thread.ResetAbort()` and the unreachable COM+ clause; `OnAsyncHandlerCompletion` keeps its unwrapping predicate |
 | `HttpContext.cs` | `InvokeCancellableCallback` must re-throw the non-timeout case rather than swallow it (the prototype's async defect); `WaitForExceptionIfCancelled` must not spin |
-| `RequestTimeoutManager.cs` | remove the `thread.Abort` call — the process-termination defect above |
+| `RequestTimeoutManager.cs` | already neutralized (ledger P51) |
 | `UI/Page.cs` | three catch sites plus `ThreadResetAbortWithAssert`; keep the four-condition fast-path guard intact |
 | `UI/LegacyPageAsyncTask.cs` | one catch site |
 | `Hosting/IPipelineRuntime.cs`, `Configuration/ConfigUtil.cs` | keep `ThreadAbortException` in the fatal/rethrow predicate lists **and add** `CancelModuleException` where the intent was "must propagate" — the prototype dropped the guard with nothing in its place |
@@ -514,7 +514,8 @@ imported source — is what M5's latch exists to bound, and it is why the
 `SynchronizationHelper` and `ExecuteInternal` sites need explicit review rather
 than a grep for `ThreadAbortException`.
 
-One portability-ledger row (next free number, P50) covers thread-abort removal:
+The `RequestTimeoutManager` neutralization landed ahead of this story as ledger
+P51. One further row (next free number) covers the rest of thread-abort removal:
 the sites, the mechanism, the residual gap, and the removal of `SYSLIB0006` from
 the runtime project's `NoWarn`, which is already listed in the parent follow-up's
 acceptance criteria. `Hosting/ISAPIRuntime.cs` is unreachable and needs no edit;
