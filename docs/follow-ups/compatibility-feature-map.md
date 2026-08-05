@@ -62,14 +62,18 @@ covered by `PageCompilationTests` and `PageOverKestrelTests`.
 | `Label`, `Repeater`, `HyperLink`, `Image`, `Panel` | Supported | Includes `ItemTemplate` compiled to its own builder, `RepeaterItem` naming containers, data binding from code-behind, and `~/` URL resolution |
 | Literal markup of 256 characters or more | Supported | Emitted as a metadata string rather than a Win32 resource; rendered bytes unchanged, per-request transcode instead of a byte copy (ledger P39) |
 | Request validation | Supported | Framework's default; a query value containing `<` is refused before the page runs |
-| `<form runat="server">`, postback, view state | Unassessed | Deferred to the request-body slice. `__VIEWSTATEGENERATOR` carries a permanent divergence recorded in [machine key and view state](machine-key-and-viewstate-bootstrap.md) |
-| Controls requiring a server form | Unsupported here | `GridView`, `TextBox` and other controls calling `VerifyRenderingInServerForm` cannot render until the form slice lands |
+| `<form runat="server">`, postback, view state | Supported | Covered under request bodies below; `__VIEWSTATEGENERATOR` carries a permanent divergence recorded in [machine key and view state](machine-key-and-viewstate-bootstrap.md) |
+| Controls requiring a server form | Partially assessed | `TextBox`, `Button`, `LinkButton`, and `FileUpload` render and post back. Other controls calling `VerifyRenderingInServerForm`, `GridView` among them, are unassessed rather than blocked |
 
 ## Request bodies
 
 | Feature | State | Boundary |
 | --- | --- | --- |
-| Raw request bodies | Supported | Real Kestrel HTTP/1.1 fixed-length and delayed chunked bodies pass on macOS `arm64` and Windows `x64` through `InputStream`, `BinaryRead`, buffered input, bufferless sync/APM, and enabled async preload. The Framework deterministic matrix, `Expect: 100-continue`, mid-read abort, and unread-body drain are covered. HTTP/2 and HTTP/3 are slice 6 gates. `Request.Filter`, forms, postback, view state, and uploads remain unassessed |
+| Raw request bodies | Supported | Real Kestrel HTTP/1.1 fixed-length and delayed chunked bodies pass on macOS `arm64` and Windows `x64` through `InputStream`, `BinaryRead`, buffered input, bufferless sync/APM, and enabled async preload. The Framework deterministic matrix, `Expect: 100-continue`, mid-read abort, and unread-body drain are covered. HTTP/2 and HTTP/3 are slice 6 gates |
+| Forms, postback, view state, multipart uploads | Supported | Urlencoded and multipart form parsing, view state, control state, event ordering, MAC enforcement, and request validation, covered by `PostbackOverKestrelTests` and `MultipartPostbackOverKestrelTests`. `__VIEWSTATEGENERATOR` carries a permanent divergence (ledger P48) |
+| Saving uploaded content to disk | Supported | `HttpPostedFile.SaveAs` and `HttpRequest.SaveAs`, from memory and from the temp file used above `requestLengthDiskThreshold`. `requireRootedSaveAsPath` keeps Framework's default and message. A path rooted only on Windows is refused off Windows, naming the platform rather than reporting "not rooted" or silently writing a file named for the whole path (ledger P50); Windows behavior is unchanged. Whether both hosts classify every header identically is unverified and reaches only the raw-request save |
+| `Request.Filter` | Unassessed | Nothing installs an input filter yet |
+| `MaxHttpCollectionKeys` rejection | Unassessed | The limit is imported but no test posts past it |
 | Request-body size limits | Supported | Kestrel `MaxRequestBodySize` remains host-owned and `httpRuntime.maxRequestLength` remains System.Web-owned; the smaller effective limit wins. The adapter changes neither and rejects no mismatch. Kestrel rejection remains host-owned; System.Web rejection remains pipeline-owned. Known and unknown lengths pass on both supported platforms. Legacy `system.webServer` `maxAllowedContentLength` mapping belongs to its dedicated follow-up |
 
 ## Shipped root configuration

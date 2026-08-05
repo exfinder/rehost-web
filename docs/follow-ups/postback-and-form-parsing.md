@@ -2,8 +2,8 @@
 
 Status: implemented and verified on macOS `arm64` and Windows `x64`. The
 oracle-session commitment is resolved below (2026-08-05) under ADR 0044/0045. Scope: urlencoded form parsing,
-view state, control state, a postback that changes rendered output, and
-read-only multipart. Sits on the
+view state, control state, a postback that changes rendered output, multipart,
+and saving uploaded content to disk. Sits on the
 [entity-body bridge](request-entity-body-bridge.md).
 
 ## What the managed path already provided
@@ -107,11 +107,46 @@ key-absent case stays recovered-from-source; the fixture keeps pinning
 `aspnet:AllowInsecureDeserialization` so no test inherits patch state from a
 host.
 
+## Saving to disk (2026-08-05)
+
+`HttpPostedFile.SaveAs` writes one uploaded part; `HttpRequest.SaveAs` writes
+the whole raw request, optionally behind its request line and headers. Both were
+imported unchanged and neither needed porting; what they needed was coverage and
+one platform decision.
+
+- The rooted-path guard is `Path.IsPathRooted`, and its answer is the running
+  platform's. `requireRootedSaveAsPath` defaults to true, so a relative path is
+  refused everywhere with Framework's own message.
+- A path written for Windows — drive letter, leading backslash, or UNC share —
+  is rooted on Windows and rooted nowhere else. Off Windows it can name no file,
+  so Framework's check would refuse it as merely "not rooted", and an
+  application that had turned the guard off would silently create one file whose
+  name is the entire path. Framework never ran off Windows, so there is no
+  behavior to preserve there; ledger P50 adds one port-owned check ahead of
+  Microsoft's, naming the real problem and the fix. Windows is untouched.
+- Saving after reading is empty by construction, on both runtimes: reading a
+  posted file through a `StreamReader` closes the `HttpInputStream`, `Uninit`
+  drops its content reference, and the later `WriteTo` writes nothing into a
+  file it still creates. The fixture page saves in its click handler, before
+  anything renders, which is also the shape a real application has.
+- Content above `requestLengthDiskThreshold` lives in a temp file rather than a
+  byte array, and saving streams out of it. That branch is covered on the body
+  fixture, whose threshold is one kilobyte, and the probe reports whether the
+  content really was file-backed so the test cannot pass from memory.
+
+Evidence: `SaveAsPathTests` for the rule; `UploadSaveOverKestrelTests` for a
+page saving an in-memory upload, an empty upload, a refused relative path, and
+the platform decision; `RawRequestSaveOverKestrelTests` for a spilled upload and
+for the raw request with and without its header block. Each test reads the file
+back and compares bytes. No Framework reading was taken: the default, the
+message, the overwrite behavior, and the saved layout are all in the imported
+source, and the header block a Framework host would write is not a baseline this
+port can be compared against directly. Whether both hosts sort every header into
+the same known/unknown group is unverified, and reaches only
+`HttpRequest.SaveAs`.
+
 ## Explicitly out
 
-- `HttpPostedFile.SaveAs` and `RequireRootedSaveAsPath`. `Path.IsPathRooted`
-  disagrees across operating systems, so that branch needs coverage on the
-  platform that triggers it and is its own story.
 - `MaxHttpCollectionKeys` rejection.
 - Client certificates, which remain in
   [deferred request surfaces](deferred-request-surfaces.md).

@@ -100,6 +100,8 @@ namespace System.Web {
         ///    </para>
         /// </devdoc>
         public void SaveAs(String filename) {
+            System.Web.Util.SaveAsPath.RequireUsableRoot(filename);
+
             // VSWhidbey 82855
             if (!Path.IsPathRooted(filename)) {
                 HttpRuntimeSection config = RuntimeConfig.GetConfig().HttpRuntime;

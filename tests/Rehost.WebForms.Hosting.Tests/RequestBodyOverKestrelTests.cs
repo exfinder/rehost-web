@@ -6,11 +6,11 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
+[Collection(nameof(BodyCollection))]
 public sealed class RequestBodyOverKestrelTests(
     BodyLiveScenario scenario,
     AbortLiveScenario aborts,
     ITestOutputHelper output)
-    : IClassFixture<BodyLiveScenario>, IClassFixture<AbortLiveScenario>
 {
     private static readonly TimeSpan AbortDetectionBudget = TimeSpan.FromSeconds(60);
 

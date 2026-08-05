@@ -62,7 +62,7 @@ public sealed class RequestBodyHandler : IHttpHandler
         WriteResult(context, Describe(body));
     }
 
-    private static bool IsFileBacked(Stream stream)
+    internal static bool IsFileBacked(Stream stream)
     {
         var data = stream.GetType()
             .GetField("_data", BindingFlags.Instance | BindingFlags.NonPublic)!

@@ -2897,6 +2897,8 @@ namespace System.Web {
         ///    <para>Saves an HTTP request to disk.</para>
         /// </devdoc>
         public void SaveAs(String filename, bool includeHeaders) {
+            System.Web.Util.SaveAsPath.RequireUsableRoot(filename);
+
             // NDPWhidbey 14376
             if (!System.IO.Path.IsPathRooted(filename)) {
                 HttpRuntimeSection config = RuntimeConfig.GetConfig(_context).HttpRuntime;
