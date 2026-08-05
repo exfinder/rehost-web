@@ -90,6 +90,23 @@ covered by `CookiesOverKestrelTests`. Story:
 | Non-ASCII response header values | Unsupported | A cookie value — or any header value — outside ASCII fails the request with an empty 500 from Kestrel's header validation. Framework writes header bytes in `Response.HeaderEncoding`, UTF-8 by default. Open, with the options recorded in [cookies](cookies.md) |
 | Session, forms authentication, roles, and anonymous identification cookies | Unassessed | Owned by those subsystems, along with every cookieless mode |
 
+## Request termination
+
+Supported means portable tested behavior on macOS `arm64` and Windows `x64`,
+covered by `ResponseEndOverKestrelTests`. Story:
+[Response.End and request termination](response-end-and-termination-plan.md);
+mechanism and residual gaps are recorded there (ledger P51, P52).
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| `Response.End` | Supported | Completes the response, then unwinds on an internal control-flow exception the pipeline recovers: code after `End()` does not run, `finally` blocks and `Page_Unload` run, bytes written before are sent and bytes after are discarded, `PostRequestHandlerExecute`/`ReleaseRequestState`/`UpdateRequestCache` are skipped, `EndRequest` runs, `Application_Error` does not fire, `Server.GetLastError()` stays null. The response flushes synchronously at the call — Framework's own documented non-abort arm — so headers can no longer be amended afterwards (for example in `EndRequest`), where Framework's abort arm left them open until the final flush |
+| `Response.Redirect(url)` | Supported | 302, `Location`, Framework's exact "Object moved" body replacing earlier buffered content, then terminates as `End` does. `Redirect(url, false)` returns and later writes append (reading R6); `RedirectToRoute*` never terminates (`endResponse` hardcoded false); redirect after a flush throws naming the cause (R8). Those three are untouched imported source over exercised substrate |
+| `HttpApplication.CompleteRequest` | Supported | No unwind: the calling code finishes, subsequent stages are skipped, `EndRequest` runs. Gated by the committed parity golden |
+| `catch (ThreadAbortException)` in application code | Partial | Compiles and never executes: termination no longer travels as `ThreadAbortException`. An application that reacts to termination by that name silently loses the reaction |
+| `catch (Exception)` swallowing termination | Partial | The catch observes an internal `CancelModuleException`. It cannot produce response output and cannot un-complete the request, but statements between the catch and the end of the current pipeline step still run, and their side effects outside the response are visible — on Framework the automatic re-raise prevented them. `Thread.ResetAbort` has no counterpart: an application that cancels termination to resume the page is explicitly broken |
+| `executionTimeout` | Unsupported | Not enforced: a slow request runs to completion (ledger P51). Policy owned by [request termination and timeouts](request-termination-and-timeouts.md) |
+| `Server.Transfer`, `Server.Execute` | Unassessed | Framework readings R13–R15 and the child-`End` trap are recorded in the story for the future Transfer/Execute story |
+
 ## Shipped root configuration
 
 The portable root web configuration is derived from the pinned .NET Framework

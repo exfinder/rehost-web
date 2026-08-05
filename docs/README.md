@@ -14,7 +14,6 @@ These documents describe accepted direction; implementation may lag:
 | Slice order and gates | [core-runtime-port-plan.md](core-runtime-port-plan.md) |
 | Test-suite refactoring | [follow-ups/test-suite-refactoring.md](follow-ups/test-suite-refactoring.md) |
 | Writing tests | [writing-tests.md](writing-tests.md) |
-| Response.End, request termination | [follow-ups/response-end-and-termination-plan.md](follow-ups/response-end-and-termination-plan.md) |
 | Decision rationale | [`adr/`](adr/) |
 
 ## Implemented contracts
@@ -28,6 +27,7 @@ These documents describe accepted direction; implementation may lag:
 | Dynamic `.aspx` GET | [follow-ups/dynamic-aspx-integration.md](follow-ups/dynamic-aspx-integration.md) |
 | Postback, forms, view state | [follow-ups/postback-and-form-parsing.md](follow-ups/postback-and-form-parsing.md) |
 | Cookies | [follow-ups/cookies.md](follow-ups/cookies.md) |
+| Response.End, request termination | [follow-ups/response-end-and-termination-plan.md](follow-ups/response-end-and-termination-plan.md) |
 | Mixed farm, incremental migration | [follow-ups/mixed-farm-incremental-migration.md](follow-ups/mixed-farm-incremental-migration.md) |
 | Supported feature boundaries | [follow-ups/compatibility-feature-map.md](follow-ups/compatibility-feature-map.md) |
 | Reached classic-path evidence | [portability-ledger.md](portability-ledger.md) |
