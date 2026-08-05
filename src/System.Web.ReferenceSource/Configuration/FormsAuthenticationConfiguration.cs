@@ -23,7 +23,7 @@
               slidingExpiration="[true|false]" - Should the forms-authentication-cookie and ticket be re-issued if they are about to expire
               defaultUrl="string" - Page to redirect to after login, if none has been specified
               cookieless="[UseCookies|UseUri|AutoDetect|UseDeviceProfile]" - Use Cookies or the URL path to store the forms authentication ticket
-              cookieSameSite="[None|Lax|Strict|-1]" - Set SameSite cookie header to the given value, or omit the header for the auth cookie entirely.
+              cookieSameSite="[None|Lax|Strict|Unspecified]" - Set SameSite cookie header to the given value, or omit the header for the auth cookie entirely.
               domain="string" - Domain of the cookie
             -->
             <forms

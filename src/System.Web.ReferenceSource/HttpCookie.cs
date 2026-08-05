@@ -494,10 +494,6 @@ namespace System.Web {
         }
     }
 
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////
-
     public enum HttpCookieMode {
 
         UseUri,          // cookieless=true
@@ -533,6 +529,18 @@ namespace System.Web {
                 return (SameSiteMode)(-1);
 
             return base.ConvertFrom(context, culture, value);
+        }
+
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+        {
+            if (value is SameSiteMode && destinationType == typeof(string))
+            {
+                int iVal = (int)value;
+                if (iVal < 0)
+                    return "Unspecified";
+            }
+
+            return base.ConvertTo(context, culture, value, destinationType);
         }
     }
 }

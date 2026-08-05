@@ -1,23 +1,51 @@
 {
-  "component": "System.Web",
-  "upstream": {
-    "repository": "https://github.com/microsoft/referencesource.git",
-    "revision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
-    "revisionDate": "2025-10-15T21:56:37+05:30",
-    "sourcePath": "System.Web",
-    "sourceTree": "a4eb8e4ad3186fdacc2472803fce105146403f75",
-    "fileCount": 1920
+ "component": "System.Web",
+ "upstream": {
+  "repository": "https://github.com/microsoft/referencesource.git",
+  "revision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
+  "revisionDate": "2025-10-15T21:56:37+05:30",
+  "sourcePath": "System.Web",
+  "sourceTree": "a4eb8e4ad3186fdacc2472803fce105146403f75",
+  "fileCount": 1920
+ },
+ "import": {
+  "path": "src/System.Web.ReferenceSource",
+  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' \u2014 shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
+  "verification": "Files not named under 'deviations' must match upstream.sourceTree; deviating files are accounted for individually."
+ },
+ "license": {
+  "spdxIdentifier": "MIT",
+  "upstreamPath": "LICENSE.txt",
+  "upstreamBlob": "232e566b5f8a015c770c3fc41730593fb0758ef4",
+  "localPath": "third_party/microsoft/referencesource/LICENSE.txt",
+  "sha256": "c1f47cf87974fdc14137ddd32e6273c0d9b30365bba4b96daf0b26243e309a4c"
+ },
+ "deviations": [
+  {
+   "files": [
+    "HttpRequest.cs",
+    "HttpPostedFile.cs"
+   ],
+   "reason": "SaveAs rooted-path guard (ledger P50)",
+   "record": "docs/portability-ledger.md P50"
   },
-  "import": {
-    "path": "src/System.Web.ReferenceSource",
-    "policy": "byte-for-byte copy with no source modifications",
-    "verification": "The imported Git tree object must equal upstream.sourceTree."
+  {
+   "files": [
+    "HttpCookie.cs",
+    "HttpRequest.cs",
+    "Util/AppSettings.cs"
+   ],
+   "reason": "request-cookie configured defaults; shipped 4.8.1 (System.Web 4.8.9319.0) carries a servicing fix absent from every published source branch, ported from IL readings",
+   "record": "docs/follow-ups/cookies.md"
   },
-  "license": {
-    "spdxIdentifier": "MIT",
-    "upstreamPath": "LICENSE.txt",
-    "upstreamBlob": "232e566b5f8a015c770c3fc41730593fb0758ef4",
-    "localPath": "third_party/microsoft/referencesource/LICENSE.txt",
-    "sha256": "c1f47cf87974fdc14137ddd32e6273c0d9b30365bba4b96daf0b26243e309a4c"
+  {
+   "files": [
+    "HttpCookie.cs",
+    "Configuration/FormsAuthenticationConfiguration.cs",
+    "Configuration/SessionStateSection.cs"
+   ],
+   "reason": "backmerged from upstream branch NetFramework48ZDP (e47d8c1b6482e0babe243dff2f9ece1507c814ff): SameSiteMode ConvertTo fix and cookieSameSite doc-comment corrections; the branch's comment-scrubber hunk in Util/AppSettings.cs was deliberately not taken",
+   "record": "this file"
   }
+ ]
 }

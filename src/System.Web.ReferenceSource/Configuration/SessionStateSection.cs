@@ -34,7 +34,7 @@ namespace System.Web.Configuration {
                 partitionResolverType="[fully qualified type of partition resolver]"
                 useHostingIdentity="[true|false]"
                 sessionIDManagerType="[fully qualified type of session ID Manager]"
-                cookieSameSite="[None|Lax|Strict|-1]" - Set SameSite cookie header to the given value, or omit the header for the session cookie entirely.
+                cookieSameSite="[None|Lax|Strict|Unspecified]" - Set SameSite cookie header to the given value, or omit the header for the session cookie entirely.
 
               Child nodes:
                 <providers>              Custom store providers (class must inherit SessionStateStoreProviderBase)
