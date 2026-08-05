@@ -2565,11 +2565,6 @@ window.onload = WebForm_RestoreScrollPosition;
         }
     }
 
-    //Note: BCL should provide a way to abort threads without asserting ControlThread for platform internal code.
-    [SecurityPermission(SecurityAction.Assert, ControlThread = true)]
-    internal static void ThreadResetAbortWithAssert() {
-        Thread.ResetAbort();
-    }
 
     /*
      * Enables controls to obtain client-side script function that will cause
@@ -4873,26 +4868,24 @@ window.onload = WebForm_RestoreScrollPosition;
                 CheckRemainingAsyncTasks(false);
             }
         }
-        catch (ThreadAbortException e) {
-            // Don't go into HandleError logic for ThreadAbortExceptions, since they
-            // are expected (e.g. when Response.Redirect() is called).
+        catch (HttpApplication.CancelModuleException cancelException) {
+            // Don't go into HandleError logic for request cancellation, since it is
+            // expected (e.g. when Response.Redirect() is called).
 
-            // VSWhidbey 500309: perf improvement. We can safely cancel the thread abort here
+            // VSWhidbey 500309: perf improvement. We can safely stop the unwind here
             // to avoid re-throwing the exception if this is a redirect and we're not being executed
             // under the context of a Server.Execute call (i.e. _context.Handler == this).  Otherwise,
             // re-throw so this can be handled lower in the stack (see HttpApplication.ExecuteStep).
 
             // This perf optimization can only be applied if we are executing the entire page
-            // lifecycle within this method call (otherwise, in async pages) calling ResetAbort
+            // lifecycle within this method call (otherwise, in async pages) stopping the unwind
             // would only skip part of the lifecycle, not the entire page (as Response.End is supposed to)
 
-            HttpApplication.CancelModuleException cancelException = e.ExceptionState as HttpApplication.CancelModuleException;
             if (includeStagesBeforeAsyncPoint && includeStagesAfterAsyncPoint &&    // executing entire page
                 _context.Handler == this &&                                         // not in server execute
                 _context.ApplicationInstance != null &&                             // application must be non-null so we can complete the request
-                cancelException != null && !cancelException.Timeout) {              // this is Response.End
+                !cancelException.Timeout) {                                         // this is Response.End
                 _context.ApplicationInstance.CompleteRequest();
-                ThreadResetAbortWithAssert();
             }
             else {
                 CheckRemainingAsyncTasks(true);
@@ -5194,26 +5187,24 @@ window.onload = WebForm_RestoreScrollPosition;
                 CheckRemainingAsyncTasks(false);
             }
         }
-        catch (ThreadAbortException e) {
-            // Don't go into HandleError logic for ThreadAbortExceptions, since they
-            // are expected (e.g. when Response.Redirect() is called).
+        catch (HttpApplication.CancelModuleException cancelException) {
+            // Don't go into HandleError logic for request cancellation, since it is
+            // expected (e.g. when Response.Redirect() is called).
 
-            // VSWhidbey 500309: perf improvement. We can safely cancel the thread abort here
+            // VSWhidbey 500309: perf improvement. We can safely stop the unwind here
             // to avoid re-throwing the exception if this is a redirect and we're not being executed
             // under the context of a Server.Execute call (i.e. _context.Handler == this).  Otherwise,
             // re-throw so this can be handled lower in the stack (see HttpApplication.ExecuteStep).
 
             // This perf optimization can only be applied if we are executing the entire page
-            // lifecycle within this method call (otherwise, in async pages) calling ResetAbort
+            // lifecycle within this method call (otherwise, in async pages) stopping the unwind
             // would only skip part of the lifecycle, not the entire page (as Response.End is supposed to)
 
-            HttpApplication.CancelModuleException cancelException = e.ExceptionState as HttpApplication.CancelModuleException;
             if (includeStagesBeforeAsyncPoint && includeStagesAfterAsyncPoint &&    // executing entire page
                 _context.Handler == this &&                                         // not in server execute
                 _context.ApplicationInstance != null &&                             // application must be non-null so we can complete the request
-                cancelException != null && !cancelException.Timeout) {              // this is Response.End
+                !cancelException.Timeout) {                                         // this is Response.End
                 _context.ApplicationInstance.CompleteRequest();
-                ThreadResetAbortWithAssert();
             }
             else {
                 CheckRemainingAsyncTasks(true);
@@ -5822,16 +5813,6 @@ window.onload = WebForm_RestoreScrollPosition;
                 _completed = true;
                 _asyncResult.Complete(onPageThread, null /*result*/, _error);
 
-                if (!onPageThread &&
-                    e is ThreadAbortException &&
-                    ((ThreadAbortException)e).ExceptionState is HttpApplication.CancelModuleException) {
-                    // don't leave this threadpool thread with CancelModuleException
-                    // as thread state - it might lead to AppDomainUnloadedException
-                    // later, when the current app domain is unloaded and there is
-                    // an attempt to get thread state form another app domain on
-                    // the same thread
-                    ThreadResetAbortWithAssert();
-                }
             }
         }
 

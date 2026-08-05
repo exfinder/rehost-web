@@ -1763,8 +1763,8 @@ namespace System.Web {
         }
 
         internal void WaitForExceptionIfCancelled() {
-            while (Volatile.Read(ref _timeoutState) == -1)
-                Thread.Sleep(100);
+            // _timeoutState never reaches -1 here: the timeout sweep is neutralized
+            // (ledger P51), and there is no pending abort to wait for.
         }
 
         internal bool IsInCancellablePeriod {
@@ -1856,17 +1856,17 @@ namespace System.Web {
 
                 WaitForExceptionIfCancelled();  // wait outside of finally
             }
-            catch (ThreadAbortException e) {
-                if (e.ExceptionState != null &&
-                    e.ExceptionState is HttpApplication.CancelModuleException &&
-                    ((HttpApplication.CancelModuleException)e.ExceptionState).Timeout) {
-
-                    Thread.ResetAbort();
+            catch (HttpApplication.CancelModuleException e) {
+                if (e.Timeout) {
                     PerfCounters.IncrementCounter(AppPerfCounter.REQUESTS_TIMED_OUT);
 
                     throw new HttpException(SR.GetString(SR.Request_timed_out),
                                         null, WebEventCodes.RuntimeErrorRequestAbort);
                 }
+
+                // Response.End: without the CLR's automatic re-raise the unwind
+                // continues only if this catch re-throws
+                throw;
             }
         }
 

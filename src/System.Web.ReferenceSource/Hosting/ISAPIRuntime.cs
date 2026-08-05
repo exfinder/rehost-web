@@ -188,9 +188,12 @@ namespace System.Web.Hosting {
                         UnsafeNativeMethods.SetDoneWithSessionCalled(pHttpCompletion);
                     }
                     // if this is a thread abort exception, cancel the abort
+                    // (unreachable ISAPI hosting; retained verbatim, ledger P52)
+#pragma warning disable SYSLIB0006
                     if (e is ThreadAbortException) {
                         Thread.ResetAbort();
-                    }                    
+                    }
+#pragma warning restore SYSLIB0006
                     // IMPORTANT: if this thread is being aborted because of an AppDomain.Unload,
                     // the CLR will still throw an AppDomainUnloadedException. The native caller
                     // must special case COR_E_APPDOMAINUNLOADED(0x80131014) and not

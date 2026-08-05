@@ -192,13 +192,12 @@ internal sealed class LegacyPageAsyncTask {
                 }
             }
         }
-        catch (ThreadAbortException e) {
+        catch (HttpApplication.CancelModuleException e) {
+           // stopping the unwind here replaces Framework's Thread.ResetAbort
            _error = e;
 
-           HttpApplication.CancelModuleException exceptionState = e.ExceptionState as HttpApplication.CancelModuleException;
-
            // Is this from Response.End()
-           if (exceptionState != null && !exceptionState.Timeout) {
+           if (!e.Timeout) {
                // Mark the request as completed
                using (app.Context.SyncContext.AcquireThreadLock()) {
                    // Handle response end once. Skip if already initiated (previous AsyncTask)
@@ -211,10 +210,7 @@ internal sealed class LegacyPageAsyncTask {
                // Clear the error for Response.End
                _error = null;
            }
-
-           // ---- the exception. Async completion required (DDB 140655)
-           Thread.ResetAbort();
-        } 
+        }
         catch (Exception e) {
             _error = e;
         }

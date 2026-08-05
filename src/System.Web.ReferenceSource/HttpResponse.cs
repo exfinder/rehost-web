@@ -3084,6 +3084,19 @@ namespace System.Web {
         /// </devdoc>
         public void End() {
             if (_context.IsInCancellablePeriod) {
+                // No thread abort on this runtime: first complete the response exactly as
+                // the non-cancellable arm does, so a catch that swallows the unwind can
+                // neither emit further output (_ended) nor resume the pipeline
+                // (CompleteRequest); then unwind.
+                if (!_flushing) {
+                    Flush();
+                    _ended = true;
+
+                    if (_context.ApplicationInstance != null) {
+                        _context.ApplicationInstance.CompleteRequest();
+                    }
+                }
+
                 AbortCurrentThread();
             }
             else {
@@ -3109,10 +3122,8 @@ namespace System.Web {
             }
         }
 
-        [SuppressMessage("Microsoft.Security", "CA2106:SecureAsserts", Justification = "Known issue, but required for proper operation of ASP.NET.")]
-        [SecurityPermission(SecurityAction.Assert, ControlThread = true)]
         private static void AbortCurrentThread() {
-            Thread.CurrentThread.Abort(new HttpApplication.CancelModuleException(false));
+            throw new HttpApplication.CancelModuleException(false);
         }
 
         /*
@@ -3314,7 +3325,7 @@ namespace System.Web {
 
         private String UrlEncodeIDNSafe(String url) {
             // Bug 86594: Should not encode the domain part of the url. For example,
-            // http://Übersite/Überpage.aspx should only encode the 2nd Ü.
+            // http://ï¿½bersite/ï¿½berpage.aspx should only encode the 2nd ï¿½.
             // To accomplish this we must separate the scheme+host+port portion of the url from the path portion,
             // encode the path portion, then reconstruct the url.
             Debug.Assert(!url.Contains("?"), "Querystring should have been stripped off.");

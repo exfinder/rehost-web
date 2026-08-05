@@ -274,6 +274,7 @@ Type_not_factory_or_handler={0} does not implement IHttpHandlerFactory or IHttpH
 Type_from_untrusted_assembly=Type '{0}' cannot be instantiated under a partially trusted security policy (AllowPartiallyTrustedCallersAttribute is not present on the target assembly).
 Type_not_module={0} does not implement IHttpModule.
 Request_timed_out=Request timed out.
+Request_terminated_by_response_end=The request was terminated by Response.End, Server.Transfer, or a terminating redirect.
 DynamicModuleRegistrationOff=RegisterModule cannot be called when <httpRuntime allowDynamicModuleRegistration='false'>.
 
 Invalid_ControlState=The state information is invalid for this page and might be corrupted.
