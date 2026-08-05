@@ -142,8 +142,9 @@ P50 is exercised by `SaveAsPathTests`, which walks the shapes the two operating
 systems disagree about, and by
 `UploadSaveOverKestrelTests.Refuses_A_Windows_Path_Where_It_Cannot_Be_Rooted`,
 which proves the guard is wired into `HttpPostedFile.SaveAs`: removing the two
-added lines fails that test alone, and it is the one test whose expectation
-differs by platform.
+added lines fails that test alone. Both are the one place whose expectation
+differs by platform, so each side runs where it applies — the refusal on macOS
+`arm64`, the inert pass-through on Windows `x64`, 261/261 on both.
 
 ## Update rule
 
