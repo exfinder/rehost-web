@@ -148,8 +148,9 @@ the same known/unknown group is unverified, and reaches only
 ## Request collection key limit (2026-08-05)
 
 The cap MSRC 12038 added against the 2011 hash-collision denial of service is
-opt-in, not on: .NET Framework 4.8.1 reads `Int32.MaxValue` and ships no key in
-`machine.config` or the root `web.config` (measured on `win-oracle`,
+opt-in, not on: .NET Framework 4.8.1 reads `Int32.MaxValue` and ships the key in
+no configuration file on the machine — every `*.config` under the framework's
+config directory was searched (measured on `win-oracle`,
 `System.Web` 4.8.9319.0, by reflection over `AppSettings.MaxHttpCollectionKeys`).
 This port carries the same constant and ships no key, so it matches without
 having decided anything.
