@@ -16,3 +16,4 @@ meet the same bar.
 | `body-customerrors` | `customErrors` conversion of host rejections is the claim. |
 | `codegen` | Compilation-substrate scenarios: runs mutate and inspect generated output. |
 | `legacy-target` / `modern-target` | `<httpRuntime targetFramework>` divergence is the claim; activation is what is under test. |
+| `timeout` | `executionTimeout="1"` plus a 2-second `rehost:RequestTimeoutScanSeconds` would time out any other fixture's slow requests; the real-timer chain firing is the claim. |

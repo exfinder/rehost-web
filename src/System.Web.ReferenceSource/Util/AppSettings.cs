@@ -154,6 +154,10 @@ namespace System.Web.Util {
                             if (settings == null || !Boolean.TryParse(settings["aspnet:EnsureCookieDefaults"], out _fixCookieDefaults))
                                 _fixCookieDefaults = true;
 
+                            // rehost: prefix marks port-owned keys with no Framework counterpart
+                            if (settings == null || !Int32.TryParse(settings["rehost:RequestTimeoutScanSeconds"], out _requestTimeoutScanSeconds) || _requestTimeoutScanSeconds < 1)
+                                _requestTimeoutScanSeconds = 15;
+
                             _settingsInitialized = true;
                         }
                     }
@@ -196,6 +200,14 @@ namespace System.Web.Util {
             get {
                 EnsureSettingsLoaded();
                 return _useHostHeaderForRequestUrl;
+            }
+        }
+
+        private static int _requestTimeoutScanSeconds;
+        internal static int RequestTimeoutScanSeconds {
+            get {
+                EnsureSettingsLoaded();
+                return _requestTimeoutScanSeconds;
             }
         }
 

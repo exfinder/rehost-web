@@ -103,6 +103,7 @@ namespace System.Web {
         private long       _timeoutStartTimeUtcTicks = -1; // should always be accessed atomically; -1 means uninitialized
         private long       _timeoutTicks = -1; // should always be accessed atomically; -1 means uninitialized
         private int        _timeoutState;   // 0=non-cancelable, 1=cancelable, -1=canceled
+        private volatile bool _pendingTimeout; // set by the timeout sweep, consumed once at a step boundary
         private DoubleLink _timeoutLink;    // link in the timeout's manager list
         private bool       _threadAbortOnTimeout = true; // whether we should Thread.Abort() this thread when it times out
         private Thread     _thread;
@@ -1763,17 +1764,22 @@ namespace System.Web {
         }
 
         internal void WaitForExceptionIfCancelled() {
-            // _timeoutState never reaches -1 here: the timeout sweep is neutralized
-            // (ledger P51), and there is no pending abort to wait for.
+            // Cooperative timeout (ledger P53): consume the sweep's flag exactly once
+            // and unwind; ExecuteStep's recovery renders the request-timed-out error.
+            // Consuming prevents the repeated re-throw at every later boundary.
+            if (_pendingTimeout) {
+                _pendingTimeout = false;
+                throw new HttpApplication.CancelModuleException(true);
+            }
         }
 
         internal bool IsInCancellablePeriod {
             get { return (Volatile.Read(ref _timeoutState) == 1); }
         }
 
-        internal Thread MustTimeout(DateTime utcNow) {
+        internal bool MustTimeout(DateTime utcNow) {
             // Note: The TimedOutToken is keyed off of the HttpContext creation time, not the most recent async
-            // completion time (like the Thread.Abort logic later in this method).
+            // completion time (like the cooperative flag later in this method).
 
             if (_utcTimestamp + Timeout < utcNow) {
                 // If we are the first call site to observe the token, then create it in the canceled state.
@@ -1787,25 +1793,23 @@ namespace System.Web {
                     // don't abort in debug mode
                     try {
                         if (CompilationUtil.IsDebuggingEnabled(this) || System.Diagnostics.Debugger.IsAttached)
-                            return null;
+                            return false;
                     }
                     catch {
                         // ignore config errors
-                        return null;
+                        return false;
                     }
 
-                    // abort the thread only if in cancelable state, avoiding race conditions
-                    // the caller MUST timeout if the return is true
-                    if (Interlocked.CompareExchange(ref _timeoutState, -1, 1) == 1) {
-                        if (_wr.IsInReadEntitySync) {
-                            AbortConnection();
-                        }
-                        return _thread;
-                    }
+                    // Cooperative: flag the request for WaitForExceptionIfCancelled to
+                    // consume at the next step boundary. The -1 _timeoutState flip
+                    // belonged to the abort handshake and would strand the request
+                    // (ledger P53).
+                    _pendingTimeout = true;
+                    return true;
                 }
             }
 
-            return null;
+            return false;
         }
 
         internal bool HasTimeoutExpired {

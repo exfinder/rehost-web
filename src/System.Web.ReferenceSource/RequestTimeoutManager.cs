@@ -45,6 +45,21 @@ namespace System.Web {
 
         }
 
+        // The scan period is read on the first registration, not in the constructor:
+        // the constructor runs from the HttpRuntime cctor, before configuration exists,
+        // and a read there would latch every appSettings switch to its default.
+        private int _timerPeriodAdjusted;
+        private void EnsureTimerPeriod() {
+            if (Interlocked.CompareExchange(ref _timerPeriodAdjusted, 1, 0) != 0)
+                return;
+
+            int seconds = AppSettings.RequestTimeoutScanSeconds;
+            if (seconds != _timerPeriod.TotalSeconds && _timer != null) {
+                TimeSpan period = TimeSpan.FromSeconds(seconds);
+                _timer.Change(period, period);
+            }
+        }
+
         internal void Stop() {
             // stop the timer
 
@@ -103,6 +118,8 @@ namespace System.Web {
         }
 
         internal void Add(HttpContext context) {
+            EnsureTimerPeriod();
+
             if (context.TimeoutLink != null) {
                 ((RequestTimeoutEntry)context.TimeoutLink).IncrementCount();
                 return;
@@ -171,8 +188,12 @@ namespace System.Web {
             }
 
             internal void TimeoutIfNeeded(DateTime now) {
-                // Thread.Abort throws on this runtime, and MustTimeout's state flip would leave
-                // WaitForExceptionIfCancelled spinning; timeout enforcement is deferred (ledger P51).
+                // Cooperative (ledger P53): MustTimeout cancels TimedOutToken and flags
+                // the request; the step-boundary checkpoint delivers the timeout. No
+                // Thread.Abort - it throws on this runtime (ledger P51).
+                if (_context.MustTimeout(now)) {
+                    RemoveFromList();
+                }
             }
 
             internal void IncrementCount() {
