@@ -35,6 +35,19 @@ internal sealed class ScenarioClient : IDisposable
     internal Task<ScenarioResponse> GetAsync(string path) =>
         SendAsync(new HttpRequestMessage(HttpMethod.Get, path));
 
+    // The handler's cookie container stays off, so a request carries exactly the Cookie headers
+    // named here and a response is read as the raw Set-Cookie lines the server wrote.
+    internal Task<ScenarioResponse> GetWithCookiesAsync(string path, params string[] cookieHeaders)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        foreach (var header in cookieHeaders)
+        {
+            request.Headers.TryAddWithoutValidation("Cookie", header);
+        }
+
+        return SendAsync(request);
+    }
+
     internal Task<ScenarioResponse> PostAsync(string path, byte[] body, string contentType)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, path)
@@ -85,6 +98,9 @@ internal sealed class ScenarioClient : IDisposable
                 StatusCode = (int)response.StatusCode,
                 ReasonPhrase = response.ReasonPhrase ?? "",
                 Headers = headers,
+                SetCookies = response.Headers.TryGetValues("Set-Cookie", out var setCookies)
+                    ? setCookies.ToArray()
+                    : [],
                 Bytes = bytes,
             };
         }

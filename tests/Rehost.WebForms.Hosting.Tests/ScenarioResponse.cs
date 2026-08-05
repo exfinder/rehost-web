@@ -8,6 +8,10 @@ internal sealed class ScenarioResponse
 
     internal required IReadOnlyDictionary<string, string> Headers { get; init; }
 
+    // Kept apart from Headers, which joins repeated values: a Set-Cookie line carries commas of
+    // its own, so the joined form cannot be split back into the lines the server wrote.
+    internal required IReadOnlyList<string> SetCookies { get; init; }
+
     internal required byte[] Bytes { get; init; }
 
     internal string? ContentType => Header("Content-Type");
