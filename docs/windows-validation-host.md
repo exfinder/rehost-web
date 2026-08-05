@@ -106,3 +106,22 @@ ambiguous one is easy to read as a dropped connection.
 
 Use single quotes on the macOS side so the local shell leaves `$LASTEXITCODE`
 alone, and double quotes for any nested argument.
+
+## Framework binary readings
+
+Published reference source lags shipped binaries: the 4.8.9319.0 cookie-
+defaults servicing fix exists in no published branch, and the newest branch
+(`NetFramework48ZDP`) carries only part of the SameSite servicing. When a
+reading of real 4.8.1 behavior is needed, decompile the GAC assembly with
+`ilspycmd` on any host carrying real 4.8.1 (`dotnet tool install -g
+ilspycmd`; already installed globally on `win-oracle`):
+
+```text
+ilspycmd -t System.Web.HttpCookie `
+  C:\Windows\Microsoft.NET\assembly\GAC_64\System.Web\v4.0_4.0.0.0__b03f5f7f11d50a3a\System.Web.dll
+```
+
+Prefer this over reflection plus raw IL: it yields reviewable C# for the
+story doc, and it is how the `EnsureCookieDefaults` port was verified.
+Reflection remains the right tool for reading live values (app settings,
+registry-backed switches) rather than code shape.
