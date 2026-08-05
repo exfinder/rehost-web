@@ -21,6 +21,9 @@ public sealed class CookieHandler : IHttpHandler
                 context.Response.Cookies.Add(new HttpCookie("first", "1"));
                 context.Response.Cookies.Add(new HttpCookie("second", "2"));
                 break;
+            case "unicode":
+                context.Response.Cookies.Add(new HttpCookie("place", "caf\u00e9"));
+                break;
             case "attributes":
                 context.Response.Cookies.Add(new HttpCookie("marked", "value")
                 {

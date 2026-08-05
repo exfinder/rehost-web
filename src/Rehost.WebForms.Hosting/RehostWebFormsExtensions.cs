@@ -1,7 +1,9 @@
 namespace Rehost.WebForms.Hosting;
 
 using System;
+using System.Text;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -21,6 +23,13 @@ public static class RehostWebFormsExtensions
 
         WebFormsApplication.Initialize(options);
         builder.Services.AddSingleton(new ClassicPipelineActivation(options));
+
+        // Framework writes response headers in HttpResponse.HeaderEncoding, UTF-8 by default
+        // (IIS7WorkerRequest encodes every header name and value with it); Kestrel's default
+        // refuses non-ASCII header values outright. A non-default
+        // <globalization responseHeaderEncoding> stays a documented residual gap.
+        builder.Services.Configure<KestrelServerOptions>(
+            kestrel => kestrel.ResponseHeaderEncodingSelector = _ => Encoding.UTF8);
 
         return builder;
     }

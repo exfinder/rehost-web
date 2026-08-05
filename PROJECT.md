@@ -79,7 +79,10 @@ Use, in order:
 Source revisions, licenses, and transformations live in
 [`docs/provenance`](docs/provenance/). Imported source should remain unchanged
 where practical. Any imported-source deviation must be narrow, explained by a
-compatibility decision, and covered by tests.
+compatibility decision, and covered by tests. Where shipped 4.8.1 binaries
+measurably disagree with the pinned snapshot (published source lags servicing),
+the binaries win; each such deviation is recorded in the provenance ledger with
+its reading.
 
 The Microsoft Reference Source and WinForms repositories are cloned locally at
 `../referencesource` and `../winforms`, alongside this repository.

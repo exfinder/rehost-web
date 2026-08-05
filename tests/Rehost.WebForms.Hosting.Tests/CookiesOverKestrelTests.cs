@@ -60,4 +60,20 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
 
         response.SetCookies.ShouldBe(["a=1; path=/"]);
     }
+
+    // Framework sends response headers as HeaderEncoding bytes (UTF-8 by default); the adapter
+    // configures Kestrel to match. Raw bytes, because HttpClient's Latin-1 header decode would
+    // disguise the wire form.
+    [Fact]
+    public async Task Encodes_A_Non_Ascii_Cookie_Value_As_Utf8_Header_Bytes()
+    {
+        var response = await scenario.Client.GetAsync("/cookies?mode=unicode");
+        response.StatusCode.ShouldBe(200);
+
+        var raw = await RawSocketProbe.GetRawResponseAsync(
+            scenario.Address, "/cookies?mode=unicode");
+        var setCookie = "place=caf\u00e9"u8.ToArray();
+        raw.AsSpan().IndexOf(setCookie).ShouldBeGreaterThanOrEqualTo(
+            0, "the UTF-8 bytes of the cookie value must appear in the Set-Cookie line");
+    }
 }

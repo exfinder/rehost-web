@@ -142,31 +142,24 @@ This is the first place the port has had to follow shipped 4.8.1 against the
 pinned snapshot, which stopped receiving servicing fixes. It will not be the
 last, and there is no mechanism that finds the others.
 
-## Open: non-ASCII response header values
+## Resolved: non-ASCII response header values (2026-08-06)
 
-A cookie whose value carries non-ASCII text — `café` — fails the request with an
-empty 500. Kestrel validates response header values as ASCII unless the host sets
-`KestrelServerOptions.ResponseHeaderEncodingSelector`, and
-`HttpHeaders.ValidateHeaderValueCharacters` throws
-`InvalidOperationException: Invalid non-ASCII or control character in header:
-0x00E9` inside the middleware's commit. Framework writes header bytes in
-`Response.HeaderEncoding`, which defaults to UTF-8 and is configurable through
-`<globalization responseHeaderEncoding>`, so it sends the cookie.
+Decompiling real 4.8.1 settled the mechanism: `IIS7WorkerRequest` defaults
+`_headerEncoding` to UTF-8 and pushes every header name and value through
+`GetNullTerminatedByteArray(_headerEncoding, ...)`; `HttpResponse.HeaderEncoding`
+reads `<globalization responseHeaderEncoding>`, falls back to UTF-8, and refuses
+UTF-16. Response headers therefore leave Framework as UTF-8 bytes by default.
+`AddRehostWebForms` now configures Kestrel's `ResponseHeaderEncodingSelector`
+to match — a server-wide option, acceptable because the adapter is terminal and
+owns every endpoint of the process's one application.
+`Encodes_A_Non_Ascii_Cookie_Value_As_Utf8_Header_Bytes` asserts the wire bytes
+through a raw socket (HttpClient's Latin-1 header decode would disguise them).
 
-This is not cookie-specific — any header value the application sets behaves the
-same way — and the remedies differ in who owns them:
-
-- have `AddRehostWebForms` configure the Kestrel selector, which restores
-  Framework's behavior but mutates a server-wide option on behalf of the host,
-  including endpoints System.Web never sees;
-- leave it to the host and document the option, which keeps ownership clean and
-  leaves a failure with no diagnostic;
-- reject a non-ASCII header value in the adapter with a message naming the header
-  and the option, which is honest but is still a failed request.
-
-Deliberately unresolved here, and deliberately untested: a standing test would
-pin a defect as a contract. See
-[the host adapter](aspnet-core-host-adapter.md).
+Residual, recorded not implemented: a non-default
+`<globalization responseHeaderEncoding>` is not honored (the selector is fixed
+at Framework's default), and the request direction — what encoding Framework
+assumes when *reading* non-ASCII request headers — has no reading yet; both
+wait for a consumer with the need.
 
 ## Traps for whoever tests near this
 
