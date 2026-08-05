@@ -14,6 +14,7 @@ These documents describe accepted direction; implementation may lag:
 | Slice order and gates | [core-runtime-port-plan.md](core-runtime-port-plan.md) |
 | Test-suite refactoring | [follow-ups/test-suite-refactoring.md](follow-ups/test-suite-refactoring.md) |
 | Writing tests | [writing-tests.md](writing-tests.md) |
+| Response.End, request termination | [follow-ups/response-end-and-termination-plan.md](follow-ups/response-end-and-termination-plan.md) |
 | Decision rationale | [`adr/`](adr/) |
 
 ## Implemented contracts

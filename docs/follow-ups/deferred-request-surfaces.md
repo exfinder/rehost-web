@@ -22,6 +22,8 @@ Existing stories:
 [postback and form parsing](postback-and-form-parsing.md), which together own
 POST bodies, forms, view state, control state, and multipart reads and
 saves;
+[Response.End and request termination](response-end-and-termination-plan.md),
+which owns the termination half of
 [request termination/timeouts](request-termination-and-timeouts.md),
 [route escaping](route-url-escaping.md), and
 [WebResource timestamps](web-resource-assembly-timestamps.md). Portable treatment
