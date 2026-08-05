@@ -6,9 +6,23 @@ namespace Rehost.WebForms.Hosting.Tests;
 // HTTP. Nothing here touches the file journal.
 internal sealed class WitnessReader(ScenarioClient client)
 {
-    internal async Task<string[]> EventsAsync() =>
-        (await client.GetAsync("/witness")).Text
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries);
+    // Witness fetches often follow a request whose connection the server deliberately aborted
+    // (413s, client aborts). The pooled connection's RST can race the reuse, so one transient
+    // transport failure retries on a fresh connection rather than failing the assertion.
+    internal async Task<string[]> EventsAsync()
+    {
+        string text;
+        try
+        {
+            text = (await client.GetAsync("/witness")).Text;
+        }
+        catch (HttpRequestException exception) when (exception.InnerException is IOException)
+        {
+            text = (await client.GetAsync("/witness")).Text;
+        }
+
+        return text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+    }
 
     internal async Task<string[]> HandlerEntriesAsync() =>
         [.. (await EventsAsync()).Where(e => e.StartsWith("handler-entered:", StringComparison.Ordinal))];
