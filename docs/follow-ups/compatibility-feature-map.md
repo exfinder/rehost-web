@@ -76,6 +76,20 @@ covered by `PageCompilationTests` and `PageOverKestrelTests`.
 | Request collection key limit | Supported, opt-in | Off by default, matching .NET Framework 4.8.1 measured at `Int32.MaxValue`, with the key absent from every shipped configuration file. An application carrying it in its own `web.config` is read identically by both runtimes. `aspnet:MaxHttpCollectionKeys` caps query string, urlencoded and multipart form fields, and posted files; the check runs before each add, so the configured value is the last accepted count. A urlencoded body reports the refusal as `HttpException` — "The URL-encoded form data is not valid" — carrying the real `InvalidOperationException` as its inner exception, which is Framework's own wrapping. ASP.NET Core's own 1024-value form limit does not apply: System.Web parses the body, not the host |
 | Request-body size limits | Supported | Kestrel `MaxRequestBodySize` remains host-owned and `httpRuntime.maxRequestLength` remains System.Web-owned; the smaller effective limit wins. The adapter changes neither and rejects no mismatch. Kestrel rejection remains host-owned; System.Web rejection remains pipeline-owned. Known and unknown lengths pass on both supported platforms. Legacy `system.webServer` `maxAllowedContentLength` mapping belongs to its dedicated follow-up |
 
+## Cookies
+
+Supported means portable tested behavior on macOS `arm64` and Windows `x64`,
+covered by `CookiesOverKestrelTests`. Story:
+[cookies](cookies.md).
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| `Request.Cookies` | Supported | The adapter hands System.Web the whole `Cookie` header and System.Web parses it: sub-key values, valueless cookies, repeated names, and `$Path`/`$Domain` attributes on the preceding cookie. Repeated `Cookie` header lines are joined with `", "`, the HTTP rule IIS also applies, which makes them one malformed cookie on both; RFC 6265 forbids a client from sending them. Request validation refuses a dangerous cookie value before the handler runs |
+| `Response.Cookies` | Supported | Each cookie leaves as its own `Set-Cookie` line with Framework's own attribute text, including the pre-RFC `expires=Www, dd-Mmm-yyyy HH:mm:ss GMT` form and `HttpOnly` via `Request.Browser`. `Set` replaces and `Remove` drops the line entirely, because the classic pipeline generates headers once; deleting a cookie in a browser still needs an expired one. Response cookies also appear in the same request's `Request.Cookies` |
+| Cookie defaults from `<httpCookies>` | Supported | The section is absent from the shipped root configuration, as it is from every configuration file on a .NET Framework 4.8.1 machine, so both runtimes take the section defaults. Cookies parsed from the request take those defaults too, which is 4.8.1 behavior and postdates the pinned Reference Source; `aspnet:EnsureCookieDefaults="false"` restores the older shape on either runtime |
+| Non-ASCII response header values | Unsupported | A cookie value — or any header value — outside ASCII fails the request with an empty 500 from Kestrel's header validation. Framework writes header bytes in `Response.HeaderEncoding`, UTF-8 by default. Open, with the options recorded in [cookies](cookies.md) |
+| Session, forms authentication, roles, and anonymous identification cookies | Unassessed | Owned by those subsystems, along with every cookieless mode |
+
 ## Shipped root configuration
 
 The portable root web configuration is derived from the pinned .NET Framework

@@ -71,5 +71,9 @@ probe had: `SafeNativeMethods.GetCurrentThreadId`, recorded as P33.
 - Server-variable coverage is the minimum the fixture needs; IIS-only variables
   are unhandled rather than surveyed.
 - `PathInfo` is always empty, and the file-path split it implies is not done.
+- `SetHeaderEncoding` is ignored, and Kestrel validates response header values as
+  ASCII unless the host sets `ResponseHeaderEncodingSelector`. A header value
+  Framework would have written in UTF-8 fails the request instead; the options
+  and the measurement are in [cookies](cookies.md).
 - Request bodies, streaming, and file send: see
   [deferred request surfaces](deferred-request-surfaces.md).
