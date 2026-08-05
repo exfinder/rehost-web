@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
@@ -43,6 +44,10 @@ internal sealed class ScenarioClient : IDisposable
         request.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
         return SendAsync(request);
     }
+
+    // A browser sends no charset here, so the default request encoding decides the reading.
+    internal Task<ScenarioResponse> PostFormAsync(string path, string body) =>
+        PostAsync(path, Encoding.UTF8.GetBytes(body), "application/x-www-form-urlencoded");
 
     internal Task<ScenarioResponse> PostBodyAsync(
         string path,

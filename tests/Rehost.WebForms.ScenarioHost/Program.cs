@@ -170,7 +170,7 @@ public static class Program
                 var index = 0;
                 foreach (var probe in options.Postbacks)
                 {
-                    index = await RunPostbackAsync(client, options, probe, index);
+                    index = await RunCapturedPostbackAsync(client, options, probe, index);
                 }
             }
             else
@@ -187,142 +187,6 @@ public static class Program
         {
             await app.StopAsync();
         }
-    }
-
-    private static async Task<int> RunPostbackAsync(
-        HttpClient client,
-        ScenarioOptions options,
-        string probe,
-        int index)
-    {
-        if (probe == "cross-page")
-        {
-            return await RunCrossPagePostbackAsync(client, options, index);
-        }
-
-        if (probe.StartsWith("captured", StringComparison.Ordinal))
-        {
-            return await RunCapturedPostbackAsync(client, options, probe, index);
-        }
-
-        if (probe.StartsWith("upload", StringComparison.Ordinal))
-        {
-            return await RunUploadAsync(client, options, probe, index);
-        }
-
-        var overrides = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["Message"] = "typed by the client",
-        };
-        var rounds = 1;
-        var tamper = false;
-
-        switch (probe)
-        {
-            case "apply":
-                overrides["Apply"] = "Apply";
-                break;
-            case "tamper":
-                overrides["Apply"] = "Apply";
-                tamper = true;
-                break;
-            case "unsafe-input":
-                overrides["Apply"] = "Apply";
-                overrides["Message"] = "<script>alert(1)</script>";
-                break;
-            // State restored across a single postback is indistinguishable from state built
-            // during it, so the control-state claim needs a second round.
-            case "apply-twice":
-                overrides["Apply"] = "Apply";
-                rounds = 2;
-                break;
-            case "bump":
-                overrides["__EVENTTARGET"] = "Bump";
-                overrides["__EVENTARGUMENT"] = "";
-                break;
-            default:
-                throw new ArgumentException("Unrecognized postback probe: " + probe);
-        }
-
-        string html;
-        using (var rendered = await client.GetAsync("/Default.aspx"))
-        {
-            html = await rendered.Content.ReadAsStringAsync();
-            await RecordResponseAsync(options, probe + ":render", rendered, index++);
-
-            if (!rendered.IsSuccessStatusCode)
-            {
-                return index;
-            }
-        }
-
-        for (var round = 0; round < rounds; round++)
-        {
-            if (tamper)
-            {
-                overrides["__VIEWSTATE"] =
-                    FlipOneCharacter(PostbackFormClient.ReadFields(html)["__VIEWSTATE"]);
-            }
-
-            using var response = await PostFormAsync(
-                client,
-                PostbackFormClient.FormAction(html),
-                PostbackFormClient.BuildBody(html, overrides));
-
-            html = await response.Content.ReadAsStringAsync();
-            await RecordResponseAsync(options, probe + ":postback", response, index++);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                break;
-            }
-        }
-
-        return index;
-    }
-
-    // Their __VIEWSTATEGENERATOR values differ, which is what tells the page the payload was not
-    // meant for it.
-    private static async Task<int> RunCrossPagePostbackAsync(
-        HttpClient client,
-        ScenarioOptions options,
-        int index)
-    {
-        string otherHtml;
-        using (var other = await client.GetAsync("/Other.aspx"))
-        {
-            otherHtml = await other.Content.ReadAsStringAsync();
-            await RecordResponseAsync(options, "cross-page:other", other, index++);
-        }
-
-        var borrowed = PostbackFormClient.ReadFields(otherHtml);
-
-        string html;
-        using (var rendered = await client.GetAsync("/Default.aspx"))
-        {
-            html = await rendered.Content.ReadAsStringAsync();
-            await RecordResponseAsync(options, "cross-page:render", rendered, index++);
-        }
-
-        // Only the borrowed state travels. An event validation field is bound to the exact
-        // __VIEWSTATE it was issued with, so carrying one would fail event validation before MAC
-        // suppression could be observed, and posting no control values keeps ValidateEvent off
-        // the path entirely.
-        var fields = new Dictionary<string, string>(StringComparer.Ordinal)
-        {
-            ["__VIEWSTATE"] = borrowed["__VIEWSTATE"],
-            ["__VIEWSTATEGENERATOR"] = borrowed["__VIEWSTATEGENERATOR"],
-            ["__EVENTTARGET"] = "",
-            ["__EVENTARGUMENT"] = "",
-        };
-
-        using var response = await PostFormAsync(
-            client,
-            PostbackFormClient.FormAction(html),
-            PostbackFormClient.Encode(fields));
-        await RecordResponseAsync(options, "cross-page:postback", response, index++);
-
-        return index;
     }
 
     // Replays a postback another runtime rendered, which is what a load-balanced farm spanning
@@ -371,55 +235,6 @@ public static class Program
         return index;
     }
 
-    private static async Task<int> RunUploadAsync(
-        HttpClient client,
-        ScenarioOptions options,
-        string probe,
-        int index)
-    {
-        string html;
-        using (var rendered = await client.GetAsync("/Upload.aspx"))
-        {
-            html = await rendered.Content.ReadAsStringAsync();
-            await RecordResponseAsync(options, probe + ":render", rendered, index++);
-        }
-
-        var fields = PostbackFormClient.ReadFields(html);
-        fields["Note"] = "a note";
-        fields["Save"] = "Save";
-
-        var files = new List<MultipartFile>();
-        switch (probe)
-        {
-            case "upload":
-                files.Add(new MultipartFile(
-                    "Picked",
-                    "notes.txt",
-                    "text/plain",
-                    Encoding.UTF8.GetBytes("hello upload")));
-                break;
-            case "upload-empty":
-                files.Add(new MultipartFile("Picked", "empty.txt", "text/plain", []));
-                break;
-            // What a browser sends when the file input was left alone: a part with an empty
-            // filename rather than no part at all.
-            case "upload-none":
-                files.Add(new MultipartFile("Picked", "", "application/octet-stream", []));
-                break;
-            default:
-                throw new ArgumentException("Unrecognized upload probe: " + probe);
-        }
-
-        using var content = new ByteArrayContent(PostbackFormClient.EncodeMultipart(fields, files));
-        content.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(
-            "multipart/form-data; boundary=" + PostbackFormClient.MultipartBoundary);
-
-        using var response = await client.PostAsync(PostbackFormClient.FormAction(html), content);
-        await RecordResponseAsync(options, probe + ":postback", response, index++);
-
-        return index;
-    }
-
     private static async Task<HttpResponseMessage> PostFormAsync(
         HttpClient client,
         string action,
@@ -431,17 +246,6 @@ public static class Program
             new System.Net.Http.Headers.MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
         return await client.PostAsync(action, content);
-    }
-
-    // Stays valid base64, so the payload reaches MAC validation rather than failing to decode,
-    // which is a different rejection.
-    private static string FlipOneCharacter(string value)
-    {
-        var characters = value.ToCharArray();
-        var middle = characters.Length / 2;
-        characters[middle] = characters[middle] == 'A' ? 'B' : 'A';
-
-        return new string(characters);
     }
 
     private static async Task RecordResponseAsync(

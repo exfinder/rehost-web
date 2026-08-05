@@ -263,7 +263,12 @@ sharing (each exception carries its why-comment, as today).
    - [x] `RequestBodyOverKestrelTests` shared-fixture facts → act/assert
          (witness endpoint + `RawSocketProbe`; the host's body-probe client
          and its trace-polling loop are deleted)
-   - [ ] `PostbackOverKestrelTests` probes → act/assert
+   - [x] `PostbackOverKestrelTests` probes → act/assert (with
+         `MultipartPostbackOverKestrelTests`, which shares the host: the
+         postback, cross-page, and upload probes left the host with them, and
+         the form scraper moved to `PostbackForm` in the test project, over the
+         BCL rather than `HttpUtility` — an unactivated process has no
+         configuration for the encoder to read)
    - [x] `PageOverKestrelTests` → act/assert (P5 exemplar)
    - [ ] `MixedFarmOverKestrelTests` → act/assert
    - [x] journal file → in-memory witness for live facts (the file journal
@@ -273,7 +278,8 @@ sharing (each exception carries its why-comment, as today).
          `RecordingWorkerRequest` records `worker.*` events in every
          override; a recording-off mode costs more than the 101-line class
          it would replace)
-   - [ ] ScenarioHost client half deleted as probes migrate
+   - [ ] ScenarioHost client half deleted as probes migrate (only the
+         captured-payload replay remains, for `MixedFarmOverKestrelTests`)
 
 ## P6 — Docs and acceptance
 
