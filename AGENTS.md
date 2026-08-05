@@ -60,22 +60,21 @@ the test-authoring rules: [`docs/writing-tests.md`](docs/writing-tests.md).
 
 ## Build diagnostics
 
-Use the non-hanging local build:
+Build the runtime project:
 
 ```text
-dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj --no-restore --disable-build-servers --nologo --verbosity:quiet --maxcpucount:1 /p:UseSharedCompilation=false /nodeReuse:false -clp:ErrorsOnly
+dotnet build src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj
 ```
 
-Run tests per project (or solution-wide — both are supported), without the
-build flags above:
+Run tests per project (or solution-wide — both are supported):
 
 ```text
 dotnet test tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj --no-build
 ```
 
-The test projects run on Microsoft.Testing.Platform, which forwards unrecognized
-arguments to the test executable. Passing `--nologo` or `--disable-build-servers`
-reports `Zero tests ran` with exit code 5 rather than an argument error.
+### Codex CLI
+
+If `dotnet build` hangs in Codex CLI, retry with `--maxcpucount:1`.
 
 ## Cross-platform validation
 
