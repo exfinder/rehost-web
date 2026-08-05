@@ -17,6 +17,7 @@ semantic risk. Each resulting story must update the compatibility map.
 Exclusion here does not authorize silent fallback.
 
 Existing stories:
+[cookies](cookies.md);
 [entity-body bridge](request-entity-body-bridge.md) and
 [postback and form parsing](postback-and-form-parsing.md), which together own
 POST bodies, forms, view state, control state, and multipart reads and
