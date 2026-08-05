@@ -3,14 +3,19 @@ using System.Text;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// Deterministic by construction: no redirects, cookies, proxy, or decompression, exact HTTP/1.1.
-// Assertions see what the server sent, not what a convenience layer made of it.
+// Deterministic by construction: no redirects, cookies, proxy, or decompression, exact HTTP/1.1,
+// and one connection per request unless a test's claim is about connection reuse
+// (maxConnectionsPerServer opts back into pooling). Reuse is hidden cross-request state: a
+// pooled connection the server deliberately aborted can race its own teardown into the next
+// request. Assertions see what the server sent, not what a convenience layer made of it.
 internal sealed class ScenarioClient : IDisposable
 {
     private readonly HttpClient _client;
+    private readonly bool _freshConnectionPerRequest;
 
     internal ScenarioClient(Uri baseAddress, int? maxConnectionsPerServer = null)
     {
+        _freshConnectionPerRequest = maxConnectionsPerServer == null;
         var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
@@ -82,6 +87,11 @@ internal sealed class ScenarioClient : IDisposable
 
     private async Task<ScenarioResponse> SendAsync(HttpRequestMessage request)
     {
+        if (_freshConnectionPerRequest)
+        {
+            request.Headers.ConnectionClose = true;
+        }
+
         using (request)
         using (var response = await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead))
         {
