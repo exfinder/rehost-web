@@ -64,6 +64,7 @@ covered by `PageCompilationTests` and `PageOverKestrelTests`.
 | Request validation | Supported | Framework's default; a query value containing `<` is refused before the page runs |
 | `<form runat="server">`, postback, view state | Supported | Covered under request bodies below; `__VIEWSTATEGENERATOR` carries a permanent divergence recorded in [machine key and view state](machine-key-and-viewstate-bootstrap.md) |
 | Controls requiring a server form | Partially assessed | `TextBox`, `Button`, `LinkButton`, and `FileUpload` render and post back. Other controls calling `VerifyRenderingInServerForm`, `GridView` among them, are unassessed rather than blocked |
+| Static files via `StaticFileHandler` | Partially supported | An extension the application maps to `System.Web.StaticFileHandler` in `httpHandlers` serves with its `MimeMapping` content type; a missing file is a 404 (ledger P54). The shipped configuration maps no content extension — Framework left static files to IIS, so an application opts each extension in. Range, `If-Modified-Since`/`If-Range`, and ETag revalidation are unassessed |
 
 ## Request bodies
 

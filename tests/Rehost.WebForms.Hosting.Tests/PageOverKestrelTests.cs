@@ -26,6 +26,27 @@ public sealed class PageOverKestrelTests(PageLiveScenario scenario) : IClassFixt
     }
 
     [Fact]
+    public async Task Serves_A_Static_File_Through_StaticFileHandler()
+    {
+        // A doubled application root survives GetFileInfo (request.PhysicalPath is correct) and
+        // fails only inside TransmitFile, so asserting the bytes is what catches ledger P54.
+        var response = await scenario.Client.GetAsync("/styles.css");
+
+        response.StatusCode.ShouldBe(200);
+        response.ContentType.ShouldBe("text/css");
+        response.Bytes.ShouldBe(File.ReadAllBytes(
+            Path.Combine(scenario.ApplicationPath, "styles.css")));
+    }
+
+    [Fact]
+    public async Task Reports_A_Missing_Static_File_As_Not_Found()
+    {
+        var response = await scenario.Client.GetAsync("/missing.css");
+
+        response.StatusCode.ShouldBe(404);
+    }
+
+    [Fact]
     public async Task Refuses_A_Path_Framework_Maps_To_The_Forbidden_Handler()
     {
         // The page is routed by the shipped root configuration, so this also covers the *.aspx

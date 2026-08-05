@@ -580,7 +580,8 @@ namespace System.Web {
             try {
                 // When not hosted on IIS, TransmitFile sends bytes in memory similar to WriteFile
                 HttpRuntime.CheckFilePermission(physicalPath);
-                context.Response.TransmitFile(physicalPath, offset, length);
+                // physicalPath is already translated; TransmitFile would re-classify it (ledger P54).
+                context.Response.TransmitFileTranslated(physicalPath, offset, length);
             }
             catch (ExternalException e) {
                 // Check for ERROR_ACCESS_DENIED and set the HTTP 

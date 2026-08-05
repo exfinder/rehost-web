@@ -2805,12 +2805,21 @@ namespace System.Web {
             if (filename == null) {
                 throw new ArgumentNullException("filename");
             }
+
+            filename = GetNormalizedFilename(filename);
+
+            TransmitFileTranslated(filename, offset, length);
+        }
+
+        // GetNormalizedFilename classifies physical-vs-virtual by string shape, which off Windows
+        // cannot tell a rooted physical path from a virtual one: a Unix-rooted physical path is
+        // re-mapped as virtual under the application root (ledger P54). A caller holding a path
+        // the worker request already translated enters here, past that classification.
+        internal void TransmitFileTranslated(string filename, long offset, long length) {
             if (offset < 0)
                 throw new ArgumentException(SR.GetString(SR.Invalid_range), "offset");
             if (length < -1)
                 throw new ArgumentException(SR.GetString(SR.Invalid_range), "length");
-
-            filename = GetNormalizedFilename(filename);
 
             long size;
             using (FileStream f = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)) {

@@ -535,10 +535,52 @@ public sealed class AspNetCoreWorkerRequestTests
     }
 
     [Fact]
-    public void Sending_A_Response_From_A_File_Is_Rejected()
+    public async Task A_File_Range_Spools_In_Order_With_Memory_Writes()
+    {
+        var request = Create();
+        var payload = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllBytes(payload, "0123456789"u8.ToArray());
+
+        try
+        {
+            request.SendResponseFromMemory("before|"u8.ToArray(), 7);
+            request.SendResponseFromFile(payload, 2, 5);
+            request.SendResponseFromMemory("|after"u8.ToArray(), 6);
+            request.Response.Seal();
+
+            using var drained = new MemoryStream();
+            await request.Response.DrainAsync(drained, CancellationToken.None);
+
+            Encoding.ASCII.GetString(drained.ToArray()).ShouldBe("before|23456|after");
+        }
+        finally
+        {
+            File.Delete(payload);
+        }
+    }
+
+    [Fact]
+    public void A_File_Shorter_Than_The_Requested_Range_Fails_The_Send()
+    {
+        var request = Create();
+        var payload = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllBytes(payload, "abc"u8.ToArray());
+
+        try
+        {
+            Should.Throw<IOException>(() => request.SendResponseFromFile(payload, 0, 9));
+        }
+        finally
+        {
+            File.Delete(payload);
+        }
+    }
+
+    [Fact]
+    public void Sending_A_Response_From_A_Native_File_Handle_Is_Rejected()
     {
         Should.Throw<NotSupportedException>(
-            () => Create().SendResponseFromFile("payload.bin", 0, 1));
+            () => Create().SendResponseFromFile(IntPtr.Zero, 0, 1));
     }
 
     [Fact]

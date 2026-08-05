@@ -286,8 +286,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override void SendResponseFromFile(string filename, long offset, long length)
     {
-        throw new NotSupportedException(
-            "Sending a response from a file is outside the first-slice transport envelope.");
+        Response.WriteFile(filename, offset, length);
     }
 
     public override void SendResponseFromFile(IntPtr handle, long offset, long length)

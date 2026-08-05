@@ -69,6 +69,30 @@ internal sealed class ResponseSpool : IDisposable
         _body.Write(data, 0, length);
     }
 
+    internal void WriteFile(string filename, long offset, long length)
+    {
+        RequireUnsealed();
+
+        using var file = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+        file.Position = offset;
+
+        var remaining = length;
+        var buffer = new byte[81920];
+        while (remaining > 0)
+        {
+            var read = file.Read(buffer, 0, (int)Math.Min(buffer.Length, remaining));
+            if (read == 0)
+            {
+                throw new IOException(
+                    "The file '" + filename + "' ended " + remaining
+                    + " bytes before the requested range; it changed after its length was read.");
+            }
+
+            _body.Write(buffer, 0, read);
+            remaining -= read;
+        }
+    }
+
     internal void Seal()
     {
         IsSealed = true;
