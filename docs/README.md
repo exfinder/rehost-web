@@ -26,6 +26,7 @@ These documents describe accepted direction; implementation may lag:
 | Runtime code generation/loading | [follow-ups/runtime-codegen-and-loading.md](follow-ups/runtime-codegen-and-loading.md) |
 | Dynamic `.aspx` GET | [follow-ups/dynamic-aspx-integration.md](follow-ups/dynamic-aspx-integration.md) |
 | Postback, forms, view state | [follow-ups/postback-and-form-parsing.md](follow-ups/postback-and-form-parsing.md) |
+| Cookies | [follow-ups/cookies.md](follow-ups/cookies.md) |
 | Mixed farm, incremental migration | [follow-ups/mixed-farm-incremental-migration.md](follow-ups/mixed-farm-incremental-migration.md) |
 | Supported feature boundaries | [follow-ups/compatibility-feature-map.md](follow-ups/compatibility-feature-map.md) |
 | Reached classic-path evidence | [portability-ledger.md](portability-ledger.md) |
