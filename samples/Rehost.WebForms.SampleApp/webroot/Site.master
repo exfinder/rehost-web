@@ -1,0 +1,50 @@
+<%@ Master Language="C#" %>
+<%@ Import Namespace="Sample" %>
+<script runat="server">
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        Nav.DataSource = FeatureCatalog.Pages;
+        Nav.DataBind();
+    }
+
+    protected string Started => Application["started"] as string ?? "(not started)";
+
+</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rehost WebForms Sample</title>
+    <link rel="stylesheet" href="<%= ResolveUrl("~/styles.css") %>" />
+</head>
+<body>
+<form id="site" runat="server">
+
+<header class="chrome">
+    <a class="brand" href="<%= ResolveUrl("~/Default.aspx") %>">
+        <asp:Image ID="Badge" runat="server" ImageUrl="~/badge.png" AlternateText="" CssClass="badge" />
+        Rehost <span>WebForms</span>
+    </a>
+    <nav>
+        <asp:Repeater ID="Nav" runat="server">
+            <ItemTemplate>
+                <asp:HyperLink runat="server"
+                    NavigateUrl='<%# DataBinder.Eval(Container.DataItem, "Url") %>'
+                    Text='<%# DataBinder.Eval(Container.DataItem, "Title") %>' />
+            </ItemTemplate>
+        </asp:Repeater>
+    </nav>
+</header>
+
+<main>
+<asp:ContentPlaceHolder ID="Main" runat="server" />
+</main>
+
+<footer class="chrome">
+    <span>System.Web on modern .NET · application started <%= Started %></span>
+    <span class="trace"><%= SampleTrace.Render(Context) %></span>
+</footer>
+
+</form>
+</body>
+</html>

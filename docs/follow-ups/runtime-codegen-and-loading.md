@@ -108,6 +108,12 @@ Page compilation and its build results pass the
 
 - User control and master page build providers are registered but no slice
   compiles them yet.
+- The enumerated shared framework includes `System.Web.HttpUtility.dll`, so any
+  compiled page or `App_Code` line naming `HttpUtility` fails with `CS0433`
+  against the port's own type. Framework applications use `HttpUtility`
+  routinely; the sample application had to fall back to `Server.HtmlEncode` /
+  `WebUtility.HtmlEncode`. The reference enumeration likely needs to exclude
+  shared-framework assemblies whose namespaces the port itself supplies.
 - Batch compilation settings, satellite culture policy beyond the neutral and
   one-culture case, and `assemblyPostProcessorType` stay with
   [compiler policy](compiler-provider-and-target-framework-policy.md).
