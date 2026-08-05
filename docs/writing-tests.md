@@ -7,6 +7,16 @@ is [ADR 0045](adr/0045-test-architecture-after-the-suite-refactoring.md).
 
 Walk down; stop at the first rung that fits.
 
+0. **No standing test.** When the behavior is decided by untouched Reference
+   Source and its path runs entirely over substrate already exercised on both
+   platforms — no first reach of a platform-sensitive leaf (registry, native
+   interop, filesystem semantics, crypto, culture/NLS) — the default evidence
+   is a recorded measurement (a Framework reading and/or one-off exploration)
+   plus a compatibility-map entry. "Untouched" alone is not the guarantee;
+   untouched imported code failed hard early on precisely at such leaves, and
+   first reach of one is the ledger rule's territory: a row plus a focused
+   test on the platform that triggers it. A standing test below this rung
+   must name the port-owned seam it guards.
 1. **Plain unit test** — the default. Lives in the folder mirroring the source
    it covers (`tests/Rehost.WebForms.Runtime.Tests/<mirrored path>/`), uses a
    disposable temp directory if it touches disk, spawns nothing.

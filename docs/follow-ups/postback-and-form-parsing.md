@@ -165,14 +165,18 @@ ASP.NET Core application is capped at 1024 form values by `FormOptions`, and tha
 limit never applies here, because System.Web parses the body itself and the host's
 form parser is never called.
 
-`CollectionKeyLimitOverKestrelTests` opts in at 1000 on its own fixture and
-covers the four places the check is written — query string, urlencoded form,
-multipart form fields, and posted files — plus the boundary, since the check runs
-before each add and the configured value is therefore the last accepted count.
-Two things a reader would not predict: the query-string cases need
-`maxQueryStringLength` raised or System.Web's length check refuses them first,
-and the urlencoded parser catches everything and rethrows one "not valid"
-`HttpException`, so only its inner exception says the limit was the reason.
+No standing test guards this: the check and its four call sites — query
+string, urlencoded form, multipart form fields, posted files — are untouched
+imported source over exercised substrate, so the measurement above and the
+compatibility-map row are the record (writing-tests rung 0; a dedicated
+fixture and five tests were built first and removed by that rule). Three traps
+for whoever tests near it later, learned from red runs: the check runs before
+each add, so the configured value is the last accepted count; the query-string
+cases need `maxQueryStringLength` raised or System.Web's length check refuses
+them first; the urlencoded parser catches everything and rethrows one "not
+valid" `HttpException`, so only its inner exception says the limit was the
+reason — and form keys written without `=` are all added under one null name,
+so a naive over-limit body can count as a single key.
 
 ## Explicitly out
 

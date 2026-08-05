@@ -51,3 +51,8 @@ fixture and an act→assert test over the shared host — no new process, fixtur
 or golden. The Windows oracle box is needed only for golden regeneration and
 ad-hoc Framework readings, not for routine test work. Old-style tests migrate
 opportunistically; the remainder is tracked in the plan's checklist.
+
+Amended 2026-08-06: the writing-tests guide adds a rung below the unit test —
+imported-behavior claims on already-exercised substrate default to a recorded
+measurement plus a compatibility-map entry, with no standing test; first reach
+of a platform-sensitive leaf stays under the portability-ledger rule.

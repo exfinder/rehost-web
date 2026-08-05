@@ -10,6 +10,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture BodyCustomErrors = new("body-customerrors");
     internal static readonly ScenarioFixture LegacyTarget = new("legacy-target");
     internal static readonly ScenarioFixture ModernTarget = new("modern-target");
-    internal static readonly ScenarioFixture CollectionKeys = new("collection-keys");
     internal static readonly ScenarioFixture Codegen = new("codegen");
 }

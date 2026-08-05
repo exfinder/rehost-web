@@ -14,6 +14,5 @@ meet the same bar.
 | `body` | `maxRequestLength`/`requestLengthDiskThreshold` limits are the claim; the spilled-content save probe needs that same low threshold. |
 | `body-preload` | `asyncPreloadMode="All"` is a different application. |
 | `body-customerrors` | `customErrors` conversion of host rejections is the claim. |
-| `collection-keys` | `aspnet:MaxHttpCollectionKeys` is per-application and caps every request collection, so any neighbour posting more keys than the cap would fail for an unrelated reason. |
 | `codegen` | Compilation-substrate scenarios: runs mutate and inspect generated output. |
 | `legacy-target` / `modern-target` | `<httpRuntime targetFramework>` divergence is the claim; activation is what is under test. |
