@@ -3,7 +3,7 @@
 Status: implemented and verified on macOS `arm64` and Windows `x64`. The
 oracle-session commitment is resolved below (2026-08-05) under ADR 0044/0045. Scope: urlencoded form parsing,
 view state, control state, a postback that changes rendered output, multipart,
-and saving uploaded content to disk. Sits on the
+saving uploaded content to disk, and the request collection key limit. Sits on the
 [entity-body bridge](request-entity-body-bridge.md).
 
 ## What the managed path already provided
@@ -145,8 +145,33 @@ port can be compared against directly. Whether both hosts sort every header into
 the same known/unknown group is unverified, and reaches only
 `HttpRequest.SaveAs`.
 
+## Request collection key limit (2026-08-05)
+
+The cap MSRC 12038 added against the 2011 hash-collision denial of service is
+opt-in, not on: .NET Framework 4.8.1 reads `Int32.MaxValue` and ships no key in
+`machine.config` or the root `web.config` (measured on `win-oracle`,
+`System.Web` 4.8.9319.0, by reflection over `AppSettings.MaxHttpCollectionKeys`).
+This port carries the same constant and ships no key, so it matches without
+having decided anything.
+
+Staying uncapped is deliberate. The attack the counter was a stopgap for depends
+on predictable string hashing, and .NET randomizes it per process with no opt-out
+— the same randomization ledger P38 had to work around. Capping by default would
+also reject requests Framework accepts. The asymmetry worth knowing: a native
+ASP.NET Core application is capped at 1024 form values by `FormOptions`, and that
+limit never applies here, because System.Web parses the body itself and the host's
+form parser is never called.
+
+`CollectionKeyLimitOverKestrelTests` opts in at 1000 on its own fixture and
+covers the four places the check is written — query string, urlencoded form,
+multipart form fields, and posted files — plus the boundary, since the check runs
+before each add and the configured value is therefore the last accepted count.
+Two things a reader would not predict: the query-string cases need
+`maxQueryStringLength` raised or System.Web's length check refuses them first,
+and the urlencoded parser catches everything and rethrows one "not valid"
+`HttpException`, so only its inner exception says the limit was the reason.
+
 ## Explicitly out
 
-- `MaxHttpCollectionKeys` rejection.
 - Client certificates, which remain in
   [deferred request surfaces](deferred-request-surfaces.md).
