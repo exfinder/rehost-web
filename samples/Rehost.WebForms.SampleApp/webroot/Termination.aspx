@@ -20,8 +20,10 @@
 
             case "complete":
                 Note.Text = "CompleteRequest() was called in Page_Load: no unwind, this page "
-                    + "still rendered to the buffer, the remaining pipeline stages were skipped, "
-                    + "and EndRequest ran — check the footer trace.";
+                    + "still rendered to the buffer, and the remaining pipeline stages were "
+                    + "skipped. EndRequest still ran — after rendering, so it can never show in "
+                    + "the footer trace; see the <code>X-Sample-EndRequest</code> response "
+                    + "header in your browser's dev tools.";
                 Context.ApplicationInstance.CompleteRequest();
                 break;
         }
@@ -41,7 +43,10 @@
         <h2>Response.End</h2>
         <p>Writes a line, calls <code>End()</code>. Bytes before the call arrive, code after it
         never runs, and the page body you are reading now is never rendered — the response is
-        just that one line.</p>
+        just that one line. The <code>X-Sample-EndRequest</code> header is also missing:
+        <code>End</code> flushes eagerly and closes the headers before
+        <code>EndRequest</code>, a documented deviation from Framework's abort arm
+        (ledger P52).</p>
     </a>
     <a class="card" href="Termination.aspx?mode=redirect">
         <h2>Response.Redirect</h2>
