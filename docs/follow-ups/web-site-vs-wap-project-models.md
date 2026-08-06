@@ -58,7 +58,10 @@ them; a WAP host must not compile-exclude or source-publish them because
 MSBuild owns them; and a precompiled deployment
 ([precompiled-deployment](precompiled-deployment.md)) needs no payload at all.
 Design the consumer target once, after the model story settles, rather than
-accreting per-model patches.
+accreting per-model patches — and design it WAP-first: the migrated
+enterprise WAP is the consumer the packaged targets exist for, and the Web
+Site shape is the secondary case even though it is what the repo's own
+fixtures exercise.
 
 ## What assessing WAP needs
 

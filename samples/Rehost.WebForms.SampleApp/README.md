@@ -14,8 +14,16 @@ first argument to move the endpoint.
 The project lays out like a classic Web Site: pages, `App_Code`,
 `App_GlobalResources`, and `web.config` at the root, binaries under `bin/`.
 Pages compile from source at first request, so editing an `.aspx` needs only a
-restart, not a rebuild. It demonstrates the currently supported surface: `Site.master` chrome, `App_Code` (including a
-control-state control), `App_GlobalResources` with a culture satellite,
-postback/view state, a CodeBehind+designer (WAP-style) page, cookies, multipart upload with `SaveAs`, `Response.End`
-and friends, request validation, and static files through `StaticFileHandler`.
+restart, not a rebuild. The layout is a demo convenience — the primary
+compatibility target is the Web Application Project model that real
+enterprise applications use, which `WapDemo.aspx` demonstrates:
+`CodeBehind` + `Inherits` + designer partial compiled by MSBuild into the
+`bin` assembly (see
+[web-site-vs-wap-project-models](../../docs/follow-ups/web-site-vs-wap-project-models.md)).
+
+It demonstrates the currently supported surface: `Site.master` chrome,
+`App_Code` (including a control-state control), `App_GlobalResources` with a
+culture satellite, postback/view state, the WAP-style page above, cookies,
+multipart upload with `SaveAs`, `Response.End` and friends, request
+validation, and static files through `StaticFileHandler`.
 

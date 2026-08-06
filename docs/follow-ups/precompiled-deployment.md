@@ -59,7 +59,10 @@ that way.
    [web-site-vs-wap-project-models](web-site-vs-wap-project-models.md).
 2. Updatable precompilation (`-u`): Framework allowed aspx markup edits on a
    precompiled site. Supporting both layouts doubles the test surface; the
-   non-updatable one carries most of the value.
+   non-updatable one carries most of the value. Under the primary WAP model
+   the code is already MSBuild-compiled into `bin`, so precompilation's
+   remaining job there is markup — the WAP-shaped producer is the one to
+   design for.
 3. Whether a fully precompiled publish may omit Roslyn, and how the runtime
    reports an attempt to compile on such a deployment (fail fast with an
    actionable error, per the portability contract — not a silent fallback).
