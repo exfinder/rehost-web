@@ -1,42 +1,88 @@
 # Portable filesystem and configuration-path semantics
 
-Status: open. Priority: high. Depends on portable path mapping.
+Status: decided 2026-08-06; delivery in two stories below. Priority: high.
 
 ## Problem
 
-Framework helpers distinguish missing, file, directory, inaccessible, invalid,
-and indeterminate paths. `File.Exists`/`Directory.Exists` often collapse those
-states. Configuration caches historically normalize casing, which breaks Unix
-paths and may alias distinct files.
+Framework's filesystem helpers and path semantics assume Windows: NTFS case
+folding, `\` separators, Windows-only name rules, Win32 lookups, and the
+`Hidden` attribute. Off Windows those assumptions either break (`\` literals),
+silently diverge (case, hidden files), or cannot be answered at all
+(physical-vs-virtual path shape, ledger P54).
 
-## Current state
+## Decisions (2026-08-06)
 
-`FileEnumerator`/`FindFileData`/`FileAttributesData` are portable (ledger P23),
-built on `DirectoryInfo.EnumerateFileSystemInfos` and `FileSystemInfo`.
+Grilled and ratified; the audit behind them enumerated every live call site of
+`FileUtil`, `UrlPath`'s physical-path members, `FindFileData`,
+`FileAttributesData`, and `FileEnumerator`.
 
-`FileAttributes.Hidden` classifies Unix dot-files differently from Windows.
-That can exclude deployed content such as `.well-known` on Unix while including
-repository metadata on Windows. The divergence is unreachable in the
-precompiled-handler slice; dynamic compilation must choose an explicit,
-cross-platform content-selection policy.
+1. **Case-insensitive everywhere.** Framework's end-to-end case-insensitivity
+   is the contract on every platform: `/default.aspx` finds `Default.aspx` on
+   Linux too. Resolution canonicalizes at the virtual→physical seam to the
+   file's true casing, so downstream consumers (compilation caches, monitors)
+   see one canonical spelling and the imported ignore-case comparisons are
+   correct rather than aliasing. `Request.Path` keeps the casing the client
+   sent, as Framework did. Rationale: consumers rely on it, and the
+   pre-decision state (ignore-case bookkeeping over a case-sensitive
+   filesystem) was the worst combination.
+2. **Collisions: exact first, else error.** Two names differing only by case
+   in one directory (impossible on NTFS): an exact-case match is served
+   without complaint; a lookup that needs the ignore-case fallback and finds
+   more than one candidate fails with an error naming both files and the fix.
+   Never a silent pick.
+3. **Windows-strict name rules on every platform.** Trailing dot/space,
+   embedded `:`, and the long-path checks refuse exactly what Framework
+   refused, including on Linux where such names are legal. Same app, same
+   answer everywhere; the refused names are an explicit boundary.
+4. **Hidden means the Windows flag only.** A file is hidden iff the
+   filesystem's `Hidden` attribute says so, on both platforms. Dot-names are
+   ordinary files, as they were to Framework — `.well-known` serves and
+   enumerates. If Unix tool droppings (`.DS_Store`) ever measurably break
+   content enumeration, that gets its own evidence-backed story.
+5. **`FileUtil` completes in place.** Direct surgical edits for line-level
+   fixes, one conditional region where a whole method body changes, new
+   port-owned members for new machinery. No `.Portable.cs` swap file.
+6. **Physical-vs-virtual ambiguity: seam on demand.** No shared helper can
+   classify a rooted Unix path (P54). Callers that know which side they hold
+   get explicit known-physical entry points (the `TransmitFileTranslated`
+   pattern); each of the 21 live `IsAbsolutePhysicalPath` call sites migrates
+   when a story reaches it, with a test. The audit's caller list is the
+   checklist.
+7. **The dormant native call goes now.** The two-arg `FindFileData.FindFile`
+   still compiles a raw `FindFirstFile`, reachable only from the disabled
+   file-change-notification subsystem — a P51-class landmine, fixed in
+   Story 1.
+8. **Two stories.** Story 1: `FileUtil` completion (mechanical, below).
+   Story 2: case-insensitive resolution (new machinery, own design pass).
 
-## Required decisions
+## Story 1 — FileUtil completion
 
-- Required filesystem result model for mapping, compilation, and config lookup.
-- Error behavior for missing, inaccessible, malformed, and race-lost paths.
-- Enumeration ordering, links, and case comparison.
-- Whether hidden-file exclusion stays an OS attribute query or becomes an
-  explicit name list, per the divergence recorded above.
-- Configuration cache keys without corrupting physical casing.
+- `RemoveTrailingDirectoryBackSlash`: `'\\'` literal → separator-aware, with a
+  root guard that also holds for Unix roots (16 live callers).
+- `FixUpPhysicalDirectory`: `@"\"` append → separator-aware (5 live callers).
+- `TruncatePathIfNeeded`: randomized `string.GetHashCode` in a codegen path
+  name → stable hash (P38 class).
+- Two-arg `FindFileData.FindFile`: portable parent-directory walk (adapted
+  from the POC's design, `../Portable.System.Web`) replaces the live
+  `FindFirstFile`.
+
+## Story 2 — case-insensitive resolution
+
+Owns decisions 1–2 end to end: seam placement, the canonicalizing lookup, the
+collision error, request-level evidence over Kestrel (`/default.aspx` finds
+`Default.aspx`), and canonical casing flowing into compilation caches.
+
+## Still open (deliberately)
+
+- Enumeration ordering guarantees across filesystems.
 - Wildcard assembly loading behavior; never swallow unrelated load failures.
+- File-change notification is disabled by design; its native surface
+  (`DirMonOpen` etc.) is out of scope until an FCN story exists.
 
-## Verification
+## Evidence
 
-Focused tests cover each path state, file/directory confusion, case-distinct
-files, disappearing files, inaccessible paths where testable, and wildcard
-assembly failures.
-
-## Done when
-
-First-request filesystem decisions preserve observable distinctions needed by
-System.Web and produce actionable diagnostics.
+`FileEnumerator`/`FindFileData`/`FileAttributesData` attribute and
+enumeration arms are portable since ledger P23. Story 1 and Story 2 carry
+their own tests; the POC in the sibling `Portable.System.Web` repo is design
+evidence only, and kept the ignore-case and randomized-hash traps this plan
+removes.
