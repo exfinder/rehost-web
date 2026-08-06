@@ -22,6 +22,24 @@ Named boundary: a running step is never interrupted. The 500 arrives when the
 current step returns — late for a single slow call, never for a step that never
 returns. Async steps are not flagged; deferred with async pages.
 
+## Considered and rejected: `ControlledExecution.Run`
+
+`System.Runtime.ControlledExecution.Run` (.NET 7+) is the one sanctioned door
+into the runtime's retained abort machinery, and the only mechanism on the
+platform that can stop the CPU-bound step cooperative delivery never reaches.
+Measured on .NET 10: it injects a genuine `ThreadAbortException` into a
+spinning loop, and a swallowing catch is re-raised past, Framework-style.
+Rejected for enforcement anyway: it only aborts code inside its wrapper from
+an outside token, so every pipeline step would need its own wrapper; nothing
+can stop the unwind short of the wrapper (no `ResetAbort`, so no
+catch-and-continue at `ExecuteStep`); `ExceptionState` is hardcoded null, so
+the End/timeout discriminator needs a side channel regardless; and it carries
+`SYSLIB0046` — the runtime dropped Framework's constrained-region guarantees,
+so an abort may corrupt process state — which fails this project's
+determinism principle. It is also unsupported on Native AOT. If the
+never-returning step ever needs bounding, the connection abort below is the
+safe tool.
+
 ## Follow-up: connection abort at budget
 
 Owned here, not yet scheduled. Bounding the *client's* wait for a blocked step
