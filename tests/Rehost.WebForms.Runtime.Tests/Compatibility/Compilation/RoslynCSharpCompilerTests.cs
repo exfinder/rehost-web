@@ -260,6 +260,38 @@ public sealed class RoslynCSharpCompilerTests
     }
 
     [Fact]
+    public void The_Port_Is_The_Only_Supplier_Of_The_System_Web_Namespaces()
+    {
+        const string source =
+            """
+            public class Page
+            {
+                public string Encoded => System.Web.HttpUtility.HtmlEncode("a<b");
+            }
+            """;
+
+        // Without the port referenced, HttpUtility must be unresolved: CS1069 is the facades'
+        // dangling type-forward, proving the shared framework's System.Web.HttpUtility.dll is
+        // out of the set — with it referenced, this compiles.
+        using (var scope = new CompilationScope())
+        {
+            scope.AddSource(source);
+
+            scope.Compile().Errors.Cast<CompilerError>()
+                .ShouldContain(e => e.ErrorNumber == "CS1069");
+        }
+
+        // With the port referenced there is exactly one supplier; two would be CS0433.
+        using (var scope = new CompilationScope())
+        {
+            scope.AddSource(source);
+            scope.Parameters.ReferencedAssemblies.Add(typeof(System.Web.HttpContext).Assembly.Location);
+
+            scope.Compile().Errors.HasErrors.ShouldBeFalse();
+        }
+    }
+
+    [Fact]
     public void Reports_A_Referenced_Assembly_That_Does_Not_Exist()
     {
         using var scope = new CompilationScope();

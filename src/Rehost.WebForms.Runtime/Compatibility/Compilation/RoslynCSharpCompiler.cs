@@ -304,6 +304,16 @@ internal sealed class RoslynCSharpCompiler : ICodeCompiler
         var references = new List<MetadataReference>();
         foreach (var path in Directory.EnumerateFiles(directory, "*.dll"))
         {
+            // This port supplies the System.Web namespaces, so the shared framework's copies would
+            // give every compiled page two suppliers of HttpUtility (CS0433). The same two names
+            // are removed from the consuming host's compile by PreferRehostWebFormsRuntimeTypes in
+            // Rehost.WebForms.Runtime.targets.
+            var fileName = Path.GetFileName(path);
+            if (fileName is "System.Web.dll" or "System.Web.HttpUtility.dll")
+            {
+                continue;
+            }
+
             // An out-of-band package advances an assembly the shared framework also ships, and the
             // copy deployed with the application is the one that loads. Compiling against the
             // framework's older copy instead fails every page referencing it with CS1705.

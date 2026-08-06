@@ -70,7 +70,7 @@ namespace Sample
                 return "(no trace)";
             }
 
-            return System.Net.WebUtility.HtmlEncode(string.Join("  →  ", entries));
+            return HttpUtility.HtmlEncode(string.Join("  →  ", entries));
         }
     }
 }

@@ -19,9 +19,3 @@ control-state control), `App_GlobalResources` with a culture satellite,
 postback/view state, a CodeBehind+designer (WAP-style) page, cookies, multipart upload with `SaveAs`, `Response.End`
 and friends, request validation, and static files through `StaticFileHandler`.
 
-Known limitation worth knowing while editing pages: code compiled at runtime
-cannot name `HttpUtility` (`CS0433` against the shared framework's
-`System.Web.HttpUtility.dll`) — use `Server.HtmlEncode` or
-`System.Net.WebUtility` until the reference-set issue in
-[`runtime-codegen-and-loading`](../../docs/follow-ups/runtime-codegen-and-loading.md)
-is resolved.

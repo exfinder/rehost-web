@@ -26,6 +26,17 @@ public sealed class PageOverKestrelTests(PageLiveScenario scenario) : IClassFixt
     }
 
     [Fact]
+    public async Task A_Page_Naming_HttpUtility_Compiles_Against_The_Port_Alone()
+    {
+        // The shared framework's System.Web.HttpUtility.dll is excluded from the codegen
+        // reference set; if it returns, this page fails CS0433 rather than rendering.
+        var response = await scenario.Client.GetAsync("/Encode.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldContain("a&lt;b &amp; &quot;c&quot;");
+    }
+
+    [Fact]
     public async Task Serves_A_Static_File_Through_StaticFileHandler()
     {
         // A doubled application root survives GetFileInfo (request.PhysicalPath is correct) and
