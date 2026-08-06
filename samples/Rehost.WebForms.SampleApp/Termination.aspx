@@ -43,10 +43,10 @@
         <h2>Response.End</h2>
         <p>Writes a line, calls <code>End()</code>. Bytes before the call arrive, code after it
         never runs, and the page body you are reading now is never rendered — the response is
-        just that one line. The <code>X-Sample-EndRequest</code> header is also missing:
-        <code>End</code> flushes eagerly and closes the headers before
-        <code>EndRequest</code>, a documented deviation from Framework's abort arm
-        (ledger P52).</p>
+        just that one line. The <code>X-Sample-EndRequest</code> header still arrives:
+        headers stamped in <code>EndRequest</code> after <code>End</code> reach the wire,
+        as measured on Framework's abort arm (ledger P55). An application's own
+        <code>Flush()</code> is what seals them.</p>
     </a>
     <a class="card" href="Termination.aspx?mode=redirect">
         <h2>Response.Redirect</h2>
