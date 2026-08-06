@@ -16,7 +16,9 @@
     <_RoslynR2RSharedFxDir>$(NetCoreRoot)shared/Microsoft.NETCore.App/$(BundledNETCoreAppPackageVersion)/</_RoslynR2RSharedFxDir>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(RehostRoslynR2RProducer)' == 'true'">
+  <!-- PublishReadyToRun makes the SDK declare this same PackageDownload; a second copy is
+       NU1505. Either declaration puts the tool at the path the producer resolves. -->
+  <ItemGroup Condition="'$(RehostRoslynR2RProducer)' == 'true' and '$(PublishReadyToRun)' != 'true'">
     <PackageDownload
       Include="Microsoft.NETCore.App.Crossgen2.$(NETCoreSdkRuntimeIdentifier)"
       Version="[$(BundledNETCoreAppPackageVersion)]" />
