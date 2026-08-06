@@ -13,7 +13,7 @@ Directory.CreateDirectory(codegen);
 builder.AddRehostWebForms(options =>
 {
     options.ApplicationId = "sample";
-    options.PhysicalRootPath = Path.Combine(AppContext.BaseDirectory, "webroot");
+    options.PhysicalRootPath = FindApplicationRoot();
     options.VirtualRootPath = "/";
     options.CompilationTempDirectory = codegen;
     options.MachineConfigurationFilePath = Path.Combine(
@@ -27,3 +27,22 @@ app.UseRehostWebForms();
 
 Console.WriteLine($"Sample Web Forms application: {url}/Default.aspx");
 app.Run();
+
+// The application lays out like a classic Web Site — pages, App_Code, and web.config at the
+// root, binaries under bin/ — so the root is the nearest ancestor of the binary carrying the
+// web.config, and pages are compiled from source: an edit needs a restart, not a rebuild.
+static string FindApplicationRoot()
+{
+    for (var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        directory != null;
+        directory = directory.Parent)
+    {
+        if (File.Exists(Path.Combine(directory.FullName, "web.config")))
+        {
+            return directory.FullName;
+        }
+    }
+
+    throw new InvalidOperationException(
+        "No web.config found between " + AppContext.BaseDirectory + " and the filesystem root.");
+}
