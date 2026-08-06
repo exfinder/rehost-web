@@ -54,7 +54,9 @@ that way.
 
 1. Producer packaging: dotnet tool, MSBuild target in the consumer's publish,
    or both. Deployment is part of architecture; this needs the same
-   determinism treatment as the R2R targets.
+   determinism treatment as the R2R targets, and should be designed together
+   with the consumer-facing publish story in
+   [web-site-vs-wap-project-models](web-site-vs-wap-project-models.md).
 2. Updatable precompilation (`-u`): Framework allowed aspx markup edits on a
    precompiled site. Supporting both layouts doubles the test surface; the
    non-updatable one carries most of the value.

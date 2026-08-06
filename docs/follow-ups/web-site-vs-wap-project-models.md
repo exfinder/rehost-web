@@ -38,6 +38,28 @@ SDK-compiling them duplicates types, but under WAP they are exactly what MSBuild
 must compile. The exclusion decision is model-dependent and waits on this
 story.
 
+## Consumer-facing targets
+
+The packaged `Rehost.WebForms.Runtime.targets` is the consumer's build
+contract today. It owns the `App_*` compile/resource exclusions above, the
+`System.Web` shim-reference removal, and the BinaryFormatter runtimeconfig
+switch. It owns nothing about **publish**, and the gap is subtle: the removes
+leave `App_Code` and `App_GlobalResources` in *no* item group at all — the
+default `Compile`/`EmbeddedResource` globs claimed them before the removes ran
+— so no SDK glob ever publishes them, and `.aspx`/`.master`/`Global.asax`
+publish only if the consumer declares them. The sample application carries the
+per-project fix (explicit `None` items with `CopyToPublishDirectory`); a
+robust packaged opt-in — a `RehostWebFormsPublishWebSitePayload`-style target
+— would generalize exactly that.
+
+Both the exclusion set and the publish set are blocked on the model decision:
+a Web Site host must publish `.aspx.cs` sources because the runtime compiles
+them; a WAP host must not compile-exclude or source-publish them because
+MSBuild owns them; and a precompiled deployment
+([precompiled-deployment](precompiled-deployment.md)) needs no payload at all.
+Design the consumer target once, after the model story settles, rather than
+accreting per-model patches.
+
 ## What assessing WAP needs
 
 - A fixture with `CodeBehind`/`Inherits` pages whose code-behind and designer
