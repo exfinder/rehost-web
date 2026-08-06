@@ -301,7 +301,7 @@ public sealed class RoslynCSharpCompilerTests
         string[] excluded = ["System.Web.dll", "System.Web.HttpUtility.dll"];
 
         var portTypes = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var assembly in Directory.GetFiles(AppContext.BaseDirectory, "Rehost.WebForms.*.dll"))
+        foreach (var assembly in Directory.GetFiles(AppContext.BaseDirectory, "Rehost.*.dll"))
         {
             portTypes.UnionWith(PublicTypeNames(assembly));
         }
