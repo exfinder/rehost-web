@@ -1,0 +1,123 @@
+<Project>
+  <!--
+    ReadyToRun images for the two Roslyn assemblies, so processes that compile pages do not
+    pay ~450 ms of compiler JIT per process (docs/follow-ups/roslyn-compile-cold-start.md).
+
+    Roles: Rehost.WebForms.Runtime sets RehostRoslynR2RProducer and crossgens the images
+    into artifacts/ exactly once per Roslyn version + RID; every other importer is a
+    consumer whose copy-local Roslyn entries are replaced by the images, so the output
+    directory is correct by construction and an incremental build never reverts it to IL.
+    Producing in one project only keeps parallel solution builds off a shared write.
+  -->
+
+  <PropertyGroup>
+    <_RoslynR2RExeSuffix Condition="$([MSBuild]::IsOSPlatform('Windows'))">.exe</_RoslynR2RExeSuffix>
+    <_RoslynR2RCrossgenDir>$(NuGetPackageRoot)microsoft.netcore.app.crossgen2.$(NETCoreSdkRuntimeIdentifier)/$(BundledNETCoreAppPackageVersion)/tools/</_RoslynR2RCrossgenDir>
+    <_RoslynR2RSharedFxDir>$(NetCoreRoot)shared/Microsoft.NETCore.App/$(BundledNETCoreAppPackageVersion)/</_RoslynR2RSharedFxDir>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(RehostRoslynR2RProducer)' == 'true'">
+    <PackageDownload
+      Include="Microsoft.NETCore.App.Crossgen2.$(NETCoreSdkRuntimeIdentifier)"
+      Version="[$(BundledNETCoreAppPackageVersion)]" />
+  </ItemGroup>
+
+  <Target Name="RehostRoslynR2RCompute" DependsOnTargets="ResolvePackageAssets">
+    <PropertyGroup>
+      <_RoslynR2RVersion Condition="'%(PackageVersion.Identity)' == 'Microsoft.CodeAnalysis.CSharp'">%(PackageVersion.Version)</_RoslynR2RVersion>
+    </PropertyGroup>
+
+    <Error
+      Condition="'$(_RoslynR2RVersion)' == ''"
+      Text="Microsoft.CodeAnalysis.CSharp not found in Directory.Packages.props." />
+
+    <PropertyGroup>
+      <!-- The runtime version is part of the key: images outlive SDK updates otherwise,
+           and a major-version-mismatched image is silently rejected back to JIT. -->
+      <_RoslynR2RImageDir>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)..', 'artifacts', 'roslyn-r2r', '$(_RoslynR2RVersion)-net$(BundledNETCoreAppPackageVersion)', '$(NETCoreSdkRuntimeIdentifier)'))</_RoslynR2RImageDir>
+    </PropertyGroup>
+
+    <!-- RuntimeCopyLocalItems is the single source both the build copy and publish draw
+         their package assets from; ReferenceCopyLocalPaths is a downstream composition. -->
+    <ItemGroup>
+      <_RoslynR2RInput
+        Include="@(RuntimeCopyLocalItems)"
+        Condition="'%(Extension)' == '.dll' and ('%(FileName)' == 'Microsoft.CodeAnalysis' or '%(FileName)' == 'Microsoft.CodeAnalysis.CSharp')" />
+      <_RoslynR2RImage Include="@(_RoslynR2RInput->'$(_RoslynR2RImageDir)%(FileName).dll')" />
+    </ItemGroup>
+
+    <Error
+      Condition="'@(_RoslynR2RInput)' == ''"
+      Text="Roslyn assemblies not found among this project's copy-local package assets." />
+
+    <!-- A property, not an inline transform: the Exec below batches per input, and a
+         transform there would be scoped to the batch, dropping the sibling -r and making
+         crossgen2 silently skip every method that touches it. -->
+    <PropertyGroup>
+      <_RoslynR2RRefArgs>@(_RoslynR2RInput->'-r &quot;%(Identity)&quot;', ' ')</_RoslynR2RRefArgs>
+    </PropertyGroup>
+  </Target>
+
+  <Target
+    Name="RehostRoslynR2RProduce"
+    Condition="'$(RehostRoslynR2RProducer)' == 'true'"
+    DependsOnTargets="RehostRoslynR2RCompute"
+    AfterTargets="Build"
+    Inputs="@(_RoslynR2RInput)"
+    Outputs="@(_RoslynR2RImage)">
+
+    <Error
+      Condition="!Exists('$(_RoslynR2RCrossgenDir)crossgen2$(_RoslynR2RExeSuffix)')"
+      Text="crossgen2 not restored at $(_RoslynR2RCrossgenDir). Run dotnet restore." />
+    <Error
+      Condition="!Exists('$(_RoslynR2RSharedFxDir)')"
+      Text="Shared framework not found at $(_RoslynR2RSharedFxDir)." />
+
+    <MakeDir Directories="$(_RoslynR2RImageDir)" />
+
+    <!-- Emit to a temp name, then move: a killed build must not leave a partial image
+         whose timestamp satisfies the up-to-date check. -->
+    <!-- Without -O crossgen2 emits minopt code and most of the JIT cost survives:
+         probe JIT 269 ms / 4654 methods against 67 ms / 1736 with it. -->
+    <Exec Command="&quot;$(_RoslynR2RCrossgenDir)crossgen2$(_RoslynR2RExeSuffix)&quot; -O -r &quot;$(_RoslynR2RSharedFxDir)*.dll&quot; $(_RoslynR2RRefArgs) --out &quot;$(_RoslynR2RImageDir)%(_RoslynR2RInput.FileName).dll.tmp&quot; &quot;%(_RoslynR2RInput.Identity)&quot;" />
+
+    <Move
+      SourceFiles="@(_RoslynR2RImage->'%(Identity).tmp')"
+      DestinationFiles="@(_RoslynR2RImage)"
+      OverwriteReadOnlyFiles="true" />
+
+    <Message Importance="high" Text="Roslyn R2R images written to $(_RoslynR2RImageDir)" />
+  </Target>
+
+  <!-- Substituting RuntimeCopyLocalItems itself, before ResolveLockFileCopyLocalFiles
+       composes ReferenceCopyLocalPaths, keeps build copy, publish, and deps.json on one
+       file set; a late ReferenceCopyLocalPaths swap left publish seeing both copies
+       (NETSDK1152). The transform preserves DestinationSubPath and asset metadata. -->
+  <Target
+    Name="RehostRoslynR2RSubstitute"
+    Condition="'$(RehostRoslynR2RProducer)' != 'true'"
+    DependsOnTargets="RehostRoslynR2RCompute"
+    AfterTargets="ResolvePackageAssets"
+    BeforeTargets="ResolveLockFileCopyLocalFiles">
+
+    <ItemGroup>
+      <RuntimeCopyLocalItems Remove="@(_RoslynR2RInput)" />
+      <RuntimeCopyLocalItems Include="@(_RoslynR2RInput->'$(_RoslynR2RImageDir)%(FileName).dll')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Existence is checked here rather than in the substitution: ResolvePackageAssets runs
+       before project references are built, so on a fresh clone the images do not exist yet
+       at substitution time. By copy time the referenced Rehost.WebForms.Runtime build —
+       including RehostRoslynR2RProduce — has completed. -->
+  <Target
+    Name="RehostRoslynR2RVerify"
+    Condition="'$(RehostRoslynR2RProducer)' != 'true'"
+    DependsOnTargets="RehostRoslynR2RCompute"
+    BeforeTargets="_CopyFilesMarkedCopyLocal">
+
+    <Error
+      Condition="'@(_RoslynR2RInput)' != '' and !Exists('%(_RoslynR2RImage.Identity)')"
+      Text="Missing Roslyn R2R image %(_RoslynR2RImage.Identity). Build src/Rehost.WebForms.Runtime first." />
+  </Target>
+</Project>

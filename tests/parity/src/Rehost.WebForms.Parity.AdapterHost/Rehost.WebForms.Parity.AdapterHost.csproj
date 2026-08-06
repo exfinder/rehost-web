@@ -64,4 +64,5 @@
   </Target>
 
   <Import Project="../../../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+  <Import Project="../../../../eng/RoslynReadyToRun.targets" />
 </Project>

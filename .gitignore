@@ -2,6 +2,7 @@
 **/obj/
 artifacts/build/**/*.binlog
 artifacts/build/**/*.log
+artifacts/roslyn-r2r/
 
 .DS_Store
 

@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+  <Import Project="../../eng/RoslynReadyToRun.targets" />
   <ItemGroup>
     <!-- Built, not referenced: scenarios run in their own process. -->
     <ProjectReference
