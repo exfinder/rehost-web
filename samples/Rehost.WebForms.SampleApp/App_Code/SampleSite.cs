@@ -36,6 +36,8 @@ namespace Sample
                 "Request validation refusing dangerous input before the page runs."),
             new FeaturePage("Resources", "~/Resources.aspx",
                 "App_GlobalResources through the generated class, with a culture switch."),
+            new FeaturePage("WAP", "~/WapDemo.aspx",
+                "CodeBehind + designer page, compiled ahead of time into the bin assembly."),
         };
     }
 

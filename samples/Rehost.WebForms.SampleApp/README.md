@@ -16,7 +16,7 @@ The project lays out like a classic Web Site: pages, `App_Code`,
 Pages compile from source at first request, so editing an `.aspx` needs only a
 restart, not a rebuild. It demonstrates the currently supported surface: `Site.master` chrome, `App_Code` (including a
 control-state control), `App_GlobalResources` with a culture satellite,
-postback/view state, cookies, multipart upload with `SaveAs`, `Response.End`
+postback/view state, a CodeBehind+designer (WAP-style) page, cookies, multipart upload with `SaveAs`, `Response.End`
 and friends, request validation, and static files through `StaticFileHandler`.
 
 Known limitation worth knowing while editing pages: code compiled at runtime

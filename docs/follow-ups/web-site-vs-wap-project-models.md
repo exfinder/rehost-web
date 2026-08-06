@@ -22,7 +22,12 @@ ownership:
 
 Every exercised slice is the Web Site path: `CodeFile` code-behind, inline
 `Global.asax`, `App_Code`, runtime-compiled `App_GlobalResources`. The
-compatibility map's `CodeFile` row is tested; nothing exercises `CodeBehind`.
+compatibility map's `CodeFile` row is tested; nothing *tests* `CodeBehind`,
+but the sample application's `WapDemo.aspx` exercises it manually and it
+works end to end: `CodeBehind` + `Inherits` + designer partial compiled by
+the SDK into the host assembly in `bin`, base type resolved from `bin`,
+designer fields wired, postback event routed — under a master page. The
+model is unassessed, not unsupported; the fixture below is what promotes it.
 
 `Rehost.WebForms.Runtime.targets` already excludes the `App_*` folders from a
 consuming host's SDK compile (opt-out
