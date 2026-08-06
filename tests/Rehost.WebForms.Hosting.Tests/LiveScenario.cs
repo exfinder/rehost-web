@@ -15,8 +15,16 @@ public class LiveScenario : IDisposable
     private readonly string _tracePath;
 
     internal LiveScenario(ScenarioFixture fixture, params string[] extraHostArgs)
+        : this(fixture, null, extraHostArgs)
     {
-        _root = Directory.CreateTempSubdirectory("rehost-live-kestrel-");
+    }
+
+    internal LiveScenario(ScenarioFixture fixture, string? rootPath, string[] extraHostArgs)
+    {
+        _root = rootPath == null
+            ? Directory.CreateTempSubdirectory("rehost-live-kestrel-")
+            : Directory.CreateDirectory(
+                Path.Combine(rootPath, "live-" + Guid.NewGuid().ToString("N")));
         ApplicationPath = Path.Combine(_root.FullName, "app");
         _tracePath = Path.Combine(_root.FullName, "trace.txt");
         var temp = Path.Combine(_root.FullName, "temp");

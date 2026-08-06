@@ -1,6 +1,7 @@
 # Portable filesystem and configuration-path semantics
 
-Status: decided 2026-08-06; delivery in two stories below. Priority: high.
+Status: decided 2026-08-06; Story 1 delivered (ledger P56) and Story 2
+delivered (ledger P57) the same day. Open remainder listed at the end.
 
 ## Problem
 
@@ -68,9 +69,15 @@ Grilled and ratified; the audit behind them enumerated every live call site of
 
 ## Story 2 — case-insensitive resolution
 
-Owns decisions 1–2 end to end: seam placement, the canonicalizing lookup, the
-collision error, request-level evidence over Kestrel (`/default.aspx` finds
-`Default.aspx`), and canonical casing flowing into compilation caches.
+Delivered (ledger P57): `CanonicalCasePath.Resolve` at the exit of
+`HostingEnvironment.MapPathActual`, the choke point every mapping funnels
+through; miss-only activation, exact-first, collision 500, unchanged 404.
+Evidence runs on a real case-sensitive filesystem everywhere: the routine
+macOS suite mounts a disposable case-sensitive APFS volume
+(`CaseSensitiveDirectory`, twinned in the two test projects), Linux uses its
+temp directly via `eng/linux-round.sh`, NTFS skips. A warm build cache serves
+every casing once one compiled — Framework's own behavior — so the
+end-to-end test compiles a page no other request has touched.
 
 ## Still open (deliberately)
 

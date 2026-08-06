@@ -1138,6 +1138,15 @@ namespace System.Web.Hosting {
                 Debug.Trace("MapPath", "    result=" + result);
             }
 
+#if !NETFRAMEWORK
+            // A case-sensitive filesystem cannot fold /default.aspx onto Default.aspx the way
+            // NTFS did for Framework; resolve a missing path to its real casing before any
+            // consumer probes it (filesystem-semantics decisions, ledger P57).
+            if (result != null) {
+                result = System.Web.Util.CanonicalCasePath.Resolve(result, _appPhysicalPath);
+            }
+#endif
+
             return result;
         }
 
