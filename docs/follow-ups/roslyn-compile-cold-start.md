@@ -76,6 +76,14 @@ builds for no additional benefit. Since process replacement is the restart
 model, every process start pays the ~450 ms compiler JIT without it — a
 deployment recommendation worth surfacing in consumer-facing docs.
 
+Measured on the sample application's first `Default.aspx` request: 1.3 s from
+a Debug bin, ~1.0 s with only Roslyn prejitted, and from a Release
+`PublishReadyToRun` publish ~600 ms against an empty codegen root (which
+batch-compiles the whole directory, as Framework's `batch="true"` did) and
+~150 ms against a warm one. The Debug-to-Release change contributes some of
+the drop, but the bulk of the post-Roslyn ~1.0 s was JIT of the runtime and
+hosting stack.
+
 ## Not pursued
 
 - A warm codegen root for the four eligible Kestrel fixtures (stable
