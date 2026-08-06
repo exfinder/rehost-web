@@ -291,6 +291,60 @@ public sealed class RoslynCSharpCompilerTests
         }
     }
 
+    // Guards sufficiency of the exclusion list in LoadSharedFrameworkReferences: a shared
+    // framework update that adds a type the port also defines, or a port type whose name lands
+    // in a shared assembly, reintroduces CS0433 for every page naming it. Measured on net10,
+    // System.Web.HttpUtility.dll is the only definer (System.Web.dll only forwards to it).
+    [Fact]
+    public void No_Unexcluded_Shared_Framework_Assembly_Defines_A_Type_The_Port_Defines()
+    {
+        string[] excluded = ["System.Web.dll", "System.Web.HttpUtility.dll"];
+
+        var portTypes = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var assembly in Directory.GetFiles(AppContext.BaseDirectory, "Rehost.WebForms.*.dll"))
+        {
+            portTypes.UnionWith(PublicTypeNames(assembly));
+        }
+        portTypes.ShouldNotBeEmpty();
+
+        var sharedFramework = Path.GetDirectoryName(typeof(object).Assembly.Location)!;
+        var collisions = Directory.GetFiles(sharedFramework, "*.dll")
+            .Where(path => !excluded.Contains(Path.GetFileName(path)))
+            .SelectMany(path => PublicTypeNames(path)
+                .Where(portTypes.Contains)
+                .Select(type => Path.GetFileName(path) + ": " + type))
+            .ToList();
+
+        collisions.ShouldBeEmpty();
+    }
+
+    private static IEnumerable<string> PublicTypeNames(string assemblyPath)
+    {
+        using var stream = File.OpenRead(assemblyPath);
+        using var peReader = new System.Reflection.PortableExecutable.PEReader(stream);
+        if (!peReader.HasMetadata)
+        {
+            yield break;
+        }
+
+        var metadata = System.Reflection.Metadata.PEReaderExtensions.GetMetadataReader(peReader);
+        foreach (var handle in metadata.TypeDefinitions)
+        {
+            var type = metadata.GetTypeDefinition(handle);
+            if ((type.Attributes & System.Reflection.TypeAttributes.VisibilityMask)
+                != System.Reflection.TypeAttributes.Public)
+            {
+                continue;
+            }
+
+            var typeNamespace = metadata.GetString(type.Namespace);
+            if (typeNamespace.Length > 0)
+            {
+                yield return typeNamespace + "." + metadata.GetString(type.Name);
+            }
+        }
+    }
+
     [Fact]
     public void Reports_A_Referenced_Assembly_That_Does_Not_Exist()
     {
