@@ -138,8 +138,12 @@ internal class FileUtil {
         if (path == null)
             return null;
 
+        // The length guard keeps the root intact: > 3 spares "c:\"; on Unix,
+        // where the root is "/", > 1 is the equivalent (a "/a/"-shaped path
+        // must still strip).
+        int minLength = Path.DirectorySeparatorChar == '/' ? 1 : 3;
         int length = path.Length;
-        if (length > 3 && path[length - 1] == '\\')
+        if (length > minLength && path[length - 1] == Path.DirectorySeparatorChar)
             path = path.Substring(0, length - 1);
 
         return path;
@@ -153,8 +157,10 @@ internal class FileUtil {
         if (path.Length > maxPathLength) {
             // 
 
-            path = path.Substring(0, maxPathLength - 13) +
-                path.GetHashCode().ToString(CultureInfo.InvariantCulture);
+            // Stable hash: the truncated name reaches codegen output shared across
+        // processes, and string.GetHashCode is randomized per process (P38).
+        path = path.Substring(0, maxPathLength - 13) +
+                StringUtil.GetNonRandomizedHashCode(path).ToString(CultureInfo.InvariantCulture);
         }
 
         return path;
@@ -169,9 +175,9 @@ internal class FileUtil {
 
         dir = Path.GetFullPath(dir);
 
-        // Append '\' to the directory if necessary.
-        if (!StringUtil.StringEndsWith(dir, @"\"))
-            dir = dir + @"\";
+        // Append the directory separator if necessary.
+        if (!StringUtil.StringEndsWith(dir, Path.DirectorySeparatorChar))
+            dir = dir + Path.DirectorySeparatorChar;
 
         return dir;
     }
@@ -558,7 +564,35 @@ sealed class FindFileData {
         if (hr != HResults.S_OK || String.IsNullOrEmpty(rootDirectoryPath)) {
             return hr;
         }
-        
+
+#if !NETFRAMEWORK
+        // Managed walk in place of the per-parent FindFirstFile. There are no 8.3
+        // alternate names outside Windows, so the long and short relative forms are
+        // the same; the per-parent existence check is kept so a vanished parent
+        // still reports instead of naming a directory that is gone.
+        rootDirectoryPath = FileUtil.RemoveTrailingDirectoryBackSlash(rootDirectoryPath);
+
+        string relativePath = String.Empty;
+        string parentDir = Path.GetDirectoryName(fullPath);
+        while (parentDir != null
+               && parentDir.Length > rootDirectoryPath.Length + 1
+               && parentDir.IndexOf(rootDirectoryPath, StringComparison.OrdinalIgnoreCase) == 0) {
+
+            DirectoryInfo parentInfo = new DirectoryInfo(parentDir);
+            if (!parentInfo.Exists) {
+                return HResults.E_PATHNOTFOUND;
+            }
+
+            relativePath = parentInfo.Name + Path.DirectorySeparatorChar + relativePath;
+            parentDir = Path.GetDirectoryName(parentDir);
+        }
+
+        if (!String.IsNullOrEmpty(relativePath)) {
+            data.PrependRelativePath(relativePath, relativePath);
+        }
+
+        return hr;
+#else
 #if DBG
         // The trailing slash should have been removed already, unless the root is "c:\"
         Debug.Assert(rootDirectoryPath.Length < 4 || rootDirectoryPath[rootDirectoryPath.Length-1] != '\\', "Trailing slash unexpected: " + rootDirectoryPath);
@@ -614,8 +648,9 @@ sealed class FindFileData {
         string fileNameShort = data.FileNameShort == null ? "<null>" : data.FileNameShort;
         Debug.Trace("FindFile", "FileNameLong=" + data.FileNameLong + ", FileNameShrot=" + fileNameShort);
 #endif
-        
+
         return hr;
+#endif
     }
 
     internal FindFileData(ref UnsafeNativeMethods.WIN32_FIND_DATA wfd) {
