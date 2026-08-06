@@ -58,6 +58,8 @@ the test-authoring rules: [`docs/writing-tests.md`](docs/writing-tests.md).
 
 - **Durable architectural records** — preserve contracts, motivations, compatibility limits, and follow-up work in repository documentation.
 
+- **Hotfixes stay minimal** — an unblocking fix ships the smallest change that unblocks; introducing a new seam or splitting an imported public method is an architectural decision to surface for approval before landing, not to document afterwards.
+
 ## Build diagnostics
 
 Build the runtime project:
