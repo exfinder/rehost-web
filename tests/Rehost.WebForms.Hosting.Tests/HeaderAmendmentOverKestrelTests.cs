@@ -57,6 +57,58 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
         stages.ShouldContain("stamp:append-ok|cookie-ok");
     }
 
+    private static (string Headers, string Body) SplitRaw(byte[] raw)
+    {
+        var text = System.Text.Encoding.Latin1.GetString(raw);
+        var boundary = text.IndexOf("\r\n\r\n", StringComparison.Ordinal);
+        return (text[..boundary], text[(boundary + 4)..]);
+    }
+
+    [Fact]
+    public async Task An_Ended_Response_States_Its_Exact_Content_Length()
+    {
+        var raw = await RawSocketProbe.GetRawResponseAsync(
+            scenario.Address, "/Amend.aspx?mode=end&stamp=1&wt=a5");
+        var (headers, body) = SplitRaw(raw);
+
+        headers.ShouldStartWith("HTTP/1.1 200");
+        body.ShouldBe("amend-start|");
+        headers.ShouldContain("Content-Length: 12");
+        headers.ShouldNotContain("Transfer-Encoding");
+        headers.ShouldContain("X-After-End: stamped");
+    }
+
+    [Fact]
+    public async Task A_Terminating_Redirect_States_Its_Exact_Content_Length()
+    {
+        var raw = await RawSocketProbe.GetRawResponseAsync(
+            scenario.Address, "/Amend.aspx?mode=redirect&stamp=1&wt=a6");
+        var (headers, body) = SplitRaw(raw);
+
+        headers.ShouldStartWith("HTTP/1.1 302");
+        headers.ShouldContain("Content-Length: " + body.Length);
+        headers.ShouldNotContain("Transfer-Encoding");
+        headers.ShouldContain("X-After-End: stamped");
+    }
+
+    // Reading W5: an explicit Flush in EndRequest after End writes the headers immediately with
+    // the amendments so far, forfeits the length, and seals against later appends.
+    [Fact]
+    public async Task A_Flush_After_End_In_EndRequest_Seals_And_Forfeits_The_Length()
+    {
+        var raw = await RawSocketProbe.GetRawResponseAsync(
+            scenario.Address, "/Amend.aspx?mode=end&stamp=1&fae=1&wt=a7");
+        var (headers, body) = SplitRaw(raw);
+        var stages = await StagesAsync("a7");
+
+        headers.ShouldStartWith("HTTP/1.1 200");
+        body.ShouldContain("amend-start|");
+        headers.ShouldNotContain("Content-Length");
+        headers.ShouldContain("X-After-End: stamped");
+        headers.ShouldNotContain("X-Late-2");
+        stages.ShouldContain("fae:flush-ok|late2-threw:HttpException");
+    }
+
     [Fact]
     public async Task An_Application_Flush_Still_Seals_The_Headers()
     {

@@ -3,9 +3,10 @@
 Status: done 2026-08-06 — reopened (ledger P55, `HeaderAmendmentOverKestrelTests`).
 `End`'s internal flush defers header generation to the final flush, so headers
 and cookies stamped in `EndRequest` ship as Framework's abort arm delivered
-(readings R19–R24); an application's own `Flush()` still seals. Accepted
-residue: the ended response leaves chunked rather than with Framework's exact
-`Content-Length`. Story:
+(readings R19–R24); an application's own `Flush()` still seals. The ended
+response states Framework's exact `Content-Length` and a `Flush` after `End`
+seals immediately (wire readings W2/W5, taken on real IIS through the
+[wire rig](../windows-validation-host.md#framework-wire-readings)). Story:
 [Response.End and request termination](response-end-and-termination-plan.md).
 
 ## The gap

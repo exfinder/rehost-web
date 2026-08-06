@@ -49,6 +49,8 @@ namespace System.Web {
 
         private bool _headersWritten;
         private bool _endHeadersDeferred;   // Response.End defers header generation to the final flush (ledger P55)
+        private bool _endInternalFlush;     // only End's own flush defers; an application Flush after End seals (reading W5)
+        private long _endDeferredBodyLength; // bytes End's flush sent while headers were deferred; the final flush reports them as Content-Length (reading W2)
         private bool _completed;    // after final flush
         private bool _ended;        // after response.end or execute url
         private bool _endRequiresObservation; // whether there was a pending call to Response.End that requires observation
@@ -599,8 +601,10 @@ namespace System.Web {
                 // Headers
                 //
 
-                if (_endHeadersDeferred && !finalFlush) {
-                    // deferred by End; the final flush generates them with any late amendments
+                if (_endHeadersDeferred && !finalFlush && _endInternalFlush) {
+                    // deferred by End; the final flush generates them with any late amendments.
+                    // An application Flush after End is not deferred: it writes headers now and
+                    // seals, as Framework's did (reading W5).
                     bufferedLength = _httpWriter.GetBufferedLength();
                 }
                 else if (!_headersWritten) {
@@ -610,9 +614,9 @@ namespace System.Web {
                         if (finalFlush) {
                             bufferedLength = _httpWriter.GetBufferedLength();
 
-                            // suppress content-type for empty responses
-                            // (not after a deferred End: the body already left for the spool)
-                            if (!_contentLengthSet && bufferedLength == 0 && _httpWriter != null && !_endHeadersDeferred)
+                            // suppress content-type for empty responses; bytes a deferred End
+                            // already sent count as body (readings W2, R20)
+                            if (!_contentLengthSet && bufferedLength + _endDeferredBodyLength == 0 && _httpWriter != null)
                                 _contentType = null;
 
                             SuppressCachingCookiesIfNecessary();
@@ -625,12 +629,16 @@ namespace System.Web {
 
                             // Calculate content-length if not set explicitely
                             // WOS #1380818: Content-Length should not be set for response with 304 status (HTTP.SYS doesn't, and HTTP 1.1 spec implies it)
-                            if (!_contentLengthSet && _statusCode != 304 && !_endHeadersDeferred)
-                                _wr.SendCalculatedContentLength(bufferedLength);
+                            // After a deferred End the length is what End's flush sent: _ended
+                            // clears anything buffered since before it can leave (reading W2).
+                            if (!_contentLengthSet && _statusCode != 304)
+                                _wr.SendCalculatedContentLength(_endHeadersDeferred ? _endDeferredBodyLength : bufferedLength);
                         }
                         else {
                             // Check if need chunking for HTTP/1.1
-                            if (!_contentLengthSet && !_transferEncodingSet && _statusCode == 200) {
+                            // (not after a deferred End: the body already left for the spool
+                            // unframed, so framing belongs to the host at commit)
+                            if (!_contentLengthSet && !_transferEncodingSet && _statusCode == 200 && !_endHeadersDeferred) {
                                 String protocol = _wr.GetHttpVersion();
 
                                 if (protocol != null && protocol.Equals("HTTP/1.1")) {
@@ -674,6 +682,9 @@ namespace System.Web {
                 }
 
                 if (!_clientDisconnected) {
+                    if (_endInternalFlush)
+                        _endDeferredBodyLength += bufferedLength;
+
                     // Fire pre-send request event
                     if (_context != null && _context.ApplicationInstance != null)
                         _context.ApplicationInstance.RaiseOnPreSendRequestContent();
@@ -3098,18 +3109,24 @@ namespace System.Web {
         ///       socket connection.</para>
         /// </devdoc>
         public void End() {
-            // Nothing reaches the wire before the single commit on this host, so End's
-            // internal flush leaves the headers open for EndRequest to amend, as they
-            // were under Framework's abort arm (readings R19-R24, ledger P55).
-            _endHeadersDeferred = true;
-
             if (_context.IsInCancellablePeriod) {
                 // No thread abort on this runtime: first complete the response exactly as
                 // the non-cancellable arm does, so a catch that swallows the unwind can
                 // neither emit further output (_ended) nor resume the pipeline
                 // (CompleteRequest); then unwind.
                 if (!_flushing) {
-                    Flush();
+                    // Nothing reaches the wire before the single commit on this host, so
+                    // End's internal flush sends body bytes only and leaves the headers
+                    // open for EndRequest to amend, as they were under Framework's abort
+                    // arm (readings R19-R24, W2, ledger P55).
+                    _endHeadersDeferred = true;
+                    _endInternalFlush = true;
+                    try {
+                        Flush();
+                    }
+                    finally {
+                        _endInternalFlush = false;
+                    }
                     _ended = true;
 
                     if (_context.ApplicationInstance != null) {
@@ -3124,7 +3141,14 @@ namespace System.Web {
                 _endRequiresObservation = true;
 
                 if (!_flushing) { // ignore Reponse.End while flushing (in OnPreSendHeaders)
-                    Flush();
+                    _endHeadersDeferred = true;
+                    _endInternalFlush = true;
+                    try {
+                        Flush();
+                    }
+                    finally {
+                        _endInternalFlush = false;
+                    }
                     _ended = true;
 
                     if (_context.ApplicationInstance != null) {

@@ -75,6 +75,29 @@
             }
             Stage(Request, "stamp:" + note);
         }
+        if (Request.QueryString["fae"] != null)
+        {
+            string note;
+            try
+            {
+                Response.Flush();
+                note = "flush-ok";
+            }
+            catch (Exception flushError)
+            {
+                note = "flush-threw:" + flushError.GetType().Name;
+            }
+            try
+            {
+                Response.AppendHeader("X-Late-2", "yes");
+                note += "|late2-ok";
+            }
+            catch (Exception lateError)
+            {
+                note += "|late2-threw:" + lateError.GetType().Name;
+            }
+            Stage(Request, "fae:" + note);
+        }
     }
 
     void Application_Error(object sender, EventArgs e)
