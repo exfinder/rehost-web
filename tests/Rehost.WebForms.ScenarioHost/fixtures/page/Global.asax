@@ -52,6 +52,29 @@
     {
         Stage(Request, "EndRequest");
         Stage(Request, Server.GetLastError() == null ? "LastError-null" : "LastError-set");
+        if (Request.QueryString["stamp"] != null)
+        {
+            string note;
+            try
+            {
+                Response.AppendHeader("X-After-End", "stamped");
+                note = "append-ok";
+            }
+            catch (Exception headerError)
+            {
+                note = "append-threw:" + headerError.GetType().Name;
+            }
+            try
+            {
+                Response.Cookies.Add(new HttpCookie("late", "yes"));
+                note += "|cookie-ok";
+            }
+            catch (Exception cookieError)
+            {
+                note += "|cookie-threw:" + cookieError.GetType().Name;
+            }
+            Stage(Request, "stamp:" + note);
+        }
     }
 
     void Application_Error(object sender, EventArgs e)

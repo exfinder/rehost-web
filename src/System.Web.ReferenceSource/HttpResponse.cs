@@ -48,6 +48,7 @@ namespace System.Web {
         private HttpHeaderCollection _headers;      // response header collection (IIS7+)
 
         private bool _headersWritten;
+        private bool _endHeadersDeferred;   // Response.End defers header generation to the final flush (ledger P55)
         private bool _completed;    // after final flush
         private bool _ended;        // after response.end or execute url
         private bool _endRequiresObservation; // whether there was a pending call to Response.End that requires observation
@@ -598,7 +599,11 @@ namespace System.Web {
                 // Headers
                 //
 
-                if (!_headersWritten) {
+                if (_endHeadersDeferred && !finalFlush) {
+                    // deferred by End; the final flush generates them with any late amendments
+                    bufferedLength = _httpWriter.GetBufferedLength();
+                }
+                else if (!_headersWritten) {
                     if (!_suppressHeaders && !_clientDisconnected) {
                         EnsureSessionStateIfNecessary();
 
@@ -606,7 +611,8 @@ namespace System.Web {
                             bufferedLength = _httpWriter.GetBufferedLength();
 
                             // suppress content-type for empty responses
-                            if (!_contentLengthSet && bufferedLength == 0 && _httpWriter != null)
+                            // (not after a deferred End: the body already left for the spool)
+                            if (!_contentLengthSet && bufferedLength == 0 && _httpWriter != null && !_endHeadersDeferred)
                                 _contentType = null;
 
                             SuppressCachingCookiesIfNecessary();
@@ -619,7 +625,7 @@ namespace System.Web {
 
                             // Calculate content-length if not set explicitely
                             // WOS #1380818: Content-Length should not be set for response with 304 status (HTTP.SYS doesn't, and HTTP 1.1 spec implies it)
-                            if (!_contentLengthSet && _statusCode != 304)
+                            if (!_contentLengthSet && _statusCode != 304 && !_endHeadersDeferred)
                                 _wr.SendCalculatedContentLength(bufferedLength);
                         }
                         else {
@@ -3092,6 +3098,11 @@ namespace System.Web {
         ///       socket connection.</para>
         /// </devdoc>
         public void End() {
+            // Nothing reaches the wire before the single commit on this host, so End's
+            // internal flush leaves the headers open for EndRequest to amend, as they
+            // were under Framework's abort arm (readings R19-R24, ledger P55).
+            _endHeadersDeferred = true;
+
             if (_context.IsInCancellablePeriod) {
                 // No thread abort on this runtime: first complete the response exactly as
                 // the non-cancellable arm does, so a catch that swallows the unwind can
