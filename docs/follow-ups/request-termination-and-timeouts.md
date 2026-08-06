@@ -25,10 +25,13 @@ returns. Async steps are not flagged; deferred with async pages.
 ## Considered and rejected: `ControlledExecution.Run`
 
 `System.Runtime.ControlledExecution.Run` (.NET 7+) is the one sanctioned door
-into the runtime's retained abort machinery, and the only mechanism on the
-platform that can stop the CPU-bound step cooperative delivery never reaches.
-Measured on .NET 10: it injects a genuine `ThreadAbortException` into a
-spinning loop, and a swallowing catch is re-raised past, Framework-style.
+into the runtime's retained abort machinery. Measured on .NET 10: it injects a
+genuine `ThreadAbortException` into a spinning loop, and a swallowing catch is
+re-raised past, Framework-style — but it does **not** interrupt blocking
+waits: a `Thread.Sleep(30s)` inside `Run` slept its full 30 seconds with the
+abort pending, where Framework's abort woke waiting threads. So it can stop
+only actively executing code — runaway computation — never a step blocked on
+a database, a lock, or I/O, which is the common shape of a stuck request.
 Rejected for enforcement anyway: it only aborts code inside its wrapper from
 an outside token, so every pipeline step would need its own wrapper; nothing
 can stop the unwind short of the wrapper (no `ResetAbort`, so no
