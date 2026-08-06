@@ -136,7 +136,10 @@ itself decides — use the wire rig on `win-oracle`: a minimal Web Forms app
 under real IIS 10 (integrated pipeline, CLR v4.0), read by a raw socket so no
 client convenience layer rewrites the answer.
 
-The rig is ad-hoc per ADR 0045 and lives at `C:\readings\wire-rig`:
+The rig's sources are committed at [`eng/wire-rig`](../eng/wire-rig)
+(`win-oracle` is rebuilt from scratch, so nothing on the box is durable);
+`scp -r eng/wire-rig win-oracle:C:/readings/` restores it. On the box, at
+`C:\readings\wire-rig`:
 `app\` (probe pages + `web.config`, `debug="false"`), `setup.ps1` (installs
 the `Web-Server`/`Web-Asp-Net45` features if absent and creates the `WireRig`
 IIS site on port 8099), `read.ps1 -Path '/page.aspx?...'` (raw capture,
