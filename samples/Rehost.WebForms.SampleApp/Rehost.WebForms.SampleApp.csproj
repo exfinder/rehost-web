@@ -5,6 +5,9 @@
     <RootNamespace>Rehost.WebForms.SampleApp</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Classic Web Site shape: assemblies directly in bin/, no configuration/tfm segments. -->
+    <OutputPath>bin</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
