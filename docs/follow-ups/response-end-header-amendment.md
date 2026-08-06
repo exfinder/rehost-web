@@ -1,8 +1,12 @@
 # Header amendment after Response.End
 
-Status: open. Priority: low. Depends on
-[Response.End and request termination](response-end-and-termination-plan.md)
-(done) and [response buffer ownership](response-buffer-ownership.md).
+Status: done 2026-08-06 — reopened (ledger P55, `HeaderAmendmentOverKestrelTests`).
+`End`'s internal flush defers header generation to the final flush, so headers
+and cookies stamped in `EndRequest` ship as Framework's abort arm delivered
+(readings R19–R24); an application's own `Flush()` still seals. Accepted
+residue: the ended response leaves chunked rather than with Framework's exact
+`Content-Length`. Story:
+[Response.End and request termination](response-end-and-termination-plan.md).
 
 ## The gap
 
@@ -38,13 +42,14 @@ port seam could keep headers amendable between `End` and the commit without any
 byte having left the process. The body-side semantics (bytes after `End`
 discarded) are unaffected either way.
 
-## Decision needed
+## Decision (2026-08-06)
 
-- Keep the deviation (headers close at `End`, matching the non-abort arm
-  Framework also had) — cheapest, already documented; or
-- Reopen header amendment until commit, matching the abort arm applications
-  actually ran under IIS integrated mode.
-
-Either way the outcome belongs in the compatibility map row, and a scenario
-over Kestrel asserting the chosen behavior for `End`, terminating `Redirect`,
-and `CompleteRequest` (whose headers stay open today) should pin it.
+Reopened, on the strength of R19–R24: Framework demonstrably shipped late
+headers and late cookies after `End` and the terminating `Redirect`, so keeping
+the seal meant losing measured behavior — session and auth cookies stamped in
+`EndRequest` being the concrete casualty. The seam is `End`-specific
+(`_endHeadersDeferred` in `HttpResponse`): body bytes still leave for the spool
+at the call, header generation waits for the final flush, and an application's
+own `Flush()` never latches, preserving R24's seal. Pinned for all four shapes
+(`End`, terminating `Redirect`, `CompleteRequest`, post-`Flush`) by
+`HeaderAmendmentOverKestrelTests`.
