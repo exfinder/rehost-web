@@ -79,6 +79,28 @@ temp directly via `eng/linux-round.sh`, NTFS skips. A warm build cache serves
 every casing once one compiled — Framework's own behavior — so the
 end-to-end test compiles a page no other request has touched.
 
+## Checklist: physical-vs-virtual call sites (decision 6)
+
+Live `UrlPath.IsAbsolutePhysicalPath` callers, from the 2026-08-06 audit; each
+migrates to an explicit known-physical seam when a story reaches it, with a
+test. `HttpResponse.GetNormalizedFilename` is done (P54).
+
+- Compilation: `BaseCodeDomTreeGenerator.CreateCodeLinePragmaHelper`,
+  `BatchParser.ProcessServerInclude`, `TemplateParser.ProcessServerInclude`.
+- Configuration: `PagesSection.CreateControlTypeFilter` (masterPageFile).
+- Monitoring (FCN, disabled): `FileChangesMonitor` Start/Stop
+  MonitoringFile/Path, `GetFileAttributes` ×2.
+- Static files: ~~`HttpResponse.GetNormalizedFilename`~~ (P54).
+- Sitemap: `SiteMapNode.CreateVirtualPathFromUrl`,
+  `StaticSiteMapProvider.AddNode`, `XmlSiteMapProvider.GetNodeFromXmlNode`.
+- UI: `Control.ResolvePhysicalOrVirtualPath`, `Control.OpenFile`,
+  `AccessDataSource.GetPhysicalDataFilePath`,
+  `MailDefinition.CreateMailMessage` ×2.
+- Internal: `UrlPath.CheckValidVirtualPath` (rejects physical shapes; the
+  rejection reads the same on every platform for `\`-shaped input).
+
+`IsUncSharePath` besides the above: `HtmlTextWriter.EncodeUrl`.
+
 ## Still open (deliberately)
 
 - Enumeration ordering guarantees across filesystems.
