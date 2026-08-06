@@ -283,6 +283,24 @@ final flush.
 | R23 | `End()`, then a cookie added in `EndRequest` | `Set-Cookie: late=yes; path=/` present — late cookies ride the same open-header window |
 | R24 | `Flush()`, then `EndRequest` appends | Append **throws** `HttpException` (headers genuinely sent); `X-After-End` absent from the wire; the request still completes 200 when the module swallows the throw |
 
+### Wire readings (W1–W6)
+
+Taken 2026-08-06 on `win-oracle` through the wire-reading rig
+([windows-validation-host](../windows-validation-host.md#framework-wire-readings)):
+the same probe pages under real IIS 10 (integrated pipeline, CLR v4.0,
+`debug="false"`), captured by a raw socket, so these are the exact bytes a
+client received — including what IIS itself decided about framing. The in-proc
+R-readings see the System.Web→server seam; these see the wire.
+
+| # | Stimulus | Wire observation |
+| --- | --- | --- |
+| W1 | normal page | `Content-Length: 23` (exact body), `X-After-End` present |
+| W2 | `End()` in `Page_Load` | **`Content-Length: 12`** — exactly the pre-`End` bytes, not chunked; `X-After-End` present |
+| W3 | `Redirect(url)` | 302, `Content-Length: 138` (the "Object moved" body), `X-After-End` present |
+| W4 | `Flush()`, then `EndRequest` appends | `Transfer-Encoding: chunked`; `X-After-End` absent (R24's wire shape) |
+| W5 | `End()`, then `EndRequest` appends → `Flush()` → appends again | **chunked**; the header appended before that `Flush` ships, the one after is lost. An explicit `Flush` after `End` generates headers immediately with the amendments so far, forfeits the length, and seals |
+| W6 | `BufferOutput = false` | chunked — a streamed response genuinely carries no length, so a host must not invent one |
+
 ### .NET 10 readings
 
 Taken locally on .NET 10; each is a hard constraint on the mechanism.

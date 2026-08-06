@@ -125,3 +125,22 @@ Prefer this over reflection plus raw IL: it yields reviewable C# for the
 story doc, and it is how the `EnsureCookieDefaults` port was verified.
 Reflection remains the right tool for reading live values (app settings,
 registry-backed switches) rather than code shape.
+
+## Framework wire readings
+
+The in-proc readings rig (real `System.Web` driven through
+`ApplicationManager` + `SimpleWorkerRequest`) observes the System.Web→server
+seam. When the question is what a *client* received — framing
+(`Content-Length` vs chunked), header presence on the wire, anything IIS
+itself decides — use the wire rig on `win-oracle`: a minimal Web Forms app
+under real IIS 10 (integrated pipeline, CLR v4.0), read by a raw socket so no
+client convenience layer rewrites the answer.
+
+The rig is ad-hoc per ADR 0045 and lives at `C:\readings\wire-rig`:
+`app\` (probe pages + `web.config`, `debug="false"`), `setup.ps1` (installs
+the `Web-Server`/`Web-Asp-Net45` features if absent and creates the `WireRig`
+IIS site on port 8099), `read.ps1 -Path '/page.aspx?...'` (raw capture,
+printed ISO-8859-1). Add stimuli by editing the probe pages and re-reading;
+record rows as W-numbered readings in the consuming story doc
+(first use: W1–W6 in
+[response-end-and-termination-plan](follow-ups/response-end-and-termination-plan.md)).
