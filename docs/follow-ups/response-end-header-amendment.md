@@ -17,6 +17,17 @@ request here. Accepted deviation, recorded in the compatibility map's
 `Response.End` row; the sample application's Termination page demonstrates it
 (the `X-Sample-EndRequest` header missing from `mode=end`).
 
+## Measured (readings R19–R24, 2026-08-06)
+
+The abort-arm behavior is measured, not inferred: on 4.8.1, a header appended
+in `EndRequest` after `Response.End` **reaches the transport** (R20), on the
+terminating redirect's 302 (R21), and matching `CompleteRequest` (R22); a
+cookie added in `EndRequest` after `End` ships too (R23). After a real
+`Flush()`, appending **throws** *"headers have been sent"* and the header is
+genuinely lost (R24) — so an application's own `Flush()` must keep sealing
+whatever this story decides. Full rows in the
+[termination plan's readings](response-end-and-termination-plan.md#framework-readings).
+
 ## Why it is revisitable at all
 
 Nothing reaches the wire at `End`: the adapter's `FlushResponse` is a no-op and

@@ -262,10 +262,26 @@ verbatim: `HttpResponse._completed`, `HttpResponse._endRequiresObservation`,
 | R17 | 45 s sleep under `executionTimeout="2"` | Abort delivered 11.4 s after entry; `ExceptionState.Timeout=True`; message *"Thread was being aborted."*; app `finally` blocks and `Page_Unload` run; `Application_Error` fires with `HttpException` / *"Request timed out."*; `Server.GetLastError()` non-null at `EndRequest`; final response is a 500 |
 | R18 | 9 s sleep under `executionTimeout="2"` | Completed normally. The 15-second scan never observed it: enforcement latency is up to one scan period beyond the configured budget |
 
-Readings still wanted, deferred with the timeout policy: `ThreadAbortOnTimeout =
-false`; `debug="true"`; a timeout during an asynchronous continuation; a
-`Response.End` from an `Async="true"` page continuation (the non-cancellable
-arm, which none of the readings above exercised).
+Readings still wanted, deferred with the async-page story: a timeout during an
+asynchronous continuation; a `Response.End` from an `Async="true"` page
+continuation (the non-cancellable arm, which none of the readings above
+exercised).
+
+Taken 2026-08-06, same host and activation entry point, `debug="false"`,
+default `executionTimeout`, for
+[header amendment after Response.End](response-end-header-amendment.md). The
+probe's `Application_EndRequest` always appends `X-After-End: stamped`; the
+recording worker request observes what the pipeline hands the transport at
+final flush.
+
+| # | Stimulus | Observation |
+| --- | --- | --- |
+| R19 | normal page | `X-After-End` present (sanity) |
+| R20 | `Response.End()` in `Page_Load` | **`X-After-End` present.** Body is the pre-`End` bytes only (`Content-Length` proves the body sealed); the header appended in `EndRequest` still reaches the transport. Headers stay open after `End` on the abort arm |
+| R21 | `Response.Redirect(url)` | `X-After-End` present on the 302, beside `Location` |
+| R22 | `CompleteRequest()` | `X-After-End` present |
+| R23 | `End()`, then a cookie added in `EndRequest` | `Set-Cookie: late=yes; path=/` present — late cookies ride the same open-header window |
+| R24 | `Flush()`, then `EndRequest` appends | Append **throws** `HttpException` (headers genuinely sent); `X-After-End` absent from the wire; the request still completes 200 when the module swallows the throw |
 
 ### .NET 10 readings
 
