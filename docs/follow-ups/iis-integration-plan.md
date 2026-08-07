@@ -113,17 +113,37 @@ that mechanism.
 | `validation`, `asp` | tolerated no-ops, recorded |
 | everything else | ignored silently, Framework-style |
 
-## Readings wanted before implementation
+## Readings (taken 2026-08-07, IIS 10.0.26100 on `win-oracle`)
 
-- `IIS_schema.xml` excerpts for each honored section (attribute defaults,
-  collection keys) — cached with the golden.
-- Collection edge cases on real IIS by probe: duplicate `add`,
-  `remove`-of-absent, `clear` + `add`, per-folder `staticContent` override
-  (does delegation permit it by default?).
-- The wire shape of a request-filtering refusal (status subcode behavior,
-  `httpErrors` interplay) — informs the P59-migration decision.
-- Integrated-mode handler resolution order (for the staged handlers story,
-  recorded now while the box is provisioned).
+Golden cache: `third_party/microsoft/iis-config/` (git-ignored;
+[reference doc](../iis-config-reference.md)).
+
+Schema (`IIS_schema.xml`): `staticContent` collection is
+`addElement="mimeMap"`, `clearElement="clear"`, `removeElement="remove"`,
+key `fileExtension` (`isUniqueKey`), `mimeType` required non-empty; the
+section also carries a `clientCache` element (`cacheControlMode` default
+`NoControl`, `setEtag` default `true`) — future tenant, out of slice.
+`hiddenSegments` collection is `add`/`clear`/`remove`, key `segment`
+(unique, non-empty).
+
+Probes over the wire rig, app-level `web.config` against the served app:
+
+| # | Stimulus | Observation |
+| --- | --- | --- |
+| C1 | duplicate `mimeMap` for an inherited extension | **500.19** — every request in the app fails on the config error |
+| C2 | `remove` of an absent extension | **tolerated** — no error, requests unaffected. (Contradicts the strict-remove assumption the discarded draft coded.) |
+| C3 | `clear` then `mimeMap .css` | `.css` serves; anything else answers **404.3** |
+| C4 | `remove` of inherited `.css` | `.css` answers **404.3** — apps can restrict below the server list |
+| C5 | app-level `<hiddenSegments><add segment="Private">` | **404.8**, case-insensitive — apps extend hiding |
+| C6 | `<hiddenSegments><remove segment="App_Data">` | **App_Data serves** — delegation permits un-hiding; the tenant must honor `remove` |
+| C7 | per-folder `web.config` `staticContent` in a subfolder | **works on IIS** (subfolder `.foo` serves with the folder's type; root unaffected) — the deferred per-folder boundary is real IIS behavior, recorded with evidence |
+
+Subcodes for the future `httpErrors` story: 404.3 (content-type
+restriction), 404.8 (hidden segment), 500.19 (config error), 404.0 (plain
+missing).
+
+Still deferred to the handlers story: integrated-mode handler resolution
+order readings.
 
 ## Decisions (ratified 2026-08-07)
 

@@ -11,3 +11,4 @@ third_party/microsoft/framework-config/
 
 # Oracle output awaiting review; only artifacts/golden/ is committed
 tests/parity/artifacts/generated/
+third_party/microsoft/iis-config/
