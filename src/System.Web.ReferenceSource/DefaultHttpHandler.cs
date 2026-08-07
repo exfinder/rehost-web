@@ -109,7 +109,8 @@ namespace System.Web {
                 // application serves an off-list extension by mapping it to StaticFileHandler
                 // in its web.config, which routes around DefaultHttpHandler entirely.
                 string gatePath = OverrideExecuteUrlPath() ?? request.FilePath;
-                if (!IisStaticContent.Serves(System.IO.Path.GetExtension(gatePath))
+                if (!System.Web.IisConfig.IisServerConfiguration.Current.ServesStaticContent(
+                        System.IO.Path.GetExtension(gatePath))
                     && !FileUtil.DirectoryExists(request.PhysicalPath)) {
                     throw new HttpException(404, String.Empty);
                 }

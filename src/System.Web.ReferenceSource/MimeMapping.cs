@@ -25,7 +25,19 @@ namespace System.Web {
                 throw new ArgumentNullException("fileName");
             }
 
+#if !NETFRAMEWORK
+            // Integrated mode took types from IIS's map, not the classic table; so does this
+            // host, from the merged baseline (ledger P60).
+            string mapped = System.Web.IisConfig.IisServerConfiguration.Current
+                .StaticContentTypeOf(System.IO.Path.GetExtension(fileName));
+            if (mapped != null) {
+                return mapped;
+            }
+
+            return "application/octet-stream";
+#else
             return _mappingDictionary.GetMimeMapping(fileName);
+#endif
         }
 
         internal static void SetIntegratedApplicationContext(IntPtr appContext) {

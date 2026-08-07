@@ -1,28 +1,13 @@
 #nullable enable
 
-using System.Collections.Generic;
+using System.Web.IisConfig;
 
 namespace System.Web;
 
-// IIS request filtering refused, with a 404, any request whose path contains one of these
-// segments, in any casing and at any depth — that is the only thing that kept App_Data (the
-// canonical database and upload folder) and its siblings undownloadable, because the managed
-// stack never carried the rule. The list is the <hiddenSegments> section of a default
-// applicationHost.config (IIS 10.0.26100, 2026-08-07), minus web.config, whose requests the
-// golden *.config forbidden-handler mapping already answers with Framework's managed 403.
+// IIS request filtering's hidden-segment 404, any casing, any depth (ledger P59/P60). The
+// list is the merged <hiddenSegments> section; apps extend or un-hide entries.
 internal static class HiddenSegments
 {
-    private static readonly HashSet<string> Segments = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "bin",
-        "App_code",
-        "App_GlobalResources",
-        "App_LocalResources",
-        "App_WebReferences",
-        "App_Data",
-        "App_Browsers",
-    };
-
     internal static void CheckVirtualPath(string? virtualPath)
     {
         if (string.IsNullOrEmpty(virtualPath))
@@ -30,9 +15,13 @@ internal static class HiddenSegments
             return;
         }
 
+        var configuration = IisServerConfiguration.Current;
         foreach (var segment in virtualPath.Split('/'))
         {
-            if (Segments.Contains(segment))
+            // web.config stays with the golden forbidden-handler 403 (ledger P59).
+            if (segment.Length != 0
+                && !string.Equals(segment, "web.config", StringComparison.OrdinalIgnoreCase)
+                && configuration.IsHiddenSegment(segment))
             {
                 throw new HttpException(404, string.Empty);
             }

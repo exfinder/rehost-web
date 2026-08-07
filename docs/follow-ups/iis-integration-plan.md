@@ -1,7 +1,9 @@
 # IIS integration: configuration subsystem and layered behaviors
 
-Status: decisions ratified 2026-08-07; readings pass and slice 1 not yet
-started. Priority: high.
+Status: decisions ratified and slice 1 delivered 2026-08-07 (ledger P60):
+the Layer-0 collection core, the shipped `applicationHost` baseline, and the
+`staticContent` + hidden-segments tenants with app-root amendments. Staged
+tenants and Layer-1 middleware remain open below. Priority: high.
 Delivery vehicle for what the [IIS-role audit](iis-role-behaviors.md)
 classifies as missing-worth-restoring; supersedes the ad-hoc shape P58/P59
 used (compiled-in tables patched per story).

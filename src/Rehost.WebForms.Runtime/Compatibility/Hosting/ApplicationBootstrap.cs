@@ -47,8 +47,12 @@ internal sealed class ApplicationBootstrap
         try
         {
             var configuration = ApplicationBootstrapConfiguration.Create(options, _environment.BaseDirectory);
+            var serverConfiguration = System.Web.IisConfig.IisServerConfiguration.Load(
+                configuration.ServerConfigurationFilePath,
+                configuration.ApplicationConfigurationFilePath);
             _environment.Preflight(configuration);
             _environment.Bind(configuration);
+            System.Web.IisConfig.IisServerConfiguration.Publish(serverConfiguration);
             Volatile.Write(ref _configuration, configuration);
             Volatile.Write(ref _state, (int)ApplicationBootstrapState.Initialized);
         }
@@ -97,6 +101,13 @@ internal sealed class ApplicationBootstrapConfiguration
 
     internal string ApplicationConfigurationFilePath =>
         Path.Combine(PhysicalRootPath, HttpConfigurationSystem.WebConfigFileName);
+
+    // The IIS half of the baseline ships beside the Framework mirrors and travels with them
+    // when MachineConfigurationFilePath is overridden.
+    internal string ServerConfigurationFilePath =>
+        Path.Combine(
+            Path.GetDirectoryName(MachineConfigurationFilePath)!,
+            "rehost-webforms.applicationHost.config");
 
     internal IConfigMapPathFactory ConfigMapPathFactory => new PortableConfigMapPathFactory(this);
 

@@ -12,4 +12,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture ModernTarget = new("modern-target");
     internal static readonly ScenarioFixture Codegen = new("codegen");
     internal static readonly ScenarioFixture Timeout = new("timeout");
+    internal static readonly ScenarioFixture WebServer = new("webserver");
 }

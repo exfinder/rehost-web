@@ -45,6 +45,10 @@ public sealed class ProcessMemoryLimitConfigurationTests
             File.WriteAllText(
                 machineConfig,
                 text.Replace("memoryLimit=\"80\"", $"memoryLimit=\"{memoryLimitPercent}\"", StringComparison.Ordinal));
+            // The IIS baseline is resolved beside the machine config and is required.
+            File.Copy(
+                Path.Combine(HostDirectory, "configs", "rehost-webforms.applicationHost.config"),
+                Path.Combine(root.FullName, "rehost-webforms.applicationHost.config"));
 
             var startInfo = new ProcessStartInfo("dotnet")
             {

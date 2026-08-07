@@ -77,17 +77,24 @@ public sealed class StaticFilesOverKestrelTests(PageLiveScenario scenario)
 
     // The extension gate (ledger P58): IIS's static content-type list decides what serves; an
     // off-list file beside the app's content must refuse, as IIS refused it.
+    // Types come from IIS's map, as integrated mode took them, not the classic table
+    // (.js is application/javascript there, and .svg exists at all).
     [Fact]
-    public async Task An_Unmapped_Known_Extension_Serves_With_Its_Content_Type()
+    public async Task An_Unmapped_Known_Extension_Serves_With_Its_Iis_Content_Type()
     {
         File.WriteAllText(
             Path.Combine(scenario.ApplicationPath, "gate-probe.js"), "var gate = 1;");
+        File.WriteAllText(
+            Path.Combine(scenario.ApplicationPath, "gate-probe.svg"), "<svg/>");
 
-        var response = await scenario.Client.GetAsync("/gate-probe.js");
+        var script = await scenario.Client.GetAsync("/gate-probe.js");
+        var image = await scenario.Client.GetAsync("/gate-probe.svg");
 
-        response.StatusCode.ShouldBe(200);
-        response.Header("Content-Type").ShouldBe("application/x-javascript");
-        response.Text.ShouldBe("var gate = 1;");
+        script.StatusCode.ShouldBe(200);
+        script.Header("Content-Type").ShouldBe("application/javascript");
+        script.Text.ShouldBe("var gate = 1;");
+        image.StatusCode.ShouldBe(200);
+        image.Header("Content-Type").ShouldBe("image/svg+xml");
     }
 
     [Fact]

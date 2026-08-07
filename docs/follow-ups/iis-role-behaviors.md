@@ -38,7 +38,7 @@ each and classify:
 
 - Default documents: `/` serving `Default.aspx`. The standout
   consumer-visible suspect; every legacy application's root URL relies on it.
-- Content types: in integrated mode System.Web swapped its hardcoded
+- ~~Content types~~ — restored (ledger P60). In integrated mode System.Web swapped its hardcoded
   344-entry table for IIS's `<staticContent>` map
   (`MimeMappingDictionaryIntegrated` — the seam already exists in the
   imported code). The port runs the classic table, which predates `.svg`,

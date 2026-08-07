@@ -17,3 +17,4 @@ meet the same bar.
 | `codegen` | Compilation-substrate scenarios: runs mutate and inspect generated output. |
 | `legacy-target` / `modern-target` | `<httpRuntime targetFramework>` divergence is the claim; activation is what is under test. |
 | `timeout` | `executionTimeout="1"` plus a 2-second `rehost:RequestTimeoutScanSeconds` would time out any other fixture's slow requests; the real-timer chain firing is the claim. |
+| `webserver` | `<system.webServer>` amendments over the shipped IIS baseline are the claim: removed and added extensions, extended and un-hidden segments, and an unhonored section tolerated. |

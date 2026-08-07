@@ -44,8 +44,6 @@ the P54 hotfix left open are each resolved below.
   Unix-rooted path still hits Framework's physical-vs-virtual classification;
   on the [decision-6 checklist](portable-filesystem-and-config-path-semantics.md),
   fixed on first real contact.
-- Content types come from `MimeMapping`'s Framework table, which predates a
-  few modern types (`.json`, `.woff2` serve, but as the generic binary type
-  where the table lacks an entry). Recorded, not yet measured against a real
-  consumer.
+- ~~Content types from the dated Framework table~~ — resolved by P60: types
+  come from the IIS map, as integrated mode took them.
 - `If-Range` behavior is imported and untested beyond the range tests above.
