@@ -38,6 +38,13 @@ each and classify:
 
 - Default documents: `/` serving `Default.aspx`. The standout
   consumer-visible suspect; every legacy application's root URL relies on it.
+- Content types: in integrated mode System.Web swapped its hardcoded
+  344-entry table for IIS's `<staticContent>` map
+  (`MimeMappingDictionaryIntegrated` — the seam already exists in the
+  imported code). The port runs the classic table, which predates `.svg`,
+  `.json`, and `.woff/.woff2`: they pass the P58 gate but serve as
+  `application/octet-stream`, and an SVG will not render. The IIS reading
+  behind the gate carries the types as well as the extensions.
 - Directory requests: default-doc-or-403 with directory browsing off.
 - Request filtering beyond hidden segments: double-escaping rejection, URL
   and query-string length limits, verb rules, high-bit characters,
