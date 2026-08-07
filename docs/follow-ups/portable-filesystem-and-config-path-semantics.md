@@ -90,7 +90,9 @@ test. `HttpResponse.GetNormalizedFilename` is done (P54).
 - Configuration: `PagesSection.CreateControlTypeFilter` (masterPageFile).
 - Monitoring (FCN, disabled): `FileChangesMonitor` Start/Stop
   MonitoringFile/Path, `GetFileAttributes` ×2.
-- Static files: ~~`HttpResponse.GetNormalizedFilename`~~ (P54).
+- Static files: ~~`HttpResponse.GetNormalizedFilename`~~ (P54 for
+  `TransmitFile`; P61 splits `WriteFile` the same way for
+  `HttpServerUtility.ExecuteInternal`'s static-file arm).
 - Sitemap: `SiteMapNode.CreateVirtualPathFromUrl`,
   `StaticSiteMapProvider.AddNode`, `XmlSiteMapProvider.GetNodeFromXmlNode`.
 - UI: `Control.ResolvePhysicalOrVirtualPath`, `Control.OpenFile`,

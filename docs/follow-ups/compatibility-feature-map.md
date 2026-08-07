@@ -84,6 +84,19 @@ and cache substrate for the first time.
 | Fragment caching | Supported | `@ OutputCache` on a control replays the fragment while the page re-renders. Only `Duration` + `VaryByParam="none"` assessed; other `VaryBy*` axes, `Shared`, and `CachePolicy` are unassessed |
 | Config-level and dynamic masters | Unassessed | `<pages masterPageFile>` and `PreInit` assignment are untested rather than blocked |
 
+### Server.Transfer and Server.Execute
+
+Untouched imported code over the P52 termination unwind; every probed shape
+worked unchanged. Pinned by `ServerTransferOverKestrelTests`.
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| `Server.Transfer` | Supported | Child renders in place, parent tail suppressed through the End unwind, parent output written before the call survives (Framework's buffered-write behavior); query preserved, overridden by a `?` in the path, or cleared with `preserveForm: false`; `PreviousPage` set; the compiled-handler overload matches |
+| `Server.Execute` | Supported | Inline composition with the parent continuing, capture into a `TextWriter`, `preserveForm` semantics as Transfer; always runs the child through the `IHttpAsyncHandler` arm |
+| `Server.Execute` to a static file | Supported | The mapped-handler arm writes the file into the response through the P61 known-physical seam |
+| `Application_Error` → `GetLastError` → `Transfer` | Supported | The error page renders with `HttpUnhandledException` wrapping the page's exception, Framework's wrapper |
+| `Server.TransferRequest` | Unsupported | No pipeline to re-enter on this host. Refused on every platform with `PlatformNotSupportedException` naming `Server.Transfer`/`Server.Execute` as replacements (ledger P62); implementing integrated-style re-entry is an owned follow-up |
+
 ## Request bodies
 
 | Feature | State | Boundary |

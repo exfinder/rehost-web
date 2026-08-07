@@ -104,6 +104,10 @@
     {
         var error = Server.GetLastError();
         Stage(Request, "ApplicationError:" + (error == null ? "null" : error.GetType().Name + ":" + error.Message));
+        if (Request.QueryString["xferr"] != null)
+        {
+            Server.Transfer("~/xfer/ErrorPage.aspx");
+        }
     }
 
 </script>

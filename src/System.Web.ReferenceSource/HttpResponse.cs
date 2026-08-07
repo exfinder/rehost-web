@@ -2780,6 +2780,13 @@ namespace System.Web {
 
             filename = GetNormalizedFilename(filename);
 
+            WriteFileTranslated(filename, readIntoMemory);
+        }
+
+        // Split at the normalization like TransmitFileTranslated: off Windows a rooted physical
+        // path is indistinguishable from a rooted virtual one, so a caller holding a path it
+        // already mapped enters here (ledger P61, pattern P54).
+        internal void WriteFileTranslated(String filename, bool readIntoMemory) {
             FileStream f = null;
 
             try {
