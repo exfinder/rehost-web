@@ -665,6 +665,10 @@ namespace System.Web {
         internal void ValidatePath() {
             CachedPathData pathData = GetConfigurationPathData();
             pathData.ValidatePath(_request.PhysicalPathInternal);
+#if !NETFRAMEWORK
+            // IIS request filtering owned this refusal; this host replaces IIS (ledger P59).
+            HiddenSegments.CheckVirtualPath(_request.Path);
+#endif
         }
 
 
