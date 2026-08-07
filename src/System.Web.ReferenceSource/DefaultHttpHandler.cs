@@ -101,6 +101,20 @@ namespace System.Web {
                     throw new HttpException(403, SR.GetString(SR.Path_forbidden, request.Path));
                 }
 
+#if !NETFRAMEWORK
+                // Port-owned gate (ledger P58): IIS refused extensions outside its static
+                // content-type list, and this host replaces IIS, so without the gate any file
+                // the forbidden mappings miss would download (a *.bak beside web.config).
+                // Directories pass through to StaticFileHandler's own directory handling; an
+                // application serves an off-list extension by mapping it to StaticFileHandler
+                // in its web.config, which routes around DefaultHttpHandler entirely.
+                string gatePath = OverrideExecuteUrlPath() ?? request.FilePath;
+                if (!IisStaticContent.Serves(System.IO.Path.GetExtension(gatePath))
+                    && !FileUtil.DirectoryExists(request.PhysicalPath)) {
+                    throw new HttpException(404, String.Empty);
+                }
+#endif
+
                 // default to static file handler
                 StaticFileHandler.ProcessRequestInternal(context, OverrideExecuteUrlPath());
 

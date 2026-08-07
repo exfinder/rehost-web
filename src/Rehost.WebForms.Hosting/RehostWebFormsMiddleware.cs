@@ -80,6 +80,6 @@ internal sealed class RehostWebFormsMiddleware
             response.ContentLength = spool.ContentLength;
         }
 
-        await spool.DrainAsync(response.Body, context.RequestAborted);
+        await spool.CommitBodyAsync(response, context.RequestAborted);
     }
 }

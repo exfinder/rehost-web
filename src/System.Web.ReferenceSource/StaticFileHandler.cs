@@ -531,6 +531,35 @@ namespace System.Web {
             etag = GenerateETag(context, lastModifiedInUtc, utcNow);
             fileLength = fileInfo.Length;
 
+#if !NETFRAMEWORK
+            // Port-owned revalidation (ledger P58): on every real deployment the 304 came from
+            // IIS's native static module, which this host replaces; the managed handler never
+            // carried it. If-None-Match wins over If-Modified-Since, as on IIS.
+            bool notModified = false;
+            string ifNoneMatch = request.Headers["If-None-Match"];
+            if (ifNoneMatch != null) {
+                notModified = ifNoneMatch == "*" || ifNoneMatch == etag;
+            }
+            else {
+                string ifModifiedSince = request.Headers["If-Modified-Since"];
+                if (ifModifiedSince != null) {
+                    try {
+                        notModified = lastModifiedInUtc <= HttpDate.UtcParse(ifModifiedSince);
+                    }
+                    catch {
+                        // an unparsable date means an unconditional request, as on IIS
+                    }
+                }
+            }
+
+            if (notModified) {
+                response.StatusCode = 304;
+                response.AppendHeader("Last-Modified", HttpUtility.FormatHttpDateTime(lastModifiedInUtc));
+                response.AppendHeader("ETag", etag);
+                return;
+            }
+#endif
+
             // is this a Range request?
             rangeHeader = request.Headers["Range"];
             if (StringUtil.StringStartsWithIgnoreCase(rangeHeader, "bytes")

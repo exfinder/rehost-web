@@ -5,30 +5,35 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 
 internal readonly record struct ResponseHeader(string Name, string Value);
 
 // System.Web writes a response through callbacks that assume a synchronous transport, which
 // Kestrel does not offer. Output is therefore collected here and committed once, after
-// EndOfRequest seals it.
+// EndOfRequest seals it. The body is an ordered list of segments: buffered byte runs, and file
+// ranges held by reference so the commit can hand them to the server's sendfile path instead of
+// copying them through the buffer.
 internal sealed class ResponseSpool : IDisposable
 {
     internal const int DefaultMemoryThreshold = 32 * 1024;
 
-    private readonly FileBufferingWriteStream _body;
+    private readonly record struct FileRange(string Path, long Offset, long Length);
+
+    private readonly Func<string> _temporaryDirectoryAccessor;
+    private readonly int _memoryThreshold;
+    private readonly List<object> _segments = new();
     private readonly List<ResponseHeader> _headers = new();
+    private FileBufferingWriteStream? _currentRun;
 
     internal ResponseSpool(
         Func<string> temporaryDirectoryAccessor,
         int memoryThreshold = DefaultMemoryThreshold)
     {
         ArgumentNullException.ThrowIfNull(temporaryDirectoryAccessor);
-
-        _body = new FileBufferingWriteStream(
-            memoryThreshold,
-            bufferLimit: null,
-            tempFileDirectoryAccessor: temporaryDirectoryAccessor);
+        _temporaryDirectoryAccessor = temporaryDirectoryAccessor;
+        _memoryThreshold = memoryThreshold;
     }
 
     internal int StatusCode { get; private set; } = 200;
@@ -66,31 +71,26 @@ internal sealed class ResponseSpool : IDisposable
     {
         ArgumentNullException.ThrowIfNull(data);
         RequireUnsealed();
-        _body.Write(data, 0, length);
+
+        if (_currentRun == null)
+        {
+            _currentRun = new FileBufferingWriteStream(
+                _memoryThreshold,
+                bufferLimit: null,
+                tempFileDirectoryAccessor: _temporaryDirectoryAccessor);
+            _segments.Add(_currentRun);
+        }
+
+        _currentRun.Write(data, 0, length);
     }
 
     internal void WriteFile(string filename, long offset, long length)
     {
         RequireUnsealed();
+        RequireRange(filename, offset, length);
 
-        using var file = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-        file.Position = offset;
-
-        var remaining = length;
-        var buffer = new byte[81920];
-        while (remaining > 0)
-        {
-            var read = file.Read(buffer, 0, (int)Math.Min(buffer.Length, remaining));
-            if (read == 0)
-            {
-                throw new IOException(
-                    "The file '" + filename + "' ended " + remaining
-                    + " bytes before the requested range; it changed after its length was read.");
-            }
-
-            _body.Write(buffer, 0, read);
-            remaining -= read;
-        }
+        _currentRun = null;
+        _segments.Add(new FileRange(filename, offset, length));
     }
 
     internal void Seal()
@@ -98,7 +98,7 @@ internal sealed class ResponseSpool : IDisposable
         IsSealed = true;
     }
 
-    internal Task DrainAsync(Stream destination, CancellationToken cancellationToken)
+    internal async Task CommitBodyAsync(HttpResponse response, CancellationToken cancellationToken)
     {
         if (!IsSealed)
         {
@@ -106,12 +106,54 @@ internal sealed class ResponseSpool : IDisposable
                 "The response cannot be committed before EndOfRequest seals it.");
         }
 
-        return _body.DrainBufferAsync(destination, cancellationToken);
+        // Re-validate every range before the first byte leaves: a file that shrank since it was
+        // spooled fails while a status can still be produced, not mid-body under sent headers.
+        foreach (var segment in _segments)
+        {
+            if (segment is FileRange range)
+            {
+                RequireRange(range.Path, range.Offset, range.Length);
+            }
+        }
+
+        foreach (var segment in _segments)
+        {
+            if (segment is FileRange range)
+            {
+                await response.SendFileAsync(
+                    range.Path, range.Offset, range.Length, cancellationToken);
+            }
+            else
+            {
+                await ((FileBufferingWriteStream)segment)
+                    .DrainBufferAsync(response.Body, cancellationToken);
+            }
+        }
     }
 
     public void Dispose()
     {
-        _body.Dispose();
+        foreach (var segment in _segments)
+        {
+            (segment as FileBufferingWriteStream)?.Dispose();
+        }
+    }
+
+    private static void RequireRange(string filename, long offset, long length)
+    {
+        var file = new FileInfo(filename);
+        if (!file.Exists)
+        {
+            throw new FileNotFoundException(
+                "The response file '" + filename + "' does not exist.", filename);
+        }
+
+        if (file.Length < offset + length)
+        {
+            throw new IOException(
+                "The file '" + filename + "' ended " + (offset + length - file.Length)
+                + " bytes before the requested range; it changed after its length was read.");
+        }
     }
 
     private void RequireUnsealed()

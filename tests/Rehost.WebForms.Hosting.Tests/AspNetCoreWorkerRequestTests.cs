@@ -549,9 +549,39 @@ public sealed class AspNetCoreWorkerRequestTests
             request.Response.Seal();
 
             using var drained = new MemoryStream();
-            await request.Response.DrainAsync(drained, CancellationToken.None);
+            var commitContext = new DefaultHttpContext();
+            commitContext.Response.Body = drained;
+            await request.Response.CommitBodyAsync(commitContext.Response, CancellationToken.None);
 
             Encoding.ASCII.GetString(drained.ToArray()).ShouldBe("before|23456|after");
+        }
+        finally
+        {
+            File.Delete(payload);
+        }
+    }
+
+    // The range is carried by reference for the server's sendfile path, not copied at write
+    // time: bytes on the wire are the file's content at commit.
+    [Fact]
+    public async Task A_File_Range_Is_Read_At_Commit_Not_At_Spool_Time()
+    {
+        var request = Create();
+        var payload = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        File.WriteAllBytes(payload, "original-a"u8.ToArray());
+
+        try
+        {
+            request.SendResponseFromFile(payload, 0, 10);
+            File.WriteAllBytes(payload, "rewritten-b"u8.ToArray());
+            request.Response.Seal();
+
+            using var drained = new MemoryStream();
+            var commitContext = new DefaultHttpContext();
+            commitContext.Response.Body = drained;
+            await request.Response.CommitBodyAsync(commitContext.Response, CancellationToken.None);
+
+            Encoding.ASCII.GetString(drained.ToArray()).ShouldBe("rewritten-");
         }
         finally
         {
@@ -650,7 +680,8 @@ public sealed class AspNetCoreWorkerRequestTests
         var request = Create();
 
         Should.Throw<InvalidOperationException>(
-            () => request.Response.DrainAsync(Stream.Null, CancellationToken.None));
+            () => request.Response.CommitBodyAsync(
+                new DefaultHttpContext().Response, CancellationToken.None));
     }
 
     private static DefaultHttpContext Context(

@@ -53,6 +53,21 @@ internal sealed class ScenarioClient : IDisposable
         return SendAsync(request);
     }
 
+    internal Task<ScenarioResponse> HeadAsync(string path) =>
+        SendAsync(new HttpRequestMessage(HttpMethod.Head, path));
+
+    internal Task<ScenarioResponse> GetWithHeadersAsync(
+        string path, params (string Name, string Value)[] headers)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, path);
+        foreach (var (name, value) in headers)
+        {
+            request.Headers.TryAddWithoutValidation(name, value);
+        }
+
+        return SendAsync(request);
+    }
+
     internal Task<ScenarioResponse> PostAsync(string path, byte[] body, string contentType)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, path)
