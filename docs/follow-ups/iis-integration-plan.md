@@ -1,6 +1,7 @@
 # IIS integration: configuration subsystem and layered behaviors
 
-Status: plan drafted 2026-08-07; decisions not yet ratified. Priority: high.
+Status: decisions ratified 2026-08-07; readings pass and slice 1 not yet
+started. Priority: high.
 Delivery vehicle for what the [IIS-role audit](iis-role-behaviors.md)
 classifies as missing-worth-restoring; supersedes the ad-hoc shape P58/P59
 used (compiled-in tables patched per story).
@@ -124,17 +125,29 @@ that mechanism.
 - Integrated-mode handler resolution order (for the staged handlers story,
   recorded now while the box is provisioned).
 
-## Decisions to ratify
+## Decisions (ratified 2026-08-07)
 
-1. Slice-1 tenant set: `staticContent` only, or + hidden-segments
-   migration, or + `customHeaders`.
-2. Per-folder merge: app-root only (recorded boundary) or folder walk now.
-3. Error shaping: keep P59's app-shaped 404 or migrate to Layer 1 with
-   IIS-shaped refusals (reading-driven).
-4. Handlers/modules staging: accept as designed end-state with its own
-   later plan, or pull scoping work forward.
-5. Disposition of the parked P60 working-tree draft (reader, IgnoreSection
-   declaration, bootstrap hook, typed map) as Layer-0 raw material.
+0. **Mode stance** (also anchored in PROJECT.md): the behavioral oracle is
+   Framework under IIS integrated mode; the execution machinery is the
+   classic managed engine. `UseIntegratedPipeline` sites resolve per-site —
+   mechanism keeps the classic branch silently; app-facing contract sites
+   (integrated-only events, `Response.Headers`, `TransferRequest`, module
+   sequencing) resolve toward integrated-observable behavior with a ledger
+   row each, catalogued by the audit.
+1. **Slice 1 tenants**: `staticContent` plus the hidden-segments
+   migration — two differently-shaped tenants prove the collection core;
+   both behaviors are already pinned by shipped tests.
+2. **Merge depth**: app root only; per-folder is an explicit recorded
+   boundary whose trigger is the first real application that needs it. The
+   Layer-0 accessor takes a path parameter from day one so adding the walk
+   changes no consumer.
+3. **Error shape**: P59's app-shaped 404 stays; the question belongs to the
+   `httpErrors` story and is decided there with wire readings.
+4. **Handlers/modules**: staged end-state with its own later plan and
+   readings; the expected forcing consumer is the session-state story
+   (async session module registration lives in `<modules>`).
+5. **Parked P60 draft**: discarded entirely; slice 1 starts clean from this
+   plan, regenerating data from the golden cache.
 
 ## Relationship to existing work
 

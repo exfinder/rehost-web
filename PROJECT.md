@@ -53,6 +53,12 @@ silent no-op.
 ## Compatibility policy
 
 - Preserve public shape and observable behavior only where supported by tests.
+- The behavioral oracle is Framework under IIS integrated mode — what
+  enterprise applications observed — while the execution machinery is the
+  classic managed engine; `UseIntegratedPipeline` branch sites resolve
+  per-site, mechanism keeping the classic branch and app-facing contract
+  resolving toward integrated-observable behavior with a ledger row
+  ([plan](docs/follow-ups/iis-integration-plan.md)).
 - Treat unsupported behavior as an explicit contract.
 - When original behavior cannot be reproduced, replicate the recovered
   intent as closely as the portability contract permits; document the
