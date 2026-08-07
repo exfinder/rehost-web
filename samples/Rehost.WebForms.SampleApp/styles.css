@@ -117,6 +117,10 @@ dt { color: var(--muted); }
 
 dd { margin: 0; overflow-wrap: anywhere; }
 
+.clock { display: flex; flex-direction: column; gap: 0.2rem; }
+
+.clock small { color: var(--muted); }
+
 .chip {
     display: inline-block;
     background: var(--accent-soft);

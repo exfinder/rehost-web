@@ -23,7 +23,8 @@ enterprise applications use, which `WapDemo.aspx` demonstrates:
 
 It demonstrates the currently supported surface: `Site.master` chrome,
 `App_Code` (including a control-state control), `App_GlobalResources` with a
-culture satellite, postback/view state, the WAP-style page above, cookies,
+culture satellite, postback/view state, the WAP-style page above, user
+controls with an `OutputCache` fragment, cookies,
 multipart upload with `SaveAs`, `Response.End` and friends, request
 validation, and static files through `StaticFileHandler`.
 
