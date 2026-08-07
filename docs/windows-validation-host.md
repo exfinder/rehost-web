@@ -147,3 +147,8 @@ printed ISO-8859-1). Add stimuli by editing the probe pages and re-reading;
 record rows as W-numbered readings in the consuming story doc
 (first use: W1–W6 in
 [response-end-and-termination-plan](follow-ups/response-end-and-termination-plan.md)).
+
+Probe before coding an assumption about IIS: readings have repeatedly
+contradicted beliefs already written down — `remove`-of-absent is tolerated
+where a draft had coded it strict (C2), and IIS omits `Last-Modified` on
+304s where the obvious shape re-sends it.

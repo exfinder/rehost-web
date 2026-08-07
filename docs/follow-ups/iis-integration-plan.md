@@ -164,7 +164,13 @@ order readings.
    Layer-0 accessor takes a path parameter from day one so adding the walk
    changes no consumer.
 3. **Error shape**: P59's app-shaped 404 stays; the question belongs to the
-   `httpErrors` story and is decided there with wire readings.
+   `httpErrors` story and is decided there with wire readings. Placement
+   fact for that story: in the classic engine `ValidatePathExecutionStep`
+   runs before the `BeginRequest` event, so the current seam is already the
+   earliest possible *managed* placement — a dedicated module would run
+   later, not earlier. The only genuinely earlier home is Layer-1 host
+   middleware, which is the natural migration if the IIS error shape
+   (404.8) wins.
 4. **Handlers/modules**: staged end-state with its own later plan and
    readings; the expected forcing consumer is the session-state story
    (async session module registration lives in `<modules>`).
