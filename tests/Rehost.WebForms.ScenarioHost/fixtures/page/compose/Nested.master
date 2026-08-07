@@ -1,0 +1,5 @@
+<%@ Master Language="C#" MasterPageFile="~/compose/Site.master" %>
+<asp:Content ContentPlaceHolderID="MainContent" runat="server">
+    <div id="section">section-chrome-from-nested-master</div>
+    <asp:ContentPlaceHolder ID="SectionContent" runat="server" />
+</asp:Content>

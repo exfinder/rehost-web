@@ -66,6 +66,24 @@ covered by `PageCompilationTests` and `PageOverKestrelTests`.
 | Controls requiring a server form | Partially assessed | `TextBox`, `Button`, `LinkButton`, and `FileUpload` render and post back. Other controls calling `VerifyRenderingInServerForm`, `GridView` among them, are unassessed rather than blocked |
 | Static files via `StaticFileHandler` | Partially supported | An extension the application maps to `System.Web.StaticFileHandler` in `httpHandlers` serves with its `MimeMapping` content type; a missing file is a 404 (ledger P54). The shipped configuration maps no content extension — Framework left static files to IIS, so an application opts each extension in. Range, `If-Modified-Since`/`If-Range`, and ETag revalidation are unassessed |
 
+### Master pages and user controls
+
+No port seam exists here: composition rides untouched Reference Source over the
+already-ported parser, codegen, and control-tree substrate, and worked on first
+probe. Pinned by `MasterPagesOverKestrelTests` because the `.master`/`.ascx`
+build providers and `PartialCachingControl` reach the port-owned compilation
+and cache substrate for the first time.
+
+| Feature | State | Boundary |
+| --- | --- | --- |
+| Master page composition | Supported | `MasterPageFile`, `asp:Content`/`ContentPlaceHolder` (including placeholder default content), page `Title` override, `head runat="server"` |
+| Nested master pages | Supported | Two levels verified |
+| `@ MasterType` | Supported | The typed `Master` property compiles and reaches master members |
+| User controls | Supported | `@ Register Src` and runtime `LoadControl`; Framework's naming-container ID mangling (`MainContent_…`, `ctl00$…`) is pinned literally |
+| Postback through a master-hosted form | Supported | Event routing and event validation under the mangled names |
+| Fragment caching | Supported | `@ OutputCache` on a control replays the fragment while the page re-renders. Only `Duration` + `VaryByParam="none"` assessed; other `VaryBy*` axes, `Shared`, and `CachePolicy` are unassessed |
+| Config-level and dynamic masters | Unassessed | `<pages masterPageFile>` and `PreInit` assignment are untested rather than blocked |
+
 ## Request bodies
 
 | Feature | State | Boundary |

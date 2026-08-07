@@ -1,0 +1,30 @@
+<%@ Master Language="C#" %>
+<script runat="server">
+    public string ChromeText {
+        get { return ChromeLabel.Text; }
+        set { ChromeLabel.Text = value; }
+    }
+    protected void Page_Load(object sender, EventArgs e) {
+        // The master's Load runs after the content page's; a page that already set the
+        // chrome through the typed master must win.
+        if (ChromeLabel.Text.Length == 0) {
+            ChromeLabel.Text = "master-load-ran";
+        }
+    }
+</script>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title>Site master</title>
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server" />
+</head>
+<body>
+    <form id="TheForm" runat="server">
+    <div id="chrome"><asp:Label ID="ChromeLabel" runat="server" /></div>
+    <asp:ContentPlaceHolder ID="MainContent" runat="server">
+        <span id="placeholder-default">default-content</span>
+    </asp:ContentPlaceHolder>
+    <div id="footer">footer-from-master</div>
+    </form>
+</body>
+</html>
