@@ -32,6 +32,18 @@ each class its own process, so the reuse contract is exercised nowhere.
 - Move per-fixture `LiveScenario` instances to assembly fixtures (or an
   equivalent registry keyed by fixture name); keep correctness-isolated
   fixtures (timeout, abort, postback, body) on their dedicated processes.
+- The registry can live inside the existing class fixture — `GetOrAdd` on a
+  static map keyed by fixture name, so classes stay `IClassFixture` and
+  parallel — but the host's lifetime must pick a lane:
+  - **refcounted** (last class out kills the child): leak-proof, but classes
+    on the same fixture that never overlap bounce the count to zero and
+    respawn — worst-case scheduling pays every spawn again, just less
+    predictably;
+  - **keep-alive to run end**: one spawn guaranteed, but no class fixture ever
+    disposes the child, so an external owner must — a `ProcessExit` hook, or
+    an assembly fixture owning the registry with the class fixture as its
+    lookup façade. The latter is the honest end state; a keep-alive without an
+    owner rebuilds the orphaned-serve-host leak.
 - Measure: the win is ~one spawn per class saved (1–2 s each, currently paid
   concurrently) plus lower peak process/port count in CI; confirm it is worth
   the shared-tenancy invariant before converting.
