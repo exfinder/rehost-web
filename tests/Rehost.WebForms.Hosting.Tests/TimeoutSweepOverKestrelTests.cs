@@ -8,23 +8,16 @@ namespace Rehost.WebForms.Hosting.Tests;
 // abort: the page's own step completes (sweep-returned), and the timeout arrives at the step
 // boundary as Framework's error shape. One ApplicationError entry guards the one-shot flag,
 // which the POC re-threw at every later boundary.
-public sealed class TimeoutSweepOverKestrelTests(PageLiveScenario scenario)
-    : IClassFixture<PageLiveScenario>
+public sealed class TimeoutSweepOverKestrelTests(SweepLiveScenario scenario)
+    : IClassFixture<SweepLiveScenario>
 {
-    private async Task<string[]> StagesAsync(string token)
-    {
-        var prefix = "stage:" + token + ":";
-        return [.. (await scenario.Witness.EventsAsync())
-            .Where(e => e.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(e => e[prefix.Length..])];
-    }
-
     [Fact]
     public async Task Sweep_Delivers_The_Timeout_At_The_Step_Boundary()
     {
-        var response = await scenario.Client.GetAsync("/TimeoutSweep.aspx?wt=q1")
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/TimeoutSweep.aspx?wt=" + token)
             .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
-        var stages = await StagesAsync("q1");
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("Request timed out.");
@@ -41,9 +34,10 @@ public sealed class TimeoutSweepOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task ThreadAbortOnTimeout_False_Suppresses_Delivery_But_Cancels_The_Token()
     {
-        var response = await scenario.Client.GetAsync("/TimeoutSweep.aspx?wt=q2&optout=1")
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/TimeoutSweep.aspx?optout=1&wt=" + token)
             .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
-        var stages = await StagesAsync("q2");
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("sweep-page|");

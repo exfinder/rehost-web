@@ -13,19 +13,12 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     private static readonly string[] SkippedStages =
         ["PostRequestHandlerExecute", "ReleaseRequestState", "UpdateRequestCache"];
 
-    private async Task<string[]> StagesAsync(string token)
-    {
-        var prefix = "stage:" + token + ":";
-        return [.. (await scenario.Witness.EventsAsync())
-            .Where(e => e.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(e => e[prefix.Length..])];
-    }
-
     [Fact]
     public async Task End_Stops_The_Page_And_Skips_To_EndRequest()
     {
-        var response = await scenario.Client.GetAsync("/End.aspx?wt=e1");
-        var stages = await StagesAsync("e1");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/End.aspx?wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before-end|");
@@ -43,8 +36,9 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Swallowing_Catch_Cannot_Unlock_The_Response()
     {
-        var response = await scenario.Client.GetAsync("/EndSwallow.aspx?wt=s1");
-        var stages = await StagesAsync("s1");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/EndSwallow.aspx?wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before|");
@@ -58,8 +52,9 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Catch_By_ThreadAbortException_Name_Never_Observes_Termination()
     {
-        var response = await scenario.Client.GetAsync("/CatchTae.aspx?wt=t1");
-        var stages = await StagesAsync("t1");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/CatchTae.aspx?wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before|");
@@ -71,8 +66,9 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Redirect_Emits_Object_Moved_And_Terminates()
     {
-        var response = await scenario.Client.GetAsync("/Redirect.aspx?wt=r1");
-        var stages = await StagesAsync("r1");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/Redirect.aspx?wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe("/Default.aspx?value=r");
@@ -88,8 +84,9 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task End_In_A_Module_Event_Skips_The_Handler()
     {
-        var response = await scenario.Client.GetAsync("/Default.aspx?wt=m1&module-end=1");
-        var stages = await StagesAsync("m1");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/Default.aspx?module-end=1&wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("module|");

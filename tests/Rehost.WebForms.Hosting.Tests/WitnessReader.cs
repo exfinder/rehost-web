@@ -3,7 +3,8 @@ using System.Diagnostics;
 namespace Rehost.WebForms.Hosting.Tests;
 
 // Typed view over the fixture's /witness endpoint: in-memory server-side facts fetched over
-// HTTP. Nothing here touches the file journal.
+// HTTP. Nothing here touches the file journal. Only StagesAsync filters by token; the other
+// readers see every request the process served, so they belong to dedicated-host scenarios.
 internal sealed class WitnessReader(ScenarioClient client)
 {
     internal async Task<string[]> EventsAsync() =>
@@ -12,6 +13,14 @@ internal sealed class WitnessReader(ScenarioClient client)
 
     internal async Task<string[]> HandlerEntriesAsync() =>
         [.. (await EventsAsync()).Where(e => e.StartsWith("handler-entered:", StringComparison.Ordinal))];
+
+    internal async Task<string[]> StagesAsync(string token)
+    {
+        var prefix = "stage:" + token + ":";
+        return [.. (await EventsAsync())
+            .Where(e => e.StartsWith(prefix, StringComparison.Ordinal))
+            .Select(e => e[prefix.Length..])];
+    }
 
     internal async Task<string> WaitForAsync(string prefix, TimeSpan timeout)
     {

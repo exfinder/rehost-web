@@ -77,12 +77,12 @@ public sealed class ServerTransferOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task An_Error_Transfer_Renders_The_Error_Page_With_GetLastError()
     {
-        var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?xferr=1&wt=xe1");
-        var stages = (await scenario.Witness.EventsAsync())
-            .Where(e => e.StartsWith("stage:xe1:", StringComparison.Ordinal));
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?xferr=1&wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.Text.ShouldBe("error-page[last=HttpUnhandledException:boom-from-page]");
-        stages.ShouldContain(s => s.Contains("ApplicationError:HttpUnhandledException"));
+        stages.ShouldContain(s => s.StartsWith("ApplicationError:HttpUnhandledException", StringComparison.Ordinal));
     }
 
     [Fact]

@@ -67,6 +67,8 @@ public class LiveScenario : IDisposable
 
     internal string ApplicationPath { get; }
 
+    internal int HostProcessId => _process.Id;
+
     internal Uri Address { get; }
 
     internal ScenarioClient Client { get; }

@@ -14,13 +14,10 @@ public sealed class TimeoutOverKestrelTests(TimeoutLiveScenario scenario)
     {
         await scenario.Client.GetAsync("/Slow.aspx?ms=0");
 
-        var response = await scenario.Client.GetAsync("/Slow.aspx?ms=5000&wt=to1")
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync("/Slow.aspx?ms=5000&wt=" + token)
             .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
-        var prefix = "stage:to1:";
-        var stages = (await scenario.Witness.EventsAsync())
-            .Where(e => e.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(e => e[prefix.Length..])
-            .ToArray();
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("Request timed out.");

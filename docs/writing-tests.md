@@ -27,14 +27,14 @@ Walk down; stop at the first rung that fits.
    configuration, a cold/activation claim, on-disk mutation, process death —
    recorded in
    [the fixtures README](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md).
-   The host is shared by contract, not by accident: that each class currently
-   gets its own process is runner mechanics, never something a scenario may
-   rely on. Write it to stay correct with other classes' requests interleaved
-   on the same host — witness reads filtered by a unique `wt` token,
-   in-application state (page statics, cache entries) keyed per request, and
-   no assertion that the host saw only this class's traffic. A scenario that
-   cannot meet this has a structural reason for isolation; record it with the
-   fixture.
+   The host is shared for real: classes on the `page` fixture reach one
+   process through `ScenarioHostRegistry`, and `PageHostSharingTests` pins it.
+   Write every scenario to stay correct with other classes' requests
+   interleaved on the same host — witness reads filtered by a
+   `WitnessToken.For` token, in-application state (page statics, cache
+   entries) keyed per request, and no assertion that the host saw only this
+   class's traffic. A scenario that cannot meet this has a structural reason
+   for isolation; record it with the fixture.
 3. **Differential** — only where only Framework can decide the outcome
    ([ADR 0044](adr/0044-gate-differentials-by-evidence-not-by-slice.md)):
    the port replaced native/host-owned code, or must match a format it cannot

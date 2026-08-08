@@ -11,19 +11,13 @@ namespace Rehost.WebForms.Hosting.Tests;
 public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
-    private async Task<string[]> StagesAsync(string token)
-    {
-        var prefix = "stage:" + token + ":";
-        return [.. (await scenario.Witness.EventsAsync())
-            .Where(e => e.StartsWith(prefix, StringComparison.Ordinal))
-            .Select(e => e[prefix.Length..])];
-    }
-
     [Fact]
     public async Task EndRequest_Header_And_Cookie_Survive_Response_End()
     {
-        var response = await scenario.Client.GetAsync("/Amend.aspx?mode=end&stamp=1&wt=a1");
-        var stages = await StagesAsync("a1");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync(
+            "/Amend.aspx?mode=end&stamp=1&wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("amend-start|");
@@ -35,8 +29,10 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task EndRequest_Header_Survives_A_Terminating_Redirect()
     {
-        var response = await scenario.Client.GetAsync("/Amend.aspx?mode=redirect&stamp=1&wt=a2");
-        var stages = await StagesAsync("a2");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync(
+            "/Amend.aspx?mode=redirect&stamp=1&wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe("/Default.aspx?value=r");
@@ -48,8 +44,10 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task EndRequest_Header_Survives_CompleteRequest()
     {
-        var response = await scenario.Client.GetAsync("/Amend.aspx?mode=complete&stamp=1&wt=a3");
-        var stages = await StagesAsync("a3");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync(
+            "/Amend.aspx?mode=complete&stamp=1&wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("amend-start|amend-tail|");
@@ -68,7 +66,8 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     public async Task An_Ended_Response_States_Its_Exact_Content_Length()
     {
         var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address, "/Amend.aspx?mode=end&stamp=1&wt=a5");
+            scenario.Address,
+            "/Amend.aspx?mode=end&stamp=1&wt=" + WitnessToken.For(this));
         var (headers, body) = SplitRaw(raw);
 
         headers.ShouldStartWith("HTTP/1.1 200");
@@ -82,7 +81,8 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     public async Task A_Terminating_Redirect_States_Its_Exact_Content_Length()
     {
         var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address, "/Amend.aspx?mode=redirect&stamp=1&wt=a6");
+            scenario.Address,
+            "/Amend.aspx?mode=redirect&stamp=1&wt=" + WitnessToken.For(this));
         var (headers, body) = SplitRaw(raw);
 
         headers.ShouldStartWith("HTTP/1.1 302");
@@ -96,10 +96,11 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task A_Flush_After_End_In_EndRequest_Seals_And_Forfeits_The_Length()
     {
+        var token = WitnessToken.For(this);
         var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address, "/Amend.aspx?mode=end&stamp=1&fae=1&wt=a7");
+            scenario.Address, "/Amend.aspx?mode=end&stamp=1&fae=1&wt=" + token);
         var (headers, body) = SplitRaw(raw);
-        var stages = await StagesAsync("a7");
+        var stages = await scenario.Witness.StagesAsync(token);
 
         headers.ShouldStartWith("HTTP/1.1 200");
         body.ShouldContain("amend-start|");
@@ -112,8 +113,10 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task An_Application_Flush_Still_Seals_The_Headers()
     {
-        var response = await scenario.Client.GetAsync("/Amend.aspx?mode=flush&stamp=1&wt=a4");
-        var stages = await StagesAsync("a4");
+        var token = WitnessToken.For(this);
+        var response = await scenario.Client.GetAsync(
+            "/Amend.aspx?mode=flush&stamp=1&wt=" + token);
+        var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("amend-start|amend-tail|");
