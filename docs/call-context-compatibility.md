@@ -20,6 +20,14 @@ System.Web restores its internal
   [illogical call context isolation](follow-ups/illogical-call-context-isolation.md),
   required before the first asynchronous pipeline scenario.
 - `ILogicalThreadAffinative` values and host contexts flow.
+- `HostContext` survives await resumptions through a restore seam (ledger P63):
+  the wipe path raises a neutral hook, and System.Web's registered handler
+  re-establishes the context on threads whose associated `ThreadContext` serves
+  the same request — Framework's `AspNetHostExecutionContextManager` guard,
+  rebuilt at the only observation point the modern CLR leaves. `HostContext`
+  changes publish a replacement state object: captured `ExecutionContext`s alias
+  the published state, so in-place mutation would rewrite what an in-flight
+  await captured.
 - Remoting headers, principals, serialization, and internal context swapping
   are omitted because retained System.Web paths do not use them.
 

@@ -42,11 +42,18 @@ It surfaced as a roughly one-in-six flake in
 uses a dedicated thread, which makes it deterministic and leaves the defect
 untested.
 
-## Not reachable yet
+## Reachability
 
-The reached pipeline is synchronous, and `ThreadContext.Enter`/`Leave` set and
-clear `HttpContext.Current` on the request thread, where the heuristic is
-correct. Reachability arrives with the delayed-asynchronous scenario.
+The async-pages story (ledger P63) made flowed illogical state hot: every
+truly-pending await now wipes and — on request threads — restores through the
+`CallContext` restore hook. The oracle-pinned scenarios pass, and the restore
+path narrows the symptom's surface for `HttpContext.Current` on request-serving
+threads, but the suspended-state heuristic itself is unchanged: pool-thread
+reuse can still pop a stale matching state, and the non-affinative `SetData`
+slots still ride the heuristic alone. The story also made `HostContext`
+publication immutable (in-place mutation rewrote states captured
+`ExecutionContext`s still referenced), which removes one aliasing hazard the
+heuristic previously interacted with.
 
 ## Rejected: thread-owned illogical state
 
