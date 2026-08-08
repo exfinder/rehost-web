@@ -39,6 +39,76 @@ public sealed class AsyncPagesOverKestrelTests(PageLiveScenario scenario)
     }
 
     [Fact]
+    public async Task An_Apm_Task_Ends_And_Renders_With_The_Context_Restored()
+    {
+        var response = await scenario.Client.GetAsync("/async/ApmTask.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        var stages = ParseStages(response.Text);
+        stages["begin"].ShouldBe(("AspNetSynchronizationContext", "same"));
+        stages["end"].ShouldBe(("AspNetSynchronizationContext", "same"));
+        stages["render"].ShouldBe(("AspNetSynchronizationContext", "same"));
+    }
+
+    [Fact]
+    public async Task AddOnPreRenderCompleteAsync_Ends_With_The_Context_Restored()
+    {
+        var response = await scenario.Client.GetAsync("/async/PreRenderCplt.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        var stages = ParseStages(response.Text);
+        stages["begin"].ShouldBe(("AspNetSynchronizationContext", "same"));
+        stages["end"].ShouldBe(("AspNetSynchronizationContext", "same"));
+        stages["render"].ShouldBe(("AspNetSynchronizationContext", "same"));
+    }
+
+    [Fact]
+    public async Task ExecuteInParallel_Is_Refused_Under_The_TaskFriendly_Context()
+    {
+        var response = await scenario.Client.GetAsync("/async/ParallelTasks.aspx");
+
+        response.StatusCode.ShouldBe(500);
+        response.Text.ShouldContain("'executeInParallel'");
+        response.Text.ShouldContain("unsupported in the current application configuration");
+    }
+
+    [Fact]
+    public async Task Sequential_Apm_Tasks_Run_In_Registration_Order()
+    {
+        var response = await scenario.Client.GetAsync("/async/ParallelTasks.aspx?seq=1");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.Trim().ShouldBe("a-begin|a-end|b-begin|b-end");
+    }
+
+    [Fact]
+    public async Task A_CancellationToken_Task_Sees_A_Cancellable_Untripped_Token()
+    {
+        var response = await scenario.Client.GetAsync("/async/TokenTask.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.Trim().ShouldBe("start[canRequest=True]|done[cancelled=False]");
+    }
+
+    [Fact]
+    public async Task A_Task_Exceeding_AsyncTimeout_Fails_With_The_Page_Timeout_Error()
+    {
+        var response = await scenario.Client.GetAsync("/async/TokenTask.aspx?slow=1");
+
+        response.StatusCode.ShouldBe(500);
+        response.Text.ShouldContain("An asynchronous operation exceeded the page timeout.");
+    }
+
+    [Fact]
+    public async Task Response_End_Inside_A_Task_Suppresses_The_Tail()
+    {
+        var response = await scenario.Client.GetAsync("/async/EndInTask.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe("before-end|");
+    }
+
+    [Fact]
     public async Task An_Async_Void_Handler_Finishes_Before_Render_With_No_Stragglers()
     {
         var first = await scenario.Client.GetAsync("/async/VoidHandler.aspx?k=complete");

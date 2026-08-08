@@ -30,4 +30,18 @@ public sealed class TimeoutOverKestrelTests(TimeoutLiveScenario scenario)
         stages.ShouldContain("LastError-set");
         stages.ShouldNotContain("PostRequestHandlerExecute");
     }
+
+    // Framework never aborted a request pending in async: the sweep can only abort an executing
+    // thread, and there is none. Measured on 4.8.1 (executionTimeout=1, 17s pending task, past
+    // the 15s sweep tick): 200 with the page's own output. The cooperative scan here must make
+    // the same distinction — flag sync steps only, never async waits (the P53 deferral).
+    [Fact]
+    public async Task A_Pending_Async_Task_Is_Never_Timed_Out()
+    {
+        var response = await scenario.Client.GetAsync("/async/AsyncSlow.aspx")
+            .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldContain("completed[past-budget=True]");
+    }
 }
