@@ -22,6 +22,15 @@ internal sealed class CallContext
     [ThreadStatic]
     private static Stack<IllogicalState>? _suspendedIllogicalStates;
 
+    // ExecutionContext.Run wipes the illogical state, and modern .NET has no
+    // HostExecutionContextManager through which a host could re-establish it inside the run the
+    // way Framework did. This hook is that seam: on each wipe it receives the flowed HostContext
+    // and returns the value to re-establish on the current thread, or null to leave the wipe.
+    private static Func<object?, object?>? _hostContextRestorer;
+
+    internal static void RegisterHostContextRestorer(Func<object?, object?> restorer) =>
+        _hostContextRestorer = restorer;
+
     private CallContext()
     {
     }
@@ -85,14 +94,25 @@ internal sealed class CallContext
     private static void SetLogicalHostContext(object? value) =>
         LogicalStateSlot.Value = (LogicalStateSlot.Value ?? LogicalState.Empty).WithHostContext(value);
 
-    private static void SetIllogicalHostContext(object? value) =>
-        GetOrCreateIllogicalState().HostContext = value;
-
-    private static void ClearIllogicalHostContext()
+    // Captured ExecutionContexts keep references to the published state, so HostContext changes
+    // must replace the state object rather than mutate it; an in-place write would rewrite what
+    // an in-flight await captured (and the restore seam keys off the captured value).
+    private static void SetIllogicalHostContext(object? value)
     {
-        if (IllogicalStateSlot.Value is not null)
-            IllogicalStateSlot.Value.HostContext = null;
+        var current = IllogicalStateSlot.Value;
+        if (current is null)
+        {
+            if (value is null)
+                return;
+            IllogicalStateSlot.Value = new IllogicalState(value);
+            return;
+        }
+
+        if (!ReferenceEquals(current.HostContext, value))
+            IllogicalStateSlot.Value = current.WithHostContext(value);
     }
+
+    private static void ClearIllogicalHostContext() => SetIllogicalHostContext(null);
 
     private static IllogicalState GetOrCreateIllogicalState() =>
         IllogicalStateSlot.Value ??= new IllogicalState();
@@ -114,14 +134,38 @@ internal sealed class CallContext
             (_suspendedIllogicalStates ??= new Stack<IllogicalState>()).Push(args.PreviousValue);
 
         if (args.CurrentValue is not null)
-            IllogicalStateSlot.Value = null;
+        {
+            var restored = _hostContextRestorer?.Invoke(args.CurrentValue.HostContext);
+            IllogicalStateSlot.Value = restored is null ? null : new IllogicalState(restored);
+        }
     }
 
     private sealed class IllogicalState
     {
-        internal Dictionary<string, object?> Data { get; } = new();
+        internal IllogicalState()
+        {
+            Data = new Dictionary<string, object?>();
+        }
 
-        internal object? HostContext { get; set; }
+        internal IllogicalState(object? hostContext)
+            : this()
+        {
+            HostContext = hostContext;
+        }
+
+        private IllogicalState(Dictionary<string, object?> data, object? hostContext)
+        {
+            Data = data;
+            HostContext = hostContext;
+        }
+
+        // Shared between generations on purpose: illogical data never survives a flow (the wipe
+        // clears it), so only the owning thread observes it and in-place mutation stays invisible.
+        internal Dictionary<string, object?> Data { get; }
+
+        internal object? HostContext { get; }
+
+        internal IllogicalState WithHostContext(object? value) => new(Data, value);
     }
 
     private sealed class LogicalState
