@@ -28,8 +28,12 @@ internal sealed class CallContext
     // and returns the value to re-establish on the current thread, or null to leave the wipe.
     private static Func<object?, object?>? _hostContextRestorer;
 
-    internal static void RegisterHostContextRestorer(Func<object?, object?> restorer) =>
-        _hostContextRestorer = restorer;
+    internal static void RegisterHostContextRestorer(Func<object?, object?> restorer)
+    {
+        if (Interlocked.CompareExchange(ref _hostContextRestorer, restorer, null) is not null)
+            throw new InvalidOperationException(
+                "A host context restorer is already registered; the restorer is fixed for the process lifetime.");
+    }
 
     private CallContext()
     {

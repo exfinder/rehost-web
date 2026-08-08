@@ -126,5 +126,16 @@ public sealed class CallContextTests
         CallContext.FreeNamedDataSlot(illogicalName);
     }
 
+    [Fact]
+    public void A_Second_HostContext_Restorer_Registration_Is_Refused()
+    {
+        // System.Web's module initializer holds the first registration, as Framework's
+        // AppDomainManager held its one HostExecutionContextManager from AppDomain creation.
+        var exception = Should.Throw<InvalidOperationException>(
+            () => CallContext.RegisterHostContextRestorer(_ => null));
+
+        exception.Message.ShouldContain("already registered");
+    }
+
     private sealed class LogicalValue : ILogicalThreadAffinative;
 }
