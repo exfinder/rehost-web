@@ -88,6 +88,46 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Preflight_Rejects_The_Legacy_Synchronization_Context()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <appSettings>
+                <add key="aspnet:UseTaskFriendlySynchronizationContext" value="false" />
+              </appSettings>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        var exception = Should.Throw<PlatformNotSupportedException>(
+            () => ApplicationConfigurationPreflight.Validate(configuration));
+
+        exception.Message.ShouldContain("aspnet:UseTaskFriendlySynchronizationContext");
+        exception.Message.ShouldContain("task-friendly");
+    }
+
+    [Fact]
+    public void Preflight_Accepts_An_Explicit_TaskFriendly_Synchronization_Context()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <appSettings>
+                <add key="aspnet:UseTaskFriendlySynchronizationContext" value="true" />
+              </appSettings>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+    }
+
+    [Fact]
     public void Preflight_Reports_Malformed_Application_Config()
     {
         using var application = TemporaryApplication.Create();
