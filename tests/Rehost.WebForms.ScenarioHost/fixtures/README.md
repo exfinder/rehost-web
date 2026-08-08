@@ -18,3 +18,4 @@ meet the same bar.
 | `legacy-target` / `modern-target` | `<httpRuntime targetFramework>` divergence is the claim; activation is what is under test. |
 | `timeout` | `executionTimeout="1"` plus a 2-second `rehost:RequestTimeoutScanSeconds` would time out any other fixture's slow requests; the real-timer chain firing is the claim. |
 | `webserver` | `<system.webServer>` amendments over the shipped IIS baseline are the claim: removed and added extensions, extended and un-hidden segments, and an unhonored section tolerated. |
+| `asyncapp` | An async `AddOnBeginRequestAsync` module event is app-global — every request through the host awaits it — which would perturb every other fixture's scenarios; hosts the truly-pending `IHttpAsyncHandler` beside it. |
