@@ -1,6 +1,7 @@
 # Deferred request surfaces
 
-Status: current. Priority: high. Slice 4; depends on completed slices 0–3.
+Status: current. Priority: high. Scope owner for slices 4 and 5; depends on
+completed slices 0–3. The transport surfaces in the last bullet reach slice 6.
 
 The completed slices still exclude or only partially cover:
 
