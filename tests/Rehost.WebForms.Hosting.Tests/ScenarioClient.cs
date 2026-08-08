@@ -85,12 +85,17 @@ internal sealed class ScenarioClient : IDisposable
     internal Task<ScenarioResponse> PostBodyAsync(
         string path,
         byte[] body,
-        bool chunked = false,
+        BodyFraming framing = BodyFraming.Fixed,
         bool expectContinue = false)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
-            Content = chunked ? new DelayedChunkedContent(body) : new ByteArrayContent(body),
+            Content = framing switch
+            {
+                BodyFraming.Chunked => new ChunkedContent(body),
+                BodyFraming.DelayedChunked => new DelayedChunkedContent(body),
+                _ => new ByteArrayContent(body),
+            },
         };
         if (expectContinue)
         {

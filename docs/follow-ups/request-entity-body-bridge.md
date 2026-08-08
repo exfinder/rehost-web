@@ -124,6 +124,15 @@ Source revision `ec9fa9ae770d522a5b5f0607898044b7478574a3`.
   divergence is that an application catching broadly, or one with `customErrors`
   redirecting, can still turn the rejection into its own response; that matches
   Framework's handling of any mid-request `HttpException`.
+- A host rejection is answered the moment it fires and the connection closes with
+  the entity unread, so a client still uploading draws a reset from its next
+  write — on Windows that discards the response it had already received, and the
+  rejection reaches the client as a transport error instead of a status code.
+  A `maxRequestLength` breach does not behave this way on either runtime: System.Web
+  consumes the entity first and answers after the upload ends, which is what IIS
+  was measured doing for the same request. The divergence is therefore confined to
+  a host limit set below `maxRequestLength`; the shipped defaults — Kestrel
+  30,000,000 bytes against 4096 KB — never reach it.
 - Failure classification is by exception type, never by polling
   `RequestAborted`. The token is raised from a different path than the failing
   read, so a reset can surface first; classifying on it made the same client

@@ -22,15 +22,15 @@ public sealed class RequestBodyOverKestrelTests(
     [Fact]
     public async Task Fixed_And_Chunked_Bodies_Reach_All_Raw_Request_Surfaces()
     {
-        var surfaces = new (string Probe, string Mode, bool Chunked, bool ExpectContinue)[]
+        var surfaces = new (string Probe, string Mode, BodyFraming Framing, bool ExpectContinue)[]
         {
-            ("fixed-input", "input", false, false),
-            ("fixed-binary", "binary", false, false),
-            ("fixed-buffered", "buffered", false, false),
-            ("fixed-bufferless", "bufferless", false, false),
-            ("chunked-bufferless", "bufferless", true, false),
-            ("chunked-apm", "apm", true, false),
-            ("expect-continue", "bufferless", false, true),
+            ("fixed-input", "input", BodyFraming.Fixed, false),
+            ("fixed-binary", "binary", BodyFraming.Fixed, false),
+            ("fixed-buffered", "buffered", BodyFraming.Fixed, false),
+            ("fixed-bufferless", "bufferless", BodyFraming.Fixed, false),
+            ("chunked-bufferless", "bufferless", BodyFraming.DelayedChunked, false),
+            ("chunked-apm", "apm", BodyFraming.DelayedChunked, false),
+            ("expect-continue", "bufferless", BodyFraming.Fixed, true),
         };
 
         foreach (var surface in surfaces)
@@ -38,7 +38,7 @@ public sealed class RequestBodyOverKestrelTests(
             var response = await Client.PostBodyAsync(
                 "/body?mode=" + surface.Mode,
                 Encoding.UTF8.GetBytes("body:" + surface.Probe),
-                chunked: surface.Chunked,
+                surface.Framing,
                 expectContinue: surface.ExpectContinue);
 
             response.StatusCode.ShouldBe(200, surface.Probe);
@@ -75,7 +75,7 @@ public sealed class RequestBodyOverKestrelTests(
         var response = await Client.PostBodyAsync(
             "/body?mode=input",
             Enumerable.Repeat((byte)'c', 5000).ToArray(),
-            chunked: true);
+            BodyFraming.DelayedChunked);
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("Maximum request length exceeded");
@@ -90,7 +90,7 @@ public sealed class RequestBodyOverKestrelTests(
         var response = await run.Client.PostBodyAsync(
             "/body?mode=preload",
             Encoding.UTF8.GetBytes("body:preload-delayed"),
-            chunked: true);
+            BodyFraming.DelayedChunked);
 
         response.StatusCode.ShouldBe(200);
         response.Header("X-Read-Mode").ShouldBe("Buffered");
@@ -172,7 +172,7 @@ public sealed class RequestBodyOverKestrelTests(
         var response = await run.Client.PostBodyAsync(
             "/body?mode=input",
             Enumerable.Repeat((byte)'K', 2048).ToArray(),
-            chunked: true);
+            BodyFraming.Chunked);
 
         response.StatusCode.ShouldBe(413);
         (await run.Witness.HandlerEntriesAsync()).ShouldContain("handler-entered:input");
@@ -187,7 +187,7 @@ public sealed class RequestBodyOverKestrelTests(
         var response = await run.Client.PostBodyAsync(
             "/body?mode=input",
             Enumerable.Repeat((byte)'C', 2048).ToArray(),
-            chunked: true);
+            BodyFraming.Chunked);
 
         response.StatusCode.ShouldBe(302);
         (await run.Witness.HandlerEntriesAsync()).ShouldContain("handler-entered:input");
