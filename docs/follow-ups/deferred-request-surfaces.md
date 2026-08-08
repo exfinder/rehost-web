@@ -18,6 +18,8 @@ Exclusion here does not authorize silent fallback.
 
 Existing stories:
 [cookies](cookies.md);
+[session state](session-state.md), with [SQL mode](session-sql.md) and
+[state server mode](session-state-server.md) split out;
 [entity-body bridge](request-entity-body-bridge.md) and
 [postback and form parsing](postback-and-form-parsing.md), which together own
 POST bodies, forms, view state, control state, and multipart reads and
