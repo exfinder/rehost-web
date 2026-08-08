@@ -48,7 +48,8 @@ covered by `CodegenSubstrateTests`.
 | `App_WebReferences`, `.wsdl` | Unsupported | Fails naming the limitation |
 | `App_Browsers` | Unsupported | Fails naming the limitation. The built-in browser definitions still apply; only application-level `.browser` overrides are refused |
 | Visual Basic | Unsupported | Registered provider fails naming the limitation and the fix |
-| `.ascx`, `.master`, `.ashx`, `.asmx` | Unassessed | Providers registered, no slice compiles them yet. `.ashx` is mapped to `SimpleHandlerFactory` by the shipped configuration but nothing exercises it |
+| `.master`, `.ascx` | Supported | Their build providers compile on first request and `PartialCachingControl` reaches the cache substrate; covered by `MasterPagesOverKestrelTests` rather than `CodegenSubstrateTests`, with the composition boundaries under [master pages and user controls](#master-pages-and-user-controls) |
+| `.ashx`, `.asmx` | Unassessed | Providers registered, no slice compiles them yet. `.ashx` is mapped to `SimpleHandlerFactory` by the shipped configuration but nothing exercises it |
 
 ## Pages
 

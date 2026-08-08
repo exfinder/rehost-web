@@ -1,8 +1,9 @@
 # Cookies
 
-Status: implemented on macOS `arm64`; Windows `x64` pending. Slice 4, split out
-of [deferred request surfaces](deferred-request-surfaces.md). One open question
-is recorded at the end.
+Status: implemented and verified on macOS `arm64` and Windows `x64`. Slice 4,
+split out of [deferred request surfaces](deferred-request-surfaces.md). The one
+open question — non-ASCII response header values — is resolved at the end; its
+residuals are recorded there.
 
 ## Scope
 
