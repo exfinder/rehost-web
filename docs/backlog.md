@@ -15,10 +15,11 @@ Milestone 1 owns these outcomes:
   [IIS configuration layers](follow-ups/iis-integration-plan.md).
 - Friendly URL behavior and escaping:
   [route URL escaping](follow-ups/route-url-escaping.md).
-- Port the remaining template dependency closure only as reached:
-  ScriptManager assemblies, Optimization/WebForms integration, WebGrease, and
-  their required dependencies.
-- Restore bundle/script/static-asset behavior and mobile master/view switching.
+- Restore the frozen template's physical script/style path without changing its
+  sources: [script-stack plan](follow-ups/stock-template-script-stack.md).
+- Attempt the complete ASP.NET Web Optimization source compile, but validate and
+  claim only the bundle/debug paths reached by the template.
+- Restore remaining static-asset behavior and mobile master/view switching.
 - Add one package-built browser journey on Windows x64, Linux x64, and macOS
   arm64.
 
@@ -111,6 +112,27 @@ Milestone 1 owns these outcomes:
   [precompilation](follow-ups/precompiled-deployment.md).
 - `WebResource` identity without file-backed assemblies:
   [resource timestamps](follow-ups/web-resource-assembly-timestamps.md).
+
+### System.Web companion assemblies and client assets
+
+- Add default `ScriptManager` embedded-resource delivery through
+  `ScriptResource.axd`, including protected URLs, debug/release selection,
+  localization, caching, and deterministic generated Microsoft AJAX assets.
+- Embed the existing `System.Web` runtime scripts (`WebForms.js`, validation,
+  menu/tree/data-control scripts, and related assets) instead of relying on
+  application-local copies.
+- Define general-consumer JS content deployment for
+  `Rehost.WebForms.ScriptManager.Bundles`; its first slice registers names only.
+- Port partial rendering (`UpdatePanel`, `UpdateProgress`, server `Timer`, and
+  the async-postback wire protocol) when a milestone application reaches it.
+- Keep PageMethods, AJAX ASMX/application services, JSON service plumbing,
+  ListView/DataPager/query controls, LINQ-to-SQL, Dynamic Data, Entity, WCF/Data
+  Services build providers, Windows-coupled Client Services, and design-time
+  stacks outside the initial Extensions compile closure.
+- Validate production Optimization combination, caching, request handling, and
+  minification separately from the frozen template's debug-mode expansion.
+- Assess WebGrease image assembly/spriting separately; those paths use legacy
+  drawing/desktop types and are not covered by JS/CSS minifier execution.
 
 ## Parked
 

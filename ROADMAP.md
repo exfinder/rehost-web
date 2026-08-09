@@ -39,6 +39,17 @@ currently stops at missing `ScriptManager` APIs. Continue with ScriptManager,
 Optimization/WebForms integration, WebGrease, and other managed `System.Web`
 relatives only as reached. Their original managed sources remain preferred.
 
+The next vertical slice keeps the frozen application tree unchanged and restores
+only its full-page script/style path. It adds a source-compatible
+`Rehost.WebForms.Extensions` ScriptManager closure, attempts a full compile of
+the official ASP.NET Web Optimization source, ports its small WebForms
+`BundleReference`, and replaces the two legacy ScriptManager startup helpers
+with one `Rehost.WebForms.ScriptManager.Bundles` package. The existing physical
+JS/CSS files remain application-owned. General AJAX, embedded script delivery,
+and unrelated `System.Web.Extensions` APIs stay deferred. Detailed boundaries
+and evidence are in the
+[stock template script-stack plan](docs/follow-ups/stock-template-script-stack.md).
+
 Done means the frozen template application builds from local packages and its
 complete journey passes automatically on all three platforms. The existing
 custom sample remains a personal visual playground, not milestone evidence.
