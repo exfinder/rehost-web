@@ -3,10 +3,9 @@
 ## The gap
 
 Framework's root web configuration registers fourteen modules
-(`third_party/microsoft/framework-config/web.config:229-244`). The port's shipped
-root configuration registers **none** — there is no `<httpModules>` element in
-`configs/rehost-webforms.web.config` at all; only the section handler is declared
-(`configs/rehost-webforms.machine.config:28`).
+(`third_party/microsoft/framework-config/web.config:229-244`). The port now
+registers `UrlAuthorization` and `UrlRoutingModule-4.0` at their Framework
+positions. The remaining entries are still classified here.
 
 Three of the fourteen are explained by the rule the compatibility map already
 applies to `httpHandlers` — their types live in assemblies this port does not
@@ -18,11 +17,10 @@ carry:
 | `ServiceModel` | `System.ServiceModel.Activation` |
 | `ScriptModule-4.0` | `System.Web.Extensions` |
 
-The other eleven are types the port **does** carry, absent with no recorded
+The other nine are types the port **does** carry, absent with no recorded
 reason: `OutputCache`, `Session`, `WindowsAuthentication`,
 `FormsAuthentication`, `PassportAuthentication`, `RoleManager`,
-`UrlAuthorization`, `FileAuthorization`, `AnonymousIdentification`, `Profile`,
-`UrlRoutingModule-4.0`.
+`FileAuthorization`, `AnonymousIdentification`, and `Profile`.
 
 The [compatibility map](../compatibility.md) documents omissions from
 `buildProviders`, `pages/namespaces`, `pages/controls`, and `httpHandlers`.
@@ -43,26 +41,20 @@ precedent cannot simply be extended.
 
 ## The decision
 
-Either:
+The general policy remains undecided. This story registered
+`UrlAuthorization` and `UrlRoutingModule-4.0` because both were reached and
+tested, preserving Framework order. That does not decide whether the remaining
+baseline should eventually land whole or one behavior story at a time.
 
-- **Ship Framework's list whole** (minus the three absent assemblies), accepting
-  that eleven modules begin running on every request in a runtime that tests
-  none of them; or
-- **Grow the list one entry per landed story**, accepting that the shipped
-  baseline is no longer Framework-derived and that each story must remember to
-  add its row.
-
-[Session state](session-state.md) takes the second shape for its own entry — it
-adds `Session` when it lands — because it needed *an* answer for one module, not
-because the general rule is settled. If the first shape is chosen instead, that
-story's registration becomes redundant rather than wrong.
+[Session state](session-state.md) owns its future entry unless the broader
+policy is decided first.
 
 ## What it costs today
 
-Silence. An application configured for session state gets a null `Session` with
+An application configured for session state gets a null `Session` with
 no diagnostic, because the module that would serve it is not registered. The
-same is true of output caching, forms authentication, URL authorization, and
-routing. The project contract does not permit that silent fallback.
+same is true of output caching and forms authentication. The project contract
+does not permit that silent fallback.
 
 Each absent module needs classifying the way the IIS-role audit classifies its
 candidates — covered elsewhere, deliberately excluded, or missing and worth

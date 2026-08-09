@@ -1,0 +1,2 @@
+<%@ Master Language="C#" %>
+desktop-master|<asp:ContentPlaceHolder ID="MainContent" runat="server" />

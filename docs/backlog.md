@@ -15,9 +15,9 @@ Milestone 1 owns these outcomes:
   [IIS configuration layers](follow-ups/iis-integration-plan.md).
 - Friendly URL behavior and escaping:
   [route URL escaping](follow-ups/route-url-escaping.md).
-- Port the template's managed dependency closure only as reached: Friendly
-  URLs, Optimization/WebForms integration, ScriptManager assemblies,
-  WebGrease, and their required dependencies.
+- Port the remaining template dependency closure only as reached:
+  ScriptManager assemblies, Optimization/WebForms integration, WebGrease, and
+  their required dependencies.
 - Restore bundle/script/static-asset behavior and mobile master/view switching.
 - Add one package-built browser journey on Windows x64, Linux x64, and macOS
   arm64.

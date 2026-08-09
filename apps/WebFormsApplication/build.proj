@@ -12,6 +12,7 @@
   <ItemGroup>
     <LocalBuildSupportProject Include="$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
     <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
     <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
     <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
 
@@ -19,6 +20,9 @@
     <LocalPackageInput
       Include="$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/*.cs;$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/*.csproj;$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/*.resx"
       Exclude="$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/bin/**;$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/obj/**" />
+    <LocalPackageInput
+      Include="$(RepoRoot)src/Rehost.WebForms.FriendlyUrls/**/*.cs;$(RepoRoot)src/Rehost.WebForms.FriendlyUrls/**/*.csproj"
+      Exclude="$(RepoRoot)src/Rehost.WebForms.FriendlyUrls/**/bin/**;$(RepoRoot)src/Rehost.WebForms.FriendlyUrls/**/obj/**" />
     <LocalPackageInput
       Include="$(RepoRoot)src/Rehost.WebForms.WebServices/**/*.cs;$(RepoRoot)src/Rehost.WebForms.WebServices/**/*.csproj"
       Exclude="$(RepoRoot)src/Rehost.WebForms.WebServices/**/bin/**;$(RepoRoot)src/Rehost.WebForms.WebServices/**/obj/**" />
@@ -37,10 +41,12 @@
     <LocalPackageInput Include="$(RepoRoot)eng/RoslynReadyToRun.targets" />
 
     <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.ApplicationServices.$(LocalPackageVersion).nupkg" />
+    <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.FriendlyUrls.$(LocalPackageVersion).nupkg" />
     <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.WebServices.$(LocalPackageVersion).nupkg" />
     <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.Runtime.$(LocalPackageVersion).nupkg" />
 
     <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.applicationservices/$(LocalPackageVersion)" />
+    <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.friendlyurls/$(LocalPackageVersion)" />
     <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.webservices/$(LocalPackageVersion)" />
     <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.runtime/$(LocalPackageVersion)" />
 

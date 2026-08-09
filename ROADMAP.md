@@ -33,9 +33,11 @@ Work follows the browser journey:
 6. Gate the same browser-visible journey on Windows x64, Linux x64, and macOS
    arm64.
 
-Port `FriendlyUrls`, Optimization/WebForms integration, ScriptManager support,
-WebGrease, and other managed `System.Web` relatives only as the application
-reaches them. Their original managed sources remain the preferred baseline.
+The local `Rehost.WebForms.FriendlyUrls` package now covers steps 4–5 in a
+focused hosted fixture. The frozen application's package build consumes it and
+currently stops at missing `ScriptManager` APIs. Continue with ScriptManager,
+Optimization/WebForms integration, WebGrease, and other managed `System.Web`
+relatives only as reached. Their original managed sources remain preferred.
 
 Done means the frozen template application builds from local packages and its
 complete journey passes automatically on all three platforms. The existing

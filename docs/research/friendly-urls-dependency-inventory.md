@@ -2,14 +2,11 @@
 
 ## Result
 
-`Microsoft.AspNet.FriendlyUrls.Core` 1.0.2 has no missing `System.Web` API
-type in the current runtime. Its .NET Framework binary is still unusable: it
-references strong-named `System.Web, Version=4.0.0.0`, while this project ships
-`Rehost.WebForms.Runtime` and explicitly rejects Microsoft binary identity.
-The current sidecar demonstrates that boundary as `CS7069` for
-`RouteCollection` and `HttpContextBase` ([sidecar](../../apps/WebFormsApplication/WebFormsApplication.Rehost.csproj#L21-L31),
-[identity contract](../compatibility.md#application-and-deployment-model)). A
-source-compatible reimplementation is required.
+`Microsoft.AspNet.FriendlyUrls.Core` 1.0.2 had no missing `System.Web` API type
+in the runtime, but its strong-named Framework binary was unusable. The resulting
+source-compatible `Rehost.WebForms.FriendlyUrls` package now preserves the
+public API without imitating Microsoft identity. The frozen application consumes
+that package and builds through Friendly URLs to the next missing dependency.
 
 The restored official package was inspected without decompiling method bodies:
 NuSpec, XML documentation, PE assembly/type/member references, manifest
@@ -50,12 +47,12 @@ Defaults reached implicitly are static resolver caching, switch route name
 handler resolution, custom resolvers, model binding, and dynamic/disabled cache
 modes are not reached by this application.
 
-## Dependency classification
+## Pre-implementation dependency classification
 
-`Available` below means the referenced type and member names exist in the
-compiled `Rehost.WebForms.Runtime`; it is not a behavior claim. The runtime
-still classifies Friendly URLs and application routing as unassessed
-([compatibility map](../compatibility.md#requests-pages-and-responses)).
+`Available` below records whether referenced type and member names existed in
+the compiled runtime before implementation; it is not a current behavior claim.
+Current support lives in the
+[compatibility map](../compatibility.md#requests-pages-and-responses).
 
 | Phase | Implicit dependency | State | Minimum implication |
 | --- | --- | --- | --- |

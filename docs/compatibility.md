@@ -35,7 +35,8 @@ Evidence: `ApplicationBootstrapTests`, `ApplicationConfigurationPublicationTests
 ## Compilation and pages
 
 Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
-`PageOverKestrelTests`, and `MasterPagesOverKestrelTests`.
+`PageOverKestrelTests`, `MasterPagesOverKestrelTests`, and
+`FriendlyUrlsOverKestrelTests`.
 
 | Capability | State | Boundary |
 | --- | --- | --- |
@@ -47,19 +48,20 @@ Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
 | `.aspx` GET, `CodeFile`, common controls | Supported | Parsing, compilation, data binding, URL resolution, request validation, and warm reuse |
 | Master pages and user controls | Supported | Nested masters, typed master, runtime `LoadControl`, postback, and basic fragment caching |
 | Other controls, config/dynamic masters, and fragment-cache axes | Unassessed | Coverage is not inferred from related controls or runtime master selection |
-| `.ashx` | Unassessed | Handler/provider registered; no scenario compiles one |
+| `.ashx` | Supported | Direct and Friendly URL handler compilation/execution are exercised |
 | `.asmx`, `.wsdl`, `App_WebReferences` | Unsupported | General ASMX/SOAP and proxy generation are absent |
 | `App_Browsers` and `.xsd` typed DataSets | Unsupported | Built-in browser definitions remain; application browser compilation and XSD build-provider generation fail explicitly |
 | Precompiled deployment | Unassessed | Imported consumer path exists; neither consumer nor producer is proven cross-platform |
 | `System.Web.Extensions`, Dynamic Data, Entity, Mobile | Unassessed | Compatible sibling assemblies are absent; applications referencing them do not currently compile |
-| Friendly URLs, Optimization/WebForms, ScriptManager, WebGrease | Unassessed | No modern-compatible package set exists in this repository yet; Milestone 1 ports the reached managed closure |
+| Friendly URLs package/API | Partial | Modern package, original public API, routing, caching modes, redirects, authorization, generic handlers, helpers, model binding, mobile pages/masters, and view switching are exercised; advanced escaping and upstream IIS rewrite mapping remain open |
+| Optimization/WebForms, ScriptManager, WebGrease | Unassessed | No modern-compatible package set exists yet; the frozen application currently stops at missing ScriptManager APIs |
 
 ## Requests, pages, and responses
 
 Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 `MultipartPostback*`, `UploadSave*`, `RawRequestSave*`, `Cookies*`,
 `AsyncPages*`, `AsyncPipeline*`, `ResponseEnd*`, `HeaderAmendment*`,
-`ServerTransfer*`, and `StaticFiles*`.
+`ServerTransfer*`, `StaticFiles*`, and `FriendlyUrls*`.
 
 | Capability | State | Boundary |
 | --- | --- | --- |
@@ -87,7 +89,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | `Server.TransferRequest` | Unsupported | No integrated pipeline to re-enter; failure names `Transfer`/`Execute` alternatives |
 | Static files through System.Web | Partial | IIS-derived extension/type map, hidden segments, normal ranges, HEAD, validators, 304, and sendfile-backed commit are exercised; `If-Range` is unassessed |
 | Application `TransmitFile`/`WriteFile` with Unix-rooted paths | Partial | Framework's Windows-only physical/virtual classifier remains ambiguous; known-physical internal call sites use explicit seams |
-| Friendly URLs and application routing | Unassessed | Milestone 1 owns the first representative application gate |
+| Friendly URLs and application routing | Partial | Extensionless pages/handlers, segments, physical redirects, route ordering, mobile selection/switching, and direct/routed authorization are exercised; route escaping breadth and real upstream rewrite variables remain open |
 | Client-visible streaming, compression, WebSockets/upgrades | Unassessed | No transport contract or end-to-end gate exists |
 
 ## Configuration and IIS-derived behavior
@@ -103,7 +105,7 @@ Evidence: `IisServerConfigurationTests`, `WebServerAmendmentsOverKestrelTests`,
 | Per-folder `system.webServer` | Unassessed | IIS honors it; this port currently merges application root only |
 | Default documents, request-filtering limits, custom headers, `httpErrors` | Unassessed | Planned IIS-configuration tenants; Milestone 1 reaches default documents first |
 | `system.webServer/handlers` and `/modules` | Unassessed | Integrated registrations are not translated |
-| Framework root `httpModules` defaults | Partial | The shipped baseline currently registers none; session, auth, routing, and related services therefore do not activate by default |
+| Framework root `httpModules` defaults | Partial | `UrlAuthorization` and `UrlRoutingModule-4.0` are registered in Framework order; the remaining baseline modules await reached behavior and classification |
 | Framework root handler fallbacks | Partial | Forbidden-source extensions return managed 403 and unsupported verbs return 405; omitted assembly-owned handlers fall through rather than producing an actionable unsupported diagnostic |
 | Unhonored `system.webServer` sections | Unassessed | Currently tolerated/ignored; no behavior claim follows |
 | Configuration reload | Partial | Configuration is immutable for the generation, but file changes are not watched or diagnosed; operators must replace the process explicitly |
@@ -125,7 +127,7 @@ and explicit unsupported-contract tests.
 | Session state | Unassessed | Implementation is compiled but no root module is registered; `HttpContext.Session` is absent unless work explicitly enables it |
 | Forms authentication, roles, profiles, anonymous identity | Unassessed | Compiled surface is not a support claim; modules/providers are not gated |
 | Windows authentication and native health providers | Unassessed | Root modules are absent and no portable host translation is defined |
-| URL/file authorization and impersonation | Unassessed | Root modules are absent; identity switching is inert and explicit impersonation is not yet refused |
+| URL/file authorization and impersonation | Partial | URL authorization allow/deny is exercised for direct and Friendly URL requests; file authorization and impersonation remain unassessed |
 | General cache and output cache | Unassessed | Basic fragment caching is exercised through user controls; broader cache policy/provider behavior is not |
 | `WebResource.axd` | Unassessed | Handler is registered; file-backed assembly timestamp assumptions remain unresolved |
 | Application Services sibling assembly | Partial | Membership/provider types and in-process loader exist; no AppDomain isolation/unload |

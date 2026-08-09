@@ -18,6 +18,10 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
+    <ProjectReference
+      Include="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
     <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <!--
       Built but not referenced: the probe assembly must reach the application through the
@@ -38,6 +42,13 @@
     <Copy
       SourceFiles="@(_FixtureFile)"
       DestinationFiles="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="StageFriendlyUrlsAssembly" AfterTargets="StageScenarioFixtures" BeforeTargets="StageScenarioProbes">
+    <Copy
+      SourceFiles="../../src/Rehost.WebForms.FriendlyUrls/bin/$(Configuration)/net10.0/Rehost.WebForms.FriendlyUrls.dll"
+      DestinationFolder="$(TargetDir)fixtures/friendlyurls/bin"
       SkipUnchangedFiles="true" />
   </Target>
 

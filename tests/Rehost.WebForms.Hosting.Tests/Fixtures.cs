@@ -14,4 +14,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture Timeout = new("timeout");
     internal static readonly ScenarioFixture WebServer = new("webserver");
     internal static readonly ScenarioFixture AsyncApp = new("asyncapp");
+    internal static readonly ScenarioFixture FriendlyUrls = new("friendlyurls");
 }

@@ -1,0 +1,2 @@
+<%@ Master Language="C#" %>
+mobile-master|<asp:ContentPlaceHolder ID="MainContent" runat="server" />
