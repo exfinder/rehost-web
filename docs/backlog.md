@@ -21,8 +21,6 @@ Milestone 1 owns these outcomes:
 - Restore bundle/script/static-asset behavior and mobile master/view switching.
 - Add one package-built browser journey on Windows x64, Linux x64, and macOS
   arm64.
-- Pin `eng/linux-round.sh` itself to `linux/amd64`; callers currently need
-  `DOCKER_DEFAULT_PLATFORM=linux/amd64` on Arm hosts.
 
 ## Next
 

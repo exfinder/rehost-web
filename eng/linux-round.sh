@@ -6,10 +6,10 @@
 # requires a running Docker daemon. Uncommitted changes are not validated.
 set -euo pipefail
 
-exec docker run --rm \
+exec docker run --rm --platform linux/amd64 \
   -v "$PWD:/src:ro" \
-  -v rehost-linux-work:/work \
-  -v rehost-linux-nuget:/root/.nuget \
+  -v rehost-linux-amd64-work:/work \
+  -v rehost-linux-amd64-nuget:/root/.nuget \
   -e DOTNET_CLI_TELEMETRY_OPTOUT=1 \
   mcr.microsoft.com/dotnet/sdk:10.0 \
   bash -ec '
@@ -21,9 +21,5 @@ exec docker run --rm \
     git checkout -q -f FETCH_HEAD
     git clean -qfd
     dotnet build Rehost.WebForms.slnx -v q 2>&1 | tail -3
-    for p in tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj \
-             tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj \
-             tests/Rehost.WebForms.WebServices.Tests/Rehost.WebForms.WebServices.Tests.csproj; do
-      dotnet test "$p" --no-build
-    done
+    dotnet test Rehost.WebForms.slnx --no-build --max-parallel-test-modules 1
   '

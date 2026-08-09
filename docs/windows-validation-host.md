@@ -7,9 +7,8 @@ The clone may be reset freely. `winbox` is LAN-only; see the EC2 alternative
 below when it is unreachable.
 
 Cross-platform validation requires macOS arm64, Linux x64, and Windows x64 to
-pass. From an Arm host, run
-`DOCKER_DEFAULT_PLATFORM=linux/amd64 eng/linux-round.sh`; the script otherwise
-follows Docker's host architecture.
+pass. Linux uses [`eng/linux-round.sh`](../eng/linux-round.sh), which pins the
+container to `linux/amd64` on every host.
 Defects found so far — path separators, hidden-file classification, native
 libraries keeping the `.dll` extension off Unix — have each appeared on only one
 platform. See the cross-platform validation policy in `AGENTS.md`.

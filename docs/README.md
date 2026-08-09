@@ -36,7 +36,7 @@ top-level documents in this directory.
 - [Scenario fixture tenancy](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md)
 - [Parity rigs](../tests/parity/README.md)
 - [Windows validation](windows-validation-host.md)
-- Linux x64 validation: `DOCKER_DEFAULT_PLATFORM=linux/amd64 eng/linux-round.sh`
+- Linux x64 validation: `eng/linux-round.sh`
 - Documentation checks: `python3 eng/check-docs.py`
 
 Files under [`follow-ups/`](follow-ups/) contain unresolved design detail only;
