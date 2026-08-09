@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>WebFormsApplication</AssemblyName>
+    <RootNamespace>WebFormsApplication</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/feed</RestoreAdditionalProjectSources>
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/packages</RestorePackagesPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile
+      Include="WebFormsApplication/**/*.cs"
+      Exclude="WebFormsApplication/**/bin/**;WebFormsApplication/**/obj/**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.WebForms.Runtime" Version="[1.0.0-local]" />
+    <PackageReference Include="Antlr" Version="[3.5.0.2]" />
+    <PackageReference Include="Microsoft.AspNet.FriendlyUrls.Core" Version="[1.0.2]" />
+    <PackageReference Include="Microsoft.AspNet.ScriptManager.MSAjax" Version="[5.0.0]" />
+    <PackageReference Include="Microsoft.AspNet.ScriptManager.WebForms" Version="[5.0.0]" />
+    <PackageReference Include="Microsoft.AspNet.Web.Optimization" Version="[1.1.3]" />
+    <PackageReference Include="Microsoft.AspNet.Web.Optimization.WebForms" Version="[1.1.3]" />
+    <PackageReference Include="Microsoft.Web.Infrastructure" Version="[2.0.0]" />
+    <PackageReference Include="Newtonsoft.Json" Version="[13.0.3]" />
+    <PackageReference Include="WebGrease" Version="[1.6.0]" />
+  </ItemGroup>
+</Project>

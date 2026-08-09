@@ -1,0 +1,88 @@
+<Project DefaultTargets="Build">
+  <PropertyGroup>
+    <RepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', '..'))</RepoRoot>
+    <LocalPackageVersion>1.0.0-local</LocalPackageVersion>
+    <LocalPackageRoot>$(RepoRoot)artifacts/webforms-application/</LocalPackageRoot>
+    <LocalPackageFeed>$(LocalPackageRoot)feed/</LocalPackageFeed>
+    <LocalPackageCache>$(LocalPackageRoot)packages/</LocalPackageCache>
+    <SidecarProject>$(MSBuildThisFileDirectory)WebFormsApplication.Rehost.csproj</SidecarProject>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <LocalBuildSupportProject Include="$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
+    <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+    <LocalPackageProject Include="$(RepoRoot)src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+
+    <LocalPackageInput Include="$(RepoRoot)Directory.Packages.props;$(RepoRoot)global.json" />
+    <LocalPackageInput
+      Include="$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/*.cs;$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/*.csproj;$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/*.resx"
+      Exclude="$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/bin/**;$(RepoRoot)src/Rehost.WebForms.ApplicationServices/**/obj/**" />
+    <LocalPackageInput
+      Include="$(RepoRoot)src/Rehost.WebForms.WebServices/**/*.cs;$(RepoRoot)src/Rehost.WebForms.WebServices/**/*.csproj"
+      Exclude="$(RepoRoot)src/Rehost.WebForms.WebServices/**/bin/**;$(RepoRoot)src/Rehost.WebForms.WebServices/**/obj/**" />
+    <LocalPackageInput
+      Include="$(RepoRoot)src/Rehost.WebForms.Runtime/**/*.cs;$(RepoRoot)src/Rehost.WebForms.Runtime/**/*.csproj;$(RepoRoot)src/Rehost.WebForms.Runtime/**/*.config;$(RepoRoot)src/Rehost.WebForms.Runtime/**/*.targets"
+      Exclude="$(RepoRoot)src/Rehost.WebForms.Runtime/**/bin/**;$(RepoRoot)src/Rehost.WebForms.Runtime/**/obj/**" />
+    <LocalPackageInput Include="$(RepoRoot)src/System.Web.ApplicationServices.ReferenceSource/**/*.cs;$(RepoRoot)src/System.Web.ApplicationServices.ReferenceSource/**/*.resx" />
+    <LocalPackageInput Include="$(RepoRoot)src/System.Web.Services.ReferenceSource/**/*.cs" />
+    <LocalPackageInput Include="$(RepoRoot)src/System.Web.ReferenceSource/**/*.cs;$(RepoRoot)src/System.Web.ReferenceSource/**/*.cspp;$(RepoRoot)src/System.Web.ReferenceSource/**/*.txt" />
+    <LocalPackageInput
+      Include="$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/*.cs;$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/*.csproj;$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/*.json;$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/*.targets"
+      Exclude="$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/bin/**;$(RepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/obj/**" />
+    <LocalPackageInput
+      Include="$(RepoRoot)eng/Rehost.WebForms.ReferenceSource.BuildInputs/**/*.cs;$(RepoRoot)eng/Rehost.WebForms.ReferenceSource.BuildInputs/**/*.csproj"
+      Exclude="$(RepoRoot)eng/Rehost.WebForms.ReferenceSource.BuildInputs/**/bin/**;$(RepoRoot)eng/Rehost.WebForms.ReferenceSource.BuildInputs/**/obj/**" />
+    <LocalPackageInput Include="$(RepoRoot)eng/RoslynReadyToRun.targets" />
+
+    <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.ApplicationServices.$(LocalPackageVersion).nupkg" />
+    <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.WebServices.$(LocalPackageVersion).nupkg" />
+    <LocalPackageOutput Include="$(LocalPackageFeed)Rehost.WebForms.Runtime.$(LocalPackageVersion).nupkg" />
+
+    <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.applicationservices/$(LocalPackageVersion)" />
+    <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.webservices/$(LocalPackageVersion)" />
+    <LocalPackageCacheEntry Include="$(LocalPackageCache)rehost.webforms.runtime/$(LocalPackageVersion)" />
+
+    <SidecarRestoreState Include="$(MSBuildThisFileDirectory)obj/project.assets.json" />
+    <SidecarRestoreState Include="$(MSBuildThisFileDirectory)obj/project.nuget.cache" />
+    <SidecarRestoreState Include="$(MSBuildThisFileDirectory)obj/WebFormsApplication.Rehost.csproj.nuget.dgspec.json" />
+    <SidecarRestoreState Include="$(MSBuildThisFileDirectory)obj/WebFormsApplication.Rehost.csproj.nuget.g.props" />
+    <SidecarRestoreState Include="$(MSBuildThisFileDirectory)obj/WebFormsApplication.Rehost.csproj.nuget.g.targets" />
+  </ItemGroup>
+
+  <Target
+    Name="PackLocalPackages"
+    Inputs="@(LocalPackageInput)"
+    Outputs="@(LocalPackageOutput)">
+    <MakeDir Directories="$(LocalPackageFeed);$(LocalPackageCache)" />
+    <RemoveDir Directories="@(LocalPackageCacheEntry)" />
+    <Delete Files="@(SidecarRestoreState)" />
+    <MSBuild
+      Projects="@(LocalBuildSupportProject)"
+      Targets="Restore"
+      BuildInParallel="false"
+      Properties="Configuration=Release" />
+    <MSBuild
+      Projects="@(LocalPackageProject)"
+      Targets="Restore"
+      BuildInParallel="false"
+      Properties="Configuration=Release;PackageOutputPath=$(LocalPackageFeed);PackageVersion=$(LocalPackageVersion)" />
+    <MSBuild
+      Projects="@(LocalPackageProject)"
+      Targets="Pack"
+      BuildInParallel="false"
+      Properties="Configuration=Release;PackageOutputPath=$(LocalPackageFeed);PackageVersion=$(LocalPackageVersion);RehostWebFormsRestoreCompleted=true" />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="PackLocalPackages">
+    <MSBuild
+      Projects="$(SidecarProject)"
+      Targets="Restore"
+      Properties="Configuration=$(Configuration);RestoreAdditionalProjectSources=$(LocalPackageFeed);RestorePackagesPath=$(LocalPackageCache)" />
+    <MSBuild
+      Projects="$(SidecarProject)"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);RehostWebFormsRestoreCompleted=true;RestoreAdditionalProjectSources=$(LocalPackageFeed);RestorePackagesPath=$(LocalPackageCache)" />
+  </Target>
+</Project>
