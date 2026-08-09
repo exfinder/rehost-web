@@ -1,5 +1,8 @@
 **/bin/
 **/obj/
+apps/WebFormsApplication/.vs/
+apps/WebFormsApplication/packages/
+apps/WebFormsApplication/**/*.user
 artifacts/build/**/*.binlog
 artifacts/build/**/*.log
 artifacts/roslyn-r2r/
