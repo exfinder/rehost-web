@@ -1,8 +1,4 @@
----
-status: accepted
----
-
-# Derive the codegen directory from the application
+# Codegen storage
 
 Framework placed generated output under `Temporary ASP.NET Files` in the CLR
 install directory, or under `<compilation tempDirectory>`, then let the CLR

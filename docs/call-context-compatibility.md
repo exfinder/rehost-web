@@ -17,8 +17,7 @@ System.Web restores its internal
   only available approximation. Thread ownership is not a substitute: illogical
   data is execution-context-scoped, not thread-scoped, and clears across
   `ExecutionContext.Run` on the same thread. Tracked in
-  [illogical call context isolation](follow-ups/illogical-call-context-isolation.md),
-  required before the first asynchronous pipeline scenario.
+  [illogical call context isolation](follow-ups/illogical-call-context-isolation.md).
 - `ILogicalThreadAffinative` values and host contexts flow.
 - `HostContext` survives await resumptions through a restore seam (ledger P63):
   the wipe path raises a neutral hook, and System.Web's registered handler

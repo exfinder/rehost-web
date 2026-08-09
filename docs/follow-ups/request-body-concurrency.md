@@ -1,8 +1,8 @@
 # Request-body concurrency measurement
 
-Status: open. Scope: locate the throughput cliff created by synchronous
-`ReadEntityBody` blocking a pooled worker, and decide from numbers whether the
-threading model needs to change.
+Locate the throughput cliff created by synchronous `ReadEntityBody` blocking a
+pooled worker, then decide from measurements whether the threading model must
+change.
 
 ## Why
 
@@ -11,7 +11,7 @@ request thread. A synchronous entity read blocks that pooled worker awaiting a
 `PipeReader` completion that Kestrel schedules back onto the same pool, so
 blocked threads delay the very continuations that would release them. The
 reasoning, the bounds, and the rejected alternative are recorded in
-[ADR 0037](../adr/0037-do-not-assume-kestrel-synchronous-io.md).
+[request-body threading](../adr/0006-request-body-threading.md).
 
 Nothing measures it. Every existing body test is single-request, so the
 behavior under concurrent slow uploads is unobserved rather than known-good.
@@ -39,5 +39,4 @@ costs — a dedicated OS thread per such request, and thread-affinity assumption
 no test currently covers — if the cliff arrives at a concurrency a real
 deployment would reach.
 
-Run on both supported platforms; thread injection and pool sizing are not
-identical across them.
+Run on all supported platforms; thread injection and pool sizing differ.

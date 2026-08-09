@@ -5,9 +5,10 @@
 System.Web uses the .NET Framework-era WinForms ResX implementation from
 `dotnet/winforms` commit
 `195f89af79d550c2da1711c45c379efd63519ac1` as its behavioral baseline.
-The imported `SYSTEM_WEB` profile supports strings, whitespace, primitives,
-nulls, aliases, metadata, data nodes, relative file references, type
-conversion, and legacy serialized/drawing values.
+The imported `SYSTEM_WEB` profile handles strings, whitespace, primitives,
+nulls, aliases, metadata, data nodes, relative file references, and common type
+conversion. Legacy serialized and drawing paths remain but their breadth and
+platform behavior are unassessed.
 
 The donor closure lives under
 `src/Rehost.WebForms.Runtime/Compatibility/Resources/WinForms195f89a/`;

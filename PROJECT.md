@@ -1,104 +1,90 @@
 # Rehost WebForms
 
-## Goal
+## Mission
 
-Rehost classic ASP.NET Web Forms applications on modern .NET with minimal
-application-source changes. Preserve observable `System.Web` behavior while
-replacing dependencies on IIS, .NET Framework hosting, remoting, CAS, and
-Windows-only services.
+Enable predominantly managed ASP.NET Web Forms applications without intrinsic
+Windows or IIS dependencies to rebuild and run on modern .NET across Windows,
+Linux, and macOS with minimal application-source changes.
 
-Behavioral compatibility is the primary goal: semantics and observable
-behavior matter more than matching source shape for its own sake. A future
-consumer must never be surprised by behavior the port introduced that legacy
-`System.Web` did not have. Where the target platform cannot preserve some
-original behavior or logic, first recover the original intent—from Reference
-Source, documented rationale, or observed .NET Framework 4.8.1 behavior—and
-replicate that intent as closely as the portability contract allows, rather
-than substituting new logic.
-
-Compatibility claims are separate:
-
-- source/API compatibility;
-- page, control, pipeline, configuration, and provider behavior;
-- third-party control compatibility after recompilation;
-- binary identity compatibility.
-
-Source compatibility is necessary but not sufficient; behavioral fidelity
-takes precedence over it. Binary interchangeability with Microsoft's
-strong-named `System.Web` is not promised.
+Preserve observable `System.Web` behavior where the portability contract permits.
+When exact behavior cannot survive, recover the Framework intent, choose the
+narrowest portable substitute, and state the boundary. This is not a promise of
+complete `System.Web` coverage or binary interchangeability with Microsoft's
+strong-named assembly.
 
 ## Architecture
 
 - Microsoft Reference Source remains the implementation baseline.
 - `Rehost.WebForms.Runtime` owns the System.Web-compatible runtime.
-- Hosting integration belongs behind host-neutral boundaries, principally
-  `HttpWorkerRequest` and lifecycle services.
-- Application Services and Web Services use sibling assemblies where their
-  original assembly boundaries matter.
-- One Web Forms application runs per OS process, in the current AppDomain and
-  at full trust. Process replacement—not secondary AppDomains—provides restart
-  and isolation.
-- Runtime compilation remains in-process. Precompilation should be a separate
+- Hosting integration stays behind host-neutral request and lifecycle seams.
+- Application Services and Web Services keep sibling assembly boundaries where
+  their original identities matter.
+- One application runs per OS process, in the current AppDomain, at full trust.
+  Process replacement provides restart and isolation.
+- Runtime compilation remains in-process. Precompilation is a separate
   build-time or process-level facility.
+- Related managed Framework-era assemblies are ported only when a real
+  application reaches them.
 
-## Portability contract
+## Compatibility contract
 
-The supported runtime is cross-platform. A feature is not considered supported
-if it requires Windows, IIS, WindowsDesktop, the registry, COM, or DPAPI.
+- Behavioral compatibility outranks source-shape similarity.
+- Source/API, behavior, third-party-after-recompile, and binary-identity claims
+  are separate.
+- Supported behavior must pass on Windows x64, Linux x64, and macOS arm64.
+- A feature requiring Windows, IIS, WindowsDesktop, the registry, COM, or DPAPI
+  is not part of the portable runtime.
+- Infeasible behavior fails consistently with actionable diagnostics; it does
+  not become a Windows-only profile or silent no-op.
+- Framework and IIS observations decide uncertain application-visible behavior.
+  The portable execution engine remains the classic managed pipeline through
+  `HttpRuntime.ProcessRequest(HttpWorkerRequest)`.
+- Security-sensitive compatibility remains explicit. Legacy serialization and
+  resource payloads are trusted-input compatibility, not security boundaries.
+- Application fixtures and generated output run from disposable copies, never a
+  source checkout.
 
-When portable behavior is infeasible, reject the feature on every platform
-with actionable diagnostics. Do not create a Windows-only runtime profile or a
-silent no-op.
+Current support claims and evidence live only in
+[`docs/compatibility.md`](docs/compatibility.md).
 
-## Compatibility policy
+## Engineering principles
 
-- Preserve public shape and observable behavior only where supported by tests.
-- The behavioral oracle is Framework under IIS integrated mode — what
-  enterprise applications observed — while the execution machinery is the
-  classic managed engine; `UseIntegratedPipeline` branch sites resolve
-  per-site, mechanism keeping the classic branch and app-facing contract
-  resolving toward integrated-observable behavior with a ledger row
-  ([plan](docs/follow-ups/iis-integration-plan.md)).
-- Treat unsupported behavior as an explicit contract.
-- When original behavior cannot be reproduced, replicate the recovered
-  intent as closely as the portability contract permits; document the
-  residual gap instead of silently diverging.
-- Separate source compatibility from assembly/binary identity.
-- Require differential evidence where only Framework can decide the outcome;
-  port-local tests on both supported platforms are the gate everywhere else
-  (ADR 0044).
-- Keep security-sensitive compatibility opt-ins explicit. Legacy serialization
-  and resource payloads are trusted-input features, not security boundaries.
-- Never run compatibility tests or generated-output cleanup against a source
-  checkout; copy fixtures to disposable directories.
+- Explicit ownership over ambient discovery.
+- Deterministic behavior across machines and operating systems.
+- Validate before mutation; publish complete state atomically.
+- Immutable application generations and a small lifecycle state machine.
+- Fail near the source with actionable errors.
+- Small public APIs with deep compatibility machinery behind them.
+- Reuse authoritative parsers, validators, and runtime sequencing.
+- Add narrow host-neutral seams; modify imported code surgically.
+- Treat deployment assets, copy rules, and packaging as architecture.
+- Record uncertain scope as backlog, never accidental partial support.
 
 ## Authorities
 
 Use, in order:
 
 1. .NET Framework reference assemblies for public API shape.
-2. A .NET Framework 4.8.1 runtime for observable behavior.
+2. .NET Framework 4.8.1 and IIS for observable behavior.
 3. Pinned Microsoft Reference Source for implementation.
 4. Current official .NET sources for modern implementation patterns.
-5. Mono or earlier prototypes only as design evidence.
+5. Mono and earlier prototypes only as design evidence.
 
-Source revisions, licenses, and transformations live in
-[`docs/provenance`](docs/provenance/). Imported source should remain unchanged
-where practical. Any imported-source deviation must be narrow, explained by a
-compatibility decision, and covered by tests. Where shipped 4.8.1 binaries
-measurably disagree with the pinned snapshot (published source lags servicing),
-the binaries win; each such deviation is recorded in the provenance ledger with
-its reading.
+Source revisions, licenses, and transformations live under
+[`docs/provenance`](docs/provenance/). Imported source stays unchanged where
+practical. A shipped 4.8.1 binary reading overrides an older published-source
+snapshot when they measurably disagree.
 
-The Microsoft Reference Source and WinForms repositories are cloned locally at
-`../referencesource` and `../winforms`, alongside this repository.
+## Direction
 
-## Documentation policy
+[`ROADMAP.md`](ROADMAP.md) owns milestones and priority. The project advances by
+running increasingly representative applications, not by pursuing abstract API
+completeness. [`docs/backlog.md`](docs/backlog.md) preserves all unresolved work.
 
-Code and tests are canonical for implementation mechanics. Documentation keeps
-only current contracts, non-obvious rationale, authoritative provenance, and
-active risks. Historical build counts and implementation chronology belong in
-Git history.
+## Documentation
 
-Start with [`docs/README.md`](docs/README.md). Active work is indexed under
-[`docs/follow-ups`](docs/follow-ups/).
+Code and tests are canonical for mechanics. Documentation keeps current
+contracts, non-obvious rationale, compatibility boundaries, authoritative
+evidence, and unresolved work. Git keeps chronology.
+
+Start at [`docs/README.md`](docs/README.md).

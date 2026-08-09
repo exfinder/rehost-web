@@ -1,8 +1,6 @@
 # Session state: SQL mode
 
-Status: open. Priority: high. Split from [session state](session-state.md),
-which delivers InProc and Custom and refuses this mode at activation until this
-story lands.
+Split from [session state](session-state.md), which owns InProc and Custom.
 
 ## What is already true
 
@@ -99,8 +97,8 @@ be meaningful, so re-enabling is mechanical.
 ## Deferred: interop with live Framework nodes
 
 Sharing one `ASPState` database with running Framework nodes — write on 4.8.1,
-read here, and the reverse — is what would close the session hole in
-[mixed farm and incremental migration](mixed-farm-incremental-migration.md). It
+read here, and the reverse — would extend the mixed-farm contract recorded in
+[the compatibility map](../compatibility.md#state-security-and-ancillary-assemblies). It
 is deliberately **not** in this story, for two structural reasons:
 
 - The parity harness compares golden traces from two *independent* runs;
@@ -124,7 +122,7 @@ two runtimes unproven.
 - An application configured `mode="SQLServer"` reaches a provisioned `ASPState`
   database and the preflight refusal in [session state](session-state.md) is
   removed.
-- The two-host and contention claims pass on macOS `arm64` and Windows `x64`
-  before the tests are skipped.
+- The port-local two-host and contention claims pass on Windows x64, Linux x64,
+  and macOS arm64 before the tests are skipped.
 - The provisioning route, its Framework-machine dependency, and the skip
   decision are recorded where an infrastructure story can pick them up.

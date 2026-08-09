@@ -1,6 +1,6 @@
 # ASP.NET on IIS integrated mode: managed initialization state flow
 
-Status: background evidence, not a compatibility contract. Sources target
+Background evidence only, not a compatibility contract. Sources target
 Microsoft Reference Source revision
 `ec9fa9ae770d522a5b5f0607898044b7478574a3`.
 
@@ -43,8 +43,7 @@ callback, or source comment proves the edge.
 
 ## Decisions derived from this evidence
 
-- [Use the classic managed pipeline](../adr/0001-classic-managed-pipeline.md).
-- [Preserve Framework sequencing](../adr/0008-preserve-framework-sequencing.md).
-- [Do not preflight System.Web configuration](../adr/0032-do-not-preflight-system-web-configuration.md).
-- [Retain BuildManager initialization](../adr/0025-retain-build-manager-initialization.md).
-- [Classify failures by ownership and mutation](../adr/0038-classify-failures-by-ownership-and-mutation.md).
+- [Runtime compatibility model](../adr/0001-runtime-compatibility-model.md).
+- [Application lifecycle](../adr/0002-application-lifecycle.md).
+- [Configuration and compilation](../adr/0004-configuration-and-compilation.md).
+- [Host boundary](../adr/0003-host-boundary.md).

@@ -1,7 +1,5 @@
 # Runtime process policy
 
-Status: open. Priority: high. Depends on host lifecycle.
-
 ## Problem
 
 `HttpRuntime` configures thread-pool limits and monitors process/machine memory

@@ -1,7 +1,5 @@
 # Windows platform diagnostics
 
-Status: open. Priority: high. Depends on supported-feature reachability.
-
 ## Problem
 
 Runtime-wide `CA1416` suppression hides Windows-only calls involving IIS/native

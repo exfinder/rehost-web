@@ -1,6 +1,6 @@
 # Response buffer ownership and zero-copy send
 
-Status: open. Priority: low until a slice measures the copy. Ledger row: P28.
+Ledger row: P28.
 
 ## Background
 
@@ -50,11 +50,10 @@ only under concurrency.
 
 ## Decide when, not now
 
-Revisit when a slice both (a) measures the copy as material, and (b) has a real
-transport to validate the protocol against. Client-visible streaming and file
-send — where zero-copy actually earns its keep — are outside the first-slice
-transport envelope by
-[ADR 0035](../adr/0035-limit-the-first-slice-transport-envelope.md).
+Revisit when application evidence measures the copy as material and a real
+transport can validate the protocol. Client-visible streaming and public file
+send remain outside the current transport envelope; see
+[the host boundary](../adr/0003-host-boundary.md).
 
 ## Done when
 

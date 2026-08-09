@@ -1,7 +1,6 @@
 # AppDomain unload call sites and the SYSLIB0024 tripwire
 
-Status: open. Priority: medium. Ready to execute — one call site remains, and the
-change is scoped. Overlaps
+One call site remains and the change is scoped. Overlaps
 [process lifetime, shutdown, and recycle](process-lifetime-shutdown-and-recycle.md),
 which owns the wider drain/recycle policy.
 

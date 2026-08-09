@@ -1,7 +1,5 @@
 # Portable request diagnostics
 
-Status: open. Priority: high. Depends on request pipeline.
-
 ## Problem
 
 Startup, compilation, and request errors can enter Windows Event Log, WMI,

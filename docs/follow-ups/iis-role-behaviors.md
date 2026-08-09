@@ -1,7 +1,5 @@
 # IIS-role behaviors
 
-Status: open — audit not yet run. Priority: high.
-
 ## Problem
 
 On Framework, the observable contract was produced by two parties: System.Web

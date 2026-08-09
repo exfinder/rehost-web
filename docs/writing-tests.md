@@ -1,15 +1,15 @@
 # Writing tests
 
 The single entry point for test authors. The architecture behind these rules
-is [ADR 0045](adr/0045-test-architecture-after-the-suite-refactoring.md).
+is [the evidence and test ADR](adr/0005-evidence-and-test-strategy.md).
 
 ## Which kind of test
 
 Walk down; stop at the first rung that fits.
 
 0. **No standing test.** When the behavior is decided by untouched Reference
-   Source and its path runs entirely over substrate already exercised on both
-   platforms — no first reach of a platform-sensitive leaf (registry, native
+   Source and its path runs entirely over substrate already exercised on all
+   supported platforms — no first reach of a platform-sensitive leaf (registry, native
    interop, filesystem semantics, crypto, culture/NLS) — the default evidence
    is a recorded measurement (a Framework reading and/or one-off exploration)
    plus a compatibility-map entry. "Untouched" alone is not the guarantee;
@@ -36,7 +36,7 @@ Walk down; stop at the first rung that fits.
    class's traffic. A scenario that cannot meet this has a structural reason
    for isolation; record it with the fixture.
 3. **Differential** — only where only Framework can decide the outcome
-   ([ADR 0044](adr/0044-gate-differentials-by-evidence-not-by-slice.md)):
+   ([evidence strategy](adr/0005-evidence-and-test-strategy.md)):
    the port replaced native/host-owned code, or must match a format it cannot
    derive from its own inputs. Prefer a captured fixture (the
    `Framework.postback` pattern) or an ad-hoc oracle reading over a new golden
@@ -62,8 +62,7 @@ response.Text.ShouldContain("...");
   typed journal (`scenario.Journal`, a `ScenarioJournalReader`) or the
   fixture's witness endpoint (`scenario.Witness`). Live facts go through the
   witness; nothing new may poll the file journal — a polled shared file once
-  lost an abort marker to Windows sharing semantics (see
-  follow-ups/client-reset-detection-latency.md). Raw trace strings never
+  lost an abort marker to Windows sharing semantics. Raw trace strings never
   appear in tests —
   string negatives over a trace can pass vacuously.
 - Tests spawn at most one level of child processes, and only because a child
@@ -88,8 +87,9 @@ response.Text.ShouldContain("...");
   literal is the assertion.
 - One type per file; xUnit `[CollectionDefinition]` markers may co-locate with
   their fixture.
-- Both supported platforms must pass before work is reported done; the loop is
-  in [windows-validation-host.md](windows-validation-host.md). One solution
+- Windows x64, Linux x64, and macOS arm64 must pass before work is reported
+  done; the loop is in [windows-validation-host.md](windows-validation-host.md).
+  One solution
   build, then `dotnet test` per project or solution-wide — both are supported.
 
 ## Why not WebApplicationFactory
@@ -105,5 +105,4 @@ middleware with no runtime activation.
 ## Old-style tests
 
 Scenario tests written before the act→assert style migrate opportunistically;
-the remainder is tracked in the
-[refactoring plan's checklist](follow-ups/test-suite-refactoring.md).
+the remaining cleanup is listed in [the backlog](backlog.md#parked).

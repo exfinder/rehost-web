@@ -21,7 +21,7 @@ remain separate compatibility decisions.
 
 `Microsoft.CodeAnalysis.CSharp` compiles generated pages in process, because
 `System.CodeDom` cannot: its providers throw `PlatformNotSupportedException`.
-See [ADR 0041](adr/0041-compile-pages-through-a-configured-roslyn-provider.md).
+See [Roslyn page compilation](adr/0007-roslyn-page-compilation.md).
 
 The dependency is deployed, not merely built against, and costs roughly 10 MB.
 Nothing loads it until a compilation is requested. Compiling out of process
@@ -55,7 +55,7 @@ The package advances an assembly the shared framework also ships, which is the o
 case of that shape in this repository. Page compilation resolves it from the
 application's deployment directory rather than the shared framework, so the port
 compiles against the same version it runs on; see
-[runtime codegen](follow-ups/runtime-codegen-and-loading.md).
+[Roslyn page compilation](adr/0007-roslyn-page-compilation.md).
 
 Two mechanisms turn the runtime switch on, and neither subsumes the other. The
 shipped `build/Rehost.WebForms.Runtime.targets` writes it into the consuming
@@ -68,3 +68,10 @@ imports neither. Its limit is that `BinaryFormatter` caches the
 switch on first read: a process whose host code serialized before it first
 touched System.Web keeps the SDK default of `false`, and the initializer, though
 it runs and does set the switch, cannot undo that. Measured both ways.
+
+## ReadyToRun deployment
+
+In-repository hosts use precompiled Roslyn images to avoid first-process compiler
+JIT. This optimization is not shipped in the package. Package consumers that
+care about cold start publish with `PublishReadyToRun`, covering Roslyn, the
+runtime, and application assemblies without a Rehost-specific toolchain.

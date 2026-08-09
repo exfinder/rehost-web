@@ -10,7 +10,7 @@ Terms shared across architecture, contracts, and work packets:
   notifications and module inventory.
 - **Semantic oracle** — executable .NET Framework 4.8.1 reference used to settle
   uncertain observable behavior.
-- **Core differential probe** — equivalent recording-worker-request fixture run
+- **Managed differential probe** — equivalent recording-worker-request fixture run
   against the oracle and portable runtime, independent of transport.
 - **Adapter integration probe** — Kestrel test of translation, completion,
   disconnect, and host lifecycle; not evidence of internal System.Web parity.

@@ -1,8 +1,5 @@
 # Process lifetime, shutdown, and recycle
 
-Status: partially decided; full drain/disposal is slice 6. Terminal notification
-is required in slice 1.
-
 ## Problem
 
 Modern .NET cannot unload the current AppDomain. Imported shutdown paths still

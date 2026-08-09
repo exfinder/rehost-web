@@ -1,8 +1,4 @@
----
-status: accepted
----
-
-# Compile pages through a configured Roslyn provider
+# Roslyn page compilation
 
 `CSharpCodeProvider.CompileAssemblyFromFile` throws `PlatformNotSupportedException`
 on .NET, so nothing emits a generated assembly. Supply a `CodeDomProvider` that

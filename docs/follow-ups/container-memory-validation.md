@@ -1,14 +1,14 @@
 # Container memory validation
 
-Status: deferred. The memory monitors are ported and unit-covered; nothing in the
-suite exercises them against a real control group.
+The memory monitors are ported and unit-covered; nothing in the suite exercises
+them against a real control group.
 
 ## Why the existing gate is not enough
 
-Both supported platforms run without a memory limit imposed on themselves, and
+Routine platform rounds run without a memory limit imposed on themselves, and
 without one `TotalAvailableMemoryBytes` happens to equal physical RAM. The defect
-recorded in P17 and P21 — load overstated by a third — is therefore invisible on
-macOS and Windows alike, and a full green run on both would not have found it.
+recorded in P17 and P21 — load overstated by a third — is therefore invisible in
+all three rounds.
 
 `MemoryLimitsTests` reaches those shapes with synthetic readings, which proves
 the arithmetic but assumes the readings a container actually produces. That

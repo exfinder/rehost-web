@@ -1,76 +1,43 @@
-# Documentation map
+# Documentation
 
-Read [`../PROJECT.md`](../PROJECT.md) first. Load only documents relevant to the
-feature being changed. Code/tests are canonical for mechanics; these files
-record contracts and rationale. Shared terms live in
-[`../CONTEXT.md`](../CONTEXT.md).
+Read [`../PROJECT.md`](../PROJECT.md), then
+[`../ROADMAP.md`](../ROADMAP.md).
 
-## Accepted target design
+## Current truth
 
-These documents describe accepted direction; implementation may lag:
+- [Compatibility and evidence](compatibility.md)
+- [Unresolved work](backlog.md)
+- [Reached portability edges](portability-ledger.md)
 
-| Area | Document |
-| --- | --- |
-| Slice order and gates | [core-runtime-port-plan.md](core-runtime-port-plan.md) |
-| Test-suite refactoring | [follow-ups/test-suite-refactoring.md](follow-ups/test-suite-refactoring.md) |
-| Writing tests | [writing-tests.md](writing-tests.md) |
-| Decision rationale | [`adr/`](adr/) |
+## Runtime contracts
 
-## Implemented contracts
+- [Classic managed runtime model](classic-managed-runtime-model.md)
+- [Application bootstrap and configuration](application-bootstrap-and-configuration.md)
+- [AppDomain, remoting, and CAS boundary](appdomain-remoting-cas-compatibility.md)
+- [Call-context boundary](call-context-compatibility.md)
+- [Application Services assembly boundary](application-services-compatibility.md)
+- [Dependency decisions](dependency-decisions.md)
 
-| Area | Document |
-| --- | --- |
-| Runtime graph, sequencing, and lifetimes | [classic-managed-runtime-model.md](classic-managed-runtime-model.md) |
-| Application bootstrap/configuration | [application-bootstrap-and-configuration.md](application-bootstrap-and-configuration.md) |
-| First runnable request | [follow-ups/first-runnable-request.md](follow-ups/first-runnable-request.md) |
-| Runtime code generation/loading | [follow-ups/runtime-codegen-and-loading.md](follow-ups/runtime-codegen-and-loading.md) |
-| Dynamic `.aspx` GET | [follow-ups/dynamic-aspx-integration.md](follow-ups/dynamic-aspx-integration.md) |
-| Postback, forms, view state | [follow-ups/postback-and-form-parsing.md](follow-ups/postback-and-form-parsing.md) |
-| Cookies | [follow-ups/cookies.md](follow-ups/cookies.md) |
-| Response.End, request termination | [follow-ups/response-end-and-termination-plan.md](follow-ups/response-end-and-termination-plan.md) |
-| Mixed farm, incremental migration | [follow-ups/mixed-farm-incremental-migration.md](follow-ups/mixed-farm-incremental-migration.md) |
-| Supported feature boundaries | [follow-ups/compatibility-feature-map.md](follow-ups/compatibility-feature-map.md) |
-| Reached classic-path evidence | [portability-ledger.md](portability-ledger.md) |
-| AppDomain, remoting, full trust | [appdomain-remoting-cas-compatibility.md](appdomain-remoting-cas-compatibility.md) |
-| Application Services assembly/loader | [application-services-compatibility.md](application-services-compatibility.md) |
-| Async/thread call context | [call-context-compatibility.md](call-context-compatibility.md) |
-| Data protection base contract | [data-protector-compatibility.md](data-protector-compatibility.md) |
-| Enterprise Services/COM+ | [enterprise-services-compatibility.md](enterprise-services-compatibility.md) |
-| Generated System.Web inputs | [generated-build-inputs.md](generated-build-inputs.md) |
-| Generated resource API | [generated-resource-contracts.md](generated-resource-contracts.md) |
-| Remote IIS configuration | [remote-configuration-compatibility.md](remote-configuration-compatibility.md) |
-| ResX behavior | [resx-reader-compatibility.md](resx-reader-compatibility.md) |
-| SMTP configuration | [smtp-configuration-compatibility.md](smtp-configuration-compatibility.md) |
-| Web Services configuration/scope | [web-services-compatibility.md](web-services-compatibility.md) |
-| Windows administration/App_Browsers | [windows-administration-compatibility.md](windows-administration-compatibility.md) |
-| XSD build provider | [xsd-build-provider-compatibility.md](xsd-build-provider-compatibility.md) |
+Narrow compatibility rationale for generated inputs, resources, configuration,
+Web Services, administration, and excluded build providers remains in the other
+top-level documents in this directory.
 
-Windows x64 validation host and sync workflow:
-[windows-validation-host.md](windows-validation-host.md);
-CPU throttling of SSH-launched builds:
-[windows-host-cpu-throttling.md](windows-host-cpu-throttling.md).
-Package rationale:
-[dependency-decisions.md](dependency-decisions.md).
-Source/licensing records:
-[`provenance/`](provenance/).
-Framework configuration baseline:
-[framework-config-reference.md](framework-config-reference.md).
+## Decisions and evidence
 
-## Current milestone
+- [Current architecture decisions](adr/README.md)
+- [Background research](research/)
+- [Source and transformation records](provenance/)
+- [Framework configuration reference](framework-config-reference.md)
+- [IIS configuration reference](iis-config-reference.md)
 
-[Deferred request surfaces](follow-ups/deferred-request-surfaces.md), slice 4:
-bridge request bodies, then add server forms, postback, view state, and uploads.
-Slices 0–3 pass their gates on macOS `arm64` and Windows `x64`. The entity-body
-bridge, postback, forms, view state, control state, and read-only multipart are
-verified on both; the oracle-session commitment is resolved under ADR 0045
-(captures gate it — see the postback follow-up). A postback captured
-from a Framework node replays here, so a load-balanced farm may span both
-runtimes and an application can move a node at a time:
-[mixed farm and incremental migration](follow-ups/mixed-farm-incremental-migration.md).
-The abort flake is resolved — a trace-journal file-sharing race in the
-harness, not a runtime defect; reset detection was correct throughout:
-[client-reset detection latency](follow-ups/client-reset-detection-latency.md).
+## Contributor workflow
 
-The [port plan](core-runtime-port-plan.md) owns ordering and cross-slice gates.
-Each follow-up owns its status, dependencies, remaining decisions, and
-acceptance criteria. Later work is under [`follow-ups/`](follow-ups/).
+- [Writing tests](writing-tests.md)
+- [Scenario fixture tenancy](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md)
+- [Parity rigs](../tests/parity/README.md)
+- [Windows validation](windows-validation-host.md)
+- Linux x64 validation: `DOCKER_DEFAULT_PLATFORM=linux/amd64 eng/linux-round.sh`
+- Documentation checks: `python3 eng/check-docs.py`
+
+Files under [`follow-ups/`](follow-ups/) contain unresolved design detail only;
+[`backlog.md`](backlog.md) is the complete index and priority authority.

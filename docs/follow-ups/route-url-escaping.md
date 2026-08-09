@@ -1,7 +1,5 @@
 # Route URL escaping
 
-Status: open. Priority: medium. Depends on .NET Framework differential fixtures.
-
 ## Problem
 
 Outbound routing uses obsolete `Uri.EscapeUriString`. Direct replacement with

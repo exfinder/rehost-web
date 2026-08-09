@@ -1,6 +1,6 @@
 # Web Services compatibility
 
-## Supported
+## Implemented surface
 
 `Rehost.WebForms.WebServices` supplies only the configuration surface currently
 required by System.Web:
@@ -12,7 +12,7 @@ required by System.Web:
 
 This is not an ASMX/SOAP compatibility claim.
 
-## Unsupported
+## Excluded surface
 
 - `.wsdl` build-provider proxy generation;
 - `Application_WebReferences` discovery/proxy generation;

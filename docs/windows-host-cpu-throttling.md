@@ -7,7 +7,7 @@ Anything launched over SSH has no foreground presence, so Windows assigns it
   preference;
 - core frequency is clamped, on both core types.
 
-Measured on `winbox`, full suite, 163 tests:
+Measured on `winbox`, full suite at the time:
 
 | | time | failures |
 | --- | --- | --- |

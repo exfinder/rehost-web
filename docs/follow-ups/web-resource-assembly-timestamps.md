@@ -1,7 +1,5 @@
 # WebResource assembly timestamps
 
-Status: open. Priority: medium. Depends on supported publishing models.
-
 ## Problem
 
 `AssemblyResourceLoader` uses obsolete `AssemblyName.CodeBase` and assumes a

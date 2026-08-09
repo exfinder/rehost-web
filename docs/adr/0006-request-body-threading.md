@@ -1,18 +1,13 @@
----
-status: accepted
----
+# Request-body threading
 
-# Do not assume Kestrel synchronous I/O
-
-Keep Kestrel `AllowSynchronousIO` disabled by default. The later request-body
-slice must probe Framework body-read behavior and design an asynchronous
-Kestrel producer that serves System.Web synchronous and asynchronous
-`HttpWorkerRequest` reads.
+Keep Kestrel `AllowSynchronousIO` disabled. The adapter's asynchronous Kestrel
+producer serves System.Web synchronous and asynchronous `HttpWorkerRequest`
+reads without eagerly buffering every body.
 
 A legacy synchronous read may still occupy its managed pipeline thread.
-Enabling Kestrel synchronous stream I/O is an explicit evidence-backed fallback,
-not the default architecture. Eagerly buffering every request body before
-System.Web is not assumed to be compatible.
+Enabling Kestrel synchronous stream I/O is not part of the contract. Eagerly
+buffering every request body before System.Web would change bufferless-read
+semantics.
 
 ## Thread-pool coupling
 

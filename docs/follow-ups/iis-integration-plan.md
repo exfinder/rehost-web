@@ -1,10 +1,9 @@
 # IIS integration: configuration subsystem and layered behaviors
 
-Status: decisions ratified and slice 1 delivered 2026-08-07 (ledger P60):
-the Layer-0 collection core, the shipped `applicationHost` baseline, and the
-`staticContent` + hidden-segments tenants with app-root amendments. Staged
-tenants and Layer-1 middleware remain open below. Priority: high.
-Delivery vehicle for what the [IIS-role audit](iis-role-behaviors.md)
+Ledger P60 delivered the Layer-0 collection core, shipped `applicationHost`
+baseline, and `staticContent` plus hidden-segment tenants with app-root
+amendments. This file owns staged tenants and Layer-1 middleware. It is the
+delivery vehicle for what the [IIS-role audit](iis-role-behaviors.md)
 classifies as missing-worth-restoring; supersedes the ad-hoc shape P58/P59
 used (compiled-in tables patched per story).
 
@@ -57,9 +56,9 @@ Request-agnostic; everything else consumes it, nothing else parses XML.
   diffable against upstream.
 - **Core model — the keyed collection**: IIS config is uniformly "ordered
   collection, keyed add/remove/clear, attribute defaults from schema,
-  `preCondition` filters". Built once, schema-true, with IIS's strict
-  semantics (duplicate `add` and `remove`-of-absent are errors — verified
-  by probe, not assumed). `preCondition` evaluation: `integratedMode` →
+  `preCondition` filters". Built once, schema-true, with measured semantics:
+  duplicate `add` is an error and removing an absent key is tolerated.
+  `preCondition` evaluation: `integratedMode` →
   true, `runtimeVersionv4.0` → true, `managedHandler` → per-tenant policy.
 - **Merge hierarchy**: shipped baseline → application root `web.config`.
   Per-folder `web.config` depth is a ratification decision (below).
@@ -156,7 +155,7 @@ order readings.
    (integrated-only events, `Response.Headers`, `TransferRequest`, module
    sequencing) resolve toward integrated-observable behavior with a ledger
    row each, catalogued by the audit.
-1. **Slice 1 tenants**: `staticContent` plus the hidden-segments
+1. **Foundation tenants**: `staticContent` plus the hidden-segments
    migration — two differently-shaped tenants prove the collection core;
    both behaviors are already pinned by shipped tests.
 2. **Merge depth**: app root only; per-folder is an explicit recorded
@@ -174,7 +173,7 @@ order readings.
 4. **Handlers/modules**: staged end-state with its own later plan and
    readings; the expected forcing consumer is the session-state story
    (async session module registration lives in `<modules>`).
-5. **Parked P60 draft**: discarded entirely; slice 1 starts clean from this
+5. **Parked P60 draft**: discarded entirely; the foundation starts clean from this
    plan, regenerating data from the golden cache.
 
 ## Relationship to existing work

@@ -10,7 +10,7 @@ Launch to usable login ~1m40s. Idle-stop after 60 min; `ssh win-oracle` wakes it
 
 ## Measurements
 
-| | cold build | warm | suite (235) | peak RAM |
+| | cold build | warm | historical suite | peak RAM |
 |---|---|---|---|---|
 | t3a.medium 2/4 | 481s | 34s | ~200s | 3353 / 4028 |
 | t3a.xlarge 4/16 | 305s | 21s | 164s | 4479 / 16220 |
@@ -58,11 +58,10 @@ so every wake throttles to baseline within minutes.
 ## Test suite
 
 `dotnet test Rehost.WebForms.slnx` (whole solution) is supported: after the
-2026-08 suite refactoring it passed three consecutive clean runs (243/243) on
-this 4-vCPU host with no parallelism capping. The historical `*OverKestrel*`
-cross-project flake predated the process consolidation, and the abort-scenario
-flake is resolved — it was a trace-journal file-sharing race in the harness
-(`docs/follow-ups/client-reset-detection-latency.md`).
+2026-08 suite refactoring it passed three consecutive clean runs on this 4-vCPU
+host with no parallelism capping. The historical `*OverKestrel*`
+cross-project flake predated process consolidation. The abort-scenario flake was
+a trace-journal file-sharing race in the harness and is resolved.
 
 The parity hosts are ordinary members of the main solution; building it (in
 any configuration) is all the parity gates need.

@@ -1,7 +1,5 @@
 # Session state
 
-Status: open. Priority: high. Slice 5.
-
 Scope: `sessionState` `mode="InProc"` and `mode="Custom"`. The other two modes
 and the shipped module list are owned elsewhere: [SQL mode](session-sql.md),
 [state server mode](session-state-server.md),
@@ -19,9 +17,8 @@ registers it (`third_party/microsoft/framework-config/web.config:231`). Only the
 section handlers are declared here
 (`configs/rehost-webforms.machine.config:28,40-41`).
 
-An application configured for session state therefore gets silence, which is the
-silent fallback [deferred request surfaces](deferred-request-surfaces.md) rules
-out.
+An application configured for session state therefore gets silence, which the
+project contract rules out.
 
 ## Scope
 
@@ -81,7 +78,7 @@ mode it never exercises starts on Framework and refuses here. `trust` and
 
 ## Evidence
 
-Three claims, both supported platforms. None needs a container, a service, or a
+Three claims, all supported platforms. None needs a container, a service, or a
 tunnel, so nothing here is skipped.
 
 1. **Round-trip.** A value written during one request is read during the next
@@ -136,7 +133,7 @@ no `HttpContext` — territory where this port has previously found divergence
 
 - `Session` is registered in the shipped root configuration and an application
   observes a working `HttpContext.Session` with no configuration of its own.
-- The three evidence claims pass on macOS `arm64` and Windows `x64`.
+- The three evidence claims pass on Windows x64, Linux x64, and macOS arm64.
 - Preflight refuses `SQLServer` and `StateServer` with the wordings above, and a
   test fails if either refusal is removed.
 - The compatibility map carries rows for both delivered modes, the two

@@ -1,7 +1,5 @@
 # Silent exception swallowing in imported Reference Source
 
-Status: open. Priority: medium. Depends on nothing; blocked on a noise policy.
-
 ## Problem
 
 Imported Reference Source contains 204 `catch` blocks with empty bodies across

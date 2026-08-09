@@ -1,8 +1,6 @@
 # Session state: state server mode
 
-Status: open, blocked on a decision. Priority: low. Split from
-[session state](session-state.md), which refuses this mode at activation until
-this story lands.
+Split from [session state](session-state.md).
 
 ## The blocker
 

@@ -1,8 +1,5 @@
 # Illogical CallContext isolation and HttpContext.Current
 
-Status: open. Priority: required before the delayed-asynchronous scenario of
-[ADR 0031](../adr/0031-require-the-first-slice-parity-gate.md).
-
 ## Background
 
 .NET Framework kept illogical call context data in the `ExecutionContext` and

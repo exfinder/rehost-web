@@ -1,7 +1,5 @@
 # Configuration reload and process restart
 
-Status: open. Priority: low. Depends on process lifetime/shutdown and recycle.
-
 ## Problem
 
 Bootstrap configuration is immutable and file watching is disabled. Framework

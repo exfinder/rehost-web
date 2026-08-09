@@ -3,11 +3,11 @@
 ## Contract
 
 - One Web Forms application and one `HostingEnvironment` per OS process.
-- The host registers one process-scoped application owner before application
-  code or System.Web activation. First routed request activates it.
+- Static bootstrap binds one application before listen. The first routed
+  request lazily creates the hosting environment.
 - Execution is always full trust.
-- Current-AppDomain request processing, configuration, runtime compilation,
-  local application inspection, and local object registration remain supported.
+- Current-AppDomain request processing retains configuration, runtime
+  compilation, local application inspection, and local object registration.
 - `ObjectHandle` may wrap a local reference only; it provides no proxy,
   serialization, lease, or isolation.
 - Dynamic assemblies are in-process, executable, and non-collectible.

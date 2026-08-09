@@ -1,8 +1,8 @@
 # Web Site vs Web Application Project models
 
-Status: open. Priority: low to document, but the WAP model is the primary
-compatibility target: real enterprise Web Forms applications are
-overwhelmingly WAPs, and everything exercised so far is Web Site-shaped.
+The WAP model is the primary compatibility target and
+[Milestone 1](../../ROADMAP.md#current--milestone-1-stock-visual-studio-application)
+owns its first package-built application gate.
 
 ## The two models
 

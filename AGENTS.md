@@ -80,7 +80,8 @@ If `dotnet build` hangs in Codex CLI, retry with `--maxcpucount:1`.
 
 ## Cross-platform validation
 
-Both supported platforms must pass before work is reported as done. Defects so
+Windows x64, Linux x64, and macOS arm64 must pass before work is reported as
+done. Defects so
 far have appeared on only one of them: path separators, hidden-file
 classification, and native libraries carrying the `.dll` extension off Unix.
 
@@ -91,7 +92,8 @@ Case-sensitive-filesystem branches are triggered by a filesystem, not an OS:
 the routine macOS suite exercises them on a disposable case-sensitive APFS
 volume (`CaseSensitiveDirectory` fixtures; the same tests skip on
 Windows/NTFS, which cannot express the situation). A story touching them also
-runs one Linux round on the deployment-target OS: `eng/linux-round.sh`
+runs one Linux x64 round on the deployment-target OS:
+`DOCKER_DEFAULT_PLATFORM=linux/amd64 eng/linux-round.sh`
 (committed HEAD only, like a Windows round).
 
 Cross-process synchronization uses a named `Mutex`. It is the only named

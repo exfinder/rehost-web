@@ -1,7 +1,5 @@
 # Shipped HTTP modules
 
-Status: open. Priority: high. Depends on nothing; blocked on a rule, not on work.
-
 ## The gap
 
 Framework's root web configuration registers fourteen modules
@@ -26,13 +24,10 @@ reason: `OutputCache`, `Session`, `WindowsAuthentication`,
 `UrlAuthorization`, `FileAuthorization`, `AnonymousIdentification`, `Profile`,
 `UrlRoutingModule-4.0`.
 
-The compatibility map's "Shipped root configuration" table documents omissions
-from `buildProviders`, `pages/namespaces`, `pages/controls`, `httpHandlers`, and
-`browserCaps/result`. Dropping an entire collection is a larger divergence than
-any row in that table and has no entry. Separately,
-[minimal-pipeline-feature-profile.md](minimal-pipeline-feature-profile.md)
-asserts that "Product defaults remain Framework-derived", which for this
-collection is not currently true.
+The [compatibility map](../compatibility.md) documents omissions from
+`buildProviders`, `pages/namespaces`, `pages/controls`, and `httpHandlers`.
+Dropping an entire collection is a larger divergence; the rest of the product
+baseline is Framework-derived, while this collection is the known exception.
 
 ## Why the existing rule does not transfer
 
@@ -67,8 +62,7 @@ story's registration becomes redundant rather than wrong.
 Silence. An application configured for session state gets a null `Session` with
 no diagnostic, because the module that would serve it is not registered. The
 same is true of output caching, forms authentication, URL authorization, and
-routing. [Deferred request surfaces](deferred-request-surfaces.md) rules out
-exactly this: "Exclusion here does not authorize silent fallback."
+routing. The project contract does not permit that silent fallback.
 
 Each absent module needs classifying the way the IIS-role audit classifies its
 candidates — covered elsewhere, deliberately excluded, or missing and worth
@@ -78,7 +72,4 @@ restoring — rather than being absent by accident.
 
 - Every one of Framework's fourteen entries is either registered, recorded as
   assembly-absent, or recorded as a deliberate exclusion with a reason.
-- The compatibility map's shipped-configuration table carries an `httpModules`
-  row.
-- `minimal-pipeline-feature-profile.md`'s "Framework-derived defaults" claim is
-  either true or amended.
+- The compatibility map's shipped-configuration row is updated.

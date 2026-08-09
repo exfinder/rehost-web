@@ -1,15 +1,12 @@
 # Precompiled deployment
 
-Status: not started (2026-08-06). PROJECT.md already scopes this:
-"Precompilation should be a separate build-time or process-level facility."
 This records what exists, the shape of the work, and the decisions it needs.
-Nothing here is committed to.
 
 ## Motivation
 
 With Roslyn prejitted and a `PublishReadyToRun` publish, the sample
 application's first request measures ~600 ms against an empty codegen root and
-~150 ms against a warm one ([roslyn-compile-cold-start](roslyn-compile-cold-start.md)).
+~150 ms against a warm one (historical local measurement).
 The remaining ~450 ms is real page compilation, paid on every process start —
 and process replacement is the restart model. Framework's answer was
 `aspnet_compiler`: compile at deployment time, serve from precompiled
@@ -79,6 +76,6 @@ layout on Framework (`aspnet_compiler` on the oracle), point the port's
 consumer path at it, and see how far `IsPrecompiledApp` serving gets. That
 sizes the consumer gap before any producer design is argued about.
 
-Related: [roslyn-compile-cold-start](roslyn-compile-cold-start.md),
-[runtime-codegen-and-loading](runtime-codegen-and-loading.md),
-[web-site-vs-wap-project-models](web-site-vs-wap-project-models.md).
+Related: [Roslyn page compilation](../adr/0007-roslyn-page-compilation.md),
+[codegen storage](../adr/0008-codegen-storage.md), and
+[Web Site versus WAP](web-site-vs-wap-project-models.md).

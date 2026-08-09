@@ -1,14 +1,13 @@
 # Application bootstrap and configuration
 
-Status: implemented through slice 3. Later transport and lifecycle extensions
-remain under [`follow-ups`](follow-ups/).
+This document describes the current implementation. The intended owner-based
+lifecycle remains in [ADR 0002](adr/0002-application-lifecycle.md).
 
 ## Host contract
 
-The host creates one process-scoped `WebFormsApplication` from immutable
-options. Registration does not load application code, create a
-`HostingEnvironment`, or mutate legacy global state. The first routed request
-single-flights activation.
+`AddRehostWebForms` builds `WebFormsApplicationOptions` and calls the static
+`WebFormsApplication.Initialize` synchronously. Initialization must complete
+before the host listens and may be called exactly once per process.
 
 Required options:
 
@@ -16,84 +15,83 @@ Required options:
 - absolute existing physical application root;
 - absolute virtual root (`/` or an application subpath).
 
-Optional `CompilationTempDirectory` supplies the writable root for generated
-output. It is the same level as `<compilation tempDirectory>`, which it
-overrides; a configured value that disagrees fails preflight as conflicting
-ownership. Absent both, the root is
-`{Path.GetTempPath()}/rehost-webforms-tempfiles`. A read-only or ephemeral
-container filesystem is the case the option exists for.
+Machine and root-web configuration paths are optional. When omitted, they
+default to the `configs` directory under `AppContext.BaseDirectory`.
+`CompilationTempDirectory` optionally supplies the writable root for generated
+output. It overrides `<compilation tempDirectory>`; disagreement fails
+preflight. Absent both, the root is
+`{Path.GetTempPath()}/rehost-webforms-tempfiles`.
 
 The physical root is normalized with `Path.GetFullPath`, retains filesystem
-casing, and is stored with a trailing platform directory separator. The
-virtual root rejects relative paths, backslashes, query/fragment text, and
-literal traversal segments. The compilation temp directory is normalized with
-`Path.GetFullPath` without a trailing separator, and must not name a file.
+casing, and receives a trailing platform directory separator. The virtual root
+rejects relative paths, backslashes, query/fragment text, and literal traversal
+segments. The compilation temp directory is normalized without a trailing
+separator and must not name a file.
 
-Registration does not resolve symlinks or establish descendant containment;
+Bootstrap does not resolve symlinks or establish descendant containment;
 [portable path mapping](follow-ups/portable-path-mapping-and-containment.md)
 owns that boundary.
 
-Host registration validates without global mutation and may be retried after a
-validation failure. Once activation begins mutating legacy global state, only
-one attempt is allowed. An escaping activation failure is terminal for that
-generation; failures owned by the managed request pipeline retain their
-Framework scope and error processing.
+## One-shot state and publication
+
+The bootstrap state is:
+
+`Uninitialized -> Initializing -> Initialized | Faulted`
+
+Initialization:
+
+1. acquires the single initialization attempt;
+2. normalizes options and configuration paths;
+3. loads the portable IIS baseline;
+4. opens mapped System.Web configuration and validates required files,
+   sections, target framework, trust, reload policy, and codegen storage;
+5. validates then writes the legacy current-AppDomain application slots;
+6. publishes the IIS configuration, immutable bootstrap configuration, and
+   `Initialized` state.
+
+A failure publishes `Faulted`; retry is unavailable. AppDomain-slot writes are
+rolled back when the binding operation itself fails. A later failure may leave
+global state mutated, so process replacement is required.
 
 ## Configuration sources
 
-Build and package consumers receive versioned portable baselines under the
-host output directory:
+The host output carries:
 
 ```text
 configs/rehost-webforms.machine.config
 configs/rehost-webforms.web.config
+configs/rehost-webforms.applicationHost.config
 ```
 
-Packaging publishes versioned baseline assets deterministically. The owning
-host passes their absolute paths during registration; runtime code does not
-discover them from `AppContext.BaseDirectory` or Runtime assembly location.
+The first two paths may be overridden explicitly. The IIS baseline is resolved
+beside the selected machine configuration file. The optional application file
+is `<physical-root>/web.config`; missing means baseline inheritance only.
 
-The application configuration source is optional
-`<physical-root>/web.config`. Missing application configuration means baseline
-inheritance only. Arbitrary external application configuration paths are not
-supported in this iteration.
+The machine and root-web baselines adapt pinned .NET Framework 4.8.1
+configuration. Assembly-identity and portability deltas are inventoried in
+[dependency decisions](dependency-decisions.md) and the
+[portability ledger](portability-ledger.md).
 
-The machine baseline adapts the pinned System.Web configuration vocabulary.
-Root-web defaults are derived structurally from pinned .NET Framework 4.8.1
-configuration. Every assembly-identity or portability delta is inventoried.
-First-slice fixtures clear inherited handlers and modules before registering
-their probe components.
+## Activation and shutdown
 
-## Validation and commit
+Bootstrap is separate from managed-pipeline activation. `UseRehostWebForms`
+registers host-stop cleanup. The first routed request evaluates a thread-safe
+`Lazy<ClassicPipelineDispatcher>` and calls `ApplicationManager.CreateObject`.
+That retained path creates the current-AppDomain `HostingEnvironment`, installs
+mapped configuration, initializes `HttpRuntime`, and creates the registered
+dispatcher. The same request then enters `HttpRuntime.ProcessRequest`.
 
-Before global mutation, registration:
+Host shutdown stops the registered dispatcher, requests application shutdown,
+and closes `ApplicationManager`. No runtime-originated host-stop notification
+is currently wired.
 
-1. validates and opens each required file;
-2. validates application identity, physical and virtual roots, and any supplied
-   compilation temp directory; and
-3. verifies no conflicting process-wide application binding exists.
-
-Registration does not open mapped System.Web configuration or eagerly resolve
-application sections. The retained `HostingEnvironment` and
-`HttpRuntime.HostingInit` sequence owns configuration installation, parsing,
-inheritance, caching, and diagnostics. Portable policy checks occur where that
-sequence normally consumes the relevant section.
-
-During activation, the immutable binding is mirrored into current-AppDomain
-data slots required by imported code. These values are explicit owner output,
-not IIS/ambient identity. Binding failure restores prior slots where reliable;
-an escape after global mutation requests terminal host shutdown. The
-host-neutral current-AppDomain leaf rejects conflicting roots, IIS Express,
-native configuration tokens, and reload.
-
-## Portability and lifecycle
+## Portability boundary
 
 - One application per process/current AppDomain.
-- No IIS, registry, runtime-assembly-location, or secondary-AppDomain lookup.
-- Configuration is immutable for process lifetime; changes require restart.
+- Configuration is immutable; changes require process replacement.
+- No IIS, registry, secondary-AppDomain, or native configuration-token lookup.
 - Runtime always uses full trust.
 - `FEATURE_PAL` is not defined by the Runtime project. Narrow portable
   deviations retain Framework behavior under `NETFRAMEWORK`.
 
-Configuration reload/restart design:
-[configuration reload](follow-ups/configuration-reload-and-process-restart.md).
+Open lifecycle work is indexed in the [backlog](backlog.md).

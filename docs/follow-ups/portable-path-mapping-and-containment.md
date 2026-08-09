@@ -1,7 +1,5 @@
 # Portable path mapping and containment
 
-Status: open. Priority: high. Depends on host filesystem contract.
-
 ## Problem
 
 System.Web mixes URL paths, configuration paths, and physical paths. Replacing
@@ -17,6 +15,11 @@ filesystems can change behavior or escape the application root.
 - Path-info and extension boundary parsing.
 - Symlink policy and behavior for invalid/encoded traversal.
 - Compatibility behavior for Windows-shaped input on non-Windows hosts.
+- Explicit known-physical seams when reached in server includes, configured
+  master pages, sitemap providers, controls/data sources/mail, and disabled FCN
+  call sites; rooted Unix strings cannot identify intent by shape.
+- Cross-filesystem enumeration ordering and wildcard `bin` assembly-loading
+  failures, without swallowing unrelated load errors.
 
 ## Verification
 

@@ -6,7 +6,10 @@ in a dedicated persistent clone at `C:\Users\sshuser\source\repos\rehost-webform
 The clone may be reset freely. `winbox` is LAN-only; see the EC2 alternative
 below when it is unreachable.
 
-Cross-platform validation requires both macOS arm64 and Windows x64 to pass.
+Cross-platform validation requires macOS arm64, Linux x64, and Windows x64 to
+pass. From an Arm host, run
+`DOCKER_DEFAULT_PLATFORM=linux/amd64 eng/linux-round.sh`; the script otherwise
+follows Docker's host architecture.
 Defects found so far — path separators, hidden-file classification, native
 libraries keeping the `.dll` extension off Unix — have each appeared on only one
 platform. See the cross-platform validation policy in `AGENTS.md`.
@@ -144,9 +147,7 @@ The rig's sources are committed at [`eng/wire-rig`](../eng/wire-rig)
 the `Web-Server`/`Web-Asp-Net45` features if absent and creates the `WireRig`
 IIS site on port 8099), `read.ps1 -Path '/page.aspx?...'` (raw capture,
 printed ISO-8859-1). Add stimuli by editing the probe pages and re-reading;
-record rows as W-numbered readings in the consuming story doc
-(first use: W1–W6 in
-[response-end-and-termination-plan](follow-ups/response-end-and-termination-plan.md)).
+record the result near the consuming contract or portability-ledger row.
 
 Probe before coding an assumption about IIS: readings have repeatedly
 contradicted beliefs already written down — `remove`-of-absent is tolerated

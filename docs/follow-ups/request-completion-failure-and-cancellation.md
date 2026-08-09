@@ -1,7 +1,5 @@
 # Request completion, failure, and cancellation
 
-Status: open. Priority: highest. Depends on ASP.NET Core host adapter.
-
 ## Problem
 
 System.Web completion is callback-based while ASP.NET Core awaits a task.

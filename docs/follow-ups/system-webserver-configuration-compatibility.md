@@ -1,7 +1,7 @@
 # `system.webServer` configuration compatibility
 
-Status: open. Priority: high. Owns portable treatment of application
-`system.webServer` configuration without introducing an IIS runtime profile.
+Owns portable treatment of application `system.webServer` configuration without
+introducing an IIS runtime profile.
 
 ## Goal
 
@@ -21,7 +21,8 @@ an application `web.config`. Kestrel has a separate host-owned request-body
 limit; `system.web/httpRuntime/maxRequestLength` remains System.Web-owned and
 uses kilobytes.
 
-Slice 4 keeps the Kestrel and System.Web limits independent, observes the
+The request-body implementation keeps Kestrel and System.Web limits independent,
+observes the
 smaller effective limit, and leaves rejection with the owning layer. This
 follow-up owns only the additional migration contract for legacy
 `maxAllowedContentLength` input.

@@ -37,7 +37,7 @@ the Windows box.
 
 ## Golden lifecycle
 
-Regeneration is exceptional ([ADR 0045](../../docs/adr/0045-test-architecture-after-the-suite-refactoring.md)):
+Regeneration is exceptional ([evidence strategy](../../docs/adr/0005-evidence-and-test-strategy.md)):
 new Framework evidence prefers captured fixtures or ad-hoc oracle readings.
 When a regeneration is warranted, on the Windows box
 ([eng/win-oracle.md](../../eng/win-oracle.md)):

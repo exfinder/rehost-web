@@ -1,8 +1,5 @@
 # Machine key and ViewState bootstrap
 
-Status: open, narrowed by the postback slice. Priority: high. Depends on
-security/persistence policy.
-
 ## Settled by the postback slice
 
 - **Portable algorithms are not a decision.** P40 refuses any application below
@@ -24,7 +21,7 @@ security/persistence policy.
 - **A shared literal key interchanges view state with Framework.** Payloads
   rendered on either runtime are accepted by the other, which is what a farm
   spanning both requires. The scope and the untested edges are in
-  [mixed farm and incremental migration](mixed-farm-incremental-migration.md);
+  [compatibility map](../compatibility.md#state-security-and-ancillary-assemblies);
   the requirement it places here is that key sharing has a consumer depending on
   it, not only a fixture.
 
@@ -90,8 +87,8 @@ among them — differed between processes. Framework keeps those branches and it
 non-randomized BCL algorithms; this port always uses the stable algorithm the
 method already carries. The two do not produce the same eight hex characters.
 
-The divergence is permanent and cannot be normalized away under
-[ADR 0029](../adr/0029-require-strict-differential-comparison.md). It is why the
+The divergence is permanent and cannot be normalized away under the
+[evidence strategy](../adr/0005-evidence-and-test-strategy.md). It is why the
 slice-3 fixture carries no server form. It is now recorded as ledger P48, and a
 Framework differential over a page with a form compares the field's shape rather
 than its value.

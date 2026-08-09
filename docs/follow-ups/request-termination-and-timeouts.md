@@ -1,55 +1,24 @@
-# Request termination and timeouts
+# Connection abort at request timeout
 
-Status: done 2026-08-05, except the connection-abort follow-up below. The
-termination half is owned by
-[Response.End and request termination](response-end-and-termination-plan.md)
-(ledger P52); the timeout half is delivered cooperatively (ledger P53) with
-its boundaries in the
-[compatibility map](compatibility-feature-map.md#request-termination).
+`executionTimeout` is currently cooperative: it cancels
+`Request.TimedOutToken`, flags the request, and unwinds at the next pipeline-step
+boundary. A synchronous step that never returns cannot be stopped safely on
+modern .NET.
 
-## Delivered policy
+Bounding the client's wait requires the hosting layer to abort the connection at
+the budget while leaving the server-side step to finish or remain stuck.
+Framework used the same transport escape when timeout occurred during a
+synchronous entity-body read.
 
-Modern .NET cannot force-stop arbitrary synchronous user code, so
-`executionTimeout` is enforced cooperatively. The 15-second scan (period
-configurable via the port-owned `rehost:RequestTimeoutScanSeconds` appSettings
-key) keeps Framework's guards — cancellable period, `ThreadAbortOnTimeout`,
-`debug`/debugger suppression — cancels `Request.TimedOutToken` at budget, and
-flags the request; the step-boundary checkpoint consumes the flag once and
-unwinds through the termination recovery, producing Framework's
-*"Request timed out."* `Application_Error` and 500.
+## Required work
 
-Named boundary: a running step is never interrupted. The 500 arrives when the
-current step returns — late for a single slow call, never for a step that never
-returns. Async steps are not flagged; deferred with async pages.
+- Define the owner and timing of connection abort relative to response seal,
+  final flush, and `RequestAborted`.
+- Cover abort racing normal completion, error formatting, and host shutdown.
+- Preserve the cooperative 500 when the step returns before transport abort.
+- Ensure the server does not present a partially committed response as success.
 
-## Considered and rejected: `ControlledExecution.Run`
+## Done when
 
-`System.Runtime.ControlledExecution.Run` (.NET 7+) is the one sanctioned door
-into the runtime's retained abort machinery. Measured on .NET 10: it injects a
-genuine `ThreadAbortException` into a spinning loop, and a swallowing catch is
-re-raised past, Framework-style — but it does **not** interrupt blocking
-waits: a `Thread.Sleep(30s)` inside `Run` slept its full 30 seconds with the
-abort pending, where Framework's abort woke waiting threads. So it can stop
-only actively executing code — runaway computation — never a step blocked on
-a database, a lock, or I/O, which is the common shape of a stuck request.
-Rejected for enforcement anyway: it only aborts code inside its wrapper from
-an outside token, so every pipeline step would need its own wrapper; nothing
-can stop the unwind short of the wrapper (no `ResetAbort`, so no
-catch-and-continue at `ExecuteStep`); `ExceptionState` is hardcoded null, so
-the End/timeout discriminator needs a side channel regardless; and it carries
-`SYSLIB0046` — the runtime dropped Framework's constrained-region guarantees,
-so an abort may corrupt process state — which fails this project's
-determinism principle. It is also unsupported on Native AOT. If the
-never-returning step ever needs bounding, the connection abort below is the
-safe tool.
-
-## Follow-up: connection abort at budget
-
-Owned here, not yet scheduled. Bounding the *client's* wait for a blocked step
-requires the hosting layer to abort the connection when the budget expires —
-the response never arrives, while the server-side step still runs to wherever
-it runs. Framework precedent: it aborts the connection itself when a timed-out
-thread is blocked in a synchronous entity-body read
-(`HttpContext.MustTimeout`'s former `IsInReadEntitySync` arm, removed with the
-abort handshake). Requires adapter machinery and abort-vs-flush race coverage;
-take it up if the late 500 bites a real application.
+A never-returning synchronous step cannot hold the client connection beyond the
+declared policy, without pretending the server-side work was terminated.

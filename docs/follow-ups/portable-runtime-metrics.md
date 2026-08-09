@@ -1,7 +1,5 @@
 # Portable runtime metrics
 
-Status: deferred, and latent rather than broken.
-
 ## Current state
 
 `PerfCounters` writes about ninety counters into shared memory owned by
