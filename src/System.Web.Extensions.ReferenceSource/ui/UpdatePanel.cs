@@ -8,6 +8,7 @@ namespace System.Web.UI {
     using System;
     using System.ComponentModel;
     using System.Diagnostics.CodeAnalysis;
+    using System.Drawing;
     using System.Drawing.Design;
     using System.Globalization;
     using System.IO;
@@ -22,7 +23,8 @@ namespace System.Web.UI {
     DefaultProperty("Triggers"),
     Designer("System.Web.UI.Design.UpdatePanelDesigner, " + AssemblyRef.SystemWebExtensionsDesign),
     ParseChildren(true),
-    PersistChildren(false)
+    PersistChildren(false),
+    ToolboxBitmap(typeof(EmbeddedResourceFinder), "System.Web.Resources.UpdatePanel.bmp")
     ]
     public class UpdatePanel : Control, IAttributeAccessor, IUpdatePanel {
 

@@ -11,6 +11,7 @@ namespace System.Web.UI {
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.Drawing;
     using System.Drawing.Design;
     using System.Globalization;
     using System.Web;
@@ -24,7 +25,8 @@ namespace System.Web.UI {
     Designer("System.Web.UI.Design.ScriptManagerProxyDesigner, " + AssemblyRef.SystemWebExtensionsDesign),
     NonVisualControl(),
     ParseChildren(true),
-    PersistChildren(false)
+    PersistChildren(false),
+    ToolboxBitmap(typeof(EmbeddedResourceFinder), "System.Web.Resources.ScriptManagerProxy.bmp")
     ]
     public class ScriptManagerProxy : Control, IControl {
 

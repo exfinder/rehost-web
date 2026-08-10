@@ -69,6 +69,27 @@ switch on first read: a process whose host code serialized before it first
 touched System.Web keeps the SDK default of `false`, and the initializer, though
 it runs and does set the switch, cannot undo that. Measured both ways.
 
+## System.Drawing
+
+`System.Drawing.Common` is not referenced. The assembly declares
+`SupportedOSPlatform("windows6.1")` over its whole surface and implements it
+through `System.Private.Windows.GdiPlus`, so no part of it is portable.
+
+The portable subset applications actually reach — `Color`, `Point`, `Size`,
+`Rectangle`, `ColorTranslator`, `SystemColors` — is `System.Drawing.Primitives`
+in the shared framework, which is what `<compilation><assemblies>` lists for
+generated page code.
+
+Three imported declarations named types from the package. `ToolboxBitmapAttribute`,
+`BitmapSuffixInSatelliteAssemblyAttribute`, and `FontConverter.FontNameConverter`
+are design-time metadata that only has to exist, so `Compatibility/DesignTime`
+carries internal shapes for them. `ResXFileRef`'s `.ico` branch does real GDI+
+work and is excluded under `SYSTEM_WEB`; the general `Activator` path is unchanged.
+
+CA1416 stays enabled for authored code and is suppressed per-directory in
+`.editorconfig` for imported Reference Source, where Windows-only providers are
+inherited rather than introduced.
+
 ## ReadyToRun deployment
 
 In-repository hosts use precompiled Roslyn images to avoid first-process compiler

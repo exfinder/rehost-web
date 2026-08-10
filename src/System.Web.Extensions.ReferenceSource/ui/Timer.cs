@@ -9,6 +9,7 @@ namespace System.Web.UI {
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics.CodeAnalysis;
+    using System.Drawing;
     using System.Globalization;
     using System.Reflection;
     using System.Web;
@@ -20,6 +21,7 @@ namespace System.Web.UI {
     DefaultProperty("Interval"),
     Designer("System.Web.UI.Design.TimerDesigner, " + AssemblyRef.SystemWebExtensionsDesign),
     NonVisualControl,
+    ToolboxBitmap(typeof(EmbeddedResourceFinder), "System.Web.Resources.Timer.bmp"),
     SupportsEventValidation
     ]
     public class Timer : Control, IPostBackEventHandler, IScriptControl {

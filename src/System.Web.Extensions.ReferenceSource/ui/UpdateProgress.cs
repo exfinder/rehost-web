@@ -9,6 +9,7 @@ namespace System.Web.UI {
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics.CodeAnalysis;
+    using System.Drawing;
     using System.Globalization;
     using System.Text;
     using System.Web;
@@ -21,7 +22,8 @@ namespace System.Web.UI {
     DefaultProperty("AssociatedUpdatePanelID"),
     Designer("System.Web.UI.Design.UpdateProgressDesigner, " + AssemblyRef.SystemWebExtensionsDesign),
     ParseChildren(true),
-    PersistChildren(false)
+    PersistChildren(false),
+    ToolboxBitmap(typeof(EmbeddedResourceFinder), "System.Web.Resources.UpdateProgress.bmp")
     ]
     public class UpdateProgress : Control, IAttributeAccessor, IScriptControl {
 
@@ -226,3 +228,4 @@ namespace System.Web.UI {
         #endregion
     }
 }
+

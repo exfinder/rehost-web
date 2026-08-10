@@ -13,6 +13,7 @@ namespace System.Web.UI {
     using System.ComponentModel;
     using System.Configuration;
     using System.Diagnostics.CodeAnalysis;
+    using System.Drawing;
     using System.Drawing.Design;
     using System.Globalization;
     using System.Linq;
@@ -39,7 +40,8 @@ namespace System.Web.UI {
     Designer("System.Web.UI.Design.ScriptManagerDesigner, " + AssemblyRef.SystemWebExtensionsDesign),
     NonVisualControl(),
     ParseChildren(true),
-    PersistChildren(false)
+    PersistChildren(false),
+    ToolboxBitmap(typeof(EmbeddedResourceFinder), "System.Web.Resources.ScriptManager.bmp")
     ]
     public class ScriptManager : Control, IPostBackDataHandler, IPostBackEventHandler, IControl, IScriptManager, IScriptManagerInternal {
         private readonly new IPage _page;

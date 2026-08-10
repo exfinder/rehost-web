@@ -316,11 +316,13 @@ namespace System.Resources {
                             MemoryStream memStream = new MemoryStream(temp);
                             if(toCreate.Equals(typeof(MemoryStream))) {
                                 return memStream;
+#if !SYSTEM_WEB
                             } else if(toCreate.Equals(typeof(System.Drawing.Bitmap)) && fileName.EndsWith(".ico")) {
                                 // we special case the .ico bitmaps because GDI+ destroy the alpha channel component and
                                 // we don't want that to happen
                                 Icon ico = new Icon(memStream);
                                 created = ico.ToBitmap();
+#endif
                             } else {
                                 created = Activator.CreateInstance(toCreate, BindingFlags.Instance | BindingFlags.Public | BindingFlags.CreateInstance, null, new Object[] {memStream}, null);
                             }
