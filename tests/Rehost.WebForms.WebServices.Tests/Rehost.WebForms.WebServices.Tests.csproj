@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+    <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>

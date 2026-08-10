@@ -9,9 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/Configuration/ProtocolElement.cs" />
-    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/Configuration/ProtocolElementCollection.cs" />
-    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/Configuration/Protocols.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
 
   <ItemGroup>
