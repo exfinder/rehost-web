@@ -13,9 +13,11 @@ because a Unix filesystem accepts them. A file is hidden only when its
 filesystem `Hidden` attribute says so; dot-prefixed names remain ordinary.
 
 Portable separator, enumeration, stable-hash, and parent-walk repairs live in
-the imported `FileUtil` path. Case canonicalization occurs once at
-`HostingEnvironment.MapPathActual`, keeping downstream ignore-case compilation
-and configuration caches coherent.
+the imported `FileUtil` path. Case canonicalization occurs once per path-producing
+seam — `HostingEnvironment.MapPathActual`, and `HttpRequest.PhysicalPathInternal`
+for the path a worker request concatenates itself — keeping downstream ignore-case
+compilation and configuration caches coherent. Resolution is idempotent, so a path
+crossing both seams folds once.
 
 A rooted Unix path cannot reveal whether the caller meant a physical or virtual
 path. Call sites that know they hold a translated physical path use an explicit

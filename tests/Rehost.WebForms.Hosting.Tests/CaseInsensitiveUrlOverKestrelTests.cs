@@ -70,4 +70,52 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
 
         response.StatusCode.ShouldBe(404);
     }
+
+    // A static file reaches the filesystem through the worker request's own concatenation rather
+    // than MapPathActual, so it needs the fold applied where that path enters the request.
+    [Fact]
+    public async Task A_Wrongly_Cased_Static_File_Url_Serves()
+    {
+        var live = RequireLive();
+        var directory = Path.Combine(live.ApplicationPath, "Assets", "Inner");
+        Directory.CreateDirectory(directory);
+        File.WriteAllText(Path.Combine(directory, "Site.js"), "//static-body");
+
+        var foldedFile = await live.Client.GetAsync("/Assets/Inner/site.js");
+        var foldedDirectory = await live.Client.GetAsync("/assets/INNER/Site.js");
+        var exact = await live.Client.GetAsync("/Assets/Inner/Site.js");
+
+        foldedFile.StatusCode.ShouldBe(200);
+        foldedFile.Text.ShouldContain("static-body");
+        foldedDirectory.StatusCode.ShouldBe(200);
+        foldedDirectory.Text.ShouldContain("static-body");
+        exact.StatusCode.ShouldBe(200);
+    }
+
+    [Fact]
+    public async Task A_Static_File_Case_Collision_Fails_With_Both_Names()
+    {
+        var live = RequireLive();
+        File.WriteAllText(Path.Combine(live.ApplicationPath, "Dup.js"), "//upper");
+        File.WriteAllText(Path.Combine(live.ApplicationPath, "dup.js"), "//lower");
+
+        var ambiguous = await live.Client.GetAsync("/DUP.js");
+        var exact = await live.Client.GetAsync("/dup.js");
+
+        ambiguous.StatusCode.ShouldBe(500);
+        ambiguous.Text.ShouldContain("Dup.js");
+        ambiguous.Text.ShouldContain("dup.js");
+        exact.StatusCode.ShouldBe(200);
+        exact.Text.ShouldContain("//lower");
+    }
+
+    [Fact]
+    public async Task A_Genuinely_Missing_Static_File_Still_Answers_404()
+    {
+        var live = RequireLive();
+
+        var response = await live.Client.GetAsync("/Assets/nothere.js");
+
+        response.StatusCode.ShouldBe(404);
+    }
 }
