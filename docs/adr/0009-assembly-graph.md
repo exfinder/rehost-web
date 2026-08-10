@@ -23,10 +23,17 @@ owner: an ASMX slice importing Reference Source must leave
 `System/Web/Services/Configuration/WebServicesSection.cs` out of its closure, or
 the two definitions collide.
 
-Naming an assembly in the root configuration's `<compilation><assemblies>` is a
-deployment promise, because a named entry is a hard `Assembly.Load` and a
-missing one fails every request during first-request initialization rather than
-where the type is used. Assemblies an application deploys to `bin` are already
-covered by the trailing `<add assembly="*" />`, which is how
-`Rehost.WebForms.Extensions` is reached today; a named entry is warranted only
-where the assembly must resolve regardless of what the application referenced.
+Naming an assembly in the root configuration is a deployment promise. In
+`<compilation><assemblies>` a named entry is a hard `Assembly.Load`, failing
+every request during first-request initialization rather than where the type is
+used; assemblies an application merely deploys to `bin` are already covered by
+the trailing `<add assembly="*" />`. In `<pages><controls>` it is worse, because
+prefix resolution loads every assembly registered for a prefix, so one missing
+entry fails `<asp:Label>` as surely as the control the entry was added for.
+
+Framework could keep such promises because the GAC guaranteed the assemblies.
+This port names `Rehost.WebForms.Extensions` under `<controls>` so that an
+unchanged application parses `<asp:ScriptManager>`, and keeps the promise by
+having every consumer here reference that package explicitly. A metapackage is
+the durable answer; see
+[runtime metapackage](../follow-ups/runtime-metapackage.md).
