@@ -121,6 +121,12 @@ P33 is exercised by the adapter parity gate over Kestrel. The bench calls
 `HttpRuntime.ProcessRequest` on a thread it owns, so nothing posts to the
 application's synchronization context.
 
+P66 is exercised by
+`DesignTimeMetadataOverKestrelTests.Controls_Carrying_Toolbox_Metadata_Parse_And_Render`,
+whose fixture page declares all six controls carrying the attribute. Giving the
+internal shape a throwing type initializer — what the real attribute does off
+Windows — turns it red, and nothing else in the suite notices.
+
 P50 is exercised by `SaveAsPathTests` and
 `UploadSaveOverKestrelTests.Refuses_A_Windows_Path_Where_It_Cannot_Be_Rooted`.
 The refusal executes on macOS/Linux; Windows proves the portable guard is inert.
