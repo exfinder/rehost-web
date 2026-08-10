@@ -129,6 +129,14 @@ Milestone 1 owns these outcomes:
   ListView/DataPager/query controls, LINQ-to-SQL, Dynamic Data, Entity, WCF/Data
   Services build providers, Windows-coupled Client Services, and design-time
   stacks outside the initial Extensions compile closure.
+- Adopting that slice ends at WCF. Dropping the `Handlers` and `Script.Services`
+  stubs pulls the real `WebServiceData`, whose `typeof(ProfileService)`,
+  `typeof(AuthenticationService)`, and `typeof(RoleService)` name
+  `[ServiceContract]` types from `System.ServiceModel`, which modern .NET does
+  not host, and a `typeof` cannot be stubbed around. Everything short of that is
+  reachable: measured, the remainder is roughly 25 imported files, a per-assembly
+  `Res` table, a five-value `TransactionOption`, and one unused
+  `using System.Web.Util` in `WebMethodAttribute`.
 - Validate production Optimization combination, caching, request handling, and
   minification separately from the frozen template's debug-mode expansion.
 - Assess WebGrease image assembly/spriting separately; those paths use legacy

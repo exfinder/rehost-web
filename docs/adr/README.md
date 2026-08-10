@@ -11,3 +11,4 @@ history.
 - [Request-body threading](0006-request-body-threading.md)
 - [Roslyn page compilation](0007-roslyn-page-compilation.md)
 - [Codegen storage](0008-codegen-storage.md)
+- [Assembly graph](0009-assembly-graph.md)
