@@ -52,7 +52,9 @@ Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
 | `.asmx`, `.wsdl`, `App_WebReferences` | Unsupported | General ASMX/SOAP and proxy generation are absent |
 | `App_Browsers` and `.xsd` typed DataSets | Unsupported | Built-in browser definitions remain; application browser compilation and XSD build-provider generation fail explicitly |
 | Precompiled deployment | Unassessed | Imported consumer path exists; neither consumer nor producer is proven cross-platform |
-| `System.Web.Extensions`, Dynamic Data, Entity, Mobile | Unassessed | Compatible sibling assemblies are absent; applications referencing them do not currently compile |
+| `System.Web.Extensions` / ScriptManager | Partial | Rehost assembly exposes the reached full-page ScriptManager closure; frozen template renders on macOS; default Microsoft AJAX embedded resources, `ScriptResource.axd`, async postbacks, and cross-platform gates remain open |
+| Page methods, `ServiceReference` proxies, profile/authentication/role application services | Unsupported | Endpoint types are WCF-hosted, so they are absent rather than deferred. `EnablePageMethods` and inline proxies fail with a named diagnostic; the application-service managers instead render client URLs to `*_JSON_AppService.axd`, which nothing serves, so those fail in the browser rather than on the server |
+| Dynamic Data, Entity, Mobile | Unassessed | APIs outside the reached Extensions closure remain absent or unassessed |
 | Friendly URLs package/API | Partial | Modern package, original public API, routing, caching modes, redirects, authorization, generic handlers, helpers, model binding, mobile pages/masters, and view switching are exercised; advanced escaping and upstream IIS rewrite mapping remain open |
 | Optimization/WebForms, ScriptManager, WebGrease | Unassessed | No modern-compatible package set exists yet; the frozen application currently stops at missing ScriptManager APIs |
 

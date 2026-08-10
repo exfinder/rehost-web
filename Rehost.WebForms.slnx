@@ -9,6 +9,7 @@
   <Folder Name="/src/">
     <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
     <Project Path="src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
+    <Project Path="src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
     <Project Path="src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
     <Project Path="src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Project Path="src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />

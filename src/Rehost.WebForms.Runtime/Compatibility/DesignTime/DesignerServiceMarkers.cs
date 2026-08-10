@@ -19,4 +19,8 @@ namespace System.Web.UI.Design
     {
         internal abstract WebFormsReferenceManager ReferenceManager { get; }
     }
+
+    internal sealed class UrlEditor
+    {
+    }
 }

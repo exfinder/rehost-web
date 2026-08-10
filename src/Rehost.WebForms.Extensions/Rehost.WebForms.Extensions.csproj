@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Rehost.WebForms.Extensions</AssemblyName>
+    <RootNamespace>System.Web</RootNamespace>
+    <Description>ASP.NET AJAX and ScriptManager compatibility for Rehost.WebForms.</Description>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS0108;CS0612;CS0618;CS0649;CS0672;CS3021;CS9191;SYSLIB0003;SYSLIB0004;SYSLIB0051</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ApplicationServiceHelper.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ProfilePropertyMetadata.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Configuration/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Globalization/ClientCultureInfo.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/HttpResponseInternalBase.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/HttpResponseInternalWrapper.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.Designer.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Script/AjaxFrameworkAssemblyAttribute.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Serialization/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Util/HeaderUtility.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Util/OrderedDictionary.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource
+      Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.resx"
+      LogicalName="System.Web.Resources.AtlasWeb.resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference
+      Include="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj"
+      Private="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target
+    Name="PreferRehostWebFormsRuntimeTypes"
+    AfterTargets="ResolveAssemblyReferences"
+    BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <ReferencePath
+        Remove="@(ReferencePath)"
+        Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
+    </ItemGroup>
+  </Target>
+</Project>

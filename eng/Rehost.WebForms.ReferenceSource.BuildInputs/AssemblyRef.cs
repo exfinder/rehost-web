@@ -10,6 +10,7 @@ namespace System.Web {
         internal const string SystemDrawingDesign = "System.Drawing.Design";
         internal const string SystemWeb = "Rehost.WebForms.Runtime";
         internal const string SystemWebDynamicData = "System.Web.DynamicData";
+        internal const string SystemWebExtensionsDesign = "System.Web.Extensions.Design";
         internal const string SystemWebMobile = "System.Web.Mobile";
     }
 }
