@@ -12,6 +12,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/WsiProfiles.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
 
