@@ -7,7 +7,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 public sealed class ScriptResourceOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
-    private async Task<string> FirstScriptAsync()
+    private async Task<string> FirstScriptUrlAsync()
     {
         var page = await scenario.Client.GetAsync("/ScriptResourceUrl.aspx");
         page.StatusCode.ShouldBe(200);
@@ -15,7 +15,12 @@ public sealed class ScriptResourceOverKestrelTests(PageLiveScenario scenario)
         var url = Regex.Match(page.Text, @"src=""(/ScriptResource\.axd\?[^""]+)""").Groups[1].Value;
         url.ShouldNotBeEmpty();
 
-        var response = await scenario.Client.GetAsync(url.Replace("&amp;", "&"));
+        return url.Replace("&amp;", "&");
+    }
+
+    private async Task<string> FirstScriptAsync()
+    {
+        var response = await scenario.Client.GetAsync(await FirstScriptUrlAsync());
 
         response.StatusCode.ShouldBe(200);
         return response.Text;
@@ -28,6 +33,15 @@ public sealed class ScriptResourceOverKestrelTests(PageLiveScenario scenario)
 
         script.ShouldStartWith("//----");
         script.ShouldContain("Sys.Debug.isDebug=false");
+    }
+
+    [Fact]
+    public async Task A_Head_Request_Reaches_The_Handler()
+    {
+        var response = await scenario.Client.HeadAsync(await FirstScriptUrlAsync());
+
+        response.StatusCode.ShouldBe(200);
+        response.Bytes.ShouldBeEmpty();
     }
 
     [Fact]
