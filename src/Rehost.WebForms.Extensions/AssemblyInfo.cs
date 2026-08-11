@@ -4,6 +4,8 @@ using WRA = System.Web.UI.WebResourceAttribute;
 
 [assembly: AjaxFrameworkAssembly]
 [assembly: TagPrefix("System.Web.UI", "asp")]
+[assembly: TagPrefix("System.Web.UI.WebControls", "asp")]
+[assembly: System.Drawing.BitmapSuffixInSatelliteAssembly]
 
 [assembly: ScriptResource("MicrosoftAjax.js", "System.Web.Resources.ScriptLibrary.Res", "Sys.Res")]
 [assembly: ScriptResource("MicrosoftAjaxCore.js", "System.Web.Resources.ScriptLibrary.Res", "Sys.Res")]
