@@ -17,6 +17,9 @@ Milestone 1 owns these outcomes:
   [route URL escaping](follow-ups/route-url-escaping.md).
 - Restore the frozen template's physical script/style path without changing its
   sources: [script-stack plan](follow-ups/stock-template-script-stack.md).
+- Ship the companion assemblies the root configuration names, so an application
+  referencing the runtime alone still parses `asp:` tags:
+  [runtime metapackage](follow-ups/runtime-metapackage.md).
 - Attempt the complete ASP.NET Web Optimization source compile, but validate and
   claim only the bundle/debug paths reached by the template.
 - Restore remaining static-asset behavior and mobile master/view switching.
