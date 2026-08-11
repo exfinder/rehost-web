@@ -8,5 +8,14 @@ upgrade additions and deletions as ordinary source changes.
 
 Run `dotnet msbuild apps/WebFormsApplication/build.proj` from the repository
 root. The driver incrementally produces ignored local packages, then builds the
-SDK-style WAP sidecar through package references only. This build remains
-expected to fail until the reached managed `System.Web` relatives are ported.
+SDK-style WAP sidecar through package references only and stages the runnable
+site under `artifacts/webforms-application/site`.
+
+Then run:
+
+```text
+dotnet artifacts/webforms-application/site/bin/WebFormsApplication.Host.dll
+```
+
+Open <http://127.0.0.1:5081/Default>. Pass another URL as the first argument to
+move the endpoint.

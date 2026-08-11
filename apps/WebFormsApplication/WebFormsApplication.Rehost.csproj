@@ -10,6 +10,7 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
     <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/feed</RestoreAdditionalProjectSources>
     <RestorePackagesPath>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/packages</RestorePackagesPath>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,13 +22,9 @@
   <ItemGroup>
     <PackageReference Include="Rehost.WebForms.Runtime" Version="[1.0.0-local]" />
     <PackageReference Include="Rehost.WebForms.FriendlyUrls" Version="[1.0.0-local]" />
-    <PackageReference Include="Antlr" Version="[3.5.0.2]" />
-    <PackageReference Include="Microsoft.AspNet.ScriptManager.MSAjax" Version="[5.0.0]" />
-    <PackageReference Include="Microsoft.AspNet.ScriptManager.WebForms" Version="[5.0.0]" />
-    <PackageReference Include="Microsoft.AspNet.Web.Optimization" Version="[1.1.3]" />
-    <PackageReference Include="Microsoft.AspNet.Web.Optimization.WebForms" Version="[1.1.3]" />
-    <PackageReference Include="Microsoft.Web.Infrastructure" Version="[2.0.0]" />
-    <PackageReference Include="Newtonsoft.Json" Version="[13.0.3]" />
-    <PackageReference Include="WebGrease" Version="[1.6.0]" />
+    <PackageReference Include="Rehost.WebForms.Extensions" Version="[1.0.0-local]" />
+    <PackageReference Include="Rehost.WebForms.Optimization" Version="[1.0.0-local]" />
+    <PackageReference Include="Rehost.WebForms.Optimization.WebForms" Version="[1.0.0-local]" />
+    <PackageReference Include="Rehost.WebForms.ScriptManager.Bundles" Version="[1.0.0-local]" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'WebFormsApplication.Rehost'">
+    <BaseIntermediateOutputPath>obj/Rehost/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>obj/Rehost/</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'WebFormsApplication.Host'">
+    <BaseIntermediateOutputPath>obj/Host/</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>obj/Host/</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>WebFormsApplication.Host</AssemblyName>
+    <RootNamespace>WebFormsApplication.Host</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <RestoreAdditionalProjectSources>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/feed</RestoreAdditionalProjectSources>
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/packages</RestorePackagesPath>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <OutputPath>bin/Host/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <StagedSiteRoot>$(MSBuildThisFileDirectory)../../artifacts/webforms-application/site/</StagedSiteRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Host/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Rehost.WebForms.Hosting" Version="[1.0.0-local]" />
+    <PackageReference Include="Rehost.WebForms.Runtime" Version="[1.0.0-local]" />
+    <ProjectReference Include="WebFormsApplication.Rehost.csproj" />
+  </ItemGroup>
+
+  <Target Name="StageSite" AfterTargets="Build">
+    <ItemGroup>
+      <SiteContent
+        Include="WebFormsApplication/**/*"
+        Exclude="WebFormsApplication/**/*.cs;WebFormsApplication/**/*.csproj;WebFormsApplication/**/bin/**;WebFormsApplication/**/obj/**;WebFormsApplication/packages.config;WebFormsApplication/Web.config;WebFormsApplication/Web.*.config" />
+      <HostPayload Include="$(TargetDir)**/*" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(StagedSiteRoot)" />
+    <MakeDir Directories="$(StagedSiteRoot)bin" />
+    <Copy
+      SourceFiles="@(SiteContent)"
+      DestinationFiles="@(SiteContent->'$(StagedSiteRoot)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy
+      SourceFiles="@(HostPayload)"
+      DestinationFiles="@(HostPayload->'$(StagedSiteRoot)bin/%(RecursiveDir)%(Filename)%(Extension)')" />
+    <XslTransformation
+      XslInputPath="Web.Rehost.xslt"
+      XmlInputPaths="WebFormsApplication/Web.config"
+      OutputPaths="$(StagedSiteRoot)web.config" />
+  </Target>
+</Project>
