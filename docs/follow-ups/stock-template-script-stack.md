@@ -23,7 +23,7 @@ embedded-script delivery or partial-page updates.
 | `Rehost.WebForms.Extensions` | Original `System.Web.*` namespaces; compile the `ScriptManager`, script-reference/mapping, full-page lifecycle, ordering, deduplication, debug-path, and Optimization-adapter closure |
 | `Rehost.WebForms.Optimization` | Import the official source and attempt its full compile; only frozen-template behavior becomes supported |
 | `Rehost.WebForms.Optimization.WebForms` | Port `BundleReference`; rewrite its original assembly name only in the staged application configuration |
-| `Rehost.WebForms.ScriptManager.Bundles` | Register the `MsAjaxBundle` and `WebFormsBundle` logical names; carry no JS content initially |
+| `Rehost.WebForms.ScriptManager.Bundles` | Register `MsAjaxBundle`, `WebFormsBundle`, and the 11 individual Microsoft AJAX names used automatically by ScriptManager; carry no JS content |
 | WebGrease 1.6.0 | Consume unchanged for JS/CSS transforms, with repository Newtonsoft.Json and Antlr versions and a project-scoped `NU1701` suppression |
 
 `Rehost.WebForms.Extensions` has direct friend access to Runtime, preserving the
@@ -59,7 +59,7 @@ claim.
    Optimization and its WebForms control.
 2. Import `System.Web.Extensions`; establish Runtime friend access and compile
    the frozen-template closure.
-3. Add the bundle-name registration package and observe the original packages'
+3. Add the script registration package and observe the original packages'
    startup mappings where source is unavailable.
 4. Replace legacy package references in the Rehost sidecar and rewrite the one
    staged WebForms Optimization assembly reference.
@@ -80,3 +80,14 @@ The slice is complete when:
 - build plus HTTP smoke passes on Windows x64, Linux x64, and macOS arm64.
 
 Deferred behavior remains indexed in [`../backlog.md`](../backlog.md).
+
+## Current result
+
+The unchanged application builds from local packages and `/Default` renders on
+macOS arm64. Both generated bundles and all six remaining emitted static assets
+return 200. Embedding is not optional for a physically served script: original
+ScriptManager semantics validate the manifest resource before rendering the
+physical path, so both runtime and Extensions embed every resource they declare.
+
+The remaining completion gates are an automated journey and a real-browser pass;
+the Linux round now covers this work.

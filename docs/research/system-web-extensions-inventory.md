@@ -200,10 +200,11 @@ The physical files split into two ownership families:
 
 The legacy NuGet install copied these files from package content; it did not
 extract them from Framework assemblies. A clean `packages.config` restore does
-not reliably recreate deleted project content. The frozen application already
-commits the files and gives each relevant `ScriptReference` a physical path or
-named bundle, so neither assembly's embedded-resource path is required for the
-first visual slice.
+not reliably recreate deleted project content. The frozen application commits
+the files and serves them physically. Original ScriptManager still validates a
+named System.Web script against its manifest resource before rendering its
+physical path, so the reached System.Web resources remain embedded. Generated
+Microsoft AJAX resources and `ScriptResource.axd` remain outside this slice.
 
 `Microsoft.AspNet.ScriptManager.MSAjax` 5.0.0 and
 `Microsoft.AspNet.ScriptManager.WebForms` 5.0.0 are not ScriptManager itself.
@@ -215,7 +216,12 @@ registration of optimization bundles
 ([MSAjax package](https://www.nuget.org/packages/Microsoft.AspNet.ScriptManager.MSAjax/5.0.0),
 [WebForms package](https://www.nuget.org/packages/Microsoft.AspNet.ScriptManager.WebForms/5.0.0)).
 Their source is not in Reference Source, and their package license is separate
-from Reference Source MIT. Their method bodies were not decompiled.
+from Reference Source MIT. Local inspection found that the MSAjax helper
+registers `MsAjaxBundle` plus all 11 individual physical-script mappings; the
+WebForms helper registers `WebFormsBundle`. The replacement reproduces those
+registrations verbatim, including the `MsAjax` path casing the helper registers
+while shipping the files under `MSAjax`; ledger P57's fold resolves the
+difference that IIS used to absorb.
 
 `System.Web.Extensions` itself avoids a direct Optimization assembly reference:
 it discovers `System.Web.Optimization.BundleResolver.Current` and three methods
@@ -254,7 +260,7 @@ WinForms, and design stacks into ScriptManager work.
 
 ASP.NET Web Optimization is not Reference Source. Its official archived source
 is in [`aspnet/AspNetWebOptimization`](https://github.com/aspnet/AspNetWebOptimization);
-the pinned sibling revision and planned import trees are recorded in
+the pinned sibling revision and imported trees are recorded in
 [`../provenance/aspnet-web-optimization.md`](../provenance/aspnet-web-optimization.md).
 No native imports were found. The main obstacles are managed Framework-era
 dependencies: `System.Web`, `Microsoft.Web.Infrastructure`, configuration,
@@ -279,11 +285,12 @@ outside the compatibility claim.
 
 Use Rehost assembly/package identity, direct Runtime friend access, the physical
 files already in the application, and one
-`Rehost.WebForms.ScriptManager.Bundles` package for `MsAjaxBundle` and
-`WebFormsBundle` startup mappings. Attempt the complete Optimization source
-compile, but claim only reached behavior. `ScriptResource.axd`, generated and
-embedded Microsoft AJAX resources, UpdatePanel/async postbacks, service/JSON
-paths, data controls, and the unrelated legacy stacks remain explicit backlog.
+`Rehost.WebForms.ScriptManager.Bundles` package for the two bundles and 11
+individual Microsoft AJAX startup mappings. The complete Optimization source
+compiles on .NET 10, but only reached behavior is claimed. `ScriptResource.axd`,
+generated and embedded Microsoft AJAX resources, UpdatePanel/async postbacks,
+service/JSON paths, data controls, and the unrelated legacy stacks remain
+explicit backlog.
 The implementation and evidence sequence is in the
 [stock template script-stack plan](../follow-ups/stock-template-script-stack.md).
 

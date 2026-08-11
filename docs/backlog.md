@@ -118,11 +118,11 @@ Milestone 1 owns these outcomes:
 - Add default `ScriptManager` embedded-resource delivery through
   `ScriptResource.axd`, including protected URLs, debug/release selection,
   localization, caching, and deterministic generated Microsoft AJAX assets.
-- Embed the existing `System.Web` runtime scripts (`WebForms.js`, validation,
-  menu/tree/data-control scripts, and related assets) instead of relying on
-  application-local copies.
+- Complete general `System.Web` embedded-resource delivery beyond the eight
+  release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
-  `Rehost.WebForms.ScriptManager.Bundles`; its first slice registers names only.
+  `Rehost.WebForms.ScriptManager.Bundles`; its first slice registers names only
+  and expects application-owned physical files.
 - Port partial rendering (`UpdatePanel`, `UpdateProgress`, server `Timer`, and
   the async-postback wire protocol) when a milestone application reaches it.
 - Keep PageMethods, AJAX ASMX/application services, JSON service plumbing,

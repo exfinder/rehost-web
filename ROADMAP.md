@@ -33,14 +33,14 @@ Work follows the browser journey:
 6. Gate the same browser-visible journey on Windows x64, Linux x64, and macOS
    arm64.
 
-The local `Rehost.WebForms.FriendlyUrls` package now covers steps 4–5 in a
-focused hosted fixture. The frozen application's package build consumes it and
-currently stops at missing `ScriptManager` APIs. Continue with ScriptManager,
-Optimization/WebForms integration, WebGrease, and other managed `System.Web`
-relatives only as reached. Their original managed sources remain preferred.
+The local `Rehost.WebForms.FriendlyUrls` package covers steps 4–5 in a focused
+hosted fixture. The frozen application's package build now consumes ported
+ScriptManager and Optimization relatives and renders its full-page script/style
+path on macOS. Continue with the automated browser journey and Windows/Linux
+gates; port other managed relatives only as reached.
 
-The next vertical slice keeps the frozen application tree unchanged and restores
-only its full-page script/style path. It adds a source-compatible
+The current vertical slice keeps the frozen application tree unchanged and
+restores only its full-page script/style path. It adds a source-compatible
 `Rehost.WebForms.Extensions` ScriptManager closure, attempts a full compile of
 the official ASP.NET Web Optimization source, ports its small WebForms
 `BundleReference`, and replaces the two legacy ScriptManager startup helpers

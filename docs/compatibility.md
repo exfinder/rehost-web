@@ -56,7 +56,7 @@ Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
 | Page methods, `ServiceReference` proxies, profile/authentication/role application services | Unsupported | Endpoint types are WCF-hosted, so they are absent rather than deferred. `EnablePageMethods` and inline proxies fail with a named diagnostic; the application-service managers instead render client URLs to `*_JSON_AppService.axd`, which nothing serves, so those fail in the browser rather than on the server |
 | Dynamic Data, Entity, Mobile | Unassessed | APIs outside the reached Extensions closure remain absent or unassessed |
 | Friendly URLs package/API | Partial | Modern package, original public API, routing, caching modes, redirects, authorization, generic handlers, helpers, model binding, mobile pages/masters, and view switching are exercised; advanced escaping and upstream IIS rewrite mapping remain open |
-| Optimization/WebForms, ScriptManager, WebGrease | Unassessed | No modern-compatible package set exists yet; the frozen application currently stops at missing ScriptManager APIs |
+| Optimization/WebForms and WebGrease | Partial | Full source compiles; frozen-template debug bundle expansion runs on macOS; production combination/minification breadth and cross-platform gates remain open |
 
 ## Requests, pages, and responses
 

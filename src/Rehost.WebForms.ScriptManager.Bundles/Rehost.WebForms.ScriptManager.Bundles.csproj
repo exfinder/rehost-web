@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Rehost.WebForms.ScriptManager.Bundles</AssemblyName>
+    <RootNamespace>Rehost.WebForms.ScriptManager.Bundles</RootNamespace>
+    <Description>Stock Web Forms ScriptManager mappings for Rehost.WebForms.</Description>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+  </ItemGroup>
+</Project>

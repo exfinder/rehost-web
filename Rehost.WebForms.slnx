@@ -8,10 +8,13 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
-    <Project Path="src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
     <Project Path="src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
+    <Project Path="src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
     <Project Path="src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
+    <Project Path="src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
+    <Project Path="src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
     <Project Path="src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <Project Path="src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
     <Project Path="src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
   </Folder>
   <Folder Name="/tests/parity/">
@@ -28,6 +31,7 @@
     <Project Path="tests/Rehost.WebForms.FriendlyUrls.Tests/Rehost.WebForms.FriendlyUrls.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />
+    <Project Path="tests/Rehost.WebForms.ScriptManager.Bundles.Tests/Rehost.WebForms.ScriptManager.Bundles.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj" />
     <Project Path="tests/Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj" />
     <Project Path="tests/Rehost.WebForms.WebServices.Tests/Rehost.WebForms.WebServices.Tests.csproj" />
