@@ -195,8 +195,8 @@ The physical files split into two ownership families:
 - `Scripts/WebForms/*.js` (`WebForms.js`, validation, menu/tree/data controls,
   and related files) belong to `System.Web` and were installed by
   `Microsoft.AspNet.ScriptManager.WebForms`. Their sources exist under
-  `src/System.Web.ReferenceSource/UI/WebControls/RuntimeScripts`, but the
-  current Runtime project does not embed them.
+  `src/System.Web.ReferenceSource/UI/WebControls/RuntimeScripts`. Runtime now
+  embeds every resource it declares, scripts and control images alike.
 
 The legacy NuGet install copied these files from package content; it did not
 extract them from Framework assemblies. A clean `packages.config` restore does

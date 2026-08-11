@@ -24,6 +24,7 @@
     <Project Path="tests/parity/src/Rehost.WebForms.Parity.PortableHost/Rehost.WebForms.Parity.PortableHost.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Rehost.WebForms.Extensions.Tests/Rehost.WebForms.Extensions.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.FriendlyUrls.Tests/Rehost.WebForms.FriendlyUrls.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />

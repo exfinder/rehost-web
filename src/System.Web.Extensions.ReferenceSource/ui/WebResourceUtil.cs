@@ -116,7 +116,7 @@ namespace System.Web.UI {
             public FastStringLookupTable(IEnumerable<string> strings) {
                 int longest = (from s in strings
                                orderby s.Length descending
-                               select s.Length).FirstOrDefault();
+                               select s.Length).First();
 
                 _table = new string[longest + 1][];
 

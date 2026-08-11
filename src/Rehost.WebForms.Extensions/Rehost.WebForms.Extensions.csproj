@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Scripts/*.js" LogicalName="%(Filename)%(Extension)" />
     <EmbeddedResource
       Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.resx"
       LogicalName="System.Web.Resources.AtlasWeb.resources" />
