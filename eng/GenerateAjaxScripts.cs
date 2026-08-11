@@ -1,4 +1,9 @@
+#:property ManagePackageVersionsCentrally=false
+#:package AjaxMin@4.12.4057.21792
 using System.Text.RegularExpressions;
+using Microsoft.Ajax.Utilities;
+
+const string Copyright = "// Copyright (C) Microsoft Corporation. All rights reserved.";
 
 var repo = Directory.GetCurrentDirectory();
 var scriptRoot = Path.Combine(repo, "src", "System.Web.Extensions.ReferenceSource", "Script");
@@ -12,30 +17,51 @@ if (!Directory.Exists(scriptRoot))
 
 Directory.CreateDirectory(outputRoot);
 
+// Framework's own output keeps hex literals but not exponent notation, plain
+// booleans, unfolded `if`, and `var` outside the `for` initializer.
+var settings = new CodeSettings
+{
+    LocalRenaming = LocalRenaming.CrunchAll,
+    OutputMode = OutputMode.SingleLine,
+    KillSwitch = (TreeModifications)(0x400000000UL | 0x200000UL | 0x2000UL | 0x400UL),
+};
+
 var written = 0;
 foreach (var jsa in Directory.GetFiles(scriptRoot, "*.jsa").OrderBy(path => path, StringComparer.Ordinal))
 {
-    var name = Path.GetFileNameWithoutExtension(jsa);
+    // COPYRIGHT stays undefined: the shipped script carries one banner, not the 62
+    // per-file headers. DEBUG builds need a generator this repository does not have,
+    // so no .debug.js is produced and ScriptMode.Auto falls back to these.
+    var preprocessed = Build(Path.GetFileName(jsa), []);
+    var name = Path.GetFileNameWithoutExtension(jsa) + ".js";
 
-    // COPYRIGHT stays undefined in both builds: the shipped release script carries the
-    // one //! banner from the .jsa, not the 62 per-file headers. DEBUGINTERNAL never ships.
-    Write($"{name}.js", Build(jsa, []));
-    Write($"{name}.debug.js", Build(jsa, ["DEBUG"]));
+    var minifier = new Minifier();
+    var code = minifier.MinifyJavaScript(preprocessed, settings).TrimEnd('\r', '\n');
+    if (minifier.Errors.Count > 0)
+    {
+        Console.Error.WriteLine($"{name}: {minifier.Errors.First()}");
+        return 1;
+    }
+
+    if (!code.EndsWith(';'))
+    {
+        code += ";";
+    }
+
+    var rule = "//" + new string('-', Copyright.Length - 2);
+    var banner = string.Join("\r\n", [rule, Copyright, rule, "// " + name]) + "\r\n";
+
+    File.WriteAllText(Path.Combine(outputRoot, name), banner + code);
+    written++;
 }
 
 Console.WriteLine($"Wrote {written} scripts to {outputRoot}");
 return 0;
 
-void Write(string fileName, string content)
-{
-    File.WriteAllText(Path.Combine(outputRoot, fileName), content);
-    written++;
-}
-
 string Build(string jsa, string[] symbols)
 {
     var lines = new List<string>();
-    Emit(Path.GetFileName(jsa), new HashSet<string>(symbols, StringComparer.Ordinal), lines);
+    Emit(jsa, new HashSet<string>(symbols, StringComparer.Ordinal), lines);
     return string.Join("\n", lines) + "\n";
 }
 

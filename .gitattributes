@@ -13,3 +13,6 @@ src/System.Web.ReferenceSource/** -text
 # pair while markup literals carry the source's LF, so these files are a deliberate
 # mix that any normalization would corrupt.
 *.expected.html -text
+
+# Generated to match the bytes the Framework assembly embeds, banner CRLF included.
+src/Rehost.WebForms.Extensions/Scripts/** -text

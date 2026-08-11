@@ -29,7 +29,7 @@ public sealed class AjaxScriptResourceTests
     {
         var declared = DeclaredNames();
 
-        declared.Count.ShouldBe(26);
+        declared.Count.ShouldBe(13);
 
         var unresolved = declared
             .Where(name => Extensions.GetManifestResourceInfo(name) is null)
@@ -68,18 +68,20 @@ public sealed class AjaxScriptResourceTests
     }
 
     [Fact]
-    public void ReleaseAndDebugSelectOppositeBranches()
+    public void DebugOnlyCodeIsExcluded()
     {
-        ReadResource("MicrosoftAjaxCore.js").ShouldContain("Sys.Debug.isDebug = false");
-        ReadResource("MicrosoftAjaxCore.debug.js").ShouldContain("Sys.Debug.isDebug = true");
+        var core = ReadResource("MicrosoftAjaxCore.js");
+
+        core.ShouldContain("Sys.Debug.isDebug=false");
+        core.ShouldNotContain("Sys.Res.notATypeName");
     }
 
     [Fact]
-    public void ReleaseDropsDebugOnlyValidation()
+    public void NoDebugScriptIsShipped()
     {
-        // Type.js guards registerNamespace with #if DEBUG; release keeps only the assignment.
-        ReadResource("MicrosoftAjaxCore.debug.js").ShouldContain("Sys.Res.notATypeName");
-        ReadResource("MicrosoftAjaxCore.js").ShouldNotContain("Sys.Res.notATypeName");
+        // ScriptMode.Auto falls back to the release script when the debug one is
+        // absent, which is the supported shape; a hollow debug script is not.
+        DeclaredNames().ShouldNotContain(name => name.EndsWith(".debug.js", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -93,11 +95,12 @@ public sealed class AjaxScriptResourceTests
     }
 
     [Fact]
-    public void PerFileCopyrightHeadersAreExcluded()
+    public void EachScriptCarriesTheSingleBanner()
     {
         var script = ReadResource("MicrosoftAjax.js");
 
-        script.ShouldStartWith("//!");
-        Regex.Matches(script, "copyright file=").Count.ShouldBe(0);
+        script.ShouldStartWith("//----");
+        script.ShouldContain("// MicrosoftAjax.js\r\n");
+        Regex.Matches(script, "Copyright").Count.ShouldBe(1);
     }
 }

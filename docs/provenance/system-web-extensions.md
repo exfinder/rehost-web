@@ -22,23 +22,33 @@ self-balanced and nesting never exceeds one level; include paths are
 backslash-separated and resolve against `Script`. Nine inputs carry a UTF-8 BOM
 that a naive reader splices into the middle of the output.
 
-`eng/GenerateAjaxScripts.cs` runs the recipes with `dotnet run` and writes
-`src/Rehost.WebForms.Extensions/Scripts`. Release defines no symbol and debug
-defines `DEBUG`, which yields the 26 names the assembly declares. `COPYRIGHT`
-stays undefined in both: the shipped release script carries the single `//!`
-banner from its `.jsa`, not the 62 per-file headers. `DEBUGINTERNAL` never
-ships.
+`eng/GenerateAjaxScripts.cs` runs the recipes with `dotnet run`, minifies, and
+writes `src/Rehost.WebForms.Extensions/Scripts`. No symbol is defined, which
+yields the 13 release names the assembly declares. `COPYRIGHT` stays undefined:
+the shipped script carries one generated banner whose rule length follows the
+copyright line, not the 62 per-file headers. `DEBUGINTERNAL` never ships.
 
 Output is committed rather than generated during the build, because the import
 is a pinned snapshot. That diverges from
 [generated build inputs](generated-build-inputs.json), which regenerates into
-`obj`; the guard here is `AjaxScriptResourceTests`, which fails if a declared
-name loses its resource or a directive survives generation.
+`obj`; the guard here is `AjaxScriptResourceTests`.
 
-The scripts are not minified, so they are three times the size of Microsoft's
-and never byte-identical. Establishing what the release build did beyond
-preprocessing needs a reading of a shipped 4.8.1 `System.Web.Extensions`, which
-has not been taken.
+Minification uses AjaxMin 4.12, the era-contemporary build of the tool the
+Framework used, with `CrunchAll`, single-line output, and four tree
+modifications suppressed: numeric-exponent and boolean shortening, `if` to
+short-circuit, and `var` folded into `for`. Those were settled by reading a
+shipped 4.8.9319.0 `System.Web.Extensions`. `MicrosoftAjaxTimer.js` reproduces
+byte-for-byte and the set stays within one percent in aggregate; the remainder
+diverges where one kill bit covers two transforms Framework treated separately.
+The banner's CRLF is why `.gitattributes` exempts this directory from `eol=lf`.
+
+No `.debug.js` is produced. Framework's debug build is a code generator, not a
+preprocessor run: it synthesizes `Function._validateParams` calls from the
+`/// <param>` and `/// <value>` comments, hoists prototype members into
+`$`-mangled named functions, and assigns `locid` attributes. That tool is not in
+the drop. `ScriptReference.ShouldUseDebugScript` falls back to the release
+script under the default `ScriptMode.Auto`, so an absent debug resource degrades
+quietly where a preprocessed-but-unvalidated one would mislead.
 
 `Rehost.WebForms.Extensions` compiles only the frozen-template closure. Excluded
 public APIs are absent rather than stubbed. Design-time metadata the closure

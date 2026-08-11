@@ -31,29 +31,3 @@ using WRA = System.Web.UI.WebResourceAttribute;
     CdnPath = WRA._microsoftCdnBasePath + "Date.HijriCalendar.js", LoadSuccessExpression = "window.Type && Type._registerScript && Type._registerScript._scripts && Type._registerScript._scripts['Date.HijriCalendar.js']")]
 [assembly: WebResource("Date.UmAlQuraCalendar.js", "application/x-javascript", CdnSupportsSecureConnection = true,
     CdnPath = WRA._microsoftCdnBasePath + "Date.UmAlQuraCalendar.js", LoadSuccessExpression = "window.Type && Type._registerScript && Type._registerScript._scripts && Type._registerScript._scripts['Date.UmAlQuraCalendar.js']")]
-[assembly: WebResource("MicrosoftAjax.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjax.debug.js", LoadSuccessExpression = "window.Sys && Sys._Application && Sys.Observer")]
-[assembly: WebResource("MicrosoftAjaxApplicationServices.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxApplicationServices.debug.js", LoadSuccessExpression = "window.Sys && Sys.Services")]
-[assembly: WebResource("MicrosoftAjaxComponentModel.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxComponentModel.debug.js", LoadSuccessExpression = "window.Sys && Sys.CommandEventArgs")]
-[assembly: WebResource("MicrosoftAjaxCore.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxCore.debug.js", LoadSuccessExpression = "window.Type && Sys.Observer")]
-[assembly: WebResource("MicrosoftAjaxGlobalization.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxGlobalization.debug.js", LoadSuccessExpression = "window.Sys && Sys.CultureInfo")]
-[assembly: WebResource("MicrosoftAjaxHistory.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxHistory.debug.js", LoadSuccessExpression = "window.Sys && Sys.HistoryEventArgs")]
-[assembly: WebResource("MicrosoftAjaxNetwork.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxNetwork.debug.js", LoadSuccessExpression = "window.Sys && Sys.Net && Sys.Net.WebRequestExecutor")]
-[assembly: WebResource("MicrosoftAjaxSerialization.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxSerialization.debug.js", LoadSuccessExpression = "window.Sys && Sys.Serialization")]
-[assembly: WebResource("MicrosoftAjaxTimer.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxTimer.debug.js", LoadSuccessExpression = "window.Sys && Sys.UI && Sys.UI._Timer")]
-[assembly: WebResource("MicrosoftAjaxWebForms.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxWebForms.debug.js", LoadSuccessExpression = "window.Sys && Sys.WebForms")]
-[assembly: WebResource("MicrosoftAjaxWebServices.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjaxWebServices.debug.js", LoadSuccessExpression = "window.Sys && Sys.Net && Sys.Net.WebServiceProxy")]
-[assembly: WebResource("Date.HijriCalendar.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "Date.HijriCalendar.debug.js", LoadSuccessExpression = "window.Type && Type._registerScript && Type._registerScript._scripts && Type._registerScript._scripts['Date.HijriCalendar.js']")]
-[assembly: WebResource("Date.UmAlQuraCalendar.debug.js", "application/x-javascript", CdnSupportsSecureConnection = true,
-    CdnPath = WRA._microsoftCdnBasePath + "Date.UmAlQuraCalendar.debug.js", LoadSuccessExpression = "window.Type && Type._registerScript && Type._registerScript._scripts && Type._registerScript._scripts['Date.UmAlQuraCalendar.js']")]
