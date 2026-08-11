@@ -25,9 +25,21 @@ dependencies are `System.Web`, `System.Configuration`,
 WebForms project contains one `BundleReference` control; its `System.Design`
 lookup is reflective.
 
-Both imported trees compile on .NET 10. The port replaces only the obsolete
-startup-module helper with direct runtime module registration; WebGrease 1.6.0
-is consumed unchanged for the reached JS/CSS bundle paths.
+Both imported trees compile on .NET 10. The port drops two files. The 4.0-era
+`AssemblyMetadataAttribute` polyfill now collides with the BCL type, and the
+compiler resolves such a collision in favour of the local copy, which would hide
+`[assembly: AssemblyMetadata]` from anything reading the real attribute.
+`PreApplicationStartCode` loses `Microsoft.Web.Infrastructure`, whose
+`DynamicModuleUtility.RegisterModule` is a delegate over
+`HttpApplication.RegisterModule` wherever that method exists; the replacement
+calls it directly and keeps the upstream namespace and type name, so the
+imported `PreApplicationStartMethod` attribute still binds.
+
+WebGrease 1.6.0 is consumed unchanged for the reached JS/CSS bundle paths; the
+source names it as `Microsoft.Ajax.Utilities`, which ships inside it. Antlr and
+Newtonsoft.Json are WebGrease's own dependencies and are named explicitly only to
+raise its pins — Newtonsoft 5.0.4 carries a high-severity advisory. Removing
+either reference as unused reintroduces it.
 
 The broader official [`aspnet`](https://github.com/aspnet) organization is the
 first source-discovery stop for other NuGet-era ASP.NET 4.x companions before
