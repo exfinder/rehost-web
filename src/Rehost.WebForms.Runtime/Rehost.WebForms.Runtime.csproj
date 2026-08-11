@@ -34,6 +34,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource
+      Include="../System.Web.ReferenceSource/UI/WebControls/RuntimeScripts/*.js;
+               ../System.Web.ReferenceSource/Resources/System/Web/UI/WebControls/*.gif;
+               ../System.Web.ReferenceSource/Resources/System/Web/Exceptions/*.gif"
+      LogicalName="%(Filename)%(Extension)" />
+    <!-- Declared as SmartNav.htm; the file on disk is lower-case. -->
+    <EmbeddedResource
+      Include="../System.Web.ReferenceSource/UI/WebControls/RuntimeScripts/smartnav.htm"
+      LogicalName="SmartNav.htm" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
     <ProjectReference
       Include="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj"
