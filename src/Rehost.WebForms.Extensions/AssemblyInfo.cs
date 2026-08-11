@@ -5,6 +5,10 @@ using WRA = System.Web.UI.WebResourceAttribute;
 [assembly: AjaxFrameworkAssembly]
 [assembly: TagPrefix("System.Web.UI", "asp")]
 
+[assembly: ScriptResource("MicrosoftAjax.js", "System.Web.Resources.ScriptLibrary.Res", "Sys.Res")]
+[assembly: ScriptResource("MicrosoftAjaxCore.js", "System.Web.Resources.ScriptLibrary.Res", "Sys.Res")]
+[assembly: ScriptResource("MicrosoftAjaxWebForms.js", "System.Web.Resources.ScriptLibrary.WebForms.Res", "Sys.WebForms.Res")]
+
 [assembly: WebResource("MicrosoftAjax.js", "application/x-javascript", CdnSupportsSecureConnection = true,
     CdnPath = WRA._microsoftCdnBasePath + "MicrosoftAjax.js", LoadSuccessExpression = "window.Sys && Sys._Application && Sys.Observer")]
 [assembly: WebResource("MicrosoftAjaxApplicationServices.js", "application/x-javascript", CdnSupportsSecureConnection = true,

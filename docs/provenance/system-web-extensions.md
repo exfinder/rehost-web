@@ -42,6 +42,12 @@ byte-for-byte and the set stays within one percent in aggregate; the remainder
 diverges where one kill bit covers two transforms Framework treated separately.
 The banner's CRLF is why `.gitattributes` exempts this directory from `eol=lf`.
 
+The scripts read `Sys.Res` but never define it, in the drop and in Framework's
+own embedded copies alike. `ScriptResourceHandler` appends it per request from
+the `ScriptLibrary` resources named by `[ScriptResource]`, so the strings exist
+only on the `ScriptResource.axd` path; a mapping that serves the file directly
+leaves them undefined, as the Framework template packages also do.
+
 No `.debug.js` is produced. Framework's debug build is a code generator, not a
 preprocessor run: it synthesizes `Function._validateParams` calls from the
 `/// <param>` and `/// <value>` comments, hoists prototype members into

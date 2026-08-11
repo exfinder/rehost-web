@@ -1,0 +1,43 @@
+using System.Text.RegularExpressions;
+using Shouldly;
+using Xunit;
+
+namespace Rehost.WebForms.Hosting.Tests;
+
+public sealed class ScriptResourceOverKestrelTests(PageLiveScenario scenario)
+    : IClassFixture<PageLiveScenario>
+{
+    private async Task<string> FirstScriptAsync()
+    {
+        var page = await scenario.Client.GetAsync("/ScriptResourceUrl.aspx");
+        page.StatusCode.ShouldBe(200);
+
+        var url = Regex.Match(page.Text, @"src=""(/ScriptResource\.axd\?[^""]+)""").Groups[1].Value;
+        url.ShouldNotBeEmpty();
+
+        var response = await scenario.Client.GetAsync(url.Replace("&amp;", "&"));
+
+        response.StatusCode.ShouldBe(200);
+        return response.Text;
+    }
+
+    [Fact]
+    public async Task A_Named_Script_Is_Served_From_The_Assembly()
+    {
+        var script = await FirstScriptAsync();
+
+        script.ShouldStartWith("//----");
+        script.ShouldContain("Sys.Debug.isDebug=false");
+    }
+
+    [Fact]
+    public async Task The_Handler_Appends_The_Client_String_Resources()
+    {
+        // Sys.Res exists on no other delivery path: the script resource never carries it.
+        var script = await FirstScriptAsync();
+
+        script.ShouldContain("Type.registerNamespace('Sys');");
+        script.ShouldContain("Sys.Res={");
+        script.ShouldContain("\"argumentNull\":");
+    }
+}

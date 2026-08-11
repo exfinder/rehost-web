@@ -31,6 +31,10 @@ the trailing `<add assembly="*" />`. In `<pages><controls>` it is worse, because
 prefix resolution loads every assembly registered for a prefix, so one missing
 entry fails `<asp:Label>` as surely as the control the entry was added for.
 
+A handler entry is the mild case: `validate="False"`, as Framework uses for
+`ScriptResource.axd`, defers type resolution to a request for that path, so a
+missing satellite costs that path rather than every activation.
+
 Framework could keep such promises because the GAC guaranteed the assemblies.
 This port names `Rehost.WebForms.Extensions` under `<controls>` so that an
 unchanged application parses `<asp:ScriptManager>`, and keeps the promise by
