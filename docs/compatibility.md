@@ -131,7 +131,7 @@ and explicit unsupported-contract tests.
 | Windows authentication and native health providers | Unassessed | Root modules are absent and no portable host translation is defined |
 | URL/file authorization and impersonation | Partial | URL authorization allow/deny is exercised for direct and Friendly URL requests; file authorization and impersonation remain unassessed |
 | General cache and output cache | Unassessed | Basic fragment caching is exercised through user controls; broader cache policy/provider behavior is not |
-| `WebResource.axd` | Unassessed | Handler is registered and every resource the runtime declares is embedded; serving behavior and file-backed assembly timestamp assumptions remain unresolved |
+| `WebResource.axd` | Partial | An embedded image round-trips end to end over Kestrel, byte-exact with the declared content type, and a tampered payload is refused with 404; localized satellites and `ScriptResource.axd` script delivery remain absent |
 | Application Services sibling assembly | Partial | Membership/provider types and in-process loader exist; no AppDomain isolation/unload |
 | ResX reading | Partial | Common strings/resources supported; legacy serialized, drawing, and platform-limited values need explicit coverage |
 | SMTP configuration | Supported | Section surface, defaults, validators, and converters are tested |
