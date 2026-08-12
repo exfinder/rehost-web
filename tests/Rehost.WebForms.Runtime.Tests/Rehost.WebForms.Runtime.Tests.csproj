@@ -1,28 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.CodeDom" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="xunit.v3.mtp-v2" />
-  </ItemGroup>
-
-  <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
-  <Import Project="../../eng/RoslynReadyToRun.targets" />
-  <ItemGroup>
     <!-- Built, not referenced: scenarios run in their own process. -->
     <ProjectReference
       Include="../Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj"
@@ -35,4 +18,11 @@
       PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.CodeDom" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" />
+  </ItemGroup>
+
+  <Import Project="../../src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+  <Import Project="../../eng/RoslynReadyToRun.targets" />
 </Project>

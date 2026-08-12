@@ -2,12 +2,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>Rehost.WebForms.ScenarioHost</AssemblyName>
-    <RootNamespace>Rehost.WebForms.ScenarioHost</RootNamespace>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <!-- The serve scenario drives the production adapter over real Kestrel. -->

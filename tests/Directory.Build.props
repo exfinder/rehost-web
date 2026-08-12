@@ -9,4 +9,23 @@
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);fixtures/**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <!-- tests/parity/Directory.Build.props imports this file and overrides per-tree
+       defaults (ImplicitUsings, LangVersion) after the import. -->
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <OutputType>Exe</OutputType>
+    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+  </PropertyGroup>
+
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
+    <PackageReference Include="Shouldly" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
+  </ItemGroup>
 </Project>
