@@ -29,7 +29,9 @@
       PrivateAssets="all" />
   </ItemGroup>
 
-  <Target Name="StageScenarioFixtures" AfterTargets="Build" BeforeTargets="StageScenarioProbes">
+  <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageScenarioFixtures;StageFriendlyUrlsAssembly;StageScenarioProbes" />
+
+  <Target Name="StageScenarioFixtures">
     <ItemGroup>
       <_FixtureFile Include="fixtures/**" />
     </ItemGroup>
@@ -40,17 +42,24 @@
       SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="StageFriendlyUrlsAssembly" AfterTargets="StageScenarioFixtures" BeforeTargets="StageScenarioProbes">
+  <Target Name="StageFriendlyUrlsAssembly" DependsOnTargets="StageScenarioFixtures">
+    <MSBuild
+      Projects="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
+      Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" PropertyName="_FriendlyUrlsAssembly" />
+    </MSBuild>
     <Copy
-      SourceFiles="../../src/Rehost.WebForms.FriendlyUrls/bin/$(Configuration)/net10.0/Rehost.WebForms.FriendlyUrls.dll"
+      SourceFiles="$(_FriendlyUrlsAssembly)"
       DestinationFolder="$(TargetDir)fixtures/friendlyurls/bin"
       SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="StageScenarioProbes" AfterTargets="Build">
-    <PropertyGroup>
-      <_ProbeAssembly>$(MSBuildProjectDirectory)/../Rehost.WebForms.ScenarioProbes/bin/$(Configuration)/net10.0/Rehost.WebForms.ScenarioProbes.dll</_ProbeAssembly>
-    </PropertyGroup>
+  <Target Name="StageScenarioProbes" DependsOnTargets="StageScenarioFixtures">
+    <MSBuild
+      Projects="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
+      Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" PropertyName="_ProbeAssembly" />
+    </MSBuild>
 
     <Error
       Condition="!Exists('$(_ProbeAssembly)')"
@@ -67,7 +76,7 @@
 
     <!-- The probe assembly now leans on the shared journal, so its dependency ships too. -->
     <Copy
-      SourceFiles="$(_ProbeAssembly);$(MSBuildProjectDirectory)/../Rehost.WebForms.ScenarioProbes/bin/$(Configuration)/net10.0/Rehost.WebForms.Parity.Contracts.dll"
+      SourceFiles="$(_ProbeAssembly);$([System.IO.Path]::GetDirectoryName('$(_ProbeAssembly)'))/Rehost.WebForms.Parity.Contracts.dll"
       DestinationFolder="%(_FixtureDirectory.Identity)/bin"
       SkipUnchangedFiles="true" />
   </Target>
