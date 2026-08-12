@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>Rehost.WebForms.Optimization.WebForms</AssemblyName>
     <RootNamespace>Microsoft.AspNet.Web.Optimization.WebForms</RootNamespace>
     <Description>Web Forms controls for Rehost.WebForms optimization bundles.</Description>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>

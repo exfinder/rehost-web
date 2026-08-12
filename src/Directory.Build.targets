@@ -1,0 +1,16 @@
+<Project>
+  <!-- One in-repo copy for every src project; the packaged
+       build/Rehost.WebForms.Runtime.targets carries the same target as the consumer
+       contract. The .NET ref pack's System.Web/System.Web.HttpUtility facades would
+       otherwise shadow the runtime's types. -->
+  <Target
+    Name="PreferRehostWebFormsRuntimeTypes"
+    AfterTargets="ResolveAssemblyReferences"
+    BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <ReferencePath
+        Remove="@(ReferencePath)"
+        Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -1,11 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>Rehost.WebForms.Hosting</AssemblyName>
     <RootNamespace>Rehost.WebForms.Hosting</RootNamespace>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,5 +38,4 @@
       Visible="false" />
   </ItemGroup>
 
-  <Import Project="../Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
 </Project>

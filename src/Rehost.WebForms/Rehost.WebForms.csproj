@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- Metapackage: no assembly of its own. It restores the GAC promise — everything
          the root configuration names is guaranteed present, so an application that
          references this package alone can parse asp: tags (docs/follow-ups/runtime-metapackage.md). -->

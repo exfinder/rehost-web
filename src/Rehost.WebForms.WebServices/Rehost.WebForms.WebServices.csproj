@@ -1,15 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AssemblyName>Rehost.WebForms.WebServices</AssemblyName>
     <RootNamespace>System.Web.Services</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
-
-  <ItemGroup>
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="../System.Web.Services.ReferenceSource/System/Web/Services/WsiProfiles.cs" />

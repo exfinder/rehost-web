@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>Rehost.WebForms.Optimization</AssemblyName>
     <RootNamespace>System.Web.Optimization</RootNamespace>
     <Description>ASP.NET script and stylesheet optimization for Rehost.WebForms.</Description>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <NoWarn>$(NoWarn);CS3001;CS3002;CS3003;SYSLIB0021</NoWarn>
   </PropertyGroup>
 
@@ -33,14 +30,4 @@
     <PackageReference Include="WebGrease" NoWarn="NU1701" />
   </ItemGroup>
 
-  <Target
-    Name="PreferRehostWebFormsRuntimeTypes"
-    AfterTargets="ResolveAssemblyReferences"
-    BeforeTargets="CoreCompile">
-    <ItemGroup>
-      <ReferencePath
-        Remove="@(ReferencePath)"
-        Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
-    </ItemGroup>
-  </Target>
 </Project>
