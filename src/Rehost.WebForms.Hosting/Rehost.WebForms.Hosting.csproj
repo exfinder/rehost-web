@@ -14,6 +14,31 @@
 
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference
+      Include="../../eng/Rehost.WebForms.Build.Tasks/Rehost.WebForms.Build.Tasks.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None
+      Update="build/Rehost.WebForms.Hosting.props"
+      Pack="true"
+      PackagePath="build/Rehost.WebForms.Hosting.props" />
+    <None
+      Update="build/Rehost.WebForms.Hosting.targets"
+      Pack="true"
+      PackagePath="build/Rehost.WebForms.Hosting.targets" />
+    <None
+      Update="build/Web.Rehost.config"
+      Pack="true"
+      PackagePath="build/Web.Rehost.config" />
+    <!-- Bundled, not a package dependency: the task assembly is build-time tooling. -->
+    <None
+      Include="../../eng/Rehost.WebForms.Build.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.Build.Tasks.dll;../../eng/Rehost.WebForms.Build.Tasks/bin/$(Configuration)/net10.0/Microsoft.Web.XmlTransform.dll"
+      Pack="true"
+      PackagePath="build/tasks/"
+      Visible="false" />
   </ItemGroup>
 
   <Import Project="../Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />

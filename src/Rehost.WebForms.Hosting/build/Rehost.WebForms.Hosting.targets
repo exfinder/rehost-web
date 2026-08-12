@@ -1,0 +1,143 @@
+<Project>
+  <!-- Consumer contract: setting RehostSiteContentRoot on an Exe project turns on site
+       staging. Build stages an always-current runnable site (content + host payload +
+       transformed web.config) under RehostStagedSiteRoot; Publish produces the same
+       layout under RehostPublishSiteRoot with Web.$(Configuration).config applied first,
+       matching Framework publish semantics. Staging is incremental and manifest-driven:
+       removed sources are deleted from the stage, never by wiping the tree. -->
+
+  <PropertyGroup Condition="'$(RehostSiteContentRoot)' != ''">
+    <RehostSiteContentRoot>$([MSBuild]::EnsureTrailingSlash('$(RehostSiteContentRoot)'))</RehostSiteContentRoot>
+    <RehostStageOnBuild Condition="'$(RehostStageOnBuild)' == ''">true</RehostStageOnBuild>
+    <RehostStagedSiteRoot Condition="'$(RehostStagedSiteRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(BaseOutputPath)', 'site'))</RehostStagedSiteRoot>
+    <RehostStagedSiteRoot>$([MSBuild]::EnsureTrailingSlash('$(RehostStagedSiteRoot)'))</RehostStagedSiteRoot>
+    <RehostPublishSiteRoot Condition="'$(RehostPublishSiteRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(OutputPath)', 'site-publish'))</RehostPublishSiteRoot>
+    <RehostPublishSiteRoot>$([MSBuild]::EnsureTrailingSlash('$(RehostPublishSiteRoot)'))</RehostPublishSiteRoot>
+  </PropertyGroup>
+
+  <!-- Publish payload goes straight into the published site's bin so the deployable is
+       the site folder itself, same shape as the dev stage. -->
+  <PropertyGroup Condition="'$(RehostSiteContentRoot)' != '' and '$(RehostPublishSiteLayout)' != 'false'">
+    <PublishDir>$(RehostPublishSiteRoot)bin/</PublishDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RehostSiteContentRoot)' != '' and '$(OutputType)' == 'Exe'">
+    <RunCommand>dotnet</RunCommand>
+    <RunArguments>"$(RehostStagedSiteRoot)bin/$(TargetFileName)"</RunArguments>
+    <RunWorkingDirectory>$(RehostStagedSiteRoot)</RunWorkingDirectory>
+  </PropertyGroup>
+
+  <Target
+    Name="RehostStageSite"
+    AfterTargets="Build"
+    Condition="'$(RehostSiteContentRoot)' != '' and '$(RehostStageOnBuild)' == 'true' and '$(_RehostStageInvocation)' == ''">
+    <MSBuild
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="RehostStageCore"
+      Properties="_RehostStageInvocation=build;RehostStageRoot=$(RehostStagedSiteRoot);RehostStagePayload=true;RehostApplyConfigurationTransform=false" />
+  </Target>
+
+  <Target
+    Name="RehostPublishSite"
+    AfterTargets="Publish"
+    Condition="'$(RehostSiteContentRoot)' != '' and '$(_RehostStageInvocation)' == ''">
+    <MSBuild
+      Projects="$(MSBuildProjectFullPath)"
+      Targets="RehostStageCore"
+      Properties="_RehostStageInvocation=publish;RehostStageRoot=$(RehostPublishSiteRoot);RehostStagePayload=false;RehostApplyConfigurationTransform=true" />
+  </Target>
+
+  <Target
+    Name="RehostStageCore"
+    Condition="'$(_RehostStageInvocation)' != '' and '$(RehostStageRoot)' != ''"
+    DependsOnTargets="RehostComputeStageItems;RehostCopyStagedFiles;RehostTransformStagedWebConfig;RehostCleanStaleStagedFiles;RehostVerifyStagedSite;RehostWriteStageManifest" />
+
+  <Target Name="RehostComputeStageItems">
+    <Error
+      Condition="!Exists('$(RehostSiteContentRoot)Web.config')"
+      Text="RehostSiteContentRoot '$(RehostSiteContentRoot)' does not contain a Web.config." />
+
+    <PropertyGroup>
+      <_RehostWebConfigTransform Condition="'$(RehostWebConfigTransform)' != ''">$(RehostWebConfigTransform)</_RehostWebConfigTransform>
+      <_RehostWebConfigTransform Condition="'$(_RehostWebConfigTransform)' == '' and Exists('$(MSBuildProjectDirectory)/Web.Rehost.config')">$(MSBuildProjectDirectory)/Web.Rehost.config</_RehostWebConfigTransform>
+      <_RehostWebConfigTransform Condition="'$(_RehostWebConfigTransform)' == ''">$(MSBuildThisFileDirectory)Web.Rehost.config</_RehostWebConfigTransform>
+      <_RehostConfigurationTransform>$(RehostSiteContentRoot)Web.$(Configuration).config</_RehostConfigurationTransform>
+      <_RehostStageManifest>$(IntermediateOutputPath)rehost-stage-$(_RehostStageInvocation).manifest</_RehostStageManifest>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_RehostSiteContent
+        Include="$(RehostSiteContentRoot)**/*"
+        Exclude="$(RehostSiteContentRoot)**/*.cs;$(RehostSiteContentRoot)**/*.csproj;$(RehostSiteContentRoot)**/*.user;$(RehostSiteContentRoot)bin/**;$(RehostSiteContentRoot)obj/**;$(RehostSiteContentRoot)packages/**;$(RehostSiteContentRoot)packages.config;$(RehostSiteContentRoot)Web.config;$(RehostSiteContentRoot)Web.*.config;$(RehostSiteContentRoot).vs/**;$(RehostSiteContentExcludes)" />
+      <_RehostPayload
+        Condition="'$(RehostStagePayload)' == 'true'"
+        Include="$(TargetDir)**/*"
+        Exclude="$(RehostStageRoot)**" />
+      <_RehostDesired Include="@(_RehostSiteContent->'$(RehostStageRoot)%(RecursiveDir)%(Filename)%(Extension)')" />
+      <_RehostDesired
+        Condition="'$(RehostStagePayload)' == 'true'"
+        Include="@(_RehostPayload->'$(RehostStageRoot)bin/%(RecursiveDir)%(Filename)%(Extension)')" />
+      <_RehostDesired Include="$(RehostStageRoot)web.config" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RehostCopyStagedFiles">
+    <Copy
+      SourceFiles="@(_RehostSiteContent)"
+      DestinationFiles="@(_RehostSiteContent->'$(RehostStageRoot)%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+    <Copy
+      Condition="'$(RehostStagePayload)' == 'true'"
+      SourceFiles="@(_RehostPayload)"
+      DestinationFiles="@(_RehostPayload->'$(RehostStageRoot)bin/%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target
+    Name="RehostTransformStagedWebConfig"
+    Inputs="$(RehostSiteContentRoot)Web.config;$(_RehostWebConfigTransform);$(_RehostConfigurationTransform)"
+    Outputs="$(RehostStageRoot)web.config">
+    <PropertyGroup>
+      <_RehostConfigSource>$(RehostSiteContentRoot)Web.config</_RehostConfigSource>
+    </PropertyGroup>
+
+    <ApplyXdtTransform
+      Condition="'$(RehostApplyConfigurationTransform)' == 'true' and Exists('$(_RehostConfigurationTransform)')"
+      Source="$(_RehostConfigSource)"
+      Transform="$(_RehostConfigurationTransform)"
+      Destination="$(IntermediateOutputPath)rehost-web.$(Configuration).config" />
+    <PropertyGroup Condition="'$(RehostApplyConfigurationTransform)' == 'true' and Exists('$(_RehostConfigurationTransform)')">
+      <_RehostConfigSource>$(IntermediateOutputPath)rehost-web.$(Configuration).config</_RehostConfigSource>
+    </PropertyGroup>
+
+    <ApplyXdtTransform
+      Source="$(_RehostConfigSource)"
+      Transform="$(_RehostWebConfigTransform)"
+      Destination="$(RehostStageRoot)web.config" />
+  </Target>
+
+  <Target Name="RehostCleanStaleStagedFiles">
+    <ReadLinesFromFile File="$(_RehostStageManifest)" Condition="Exists('$(_RehostStageManifest)')">
+      <Output TaskParameter="Lines" ItemName="_RehostPreviouslyStaged" />
+    </ReadLinesFromFile>
+    <ItemGroup>
+      <_RehostStale Include="@(_RehostPreviouslyStaged)" Exclude="@(_RehostDesired)" />
+    </ItemGroup>
+    <Delete Files="@(_RehostStale)" />
+  </Target>
+
+  <!-- Guard: a successful build means the staged site is complete. -->
+  <Target Name="RehostVerifyStagedSite">
+    <Error
+      Condition="!Exists('%(_RehostDesired.Identity)')"
+      Text="Staged site is missing '%(_RehostDesired.Identity)'; the stage is incomplete." />
+  </Target>
+
+  <Target Name="RehostWriteStageManifest">
+    <WriteLinesToFile
+      File="$(_RehostStageManifest)"
+      Lines="@(_RehostDesired)"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+  </Target>
+</Project>

@@ -10,6 +10,18 @@
     </ItemGroup>
   </Target>
 
+  <!-- Consumer contract: pointing RehostAppContentRoot at a legacy WAP folder compiles
+       its code-behind the way the WAP csproj did — every .cs into the app assembly,
+       leaving markup for runtime compilation. -->
+  <PropertyGroup Condition="'$(RehostAppContentRoot)' != ''">
+    <RehostAppContentRoot>$([MSBuild]::EnsureTrailingSlash('$(RehostAppContentRoot)'))</RehostAppContentRoot>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(RehostAppContentRoot)' != ''">
+    <Compile
+      Include="$(RehostAppContentRoot)**/*.cs"
+      Exclude="$(RehostAppContentRoot)bin/**;$(RehostAppContentRoot)obj/**;$(RehostAppContentRoot)packages/**" />
+  </ItemGroup>
+
   <!-- The runtime compiles these folders itself, into their own assemblies that page
        compilation references. Letting the SDK also compile them into the host assembly puts
        the same types in two assemblies and every page referencing them fails with CS0433 —
