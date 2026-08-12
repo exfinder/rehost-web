@@ -1,0 +1,6 @@
+<Project>
+  <!-- Solution-level restore runs through the solution metaproject, which does not
+       import Directory.Build.*; the hook must ride here as well. -->
+  <Import Project="LocalFeed.props" />
+  <Import Project="../../eng/LocalFeed.targets" />
+</Project>

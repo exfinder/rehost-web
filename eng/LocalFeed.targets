@@ -1,0 +1,117 @@
+<Project>
+  <!-- Auto-pack-on-restore for apps/* package consumers. Imported from an app's
+       Directory.Build.targets (direct project builds) and Directory.Solution.targets
+       (solution builds) — restore fires through a different project in each flow, so
+       both imports are required. Before restore resolves, changed src/ packages are
+       re-packed into the app's local feed and the extracted copies are purged, so a
+       plain `dotnet build` is always current from any starting state.
+
+       Packages are always packed Release; $(Configuration) governs only the app and
+       host projects. The importer must define RehostLocalPackageRoot. -->
+
+  <PropertyGroup>
+    <RehostRepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</RehostRepoRoot>
+    <RehostWebFormsVersion Condition="'$(RehostWebFormsVersion)' == ''">1.0.0-local</RehostWebFormsVersion>
+    <RehostLocalPackageFeed>$(RehostLocalPackageRoot)feed/</RehostLocalPackageFeed>
+    <RehostLocalPackageCache>$(RehostLocalPackageRoot)packages/</RehostLocalPackageCache>
+    <RehostLocalPackageStamp>$(RehostLocalPackageRoot)local-packages.stamp</RehostLocalPackageStamp>
+    <_RehostLocalFeedEnabled>true</_RehostLocalFeedEnabled>
+    <_RehostLocalFeedEnabled Condition="'$(RehostSkipLocalFeed)' == 'true' or '$(DesignTimeBuild)' == 'true' or '$(RehostLocalPackageRoot)' == ''">false</_RehostLocalFeedEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
+
+    <RehostLocalBuildSupportProject Include="$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
+
+    <!-- Broad on purpose: a hand-maintained per-project list once missed Extensions'
+         embedded Scripts/*.js and shipped a stale package. False repacks are cheap;
+         stale packages are not. -->
+    <RehostLocalPackageSource
+      Include="$(RehostRepoRoot)src/**/*"
+      Exclude="$(RehostRepoRoot)src/**/bin/**;$(RehostRepoRoot)src/**/obj/**" />
+    <RehostLocalPackageSource Include="$(RehostRepoRoot)Directory.Packages.props;$(RehostRepoRoot)global.json" />
+  </ItemGroup>
+
+  <Target
+    Name="RehostPackLocalFeed"
+    BeforeTargets="Restore"
+    Condition="'$(_RehostLocalFeedEnabled)' == 'true'"
+    Inputs="@(RehostLocalPackageSource)"
+    Outputs="$(RehostLocalPackageStamp)">
+    <ItemGroup>
+      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(RehostLocalPackageProject.Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+      <!-- The hook runs inside the caller's restore pass, whose global properties are
+           restore-only optimizations (the CLI disables default item globs and package
+           imports there). Children here are real builds; those globals must not leak. -->
+      <_RehostRestorePassGlobals>EnableDefaultItems;EnableDefaultCompileItems;EnableDefaultEmbeddedResourceItems;EnableDefaultNoneItems;ExcludeRestorePackageImports;MSBuildIsRestoring;MSBuildRestoreSessionId</_RehostRestorePassGlobals>
+    </PropertyGroup>
+
+    <Message Importance="high" Text="Local Rehost packages are stale — repacking into $(RehostLocalPackageFeed)" />
+    <MakeDir Directories="$(RehostLocalPackageFeed);$(RehostLocalPackageCache)" />
+    <MSBuild
+      Projects="@(RehostLocalBuildSupportProject)"
+      Targets="Restore"
+      BuildInParallel="false"
+      Properties="Configuration=Release"
+      RemoveProperties="$(_RehostRestorePassGlobals)" />
+    <MSBuild
+      Projects="@(RehostLocalPackageProject)"
+      Targets="Restore"
+      BuildInParallel="false"
+      Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostWebFormsVersion)"
+      RemoveProperties="$(_RehostRestorePassGlobals)" />
+    <MSBuild
+      Projects="@(RehostLocalPackageProject)"
+      Targets="Pack"
+      BuildInParallel="false"
+      Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostWebFormsVersion)"
+      RemoveProperties="$(_RehostRestorePassGlobals)" />
+    <!-- Same version string every pack, so the extracted copies must go; restore then
+         re-extracts from the fresh feed. -->
+    <RemoveDir Directories="@(_RehostLocalCacheEntry)" />
+    <Touch Files="$(RehostLocalPackageStamp)" AlwaysCreate="true" />
+  </Target>
+
+  <!-- Guard belt: a restore that resolved older extractions than the feed means the
+       hook was bypassed; fail rather than build against stale packages. -->
+  <Target
+    Name="RehostVerifyLocalFeed"
+    AfterTargets="Restore"
+    Condition="'$(_RehostLocalFeedEnabled)' == 'true'">
+    <ItemGroup>
+      <_RehostFeedCheck Include="@(RehostLocalPackageProject->'%(Filename)')">
+        <FeedNupkg>$(RehostLocalPackageFeed)%(Filename).$(RehostWebFormsVersion).nupkg</FeedNupkg>
+        <CacheMetadata>$(RehostLocalPackageCache)$([System.String]::Copy('%(Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)/.nupkg.metadata</CacheMetadata>
+      </_RehostFeedCheck>
+    </ItemGroup>
+    <Error
+      Condition="!Exists('%(_RehostFeedCheck.FeedNupkg)')"
+      Text="Local feed is missing '%(_RehostFeedCheck.FeedNupkg)'. Delete '$(RehostLocalPackageStamp)' and rebuild to repack." />
+    <Error
+      Condition="Exists('%(_RehostFeedCheck.CacheMetadata)') and $([System.IO.File]::GetLastWriteTime('%(_RehostFeedCheck.CacheMetadata)').Ticks) &lt; $([System.IO.File]::GetLastWriteTime('%(_RehostFeedCheck.FeedNupkg)').Ticks)"
+      Text="Restored copy of '%(_RehostFeedCheck.Identity)' is older than the local feed. Delete '$(RehostLocalPackageCache)' and rebuild." />
+  </Target>
+
+  <!-- Guard belt: builds that skip restore must still refuse to compile against a
+       stale feed. Same inputs as the pack target, so stale means error. -->
+  <Target
+    Name="RehostAssertLocalFeedCurrent"
+    BeforeTargets="CoreCompile"
+    Condition="'$(_RehostLocalFeedEnabled)' == 'true' and '$(MSBuildProjectExtension)' == '.csproj'"
+    Inputs="@(RehostLocalPackageSource)"
+    Outputs="$(RehostLocalPackageStamp)">
+    <Error Text="Local Rehost package feed is stale and this build skipped restore. Build without --no-restore so the feed can repack." />
+  </Target>
+</Project>

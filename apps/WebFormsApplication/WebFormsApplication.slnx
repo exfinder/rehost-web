@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="WebFormsApplication.App/WebFormsApplication.App.csproj" />
+  <Project Path="WebFormsApplication.Host/WebFormsApplication.Host.csproj" />
+</Solution>
