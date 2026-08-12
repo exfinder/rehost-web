@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <RehostRepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</RehostRepoRoot>
+  </PropertyGroup>
+</Project>

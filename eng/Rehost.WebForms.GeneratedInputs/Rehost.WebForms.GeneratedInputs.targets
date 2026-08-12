@@ -9,10 +9,10 @@
     <_SystemWebGeneratorInput Include="$(GeneratedInputsToolProject)" />
     <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)Program.cs" />
     <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)inputs/*.json" />
-    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/System.Web.txt" />
-    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/Names.cspp" />
-    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/cacheusage.cspp" />
-    <_SystemWebGeneratorInput Include="$(MSBuildProjectDirectory)/../System.Web.ReferenceSource/cacheexpires.cspp" />
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)../../src/System.Web.ReferenceSource/System.Web.txt" />
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)../../src/System.Web.ReferenceSource/Names.cspp" />
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)../../src/System.Web.ReferenceSource/cacheusage.cspp" />
+    <_SystemWebGeneratorInput Include="$(MSBuildThisFileDirectory)../../src/System.Web.ReferenceSource/cacheexpires.cspp" />
 
     <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)CacheExpires.g.cs" />
     <_SystemWebGeneratedSource Include="$(SystemWebGeneratedInputsDir)CacheUsage.g.cs" />
@@ -36,6 +36,6 @@
              Properties="Configuration=$(Configuration)">
       <Output TaskParameter="TargetOutputs" ItemName="_GeneratedInputsToolOutput" />
     </MSBuild>
-    <Exec Command="dotnet &quot;%(_GeneratedInputsToolOutput.Identity)&quot; generate &quot;$(MSBuildProjectDirectory)/../..&quot; &quot;$(SystemWebGeneratedInputsDir)&quot;" />
+    <Exec Command="dotnet &quot;%(_GeneratedInputsToolOutput.Identity)&quot; generate &quot;$(MSBuildThisFileDirectory)../..&quot; &quot;$(SystemWebGeneratedInputsDir)&quot;" />
   </Target>
 </Project>
