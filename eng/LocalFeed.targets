@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms/Rehost.WebForms.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />

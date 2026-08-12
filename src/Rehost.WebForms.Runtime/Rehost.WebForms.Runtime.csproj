@@ -68,17 +68,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Root configs ship in the Rehost.WebForms metapackage, which owns the promise
+         that everything they name is present; the copy here serves project-reference
+         consumers only. -->
     <None
       Update="configs/*.config"
       CopyToOutputDirectory="PreserveNewest"
-      CopyToPublishDirectory="PreserveNewest"
-      Pack="true"
-      PackagePath="contentFiles/any/any"
-      PackageCopyToOutput="true" />
+      CopyToPublishDirectory="PreserveNewest" />
+    <!-- buildTransitive as well: consumers usually reference the Rehost.WebForms
+         metapackage, and plain build/ assets do not flow through a dependency. -->
     <None
       Update="build/Rehost.WebForms.Runtime.targets"
       Pack="true"
-      PackagePath="build/Rehost.WebForms.Runtime.targets" />
+      PackagePath="build/Rehost.WebForms.Runtime.targets;buildTransitive/Rehost.WebForms.Runtime.targets" />
   </ItemGroup>
 
   <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets" />

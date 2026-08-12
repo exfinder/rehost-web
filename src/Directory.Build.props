@@ -1,0 +1,27 @@
+<Project>
+  <!-- Shared shipping metadata for the Rehost.WebForms packages. The version is the
+       single source for the whole family; local app feeds override it on the command
+       line with PackageVersion=1.0.0-local. -->
+  <PropertyGroup>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <Authors>Rehost WebForms contributors</Authors>
+    <RepositoryUrl>https://github.com/exfinder/rehost-webforms</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/exfinder/rehost-webforms</PackageProjectUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <!-- PackageLicenseExpression is deliberately unset: the project license is an open
+         decision (docs/follow-ups/package-license.md). nuget.org publishing is blocked
+         until it lands. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None
+      Include="$(MSBuildThisFileDirectory)PACKAGE_README.md"
+      Pack="true"
+      PackagePath="README.md"
+      Visible="false" />
+  </ItemGroup>
+</Project>

@@ -7,6 +7,7 @@
     <Project Path="samples/Rehost.WebForms.SampleApp/Rehost.WebForms.SampleApp.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Rehost.WebForms/Rehost.WebForms.csproj" />
     <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
     <Project Path="src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
     <Project Path="src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Metapackage: no assembly of its own. It restores the GAC promise — everything
+         the root configuration names is guaranteed present, so an application that
+         references this package alone can parse asp: tags (docs/follow-ups/runtime-metapackage.md). -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoWarn>$(NoWarn);CS2008;NU5128</NoWarn>
+    <Description>ASP.NET Web Forms runtime for modern .NET: the System.Web-compatible runtime and the companion assemblies the root configuration names.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+  </ItemGroup>
+
+  <!-- The package that guarantees the companions also owns the root configuration
+       that names them. -->
+  <ItemGroup>
+    <None
+      Include="../Rehost.WebForms.Runtime/configs/*.config"
+      Pack="true"
+      PackagePath="contentFiles/any/any/configs/"
+      PackageCopyToOutput="true" />
+  </ItemGroup>
+</Project>

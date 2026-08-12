@@ -11,8 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms.Runtime" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.Extensions" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
     <PackageReference Include="Rehost.WebForms.FriendlyUrls" Version="$(RehostWebFormsVersion)" />
     <PackageReference Include="Rehost.WebForms.Optimization" Version="$(RehostWebFormsVersion)" />
     <PackageReference Include="Rehost.WebForms.Optimization.WebForms" Version="$(RehostWebFormsVersion)" />
