@@ -17,9 +17,9 @@ Milestone 1 owns these outcomes:
   [route URL escaping](follow-ups/route-url-escaping.md).
 - Restore the frozen template's physical script/style path without changing its
   sources: [script-stack plan](follow-ups/stock-template-script-stack.md).
-- Ship the companion assemblies the root configuration names, so an application
-  referencing the runtime alone still parses `asp:` tags:
-  [runtime metapackage](follow-ups/runtime-metapackage.md).
+- ~~Ship the companion assemblies the root configuration names~~ — done: the
+  [`Rehost.WebForms` metapackage](follow-ups/runtime-metapackage.md) owns the
+  root configuration and its companions.
 - Attempt the complete ASP.NET Web Optimization source compile, but validate and
   claim only the bundle/debug paths reached by the template.
 - Restore remaining static-asset behavior and mobile master/view switching.
@@ -144,6 +144,18 @@ Milestone 1 owns these outcomes:
   minification separately from the frozen template's debug-mode expansion.
 - Assess WebGrease image assembly/spriting separately; those paths use legacy
   drawing/desktop types and are not covered by JS/CSS minifier execution.
+
+### Build system and packaging
+
+- `Rehost.WebForms.Sdk` MSBuild SDK package for minimal consumer csproj files:
+  [Rehost SDK](follow-ups/rehost-sdk.md).
+- In-place development run via a host-provided bin seam, restoring the
+  edit-markup-refresh loop: [in-place dev run](follow-ups/in-place-dev-run.md).
+- Choose the project license and set `PackageLicenseExpression`; nuget.org
+  publishing is blocked until then:
+  [package license](follow-ups/package-license.md).
+- Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
+  get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
 
 ## Parked
 

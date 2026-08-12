@@ -40,17 +40,22 @@ story.
 
 ## Consumer-facing targets
 
-The packaged `Rehost.WebForms.Runtime.targets` is the consumer's build
-contract today. It owns the `App_*` compile/resource exclusions above, the
-`System.Web` shim-reference removal, and the BinaryFormatter runtimeconfig
-switch. It owns nothing about **publish**, and the gap is subtle: the removes
+The consumer's build contract now spans two packages: the runtime's
+`Rehost.WebForms.Runtime.targets` (also shipped `buildTransitive/`) owns the
+lib side — the `App_*` compile/resource exclusions above, the `System.Web`
+shim-reference removal, the BinaryFormatter runtimeconfig switch, and the
+`RehostAppContentRoot` WAP-style compile glob — while the hosting package's
+`Rehost.WebForms.Hosting.targets` owns the exe side: `RehostSiteContentRoot`
+staging, the XDT `web.config` pipeline, and the publish site layout. The
+hosting staging copies the site **content**; the subtle `App_Code` gap below
+remains for anything the content globs exclude: the removes
 leave `App_Code` and `App_GlobalResources` in *no* item group at all — the
 default `Compile`/`EmbeddedResource` globs claimed them before the removes ran
 — so no SDK glob ever publishes them, and `.aspx`/`.master`/`Global.asax`
-publish only if the consumer declares them. The sample application carries the
-per-project fix (explicit `None` items with `CopyToPublishDirectory`); a
-robust packaged opt-in — a `RehostWebFormsPublishWebSitePayload`-style target
-— would generalize exactly that.
+reach a deployable only because the hosting package's staging copies them as
+site content. A Web Site-model consumer whose `App_Code` must ship as source
+still has no packaged answer; a `RehostWebFormsPublishWebSitePayload`-style
+opt-in would generalize that.
 
 Both the exclusion set and the publish set are blocked on the model decision:
 a Web Site host must publish `.aspx.cs` sources because the runtime compiles
