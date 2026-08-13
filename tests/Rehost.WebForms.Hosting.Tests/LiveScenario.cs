@@ -60,9 +60,6 @@ public class LiveScenario : IDisposable
 
     internal WitnessReader Witness => new(Client);
 
-    internal ScenarioJournalReader Journal =>
-        ScenarioJournalReader.Parse(TraceFile.ReadLines(_tracePath));
-
     private string WaitForAddress()
     {
         var deadline = Stopwatch.StartNew();
@@ -76,7 +73,7 @@ public class LiveScenario : IDisposable
                     + _process.StandardError);
             }
 
-            var address = ScenarioJournalReader.Parse(TraceFile.ReadLines(_tracePath)).Address;
+            var address = ReadAddress();
             if (address != null)
             {
                 return address;
@@ -92,6 +89,11 @@ public class LiveScenario : IDisposable
             + "s. "
             + _process.StandardError);
     }
+
+    private string? ReadAddress() => TraceFile.ReadLines(_tracePath)
+        .Where(line => line.StartsWith("address:", StringComparison.Ordinal))
+        .Select(line => line["address:".Length..])
+        .FirstOrDefault();
 
     public void Dispose()
     {

@@ -65,8 +65,6 @@ internal sealed class ScenarioRun : IDisposable
                 + string.Join(", ", Trace));
     }
 
-    internal ScenarioJournalReader Journal => ScenarioJournalReader.Parse(Trace);
-
     // Responses are numbered in order across probes: one render, then one per postback round.
     internal static ScenarioRun Farm(params string[] probes)
     {

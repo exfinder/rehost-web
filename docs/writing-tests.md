@@ -59,11 +59,9 @@ response.Text.ShouldContain("...");
   a probe that throws from its own journaling turns the evidence channel into
   the failure (the lost-reset post-mortem).
 - Assertion hierarchy: the typed response first; server-side facts through the
-  typed journal (`scenario.Journal`, a `ScenarioJournalReader`) or the
-  fixture's witness endpoint (`scenario.Witness`). Live facts go through the
-  witness; nothing new may poll the file journal — a polled shared file once
-  lost an abort marker to Windows sharing semantics. Raw trace strings never
-  appear in tests —
+  fixture's witness endpoint (`scenario.Witness`). Nothing may poll the trace
+  file for assertions — a polled shared file once lost an abort marker to
+  Windows sharing semantics. Raw trace strings never appear in tests —
   string negatives over a trace can pass vacuously.
 - Tests spawn at most one level of child processes, and only because a child
   is one application activation. Orchestration stays in the test process.
