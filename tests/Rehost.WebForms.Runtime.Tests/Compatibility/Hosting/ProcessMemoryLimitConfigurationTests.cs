@@ -1,5 +1,6 @@
 using System.Web.Hosting;
 using Shouldly;
+using Rehost.WebForms.Hosting;
 using Xunit;
 using Rehost.WebForms.TestSupport;
 
@@ -39,7 +40,7 @@ public sealed class ProcessMemoryLimitConfigurationTests
 
             var machineConfig = Path.Combine(root.FullName, "machine.config");
             var shipped = Path.Combine(
-                ScenarioHostInvocation.HostDirectory, "configs", "rehost-webforms.machine.config");
+                ScenarioHostInvocation.HostDirectory, "configs", WebFormsApplicationOptions.DefaultMachineConfigurationFileName);
             var text = File.ReadAllText(shipped);
             text.ShouldContain("memoryLimit=\"80\"", Case.Sensitive);
             File.WriteAllText(

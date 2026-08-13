@@ -1,4 +1,5 @@
 using System.Web;
+using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.ScenarioProbes;
 
@@ -17,7 +18,7 @@ public sealed class SaveHandler : IHttpHandler
                 case "file":
                     var file = context.Request.Files["Picked"];
                     context.Response.AddHeader(
-                        "X-Spilled",
+                        ProbeHeaders.Spilled,
                         RequestBodyHandler.IsFileBacked(file.InputStream).ToString());
                     file.SaveAs(target);
                     break;

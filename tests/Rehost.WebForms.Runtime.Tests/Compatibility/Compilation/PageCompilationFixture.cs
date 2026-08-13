@@ -2,12 +2,13 @@ using System.Collections.Immutable;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
 public sealed class PageCompilationFixture : IDisposable
 {
-    private const string Request = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
+    private const string Request = PageRequests.Canonical;
 
     private readonly PageApplication _application = PageApplication.Create();
 

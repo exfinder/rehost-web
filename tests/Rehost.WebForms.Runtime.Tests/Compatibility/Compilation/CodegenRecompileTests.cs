@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.ScenarioTrace;
 
@@ -16,10 +17,10 @@ public sealed class CodegenRecompileTests
         application.EditAppCode();
         var second = application.Run();
 
-        Value(second, "app-code:").ShouldNotBe(Value(first, "app-code:"));
-        Value(second, "resource:").ShouldBe("neutral-greeting");
+        Value(second, TraceEvents.AppCode).ShouldNotBe(Value(first, TraceEvents.AppCode));
+        Value(second, TraceEvents.Resource).ShouldBe("neutral-greeting");
         IsLogicallyDeleted(Path.Combine(
             application.Segment,
-            Path.GetFileName(Value(first, "app-code:")) + ".dll")).ShouldBeTrue();
+            Path.GetFileName(Value(first, TraceEvents.AppCode)) + ".dll")).ShouldBeTrue();
     }
 }

@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 using Rehost.WebForms.TestSupport;
 
@@ -26,7 +27,7 @@ public sealed class ApplicationConfigurationPublicationTests
 
         trace.ShouldContain("request:/quirks:500");
         trace.ShouldContain(
-            entry => entry.StartsWith("error-body:") && entry.Contains("targetFramework"),
+            entry => entry.StartsWith(TraceEvents.ErrorBody) && entry.Contains("targetFramework"),
             "The rendered error should name the missing targetFramework.");
     }
 

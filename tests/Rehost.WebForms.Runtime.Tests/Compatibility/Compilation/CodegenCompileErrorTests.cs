@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
@@ -17,7 +18,7 @@ public sealed class CodegenCompileErrorTests
         var trace = application.Run("/default", "/default");
 
         trace.FindAll(entry => entry == "request:/default:500").Count.ShouldBe(2);
-        var diagnostics = trace.FindAll(entry => entry.StartsWith("error-body:"));
+        var diagnostics = trace.FindAll(entry => entry.StartsWith(TraceEvents.ErrorBody));
         diagnostics.Count.ShouldBe(2);
         diagnostics[0].ShouldContain("Compilation Error");
         diagnostics[1].ShouldBe(diagnostics[0]);

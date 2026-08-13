@@ -78,7 +78,7 @@ public sealed class ServerTransferOverKestrelTests(PageLiveScenario scenario)
     public async Task An_Error_Transfer_Renders_The_Error_Page_With_GetLastError()
     {
         var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?xferr=1&wt=" + token);
+        var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?xferr=1&" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.Text.ShouldBe("error-page[last=HttpUnhandledException:boom-from-page]");

@@ -150,11 +150,11 @@ internal static class Program
                 options.MachineConfigurationFilePath = Path.Combine(
                     basePath,
                     "configs",
-                    "rehost-webforms.machine.config");
+                    WebFormsApplicationOptions.DefaultMachineConfigurationFileName);
                 options.RootWebConfigurationFilePath = Path.Combine(
                     basePath,
                     "configs",
-                    "rehost-webforms.web.config");
+                    WebFormsApplicationOptions.DefaultRootWebConfigurationFileName);
             }));
 
         var app = builder.Build();

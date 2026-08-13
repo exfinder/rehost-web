@@ -1,6 +1,7 @@
 using System.CodeDom.Compiler;
 using System.Xml.Linq;
 using Shouldly;
+using Rehost.WebForms.Hosting;
 using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
@@ -43,7 +44,7 @@ public sealed class RootConfigurationCompilerTests
 
     private static XElement[] LoadCompilers()
     {
-        var path = Path.Combine(AppContext.BaseDirectory, "configs", "rehost-webforms.web.config");
+        var path = Path.Combine(AppContext.BaseDirectory, "configs", WebFormsApplicationOptions.DefaultRootWebConfigurationFileName);
 
         return
         [

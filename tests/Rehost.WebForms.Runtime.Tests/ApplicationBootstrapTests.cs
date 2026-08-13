@@ -38,12 +38,12 @@ public sealed class ApplicationBootstrapTests
             Path.Combine(
                 application.OutputDirectory,
                 "configs",
-                "rehost-webforms.machine.config"));
+                WebFormsApplicationOptions.DefaultMachineConfigurationFileName));
         configuration.RootWebConfigurationFilePath.ShouldBe(
             Path.Combine(
                 application.OutputDirectory,
                 "configs",
-                "rehost-webforms.web.config"));
+                WebFormsApplicationOptions.DefaultRootWebConfigurationFileName));
     }
 
     [Fact]
@@ -54,11 +54,11 @@ public sealed class ApplicationBootstrapTests
         options.MachineConfigurationFilePath = Path.Combine(
             application.OutputDirectory,
             "configs",
-            "rehost-webforms.machine.config");
+            WebFormsApplicationOptions.DefaultMachineConfigurationFileName);
         options.RootWebConfigurationFilePath = Path.Combine(
             application.OutputDirectory,
             "configs",
-            "rehost-webforms.web.config");
+            WebFormsApplicationOptions.DefaultRootWebConfigurationFileName);
         var configuration = ApplicationBootstrapConfiguration.Create(
             options,
             application.OutputDirectory);

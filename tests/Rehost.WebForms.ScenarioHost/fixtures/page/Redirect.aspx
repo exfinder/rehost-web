@@ -4,10 +4,9 @@
 
     void Page_Load(object sender, EventArgs e)
     {
-        var token = Request.QueryString["wt"];
         Response.Write("gone|");
         Response.Redirect("/Default.aspx?value=r");
-        WitnessJournal.Record("stage:" + token + ":after-redirect");
+        WitnessJournal.Stage(Request, "after-redirect");
     }
 
 </script>

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Rehost.WebForms.Parity.Contracts;
 using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;
@@ -91,8 +92,8 @@ public class LiveScenario : IDisposable
     }
 
     private string? ReadAddress() => TraceFile.ReadLines(_tracePath)
-        .Where(line => line.StartsWith("address:", StringComparison.Ordinal))
-        .Select(line => line["address:".Length..])
+        .Where(line => line.StartsWith(TraceEvents.Address, StringComparison.Ordinal))
+        .Select(line => line[TraceEvents.Address.Length..])
         .FirstOrDefault();
 
     public void Dispose()

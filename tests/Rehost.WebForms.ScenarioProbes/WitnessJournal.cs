@@ -1,3 +1,6 @@
+using System.Web;
+using Rehost.WebForms.Parity.Contracts;
+
 namespace Rehost.WebForms.ScenarioProbes;
 
 // In-memory and served over HTTP by WitnessHandler: live facts never ride the file journal,
@@ -15,6 +18,23 @@ public static class WitnessJournal
             Events.Add(entry);
         }
     }
+
+    public static string? Token(HttpRequest request) =>
+        request.QueryString[WitnessProtocol.TokenKey];
+
+    // Stages reach the witness only for requests carrying a token, so untagged requests
+    // (and /witness itself) leave no trace.
+    public static void Stage(HttpRequest request, string stage)
+    {
+        var token = Token(request);
+        if (token != null)
+        {
+            Stage(token, stage);
+        }
+    }
+
+    public static void Stage(string? token, string stage) =>
+        Record(WitnessProtocol.StagePrefix + token + ":" + stage);
 
     public static string[] Snapshot()
     {

@@ -4,6 +4,9 @@ using System;
 
 public sealed class WebFormsApplicationOptions
 {
+    public const string DefaultMachineConfigurationFileName = "rehost-webforms.machine.config";
+    public const string DefaultRootWebConfigurationFileName = "rehost-webforms.web.config";
+
     public string ApplicationId { get; set; }
 
     public string PhysicalRootPath { get; set; }

@@ -9,7 +9,6 @@ public partial class TimeoutSweepPage : System.Web.UI.Page
 
     protected void Page_Load(object sender, EventArgs e)
     {
-        var token = Request.QueryString["wt"];
         if (Request.QueryString["optout"] != null)
         {
             Context.ThreadAbortOnTimeout = false;
@@ -23,12 +22,9 @@ public partial class TimeoutSweepPage : System.Web.UI.Page
             "CancelTimedOutRequests", BindingFlags.NonPublic | BindingFlags.Instance);
         sweep.Invoke(manager, new object[] { DateTime.UtcNow.AddYears(1) });
 
-        if (token != null)
-        {
-            WitnessJournal.Record("stage:" + token + ":sweep-returned");
-            WitnessJournal.Record(
-                "stage:" + token + ":token-canceled:" + Request.TimedOutToken.IsCancellationRequested);
-        }
+        WitnessJournal.Stage(Request, "sweep-returned");
+        WitnessJournal.Stage(
+            Request, "token-canceled:" + Request.TimedOutToken.IsCancellationRequested);
 
         Result = "sweep-page|";
     }

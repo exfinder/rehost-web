@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.TestSupport;
 using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
@@ -17,7 +18,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     public async Task End_Stops_The_Page_And_Skips_To_EndRequest()
     {
         var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/End.aspx?wt=" + token);
+        var response = await scenario.Client.GetAsync("/End.aspx?" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
@@ -37,7 +38,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     public async Task Swallowing_Catch_Cannot_Unlock_The_Response()
     {
         var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/EndSwallow.aspx?wt=" + token);
+        var response = await scenario.Client.GetAsync("/EndSwallow.aspx?" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
@@ -53,7 +54,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     public async Task Catch_By_ThreadAbortException_Name_Never_Observes_Termination()
     {
         var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/CatchTae.aspx?wt=" + token);
+        var response = await scenario.Client.GetAsync("/CatchTae.aspx?" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
@@ -67,11 +68,11 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     public async Task Redirect_Emits_Object_Moved_And_Terminates()
     {
         var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/Redirect.aspx?wt=" + token);
+        var response = await scenario.Client.GetAsync("/Redirect.aspx?" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(302);
-        response.Header("Location").ShouldBe("/Default.aspx?value=r");
+        response.Header("Location").ShouldBe(PageRequests.RedirectTarget);
         response.Text.ShouldBe(
             "<html><head><title>Object moved</title></head><body>\r\n"
             + "<h2>Object moved to <a href=\"/Default.aspx?value=r\">here</a>.</h2>\r\n"
@@ -85,7 +86,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     public async Task End_In_A_Module_Event_Skips_The_Handler()
     {
         var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/Default.aspx?module-end=1&wt=" + token);
+        var response = await scenario.Client.GetAsync("/Default.aspx?module-end=1&" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);

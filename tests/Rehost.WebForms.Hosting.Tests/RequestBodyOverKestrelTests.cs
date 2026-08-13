@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
@@ -54,7 +55,7 @@ public sealed class RequestBodyOverKestrelTests(
             Encoding.UTF8.GetBytes(new string('s', 2048)));
 
         response.StatusCode.ShouldBe(200);
-        response.Header("X-Spilled").ShouldBe("True");
+        response.Header(ProbeHeaders.Spilled).ShouldBe("True");
         response.Text.ShouldBe(Describe(new string('s', 2048)));
     }
 
@@ -93,7 +94,7 @@ public sealed class RequestBodyOverKestrelTests(
             BodyFraming.DelayedChunked);
 
         response.StatusCode.ShouldBe(200);
-        response.Header("X-Read-Mode").ShouldBe("Buffered");
+        response.Header(ProbeHeaders.ReadMode).ShouldBe("Buffered");
         response.Text.ShouldBe(Describe("body:preload-delayed"));
     }
 
@@ -113,8 +114,8 @@ public sealed class RequestBodyOverKestrelTests(
 
         unread.Text.ShouldBe("unread");
         followUp.Text.ShouldBe(Describe("body:fixed-input"));
-        unread.Header("X-Remote-Port").ShouldNotBeNull();
-        followUp.Header("X-Remote-Port").ShouldBe(unread.Header("X-Remote-Port"));
+        unread.Header(ProbeHeaders.RemotePort).ShouldNotBeNull();
+        followUp.Header(ProbeHeaders.RemotePort).ShouldBe(unread.Header(ProbeHeaders.RemotePort));
     }
 
     [Fact]
@@ -124,7 +125,7 @@ public sealed class RequestBodyOverKestrelTests(
         var detection = Stopwatch.StartNew();
 
         interim.ShouldBe(100);
-        var outcome = await aborts.Witness.WaitForAsync("body-abort:", AbortDetectionBudget);
+        var outcome = await aborts.Witness.WaitForAsync(WitnessProtocol.BodyAbort, AbortDetectionBudget);
 
         // Recorded, never asserted: detection latency is load-dependent.
         output.WriteLine("abort detected after " + detection.ElapsedMilliseconds + "ms");

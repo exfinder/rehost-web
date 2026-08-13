@@ -66,8 +66,10 @@ internal sealed class ApplicationBootstrap
 
 internal sealed class ApplicationBootstrapConfiguration
 {
-    internal const string DefaultMachineConfigurationFileName = "rehost-webforms.machine.config";
-    internal const string DefaultRootWebConfigurationFileName = "rehost-webforms.web.config";
+    internal const string DefaultMachineConfigurationFileName =
+        WebFormsApplicationOptions.DefaultMachineConfigurationFileName;
+    internal const string DefaultRootWebConfigurationFileName =
+        WebFormsApplicationOptions.DefaultRootWebConfigurationFileName;
 
     private ApplicationBootstrapConfiguration(
         string applicationId,

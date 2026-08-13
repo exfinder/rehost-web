@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
@@ -19,4 +20,6 @@ internal static class WitnessToken
 
         return testClass.GetType().Name + "." + method;
     }
+
+    internal static string Query(string token) => WitnessProtocol.TokenKey + "=" + token;
 }

@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.TestSupport;
 using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
@@ -12,7 +13,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 // to PageProbe.Stages, so a second request renders the same body as the first.
 public sealed class PageOverKestrelTests(PageLiveScenario scenario) : IClassFixture<PageLiveScenario>
 {
-    private const string PageRequest = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
+    private const string PageRequest = PageRequests.Canonical;
 
     [Fact]
     public async Task Serves_A_Dynamically_Compiled_Page_Over_Kestrel()

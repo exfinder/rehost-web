@@ -4,7 +4,6 @@
 
     void Page_Load(object sender, EventArgs e)
     {
-        var token = Request.QueryString["wt"];
         Response.Write("before|");
         try
         {
@@ -12,11 +11,11 @@
         }
         catch (Exception ex)
         {
-            WitnessJournal.Record("stage:" + token + ":swallowed:" + ex.GetType().Name);
+            WitnessJournal.Stage(Request, "swallowed:" + ex.GetType().Name);
             Response.Write("swallowed-write|");
             try { Response.End(); }
             catch (Exception) { }
-            WitnessJournal.Record("stage:" + token + ":after-second-end");
+            WitnessJournal.Stage(Request, "after-second-end");
         }
         Response.Write("tail|");
     }

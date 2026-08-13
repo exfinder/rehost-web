@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.ScenarioTrace;
 
@@ -18,8 +19,8 @@ public sealed class CodegenReuseTests(CodegenSubstrateFixture fixture)
 
         // A recompile draws a new random assembly name, so identical names mean the second run
         // loaded the first run's output instead of rebuilding it.
-        Value(second, "app-code:").ShouldBe(Value(fixture.FirstTrace, "app-code:"));
-        Value(second, "sub-code:").ShouldBe(Value(fixture.FirstTrace, "sub-code:"));
+        Value(second, TraceEvents.AppCode).ShouldBe(Value(fixture.FirstTrace, TraceEvents.AppCode));
+        Value(second, TraceEvents.SubCode).ShouldBe(Value(fixture.FirstTrace, TraceEvents.SubCode));
         Directory.GetFiles(application.Segment, "*.dll").Order().ShouldBe(firstAssemblies);
     }
 }

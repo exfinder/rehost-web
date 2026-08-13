@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.ScenarioTrace;
 
@@ -31,9 +32,9 @@ public sealed class CodegenSubstrateTests(CodegenSubstrateFixture fixture)
         // Global.asax used a type from App_Code, which used one from the sub-directory assembly
         // and the generated resource class. Separate load contexts would fail this, not the
         // assembly names.
-        Value(first, "app-code:").ShouldStartWith("App_Code.");
-        Value(first, "sub-code:").ShouldStartWith("App_SubCode_Shared.");
-        Value(first, "resource:").ShouldBe("neutral-greeting");
+        Value(first, TraceEvents.AppCode).ShouldStartWith("App_Code.");
+        Value(first, TraceEvents.SubCode).ShouldStartWith("App_SubCode_Shared.");
+        Value(first, TraceEvents.Resource).ShouldBe("neutral-greeting");
 
         fixture.AppCodeCount.ShouldBe(1);
         fixture.SubCodeCount.ShouldBe(1);

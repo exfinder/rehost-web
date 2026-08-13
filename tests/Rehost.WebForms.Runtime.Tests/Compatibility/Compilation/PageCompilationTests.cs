@@ -1,4 +1,6 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.TestSupport;
 using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
@@ -6,12 +8,12 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 [Collection(nameof(PageCompilationCollection))]
 public sealed class PageCompilationTests(PageCompilationFixture fixture)
 {
-    private const string Request = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
+    private const string Request = PageRequests.Canonical;
 
     [Fact]
     public void Compiles_And_Renders_A_Page_On_The_First_Request()
     {
-        fixture.FirstTrace.ShouldContain("request:" + Request + ":200");
+        fixture.FirstTrace.ShouldContain(TraceEvents.Request + Request + ":200");
         fixture.FirstResponse.ShouldBe(fixture.ExpectedResponse);
     }
 

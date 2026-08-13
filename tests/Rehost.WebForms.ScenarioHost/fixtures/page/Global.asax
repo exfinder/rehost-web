@@ -7,20 +7,9 @@
         PageProbe.Stages.Add("application-start");
     }
 
-    // Stage names reach the witness only for requests carrying a wt token, so
-    // untagged requests (and /witness itself) leave no trace.
-    static void Stage(HttpRequest request, string stage)
-    {
-        var token = request.QueryString["wt"];
-        if (token != null)
-        {
-            WitnessJournal.Record("stage:" + token + ":" + stage);
-        }
-    }
-
     void Application_BeginRequest(object sender, EventArgs e)
     {
-        Stage(Request, "BeginRequest");
+        WitnessJournal.Stage(Request, "BeginRequest");
         if (Request.QueryString["module-end"] != null)
         {
             Response.Write("module|");
@@ -30,28 +19,28 @@
 
     void Application_PreRequestHandlerExecute(object sender, EventArgs e)
     {
-        Stage(Request, "PreRequestHandlerExecute");
+        WitnessJournal.Stage(Request, "PreRequestHandlerExecute");
     }
 
     void Application_PostRequestHandlerExecute(object sender, EventArgs e)
     {
-        Stage(Request, "PostRequestHandlerExecute");
+        WitnessJournal.Stage(Request, "PostRequestHandlerExecute");
     }
 
     void Application_ReleaseRequestState(object sender, EventArgs e)
     {
-        Stage(Request, "ReleaseRequestState");
+        WitnessJournal.Stage(Request, "ReleaseRequestState");
     }
 
     void Application_UpdateRequestCache(object sender, EventArgs e)
     {
-        Stage(Request, "UpdateRequestCache");
+        WitnessJournal.Stage(Request, "UpdateRequestCache");
     }
 
     void Application_EndRequest(object sender, EventArgs e)
     {
-        Stage(Request, "EndRequest");
-        Stage(Request, Server.GetLastError() == null ? "LastError-null" : "LastError-set");
+        WitnessJournal.Stage(Request, "EndRequest");
+        WitnessJournal.Stage(Request, Server.GetLastError() == null ? "LastError-null" : "LastError-set");
         if (Request.QueryString["stamp"] != null)
         {
             string note;
@@ -73,7 +62,7 @@
             {
                 note += "|cookie-threw:" + cookieError.GetType().Name;
             }
-            Stage(Request, "stamp:" + note);
+            WitnessJournal.Stage(Request, "stamp:" + note);
         }
         if (Request.QueryString["fae"] != null)
         {
@@ -96,14 +85,14 @@
             {
                 note += "|late2-threw:" + lateError.GetType().Name;
             }
-            Stage(Request, "fae:" + note);
+            WitnessJournal.Stage(Request, "fae:" + note);
         }
     }
 
     void Application_Error(object sender, EventArgs e)
     {
         var error = Server.GetLastError();
-        Stage(Request, "ApplicationError:" + (error == null ? "null" : error.GetType().Name + ":" + error.Message));
+        WitnessJournal.Stage(Request, "ApplicationError:" + (error == null ? "null" : error.GetType().Name + ":" + error.Message));
         if (Request.QueryString["xferr"] != null)
         {
             Server.Transfer("~/xfer/ErrorPage.aspx");

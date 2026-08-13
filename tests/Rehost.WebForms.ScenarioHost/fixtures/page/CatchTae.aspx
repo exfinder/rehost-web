@@ -4,7 +4,6 @@
 
     void Page_Load(object sender, EventArgs e)
     {
-        var token = Request.QueryString["wt"];
         Response.Write("before|");
         try
         {
@@ -12,7 +11,7 @@
         }
         catch (System.Threading.ThreadAbortException)
         {
-            WitnessJournal.Record("stage:" + token + ":tae-caught");
+            WitnessJournal.Stage(Request, "tae-caught");
         }
     }
 

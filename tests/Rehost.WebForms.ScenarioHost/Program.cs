@@ -54,11 +54,11 @@ public static class Program
             MachineConfigurationFilePath = options.MachineConfigurationPath ?? Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",
-                "rehost-webforms.machine.config"),
+                WebFormsApplicationOptions.DefaultMachineConfigurationFileName),
             RootWebConfigurationFilePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",
-                "rehost-webforms.web.config"),
+                WebFormsApplicationOptions.DefaultRootWebConfigurationFileName),
         });
 
         var manager = ApplicationManager.GetApplicationManager();
@@ -86,7 +86,7 @@ public static class Program
                     : Path.Combine(options.ResponseDirectory, i + ".body");
 
                 var status = runner.Request(path, responsePath);
-                TraceJournal.Record("request:" + path + ":" + status);
+                TraceJournal.Record(TraceEvents.Request + path + ":" + status);
             }
 
             // Holding the process alive keeps its generated assemblies loaded, which is the only
@@ -131,11 +131,11 @@ public static class Program
             configured.MachineConfigurationFilePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",
-                "rehost-webforms.machine.config");
+                WebFormsApplicationOptions.DefaultMachineConfigurationFileName);
             configured.RootWebConfigurationFilePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",
-                "rehost-webforms.web.config");
+                WebFormsApplicationOptions.DefaultRootWebConfigurationFileName);
         });
 
         var app = builder.Build();
@@ -153,7 +153,7 @@ public static class Program
             if (options.Postbacks.Count == 0
                 && options.Requests.Count == 0)
             {
-                TraceJournal.Record("address:" + address);
+                TraceJournal.Record(TraceEvents.Address + address);
                 await Task.Delay(Timeout.Infinite);
             }
 
@@ -262,17 +262,17 @@ public static class Program
                 body);
         }
 
-        TraceJournal.Record("request:" + label + ":" + (int)response.StatusCode);
-        TraceJournal.Record("content-type:" + response.Content.Headers.ContentType);
+        TraceJournal.Record(TraceEvents.Request + label + ":" + (int)response.StatusCode);
+        TraceJournal.Record(TraceEvents.ContentType + response.Content.Headers.ContentType);
         if ((int)response.StatusCode >= 500)
         {
             var error = Regex.Replace(Encoding.UTF8.GetString(body), @"\s+", " ");
             TraceJournal.Record(
-                "error-body:" + error.Substring(0, Math.Min(1000, error.Length)));
+                TraceEvents.ErrorBody + error.Substring(0, Math.Min(1000, error.Length)));
         }
-        RecordHeader(response, "X-Remote-Port");
-        RecordHeader(response, "X-Read-Mode");
-        RecordHeader(response, "X-Spilled");
+        RecordHeader(response, ProbeHeaders.RemotePort);
+        RecordHeader(response, ProbeHeaders.ReadMode);
+        RecordHeader(response, ProbeHeaders.Spilled);
     }
 
     private static void RecordHeader(HttpResponseMessage response, string name)
@@ -482,7 +482,7 @@ public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
 
         if (request.StatusCode >= 500)
         {
-            TraceJournal.Record("error-body:" + Summarize(request.Body));
+            TraceJournal.Record(TraceEvents.ErrorBody + Summarize(request.Body));
         }
 
         return request.StatusCode;

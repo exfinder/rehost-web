@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Web;
+using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.ScenarioProbes;
 
@@ -13,7 +14,7 @@ public sealed class RequestBodyHandler : IHttpHandler
         var mode = context.Request.QueryString["mode"];
         byte[] body;
 
-        WitnessJournal.Record("handler-entered:" + mode);
+        WitnessJournal.Record(WitnessProtocol.HandlerEntered + mode);
 
         switch (mode)
         {
@@ -27,7 +28,7 @@ public sealed class RequestBodyHandler : IHttpHandler
                 }
                 catch (HttpException exception)
                 {
-                    WitnessJournal.Record("body-abort:" + exception.GetType().FullName);
+                    WitnessJournal.Record(WitnessProtocol.BodyAbort + exception.GetType().FullName);
                 }
                 return;
             case "unread":
@@ -46,7 +47,7 @@ public sealed class RequestBodyHandler : IHttpHandler
                 body = ReadAll(context.Request.GetBufferlessInputStream());
                 break;
             case "preload":
-                context.Response.AddHeader("X-Read-Mode", context.Request.ReadEntityBodyMode.ToString());
+                context.Response.AddHeader(ProbeHeaders.ReadMode, context.Request.ReadEntityBodyMode.ToString());
                 body = ReadAll(context.Request.InputStream);
                 break;
             default:
@@ -56,7 +57,7 @@ public sealed class RequestBodyHandler : IHttpHandler
 
         if (mode == "spill")
         {
-            context.Response.AddHeader("X-Spilled", IsFileBacked(context.Request.InputStream).ToString());
+            context.Response.AddHeader(ProbeHeaders.Spilled, IsFileBacked(context.Request.InputStream).ToString());
         }
 
         WriteResult(context, Describe(body));
@@ -125,7 +126,7 @@ public sealed class RequestBodyHandler : IHttpHandler
     {
         context.Response.StatusCode = 200;
         context.Response.ContentType = "text/plain";
-        context.Response.AddHeader("X-Remote-Port", context.Request.ServerVariables["REMOTE_PORT"]);
+        context.Response.AddHeader(ProbeHeaders.RemotePort, context.Request.ServerVariables["REMOTE_PORT"]);
         context.Response.Write(value);
     }
 }

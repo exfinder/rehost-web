@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.TestSupport;
 using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
@@ -7,7 +8,7 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 [Collection(nameof(PageCompilationCollection))]
 public sealed class PageReuseTests(PageCompilationFixture fixture)
 {
-    private const string Request = "/Default.aspx?value=a%26c%20%22q%22%20%C3%A9";
+    private const string Request = PageRequests.Canonical;
 
     [Fact]
     public void Reuses_The_Page_Assembly_Across_A_Restart()

@@ -7,24 +7,24 @@
 
     void Page_Load(object sender, EventArgs e)
     {
-        _token = Request.QueryString["wt"];
+        _token = WitnessJournal.Token(Request);
         Response.AppendHeader("X-End-Probe", "set");
         Response.Write("before-end|");
         try
         {
             Response.End();
-            WitnessJournal.Record("stage:" + _token + ":after-end-ran");
+            WitnessJournal.Stage(_token, "after-end-ran");
             Response.Write("after-end|");
         }
         finally
         {
-            WitnessJournal.Record("stage:" + _token + ":page-finally");
+            WitnessJournal.Stage(_token, "page-finally");
         }
     }
 
     void Page_Unload(object sender, EventArgs e)
     {
-        WitnessJournal.Record("stage:" + _token + ":page-unload");
+        WitnessJournal.Stage(_token, "page-unload");
     }
 
 </script>

@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;
@@ -39,7 +40,7 @@ internal sealed class ScenarioRun : IDisposable
 
         foreach (var entry in Trace)
         {
-            if (!entry.StartsWith("request:", StringComparison.Ordinal))
+            if (!entry.StartsWith(TraceEvents.Request, StringComparison.Ordinal))
             {
                 continue;
             }

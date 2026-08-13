@@ -129,11 +129,11 @@ internal static class Program
                 MachineConfigurationFilePath = Path.Combine(
                     basePath,
                     "configs",
-                    "rehost-webforms.machine.config"),
+                    WebFormsApplicationOptions.DefaultMachineConfigurationFileName),
                 RootWebConfigurationFilePath = Path.Combine(
                     basePath,
                     "configs",
-                    "rehost-webforms.web.config"),
+                    WebFormsApplicationOptions.DefaultRootWebConfigurationFileName),
                 // The fixture also declares this path as <compilation tempDirectory>, which the
                 // Framework oracle needs because it has no host option. Supplying both exercises
                 // host precedence and the agreement branch of the conflict check.

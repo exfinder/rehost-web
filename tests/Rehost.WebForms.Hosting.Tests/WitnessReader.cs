@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
@@ -12,11 +13,11 @@ internal sealed class WitnessReader(ScenarioClient client)
             .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
     internal async Task<string[]> HandlerEntriesAsync() =>
-        [.. (await EventsAsync()).Where(e => e.StartsWith("handler-entered:", StringComparison.Ordinal))];
+        [.. (await EventsAsync()).Where(e => e.StartsWith(WitnessProtocol.HandlerEntered, StringComparison.Ordinal))];
 
     internal async Task<string[]> StagesAsync(string token)
     {
-        var prefix = "stage:" + token + ":";
+        var prefix = WitnessProtocol.StagePrefix + token + ":";
         return [.. (await EventsAsync())
             .Where(e => e.StartsWith(prefix, StringComparison.Ordinal))
             .Select(e => e[prefix.Length..])];

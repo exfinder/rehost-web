@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.TestSupport;
 using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
@@ -16,7 +17,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var token = WitnessToken.For(this);
         var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=end&stamp=1&wt=" + token);
+            "/Amend.aspx?mode=end&stamp=1&" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
@@ -31,11 +32,11 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var token = WitnessToken.For(this);
         var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=redirect&stamp=1&wt=" + token);
+            "/Amend.aspx?mode=redirect&stamp=1&" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(302);
-        response.Header("Location").ShouldBe("/Default.aspx?value=r");
+        response.Header("Location").ShouldBe(PageRequests.RedirectTarget);
         response.Header("X-After-End").ShouldBe("stamped");
         response.SetCookies.ShouldContain("late=yes; path=/");
         stages.ShouldContain("stamp:append-ok|cookie-ok");
@@ -46,7 +47,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var token = WitnessToken.For(this);
         var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=complete&stamp=1&wt=" + token);
+            "/Amend.aspx?mode=complete&stamp=1&" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);
@@ -67,7 +68,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var raw = await RawSocketProbe.GetRawResponseAsync(
             scenario.Address,
-            "/Amend.aspx?mode=end&stamp=1&wt=" + WitnessToken.For(this));
+            "/Amend.aspx?mode=end&stamp=1&" + WitnessToken.Query(WitnessToken.For(this)));
         var (headers, body) = SplitRaw(raw);
 
         headers.ShouldStartWith("HTTP/1.1 200");
@@ -82,7 +83,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var raw = await RawSocketProbe.GetRawResponseAsync(
             scenario.Address,
-            "/Amend.aspx?mode=redirect&stamp=1&wt=" + WitnessToken.For(this));
+            "/Amend.aspx?mode=redirect&stamp=1&" + WitnessToken.Query(WitnessToken.For(this)));
         var (headers, body) = SplitRaw(raw);
 
         headers.ShouldStartWith("HTTP/1.1 302");
@@ -98,7 +99,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var token = WitnessToken.For(this);
         var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address, "/Amend.aspx?mode=end&stamp=1&fae=1&wt=" + token);
+            scenario.Address, "/Amend.aspx?mode=end&stamp=1&fae=1&" + WitnessToken.Query(token));
         var (headers, body) = SplitRaw(raw);
         var stages = await scenario.Witness.StagesAsync(token);
 
@@ -115,7 +116,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     {
         var token = WitnessToken.For(this);
         var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=flush&stamp=1&wt=" + token);
+            "/Amend.aspx?mode=flush&stamp=1&" + WitnessToken.Query(token));
         var stages = await scenario.Witness.StagesAsync(token);
 
         response.StatusCode.ShouldBe(200);

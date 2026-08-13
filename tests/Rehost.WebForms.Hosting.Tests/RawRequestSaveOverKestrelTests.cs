@@ -1,5 +1,6 @@
 using System.Text;
 using Shouldly;
+using Rehost.WebForms.Parity.Contracts;
 using Xunit;
 using Rehost.WebForms.TestSupport;
 
@@ -29,7 +30,7 @@ public sealed class RawRequestSaveOverKestrelTests(BodyLiveScenario scenario)
         response.Text.ShouldBe("saved");
         // Without this the test would pass just as well from memory, proving nothing about the
         // file-backed branch it exists for.
-        response.Header("X-Spilled").ShouldBe("True");
+        response.Header(ProbeHeaders.Spilled).ShouldBe("True");
         File.ReadAllBytes(target).ShouldBe(Spilled);
     }
 
