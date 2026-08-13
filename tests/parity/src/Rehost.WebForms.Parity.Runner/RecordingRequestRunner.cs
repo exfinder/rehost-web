@@ -24,7 +24,7 @@ internal sealed class RecordingRequestRunner
 
         foreach (var request in requests)
         {
-            PipelineEventJournal.OpenRequest(request.Name);
+            PipelineEvents.OpenRequest(request.Name);
         }
 
         ParityBarrier.Begin(requests.Count);
@@ -84,17 +84,17 @@ internal sealed class RecordingRequestRunner
         var workerRequest = new RecordingWorkerRequest(request);
         ExceptionObservation? escapedException = null;
 
-        PipelineEventJournal.Record(request.Name, "runner.process-request.enter");
+        PipelineEvents.Record(request.Name, "runner.process-request.enter");
 
         try
         {
             HttpRuntime.ProcessRequest(workerRequest);
-            PipelineEventJournal.Record(request.Name, "runner.process-request.return");
+            PipelineEvents.Record(request.Name, "runner.process-request.return");
         }
         catch (Exception exception)
         {
             escapedException = ExceptionObservation.FromException(exception);
-            PipelineEventJournal.Record(request.Name, "runner.process-request.escape");
+            PipelineEvents.Record(request.Name, "runner.process-request.escape");
         }
         finally
         {
@@ -114,7 +114,7 @@ internal sealed class RecordingRequestRunner
         {
             Name = request.Name,
             Observation = workerRequest.CreateObservation(
-                PipelineEventJournal.DrainRequest(request.Name),
+                PipelineEvents.DrainRequest(request.Name),
                 escapedException)
         };
     }
@@ -271,7 +271,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     {
         if (_preloadedEntityBody != null)
         {
-            PipelineEventJournal.Record(_request.Name, "worker.body.preloaded");
+            PipelineEvents.Record(_request.Name, "worker.body.preloaded");
         }
 
         return _preloadedEntityBody;
@@ -298,7 +298,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
         {
             Buffer.BlockCopy(_entityBody, _entityOffset, buffer, offset, count);
             _entityOffset += count;
-            PipelineEventJournal.Record(_request.Name, "worker.body.read");
+            PipelineEvents.Record(_request.Name, "worker.body.read");
         }
 
         return count;
@@ -341,7 +341,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     {
         return string.Equals(
                 name,
-                PipelineEventJournal.RequestHeaderName,
+                PipelineEvents.RequestHeaderName,
                 StringComparison.OrdinalIgnoreCase)
             ? _request.Name
             : null;
@@ -351,7 +351,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     {
         return new[]
         {
-            new[] { PipelineEventJournal.RequestHeaderName, _request.Name }
+            new[] { PipelineEvents.RequestHeaderName, _request.Name }
         };
     }
 
@@ -395,7 +395,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     {
         _statusCode = statusCode;
         _statusDescription = statusDescription;
-        PipelineEventJournal.Record(_request.Name, "worker.status");
+        PipelineEvents.Record(_request.Name, "worker.status");
     }
 
     public override void SendKnownResponseHeader(int index, string value)
@@ -405,7 +405,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             Name = GetKnownResponseHeaderName(index),
             Value = value
         });
-        PipelineEventJournal.Record(_request.Name, "worker.header.known");
+        PipelineEvents.Record(_request.Name, "worker.header.known");
     }
 
     public override void SendUnknownResponseHeader(string name, string value)
@@ -415,7 +415,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             Name = name,
             Value = value
         });
-        PipelineEventJournal.Record(_request.Name, "worker.header.unknown");
+        PipelineEvents.Record(_request.Name, "worker.header.unknown");
     }
 
     public override void SendCalculatedContentLength(int contentLength)
@@ -425,13 +425,13 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             Name = GetKnownResponseHeaderName(HeaderContentLength),
             Value = contentLength.ToString(CultureInfo.InvariantCulture)
         });
-        PipelineEventJournal.Record(_request.Name, "worker.header.content-length");
+        PipelineEvents.Record(_request.Name, "worker.header.content-length");
     }
 
     public override void SendResponseFromMemory(byte[] data, int length)
     {
         _body.Write(data, 0, length);
-        PipelineEventJournal.Record(_request.Name, "worker.body");
+        PipelineEvents.Record(_request.Name, "worker.body");
     }
 
     public override void SendResponseFromFile(string filename, long offset, long length)
@@ -442,7 +442,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
             CopyBytes(stream, length);
         }
 
-        PipelineEventJournal.Record(_request.Name, "worker.file");
+        PipelineEvents.Record(_request.Name, "worker.file");
     }
 
     public override void SendResponseFromFile(IntPtr handle, long offset, long length)
@@ -454,7 +454,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     public override void FlushResponse(bool finalFlush)
     {
         _flushes.Add(finalFlush);
-        PipelineEventJournal.Record(
+        PipelineEvents.Record(
             _request.Name,
             finalFlush ? "worker.flush.final" : "worker.flush");
     }
@@ -462,7 +462,7 @@ internal sealed class RecordingWorkerRequest : HttpWorkerRequest
     public override void EndOfRequest()
     {
         Interlocked.Increment(ref _endOfRequestCount);
-        PipelineEventJournal.Record(_request.Name, "worker.end-of-request");
+        PipelineEvents.Record(_request.Name, "worker.end-of-request");
 
         if (Interlocked.CompareExchange(ref _completionCount, 1, 0) == 0)
         {

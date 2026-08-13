@@ -218,7 +218,7 @@ public sealed class TraceProvenance
 // Concurrent requests would interleave a single shared list, so each request owns a notebook
 // and anything belonging to the application rather than one request goes to the session
 // notebook. A session is always a fresh process, so the statics start empty.
-public static class PipelineEventJournal
+public static class PipelineEvents
 {
     public const string RequestHeaderName = "X-Parity-Request";
 

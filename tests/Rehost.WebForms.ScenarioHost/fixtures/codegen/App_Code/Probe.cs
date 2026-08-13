@@ -9,14 +9,14 @@ public static class CodegenProbe
 {
     public static void RecordCompiled()
     {
-        ScenarioJournal.Record(TraceEvents.AppCode + typeof(CodegenProbe).Assembly.GetName().Name);
-        ScenarioJournal.Record(TraceEvents.SubCode + SharedProbe.AssemblyName);
-        ScenarioJournal.Record(TraceEvents.Resource + Resources.Strings.Greeting);
+        TraceProbe.Record(TraceEvents.AppCode + typeof(CodegenProbe).Assembly.GetName().Name);
+        TraceProbe.Record(TraceEvents.SubCode + SharedProbe.AssemblyName);
+        TraceProbe.Record(TraceEvents.Resource + Resources.Strings.Greeting);
     }
 
     // ASP.NET calls this static method on the App_Code assembly before Application_Start.
     public static void AppInitialize()
     {
-        ScenarioJournal.Record("app-initialize");
+        TraceProbe.Record("app-initialize");
     }
 }

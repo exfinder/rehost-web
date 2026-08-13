@@ -56,7 +56,7 @@ response.Text.ShouldContain("...");
 - `LiveScenario` starts the host for a `ScenarioFixture`; `ScenarioClient` is
   the deterministic client (no redirects, no cookies, exact HTTP/1.1).
 - Evidence recording must never be able to fail the request being observed:
-  a probe that throws from its own journaling turns the evidence channel into
+  a probe that throws from its own recording turns the evidence channel into
   the failure (the lost-reset post-mortem).
 - Assertion hierarchy: the typed response first; server-side facts through the
   fixture's witness endpoint (`scenario.Witness`). Nothing may poll the trace
@@ -79,7 +79,7 @@ response.Text.ShouldContain("...");
   build cache's case-insensitive key served any casing once one compiled.
   Arrange a cache miss (request the wrongly-cased path first), and verify a
   new test by mutation — stash the implementation out and watch it fail.
-- Protocol strings (labels, CLI options, environment variables, journal
+- Protocol strings (labels, CLI options, environment variables, trace
   grammar) have exactly one typed definition site. Pinned expected values —
   golden hashes, rendered markup, error text — stay literal in the test: the
   literal is the assertion.

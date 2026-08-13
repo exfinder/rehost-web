@@ -4,12 +4,12 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
 // A held mutex, rather than a sleep of a guessed length: the child stays alive exactly while
 // the overlap under test lasts, and neither machine speed nor load can shorten it.
-internal sealed class ScenarioGate : IDisposable
+internal sealed class HoldGate : IDisposable
 {
     private readonly Mutex _mutex;
     private bool _held;
 
-    private ScenarioGate(Mutex mutex, string name)
+    private HoldGate(Mutex mutex, string name)
     {
         _mutex = mutex;
         _held = true;
@@ -18,13 +18,13 @@ internal sealed class ScenarioGate : IDisposable
 
     internal string Name { get; }
 
-    internal static ScenarioGate Take()
+    internal static HoldGate Take()
     {
         var name = @"Local\rehost-scenario-" + Guid.NewGuid().ToString("n");
         var mutex = new Mutex(false, name);
         mutex.WaitOne();
 
-        return new ScenarioGate(mutex, name);
+        return new HoldGate(mutex, name);
     }
 
     internal void Release()

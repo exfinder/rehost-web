@@ -3,10 +3,10 @@ using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.ScenarioProbes;
 
-// In-memory and served over HTTP by WitnessHandler: live facts never ride the file journal,
+// In-memory and served over HTTP by WitnessHandler: live facts never ride the trace file,
 // whose Windows sharing semantics once lost an outcome marker under load (see the client-reset
-// post-mortem). The file journal remains only for process-death and cross-process evidence.
-public static class WitnessJournal
+// post-mortem). The trace file remains only for process-death and cross-process evidence.
+public static class Witness
 {
     private static readonly Lock Gate = new();
     private static readonly List<string> Events = [];

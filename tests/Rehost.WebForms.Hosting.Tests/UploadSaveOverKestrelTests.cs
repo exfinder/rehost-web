@@ -9,7 +9,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 // content path is the body fixture's, since only that application sets a threshold low enough to
 // reach it.
 [Collection(nameof(PostbackCollection))]
-public sealed class UploadSaveOverKestrelTests(PostbackScenario scenario)
+public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
 {
     private static readonly byte[] Content = Encoding.UTF8.GetBytes("hello upload");
 

@@ -56,7 +56,7 @@ public sealed class ApplicationConfigurationPublicationTests
                 .Start();
             process.WaitForExit();
 
-            return (process.ExitCode, process.StandardError, TraceFile.ReadLines(tracePath));
+            return (process.ExitCode, process.StandardError, TraceChannel.ReadLines(tracePath));
         }
         finally
         {

@@ -6,7 +6,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 // Each test renders the page, scrapes the form it rendered, and posts that back over a real socket,
 // so nothing here replays a recorded body.
 [Collection(nameof(PostbackCollection))]
-public sealed class PostbackOverKestrelTests(PostbackScenario scenario)
+public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
 {
     private const string Message = "typed by the client";
 

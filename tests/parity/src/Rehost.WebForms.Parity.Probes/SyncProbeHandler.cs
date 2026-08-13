@@ -10,7 +10,7 @@ public sealed class SyncProbeHandler : IHttpHandler
 
     public void ProcessRequest(HttpContext context)
     {
-        ProbeJournal.Record(context, "handler.process-request");
+        ProbeEvents.Record(context, "handler.process-request");
 
         var body = Encoding.UTF8.GetBytes("oracle-ok");
         context.Response.StatusCode = 201;

@@ -9,7 +9,7 @@ public sealed class CodegenCompileErrorTests
     [Fact]
     public void Reports_A_Compile_Error_On_Every_Request_Without_Failing_Activation()
     {
-        using var application = ScenarioApplication.Create();
+        using var application = BatchApplication.Create();
         application.BreakAppCode();
 
         // Framework stashes an initialization failure and renders it per request rather than

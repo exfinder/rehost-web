@@ -1,3 +1,4 @@
+using Rehost.WebForms.Parity.Contracts;
 using Shouldly;
 using Rehost.WebForms.TestSupport;
 
@@ -100,7 +101,7 @@ internal sealed class PageApplication : IDisposable
         process.WaitForExit();
         process.ExitCode.ShouldBe(0, process.StandardError);
 
-        return TraceFile.ReadLines(TracePath);
+        return TraceChannel.ReadLines(TracePath);
     }
 
     public void Dispose()

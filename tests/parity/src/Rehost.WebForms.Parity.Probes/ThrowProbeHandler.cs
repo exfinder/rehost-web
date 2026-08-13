@@ -9,7 +9,7 @@ public sealed class ThrowProbeHandler : IHttpHandler
 
     public void ProcessRequest(HttpContext context)
     {
-        ProbeJournal.Record(context, "handler.throw");
+        ProbeEvents.Record(context, "handler.throw");
         throw new InvalidOperationException("Probe handler failed deliberately.");
     }
 }

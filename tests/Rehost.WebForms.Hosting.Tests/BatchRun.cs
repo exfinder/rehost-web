@@ -4,11 +4,11 @@ using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-internal sealed class ScenarioRun : IDisposable
+internal sealed class BatchRun : IDisposable
 {
     private readonly DirectoryInfo _root;
 
-    private ScenarioRun(DirectoryInfo root, string applicationPath, List<string> trace)
+    private BatchRun(DirectoryInfo root, string applicationPath, List<string> trace)
     {
         _root = root;
         ApplicationPath = applicationPath;
@@ -67,7 +67,7 @@ internal sealed class ScenarioRun : IDisposable
     }
 
     // Responses are numbered in order across probes: one render, then one per postback round.
-    internal static ScenarioRun Farm(params string[] probes)
+    internal static BatchRun Farm(params string[] probes)
     {
         var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
         var applicationPath = Path.Combine(root.FullName, "app");
@@ -96,7 +96,7 @@ internal sealed class ScenarioRun : IDisposable
         process.WaitForExit();
         process.ExitCode.ShouldBe(0, process.StandardError);
 
-        return new ScenarioRun(root, applicationPath, TraceFile.ReadLines(tracePath));
+        return new BatchRun(root, applicationPath, TraceChannel.ReadLines(tracePath));
     }
 
     public void Dispose()

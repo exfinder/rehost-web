@@ -1,6 +1,6 @@
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
-internal static class ScenarioTrace
+internal static class BatchTrace
 {
     internal static string Value(IEnumerable<string> trace, string prefix) =>
         trace.FirstOrDefault(entry => entry.StartsWith(prefix))?[prefix.Length..]

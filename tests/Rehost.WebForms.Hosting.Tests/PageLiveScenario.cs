@@ -15,5 +15,5 @@ public sealed class PageLiveScenario(ScenarioHostRegistry registry)
 
     internal ScenarioClient Client => _host.Client;
 
-    internal WitnessReader Witness => _host.Witness;
+    internal ScopedWitness Witness => new(_host.Witness);
 }

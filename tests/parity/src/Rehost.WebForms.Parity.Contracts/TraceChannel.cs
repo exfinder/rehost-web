@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Rehost.WebForms.Parity.Contracts;
 // Scenario events come from places that share no stream — a bin assembly before the application
 // starts, generated App_Code and Global.asax, and the host process itself — so they meet in one
 // append-only file named by the environment.
-public static class TraceJournal
+public static class TraceChannel
 {
     public const string TraceVariable = "REHOST_SCENARIO_TRACE";
 
@@ -28,7 +29,7 @@ public static class TraceJournal
         lock (Gate)
         {
             // Writers and readers must both share the file: on Windows an overlapping open with
-            // a narrower share mode throws, and a journal write that throws loses the entry and
+            // a narrower share mode throws, and a trace write that throws loses the entry and
             // fails whatever recorded it. Retry rides out readers that do not share for write.
             var attempt = Stopwatch.StartNew();
             while (true)
@@ -65,5 +66,28 @@ public static class TraceJournal
             FileShare.ReadWrite | FileShare.Delete);
         using var reader = new StreamReader(stream);
         return reader.ReadToEnd();
+    }
+
+    public static List<string> ReadLines(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return new List<string>();
+        }
+
+        using var stream = new FileStream(
+            path,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete);
+        using var reader = new StreamReader(stream);
+        var lines = new List<string>();
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            lines.Add(line);
+        }
+
+        return lines;
     }
 }

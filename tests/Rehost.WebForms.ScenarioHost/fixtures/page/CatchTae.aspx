@@ -11,7 +11,7 @@
         }
         catch (System.Threading.ThreadAbortException)
         {
-            WitnessJournal.Stage(Request, "tae-caught");
+            Witness.Stage(Request, "tae-caught");
         }
     }
 

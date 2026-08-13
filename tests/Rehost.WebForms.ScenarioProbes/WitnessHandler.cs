@@ -11,6 +11,6 @@ public sealed class WitnessHandler : IHttpHandler
         context.Response.StatusCode = 200;
         context.Response.ContentType = "text/plain";
         context.Response.Cache.SetCacheability(HttpCacheability.NoCache);
-        context.Response.Write(string.Join("\n", WitnessJournal.Snapshot()));
+        context.Response.Write(string.Join("\n", Witness.Snapshot()));
     }
 }

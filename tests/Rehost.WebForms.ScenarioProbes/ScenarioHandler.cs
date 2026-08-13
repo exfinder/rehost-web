@@ -11,7 +11,7 @@ public sealed class QuirksHandler : IHttpHandler
 
     public void ProcessRequest(HttpContext context)
     {
-        ScenarioJournal.Record("unobtrusive-validation:" + ValidationSettings.UnobtrusiveValidationMode);
+        TraceProbe.Record("unobtrusive-validation:" + ValidationSettings.UnobtrusiveValidationMode);
         context.Response.StatusCode = 200;
     }
 }
@@ -25,7 +25,7 @@ public sealed class ScenarioHandler : IHttpHandler
 
     public void ProcessRequest(HttpContext context)
     {
-        ScenarioJournal.Record("handler");
+        TraceProbe.Record("handler");
         context.Response.StatusCode = 200;
         context.Response.Write("scenario");
     }

@@ -22,8 +22,8 @@ public partial class TimeoutSweepPage : System.Web.UI.Page
             "CancelTimedOutRequests", BindingFlags.NonPublic | BindingFlags.Instance);
         sweep.Invoke(manager, new object[] { DateTime.UtcNow.AddYears(1) });
 
-        WitnessJournal.Stage(Request, "sweep-returned");
-        WitnessJournal.Stage(
+        Witness.Stage(Request, "sweep-returned");
+        Witness.Stage(
             Request, "token-canceled:" + Request.TimedOutToken.IsCancellationRequested);
 
         Result = "sweep-page|";

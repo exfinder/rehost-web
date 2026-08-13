@@ -33,7 +33,7 @@ other classes' requests interleaving:
 - the unfiltered witness readers (`EventsAsync`, `HandlerEntriesAsync`,
   `WaitForAsync`) return process-wide events — dedicated-host tools, never for
   a shared-host assertion;
-- the shared façade exposes no trace journal: the trace file cannot be
+- the shared façade exposes no trace view: the trace file cannot be
   filtered by class;
 - no write into the application directory may change application startup
   behavior. Paths no other class reads are not enough: the hidden-segment

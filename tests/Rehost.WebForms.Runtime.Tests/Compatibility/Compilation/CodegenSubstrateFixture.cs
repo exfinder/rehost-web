@@ -4,7 +4,7 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
 public sealed class CodegenSubstrateFixture : IDisposable
 {
-    private readonly ScenarioApplication _application = ScenarioApplication.Create();
+    private readonly BatchApplication _application = BatchApplication.Create();
 
     public CodegenSubstrateFixture()
     {
@@ -16,7 +16,7 @@ public sealed class CodegenSubstrateFixture : IDisposable
         SatelliteCount = Directory.GetFiles(Path.Combine(segment, "fr"), "*.resources.dll").Length;
     }
 
-    internal ScenarioApplication Application => _application;
+    internal BatchApplication Application => _application;
 
     internal ImmutableArray<string> FirstTrace { get; }
     internal int AppCodeCount { get; }

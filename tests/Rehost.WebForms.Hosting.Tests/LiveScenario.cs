@@ -5,7 +5,7 @@ using Rehost.WebForms.TestSupport;
 namespace Rehost.WebForms.Hosting.Tests;
 
 // One passively-serving host process for a fixture; tests act through the client and assert on
-// the response, reaching for the journal only for server-side facts.
+// the response, reaching for the witness only for server-side facts.
 public class LiveScenario : IDisposable
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
@@ -59,7 +59,7 @@ public class LiveScenario : IDisposable
 
     internal ScenarioClient Client { get; }
 
-    internal WitnessReader Witness => new(Client);
+    internal HostWitness Witness => new(Client);
 
     private string WaitForAddress()
     {
@@ -91,7 +91,7 @@ public class LiveScenario : IDisposable
             + _process.StandardError);
     }
 
-    private string? ReadAddress() => TraceFile.ReadLines(_tracePath)
+    private string? ReadAddress() => TraceChannel.ReadLines(_tracePath)
         .Where(line => line.StartsWith(TraceEvents.Address, StringComparison.Ordinal))
         .Select(line => line[TraceEvents.Address.Length..])
         .FirstOrDefault();

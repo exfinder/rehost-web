@@ -14,7 +14,7 @@ public sealed class RequestBodyHandler : IHttpHandler
         var mode = context.Request.QueryString["mode"];
         byte[] body;
 
-        WitnessJournal.Record(WitnessProtocol.HandlerEntered + mode);
+        Witness.Record(WitnessProtocol.HandlerEntered + mode);
 
         switch (mode)
         {
@@ -28,7 +28,7 @@ public sealed class RequestBodyHandler : IHttpHandler
                 }
                 catch (HttpException exception)
                 {
-                    WitnessJournal.Record(WitnessProtocol.BodyAbort + exception.GetType().FullName);
+                    Witness.Record(WitnessProtocol.BodyAbort + exception.GetType().FullName);
                 }
                 return;
             case "unread":
@@ -115,7 +115,7 @@ public sealed class RequestBodyHandler : IHttpHandler
         }
         catch (HttpException exception)
         {
-            WitnessJournal.Record("body-apm-abort:" + exception.GetType().FullName);
+            Witness.Record("body-apm-abort:" + exception.GetType().FullName);
         }
     }
 

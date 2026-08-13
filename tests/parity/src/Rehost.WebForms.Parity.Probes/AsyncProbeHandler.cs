@@ -17,15 +17,15 @@ public sealed class AsyncProbeHandler : IHttpAsyncHandler
         AsyncCallback callback,
         object? state)
     {
-        ProbeJournal.Record(context, "handler.begin-process-request");
+        ProbeEvents.Record(context, "handler.begin-process-request");
 
-        var name = ProbeJournal.NameOf(context) ?? "";
+        var name = ProbeEvents.NameOf(context) ?? "";
         var result = new ProbeAsyncResult(context, state);
         var completion = new Thread(() =>
         {
             if (!ParityGate.Wait(name, GateTimeout))
             {
-                PipelineEventJournal.Record(name, "handler.gate-timeout");
+                PipelineEvents.Record(name, "handler.gate-timeout");
             }
 
             result.Complete();
@@ -45,7 +45,7 @@ public sealed class AsyncProbeHandler : IHttpAsyncHandler
         // The context travels on the result rather than being looked up ambiently: completion
         // runs on a thread the pipeline never touched.
         var context = ((ProbeAsyncResult)result).Context;
-        ProbeJournal.Record(context, "handler.end-process-request");
+        ProbeEvents.Record(context, "handler.end-process-request");
 
         var body = Encoding.UTF8.GetBytes("async-ok");
         context.Response.StatusCode = 202;

@@ -1,8 +1,8 @@
 namespace Rehost.WebForms.Hosting.Tests;
 
-public sealed class FarmScenario : IDisposable
+public sealed class FarmBatch : IDisposable
 {
-    internal ScenarioRun Run { get; } = ScenarioRun.Farm(
+    internal BatchRun Run { get; } = BatchRun.Farm(
         "captured",
         "captured-without-event-validation");
 

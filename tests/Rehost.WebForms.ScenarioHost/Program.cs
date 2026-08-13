@@ -37,7 +37,7 @@ public static class Program
 
     private static void Run(ScenarioOptions options)
     {
-        Environment.SetEnvironmentVariable(TraceJournal.TraceVariable, options.TracePath);
+        Environment.SetEnvironmentVariable(TraceChannel.TraceVariable, options.TracePath);
 
         if (options.Serve)
         {
@@ -64,9 +64,9 @@ public static class Program
         var manager = ApplicationManager.GetApplicationManager();
         manager.Open();
 
-        var runner = (ScenarioRunner)manager.CreateObject(
+        var runner = (BatchRunner)manager.CreateObject(
             options.ApplicationId,
-            typeof(ScenarioRunner),
+            typeof(BatchRunner),
             "/",
             EnsureTrailingSeparator(options.ApplicationPath),
             failIfExists: true,
@@ -75,8 +75,8 @@ public static class Program
 
         try
         {
-            TraceJournal.Record("codegen-dir:" + HttpRuntime.CodegenDir);
-            TraceJournal.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
+            TraceChannel.Record("codegen-dir:" + HttpRuntime.CodegenDir);
+            TraceChannel.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
 
             for (var i = 0; i < options.Requests.Count; i++)
             {
@@ -86,7 +86,7 @@ public static class Program
                     : Path.Combine(options.ResponseDirectory, i + ".body");
 
                 var status = runner.Request(path, responsePath);
-                TraceJournal.Record(TraceEvents.Request + path + ":" + status);
+                TraceChannel.Record(TraceEvents.Request + path + ":" + status);
             }
 
             // Holding the process alive keeps its generated assemblies loaded, which is the only
@@ -100,7 +100,7 @@ public static class Program
         }
         finally
         {
-            manager.StopObject(options.ApplicationId, typeof(ScenarioRunner));
+            manager.StopObject(options.ApplicationId, typeof(BatchRunner));
             manager.ShutdownApplication(options.ApplicationId);
             manager.Close();
         }
@@ -153,7 +153,7 @@ public static class Program
             if (options.Postbacks.Count == 0
                 && options.Requests.Count == 0)
             {
-                TraceJournal.Record(TraceEvents.Address + address);
+                TraceChannel.Record(TraceEvents.Address + address);
                 await Task.Delay(Timeout.Infinite);
             }
 
@@ -262,12 +262,12 @@ public static class Program
                 body);
         }
 
-        TraceJournal.Record(TraceEvents.Request + label + ":" + (int)response.StatusCode);
-        TraceJournal.Record(TraceEvents.ContentType + response.Content.Headers.ContentType);
+        TraceChannel.Record(TraceEvents.Request + label + ":" + (int)response.StatusCode);
+        TraceChannel.Record(TraceEvents.ContentType + response.Content.Headers.ContentType);
         if ((int)response.StatusCode >= 500)
         {
             var error = Regex.Replace(Encoding.UTF8.GetString(body), @"\s+", " ");
-            TraceJournal.Record(
+            TraceChannel.Record(
                 TraceEvents.ErrorBody + error.Substring(0, Math.Min(1000, error.Length)));
         }
         RecordHeader(response, ProbeHeaders.RemotePort);
@@ -279,7 +279,7 @@ public static class Program
     {
         if (response.Headers.TryGetValues(name, out var values))
         {
-            TraceJournal.Record(name.ToLowerInvariant() + ":" + string.Join(",", values));
+            TraceChannel.Record(name.ToLowerInvariant() + ":" + string.Join(",", values));
         }
     }
 
@@ -290,7 +290,7 @@ public static class Program
         using var gate = new Mutex(false, gateName);
         var acquired = false;
 
-        TraceJournal.Record("holding");
+        TraceChannel.Record("holding");
         try
         {
             acquired = gate.WaitOne(TimeSpan.FromMinutes(2));
@@ -463,7 +463,7 @@ internal sealed class ScenarioOptions
 
 // ApplicationManager hands the application a registered object, which is the seam through which
 // requests enter an activated application.
-public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
+public sealed class BatchRunner : MarshalByRefObject, IRegisteredObject
 {
     public int Request(string path, string? responsePath)
     {
@@ -482,7 +482,7 @@ public sealed class ScenarioRunner : MarshalByRefObject, IRegisteredObject
 
         if (request.StatusCode >= 500)
         {
-            TraceJournal.Record(TraceEvents.ErrorBody + Summarize(request.Body));
+            TraceChannel.Record(TraceEvents.ErrorBody + Summarize(request.Body));
         }
 
         return request.StatusCode;

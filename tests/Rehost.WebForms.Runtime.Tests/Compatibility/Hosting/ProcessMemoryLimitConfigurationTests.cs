@@ -1,3 +1,4 @@
+using Rehost.WebForms.Parity.Contracts;
 using System.Web.Hosting;
 using Shouldly;
 using Rehost.WebForms.Hosting;
@@ -65,7 +66,7 @@ public sealed class ProcessMemoryLimitConfigurationTests
 
             process.ExitCode.ShouldBe(0, process.StandardError);
 
-            return TraceFile.ReadLines(tracePath);
+            return TraceChannel.ReadLines(tracePath);
         }
         finally
         {

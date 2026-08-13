@@ -6,9 +6,9 @@ namespace Rehost.WebForms.Hosting.Tests;
 // A postback captured from a .NET Framework 4.8.1 node, replayed here over a real socket. Passing
 // means a load-balanced farm may span both runtimes, so an application can be migrated a node at a
 // time rather than all at once. The payload and its provenance ship with the fixture.
-public sealed class MixedFarmOverKestrelTests(FarmScenario scenario) : IClassFixture<FarmScenario>
+public sealed class MixedFarmOverKestrelTests(FarmBatch scenario) : IClassFixture<FarmBatch>
 {
-    private ScenarioRun Run => scenario.Run;
+    private BatchRun Run => scenario.Run;
 
     [Fact]
     public void A_Framework_Postback_Raises_The_Control_Event_On_This_Runtime()

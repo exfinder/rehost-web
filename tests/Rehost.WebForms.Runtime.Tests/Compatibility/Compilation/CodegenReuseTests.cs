@@ -1,7 +1,7 @@
 using Shouldly;
 using Rehost.WebForms.Parity.Contracts;
 using Xunit;
-using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.ScenarioTrace;
+using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.BatchTrace;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 

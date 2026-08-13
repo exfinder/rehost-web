@@ -1,3 +1,4 @@
+using Rehost.WebForms.Parity.Contracts;
 using Shouldly;
 using Xunit;
 using Rehost.WebForms.TestSupport;
@@ -9,14 +10,14 @@ public sealed class CodegenSharedSegmentTests
     [Fact]
     public void Serves_A_Second_Process_Sharing_One_Codegen_Segment()
     {
-        using var first = ScenarioApplication.Create();
+        using var first = BatchApplication.Create();
         using var second = first.CloneApplicationSharingCodegenRoot();
 
         // Both processes compile the same application from one segment at once, which is the
         // condition the cross-process compilation mutex exists for.
-        using var gate = ScenarioGate.Take();
+        using var gate = HoldGate.Take();
         var firstRun = first.StartRun(gate.Name);
-        ScenarioApplication.WaitForEntry(first.TracePath, "holding", TimeSpan.FromSeconds(60), firstRun);
+        BatchApplication.WaitForEntry(first.TracePath, "holding", TimeSpan.FromSeconds(60), firstRun);
 
         var secondTrace = second.Run();
 
@@ -25,6 +26,6 @@ public sealed class CodegenSharedSegmentTests
         firstRun.ExitCode.ShouldBe(0, firstRun.StandardError);
 
         secondTrace.ShouldContain("request:/default:200");
-        TraceFile.ReadLines(first.TracePath).ShouldContain("request:/default:200");
+        TraceChannel.ReadLines(first.TracePath).ShouldContain("request:/default:200");
     }
 }

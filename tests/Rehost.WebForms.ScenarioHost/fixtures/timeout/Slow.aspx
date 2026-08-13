@@ -6,7 +6,7 @@
     {
         var ms = Request.QueryString["ms"];
         System.Threading.Thread.Sleep(ms == null ? 0 : int.Parse(ms));
-        WitnessJournal.Stage(Request, "after-sleep-ran");
+        Witness.Stage(Request, "after-sleep-ran");
         Response.Write("slow-done|");
     }
 

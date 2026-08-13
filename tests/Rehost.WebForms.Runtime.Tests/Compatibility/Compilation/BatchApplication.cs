@@ -1,3 +1,4 @@
+using Rehost.WebForms.Parity.Contracts;
 using Shouldly;
 using Rehost.WebForms.TestSupport;
 
@@ -5,13 +6,13 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 // Activating an application permanently mutates process-global state, so every scenario driven from
 // here runs in its own child process through Rehost.WebForms.ScenarioHost. The slice-2 gate is
 // port-local; see ADR 0043.
-internal sealed class ScenarioApplication : IDisposable
+internal sealed class BatchApplication : IDisposable
 {
     private readonly DirectoryInfo _root;
     private readonly bool _ownsRoot;
     private int _runs;
 
-    private ScenarioApplication(
+    private BatchApplication(
         DirectoryInfo root,
         string applicationPath,
         string codegenRoot,
@@ -33,14 +34,14 @@ internal sealed class ScenarioApplication : IDisposable
     internal string Segment => Directory.GetDirectories(
         Path.Combine(CodegenRoot, "root")).Single();
 
-    internal static ScenarioApplication Create()
+    internal static BatchApplication Create()
     {
         var root = Directory.CreateTempSubdirectory("rehost-codegen-");
         var applicationPath = Path.Combine(root.FullName, "app");
         TestFiles.CopyDirectory(ScenarioHostInvocation.FixturePath("codegen"), applicationPath);
         Directory.CreateDirectory(Path.Combine(root.FullName, "temp"));
 
-        return new ScenarioApplication(
+        return new BatchApplication(
             root,
             applicationPath,
             Path.Combine(root.FullName, "temp"),
@@ -49,10 +50,10 @@ internal sealed class ScenarioApplication : IDisposable
 
     // A second application directory pointed at the same codegen root: two processes, one
     // segment is impossible from one directory because the segment is derived from it.
-    internal ScenarioApplication CloneApplicationSharingCodegenRoot()
+    internal BatchApplication CloneApplicationSharingCodegenRoot()
     {
         var root = Directory.CreateTempSubdirectory("rehost-codegen-peer-");
-        return new ScenarioApplication(root, ApplicationPath, CodegenRoot, ownsRoot: true);
+        return new BatchApplication(root, ApplicationPath, CodegenRoot, ownsRoot: true);
     }
 
     internal void EditAppCode()
@@ -76,7 +77,7 @@ internal sealed class ScenarioApplication : IDisposable
         process.WaitForExit();
         process.ExitCode.ShouldBe(0, process.StandardError);
 
-        return TraceFile.ReadLines(TracePath);
+        return TraceChannel.ReadLines(TracePath);
     }
 
     internal ScenarioHostProcess StartRun(string? holdGate, params string[] requests)
@@ -113,7 +114,7 @@ internal sealed class ScenarioApplication : IDisposable
         var deadline = DateTime.UtcNow + timeout;
         while (DateTime.UtcNow < deadline)
         {
-            if (TraceFile.ReadLines(path).Contains(entry))
+            if (TraceChannel.ReadLines(path).Contains(entry))
             {
                 return;
             }

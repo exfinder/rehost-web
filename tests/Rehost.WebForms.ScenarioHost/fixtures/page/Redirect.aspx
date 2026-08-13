@@ -6,7 +6,7 @@
     {
         Response.Write("gone|");
         Response.Redirect("/Default.aspx?value=r");
-        WitnessJournal.Stage(Request, "after-redirect");
+        Witness.Stage(Request, "after-redirect");
     }
 
 </script>

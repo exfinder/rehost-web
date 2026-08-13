@@ -4,9 +4,10 @@ using Rehost.WebForms.Parity.Contracts;
 namespace Rehost.WebForms.Hosting.Tests;
 
 // Typed view over the fixture's /witness endpoint: in-memory server-side facts fetched over
-// HTTP. Nothing here touches the file journal. Only StagesAsync filters by token; the other
-// readers see every request the process served, so they belong to dedicated-host scenarios.
-internal sealed class WitnessReader(ScenarioClient client)
+// HTTP. Nothing here touches the trace file. Every reader except StagesAsync sees every request
+// the process served, so only dedicated hosts expose this type; shared hosts hand out
+// ScopedWitness.
+internal sealed class HostWitness(ScenarioClient client)
 {
     internal async Task<string[]> EventsAsync() =>
         (await client.GetAsync("/witness")).Text

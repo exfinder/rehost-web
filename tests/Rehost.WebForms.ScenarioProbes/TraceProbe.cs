@@ -6,12 +6,12 @@ using Rehost.WebForms.Parity.Contracts;
 
 namespace Rehost.WebForms.ScenarioProbes;
 
-// Fixture application code records ordering here; the writing lives in TraceJournal.
-public static class ScenarioJournal
+// Fixture application code records ordering here; the writing lives in TraceChannel.
+public static class TraceProbe
 {
-    public const string TraceVariable = TraceJournal.TraceVariable;
+    public const string TraceVariable = TraceChannel.TraceVariable;
 
-    public static void Record(string entry) => TraceJournal.Record(entry);
+    public static void Record(string entry) => TraceChannel.Record(entry);
 
     // The generated assembly's identity is what tells a later run whether its output was reused
     // or recompiled, since a recompile draws a new random name.
@@ -33,6 +33,6 @@ public static class PreStartProbe
             return;
         }
 
-        ScenarioJournal.Record("pre-start");
+        TraceProbe.Record("pre-start");
     }
 }

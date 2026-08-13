@@ -8,12 +8,12 @@ public sealed class ProbeModule : IHttpModule
 {
     public void Init(HttpApplication context)
     {
-        PipelineEventJournal.CountApplication();
-        PipelineEventJournal.RecordApplication("module.init");
+        PipelineEvents.CountApplication();
+        PipelineEvents.RecordApplication("module.init");
 
         foreach (var name in context.Modules.AllKeys)
         {
-            PipelineEventJournal.RecordApplication("module.collection:" + name);
+            PipelineEvents.RecordApplication("module.collection:" + name);
         }
 
         context.BeginRequest += OnBeginRequest;
@@ -24,26 +24,26 @@ public sealed class ProbeModule : IHttpModule
 
     public void Dispose()
     {
-        PipelineEventJournal.RecordApplication("module.dispose");
+        PipelineEvents.RecordApplication("module.dispose");
     }
 
     private static void OnBeginRequest(object? sender, EventArgs eventArgs)
     {
         var application = (HttpApplication)sender!;
-        ProbeJournal.Record(application.Context, "module.begin-request");
+        ProbeEvents.Record(application.Context, "module.begin-request");
 
         var path = application.Context.Request.Path;
 
         if (path.EndsWith("/complete", StringComparison.Ordinal))
         {
-            ProbeJournal.Record(application.Context, "module.complete-request");
+            ProbeEvents.Record(application.Context, "module.complete-request");
             application.CompleteRequest();
             return;
         }
 
         if (path.EndsWith("/throw-module", StringComparison.Ordinal))
         {
-            ProbeJournal.Record(application.Context, "module.throw");
+            ProbeEvents.Record(application.Context, "module.throw");
             throw new InvalidOperationException("Probe module failed deliberately.");
         }
     }
@@ -65,6 +65,6 @@ public sealed class ProbeModule : IHttpModule
 
     private static void Record(object? sender, string value)
     {
-        ProbeJournal.Record(((HttpApplication)sender!).Context, value);
+        ProbeEvents.Record(((HttpApplication)sender!).Context, value);
     }
 }

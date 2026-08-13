@@ -1,7 +1,7 @@
 using Shouldly;
 using Rehost.WebForms.Parity.Contracts;
 using Xunit;
-using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.ScenarioTrace;
+using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.BatchTrace;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
@@ -10,7 +10,7 @@ public sealed class CodegenRecompileTests
     [Fact]
     public void Recompiles_After_Application_Code_Changes()
     {
-        using var application = ScenarioApplication.Create();
+        using var application = BatchApplication.Create();
 
         var first = application.Run();
 

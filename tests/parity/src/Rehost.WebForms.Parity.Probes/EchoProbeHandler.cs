@@ -15,12 +15,12 @@ public sealed class EchoProbeHandler : IHttpHandler
 
     public void ProcessRequest(HttpContext context)
     {
-        var name = ProbeJournal.NameOf(context) ?? "";
-        ProbeJournal.Record(context, "handler.echo");
+        var name = ProbeEvents.NameOf(context) ?? "";
+        ProbeEvents.Record(context, "handler.echo");
 
         if (!ParityBarrier.Arrive(BarrierTimeout))
         {
-            ProbeJournal.Record(context, "handler.barrier-timeout");
+            ProbeEvents.Record(context, "handler.barrier-timeout");
         }
 
         var body = Encoding.UTF8.GetBytes("echo:" + name);

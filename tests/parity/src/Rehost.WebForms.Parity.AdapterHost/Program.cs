@@ -200,7 +200,7 @@ internal static class Program
     {
         foreach (var request in step)
         {
-            PipelineEventJournal.OpenRequest(request.Name);
+            PipelineEvents.OpenRequest(request.Name);
         }
 
         ParityBarrier.Begin(step.Count);
@@ -230,7 +230,7 @@ internal static class Program
             VersionPolicy = HttpVersionPolicy.RequestVersionExact
         };
         message.Headers.TryAddWithoutValidation(
-            PipelineEventJournal.RequestHeaderName,
+            PipelineEvents.RequestHeaderName,
             request.Name);
 
         if (!string.IsNullOrEmpty(request.BodyFraming))
@@ -261,7 +261,7 @@ internal static class Program
             Name = request.Name,
             Observation = new PipelineObservation
             {
-                Events = PipelineEventJournal.DrainRequest(request.Name),
+                Events = PipelineEvents.DrainRequest(request.Name),
                 Response = new ResponseObservation
                 {
                     StatusCode = (int)response.StatusCode,

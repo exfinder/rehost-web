@@ -13,19 +13,19 @@ public sealed class PortableSessionRunner : IRegisteredObject, IClassicPipelineR
 
     public List<string> DrainApplicationEvents()
     {
-        return PipelineEventJournal.DrainApplication();
+        return PipelineEvents.DrainApplication();
     }
 
     public List<string> DrainSessionEvents()
     {
-        var events = PipelineEventJournal.DrainSession();
-        events.Add(RunnerEvents.ApplicationsCreated + PipelineEventJournal.ApplicationsCreated);
+        var events = PipelineEvents.DrainSession();
+        events.Add(RunnerEvents.ApplicationsCreated + PipelineEvents.ApplicationsCreated);
         return events;
     }
 
     public void Stop(bool immediate)
     {
-        PipelineEventJournal.RecordSession(immediate
+        PipelineEvents.RecordSession(immediate
             ? RunnerEvents.StopImmediate
             : RunnerEvents.Stop);
 
