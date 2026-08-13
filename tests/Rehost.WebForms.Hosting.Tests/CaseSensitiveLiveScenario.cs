@@ -1,3 +1,5 @@
+using Rehost.WebForms.TestSupport;
+
 namespace Rehost.WebForms.Hosting.Tests;
 
 // The page fixture served from a genuinely case-sensitive filesystem, where /default.aspx and
@@ -11,7 +13,7 @@ public sealed class CaseSensitiveLiveScenario : IDisposable
     {
         if (_volume.Path != null)
         {
-            Live = new LiveScenario(Fixtures.Page, _volume.Path, []);
+            Live = new LiveScenario(Fixtures.Page, _volume.Path);
         }
     }
 

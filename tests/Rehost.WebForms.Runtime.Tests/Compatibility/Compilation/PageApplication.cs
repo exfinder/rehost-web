@@ -1,6 +1,5 @@
-using System.Diagnostics;
 using Shouldly;
-using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
@@ -9,8 +8,6 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 // see ADR 0044.
 internal sealed class PageApplication : IDisposable
 {
-    private static readonly string HostDirectory = FindHostDirectory();
-
     private readonly DirectoryInfo _root;
     private int _runs;
 
@@ -38,8 +35,8 @@ internal sealed class PageApplication : IDisposable
         var root = Directory.CreateTempSubdirectory("rehost-page-");
         var application = new PageApplication(root);
 
-        CopyDirectory(
-            Path.Combine(HostDirectory, "fixtures", "page"),
+        TestFiles.CopyDirectory(
+            ScenarioHostInvocation.FixturePath("page"),
             application.ApplicationPath);
         Directory.CreateDirectory(application.CodegenRoot);
         Directory.CreateDirectory(application.ResponseDirectory);
@@ -89,37 +86,21 @@ internal sealed class PageApplication : IDisposable
             File.Delete(TracePath);
         }
 
-        var startInfo = new ProcessStartInfo("dotnet")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            WorkingDirectory = HostDirectory,
-        };
-        startInfo.ArgumentList.Add(Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll"));
-        startInfo.ArgumentList.Add("--app");
-        startInfo.ArgumentList.Add(ApplicationPath);
-        startInfo.ArgumentList.Add("--temp");
-        startInfo.ArgumentList.Add(CodegenRoot);
-        startInfo.ArgumentList.Add("--trace");
-        startInfo.ArgumentList.Add(TracePath);
-        startInfo.ArgumentList.Add("--response-dir");
-        startInfo.ArgumentList.Add(ResponseDirectory);
-
+        var invocation = new ScenarioHostInvocation()
+            .Application(ApplicationPath)
+            .CompilationTemp(CodegenRoot)
+            .Trace(TracePath)
+            .ResponseDirectory(ResponseDirectory);
         foreach (var request in requests)
         {
-            startInfo.ArgumentList.Add("--request");
-            startInfo.ArgumentList.Add(request);
+            invocation.Request(request);
         }
 
-        using var process = Process.Start(startInfo)!;
-        var standardError = process.StandardError.ReadToEndAsync();
-        var standardOutput = process.StandardOutput.ReadToEndAsync();
-        Task.WaitAll(standardError, standardOutput);
+        using var process = invocation.Start();
         process.WaitForExit();
+        process.ExitCode.ShouldBe(0, process.StandardError);
 
-        process.ExitCode.ShouldBe(0, standardError.Result);
-
-        return File.ReadAllLines(TracePath).ToList();
+        return TraceFile.ReadLines(TracePath);
     }
 
     public void Dispose()
@@ -136,25 +117,4 @@ internal sealed class PageApplication : IDisposable
         }
     }
 
-    private static void CopyDirectory(string source, string destination)
-    {
-        Directory.CreateDirectory(destination);
-
-        foreach (var file in Directory.GetFiles(source))
-        {
-            File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
-        }
-
-        foreach (var directory in Directory.GetDirectories(source))
-        {
-            CopyDirectory(
-                directory,
-                Path.Combine(destination, Path.GetFileName(directory)));
-        }
-    }
-
-    private static string FindHostDirectory()
-    {
-        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
-    }
 }

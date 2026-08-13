@@ -152,7 +152,7 @@ public sealed class RequestBodyOverKestrelTests(
     [Fact]
     public async Task Kestrel_Refuses_A_Declared_Length_Over_Its_Own_Limit_Before_The_Pipeline()
     {
-        using var run = new LiveScenario(Fixtures.Body, "--kestrel-max-body", "1024");
+        using var run = new LiveScenario(Fixtures.Body, kestrelMaxBody: 1024);
 
         var response = await run.Client.PostBodyAsync(
             "/body?mode=input",
@@ -167,7 +167,7 @@ public sealed class RequestBodyOverKestrelTests(
     [Fact]
     public async Task An_Undeclared_Length_Over_The_Host_Limit_Fails_The_Handler_Mid_Read()
     {
-        using var run = new LiveScenario(Fixtures.Body, "--kestrel-max-body", "1024");
+        using var run = new LiveScenario(Fixtures.Body, kestrelMaxBody: 1024);
 
         var response = await run.Client.PostBodyAsync(
             "/body?mode=input",
@@ -182,7 +182,7 @@ public sealed class RequestBodyOverKestrelTests(
     [Fact]
     public async Task Custom_Errors_Convert_A_Host_Rejection_Into_The_Application_Response()
     {
-        using var run = new LiveScenario(Fixtures.BodyCustomErrors, "--kestrel-max-body", "1024");
+        using var run = new LiveScenario(Fixtures.BodyCustomErrors, kestrelMaxBody: 1024);
 
         var response = await run.Client.PostBodyAsync(
             "/body?mode=input",

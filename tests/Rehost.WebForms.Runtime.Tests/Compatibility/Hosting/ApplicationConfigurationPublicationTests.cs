@@ -1,7 +1,6 @@
-using System.Diagnostics;
 using Shouldly;
 using Xunit;
-using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 
@@ -48,33 +47,15 @@ public sealed class ApplicationConfigurationPublicationTests
             var temp = Path.Combine(root.FullName, "temp");
             Directory.CreateDirectory(temp);
 
-            var startInfo = new ProcessStartInfo("dotnet")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                WorkingDirectory = HostDirectory,
-            };
-            startInfo.ArgumentList.Add(Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll"));
-            startInfo.ArgumentList.Add("--app");
-            startInfo.ArgumentList.Add(Path.Combine(HostDirectory, "fixtures", fixture));
-            startInfo.ArgumentList.Add("--temp");
-            startInfo.ArgumentList.Add(temp);
-            startInfo.ArgumentList.Add("--trace");
-            startInfo.ArgumentList.Add(tracePath);
-            startInfo.ArgumentList.Add("--request");
-            startInfo.ArgumentList.Add("/quirks");
-
-            using var process = Process.Start(startInfo)!;
-            var standardError = process.StandardError.ReadToEndAsync();
-            var standardOutput = process.StandardOutput.ReadToEndAsync();
-            Task.WaitAll(standardError, standardOutput);
+            using var process = new ScenarioHostInvocation()
+                .Application(ScenarioHostInvocation.FixturePath(fixture))
+                .CompilationTemp(temp)
+                .Trace(tracePath)
+                .Request("/quirks")
+                .Start();
             process.WaitForExit();
 
-            var trace = File.Exists(tracePath)
-                ? File.ReadAllLines(tracePath).ToList()
-                : new List<string>();
-
-            return (process.ExitCode, standardError.Result, trace);
+            return (process.ExitCode, process.StandardError, TraceFile.ReadLines(tracePath));
         }
         finally
         {
@@ -88,10 +69,4 @@ public sealed class ApplicationConfigurationPublicationTests
         }
     }
 
-    private static string HostDirectory { get; } = FindHostDirectory();
-
-    private static string FindHostDirectory()
-    {
-        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
-    }
 }

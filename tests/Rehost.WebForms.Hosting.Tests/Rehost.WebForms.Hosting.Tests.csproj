@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
     <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.TestSupport/Rehost.WebForms.TestSupport.csproj" />
     <!--
       Built but not referenced: the scenario tests launch this host as a child process from
       its own output directory, which carries its own copy of the hosting assembly. Without

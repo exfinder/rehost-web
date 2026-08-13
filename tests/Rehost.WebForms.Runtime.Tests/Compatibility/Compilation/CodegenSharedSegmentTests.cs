@@ -1,5 +1,6 @@
 using Shouldly;
 using Xunit;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 
@@ -24,6 +25,6 @@ public sealed class CodegenSharedSegmentTests
         firstRun.ExitCode.ShouldBe(0, firstRun.StandardError);
 
         secondTrace.ShouldContain("request:/default:200");
-        ScenarioApplication.ReadTrace(first.TracePath).ShouldContain("request:/default:200");
+        TraceFile.ReadLines(first.TracePath).ShouldContain("request:/default:200");
     }
 }

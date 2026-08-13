@@ -1,6 +1,5 @@
-using System.Diagnostics;
 using Shouldly;
-using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 // Activating an application permanently mutates process-global state, so every scenario driven from
@@ -8,8 +7,6 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 // port-local; see ADR 0043.
 internal sealed class ScenarioApplication : IDisposable
 {
-    private static readonly string HostDirectory = FindHostDirectory();
-
     private readonly DirectoryInfo _root;
     private readonly bool _ownsRoot;
     private int _runs;
@@ -40,7 +37,7 @@ internal sealed class ScenarioApplication : IDisposable
     {
         var root = Directory.CreateTempSubdirectory("rehost-codegen-");
         var applicationPath = Path.Combine(root.FullName, "app");
-        CopyDirectory(Path.Combine(HostDirectory, "fixtures", "codegen"), applicationPath);
+        TestFiles.CopyDirectory(ScenarioHostInvocation.FixturePath("codegen"), applicationPath);
         Directory.CreateDirectory(Path.Combine(root.FullName, "temp"));
 
         return new ScenarioApplication(
@@ -75,14 +72,14 @@ internal sealed class ScenarioApplication : IDisposable
 
     internal List<string> Run(params string[] requests)
     {
-        var process = StartRun(holdGate: null, requests);
+        using var process = StartRun(holdGate: null, requests);
         process.WaitForExit();
         process.ExitCode.ShouldBe(0, process.StandardError);
 
-        return ReadTrace(TracePath);
+        return TraceFile.ReadLines(TracePath);
     }
 
-    internal ScenarioProcess StartRun(string? holdGate, params string[] requests)
+    internal ScenarioHostProcess StartRun(string? holdGate, params string[] requests)
     {
         _runs++;
         if (File.Exists(TracePath))
@@ -90,54 +87,33 @@ internal sealed class ScenarioApplication : IDisposable
             File.Delete(TracePath);
         }
 
-        var startInfo = new ProcessStartInfo("dotnet")
-        {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            WorkingDirectory = HostDirectory,
-        };
-        startInfo.ArgumentList.Add(Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll"));
-        startInfo.ArgumentList.Add("--app");
-        startInfo.ArgumentList.Add(ApplicationPath);
-        startInfo.ArgumentList.Add("--temp");
-        startInfo.ArgumentList.Add(CodegenRoot);
-        startInfo.ArgumentList.Add("--trace");
-        startInfo.ArgumentList.Add(TracePath);
+        var invocation = new ScenarioHostInvocation()
+            .Application(ApplicationPath)
+            .CompilationTemp(CodegenRoot)
+            .Trace(TracePath);
         if (holdGate != null)
         {
-            startInfo.ArgumentList.Add("--hold-gate");
-            startInfo.ArgumentList.Add(holdGate);
+            invocation.HoldGate(holdGate);
         }
 
         foreach (var request in requests)
         {
-            startInfo.ArgumentList.Add("--request");
-            startInfo.ArgumentList.Add(request);
+            invocation.Request(request);
         }
 
-        return new ScenarioProcess(Process.Start(startInfo)!);
+        return invocation.Start();
     }
 
-    internal static List<string> ReadTrace(string path)
-    {
-        using var stream = new FileStream(
-            path,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.ReadWrite | FileShare.Delete);
-        using var reader = new StreamReader(stream);
-
-        return reader.ReadToEnd()
-            .Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-            .ToList();
-    }
-
-    internal static void WaitForEntry(string path, string entry, TimeSpan timeout, ScenarioProcess process)
+    internal static void WaitForEntry(
+        string path,
+        string entry,
+        TimeSpan timeout,
+        ScenarioHostProcess process)
     {
         var deadline = DateTime.UtcNow + timeout;
         while (DateTime.UtcNow < deadline)
         {
-            if (File.Exists(path) && ReadTrace(path).Contains(entry))
+            if (TraceFile.ReadLines(path).Contains(entry))
             {
                 return;
             }
@@ -171,25 +147,5 @@ internal sealed class ScenarioApplication : IDisposable
         catch (UnauthorizedAccessException)
         {
         }
-    }
-
-    private static void CopyDirectory(string source, string destination)
-    {
-        Directory.CreateDirectory(destination);
-
-        foreach (var file in Directory.GetFiles(source))
-        {
-            File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
-        }
-
-        foreach (var directory in Directory.GetDirectories(source))
-        {
-            CopyDirectory(directory, Path.Combine(destination, Path.GetFileName(directory)));
-        }
-    }
-
-    private static string FindHostDirectory()
-    {
-        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
     }
 }

@@ -2,6 +2,7 @@ using System.Web;
 using System.Web.Util;
 using Shouldly;
 using Xunit;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Util;
 

@@ -2,6 +2,7 @@ using System.Xml;
 using Rehost.WebForms.Parity.Harness;
 using Shouldly;
 using Xunit;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests;
 
@@ -60,7 +61,7 @@ public sealed class PortableParityGateTests
                 var name = Path.GetFileName(fixture);
                 if (name != "temp")
                 {
-                    CopyDirectory(fixture, Path.Combine(root.FullName, name));
+                    TestFiles.CopyDirectory(fixture, Path.Combine(root.FullName, name));
                 }
             }
 
@@ -109,18 +110,4 @@ public sealed class PortableParityGateTests
         document.Save(webConfigPath);
     }
 
-    private static void CopyDirectory(string source, string destination)
-    {
-        Directory.CreateDirectory(destination);
-
-        foreach (var file in Directory.GetFiles(source))
-        {
-            File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
-        }
-
-        foreach (var directory in Directory.GetDirectories(source))
-        {
-            CopyDirectory(directory, Path.Combine(destination, Path.GetFileName(directory)));
-        }
-    }
 }

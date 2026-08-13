@@ -1,6 +1,7 @@
 using System.Text;
 using Shouldly;
 using Xunit;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;
 

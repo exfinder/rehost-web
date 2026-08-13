@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
@@ -9,17 +10,13 @@ public class LiveScenario : IDisposable
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
 
     private readonly DirectoryInfo _root;
-    private readonly Process _process;
-    private readonly Task<string> _standardError;
-    private readonly Task<string> _standardOutput;
+    private readonly ScenarioHostProcess _process;
     private readonly string _tracePath;
 
-    internal LiveScenario(ScenarioFixture fixture, params string[] extraHostArgs)
-        : this(fixture, null, extraHostArgs)
-    {
-    }
-
-    internal LiveScenario(ScenarioFixture fixture, string? rootPath, string[] extraHostArgs)
+    internal LiveScenario(
+        ScenarioFixture fixture,
+        string? rootPath = null,
+        long? kestrelMaxBody = null)
     {
         _root = rootPath == null
             ? Directory.CreateTempSubdirectory("rehost-live-kestrel-")
@@ -30,36 +27,24 @@ public class LiveScenario : IDisposable
         var temp = Path.Combine(_root.FullName, "temp");
         var responses = Path.Combine(_root.FullName, "responses");
 
-        ScenarioRun.CopyDirectory(
-            Path.Combine(ScenarioRun.HostDirectory, "fixtures", fixture.Name),
+        TestFiles.CopyDirectory(
+            ScenarioHostInvocation.FixturePath(fixture.Name),
             ApplicationPath);
         Directory.CreateDirectory(temp);
         Directory.CreateDirectory(responses);
 
-        var startInfo = new ProcessStartInfo("dotnet")
+        var invocation = new ScenarioHostInvocation()
+            .Serve()
+            .Application(ApplicationPath)
+            .CompilationTemp(temp)
+            .Trace(_tracePath)
+            .ResponseDirectory(responses);
+        if (kestrelMaxBody != null)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            WorkingDirectory = ScenarioRun.HostDirectory,
-        };
-        startInfo.ArgumentList.Add(ScenarioRun.HostAssemblyPath);
-        startInfo.ArgumentList.Add("--serve");
-        startInfo.ArgumentList.Add("--app");
-        startInfo.ArgumentList.Add(ApplicationPath);
-        startInfo.ArgumentList.Add("--temp");
-        startInfo.ArgumentList.Add(temp);
-        startInfo.ArgumentList.Add("--trace");
-        startInfo.ArgumentList.Add(_tracePath);
-        startInfo.ArgumentList.Add("--response-dir");
-        startInfo.ArgumentList.Add(responses);
-        foreach (var argument in extraHostArgs)
-        {
-            startInfo.ArgumentList.Add(argument);
+            invocation.KestrelMaxBody(kestrelMaxBody.Value);
         }
 
-        _process = Process.Start(startInfo)!;
-        _standardError = _process.StandardError.ReadToEndAsync();
-        _standardOutput = _process.StandardOutput.ReadToEndAsync();
+        _process = invocation.Start();
 
         Address = new Uri(WaitForAddress());
         Client = new ScenarioClient(Address);
@@ -75,7 +60,8 @@ public class LiveScenario : IDisposable
 
     internal WitnessReader Witness => new(Client);
 
-    internal ScenarioJournalReader Journal => ScenarioJournalReader.Parse(ReadTrace());
+    internal ScenarioJournalReader Journal =>
+        ScenarioJournalReader.Parse(TraceFile.ReadLines(_tracePath));
 
     private string WaitForAddress()
     {
@@ -87,10 +73,10 @@ public class LiveScenario : IDisposable
             {
                 throw new InvalidOperationException(
                     "The scenario host exited before publishing an address. "
-                    + _standardError.Result);
+                    + _process.StandardError);
             }
 
-            var address = ScenarioJournalReader.Parse(ReadTrace()).Address;
+            var address = ScenarioJournalReader.Parse(TraceFile.ReadLines(_tracePath)).Address;
             if (address != null)
             {
                 return address;
@@ -104,42 +90,12 @@ public class LiveScenario : IDisposable
             "The scenario host did not publish an address within "
             + StartupTimeout.TotalSeconds
             + "s. "
-            + _standardError.Result);
-    }
-
-    private IEnumerable<string> ReadTrace()
-    {
-        if (!File.Exists(_tracePath))
-        {
-            return [];
-        }
-
-        // The child keeps the file open for appending.
-        using var stream = new FileStream(
-            _tracePath,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.ReadWrite | FileShare.Delete);
-        using var reader = new StreamReader(stream);
-        var lines = new List<string>();
-        while (reader.ReadLine() is { } line)
-        {
-            lines.Add(line);
-        }
-
-        return lines;
+            + _process.StandardError);
     }
 
     public void Dispose()
     {
         Client?.Dispose();
-
-        if (!_process.HasExited)
-        {
-            _process.Kill(entireProcessTree: true);
-        }
-
-        _process.WaitForExit();
         _process.Dispose();
 
         try

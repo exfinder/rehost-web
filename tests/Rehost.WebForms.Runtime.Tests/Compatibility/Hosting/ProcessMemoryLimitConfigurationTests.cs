@@ -1,8 +1,7 @@
-using System.Diagnostics;
 using System.Web.Hosting;
 using Shouldly;
 using Xunit;
-using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Hosting;
 
@@ -39,7 +38,8 @@ public sealed class ProcessMemoryLimitConfigurationTests
             Directory.CreateDirectory(temp);
 
             var machineConfig = Path.Combine(root.FullName, "machine.config");
-            var shipped = Path.Combine(HostDirectory, "configs", "rehost-webforms.machine.config");
+            var shipped = Path.Combine(
+                ScenarioHostInvocation.HostDirectory, "configs", "rehost-webforms.machine.config");
             var text = File.ReadAllText(shipped);
             text.ShouldContain("memoryLimit=\"80\"", Case.Sensitive);
             File.WriteAllText(
@@ -47,38 +47,24 @@ public sealed class ProcessMemoryLimitConfigurationTests
                 text.Replace("memoryLimit=\"80\"", $"memoryLimit=\"{memoryLimitPercent}\"", StringComparison.Ordinal));
             // The IIS baseline is resolved beside the machine config and is required.
             File.Copy(
-                Path.Combine(HostDirectory, "configs", "rehost-webforms.applicationHost.config"),
+                Path.Combine(
+                    ScenarioHostInvocation.HostDirectory,
+                    "configs",
+                    "rehost-webforms.applicationHost.config"),
                 Path.Combine(root.FullName, "rehost-webforms.applicationHost.config"));
 
-            var startInfo = new ProcessStartInfo("dotnet")
-            {
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                WorkingDirectory = HostDirectory,
-            };
-            startInfo.ArgumentList.Add(Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll"));
-            startInfo.ArgumentList.Add("--app");
-            startInfo.ArgumentList.Add(Path.Combine(HostDirectory, "fixtures", "modern-target"));
-            startInfo.ArgumentList.Add("--temp");
-            startInfo.ArgumentList.Add(temp);
-            startInfo.ArgumentList.Add("--trace");
-            startInfo.ArgumentList.Add(tracePath);
-            startInfo.ArgumentList.Add("--machine-config");
-            startInfo.ArgumentList.Add(machineConfig);
-            startInfo.ArgumentList.Add("--request");
-            startInfo.ArgumentList.Add("/quirks");
-
-            using var process = Process.Start(startInfo)!;
-            var standardError = process.StandardError.ReadToEndAsync();
-            var standardOutput = process.StandardOutput.ReadToEndAsync();
-            Task.WaitAll(standardError, standardOutput);
+            using var process = new ScenarioHostInvocation()
+                .Application(ScenarioHostInvocation.FixturePath("modern-target"))
+                .CompilationTemp(temp)
+                .Trace(tracePath)
+                .MachineConfig(machineConfig)
+                .Request("/quirks")
+                .Start();
             process.WaitForExit();
 
-            process.ExitCode.ShouldBe(0, standardError.Result);
+            process.ExitCode.ShouldBe(0, process.StandardError);
 
-            return File.Exists(tracePath)
-                ? File.ReadAllLines(tracePath).ToList()
-                : new List<string>();
+            return TraceFile.ReadLines(tracePath);
         }
         finally
         {
@@ -92,10 +78,4 @@ public sealed class ProcessMemoryLimitConfigurationTests
         }
     }
 
-    private static string HostDirectory { get; } = FindHostDirectory();
-
-    private static string FindHostDirectory()
-    {
-        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
-    }
 }

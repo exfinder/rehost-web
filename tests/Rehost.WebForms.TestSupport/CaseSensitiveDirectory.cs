@@ -1,18 +1,17 @@
 using System.Diagnostics;
 
-namespace Rehost.WebForms.Runtime.Tests.Compatibility.Util;
+namespace Rehost.WebForms.TestSupport;
 
 // A directory on a genuinely case-sensitive filesystem, or null where the platform cannot
 // provide one. Linux temp already is one; macOS mounts a disposable case-sensitive APFS sparse
 // image (no admin rights involved); Windows/NTFS cannot express the situation and callers skip.
-// A twin copy exists in Rehost.WebForms.Hosting.Tests for the scenario-level tests.
-internal sealed class CaseSensitiveDirectory : IDisposable
+public sealed class CaseSensitiveDirectory : IDisposable
 {
     private readonly DirectoryInfo? _plainRoot;
     private readonly string? _mountPoint;
     private readonly string? _imagePath;
 
-    internal string? Path { get; }
+    public string? Path { get; }
 
     private CaseSensitiveDirectory(DirectoryInfo? plainRoot, string? mountPoint, string? imagePath)
     {
@@ -22,7 +21,7 @@ internal sealed class CaseSensitiveDirectory : IDisposable
         Path = mountPoint ?? plainRoot?.FullName;
     }
 
-    internal static CaseSensitiveDirectory Create()
+    public static CaseSensitiveDirectory Create()
     {
         var probe = Directory.CreateTempSubdirectory("rehost-cs-probe-");
         try

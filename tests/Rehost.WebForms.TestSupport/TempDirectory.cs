@@ -1,12 +1,12 @@
-namespace Rehost.WebForms.Hosting.Tests;
+namespace Rehost.WebForms.TestSupport;
 
 // The application writes into a directory the test owns and deletes, never into the checkout or
 // the fixture copy the host is serving.
-internal sealed class TempDirectory : IDisposable
+public sealed class TempDirectory : IDisposable
 {
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("rehost-saveas-");
 
-    internal string Path(string name) => System.IO.Path.Combine(_root.FullName, name);
+    public string Path(string name) => System.IO.Path.Combine(_root.FullName, name);
 
     public void Dispose()
     {

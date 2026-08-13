@@ -1,6 +1,5 @@
-using System.Diagnostics;
 using Shouldly;
-using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
@@ -71,57 +70,34 @@ internal sealed class ScenarioRun : IDisposable
     // Responses are numbered in order across probes: one render, then one per postback round.
     internal static ScenarioRun Farm(params string[] probes)
     {
-        return Run(Fixtures.Farm, "--postback", probes);
-    }
-
-    private static ScenarioRun Run(ScenarioFixture fixture, string argument, string[] values)
-    {
         var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
         var applicationPath = Path.Combine(root.FullName, "app");
         var responses = Path.Combine(root.FullName, "responses");
         var temp = Path.Combine(root.FullName, "temp");
         var tracePath = Path.Combine(root.FullName, "trace.txt");
 
-        CopyDirectory(Path.Combine(HostDirectory, "fixtures", fixture.Name), applicationPath);
+        TestFiles.CopyDirectory(
+            ScenarioHostInvocation.FixturePath(Fixtures.Farm.Name),
+            applicationPath);
         Directory.CreateDirectory(responses);
         Directory.CreateDirectory(temp);
 
-        var hostAssembly = HostAssemblyPath;
-        File.Exists(hostAssembly).ShouldBeTrue(
-            "Build the scenario host first: dotnet build tests/Rehost.WebForms.ScenarioHost");
-
-        var startInfo = new ProcessStartInfo("dotnet")
+        var invocation = new ScenarioHostInvocation()
+            .Serve()
+            .Application(applicationPath)
+            .CompilationTemp(temp)
+            .Trace(tracePath)
+            .ResponseDirectory(responses);
+        foreach (var probe in probes)
         {
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            WorkingDirectory = HostDirectory,
-        };
-        startInfo.ArgumentList.Add(hostAssembly);
-        startInfo.ArgumentList.Add("--serve");
-        startInfo.ArgumentList.Add("--app");
-        startInfo.ArgumentList.Add(applicationPath);
-        startInfo.ArgumentList.Add("--temp");
-        startInfo.ArgumentList.Add(temp);
-        startInfo.ArgumentList.Add("--trace");
-        startInfo.ArgumentList.Add(tracePath);
-        startInfo.ArgumentList.Add("--response-dir");
-        startInfo.ArgumentList.Add(responses);
-
-        foreach (var value in values)
-        {
-            startInfo.ArgumentList.Add(argument);
-            startInfo.ArgumentList.Add(value);
+            invocation.Postback(probe);
         }
 
-        using var process = Process.Start(startInfo)!;
-        var standardError = process.StandardError.ReadToEndAsync();
-        var standardOutput = process.StandardOutput.ReadToEndAsync();
-        Task.WaitAll(standardError, standardOutput);
+        using var process = invocation.Start();
         process.WaitForExit();
+        process.ExitCode.ShouldBe(0, process.StandardError);
 
-        process.ExitCode.ShouldBe(0, standardError.Result);
-
-        return new ScenarioRun(root, applicationPath, File.ReadAllLines(tracePath).ToList());
+        return new ScenarioRun(root, applicationPath, TraceFile.ReadLines(tracePath));
     }
 
     public void Dispose()
@@ -138,28 +114,4 @@ internal sealed class ScenarioRun : IDisposable
         }
     }
 
-    internal static string HostDirectory { get; } = FindHostDirectory();
-
-    internal static string HostAssemblyPath =>
-        Path.Combine(HostDirectory, "Rehost.WebForms.ScenarioHost.dll");
-
-    internal static void CopyDirectory(string source, string destination)
-    {
-        Directory.CreateDirectory(destination);
-
-        foreach (var file in Directory.GetFiles(source))
-        {
-            File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
-        }
-
-        foreach (var directory in Directory.GetDirectories(source))
-        {
-            CopyDirectory(directory, Path.Combine(destination, Path.GetFileName(directory)));
-        }
-    }
-
-    private static string FindHostDirectory()
-    {
-        return TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
-    }
 }
