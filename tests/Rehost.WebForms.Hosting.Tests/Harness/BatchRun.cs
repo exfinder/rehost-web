@@ -17,7 +17,7 @@ internal sealed class BatchRun : IDisposable
 
     internal string ApplicationPath { get; }
 
-    internal List<string> Trace { get; }
+    private List<string> Trace { get; }
 
     internal byte[] Response(int index) =>
         File.ReadAllBytes(Path.Combine(_root.FullName, "responses", index + ".body"));
@@ -25,15 +25,17 @@ internal sealed class BatchRun : IDisposable
     internal string ResponseText(int index) =>
         File.ReadAllText(Path.Combine(_root.FullName, "responses", index + ".body"));
 
-    internal byte[] Response(string label, int occurrence = 0) => Response(IndexOf(label, occurrence));
+    internal byte[] Response(string label, int occurrence = 0) => Response(Find(label, occurrence).Index);
 
     internal string ResponseText(string label, int occurrence = 0) =>
-        ResponseText(IndexOf(label, occurrence));
+        ResponseText(Find(label, occurrence).Index);
+
+    internal int Status(string label, int occurrence = 0) => Find(label, occurrence).Status;
 
     // Responses are numbered in the order they were recorded, and so are the trace's request
     // lines, so a label locates one without the caller counting positions. A label repeats when a
     // probe issues more than one request, hence the occurrence.
-    private int IndexOf(string label, int occurrence)
+    private (int Index, int Status) Find(string label, int occurrence)
     {
         var seen = 0;
         var index = 0;
@@ -47,15 +49,15 @@ internal sealed class BatchRun : IDisposable
 
             // An aborted probe records a request line but no response, so it must not advance the
             // ordinal. Its status is a word rather than a code.
-            var status = entry.LastIndexOf(':');
-            if (!int.TryParse(entry[(status + 1)..], out _))
+            var separator = entry.LastIndexOf(':');
+            if (!int.TryParse(entry[(separator + 1)..], out var status))
             {
                 continue;
             }
 
-            if (entry[8..status] == label && seen++ == occurrence)
+            if (entry[TraceEvents.Request.Length..separator] == label && seen++ == occurrence)
             {
-                return index;
+                return (index, status);
             }
 
             index++;

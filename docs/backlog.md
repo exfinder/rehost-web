@@ -177,9 +177,15 @@ Milestone 1 owns these outcomes:
   the frozen golden gate, prefer captured fixtures or ad-hoc Framework readings,
   and do not recreate historical experiments unless evidence is missing or
   contradictory.
-- Opportunistic test cleanup: migrate `MixedFarmOverKestrelTests` to act/assert,
-  merge `ScenarioWorkerRequest` only if it becomes cheaper, and remove the
-  ScenarioHost client half as probes migrate.
+- Opportunistic test cleanup: merge `ScenarioWorkerRequest` only if it becomes
+  cheaper, and remove the ScenarioHost client half as probes migrate.
+- Test-suite process infrastructure, deliberately deferred from the 2026-08
+  harness refactoring: a three-OS CI matrix for the routine suite (the
+  Framework oracle stays exceptional, above), committed runner configuration
+  (parallelism and hung-test detection are xUnit defaults today), a suite
+  timing record with a budget, periodic mutation runs over port-owned seams,
+  and shrinking `TimeoutOverKestrelTests`' real-clock wait (~7s) if the sweep
+  contract allows a shorter fixture timeout.
 
 ## Rejected
 
