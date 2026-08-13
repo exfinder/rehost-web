@@ -10,37 +10,38 @@
                                       would relocate output instead of failing quietly.
        Staged, not Content: the payload must not flow into consumers' output. -->
 
+  <Import Project="$(MSBuildThisFileDirectory)../FixtureStaging.targets" />
+
   <PropertyGroup>
     <ParityProbeTargetFramework Condition="'$(ParityProbeTargetFramework)' == ''">$(TargetFramework)</ParityProbeTargetFramework>
     <ParityStageGoldenSessions Condition="'$(ParityStageGoldenSessions)' == ''">true</ParityStageGoldenSessions>
     <ParityClearErrorsTempDirectory Condition="'$(ParityClearErrorsTempDirectory)' == ''">false</ParityClearErrorsTempDirectory>
   </PropertyGroup>
 
-  <Target Name="ResolveParityProbeAssembly">
-    <MSBuild
-      Projects="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
-      Targets="GetTargetPath"
-      Properties="TargetFramework=$(ParityProbeTargetFramework)">
-      <Output TaskParameter="TargetOutputs" PropertyName="_ProbeAssembly" />
-    </MSBuild>
+  <ItemGroup>
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
+    <ProjectReference
+      Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+    <FixturePayloadProject
+      Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
+      AdditionalProperties="TargetFramework=$(ParityProbeTargetFramework)"
+      MustNotLeakBesideHost="true" />
+  </ItemGroup>
 
-    <Error
-      Condition="!Exists('$(_ProbeAssembly)')"
-      Text="Probe build output missing: $(_ProbeAssembly)" />
-    <Error
-      Condition="Exists('$(TargetDir)Rehost.WebForms.Parity.Probes.dll')"
-      Text="Rehost.WebForms.Parity.Probes must not be copied beside the host." />
-  </Target>
+  <Target Name="StageParityPayload" AfterTargets="Build" DependsOnTargets="StageParityFixtures;StageFixtureBinPayload" />
 
-  <Target
-    Name="StageParityFixtures"
-    AfterTargets="Build"
-    DependsOnTargets="ResolveParityProbeAssembly">
+  <Target Name="StageParityFixtures">
     <PropertyGroup>
-      <_FixtureBin>$(TargetDir)fixture/app/bin</_FixtureBin>
-      <_ErrorFixtureBin>$(TargetDir)fixture/app-errors/bin</_ErrorFixtureBin>
       <_FixtureTemp>$(TargetDir)fixture/temp</_FixtureTemp>
     </PropertyGroup>
+    <ItemGroup>
+      <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.Parity.Contracts.dll;$(TargetDir)Rehost.WebForms.Parity.Runner.dll" />
+      <FixtureBinDir Include="$(TargetDir)fixture/app/bin;$(TargetDir)fixture/app-errors/bin" />
+    </ItemGroup>
 
     <Copy SourceFiles="$(MSBuildThisFileDirectory)fixture/web.config" DestinationFiles="$(TargetDir)fixture/app/web.config" SkipUnchangedFiles="true" />
     <Copy SourceFiles="$(MSBuildThisFileDirectory)fixture/errors.web.config" DestinationFiles="$(TargetDir)fixture/app-errors/web.config" SkipUnchangedFiles="true" />
@@ -51,7 +52,7 @@
       DestinationFiles="$(TargetDir)oracle/sessions.json"
       SkipUnchangedFiles="true" />
 
-    <MakeDir Directories="$(_FixtureBin);$(_ErrorFixtureBin);$(_FixtureTemp)" />
+    <MakeDir Directories="$(_FixtureTemp)" />
     <XmlPoke
       XmlInputPath="$(TargetDir)fixture/app/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
@@ -66,17 +67,5 @@
       XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
       Query="/configuration/system.web/compilation/@tempDirectory"
       Value="" />
-
-    <ItemGroup>
-      <_ParityFixturePayload Include="$(TargetDir)Rehost.WebForms.Parity.Contracts.dll;$(TargetDir)Rehost.WebForms.Parity.Runner.dll;$(_ProbeAssembly)" />
-      <!-- Anything else in a warm fixture bin is a leftover (renamed assembly, removed
-           dependency) and would keep resolving; deleting the leftovers replaces the old
-           wipe-and-recopy while keeping the copies incremental. -->
-      <_StaleFixtureBinFile Include="$(_FixtureBin)/**;$(_ErrorFixtureBin)/**" Exclude="@(_ParityFixturePayload->'$(_FixtureBin)/%(Filename)%(Extension)');@(_ParityFixturePayload->'$(_ErrorFixtureBin)/%(Filename)%(Extension)')" />
-    </ItemGroup>
-    <Delete Files="@(_StaleFixtureBinFile)" />
-
-    <Copy SourceFiles="@(_ParityFixturePayload)" DestinationFolder="$(_FixtureBin)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_ParityFixturePayload)" DestinationFolder="$(_ErrorFixtureBin)" SkipUnchangedFiles="true" />
   </Target>
 </Project>

@@ -12,16 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
-    <ProjectReference
-      Include="../Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all" />
     <ProjectReference Include="../../../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
   </ItemGroup>
-
 
   <Import Project="../../StageParityFixtures.targets" />
   <Import Project="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />

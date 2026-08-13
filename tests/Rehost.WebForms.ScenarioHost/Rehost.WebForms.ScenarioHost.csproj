@@ -30,58 +30,68 @@
       PrivateAssets="all" />
   </ItemGroup>
 
-  <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageScenarioFixtures;StageFriendlyUrlsAssembly;StageScenarioProbes" />
+  <ItemGroup>
+    <_FixtureFile Include="fixtures/**" />
+    <FixturePayloadProject
+      Include="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
+      MustNotLeakBesideHost="true" />
+  </ItemGroup>
 
-  <Target Name="StageScenarioFixtures">
-    <ItemGroup>
-      <_FixtureFile Include="fixtures/**" />
-    </ItemGroup>
+  <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageScenarioFixtures;PruneStaleScenarioFixtures;StageFixtureBinPayload" />
 
+  <Target
+    Name="StageScenarioFixtures"
+    Inputs="@(_FixtureFile)"
+    Outputs="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)')">
     <Copy
       SourceFiles="@(_FixtureFile)"
       DestinationFiles="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)')"
       SkipUnchangedFiles="true" />
   </Target>
 
-  <Target Name="StageFriendlyUrlsAssembly" DependsOnTargets="StageScenarioFixtures">
+  <!-- Without pruning, a fixture or page deleted from source keeps serving from the
+       staged copy until a clean build. Directories are compared by bare name; separator
+       differences cannot misclassify them. -->
+  <Target Name="PruneStaleScenarioFixtures" DependsOnTargets="StageScenarioFixtures">
+    <ItemGroup>
+      <_FixtureSourceDir Include="$([System.IO.Directory]::GetDirectories('$(MSBuildProjectDirectory)/fixtures'))" />
+      <_StagedFixtureDir
+        Include="$([System.IO.Directory]::GetDirectories('$(TargetDir)fixtures'))"
+        Condition="Exists('$(TargetDir)fixtures')" />
+      <_StaleFixtureDirName
+        Include="@(_StagedFixtureDir->'%(Filename)')"
+        Exclude="@(_FixtureSourceDir->'%(Filename)')" />
+      <_StaleFixtureFile
+        Include="$(TargetDir)fixtures/**"
+        Exclude="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)');$(TargetDir)fixtures/*/bin/**" />
+    </ItemGroup>
+
+    <Delete Files="@(_StaleFixtureFile)" />
+    <RemoveDir Directories="@(_StaleFixtureDirName->'$(TargetDir)fixtures/%(Identity)')" />
+  </Target>
+
+  <Target Name="StageScenarioFixtureBins" BeforeTargets="StageFixtureBinPayload" DependsOnTargets="PruneStaleScenarioFixtures">
     <MSBuild
       Projects="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
       Targets="GetTargetPath">
       <Output TaskParameter="TargetOutputs" PropertyName="_FriendlyUrlsAssembly" />
     </MSBuild>
-    <Copy
-      SourceFiles="$(_FriendlyUrlsAssembly)"
-      DestinationFolder="$(TargetDir)fixtures/friendlyurls/bin"
-      SkipUnchangedFiles="true" />
-  </Target>
-
-  <Target Name="StageScenarioProbes" DependsOnTargets="StageScenarioFixtures">
-    <MSBuild
-      Projects="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
-      Targets="GetTargetPath">
-      <Output TaskParameter="TargetOutputs" PropertyName="_ProbeAssembly" />
-    </MSBuild>
-
     <Error
-      Condition="!Exists('$(_ProbeAssembly)')"
-      Text="Probe build output missing: $(_ProbeAssembly)" />
-    <Error
-      Condition="Exists('$(TargetDir)Rehost.WebForms.ScenarioProbes.dll')"
-      Text="Rehost.WebForms.ScenarioProbes must not be copied beside the host." />
+      Condition="!Exists('$(_FriendlyUrlsAssembly)')"
+      Text="FriendlyUrls build output missing: $(_FriendlyUrlsAssembly)" />
 
     <ItemGroup>
-      <_FixtureDirectory
-        Include="$([System.IO.Directory]::GetDirectories('$(TargetDir)fixtures'))"
-        Condition="Exists('$(TargetDir)fixtures')" />
+      <!-- The probe assembly leans on the shared journal, so its dependency ships too. -->
+      <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.Parity.Contracts.dll" />
+      <!-- Not Update: inside a target, Update applies metadata to every item. -->
+      <FixtureBinDir
+        Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')"
+        Exclude="$(TargetDir)fixtures/friendlyurls/bin" />
+      <FixtureBinDir Include="$(TargetDir)fixtures/friendlyurls/bin" ExtraPayload="$(_FriendlyUrlsAssembly)" />
     </ItemGroup>
-
-    <!-- The probe assembly now leans on the shared journal, so its dependency ships too. -->
-    <Copy
-      SourceFiles="$(_ProbeAssembly);$([System.IO.Path]::GetDirectoryName('$(_ProbeAssembly)'))/Rehost.WebForms.Parity.Contracts.dll"
-      DestinationFolder="%(_FixtureDirectory.Identity)/bin"
-      SkipUnchangedFiles="true" />
   </Target>
 
+  <Import Project="../FixtureStaging.targets" />
   <Import Project="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
   <Import Project="$(RehostRepoRoot)eng/RoslynReadyToRun.targets" />
 </Project>

@@ -9,13 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
-    <ProjectReference
-      Include="../Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
   </ItemGroup>

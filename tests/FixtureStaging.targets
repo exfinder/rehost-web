@@ -1,0 +1,45 @@
+<Project>
+  <!--
+    Shared fixture-bin staging. Consumers declare, from a target so $(TargetDir) is set:
+      FixturePayloadProject  built into every bin; MustNotLeakBesideHost guards against
+                             the assembly resolving beside the host instead of the bin
+      FixtureBinPayload      already-built files for every bin
+      FixtureBinDir          the bin directories; ExtraPayload names per-bin additions
+    Anything else in a warm bin is a leftover that would keep resolving; leftovers are
+    deleted so the copies stay incremental without wipe-and-recopy.
+  -->
+
+  <Target Name="ResolveFixtureBinPayload">
+    <MSBuild Projects="@(FixturePayloadProject)" Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" ItemName="FixtureBinPayload" />
+    </MSBuild>
+
+    <Error
+      Condition="!Exists('%(FixtureBinPayload.Identity)')"
+      Text="Fixture payload build output missing: %(FixtureBinPayload.Identity)" />
+    <Error
+      Condition="'%(FixturePayloadProject.MustNotLeakBesideHost)' == 'true' And Exists('$(TargetDir)%(FixturePayloadProject.Filename).dll')"
+      Text="%(FixturePayloadProject.Filename) must not be copied beside the host." />
+  </Target>
+
+  <Target
+    Name="StageFixtureBinPayload"
+    DependsOnTargets="ResolveFixtureBinPayload"
+    Outputs="%(FixtureBinDir.Identity)">
+    <PropertyGroup>
+      <_FixtureBin>%(FixtureBinDir.Identity)</_FixtureBin>
+    </PropertyGroup>
+    <ItemGroup>
+      <_BinPayload Remove="@(_BinPayload)" />
+      <_BinPayload Include="@(FixtureBinPayload);%(FixtureBinDir.ExtraPayload)" />
+      <_StaleFixtureBinFile Remove="@(_StaleFixtureBinFile)" />
+      <_StaleFixtureBinFile
+        Include="$(_FixtureBin)/**"
+        Exclude="@(_BinPayload->'$(_FixtureBin)/%(Filename)%(Extension)')" />
+    </ItemGroup>
+
+    <Delete Files="@(_StaleFixtureBinFile)" />
+    <MakeDir Directories="$(_FixtureBin)" />
+    <Copy SourceFiles="@(_BinPayload)" DestinationFolder="$(_FixtureBin)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
