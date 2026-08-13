@@ -20,8 +20,7 @@ internal sealed class ScenarioGate : IDisposable
 
     internal static ScenarioGate Take()
     {
-        var name = @"Local
-ehost-scenario-" + Guid.NewGuid().ToString("n");
+        var name = @"Local\rehost-scenario-" + Guid.NewGuid().ToString("n");
         var mutex = new Mutex(false, name);
         mutex.WaitOne();
 
