@@ -10,8 +10,8 @@ Milestone 1 owns these outcomes:
 
 - WAP sidecar build, publish payload, designer-file policy, and package-only
   consumption: [Web Site vs WAP](follow-ups/web-site-vs-wap-project-models.md).
-- Default document and remaining IIS request-path behavior:
-  [IIS-role audit](follow-ups/iis-role-behaviors.md) and
+- ~~Default document~~ (done: ledger P67) and remaining IIS request-path
+  behavior: [IIS-role audit](follow-ups/iis-role-behaviors.md) and
   [IIS configuration layers](follow-ups/iis-integration-plan.md).
 - Friendly URL behavior and escaping:
   [route URL escaping](follow-ups/route-url-escaping.md).

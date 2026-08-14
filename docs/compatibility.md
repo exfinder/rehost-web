@@ -105,7 +105,8 @@ Evidence: `IisServerConfigurationTests`, `WebServerAmendmentsOverKestrelTests`,
 | App-root `system.webServer/staticContent` | Supported | `add`/`remove`/`clear`, MIME types, duplicate validation, and inherited baseline |
 | App-root `requestFiltering/hiddenSegments` | Supported | Case-insensitive add/remove/clear; request refusal currently has an app-shaped response rather than IIS substatus 404.8 |
 | Per-folder `system.webServer` | Unassessed | IIS honors it; this port currently merges application root only |
-| Default documents, request-filtering limits, custom headers, `httpErrors` | Unassessed | Planned IIS-configuration tenants; Milestone 1 reaches default documents first |
+| App-root `system.webServer/defaultDocument` | Supported | Directory requests rewrite to the first existing candidate in list order (app observes the list's casing), 301 slash redirect, 403-class refusal; broken/disabled sections fail only directory requests (readings D1–D15); error bodies app-shaped pending `httpErrors` |
+| Request-filtering limits, custom headers, `httpErrors` | Unassessed | Planned IIS-configuration tenants |
 | `system.webServer/handlers` and `/modules` | Unassessed | Integrated registrations are not translated |
 | Framework root `httpModules` defaults | Partial | `UrlAuthorization` and `UrlRoutingModule-4.0` are registered in Framework order; the remaining baseline modules await reached behavior and classification |
 | Framework root handler fallbacks | Partial | Forbidden-source extensions return managed 403 and unsupported verbs return 405; omitted assembly-owned handlers fall through rather than producing an actionable unsupported diagnostic |

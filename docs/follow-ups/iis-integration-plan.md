@@ -107,7 +107,7 @@ that mechanism.
 | `staticContent` | honored — first tenant (gate + content types, replacing the P58 compiled table; app `mimeMap`/`remove`/`clear`) |
 | `security/requestFiltering/hiddenSegments` | honored — migrate P59's compiled list |
 | `httpProtocol/customHeaders` | honored — slice decision below |
-| `defaultDocument` | decided — readings D1–D13 and decisions 6–11 below; Layer-2 directory-request seam consuming a Layer-0 tenant |
+| `defaultDocument` | honored — ledger P67; Layer-2 directory-request seam consuming the Layer-0 tenant (readings D1–D15, decisions 6–11 below) |
 | `security/requestFiltering` limits | staged — three-way reconciliation with `maxRequestLength` and Kestrel |
 | `httpErrors` | staged — governs Layer-1 error shaping; readings first |
 | `handlers`, `modules` | staged, own story — integrated mode ignored `system.web/httpHandlers` entirely, a genuine resolution fork from the port today; bridging design needs readings and its own plan |
@@ -218,7 +218,10 @@ candidate probe; only the dir-exists check precedes the section.
    redirect with D5's shape (absolute `Location`, query preserved).
 7. **Placement**: Layer-2 seam **after routing** — fires only for unrouted
    directory-mapped requests; the rewritten path then flows through normal
-   handler mapping, authorization, and P57 case folding. Matches measured
+   handler mapping and P57 case folding. (Authorization runs before routing
+   in the classic pipeline, so it evaluates the directory URL — matching the
+   integrated-mode notification order, where auth precedes
+   `MapRequestHandler`.) Matches measured
    ordering (routing at `PostResolveRequestCache`, default-doc work at
    `MapRequestHandler`/`ExecuteRequestHandler`); a route claiming `/` keeps
    winning, so Friendly URLs is unaffected.
@@ -237,7 +240,8 @@ candidate probe; only the dir-exists check precedes the section.
     them; keeping them preserves oracle-diffability.
 11. **Error shape**: measured statuses now (301/403/404/500-class); bodies
     stay app-shaped per the P59 precedent. IIS-shaped bodies and subcodes
-    remain the `httpErrors` story's decision.
+    remain the `httpErrors` story's decision — including the stub HTML body
+    IIS attaches to the courtesy 301, which the port's redirect omits.
 
 ## Relationship to existing work
 
