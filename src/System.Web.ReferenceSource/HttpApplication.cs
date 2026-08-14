@@ -3819,6 +3819,11 @@ namespace System.Web {
                 app.CreateEventExecutionSteps(HttpApplication.EventPostAuthorizeRequest, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventResolveRequestCache, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPostResolveRequestCache, steps);
+#if !NETFRAMEWORK
+                // IIS's DefaultDocumentModule ran here — after routing, before handler
+                // mapping — and this host replaces IIS (ledger P67).
+                steps.Add(new DirectoryRequestExecutionStep(app));
+#endif
                 steps.Add(new MapHandlerExecutionStep(app));     // map handler
                 app.CreateEventExecutionSteps(HttpApplication.EventPostMapRequestHandler, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventAcquireRequestState, steps);

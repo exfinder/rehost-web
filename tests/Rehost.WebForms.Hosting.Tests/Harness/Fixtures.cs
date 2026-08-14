@@ -15,4 +15,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture WebServer = new("webserver");
     internal static readonly ScenarioFixture AsyncApp = new("asyncapp");
     internal static readonly ScenarioFixture FriendlyUrls = new("friendlyurls");
+    internal static readonly ScenarioFixture DefDocBroken = new("defdoc-broken");
 }
