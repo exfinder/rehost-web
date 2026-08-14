@@ -6,10 +6,12 @@ using System.Web.Util;
 
 namespace System.Web;
 
-// IIS's DefaultDocumentModule decided directory requests after routing and before handler
-// mapping, and this host replaces IIS (ledger P67, readings D1-D13): rewrite to the first
-// existing candidate, redirect a slash-less directory URL, refuse when no candidate exists.
-// The rewritten path flows on through normal handler mapping.
+// Two IIS modules decided directory requests after routing and before handler mapping, and
+// this host replaces IIS (ledger P67, readings D1-D15): DefaultDocumentModule rewrote to the
+// first existing candidate and redirected slash-less directory URLs; when it declined, the
+// request fell through to DirectoryListingModule, whose browsing-off answer was the 403. The
+// classic engine has no fall-through module, so one step owns both halves. The rewritten
+// path flows on through normal handler mapping.
 internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecutionStep
 {
     private readonly HttpApplication _application;
