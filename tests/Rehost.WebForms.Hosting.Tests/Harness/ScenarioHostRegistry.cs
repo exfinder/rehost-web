@@ -18,7 +18,7 @@ public sealed class ScenarioHostRegistry : IDisposable
         _hosts.GetOrAdd(
             role == null ? fixture.Name : fixture.Name + "#" + role,
             _ => new Lazy<LiveScenario>(
-                () => new LiveScenario(fixture),
+                () => LiveScenario.StartPooled(fixture),
                 LazyThreadSafetyMode.ExecutionAndPublication)).Value;
 
     public void Dispose()

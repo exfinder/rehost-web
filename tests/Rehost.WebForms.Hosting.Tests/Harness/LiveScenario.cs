@@ -6,7 +6,11 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // One passively-serving host process for a fixture; tests act through the client and assert on
 // the response, reaching for the witness only for server-side facts.
-public class LiveScenario : IDisposable
+//
+// Two doors, no third: shared hosts come from ScenarioHostRegistry.GetOrAdd, and a private
+// process exists only through StartIsolated, which demands a structural IsolationReason. The
+// constructor stays private so a same-configuration duplicate host cannot be expressed.
+public sealed class LiveScenario : IDisposable
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
 
@@ -14,7 +18,20 @@ public class LiveScenario : IDisposable
     private readonly ScenarioHostProcess _process;
     private readonly string _tracePath;
 
-    internal LiveScenario(
+    // ScenarioHostRegistry's door only; every other caller goes through StartIsolated.
+    internal static LiveScenario StartPooled(ScenarioFixture fixture) => new(fixture);
+
+    internal static LiveScenario StartIsolated(
+        ScenarioFixture fixture,
+        IsolationReason reason,
+        string? rootPath = null,
+        long? kestrelMaxBody = null)
+    {
+        _ = reason;
+        return new(fixture, rootPath, kestrelMaxBody);
+    }
+
+    private LiveScenario(
         ScenarioFixture fixture,
         string? rootPath = null,
         long? kestrelMaxBody = null)

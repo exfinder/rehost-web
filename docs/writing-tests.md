@@ -23,12 +23,18 @@ Walk down; stop at the first rung that fits.
 2. **Scenario over the shared host** — for claims about a running application
    over Kestrel. Join an existing fixture's shared host (`Fixtures.*` in
    Hosting.Tests); add a probe or page to the fixture and assert by response.
-   A new fixture or a new process needs a structural reason — conflicting
-   configuration, a cold/activation claim, on-disk mutation, process death —
-   recorded in
+   The API enforces this: `ScenarioHostRegistry.GetOrAdd(fixture, role)` is the
+   only door to a shared host, and a private process exists only through
+   `LiveScenario.StartIsolated`, which demands a structural `IsolationReason`
+   at the call site — the constructor is private, so a duplicate host with the
+   same configuration cannot be expressed. Structural reasons are conflicting
+   configuration, a cold/activation claim, on-disk mutation, process death,
+   and a whole-host negative assertion (a claim that the host *never* did
+   something, meaningful only on a pristine process); a new fixture app is
+   additionally recorded in
    [the fixtures README](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md).
    The host is shared for real: classes on the `page` fixture reach one
-   process through `ScenarioHostRegistry`, and `PageHostSharingTests` pins it.
+   process through the registry, and `PageHostSharingTests` pins it.
    Write every scenario to stay correct with other classes' requests
    interleaved on the same host — witness reads filtered by a
    `WitnessToken.For` token, in-application state (page statics, cache

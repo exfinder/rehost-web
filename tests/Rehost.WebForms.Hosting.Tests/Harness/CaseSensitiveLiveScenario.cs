@@ -16,7 +16,10 @@ public sealed class CaseSensitiveLiveScenario : IDisposable
         () =>
         {
             var volume = CaseSensitiveDirectory.Create();
-            return (volume, volume.Path == null ? null : new LiveScenario(Fixtures.Page, volume.Path));
+            return (volume, volume.Path == null
+                ? null
+                : LiveScenario.StartIsolated(
+                    Fixtures.Page, IsolationReason.HostConfiguration, volume.Path));
         },
         LazyThreadSafetyMode.ExecutionAndPublication);
 
