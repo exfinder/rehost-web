@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using System.Web.ModelBinding;
 
 namespace Microsoft.AspNet.FriendlyUrls.ModelBinding;
@@ -9,8 +11,13 @@ public class FriendlyUrlSegmentsValueProvider : SimpleValueProvider
     public FriendlyUrlSegmentsValueProvider(
         ModelBindingExecutionContext modelBindingExecutionContext,
         int index)
-        : base(modelBindingExecutionContext)
+        : base(modelBindingExecutionContext, CultureInfo.InvariantCulture)
     {
+        if (index < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
+
         _index = index;
     }
 
@@ -18,8 +25,8 @@ public class FriendlyUrlSegmentsValueProvider : SimpleValueProvider
     {
         var segments = ModelBindingExecutionContext.HttpContext.Request
             .GetFriendlyUrlSegments();
-        return _index >= 0 && _index < segments.Count
-            ? segments[_index]
-            : null;
+        return segments == null || segments.Count <= _index
+            ? null
+            : segments[_index];
     }
 }

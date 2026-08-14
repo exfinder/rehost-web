@@ -46,6 +46,7 @@ public sealed class FriendlyUrlSegmentsValueProviderTests
     private sealed class TestHttpContext : HttpContextBase
     {
         private readonly HttpRequestBase _request;
+        private readonly System.Collections.Hashtable _items = [];
 
         internal TestHttpContext(RouteData routeData)
         {
@@ -53,6 +54,8 @@ public sealed class FriendlyUrlSegmentsValueProviderTests
         }
 
         public override HttpRequestBase Request => _request;
+
+        public override System.Collections.IDictionary Items => _items;
     }
 
     private sealed class TestHttpRequest(RequestContext requestContext) : HttpRequestBase

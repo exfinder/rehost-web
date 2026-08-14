@@ -16,4 +16,15 @@ public sealed class FriendlyUrlSettingsTests
         settings.AutoRedirectMode.ShouldBe(RedirectMode.Off);
         settings.ResolverCachingMode.ShouldBe(ResolverCachingMode.Static);
     }
+
+    [Fact]
+    public void OutOfRangeValuesAreRejected()
+    {
+        var settings = new FriendlyUrlSettings();
+
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => settings.AutoRedirectMode = (RedirectMode)3);
+        Should.Throw<ArgumentOutOfRangeException>(
+            () => settings.ResolverCachingMode = (ResolverCachingMode)(-1));
+    }
 }

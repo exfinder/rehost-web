@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Web;
 
 namespace Microsoft.AspNet.FriendlyUrls.Resolvers;
@@ -7,6 +8,7 @@ namespace Microsoft.AspNet.FriendlyUrls.Resolvers;
 public class FriendlyUrlResolver : IFriendlyUrlResolver
 {
     private readonly string _fileExtension;
+    private readonly IList<string> _fileExtensions;
 
     public FriendlyUrlResolver(string fileExtension)
     {
@@ -23,22 +25,30 @@ public class FriendlyUrlResolver : IFriendlyUrlResolver
         }
 
         _fileExtension = fileExtension;
+        _fileExtensions = new ReadOnlyCollection<string>([_fileExtension]);
     }
 
     public virtual string? ConvertToFriendlyUrl(string? path)
     {
-        if (string.IsNullOrEmpty(path) ||
-            !path.EndsWith(_fileExtension, StringComparison.OrdinalIgnoreCase))
+        if (string.IsNullOrEmpty(path))
         {
             return null;
         }
 
-        return VirtualPathUtility.ToAbsolute(path[..^_fileExtension.Length]);
+        if (string.Equals(
+                VirtualPathUtility.GetExtension(path),
+                _fileExtension,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return path.Remove(path.LastIndexOf(_fileExtension, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return null;
     }
 
     public virtual IList<string> GetExtensions(HttpContextBase? httpContext)
     {
-        return new[] { _fileExtension };
+        return _fileExtensions;
     }
 
     public virtual void PreprocessRequest(

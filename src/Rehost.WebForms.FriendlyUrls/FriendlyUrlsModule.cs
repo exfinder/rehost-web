@@ -6,8 +6,11 @@ namespace Microsoft.AspNet.FriendlyUrls;
 
 internal sealed class FriendlyUrlsModule : IHttpModule
 {
+    internal static readonly object RouteDataItemsKey = new();
+
     public void Init(HttpApplication context)
     {
+        ArgumentNullException.ThrowIfNull(context);
         context.PostMapRequestHandler += OnPostMapRequestHandler;
     }
 
@@ -19,47 +22,48 @@ internal sealed class FriendlyUrlsModule : IHttpModule
     {
         var application = (HttpApplication)sender!;
         var context = application.Context;
-        if (RouteTable.Routes["AspNet.FriendlyUrls"] is not FriendlyUrlRoute route ||
-            route.Settings.AutoRedirectMode == RedirectMode.Off ||
-            WasUrlRewritten(context.Request))
+        if (RouteTable.Routes["AspNet.FriendlyUrls"] is not FriendlyUrlRoute route)
         {
             return;
         }
 
-        var requestPath = context.Request.AppRelativeCurrentExecutionFilePath;
-        if (string.IsNullOrEmpty(requestPath))
+        var request = context.Request;
+        var currentExecutionFilePath = request.CurrentExecutionFilePath;
+        if (string.IsNullOrEmpty(VirtualPathUtility.GetExtension(currentExecutionFilePath)))
         {
             return;
         }
 
-        var friendlyUrl = route.ConvertToFriendlyUrl(requestPath);
-        if (friendlyUrl == null)
+        var friendlyUrl = route.ResolveUrl(currentExecutionFilePath);
+        if (string.Equals(friendlyUrl, currentExecutionFilePath, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        var queryStart = context.Request.RawUrl.IndexOf('?', StringComparison.Ordinal);
-        if (queryStart >= 0)
-        {
-            friendlyUrl += context.Request.RawUrl[queryStart..];
-        }
+        var target = friendlyUrl + request.PathInfo + request.Url.Query;
 
-        if (route.Settings.AutoRedirectMode == RedirectMode.Permanent)
+        // The execution path carries an extension the client never typed exactly when
+        // something rewrote the URL (IIS default document, URL rewriting): serve the
+        // rewritten request through the friendly route instead of redirecting, so the
+        // client-visible URL survives and the page still sees friendly route data.
+        if (request.RawUrl.Contains(currentExecutionFilePath, StringComparison.OrdinalIgnoreCase))
         {
-            context.Response.RedirectPermanent(friendlyUrl, false);
+            if (route.Settings.AutoRedirectMode == RedirectMode.Temporary)
+            {
+                context.Response.Redirect(target);
+            }
+            else if (route.Settings.AutoRedirectMode == RedirectMode.Permanent)
+            {
+                context.Response.RedirectPermanent(target);
+            }
         }
         else
         {
-            context.Response.Redirect(friendlyUrl, false);
+            var routeData = route.GetRouteData(
+                new HttpContextWrapper(context),
+                VirtualPathUtility.ToAppRelative(friendlyUrl));
+            context.Items[RouteDataItemsKey] = routeData;
+            context.Handler = routeData!.RouteHandler.GetHttpHandler(request.RequestContext);
         }
-    }
-
-    private static bool WasUrlRewritten(HttpRequest request)
-    {
-        return !string.IsNullOrEmpty(request.ServerVariables["IIS_UrlRewriteModule"]) ||
-            string.Equals(
-                request.ServerVariables["IIS_WasUrlRewritten"],
-                "1",
-                StringComparison.OrdinalIgnoreCase);
     }
 }

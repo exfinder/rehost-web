@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Web;
+using System.Web.Routing;
 
 namespace Microsoft.AspNet.FriendlyUrls;
 
@@ -9,37 +11,49 @@ public static class HttpRequestExtensions
 
     public static IList<string> GetFriendlyUrlSegments(this HttpRequest httpRequest)
     {
-        return GetFriendlyUrlSegments(new HttpRequestWrapper(httpRequest));
+        ArgumentNullException.ThrowIfNull(httpRequest);
+        return new HttpRequestWrapper(httpRequest).GetFriendlyUrlSegments();
     }
 
     public static IList<string> GetFriendlyUrlSegments(this HttpRequestBase httpRequest)
     {
-        return GetDataToken<IList<string>>(httpRequest, "FriendlyUrlSegments") ?? EmptySegments;
+        ArgumentNullException.ThrowIfNull(httpRequest);
+        return httpRequest.GetRouteData().DataTokens["FriendlyUrlSegments"] as IList<string>
+            ?? EmptySegments;
     }
 
-    public static string? GetFriendlyUrlFileExtension(this HttpRequest httpRequest)
+    public static string GetFriendlyUrlFileExtension(this HttpRequest httpRequest)
     {
-        return GetFriendlyUrlFileExtension(new HttpRequestWrapper(httpRequest));
+        ArgumentNullException.ThrowIfNull(httpRequest);
+        return new HttpRequestWrapper(httpRequest).GetFriendlyUrlFileExtension();
     }
 
-    public static string? GetFriendlyUrlFileExtension(this HttpRequestBase httpRequest)
+    public static string GetFriendlyUrlFileExtension(this HttpRequestBase httpRequest)
     {
-        return GetDataToken<string>(httpRequest, "FriendlyUrlFileExtension");
+        ArgumentNullException.ThrowIfNull(httpRequest);
+        return httpRequest.GetRouteData().DataTokens["FriendlyUrlFileExtension"] as string
+            ?? string.Empty;
     }
 
-    public static string? GetFriendlyUrlFileVirtualPath(this HttpRequest httpRequest)
+    public static string GetFriendlyUrlFileVirtualPath(this HttpRequest httpRequest)
     {
-        return GetFriendlyUrlFileVirtualPath(new HttpRequestWrapper(httpRequest));
+        ArgumentNullException.ThrowIfNull(httpRequest);
+        return new HttpRequestWrapper(httpRequest).GetFriendlyUrlFileVirtualPath();
     }
 
-    public static string? GetFriendlyUrlFileVirtualPath(this HttpRequestBase httpRequest)
+    public static string GetFriendlyUrlFileVirtualPath(this HttpRequestBase httpRequest)
     {
-        return GetDataToken<string>(httpRequest, "FriendlyUrlFileVirtualPath");
+        ArgumentNullException.ThrowIfNull(httpRequest);
+        return httpRequest.GetRouteData().DataTokens["FriendlyUrlFileVirtualPath"] as string
+            ?? string.Empty;
     }
 
-    private static T? GetDataToken<T>(HttpRequestBase request, string key)
-        where T : class
+    // A request served through the module's rewritten-URL remap has its friendly route
+    // data stashed in Items rather than in RequestContext.RouteData.
+    internal static RouteData GetRouteData(this HttpRequestBase httpRequest)
     {
-        return request.RequestContext?.RouteData.DataTokens[key] as T;
+        return httpRequest.RequestContext.HttpContext.Items[FriendlyUrlsModule.RouteDataItemsKey]
+            as RouteData
+            ?? httpRequest.RequestContext.RouteData;
     }
 }

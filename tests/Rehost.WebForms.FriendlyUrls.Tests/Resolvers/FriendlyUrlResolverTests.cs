@@ -15,4 +15,13 @@ public sealed class FriendlyUrlResolverTests
             .ShouldBe("/Catalog/Details");
         resolver.ConvertToFriendlyUrl("/Catalog/Details.ashx").ShouldBeNull();
     }
+
+    [Fact]
+    public void ConvertToFriendlyUrlStripsWithoutRebasingThePath()
+    {
+        var resolver = new FriendlyUrlResolver(".aspx");
+
+        resolver.ConvertToFriendlyUrl("/app/sub/Details.aspx")
+            .ShouldBe("/app/sub/Details");
+    }
 }

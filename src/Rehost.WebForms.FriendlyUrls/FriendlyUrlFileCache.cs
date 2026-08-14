@@ -12,6 +12,37 @@ internal sealed class FriendlyUrlFileCache
 {
     private static long _nextId;
 
+    internal static Lazy<FriendlyUrlFileCache?> CreateLazy(ResolverCachingMode mode)
+    {
+        return new Lazy<FriendlyUrlFileCache?>(() =>
+        {
+            var provider = HostingEnvironment.VirtualPathProvider;
+            if (provider == null)
+            {
+                return null;
+            }
+
+            var applicationVirtualPath = HostingEnvironment.ApplicationVirtualPath;
+            if (string.IsNullOrEmpty(applicationVirtualPath))
+            {
+                applicationVirtualPath = "~/";
+            }
+
+            return new FriendlyUrlFileCache(
+                IsDebuggingEnabled() ? ResolverCachingMode.Disabled : mode,
+                provider,
+                applicationVirtualPath,
+                HttpRuntimeCacheStore.Instance);
+        });
+    }
+
+    private static bool IsDebuggingEnabled()
+    {
+        return System.Web.Configuration.WebConfigurationManager
+                .GetWebApplicationSection("system.web/compilation")
+            is System.Web.Configuration.CompilationSection { Debug: true };
+    }
+
     private readonly ResolverCachingMode _mode;
     private readonly VirtualPathProvider _provider;
     private readonly IFriendlyUrlCacheStore _cache;

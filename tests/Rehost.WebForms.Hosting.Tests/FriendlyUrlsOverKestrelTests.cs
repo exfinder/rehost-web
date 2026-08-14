@@ -11,6 +11,15 @@ public sealed class FriendlyUrlsOverKestrelTests(FriendlyUrlsLiveScenario scenar
         "AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1";
 
     [Fact]
+    public async Task RootServesTheDefaultDocumentThroughTheFriendlyRoute()
+    {
+        var response = await scenario.Client.GetAsync("/");
+
+        response.StatusCode.ShouldBe(200, response.Text);
+        response.Text.ShouldBe("~/default.aspx|/|/default.aspx");
+    }
+
+    [Fact]
     public async Task ExtensionlessUrlExecutesPageWithRemainingSegments()
     {
         var response = await scenario.Client.GetAsync("/About/one/two");
@@ -88,7 +97,7 @@ public sealed class FriendlyUrlsOverKestrelTests(FriendlyUrlsLiveScenario scenar
         switched.Headers["Location"].ShouldBe("/Variant");
         switched.SetCookies.ShouldHaveSingleItem();
         switched.SetCookies[0].ShouldStartWith(
-            "AspNet.FriendlyUrls.IsMobile=True; path=/");
+            "FriendlyUrlsViewSwitcher=Mobile; path=/");
 
         var cookie = switched.SetCookies[0].Split(';')[0];
         var response = await scenario.Client.GetWithCookiesAsync("/Variant", cookie);

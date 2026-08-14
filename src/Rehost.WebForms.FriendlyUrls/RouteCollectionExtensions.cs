@@ -8,14 +8,18 @@ public static class RouteCollectionExtensions
 {
     public static void EnableFriendlyUrls(this RouteCollection routes)
     {
-        EnableFriendlyUrls(routes, new FriendlyUrlSettings());
+        EnableFriendlyUrls(routes, new WebFormsFriendlyUrlResolver());
     }
 
     public static void EnableFriendlyUrls(
         this RouteCollection routes,
         FriendlyUrlSettings settings)
     {
-        EnableFriendlyUrls(routes, settings, CreateDefaultResolvers());
+        ArgumentNullException.ThrowIfNull(settings);
+        EnableFriendlyUrls(
+            routes,
+            settings,
+            new WebFormsFriendlyUrlResolver(settings.ResolverCachingMode));
     }
 
     public static void EnableFriendlyUrls(
@@ -33,21 +37,19 @@ public static class RouteCollectionExtensions
         ArgumentNullException.ThrowIfNull(routes);
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(resolvers);
+        if (resolvers.Length == 0)
+        {
+            throw new ArgumentException(
+                "The enumerable argument must contain at least one item.",
+                nameof(resolvers));
+        }
 
-        var switchRoute = new Route(
-            settings.SwitchViewUrl,
-            new RouteValueDictionary { ["view"] = "Desktop" },
-            new SwitchViewRouteHandler());
-
-        routes.Add(settings.SwitchViewRouteName, switchRoute);
+        routes.Add(
+            settings.SwitchViewRouteName,
+            new FriendlyUrlsViewSwitcherRoute(
+                settings.SwitchViewUrl,
+                new RouteValueDictionary { ["view"] = "Desktop" },
+                new SwitchViewRouteHandler()));
         routes.Add("AspNet.FriendlyUrls", new FriendlyUrlRoute(settings, resolvers));
-    }
-
-    private static IFriendlyUrlResolver[] CreateDefaultResolvers()
-    {
-        return [
-            new WebFormsFriendlyUrlResolver(),
-            new GenericHandlerFriendlyUrlResolver()
-        ];
     }
 }
