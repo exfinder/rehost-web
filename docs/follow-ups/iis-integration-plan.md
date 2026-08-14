@@ -30,6 +30,8 @@ actually coming:
 - `<httpProtocol><customHeaders>` — response headers IIS applied to every
   response, static and dynamic.
 - `<defaultDocument>` — ordered candidate list with app-level additions.
+  Production configs rely on the prepend semantics (reading D8): a single
+  added login page owns the root URL over the inherited list.
 - `<httpErrors>` — error-shape control (`errorMode`, `existingResponse`);
   IIS's refusals were IIS-shaped, not `customErrors`-shaped, and this
   section governed them.
@@ -125,9 +127,9 @@ not a rebuilt integrated pipeline (decision 0).
 | `security/requestFiltering/hiddenSegments` | honored — migrate P59's compiled list |
 | `httpProtocol/customHeaders` | honored — slice decision below |
 | `defaultDocument` | honored — ledger P67; Layer-2 directory-request seam consuming the Layer-0 tenant (readings D1–D15, decisions 6–11 below) |
-| `security/requestFiltering` limits | staged — three-way reconciliation with `maxRequestLength` and Kestrel |
-| `httpErrors` | staged — governs Layer-1 error shaping; readings first |
-| `handlers`, `modules` | staged, own story — integrated mode ignored `system.web/httpHandlers` entirely, a genuine resolution fork from the port today; bridging design needs readings and its own plan |
+| `security/requestFiltering` limits | staged — three-way reconciliation with `maxRequestLength` and Kestrel. Production configs deliberately pair `maxAllowedContentLength` with an aligned `maxRequestLength`; the reconciliation must treat the pair as one intent, not refuse twice with two shapes |
+| `httpErrors` | staged — governs Layer-1 error shaping; readings first. The observed production stance is `errorMode="Custom" existingResponse="PassThrough"` — IIS steps aside — which the port's app-shaped responses already satisfy; pin that mode first |
+| `handlers`, `modules` | staged, own story — integrated mode ignored `system.web/httpHandlers` entirely, a genuine resolution fork from the port today; bridging design needs readings and its own plan. Production configs dual-register the same handler in classic `httpHandlers` and integrated `handlers`, so the classic engine honors the twin today; `modules` entries have no classic twin, making module bridging the urgent half (async session swap, third-party auth modules) |
 | `validation`, `asp` | tolerated no-ops, recorded |
 | everything else | ignored silently, Framework-style |
 

@@ -88,7 +88,10 @@ Milestone 1 owns these outcomes:
   [shipped modules](follow-ups/shipped-http-modules.md).
 - Replace catch-all/ignored behavior for omitted handlers and build providers
   with explicit diagnostics where the current request or compilation path hides
-  an unsupported feature.
+  an unsupported feature. Concrete case from production candidates: ReportViewer
+  registers an `.rdlc` build provider and an `.axd` handler backed by a
+  closed-source GDI+-bound assembly with no recompile path — that must surface
+  as a named unsupported boundary, not a silent compilation or handler failure.
 - Exercise `StaticFileHandler` `If-Range` behavior before widening the static
   file claim.
 
@@ -104,6 +107,15 @@ Milestone 1 owns these outcomes:
   behavior: [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
 - Define worker identity and impersonation policy; explicitly refuse
   `<identity impersonate="true">` until a portable identity seam exists.
+  Observed in production candidates as likely-vestigial config beside
+  `authentication mode="None"`, so the refusal diagnostic should name the
+  setting and the removal fix.
+- Decide port-or-substitute for `System.IdentityModel.Services` (WIF session
+  and federation): Framework-only, never carried to modern .NET, yet
+  production candidates register `SessionAuthenticationModule` and
+  `MachineKeySessionSecurityTokenHandler`, and third-party SAML modules
+  depend on it transitively; any answer drags `machineKey` crypto
+  compatibility with it.
 - Define Windows-authentication and native health-provider boundaries.
 - Extend mixed Framework/port view-state evidence beyond the one captured root
   page only if a real multi-node consumer needs it.
