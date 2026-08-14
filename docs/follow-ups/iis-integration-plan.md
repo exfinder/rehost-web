@@ -100,6 +100,23 @@ pipeline or produce app-shaped responses?* → Layer 2. *Is it data an
 existing System.Web mechanism already consumes?* → Layer 0 accessor feeding
 that mechanism.
 
+## IIS module map
+
+Navigation aid, not a runtime registry: each restored IIS-owned behavior sits
+at a bespoke, readings-pinned position rather than behind a shared module
+abstraction — the port's execution machinery is the classic managed engine,
+not a rebuilt integrated pipeline (decision 0).
+
+| IIS module | Behavior | Where it lives in the port |
+| --- | --- | --- |
+| `StaticFileModule` (native) | static transmit, content-type gate, revalidation 304s | P54/P58 inside the imported `StaticFileHandler`; types from the Layer-0 `staticContent` tenant (P60) |
+| `RequestFilteringModule` (native), hidden segments | `404.8`-class refusal of hidden paths | P59 `ValidatePathExecutionStep` hook — before any pipeline event fires; Layer-0 `hiddenSegments` tenant |
+| `DefaultDocumentModule` (native) | directory rewrite, courtesy 301, `403.14`-class refusal | P67 `DirectoryRequestExecutionStep` in `BuildSteps` after `PostResolveRequestCache`; Layer-0 `defaultDocument` tenant (readings D1–D15) |
+| `DirectoryListingModule` (native) | directory listings; the 403.14 refusal shape when browsing is off | refusal folded into P67; listing itself is out of contract |
+| `UrlRoutingModule` (managed, even on IIS) | route resolution | imported managed module, registration restored in the root configuration |
+| `RequestFilteringModule` limits, `ProtocolSupportModule`/`customHeaders`, `httpErrors` shaping | pre-pipeline refusals and response-side shaping | staged — planned Layer-1 host middleware, per the tenant ledger |
+| `ManagedEngine` (handler/module bridging) | integrated-mode `<handlers>`/`<modules>` registration | staged, own story |
+
 ## Tenant ledger (initial)
 
 | Section | Classification |
