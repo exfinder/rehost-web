@@ -19,6 +19,15 @@ public sealed class DefaultDocumentFailureOverKestrelTests(DefDocBrokenLiveScena
     }
 
     [Fact]
+    public async Task A_Slashless_Directory_Url_Fails_Without_Redirecting()
+    {
+        var response = await scenario.Client.GetAsync("/sub");
+
+        response.StatusCode.ShouldBe(500);
+        response.Header("Location").ShouldBeNull();
+    }
+
+    [Fact]
     public async Task Direct_Requests_Keep_Serving_Beside_The_Broken_Section()
     {
         var file = await scenario.Client.GetAsync("/note.txt");

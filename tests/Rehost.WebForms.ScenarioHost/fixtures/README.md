@@ -21,6 +21,7 @@ meet the same bar.
 | `asyncapp` | An async `AddOnBeginRequestAsync` module event is app-global — every request through the host awaits it — which would perturb every other fixture's scenarios; hosts the truly-pending `IHttpAsyncHandler` beside it. |
 | `friendlyurls` | Route-table registration is app-global, and later cache-mode scenarios mutate its file inventory. |
 | `defdoc-broken` | A deliberately broken `<defaultDocument>` section: every directory request app-wide must 500 while direct requests serve (readings D11/D13), which no serving fixture could tolerate. |
+| `defdoc-disabled` | `<defaultDocument enabled="false" />` app-wide: directory requests must 403 with the courtesy redirect suppressed (readings D12/D14), so no directory URL in it can ever serve. |
 
 ## Host tenancy
 

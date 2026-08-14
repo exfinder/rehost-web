@@ -35,16 +35,18 @@ internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecution
             return;
         }
 
-        var path = request.Path;
-        if (!path.EndsWith('/'))
-        {
-            RedirectAppendingSlash(context);
-            return;
-        }
-
+        // Section first: a broken section refuses both slash forms without redirecting, and
+        // a disabled section suppresses the courtesy redirect too (readings D14/D15).
         var documents = IisServerConfiguration.Current.DefaultDocuments;
+        var path = request.Path;
         if (documents.Enabled)
         {
+            if (!path.EndsWith('/'))
+            {
+                RedirectAppendingSlash(context);
+                return;
+            }
+
             foreach (var file in documents.Files)
             {
                 var candidate = CanonicalCasePath.Resolve(

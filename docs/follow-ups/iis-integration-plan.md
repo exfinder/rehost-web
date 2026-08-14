@@ -201,12 +201,14 @@ facts from the golden cache: `files` collection is `add`/`clear`/`remove`,
 | D12 | folder `<defaultDocument enabled="false" />` | 403.14; direct file requests unaffected |
 | D13 | duplicate `<add>` at the **app root** | all directory requests fail 500-class app-wide — including folders whose own `<clear/>` would discard the duplicate — while direct static and `.aspx` requests keep serving |
 
+| D14 | slash-less URLs: nonexistent dir / existing empty dir / `enabled="false"` dir | `/nope` → **404, no redirect**; `/sub-empty` → **301** (redirect precedes candidate probing); `/sub-off` → **403, no redirect** — a disabled section suppresses the courtesy redirect too |
+| D15 | duplicate `<add>` at app root, slash-less existing dir | **500, no redirect** — the broken section refuses before the redirect; direct file requests still 200 |
+
 D11 + D13 with P60's C1 reconcile under one IIS model: a broken section fails
 exactly the requests that consume it (`staticContent` is consumed by every
-request, `defaultDocument` only by directory requests).
-
-Leftover micro-reading for the implementation round: `/nope` without trailing
-slash — confirm the 301 fires only for directories that exist.
+request, `defaultDocument` only by directory requests). D14/D15 pin the
+module's internal order: read section → enabled gate → courtesy redirect →
+candidate probe; only the dir-exists check precedes the section.
 
 ## Decisions — default documents (ratified 2026-08-14)
 
