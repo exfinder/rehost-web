@@ -27,15 +27,17 @@ public sealed class DefaultDocumentFailureOverKestrelTests(DefDocBrokenLiveScena
         response.Header("Location").ShouldBeNull();
     }
 
+    // The dynamic probe walks the full pipeline — through the directory-request step — so it
+    // fails if the step consults the broken section for non-directory paths (reading D13).
     [Fact]
     public async Task Direct_Requests_Keep_Serving_Beside_The_Broken_Section()
     {
         var file = await scenario.Client.GetAsync("/note.txt");
-        var page = await scenario.Client.GetAsync("/Probe.aspx");
+        var handler = await scenario.Client.GetAsync("/probe");
 
         file.StatusCode.ShouldBe(200);
         file.Text.ShouldBe("note-content\n");
-        page.StatusCode.ShouldBe(200);
-        page.Text.ShouldContain("probe-page");
+        handler.StatusCode.ShouldBe(200);
+        handler.Text.ShouldBe("scenario");
     }
 }

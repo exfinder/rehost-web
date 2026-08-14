@@ -35,6 +35,10 @@ Walk down; stop at the first rung that fits.
    [the fixtures README](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md).
    The host is shared for real: classes on the `page` fixture reach one
    process through the registry, and `PageHostSharingTests` pins it.
+   Probes default to precompiled `ScenarioProbes` handlers registered by
+   assembly-qualified type; a fixture `.aspx` exists only when the claim
+   exercises page machinery, since every page costs the host a compilation
+   episode at startup.
    Write every scenario to stay correct with other classes' requests
    interleaved on the same host — witness reads filtered by a
    `WitnessToken.For` token, in-application state (page statics, cache
