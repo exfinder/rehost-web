@@ -8,7 +8,6 @@ namespace Rehost.WebForms.Hosting.Tests;
 // where those are different names. Without the P57 fold every candidate misses and the
 // directory request answers 403 instead.
 public sealed class DefaultDocumentCaseOverKestrelTests(CaseSensitiveLiveScenario scenario)
-    : IClassFixture<CaseSensitiveLiveScenario>
 {
     private LiveScenario RequireLive()
     {

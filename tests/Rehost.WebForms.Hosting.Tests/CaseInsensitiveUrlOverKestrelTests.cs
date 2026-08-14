@@ -9,7 +9,6 @@ namespace Rehost.WebForms.Hosting.Tests;
 // volume; where the platform cannot provide one the tests skip — Windows already proves the
 // insensitive behavior natively.
 public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario scenario)
-    : IClassFixture<CaseSensitiveLiveScenario>
 {
     private LiveScenario RequireLive()
     {

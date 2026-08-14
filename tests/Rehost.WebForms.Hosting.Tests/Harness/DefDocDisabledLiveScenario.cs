@@ -1,9 +1,8 @@
 namespace Rehost.WebForms.Hosting.Tests;
 
-public sealed class DefDocDisabledLiveScenario : LiveScenario
+public sealed class DefDocDisabledLiveScenario(ScenarioHostRegistry registry)
 {
-    public DefDocDisabledLiveScenario()
-        : base(Fixtures.DefDocDisabled)
-    {
-    }
+    private readonly LiveScenario _host = registry.GetOrAdd(Fixtures.DefDocDisabled);
+
+    internal ScenarioClient Client => _host.Client;
 }
