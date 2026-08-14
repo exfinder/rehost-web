@@ -95,7 +95,7 @@ response.Text.ShouldContain("...");
   literal is the assertion.
 - One type per file; xUnit `[CollectionDefinition]` markers may co-locate with
   their fixture.
-- Windows x64, Linux x64, and macOS arm64 must pass before work is reported
+- Windows x64, Linux, and macOS arm64 must pass before work is reported
   done; the loop is in [windows-validation-host.md](windows-validation-host.md).
   One solution
   build, then `dotnet test` per project or solution-wide — both are supported.

@@ -6,9 +6,10 @@ in a dedicated persistent clone at `C:\Users\sshuser\source\repos\rehost-webform
 The clone may be reset freely. `winbox` is LAN-only; see the EC2 alternative
 below when it is unreachable.
 
-Cross-platform validation requires macOS arm64, Linux x64, and Windows x64 to
-pass. Linux uses [`eng/linux-round.sh`](../eng/linux-round.sh), which pins the
-container to `linux/amd64` on every host.
+Cross-platform validation requires macOS arm64, Linux, and Windows x64 to
+pass. Linux uses [`eng/linux-round.sh`](../eng/linux-round.sh), which runs the
+container on the Docker daemon's native architecture — an emulated round costs
+minutes where a native one costs seconds.
 Defects found so far — path separators, hidden-file classification, native
 libraries keeping the `.dll` extension off Unix — have each appeared on only one
 platform. See the cross-platform validation policy in `AGENTS.md`.

@@ -31,7 +31,7 @@ strong-named assembly.
 - Behavioral compatibility outranks source-shape similarity.
 - Source/API, behavior, third-party-after-recompile, and binary-identity claims
   are separate.
-- Supported behavior must pass on Windows x64, Linux x64, and macOS arm64.
+- Supported behavior must pass on Windows x64, Linux, and macOS arm64.
 - A feature requiring Windows, IIS, WindowsDesktop, the registry, COM, or DPAPI
   is not part of the portable runtime.
 - Infeasible behavior fails consistently with actionable diagnostics; it does

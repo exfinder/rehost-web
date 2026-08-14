@@ -23,7 +23,7 @@ Milestone 1 owns these outcomes:
 - Attempt the complete ASP.NET Web Optimization source compile, but validate and
   claim only the bundle/debug paths reached by the template.
 - Restore remaining static-asset behavior and mobile master/view switching.
-- Add one package-built browser journey on Windows x64, Linux x64, and macOS
+- Add one package-built browser journey on Windows x64, Linux, and macOS
   arm64.
 
 ## Next

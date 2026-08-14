@@ -30,7 +30,7 @@ Work follows the browser journey:
 3. Restore bundles, scripts, styles, and static assets.
 4. Restore Friendly URLs and routing.
 5. Restore mobile master selection and view switching.
-6. Gate the same browser-visible journey on Windows x64, Linux x64, and macOS
+6. Gate the same browser-visible journey on Windows x64, Linux, and macOS
    arm64.
 
 The local `Rehost.WebForms.FriendlyUrls` package covers steps 4–5 in a focused

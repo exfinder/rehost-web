@@ -5,7 +5,7 @@ rationale but do not widen these claims.
 
 ## Reading the map
 
-- **Supported**: behavior-focused tests pass on Windows x64, Linux x64, and
+- **Supported**: behavior-focused tests pass on Windows x64, Linux, and
   macOS arm64.
 - **Partial**: the exact supported boundary and divergence are stated.
 - **Unsupported**: deliberately excluded; reached entry points fail explicitly.
