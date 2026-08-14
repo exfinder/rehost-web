@@ -14,14 +14,17 @@ set -euo pipefail
 SDK_VERSION=$(python3 -c 'import json; print(json.load(open("global.json"))["sdk"]["version"])')
 ARCH=$(docker version --format '{{.Server.Arch}}')
 
-exec docker run --rm \
+TTY=""
+[ -t 1 ] && TTY="-t"
+
+# shellcheck disable=SC2086 # $TTY is empty or a single flag
+exec docker run --rm $TTY \
   -v "$PWD:/src:ro" \
   -v "rehost-linux-$ARCH-work:/work" \
   -v "rehost-linux-$ARCH-nuget:/root/.nuget" \
   -e DOTNET_CLI_TELEMETRY_OPTOUT=1 \
   "mcr.microsoft.com/dotnet/sdk:$SDK_VERSION" \
   bash -ec '
-    set -o pipefail
     if [ ! -d /work/repo/.git ]; then
       git clone -q /src /work/repo
     fi
@@ -29,6 +32,6 @@ exec docker run --rm \
     git fetch -q /src HEAD
     git checkout -q -f FETCH_HEAD
     git clean -qfd
-    dotnet build Rehost.WebForms.slnx -v q 2>&1 | tail -3
+    dotnet build Rehost.WebForms.slnx -v q
     dotnet test Rehost.WebForms.slnx --no-build
   '
