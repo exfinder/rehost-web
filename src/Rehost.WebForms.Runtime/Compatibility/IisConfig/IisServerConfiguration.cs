@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Xml;
 
@@ -19,20 +20,33 @@ internal sealed class IisServerConfiguration
 
     private static volatile IisServerConfiguration _current = new(
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        new DefaultDocuments(enabled: true, Array.Empty<string>()),
+        defaultDocumentsError: null);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
+    private readonly DefaultDocuments _defaultDocuments;
+    private readonly ConfigurationErrorsException? _defaultDocumentsError;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
-        Dictionary<string, string> hiddenSegments)
+        Dictionary<string, string> hiddenSegments,
+        DefaultDocuments defaultDocuments,
+        ConfigurationErrorsException? defaultDocumentsError)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
+        _defaultDocuments = defaultDocuments;
+        _defaultDocumentsError = defaultDocumentsError;
     }
 
     internal static IisServerConfiguration Current => _current;
+
+    // Consumption-scoped failure (readings D11/D13): a broken section fails the requests that
+    // consult it, not activation.
+    internal DefaultDocuments DefaultDocuments =>
+        _defaultDocumentsError == null ? _defaultDocuments : throw _defaultDocumentsError;
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
@@ -50,11 +64,16 @@ internal sealed class IisServerConfiguration
     {
         var staticContent = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var hiddenSegments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var defaultDocuments = new DefaultDocumentSection();
 
-        ApplyFile(baselineConfigPath, required: true, staticContent, hiddenSegments);
-        ApplyFile(applicationConfigPath, required: false, staticContent, hiddenSegments);
+        ApplyFile(baselineConfigPath, required: true, staticContent, hiddenSegments, defaultDocuments);
+        ApplyFile(applicationConfigPath, required: false, staticContent, hiddenSegments, defaultDocuments);
 
-        return new IisServerConfiguration(staticContent, hiddenSegments);
+        return new IisServerConfiguration(
+            staticContent,
+            hiddenSegments,
+            defaultDocuments.Build(out var defaultDocumentsError),
+            defaultDocumentsError);
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -66,7 +85,8 @@ internal sealed class IisServerConfiguration
         string configPath,
         bool required,
         Dictionary<string, string> staticContent,
-        Dictionary<string, string> hiddenSegments)
+        Dictionary<string, string> hiddenSegments,
+        DefaultDocumentSection defaultDocuments)
     {
         if (!File.Exists(configPath))
         {
@@ -96,6 +116,13 @@ internal sealed class IisServerConfiguration
         {
             IisCollectionReader.Apply(
                 hiddenSegmentsNode, HiddenSegmentSchema, hiddenSegments, configPath);
+        }
+
+        var defaultDocumentNode = document.SelectSingleNode(
+            "/configuration/system.webServer/defaultDocument");
+        if (defaultDocumentNode != null)
+        {
+            defaultDocuments.Apply(defaultDocumentNode, configPath);
         }
     }
 }
