@@ -5,8 +5,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // The client's cookie container is off, so each test sends the Cookie header it means to send and
 // reads the Set-Cookie lines the server actually wrote.
-[Collection(nameof(BodyCollection))]
 public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
+    : IClassFixture<BodyLiveScenario>
 {
     // Guards AspNetCoreWorkerRequest.GetKnownRequestHeader(HeaderCookie): System.Web parses the
     // Cookie header itself, so the adapter has to hand it over whole. The subkeys and the valueless

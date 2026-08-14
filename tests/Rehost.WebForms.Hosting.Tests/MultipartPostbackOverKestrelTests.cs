@@ -6,8 +6,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // Reading only. HttpPostedFile.SaveAs and its RequireRootedSaveAsPath check are a separate story:
 // Path.IsPathRooted disagrees across operating systems, so that branch needs its own coverage.
-[Collection(nameof(PostbackCollection))]
 public sealed class MultipartPostbackOverKestrelTests(PostbackLiveScenario scenario)
+    : IClassFixture<PostbackLiveScenario>
 {
     // note= comes from Request.Form, which on a multipart body is filled by the multipart branch
     // of FillInFormCollection rather than the urlencoded one, and postback=True means the view

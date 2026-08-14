@@ -12,9 +12,11 @@ public sealed class ScenarioHostRegistry : IDisposable
 {
     private readonly ConcurrentDictionary<string, Lazy<LiveScenario>> _hosts = new();
 
-    internal LiveScenario GetOrAdd(ScenarioFixture fixture) =>
+    // A role names a deliberate second host of the same fixture (e.g. the abort host stays off
+    // the main body host so socket kills never neighbor ordinary probes).
+    internal LiveScenario GetOrAdd(ScenarioFixture fixture, string? role = null) =>
         _hosts.GetOrAdd(
-            fixture.Name,
+            role == null ? fixture.Name : fixture.Name + "#" + role,
             _ => new Lazy<LiveScenario>(
                 () => new LiveScenario(fixture),
                 LazyThreadSafetyMode.ExecutionAndPublication)).Value;

@@ -8,8 +8,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // This application spills content above one kilobyte to a temporary file, so saving here streams
 // out of that file rather than out of the byte array the postback fixture keeps in memory.
-[Collection(nameof(BodyCollection))]
 public sealed class RawRequestSaveOverKestrelTests(BodyLiveScenario scenario)
+    : IClassFixture<BodyLiveScenario>
 {
     private static readonly byte[] Spilled = Encoding.UTF8.GetBytes(new string('u', 2048));
 

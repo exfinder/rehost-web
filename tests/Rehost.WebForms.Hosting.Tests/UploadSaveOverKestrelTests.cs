@@ -8,8 +8,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 // The write half of an upload, from a page holding the posted content in memory. The spilled
 // content path is the body fixture's, since only that application sets a threshold low enough to
 // reach it.
-[Collection(nameof(PostbackCollection))]
 public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
+    : IClassFixture<PostbackLiveScenario>
 {
     private static readonly byte[] Content = Encoding.UTF8.GetBytes("hello upload");
 
