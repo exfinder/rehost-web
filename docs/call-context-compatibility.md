@@ -38,3 +38,10 @@ publishing them would imply unsupported general remoting compatibility.
 Implementation:
 `src/Rehost.WebForms.Runtime/Compatibility/Remoting/CallContext.cs`.
 Tests: `tests/Rehost.WebForms.Runtime.Tests/CallContextTests.cs`.
+Contract suite: `tests/Rehost.WebForms.CallContext.Contract.Tests` runs the same
+bodies against mscorlib (net481, Windows round only) and the port (net10.0); the
+Framework leg is the authority for illogical isolation. Note that mscorlib's
+`ExecutionContext.IsDefaultFTContext` ignores a lone illogical `HostContext`, so
+`Run` does not switch a thread carrying nothing else — pinned there as
+`Bare_HostContext_...`; the isolation tests install a `SynchronizationContext`
+as every ASP.NET request thread has.
