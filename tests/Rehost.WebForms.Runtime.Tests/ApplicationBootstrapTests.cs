@@ -280,6 +280,73 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Preflight_Rejects_State_Server_Session_Mode()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <system.web>
+                <sessionState mode="StateServer" stateConnectionString="tcpip=127.0.0.1:42424" />
+              </system.web>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        var exception = Should.Throw<PlatformNotSupportedException>(
+            () => ApplicationConfigurationPreflight.Validate(configuration));
+
+        exception.Message.ShouldContain("mode=\"StateServer\"");
+        exception.Message.ShouldContain("is not supported");
+        exception.Message.ShouldContain("mode=\"InProc\"");
+    }
+
+    [Fact]
+    public void Preflight_Rejects_Sql_Server_Session_Mode()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <system.web>
+                <sessionState mode="SQLServer" sqlConnectionString="data source=127.0.0.1;user id=sa" />
+              </system.web>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        var exception = Should.Throw<PlatformNotSupportedException>(
+            () => ApplicationConfigurationPreflight.Validate(configuration));
+
+        exception.Message.ShouldContain("mode=\"SQLServer\"");
+        exception.Message.ShouldContain("is not yet implemented");
+        exception.Message.ShouldContain("mode=\"InProc\"");
+    }
+
+    [Fact]
+    public void Preflight_Accepts_The_Delivered_Session_Modes()
+    {
+        foreach (var mode in new[] { "InProc", "Off" })
+        {
+            using var application = TemporaryApplication.Create();
+            File.WriteAllText(
+                Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+                $"""
+                <configuration>
+                  <system.web>
+                    <sessionState mode="{mode}" />
+                  </system.web>
+                </configuration>
+                """);
+            var configuration = application.CreateConfiguration();
+
+            Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+        }
+    }
+
+    [Fact]
     public void Preflight_Rejects_Configuration_Reload()
     {
         using var application = TemporaryApplication.Create();
