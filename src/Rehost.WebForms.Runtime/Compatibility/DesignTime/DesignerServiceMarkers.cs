@@ -23,4 +23,8 @@ namespace System.Web.UI.Design
     internal sealed class UrlEditor
     {
     }
+
+    internal sealed class ImageUrlEditor
+    {
+    }
 }

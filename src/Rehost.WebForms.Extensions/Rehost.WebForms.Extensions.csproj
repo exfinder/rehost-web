@@ -18,6 +18,15 @@
     <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/IScriptResourceHandler.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/ScriptResourceHandler.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/ListView*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IPageableItemContainer.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/InsertItemPosition.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/PageEventArgs.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/PagePropertiesChangingEventArgs.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/DataPager*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/NextPreviousPagerField.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/NumericPagerField.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/TemplatePagerField.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.Designer.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Script/AjaxFrameworkAssemblyAttribute.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Serialization/*.cs" />

@@ -56,7 +56,13 @@ the drop. `ScriptReference.ShouldUseDebugScript` falls back to the release
 script under the default `ScriptMode.Auto`, so an absent debug resource degrades
 quietly where a preprocessed-but-unvalidated one would mislead.
 
-`Rehost.WebForms.Extensions` compiles only the frozen-template closure. Excluded
+`Rehost.WebForms.Extensions` compiles the closure the frozen templates reach.
+`WebFormsIdentityApplication` added the second slice: `ListView` and the
+`DataPager` family it names (`ListView*`, `DataPager*`, the three pager fields,
+`IPageableItemContainer`, `InsertItemPosition`, `PageEventArgs`,
+`PagePropertiesChangingEventArgs`), which the account pages declare through
+`OpenAuthProviders.ascx`. The remaining `ui/WebControls` files — the LINQ,
+context, and query data sources — stay out. Excluded
 public APIs are absent rather than stubbed. Design-time metadata the closure
 still names is carried by internal shapes in the runtime's
 `Compatibility/DesignTime`, which keeps the control declarations byte-for-byte;
