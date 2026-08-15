@@ -21,17 +21,16 @@ PORT=${2:?host port}
 SDK_VERSION=$(python3 -c 'import json; print(json.load(open("global.json"))["sdk"]["version"])')
 ARCH=$(docker version --format '{{.Server.Arch}}')
 
-NETWORK=()
+NETWORK=""
 if [ "$APP" = WebFormsIdentityApplication ]; then
-  NETWORK=(--network "container:${SQL_CONTAINER:-rehost-identity-sql-linux}")
+  NETWORK="--network container:${SQL_CONTAINER:-rehost-identity-sql-linux}"
 fi
 
 TTY=""
 [ -t 1 ] && TTY="-t"
 
-# shellcheck disable=SC2086 # $TTY is empty or a single flag
-exec docker run --rm $TTY \
-  "${NETWORK[@]}" \
+# shellcheck disable=SC2086 # $TTY and $NETWORK are empty or single flags
+exec docker run --rm $TTY $NETWORK \
   -v "$PWD:/src:ro" \
   -v "rehost-linux-$ARCH-work:/work" \
   -v "rehost-linux-$ARCH-nuget:/root/.nuget" \
