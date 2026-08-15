@@ -145,6 +145,14 @@ namespace System.Web.Configuration {
                 throw new HttpException(SR.GetString(SR.Cannot_map_path, path));
             }
 
+#if !NETFRAMEWORK
+            // Configuration paths are lowercased, and NTFS folded that back onto the real
+            // directory name. This is the configuration system's own path-producing seam, so a
+            // case-sensitive filesystem misses here and IsConfigRecordRequired then reports no
+            // record for a directory that has one (ledger P70).
+            physicalPath = CanonicalCasePath.Resolve(physicalPath, mapping.PhysicalDirectory);
+#endif
+
             return physicalPath;
         }
 

@@ -53,6 +53,14 @@
    ],
    "reason": "Dynamic Data enablement guarded behind a resolvable-type probe; System.Web.DynamicData is not carried (ledger P69)",
    "record": "docs/portability-ledger.md P69"
+  },
+  {
+   "files": [
+    "Configuration/UserMapPath.cs",
+    "Configuration/WebConfigurationHost.cs"
+   ],
+   "reason": "case-folding the configuration system's mapped directory and composed web.config name on a case-sensitive filesystem (ledger P70)",
+   "record": "docs/portability-ledger.md P70"
   }
  ]
 }
