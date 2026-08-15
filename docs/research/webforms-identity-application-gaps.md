@@ -92,6 +92,39 @@ Not exercised by the template as generated: external providers (all four
 account confirmation and password reset (links commented out), two-factor.
 Their assemblies still load and their pages still compile.
 
+## Result on the port
+
+`apps/WebFormsIdentityApplication/smoke.sh`, one run per platform, against the
+same baseline table above. Every row matches; no delta was recorded.
+
+| Step | Framework baseline | Port |
+| --- | --- | --- |
+| `GET /` | 200; `__AntiXsrfToken` | match |
+| `GET /Account/Manage` anonymous | 302 → absolute `…/Account/Login?ReturnUrl=%2FAccount%2FManage` | match |
+| `GET /Account/Register` | 200; fields `ctl00$MainContent$Email/Password/ConfirmPassword`, submit `ctl00$MainContent$ctl08` | match, including the auto-generated control IDs |
+| `POST /Account/Register` | 302 → `/`; sets `.AspNet.ApplicationCookie` (HttpOnly, path=/), clears `.AspNet.TwoFactorCookie` and `.AspNet.ExternalCookie` | match; EF creates the schema on the first POST as it does on LocalDb |
+| `GET /Account/Manage` signed in | 200; `Hello, <e-mail>` | match |
+| `GET /` signed in | 200; `LoginStatus` renders `__doPostBack('ctl00$ctl14$ctl02$ctl00','')` | match, same generated target |
+| `POST /` log off | 302 → `/`; expired `.ASPXAUTH` **and** expired `.AspNet.ApplicationCookie` | match — `FormsAuthentication.SignOut()` writes the expired `.ASPXAUTH` under `mode="None"` here too |
+| `GET /Account/Manage` after log off | 302 → login | match |
+| `POST /Account/Login` wrong password | 200; `Invalid login attempt` | match |
+| `POST /Account/Login` right password | 302 → `/` + cookie | match |
+
+## Gaps the pair exposed
+
+| Gap | Symptom | Resolution |
+| --- | --- | --- |
+| `System.Web.UI.WebControls.ListView` absent | `CS0234` compiling `OpenAuthProviders.ascx.designer.cs`: the control family was outside the Extensions compile closure, and Framework's `asp:` registration of `System.Web.UI.WebControls` from `System.Web.Extensions` had been dropped with it | `0bd154e` — `ListView`/`DataPager` family compiled and registered; an `ImageUrlEditor` design-time marker joins the existing ones |
+| `BuildManager.GetType("System.String")` | 500 `Could not load type 'System.String'` from `ModelDataSourceView.ModelType`: the port's `<assemblies>` list had dropped Framework's opening `mscorlib` entry, which is what resolves a bare BCL name | `8557e6e` — entry restored; the facade's type forwards answer, and compilation is unaffected |
+| `System.Web.DynamicData` not carried | 500 `FileNotFoundException` at `ListView.OnInit`: every `ItemType` data control loads that assembly to enable Dynamic Data | `317d722`, ledger P69 — the load became a resolvable-type probe, so the hook is inactive rather than fatal |
+| Subdirectory `Web.config` invisible off NTFS | Linux only: `Account/Web.config`'s `deny users="?"` never applied, so `/Account/Manage` ran the page for an anonymous user and threw `UserId not found`. Configuration paths are lowercased and the file is composed as `web.config`, so `IsConfigRecordRequired` reported the subtree needed no record at all | `985e823`, ledger P70 — the case fold now runs at the configuration system's map-path seam and on the composed file name |
+| EF's `ConfigurationManager` placement | The component map called this an open seam decision | None needed: `HttpConfigurationSystem` already installs itself as the configuration system, so `ConfigurationManager.ConnectionStrings` reads the site `web.config` and EF finds `DefaultConnection` there |
+
+Everything else in the component map held as predicted: all eight `net45`
+assemblies load, `<sessionState>` naming the absent `System.Web.Providers` type
+parses and activates, the unhonored `<system.webServer><modules><remove>` is
+ignored, and the only application-visible edit is the connection string.
+
 ## Component map
 
 "Ported" means a `Rehost.*` package exists. "Runs off Windows" is about the
@@ -143,9 +176,11 @@ following from `Rehost.WebForms.Runtime`. Status from `docs/compatibility.md`.
    runtime blocker it exposed — `Response.Headers` threw off IIS7 — was closed
    as ledger P68 against IIS readings H1–H16. Cookie authentication runs end
    to end over the `friendlyurls` fixture.
-3. **App/Host pair** for this app: `packages.config` → package references
-   (`Rehost.WebForms.Owin.Host` replaces `Microsoft.Owin.Host.SystemWeb`;
-   everything else from nuget.org), connection string via `Web.Rehost.config`.
+3. ~~**App/Host pair** for this app~~ — landed: `apps/WebFormsIdentityApplication`
+   has the consumer-shaped `.App`/`.Host` pair, one app-local `Web.Rehost.config`
+   carrying the connection string, and `smoke.sh`. Register, log in, and log off
+   run end to end on macOS arm64, Linux, and Windows x64 against SQL Server in a
+   container; the five gaps it exposed are below.
 4. Classify what lights up: `LoginView`/`LoginStatus`, `FormsAuthentication`
    statics, `HttpContext.User`, ServerVariables, `<sessionState>` tolerance —
    each becomes a compatibility row or a backlog item.
