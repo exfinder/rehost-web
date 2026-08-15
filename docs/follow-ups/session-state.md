@@ -53,7 +53,125 @@ Out:
   (`SessionStateSection.cs:183-185`). The imported comment block at
   `SessionStateSection.cs:59-61` documents `false`; it is Framework's own stale
   header and the property wins. Anything asserting the documented value tests the
-  comment.
+  comment. Reading S5 measures the property against a running 4.8.1.
+- It is also inert on the supported path. `SessionIDManager.InitializeRequest`
+  returns `supportSessionIDReissue = false` whenever `Cookieless ==
+  UseCookies`, above Microsoft's own note — *"We support cookie reissue only if
+  we're using cookieless. VSWhidbey 384892"* (`SessionIDManager.cs:266-277`).
+  Reissue is a cookieless-only feature, so nothing on the cookie path exercises
+  it.
+
+## Framework baseline
+
+Rig: `winbox`, IIS Express 10.0.26013, `System.Web` **4.8.9344.0**
+(`NET481REL1LAST_25H2_B`), a scratch site carrying **no `<sessionState>`
+element** so the shipped defaults are what answer. Taken 2026-08-15.
+
+Two mechanisms below were confirmed against the shipped binary with `ilspycmd`
+rather than the pinned snapshot, because the snapshot alone could not settle
+them.
+
+### Effective defaults
+
+| # | Reading |
+| --- | --- |
+| S1 | `mode=InProc` |
+| S2 | `cookieName=ASP.NET_SessionId` |
+| S3 | `cookieless=UseCookies` |
+| S4 | `timeout=20` minutes |
+| S5 | `regenerateExpiredSessionId=True` — the property, not the stale comment |
+| S6 | `useHostingIdentity=True` |
+| S7 | `cookieSameSite=Lax` |
+
+### Cookie shape
+
+| # | Reading |
+| --- | --- |
+| S8 | `Set-Cookie: ASP.NET_SessionId=<24 chars of [a-z0-9]>; path=/; HttpOnly; SameSite=Lax`. No `Expires` (browser-session cookie), no `Secure`, no `Domain` |
+| S9 | A request already carrying a valid session cookie gets **no** `Set-Cookie` back |
+
+### When the cookie is issued — gated by `Session_Start`
+
+The decisive finding, and not the one the source reading predicted. Issuance
+does not turn on whether the application writes to `Session`; it turns on
+whether `Global.asax` **declares a `Session_Start` handler at all**.
+
+| # | Reading |
+| --- | --- |
+| S10 | No `Session_Start` handler, page never touches `Session` → **no cookie** |
+| S11 | No handler, page reads `Session["v"]` (null) → **no cookie** |
+| S12 | No handler, page reads `Session.SessionID` → an ID is returned but **no cookie**; two successive cookie-less requests return **different** IDs |
+| S13 | No handler, page writes `Session["v"]` → cookie issued, `IsNewSession=True` |
+| S14 | No handler, a cookie-less request **after** another session was created and stored in the same process → still **no cookie**. Session creation is not sticky process-wide |
+| S15 | `Session_Start` handler present that never touches `Session` → **every** session-enabled request issues a cookie, including the never-touch, read-item and read-ID pages, and the handler fires for each |
+
+Mechanism (`SessionStateModule.cs:1285-1298`, `OnReleaseState`): a brand-new
+session with nothing stored is discarded — *"Not storing unused new session"* —
+and one of the four conditions for discarding it is
+`_sessionStartEventHandler == null`. Declaring the handler therefore promotes
+every request to a stored session. S12's per-request throwaway ID is the same
+rule seen from the other side.
+
+### Round-trip, identity, unknown IDs
+
+| # | Reading |
+| --- | --- |
+| S16 | Second request under the cookie: same `SessionID`, `IsNewSession=False`, value readable, `Count` reflects stored items |
+| S17 | On a live session: `Mode=InProc`, `IsCookieless=False`, `Timeout=20`, `IsReadOnly=False` |
+| S18 | A syntactically valid but **unknown** ID in the cookie is **adopted**: `SessionID` echoes the client-supplied value, `IsNewSession=True`, `Count=0`, no `Set-Cookie`, and `Session_Start` fires for that ID |
+
+### Opting in and out
+
+| # | Reading |
+| --- | --- |
+| S19 | `EnableSessionState="false"`: `HttpContext.Current.Session` is null and `Page.Session` throws `HttpException` |
+| S20 | Plain `IHttpHandler`: `HttpContext.Session` is null |
+| S21 | `IRequiresSessionState` handler: session present, `IsReadOnly=False`, writes persist |
+| S22 | `EnableSessionState="ReadOnly"` page: `IsReadOnly=True`, reads work, and a write **does not throw** |
+| S23 | That read-only write **persists** to the next request |
+| S24 | `IReadOnlySessionState` handler behaves the same as S22/S23 |
+
+S23 is InProc-specific and worth stating plainly: the store hands out a live
+reference to the cached collection, so mutating it during a read-only request
+sticks without any save. The module never calls `SetAndReleaseItemExclusive` on
+a read-only request, so an out-of-process or custom store would discard the same
+write. Anything asserting "read-only means the write is lost" is asserting
+out-of-proc behavior, not InProc.
+
+### Request serialization
+
+Two overlapping requests, each holding for 3 seconds, timestamps recorded by the
+pages themselves.
+
+| # | Reading |
+| --- | --- |
+| S25 | Same session cookie, writable pages: **strictly serialized** — the second entered 0.14 s *after* the first exited |
+| S26 | Control, different session cookies: **overlapped** — the second entered 0.10 s after the first, while it still held |
+| S27 | Same session cookie, both `EnableSessionState="ReadOnly"`: **overlapped**, 0.075 s apart. Read-only acquires are shared |
+
+S26 is what makes S25 mean anything: it rules out the host simply being
+serial. S27 pins the read-only path as genuinely non-exclusive rather than
+merely faster.
+
+### `Session_End`
+
+| # | Reading |
+| --- | --- |
+| S28 | `Session.Abandon()` within the request: `SessionID` unchanged, `Count` still readable and unchanged for the rest of that request, no `Set-Cookie` |
+| S29 | Next request under the same cookie: the **same** `SessionID` is reused with `IsNewSession=True`, `Count=0`. Abandon neither rotates the ID nor clears the cookie |
+| S30 | `Session_End` fires on the abandon path with **`HttpContext.Current == null`** |
+
+S30 corrects an assumption this plan started from. The abandon path was expected
+to raise `Session_End` on the request thread with a live context; it does not.
+So the cheap abandon-driven test does exercise the no-context condition, and the
+expiry path's remaining unknown is narrower than "does it work without a
+context" — it is whether the cache's own sweep thread reaches the callback at
+all.
+
+The sweep interval is not a guess either: `CacheExpires` in the shipped binary
+carries `_tsPerBucket = 20 seconds` over `NUMBUCKETS = 30`. With the 1-minute
+floor on `<sessionState timeout>`, a timer-driven `Session_End` test costs 60-80
+seconds, which is why it stays unassessed here.
 
 ## Refusing the modes this story does not deliver
 
@@ -120,14 +238,31 @@ compiling today. Nothing structurally blocks them; they are simply untested.
 Refusing code that may well work would invent a boundary the runtime does not
 have.
 
-**`Session_End`** — unassessed in both modes. The machinery is present and
-compiled: InProc raises it from a `CacheItemRemovedCallback`
-(`InProcStateClientManager.cs:34,85`), and for a provider that supports expiry
-the module raises it explicitly on abandonment
-(`SessionStateModule.cs:1308-1318`). The open question is whether the cache
-expiration timer fires the eviction callback here, on a background thread with
-no `HttpContext` — territory where this port has previously found divergence
-(ledger P44, P46).
+The three do not carry equal risk, and recording them as one line would say they
+do. `UseUri` is mechanical URL munging. `AutoDetect` and `UseDeviceProfile`
+decide from `Request.Browser`, and this port does not ship Framework's browser
+capabilities — the root configuration substitutes `HttpCapabilitiesBase` for
+`MobileCapabilities`, the definitions come from the compiled-in factory, and
+`App_Browsers` is unsupported. Those two therefore rest on a divergence already
+recorded, not merely on untested code.
+
+**`Session_End`** — the abandon path is delivered; expiry stays unassessed.
+InProc raises the event from a `CacheItemRemovedCallback`
+(`InProcStateClientManager.cs:34,85`) for both removal reasons, so
+`Session.Abandon` drives it as expiry would.
+
+Reading S30 removed the reason to treat the abandon path as the easy half: it
+already fires with `HttpContext.Current == null`, so the no-context condition is
+covered. What expiry adds is the cache's own sweep thread reaching the callback
+— territory where this port has previously found divergence (ledger P44, P46).
+The machinery is present: the shipped binary's `CacheExpires` runs a real
+`Timer` over 20-second buckets, and `AspNetCache` is what the port compiles
+(`MemCache` sits behind `#if USE_MEMORY_CACHE` and is absent from the shipped
+4.8.1 assembly too, so it is dead on both sides).
+
+The cost of assessing it is the reason it stays open: `<sessionState timeout>`
+has a 1-minute floor and the sweep runs on 20-second buckets, so the test is
+60-80 seconds on every platform.
 
 ## Done when
 
