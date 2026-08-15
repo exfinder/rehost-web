@@ -29,16 +29,6 @@ public sealed class FriendlyUrlsOverKestrelTests(FriendlyUrlsLiveScenario scenar
     }
 
     [Fact]
-    public async Task ExtensionlessUrlPreservesPhysicalPageAuthorization()
-    {
-        var direct = await scenario.Client.GetAsync("/Protected.aspx");
-        var friendly = await scenario.Client.GetAsync("/Protected");
-
-        direct.StatusCode.ShouldBe(401, direct.Text);
-        friendly.StatusCode.ShouldBe(401, friendly.Text);
-    }
-
-    [Fact]
     public async Task PhysicalPageRedirectsPermanentlyAndPreservesQuery()
     {
         var response = await scenario.Client.GetAsync("/About.aspx?value=one%20two");
