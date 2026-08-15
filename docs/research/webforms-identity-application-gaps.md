@@ -101,7 +101,7 @@ shipped binary as-is on .NET 10 (`net45` assemblies load under `NU1701`).
 | --- | --- | --- | --- | --- | --- |
 | `Microsoft.Owin` 4.2.2, `Owin` 1.0 | `IAppBuilder`, `IOwinContext`, `PathString`, `OwinStartupAttribute` | No | Yes — pure managed, no System.Web reference | Consume as-is from nuget.org | — |
 | `Microsoft.Owin.Security` 4.2.2, `.Security.Cookies` | `UseCookieAuthentication`, `CookieAuthenticationProvider`, `IAuthenticationManager` (`SignOut`, `Challenge`, `GetExternalLoginInfo`) | No | Yes, given a protector. Its *default* `IDataProtectionProvider` derives from `System.Security.Cryptography.DpapiDataProtector`, a type absent from .NET on every OS: `TypeLoadException` at `app.Build()`, before any request. Transitively pins `Newtonsoft.Json` 6.0.4 (NU1903) — pin 13.x | Consume as-is; the recompiled host must call `SetDataProtectionProvider` with the MachineKey protector **unconditionally** | — |
-| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | `HttpContext.GetOwinContext()`, `OwinHttpModule`, `MachineKeyDataProtector`, `HttpContext.User` bridging | No | **No** — references Microsoft's `System.Web` 4.0.0.0 by strong name; also `Microsoft.Web.Infrastructure` | **Port**: `Rehost.WebForms.Owin.Host` recompiled from Katana source against `Rehost.WebForms.Runtime`, dropping `Microsoft.Web.Infrastructure` exactly as the Optimization port did (`docs/provenance/aspnet-web-optimization.md`) | S–M (~40 files; the module, call context, environment dictionary, data protector) |
+| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | `HttpContext.GetOwinContext()`, `OwinHttpModule`, `MachineKeyDataProtector`, `HttpContext.User` bridging | **Yes** — `Rehost.WebForms.Owin.Host.SystemWeb` (Katana v4.2.3) | **No** — references Microsoft's `System.Web` 4.0.0.0 by strong name; also `Microsoft.Web.Infrastructure` | **Port**: `Rehost.WebForms.Owin.Host` recompiled from Katana source against `Rehost.WebForms.Runtime`, dropping `Microsoft.Web.Infrastructure` exactly as the Optimization port did (`docs/provenance/aspnet-web-optimization.md`) | S–M (~40 files; the module, call context, environment dictionary, data protector) |
 | `Microsoft.Owin.Security.OAuth`, `.Google`, `.Facebook`, `.Twitter`, `.MicrosoftAccount` | Referenced; not called (commented out) | No | Yes | Consume as-is; behaviour unassessed until an app enables one | — |
 | `Microsoft.AspNet.Identity.Core` 2.2.4 | `UserManager<T>`, `IdentityResult`, `PasswordValidator`, token providers, `IIdentityMessageService` | No | Yes — pure managed | Consume as-is | — |
 | `Microsoft.AspNet.Identity.Owin` 2.2.4 | `SignInManager`, `CreatePerOwinContext`, `GetUserManager<T>`, `SecurityStampValidator`, `DataProtectorTokenProvider`, `IdentityFactoryOptions.DataProtectionProvider` | No | Yes — depends on Owin.Security.*, not System.Web | Consume as-is | — |
@@ -138,11 +138,11 @@ following from `Rehost.WebForms.Runtime`. Status from `docs/compatibility.md`.
 1. ~~Storage boundary first~~ — done by the probe above: EF 6.4 + Identity.EF
    run on .NET 10 off Windows against SQL Server; LocalDb is the only
    non-portable piece and the fix is a connection string.
-2. **`Rehost.WebForms.Owin.Host`**: recompile Katana's SystemWeb host against
-   the runtime (provenance record, `Microsoft.Web.Infrastructure` dropped,
-   `MachineKey` protector kept). Unit-test the module registration and the
-   two stage hooks; scenario-test register → login → log off against the
-   baseline table above.
+2. ~~`Rehost.WebForms.Owin.Host.SystemWeb`~~ — landed: Katana v4.2.3 recompiled
+   (`docs/provenance/aspnet-katana.md`, two source edits), after the one
+   runtime blocker it exposed — `Response.Headers` threw off IIS7 — was closed
+   as ledger P68 against IIS readings H1–H16. Cookie authentication runs end
+   to end over the `friendlyurls` fixture.
 3. **App/Host pair** for this app: `packages.config` → package references
    (`Rehost.WebForms.Owin.Host` replaces `Microsoft.Owin.Host.SystemWeb`;
    everything else from nuget.org), connection string via `Web.Rehost.config`.
