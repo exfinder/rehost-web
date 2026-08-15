@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Microsoft.Owin.Host.SystemWeb</RootNamespace>
+    <Description>OWIN host over the Rehost.WebForms ASP.NET request pipeline.</Description>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);CS3001;CS3002;CS3003;SYSLIB0057</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Owin" NoWarn="NU1701" />
+    <PackageReference Include="Owin" NoWarn="NU1701" />
+  </ItemGroup>
+
+</Project>

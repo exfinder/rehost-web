@@ -14,6 +14,7 @@
     <Project Path="src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
     <Project Path="src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
     <Project Path="src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
+    <Project Path="src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
     <Project Path="src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Project Path="src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
     <Project Path="src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
@@ -31,6 +32,7 @@
     <Project Path="tests/Rehost.WebForms.Extensions.Tests/Rehost.WebForms.Extensions.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.FriendlyUrls.Tests/Rehost.WebForms.FriendlyUrls.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
+    <Project Path="tests/Rehost.WebForms.Owin.Host.SystemWeb.Tests/Rehost.WebForms.Owin.Host.SystemWeb.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.ScriptManager.Bundles.Tests/Rehost.WebForms.ScriptManager.Bundles.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj" />

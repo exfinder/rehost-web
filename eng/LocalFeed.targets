@@ -27,6 +27,7 @@
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
+    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
