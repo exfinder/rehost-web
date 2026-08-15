@@ -29,7 +29,8 @@ nuget.org unchanged, and the connection string has to move off LocalDb.
 | `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` | dropped | The runtime owns compiler selection; `<system.codedom>` is removed by XDT |
 | `Owin`, `Microsoft.Owin`, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Security.Facebook`, `.Security.Twitter`, `.Security.MicrosoftAccount` | same packages from nuget.org | Pure managed; consumed as shipped under `NU1701` |
 | `Microsoft.AspNet.Identity.Core`, `.Owin`, `.EntityFramework` 2.2.4 | same packages from nuget.org | Pure managed |
-| `EntityFramework` 6.4.4 | same package from nuget.org | 6.3+ ships `netstandard2.1`; its SQL Server provider uses `System.Data.SqlClient` |
+| `EntityFramework` 6.4.4 | same package from nuget.org, bumped to 6.5.2 | 6.3+ ships `netstandard2.1`. The bump is what the maintained SQLite provider requires (see database) |
+| — | `System.Data.SQLite` 2.0.4, `.EF6` 2.0.3, `SQLitePCLRaw.lib.e_sqlite3` | Added by the host, not the app: the store the template pointed at LocalDb |
 | `Newtonsoft.Json` 13.0.3 | same package, pinned | `Microsoft.Owin.Security` still asks for 6.0.4 (NU1903) |
 | Antlr, WebGrease, bootstrap, jQuery, Modernizr | unchanged content/dependencies | Same as `WebFormsApplication` |
 
@@ -39,15 +40,36 @@ Framework app; the host adds the latter.
 ## Database
 
 The template's `(LocalDb)\MSSQLLocalDB` connection string is the app-visible
-change (see boundaries). Any reachable SQL Server works; a container is the
-short path:
+change (see boundaries). It points at SQLite here — a file under `App_Data`, so
+the app needs no server and no second connection string per platform:
 
 ```text
-docker run -d --name rehost-identity-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Rehost!Dev2026' -p 14333:1433 mcr.microsoft.com/mssql/server:2022-latest
+Data Source=|DataDirectory|Identity.db;Foreign Keys=True
 ```
 
-Entity Framework creates the database on first use, so the first register POST
-takes a few seconds longer than the rest.
+Three things the host has to do that SQL Server got for free:
+
+- **Register the ADO.NET factory in code.** `<entityFramework><providers>`
+  supplies provider *services*, but the factory behind them cannot come from
+  configuration: .NET dropped the `<system.data><DbProviderFactories>` registry
+  the Framework read, leaving `DbProviderFactories.RegisterFactory` as the only
+  way in. It registers `SQLiteFactory`, not the EF6 provider factory, because EF
+  reverse-maps the connection's own factory type back to an invariant name.
+- **Create the schema itself.** The EF6 SQLite provider generates no DDL, so
+  `Database.Create()` throws instead of building the Identity tables.
+  `Identity.schema.sql`, generated once from `ApplicationDbContext`'s model with
+  `SQLite.CodeFirst`, is applied to a missing database file at startup, and
+  `disableDatabaseInitialization` keeps EF from trying afterwards.
+- **Stay out of Entity Framework until the application is up.** Reaching EF
+  before `HostingEnvironment` initializes installs the configuration system, and
+  initialization then fails with *the configuration system has already been
+  initialized*. Hence raw DDL over a `SQLiteConnection` rather than a context.
+
+`SQLitePCLRaw.lib.e_sqlite3` carries the native library for every target,
+including `osx-arm64` and `linux-arm64`. This works only on the 2.0.x provider
+line: 1.0.x binds the SQLite team's own `SQLite.Interop.dll`, which ships
+`win-x86/x64`, `linux-x64`, and `osx-x64` only, and the community arm64 builds
+export plain `sqlite3_*` symbols the mangled managed assembly cannot call.
 
 ## Commands
 
@@ -69,12 +91,10 @@ status codes, the absolute `Location` of the challenge redirect, the
 `LoginStatus` writes, and the page markers. Every row matches; there is no
 recorded delta.
 
-One Linux round joins the SQL container's own network namespace, so the single
-committed connection string (`127.0.0.1,14333`) needs no second copy:
+One Linux round needs nothing but the runner:
 
 ```text
-docker run -d --name rehost-identity-sql-linux -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Rehost!Dev2026' -e MSSQL_TCP_PORT=14333 mcr.microsoft.com/mssql/server:2022-latest
-eng/app-linux-smoke.sh WebFormsIdentityApplication 5082   # builds and smokes the committed HEAD in that namespace
+eng/app-linux-smoke.sh WebFormsIdentityApplication 5082   # builds and smokes the committed HEAD
 ```
 
 ## web.config
@@ -82,10 +102,11 @@ eng/app-linux-smoke.sh WebFormsIdentityApplication 5082   # builds and smokes th
 `WebFormsIdentityApplication.Host/Web.Rehost.config` replaces the package
 default wholesale, so it repeats the default's three rules — remove `<runtime>`,
 remove `<system.codedom>`, retarget the Optimization `<controls>` assembly — and
-adds one of its own: the `DefaultConnection` connection string. Nothing else in
-the template's `web.config` needed a transform. `<sessionState>` naming a
-provider type from `System.Web.Providers`, which is not in `bin`, parses and
-activates exactly as it does on Framework, and the unhonored
+adds three of its own: the `DefaultConnection` connection string, the SQLite
+entry in `<entityFramework><providers>`, and `disableDatabaseInitialization` for
+`ApplicationDbContext`. Nothing else in the template's `web.config` needed a
+transform. `<sessionState>` naming a provider type from `System.Web.Providers`, which is not in
+`bin`, parses and activates exactly as it does on Framework, and the unhonored
 `<system.webServer><modules><remove name="FormsAuthentication" />` is ignored
 the same way.
 
@@ -94,6 +115,14 @@ the same way.
 - **LocalDb is out of contract.** It is a Windows-only SQL Server flavour, so
   the connection string is the one application-visible edit a migration must
   make. `|DataDirectory|` itself is fine — the runtime points it at `App_Data`.
+- **A non-SqlClient provider cannot be registered from configuration.** The
+  factory registration above is host code because the runtime does not read
+  `<system.data><DbProviderFactories>`; the same gap reaches declarative markup
+  such as `<asp:SqlDataSource ProviderName="...">`:
+  [provider factory configuration](../../docs/follow-ups/db-provider-factories-config.md).
+- **SQLite is a fixture choice, not a compatibility claim.** It shows EF6 running
+  on the port against a real engine without a server; SQL Server deployment
+  belongs to Milestone 3.
 - **`<machineKey>` is auto-generated.** The template declares none, so the key
   protecting `.AspNet.ApplicationCookie` is random and process-scoped: every
   restart invalidates every issued cookie, and two processes cannot share them.

@@ -5,15 +5,6 @@
 #
 #   eng/app-linux-smoke.sh WebFormsApplication 5081
 #   eng/app-linux-smoke.sh WebFormsIdentityApplication 5082
-#
-# WebFormsIdentityApplication needs SQL Server; the container then joins the SQL
-# container's network namespace (SQL_CONTAINER, default rehost-identity-sql-linux), so
-# the app reaches the server at the same 127.0.0.1,14333 the committed
-# Web.Rehost.config names and no second connection string exists. Start it first:
-#
-#   docker run -d --name rehost-identity-sql-linux -e ACCEPT_EULA=Y \
-#     -e MSSQL_SA_PASSWORD='Rehost!Dev2026' -e MSSQL_TCP_PORT=14333 \
-#     mcr.microsoft.com/mssql/server:2022-latest
 set -euo pipefail
 
 APP=${1:?app folder under apps/}
@@ -21,16 +12,11 @@ PORT=${2:?host port}
 SDK_VERSION=$(python3 -c 'import json; print(json.load(open("global.json"))["sdk"]["version"])')
 ARCH=$(docker version --format '{{.Server.Arch}}')
 
-NETWORK=""
-if [ "$APP" = WebFormsIdentityApplication ]; then
-  NETWORK="--network container:${SQL_CONTAINER:-rehost-identity-sql-linux}"
-fi
-
 TTY=""
 [ -t 1 ] && TTY="-t"
 
-# shellcheck disable=SC2086 # $TTY and $NETWORK are empty or single flags
-exec docker run --rm $TTY $NETWORK \
+# shellcheck disable=SC2086 # $TTY is empty or a single flag
+exec docker run --rm $TTY \
   -v "$PWD:/src:ro" \
   -v "rehost-linux-$ARCH-work:/work" \
   -v "rehost-linux-$ARCH-nuget:/root/.nuget" \
