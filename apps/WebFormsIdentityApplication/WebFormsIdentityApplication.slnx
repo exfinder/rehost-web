@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="WebFormsIdentityApplication.App/WebFormsIdentityApplication.App.csproj" />
+  <Project Path="WebFormsIdentityApplication.Host/WebFormsIdentityApplication.Host.csproj" />
+</Solution>
