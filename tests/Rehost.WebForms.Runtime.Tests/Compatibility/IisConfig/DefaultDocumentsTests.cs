@@ -5,8 +5,8 @@ using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.IisConfig;
 
-// The measured <defaultDocument> semantics (readings D8-D13): ordered list, app adds prepend,
-// and a broken section deferring its failure to the accessor instead of activation.
+// The measured <defaultDocument> semantics (readings D8-D12): ordered list with app adds
+// prepending. A broken section fails activation, as every honored section does (P60).
 public sealed class DefaultDocumentsTests : IDisposable
 {
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("rehost-defdoc-");
@@ -84,43 +84,37 @@ public sealed class DefaultDocumentsTests : IDisposable
     }
 
     [Fact]
-    public void A_Duplicate_Add_Defers_Its_Failure_To_The_Accessor()
+    public void A_Duplicate_Add_Fails_Activation_Naming_The_File()
     {
         var app = WriteConfig(
             "web.config",
             "<defaultDocument><files><add value=\"DEFAULT.HTM\" /></files></defaultDocument>");
 
-        var configuration = IisServerConfiguration.Load(Baseline(), app);
-
         var exception = Should.Throw<ConfigurationErrorsException>(
-            () => configuration.DefaultDocuments);
+            () => IisServerConfiguration.Load(Baseline(), app));
+
         exception.Message.ShouldContain("DEFAULT.HTM");
         exception.Message.ShouldContain("web.config");
     }
 
     [Fact]
-    public void A_Broken_Section_Leaves_The_Other_Tenants_Serving()
-    {
-        var app = WriteConfig(
-            "web.config",
-            "<staticContent><mimeMap fileExtension=\".probe\" mimeType=\"application/x-probe\" /></staticContent>"
-            + "<defaultDocument><files><add value=\"Default.htm\" /></files></defaultDocument>");
-
-        var configuration = IisServerConfiguration.Load(Baseline(), app);
-
-        configuration.ServesStaticContent(".probe").ShouldBeTrue();
-        Should.Throw<ConfigurationErrorsException>(() => configuration.DefaultDocuments);
-    }
-
-    [Fact]
-    public void A_Missing_Value_Attribute_Defers_Naming_The_Attribute()
+    public void A_Missing_Value_Attribute_Fails_Activation_Naming_The_Attribute()
     {
         var app = WriteConfig(
             "web.config", "<defaultDocument><files><add /></files></defaultDocument>");
 
-        var configuration = IisServerConfiguration.Load(Baseline(), app);
-
-        Should.Throw<ConfigurationErrorsException>(() => configuration.DefaultDocuments)
+        Should.Throw<ConfigurationErrorsException>(
+                () => IisServerConfiguration.Load(Baseline(), app))
             .Message.ShouldContain("value");
+    }
+
+    [Fact]
+    public void A_Non_Boolean_Enabled_Fails_Activation_Naming_The_Value()
+    {
+        var app = WriteConfig("web.config", "<defaultDocument enabled=\"yes\" />");
+
+        Should.Throw<ConfigurationErrorsException>(
+                () => IisServerConfiguration.Load(Baseline(), app))
+            .Message.ShouldContain("yes");
     }
 }

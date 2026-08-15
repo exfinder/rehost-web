@@ -1,7 +1,6 @@
 #nullable enable
 
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Xml;
 
@@ -21,32 +20,24 @@ internal sealed class IisServerConfiguration
     private static volatile IisServerConfiguration _current = new(
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-        new DefaultDocuments(enabled: true, Array.Empty<string>()),
-        defaultDocumentsError: null);
+        new DefaultDocuments(enabled: true, Array.Empty<string>()));
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
-    private readonly DefaultDocuments _defaultDocuments;
-    private readonly ConfigurationErrorsException? _defaultDocumentsError;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
         Dictionary<string, string> hiddenSegments,
-        DefaultDocuments defaultDocuments,
-        ConfigurationErrorsException? defaultDocumentsError)
+        DefaultDocuments defaultDocuments)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
-        _defaultDocuments = defaultDocuments;
-        _defaultDocumentsError = defaultDocumentsError;
+        DefaultDocuments = defaultDocuments;
     }
 
     internal static IisServerConfiguration Current => _current;
 
-    // Consumption-scoped failure (readings D11/D13): a broken section fails the requests that
-    // consult it, not activation.
-    internal DefaultDocuments DefaultDocuments =>
-        _defaultDocumentsError == null ? _defaultDocuments : throw _defaultDocumentsError;
+    internal DefaultDocuments DefaultDocuments { get; }
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
@@ -69,11 +60,7 @@ internal sealed class IisServerConfiguration
         ApplyFile(baselineConfigPath, required: true, staticContent, hiddenSegments, defaultDocuments);
         ApplyFile(applicationConfigPath, required: false, staticContent, hiddenSegments, defaultDocuments);
 
-        return new IisServerConfiguration(
-            staticContent,
-            hiddenSegments,
-            defaultDocuments.Build(out var defaultDocumentsError),
-            defaultDocumentsError);
+        return new IisServerConfiguration(staticContent, hiddenSegments, defaultDocuments.Build());
     }
 
     internal static void Publish(IisServerConfiguration configuration)

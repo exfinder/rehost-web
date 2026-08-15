@@ -6,9 +6,7 @@ using System.Xml;
 
 namespace System.Web.IisConfig;
 
-// The merged <defaultDocument> section. Unlike the other honored sections, a broken one defers
-// its failure to consumption (readings D11/D13): IIS answers 500.19 only for the requests that
-// read the section — directory requests — while direct requests keep serving.
+// The merged <defaultDocument> section.
 internal sealed class DefaultDocuments
 {
     internal DefaultDocuments(bool enabled, IReadOnlyList<string> files)
@@ -26,32 +24,10 @@ internal sealed class DefaultDocumentSection
 {
     private readonly List<string> _files = new();
     private bool _enabled = true;
-    private ConfigurationErrorsException? _error;
+
+    internal DefaultDocuments Build() => new(_enabled, _files.ToArray());
 
     internal void Apply(XmlNode sectionNode, string configPath)
-    {
-        if (_error != null)
-        {
-            return;
-        }
-
-        try
-        {
-            ApplyValid(sectionNode, configPath);
-        }
-        catch (ConfigurationErrorsException exception)
-        {
-            _error = exception;
-        }
-    }
-
-    internal DefaultDocuments Build(out ConfigurationErrorsException? error)
-    {
-        error = _error;
-        return new DefaultDocuments(_enabled, _files.ToArray());
-    }
-
-    private void ApplyValid(XmlNode sectionNode, string configPath)
     {
         var enabledText = sectionNode.Attributes?["enabled"]?.Value;
         if (enabledText != null)
@@ -101,8 +77,7 @@ internal sealed class DefaultDocumentSection
                     throw new ConfigurationErrorsException(
                         "<add value=\"" + value + "\"> in '" + configPath + "' duplicates an"
                         + " entry the <defaultDocument> files collection already contains; IIS"
-                        + " answers 500.19 for every directory request. <remove> it first to"
-                        + " reposition it.");
+                        + " refuses this with a 500.19. <remove> it first to reposition it.");
                 }
 
                 added.Add(value);

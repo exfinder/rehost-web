@@ -37,8 +37,8 @@ internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecution
             return;
         }
 
-        // Section first: a broken section refuses both slash forms without redirecting, and
-        // a disabled section suppresses the courtesy redirect too (readings D14/D15).
+        // Enabled gate first: a disabled section suppresses the courtesy redirect too
+        // (reading D14).
         var documents = IisServerConfiguration.Current.DefaultDocuments;
         var path = request.Path;
         if (documents.Enabled)
