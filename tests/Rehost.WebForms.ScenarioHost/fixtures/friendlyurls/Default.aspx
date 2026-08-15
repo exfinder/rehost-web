@@ -4,12 +4,8 @@
 
     protected override void OnLoad(EventArgs e)
     {
-        Response.ContentType = "text/plain";
-        Response.Write(Request.GetFriendlyUrlFileVirtualPath());
-        Response.Write("|");
-        Response.Write(Request.RawUrl);
-        Response.Write("|");
-        Response.Write(Request.Path);
+        Marker.Text = Request.GetFriendlyUrlFileVirtualPath() + "|" + Request.RawUrl + "|" + Request.Path;
     }
 
 </script>
+<html><body><form runat="server"><asp:Literal runat="server" ID="Marker" /></form></body></html>

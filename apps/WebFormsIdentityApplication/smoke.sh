@@ -119,9 +119,11 @@ status=$(get / home)
 check 'GET / signed in -> 200' "$status" 200
 target=$(postback_target "$work/home.html")
 check_contains 'LoginStatus renders a log-off postback' "$work/home.html" "__doPostBack(&#39;$target"
+action=$(sed -n 's/.*<form[^>]*action="\([^"]*\)".*/\1/p' "$work/home.html" | head -1)
+check 'form on / posts back to ./ (not the rewritten default document)' "$action" ./
 
 status=$(curl -sS -b "$jar" -c "$jar" -o "$work/logoff.html" -D "$work/logoff.head" \
-  -w '%{http_code}' --max-time 300 -X POST "$BASE/" \
+  -w '%{http_code}' --max-time 300 -X POST "$BASE/$action" \
   --data-urlencode "__EVENTTARGET=$target" \
   --data-urlencode '__EVENTARGUMENT=' \
   --data-urlencode "__VIEWSTATE=$(field "$work/home.html" __VIEWSTATE)" \

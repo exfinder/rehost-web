@@ -16,8 +16,21 @@ public sealed class FriendlyUrlsOverKestrelTests(FriendlyUrlsLiveScenario scenar
         var response = await scenario.Client.GetAsync("/");
 
         response.StatusCode.ShouldBe(200, response.Text);
-        response.Text.ShouldBe("~/default.aspx|/|/default.aspx");
+        response.Text.ShouldContain("~/default.aspx|/|/default.aspx");
     }
+
+    [Fact]
+    public async Task TheDefaultDocumentsFormPostsBackToTheClientUrl()
+    {
+        var root = await scenario.Client.GetAsync("/");
+        var friendly = await scenario.Client.GetAsync("/Default");
+
+        FormAction(root.Text).ShouldBe("./");
+        FormAction(friendly.Text).ShouldBe("./Default");
+    }
+
+    private static string FormAction(string html) =>
+        System.Text.RegularExpressions.Regex.Match(html, "<form[^>]*action=\"([^\"]*)\"").Groups[1].Value;
 
     [Fact]
     public async Task ExtensionlessUrlExecutesPageWithRemainingSegments()

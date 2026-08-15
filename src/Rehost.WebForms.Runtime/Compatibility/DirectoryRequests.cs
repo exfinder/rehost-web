@@ -55,8 +55,10 @@ internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecution
                     Path.Combine(physicalPath, file), HttpRuntime.AppDomainAppPathInternal);
                 if (File.Exists(candidate))
                 {
-                    // The app observes the list's spelling, not the disk's (reading D1).
-                    context.RewritePath(path + file, rebaseClientPath: true);
+                    // The app observes the list's spelling, not the disk's (reading D1), while
+                    // ClientFilePath stays the client's URL so a server form posts back to "./"
+                    // as under IIS, not to the rewritten name.
+                    context.RewritePath(path + file, rebaseClientPath: false);
                     return;
                 }
             }
