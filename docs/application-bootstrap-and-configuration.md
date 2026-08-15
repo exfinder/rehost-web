@@ -68,7 +68,14 @@ beside the selected machine configuration file. The optional application file
 is `<physical-root>/web.config`; missing means baseline inheritance only.
 
 The machine and root-web baselines adapt pinned .NET Framework 4.8.1
-configuration. Assembly-identity and portability deltas are inventoried in
+configuration and mirror the golden files' shape: the same elements and
+attributes, and each collection in Framework's own order, so an entry's position
+is the position it holds in
+[the golden reference](framework-config-reference.md). Conformance is the
+default state of these files and needs no annotation; a *deviation* is what
+carries a reason, in the file where it is not self-evident — `<browserCaps>`
+substituting `HttpCapabilitiesBase` for the absent `MobileCapabilities` is the
+worked example. Assembly-identity and portability deltas are inventoried in
 [dependency decisions](dependency-decisions.md) and the
 [portability ledger](portability-ledger.md).
 
