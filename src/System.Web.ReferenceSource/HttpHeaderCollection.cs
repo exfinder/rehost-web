@@ -70,6 +70,12 @@ namespace System.Web {
 
         public override void Add(String name, String value) {
             if (_iis7WorkerRequest == null) {
+#if !NETFRAMEWORK
+                if (_request == null) {
+                    SetManagedResponseHeader(name, value, false /*replace*/);
+                    return;
+                }
+#endif
                 throw new PlatformNotSupportedException();
             }
             // append to existing value
@@ -90,11 +96,56 @@ namespace System.Web {
 
         public override void Set(String name, String value) {
             if (_iis7WorkerRequest == null) {
+#if !NETFRAMEWORK
+                if (_request == null) {
+                    SetManagedResponseHeader(name, value, true /*replace*/);
+                    return;
+                }
+#endif
                 throw new PlatformNotSupportedException();
             }
             // set new value
             SetHeader(name, value, true /*replace*/);
         }
+
+#if !NETFRAMEWORK
+        // Response headers without a native block to write through (ledger P68). The entry is
+        // the whole effect: nothing syncs back into RedirectLocation, ContentType, or the cache
+        // flags, which integrated mode did not do either (readings H7, H8).
+        private void SetManagedResponseHeader(String name, String value, bool replace) {
+            if (name == null) {
+                throw new ArgumentNullException("name");
+            }
+
+            if (value == null) {
+                throw new ArgumentNullException("value");
+            }
+
+            if (_response.HeadersWritten) {
+                throw new HttpException(SR.GetString(SR.Cannot_append_header_after_headers_sent));
+            }
+
+            if (_response.HasCachePolicy && StringUtil.EqualsIgnoreCase("Set-Cookie", name)) {
+                _response.Cache.SetHasSetCookieHeader();
+            }
+
+            if (replace) {
+                base.Set(name, value);
+            }
+            else {
+                base.Add(name, value);
+            }
+        }
+
+        // The collection reports the block that left once headers are written (reading H15).
+        internal void ReplaceWithSentHeaders(ArrayList sentHeaders) {
+            base.Clear();
+
+            foreach (HttpResponseHeader header in sentHeaders) {
+                base.Add(header.Name, header.Value);
+            }
+        }
+#endif
 
         internal void SetHeader(String name, String value, bool replace) {
             Debug.Assert(_iis7WorkerRequest != null, "_iis7WorkerRequest != null");
@@ -174,6 +225,20 @@ namespace System.Web {
 
         public override void Remove(String name) {
             if (_iis7WorkerRequest == null) {
+#if !NETFRAMEWORK
+                if (_request == null) {
+                    if (name == null) {
+                        throw new ArgumentNullException("name");
+                    }
+
+                    // Inert once the block has left, where Add throws (reading H15).
+                    if (!_response.HeadersWritten) {
+                        base.Remove(name);
+                    }
+
+                    return;
+                }
+#endif
                 throw new PlatformNotSupportedException();
             }
 

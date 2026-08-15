@@ -63,7 +63,7 @@ Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
 Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 `MultipartPostback*`, `UploadSave*`, `RawRequestSave*`, `Cookies*`,
 `AsyncPages*`, `AsyncPipeline*`, `ResponseEnd*`, `HeaderAmendment*`,
-`ServerTransfer*`, `StaticFiles*`, and `FriendlyUrls*`.
+`ResponseHeaders*`, `ServerTransfer*`, `StaticFiles*`, and `FriendlyUrls*`.
 
 | Capability | State | Boundary |
 | --- | --- | --- |
@@ -74,6 +74,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | Uploaded-file and raw-request `SaveAs` | Supported | Memory/disk-spill paths; Windows-rooted paths fail actionably off Windows rather than being misinterpreted |
 | `Request.Filter` and raw-header grouping parity | Unassessed | No filter scenario; `HttpRequest.SaveAs` header grouping is not compared to IIS |
 | Request/response cookies | Supported | Subkeys, defaults, validation, repeated `Set-Cookie`, attributes, mutation, and UTF-8 default response-header bytes |
+| `Response.Headers` read/`Add`/`Set`/`Remove` off IIS | Supported | The managed collection is the response-header store: it holds what was written through it, `AppendHeader` included, and nothing else; at send, `ContentType`, the cache policy, and a set `RedirectLocation` outrank a same-named entry while `Set-Cookie` is additive, and after the first flush `Add` throws and `Remove` is inert (readings H1-H16). No IIS `Server` header exists to hold or re-emit, and the post-flush collection mirrors this host's single-shot generated block rather than the partial native block IIS showed |
 | Configured non-default response-header encoding | Partial | Kestrel is pinned to Framework's UTF-8 default; `<globalization responseHeaderEncoding>` is not translated; non-ASCII request-header decoding is unassessed |
 | `aspnet:MaxHttpCollectionKeys` | Supported | Opt-in: absent by default as on measured Framework 4.8.1; when configured it caps query, URL-encoded, multipart-field, and posted-file collections |
 | Kestrel and `httpRuntime.maxRequestLength` limits | Supported | Each owner keeps its limit and error path; the smaller effective limit wins; legacy `system.webServer` limit translation is unassessed |

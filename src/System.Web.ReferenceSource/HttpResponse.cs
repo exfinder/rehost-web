@@ -46,6 +46,9 @@ namespace System.Web {
         private TextWriter _writer;                 // others just have Writer
 
         private HttpHeaderCollection _headers;      // response header collection (IIS7+)
+#if !NETFRAMEWORK
+        private ArrayList _sentHeaders;             // block that left the wire, folded into _headers on the next read (ledger P68)
+#endif
 
         private bool _headersWritten;
         private bool _endHeadersDeferred;   // Response.End defers header generation to the final flush (ledger P55)
@@ -426,6 +429,14 @@ namespace System.Web {
                     headers.Add(_customHeaders[i]);
             }
 
+#if !NETFRAMEWORK
+            // where AppendHeader's own headers stood before they moved into the collection, so
+            // the generated order — which the parity gate pins — is unchanged
+            int managedHeadersStart = headers.Count;
+            AppendManagedHeaderCollection(headers, forCache);
+            int managedHeadersEnd = headers.Count;
+#endif
+
             // location of redirect
             if (_redirectLocation != null) {
                 headers.Add(new HttpResponseHeader(HttpWorkerRequest.HeaderLocation, _redirectLocation));
@@ -469,9 +480,90 @@ namespace System.Web {
                 headers.Add(new HttpResponseHeader(HttpWorkerRequest.HeaderContentType, contentType));
             }
 
+#if !NETFRAMEWORK
+            RemoveOutrankedManagedHeaders(headers, managedHeadersStart, managedHeadersEnd);
+#endif
+
             // done
             return headers;
         }
+
+#if !NETFRAMEWORK
+        // ASP.NET's own generation runs on top of the collection (ledger P68): a field- or
+        // policy-generated header of the same name wins (readings H8, H9, H11), a collection
+        // Location with no RedirectLocation goes out as written (H7), and Set-Cookie is
+        // additive alongside the cookies (H10, H14). After the block has left the collection
+        // holds what was sent, so it contributes nothing further.
+        private void AppendManagedHeaderCollection(ArrayList headers, bool forCache) {
+            if (_headers == null || _headersWritten) {
+                return;
+            }
+
+            foreach (String name in _headers) {
+                if (name == null) {
+                    continue;
+                }
+
+                int knownHeaderIndex = HttpWorkerRequest.GetKnownResponseHeaderIndex(name);
+                bool isSetCookie = knownHeaderIndex == HttpWorkerRequest.HeaderSetCookie;
+
+                // the headers the cache recomputes on a hit, as GenerateResponseHeadersIntegrated skips them
+                if (forCache &&
+                     (isSetCookie ||
+                      knownHeaderIndex == HttpWorkerRequest.HeaderServer ||
+                      knownHeaderIndex == HttpWorkerRequest.HeaderCacheControl ||
+                      knownHeaderIndex == HttpWorkerRequest.HeaderExpires ||
+                      knownHeaderIndex == HttpWorkerRequest.HeaderLastModified ||
+                      knownHeaderIndex == HttpWorkerRequest.HeaderEtag ||
+                      knownHeaderIndex == HttpWorkerRequest.HeaderVary)) {
+                    continue;
+                }
+
+                String[] values = _headers.GetValues(name);
+                if (values == null) {
+                    continue;
+                }
+
+                for (int i = 0; i < values.Length; i++) {
+                    headers.Add(new HttpResponseHeader(name, values[i]));
+                }
+            }
+        }
+
+        // The entries ASP.NET's own generation outranks leave again once the whole block is
+        // built, which keeps the survivors in the generated order a same-name check up front
+        // could not have preserved.
+        private static void RemoveOutrankedManagedHeaders(ArrayList headers, int start, int end) {
+            // descending: each removal shifts the generated headers behind the range down one
+            for (int i = end - 1; i >= start; i--) {
+                HttpResponseHeader header = (HttpResponseHeader)headers[i];
+
+                if (HttpWorkerRequest.GetKnownResponseHeaderIndex(header.Name) == HttpWorkerRequest.HeaderSetCookie) {
+                    continue;
+                }
+
+                if (ContainsHeaderOutside(headers, header.Name, start, end)) {
+                    headers.RemoveAt(i);
+                    end--;
+                }
+            }
+        }
+
+        private static bool ContainsHeaderOutside(ArrayList headers, String name, int start, int end) {
+            for (int i = 0; i < headers.Count; i++) {
+                if (i >= start && i < end) {
+                    continue;
+                }
+
+                HttpResponseHeader header = headers[i] as HttpResponseHeader;
+                if (header != null && StringUtil.EqualsIgnoreCase(header.Name, name)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+#endif
 
         internal string AppendCharSetToContentType(string contentType)
         {
@@ -544,6 +636,13 @@ namespace System.Web {
                 header = headers[i] as HttpResponseHeader;
                 header.Send(_wr);
             }
+
+#if !NETFRAMEWORK
+            // From here Response.Headers reports the block that left, as the native collection
+            // did after the first flush (reading H15, ledger P68). Folded in on the next read so
+            // a response nobody asks about allocates no collection.
+            _sentHeaders = headers;
+#endif
         }
 
         internal int GetBufferedLength() {
@@ -936,6 +1035,20 @@ namespace System.Web {
 
         public NameValueCollection Headers {
             get {
+#if !NETFRAMEWORK
+                // Without a native header block the managed collection is the store itself
+                // (ledger P68); the throw was IIS7's absence, not an unportable operation.
+                if (_headers == null) {
+                    _headers = new HttpHeaderCollection(_wr, this, 16);
+                }
+
+                if (_sentHeaders != null) {
+                    _headers.ReplaceWithSentHeaders(_sentHeaders);
+                    _sentHeaders = null;
+                }
+
+                return _headers;
+#else
                 if ( !(_wr is IIS7WorkerRequest) ) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
@@ -945,6 +1058,7 @@ namespace System.Web {
                 }
 
                 return _headers;
+#endif
             }
         }
 
@@ -1651,6 +1765,11 @@ namespace System.Web {
                     coding = _headers["Content-Encoding"];
                 }
             }
+#if !NETFRAMEWORK
+            else if (_headers != null && _headers["Content-Encoding"] != null) {
+                coding = _headers["Content-Encoding"];
+            }
+#endif
             else if (_customHeaders != null) {
                 int numCustomHeaders = _customHeaders.Count;
                 for (int i = 0; i < numCustomHeaders; i++) {
@@ -2072,6 +2191,11 @@ namespace System.Web {
                     return;
                 }
                 else {
+#if !NETFRAMEWORK
+                    // Integrated mode routed AppendHeader into the collection, so the entry is
+                    // visible there and answers to Remove (readings H6, H13; ledger P68).
+                    Headers.Add(name, value);
+#else
                     HttpResponseHeader h;
                     if (knownHeaderIndex >= 0)
                         h = new HttpResponseHeader(knownHeaderIndex, value);
@@ -2079,6 +2203,7 @@ namespace System.Web {
                         h = new HttpResponseHeader(name, value);
 
                     AppendHeader(h);
+#endif
                 }
             }
         }
