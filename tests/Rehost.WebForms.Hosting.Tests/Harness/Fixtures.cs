@@ -16,4 +16,6 @@ internal static class Fixtures
     internal static readonly ScenarioFixture AsyncApp = new("asyncapp");
     internal static readonly ScenarioFixture FriendlyUrls = new("friendlyurls");
     internal static readonly ScenarioFixture DefDocDisabled = new("defdoc-disabled");
+    internal static readonly ScenarioFixture Session = new("session");
+    internal static readonly ScenarioFixture SessionCustom = new("session-custom");
 }

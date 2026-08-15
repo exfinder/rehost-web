@@ -8,4 +8,8 @@ public static class WitnessProtocol
     public const string StagePrefix = "stage:";
     public const string HandlerEntered = "handler-entered:";
     public const string BodyAbort = "body-abort:";
+    public const string SessionEntered = "session-entered:";
+    public const string SessionExited = "session-exited:";
+    public const string SessionEnded = "session-ended:";
+    public const string SessionStoreCall = "session-store:";
 }
