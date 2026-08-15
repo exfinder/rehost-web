@@ -105,7 +105,8 @@ Evidence: `IisServerConfigurationTests`, `WebServerAmendmentsOverKestrelTests`,
 | App-root `system.webServer/staticContent` | Supported | `add`/`remove`/`clear`, MIME types, duplicate validation, and inherited baseline |
 | App-root `requestFiltering/hiddenSegments` | Supported | Case-insensitive add/remove/clear; request refusal currently has an app-shaped response rather than IIS substatus 404.8 |
 | Per-folder `system.webServer` | Unassessed | IIS honors it; this port currently merges application root only |
-| App-root `system.webServer/defaultDocument` | Supported | Directory requests rewrite to the first existing candidate in list order (app observes the list's casing), 301 slash redirect, 403-class refusal; broken/disabled sections fail only directory requests (readings D1–D15); error bodies app-shaped pending `httpErrors` |
+| App-root `system.webServer/defaultDocument` | Supported | Directory requests rewrite to the first existing candidate in list order (app observes the list's casing), 301 slash redirect, 403-class refusal, and `enabled="false"` narrows to directory requests alone (readings D1–D15); error bodies app-shaped pending `httpErrors` |
+| Broken `system.webServer` sections | Supported | Any honored section that fails to parse or validate refuses activation, naming the file and the entry; IIS instead scoped its 500.19 to the requests reading the section, so an application it served despite a latent duplicate must be corrected before it starts here |
 | Request-filtering limits, custom headers, `httpErrors` | Unassessed | Planned IIS-configuration tenants |
 | `system.webServer/handlers` and `/modules` | Unassessed | Integrated registrations are not translated |
 | Framework root `httpModules` defaults | Partial | `UrlAuthorization` and `UrlRoutingModule-4.0` are registered in Framework order; the remaining baseline modules await reached behavior and classification |

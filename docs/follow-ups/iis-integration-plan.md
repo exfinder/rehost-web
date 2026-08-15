@@ -223,9 +223,10 @@ facts from the golden cache: `files` collection is `add`/`clear`/`remove`,
 | D14 | slash-less URLs: nonexistent dir / existing empty dir / `enabled="false"` dir | `/nope` → **404, no redirect**; `/sub-empty` → **301** (redirect precedes candidate probing); `/sub-off` → **403, no redirect** — a disabled section suppresses the courtesy redirect too |
 | D15 | duplicate `<add>` at app root, slash-less existing dir | **500, no redirect** — the broken section refuses before the redirect; direct file requests still 200 |
 
-D11 + D13 with P60's C1 reconcile under one IIS model: a broken section fails
+D11 + D13 with P60's C1 reconcile under one IIS model — a broken section fails
 exactly the requests that consume it (`staticContent` is consumed by every
-request, `defaultDocument` only by directory requests). D14/D15 pin the
+request, `defaultDocument` only by directory requests) — which the port
+declines to reproduce (decision 9). D14/D15 pin the
 module's internal order: read section → enabled gate → courtesy redirect →
 candidate probe; only the dir-exists check precedes the section.
 
@@ -248,12 +249,25 @@ candidate probe; only the dir-exists check precedes the section.
    platform via the P57 machinery; the app observes the **list's** casing
    (D1), `RawUrl` the original. Exercised on the CaseSensitiveDirectory
    fixtures plus a Linux round.
-9. **Config-error model — recorded amendment**: `defaultDocument` alone
-   adopts IIS's consumption-scoped failure (D11/D13): a broken section fails
-   directory requests app-wide with a 500-class response and leaves direct
-   requests serving. This deliberately deviates from the Layer-0
-   fail-at-activation rule, which `staticContent` and `hiddenSegments` keep;
-   the split is a ratified per-tenant exception, not drift.
+9. **Config-error model**: one rule for every honored section — validate at
+   activation, and a broken section refuses startup. The rule lives in ledger
+   P60; tenant stories consume it rather than re-deciding it.
+
+   Superseded 2026-08-15. This decision first ratified the opposite for
+   `defaultDocument` alone, adopting IIS's consumption-scoped failure
+   (D11/D13/D15) as a per-tenant exception. Two arguments retired it. IIS has
+   no per-section rule to copy: each native module reads its own config when
+   it runs, so `staticContent` looks app-wide only because every request
+   reads it — the port's activation-time merge cannot express that model
+   without abandoning atomic publication for all tenants. And the deferred
+   path was reachable only for authoring mistakes (duplicate `add`, missing
+   attribute, unparseable `enabled`, unknown element), so the fidelity bought
+   was fidelity to broken configuration, priced at a fork every remaining
+   tenant would have to re-argue from its own readings. The accepted cost:
+   an application IIS ran despite a latent duplicate — plausible where every
+   URL is routed or explicit, so the scoped 500.19 never surfaced — will not
+   start here until the configuration is fixed. D11/D13/D15 stay in the
+   readings table as measured and deliberately unmatched.
 10. **Baseline list**: verbatim golden six, order and casing untouched.
     `Default.asp`/`iisstart.htm` never exist in real apps, so probing skips
     them; keeping them preserves oracle-diffability.
