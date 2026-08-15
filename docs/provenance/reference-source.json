@@ -10,7 +10,7 @@
  },
  "import": {
   "path": "src/System.Web.ReferenceSource",
-  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' \u2014 shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
+  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' — shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
   "verification": "Files not named under 'deviations' must match upstream.sourceTree; deviating files are accounted for individually."
  },
  "license": {
@@ -46,6 +46,13 @@
    ],
    "reason": "backmerged from upstream branch NetFramework48ZDP (e47d8c1b6482e0babe243dff2f9ece1507c814ff): SameSiteMode ConvertTo fix and cookieSameSite doc-comment corrections; the branch's comment-scrubber hunk in Util/AppSettings.cs was deliberately not taken",
    "record": "this file"
+  },
+  {
+   "files": [
+    "UI/WebControls/DataBoundControlHelper.cs"
+   ],
+   "reason": "Dynamic Data enablement guarded behind a resolvable-type probe; System.Web.DynamicData is not carried (ledger P69)",
+   "record": "docs/portability-ledger.md P69"
   }
  ]
 }
