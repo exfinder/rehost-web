@@ -17,10 +17,10 @@ carry:
 | `ServiceModel` | `System.ServiceModel.Activation` |
 | `ScriptModule-4.0` | `System.Web.Extensions` |
 
-The other nine are types the port **does** carry, absent with no recorded
-reason: `OutputCache`, `Session`, `WindowsAuthentication`,
-`FormsAuthentication`, `PassportAuthentication`, `RoleManager`,
-`FileAuthorization`, `AnonymousIdentification`, and `Profile`.
+`Session` has since landed with the session-state story. The other eight are
+types the port **does** carry, absent with no recorded reason: `OutputCache`,
+`WindowsAuthentication`, `FormsAuthentication`, `PassportAuthentication`,
+`RoleManager`, `FileAuthorization`, `AnonymousIdentification`, and `Profile`.
 
 The [compatibility map](../compatibility.md) documents omissions from
 `buildProviders`, `pages/namespaces`, `pages/controls`, and `httpHandlers`.
@@ -41,20 +41,22 @@ precedent cannot simply be extended.
 
 ## The decision
 
-The general policy remains undecided. This story registered
-`UrlAuthorization` and `UrlRoutingModule-4.0` because both were reached and
-tested, preserving Framework order. That does not decide whether the remaining
-baseline should eventually land whole or one behavior story at a time.
+The general policy remains undecided. Three entries have landed —
+`UrlAuthorization`, `UrlRoutingModule-4.0`, and now `Session` — each because a
+behavior story reached and tested it, preserving Framework order. That is the
+pattern so far, not a decision that the remaining baseline should land whole.
 
-[Session state](session-state.md) owns its future entry unless the broader
-policy is decided first.
+`Session` carries one lesson for whoever decides the general policy: a module
+name in this collection is not only an identifier. `Global.asax` binds
+`Session_Start`/`Session_End` by matching it, so the registered name is part of
+the behavior, not merely a label.
 
 ## What it costs today
 
-An application configured for session state gets a null `Session` with
-no diagnostic, because the module that would serve it is not registered. The
-same is true of output caching and forms authentication. The project contract
-does not permit that silent fallback.
+Output caching and forms authentication still answer with silence: the modules
+that would serve them are not registered, and no diagnostic says so. The
+project contract does not permit that silent fallback. Session state was the
+worked example of the cost and is now fixed.
 
 Each absent module needs classifying the way the IIS-role audit classifies its
 candidates — covered elsewhere, deliberately excluded, or missing and worth

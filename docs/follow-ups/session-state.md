@@ -264,12 +264,31 @@ The cost of assessing it is the reason it stays open: `<sessionState timeout>`
 has a 1-minute floor and the sweep runs on 20-second buckets, so the test is
 60-80 seconds on every platform.
 
-## Done when
+## Delivered
 
-- `Session` is registered in the shipped root configuration and an application
-  observes a working `HttpContext.Session` with no configuration of its own.
-- The three evidence claims pass on Windows x64, Linux x64, and macOS arm64.
-- Preflight refuses `SQLServer` and `StateServer` with the wordings above, and a
-  test fails if either refusal is removed.
-- The compatibility map carries rows for both delivered modes, the two
-  unassessed areas, and the two refusals.
+`Session` is registered in the shipped root `<httpModules>` at Framework's
+position, preflight refuses both out-of-process modes, and the three evidence
+claims are covered by `SessionStateOverKestrelTests` and
+`CustomSessionStoreOverKestrelTests` over the `session` and `session-custom`
+fixtures.
+
+Two decisions departed from the plan above and are recorded rather than left
+contradicted:
+
+- The compatibility map carries **one** consolidated `Partial` row, not a row
+  per mode. The boundaries are all stated inside it.
+- The delivered evidence sits below the standing-test bar wherever it names no
+  port-owned seam, per rung 0 of
+  [writing tests](../writing-tests.md). `EnableSessionState="false"`,
+  `IsNewSession`, the lazy no-`Session_Start` issuance path, and the cookie's
+  own shape are Framework readings above plus compatibility boundaries; the
+  standing tests keep only the registration, the exclusive acquire, the
+  `ReadOnly` directive's codegen, the abandon-driven `Session_End`, the
+  provider resolution, and the two refusals.
+
+## Still open
+
+- `Session_End` on expiry, which needs the cache sweep thread and a 60-80
+  second test.
+- Cookieless identity, split by risk as recorded above.
+- `mode="SQLServer"` and `mode="StateServer"`, each owned by its own document.

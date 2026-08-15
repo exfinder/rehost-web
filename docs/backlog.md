@@ -110,8 +110,10 @@ Carried from Milestone 1 as unresolved detail:
 
 ### State, security, and providers
 
-- InProc and custom session providers, then explicit boundaries for cookieless
-  identity and `Session_End`: [session](follow-ups/session-state.md).
+- `Session_End` on expiry, and cookieless identity: InProc and custom providers
+  are delivered, so what remains is the cache sweep thread reaching the expiry
+  callback, and `UseUri`/`AutoDetect`/`UseDeviceProfile`:
+  [session](follow-ups/session-state.md).
 - SQL session schema/provisioning and two-host contention:
   [SQL session](follow-ups/session-sql.md).
 - Capture and implement the native state-server client protocol:
