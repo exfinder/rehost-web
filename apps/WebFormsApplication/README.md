@@ -24,7 +24,16 @@ dotnet run --project apps/WebFormsApplication/WebFormsApplication.Host
 
 dotnet publish apps/WebFormsApplication/WebFormsApplication.Host -c Release
 # deployable site: WebFormsApplication.Host/bin/Release/net10.0/site-publish/
+
+apps/WebFormsApplication/smoke.sh                    # journey against the running host
+eng/app-linux-smoke.sh WebFormsApplication 5081      # the same, built and run in a Linux container
 ```
+
+`smoke.sh` is bash + curl only and walks the template's browser journey: the
+default document and its `./` postback target, `/About` and `/Contact` through
+Friendly URLs, the `/Default.aspx` → `/Default` redirect, a static asset, the
+`WebFormsJs` script bundle and the `Content/css` style bundle, and mobile master
+selection by user agent and by the view-switcher cookie.
 
 One command is always enough. Building packs any changed `src/` project into
 the local feed (`artifacts/apps/feed/`, shared by every app under `apps/`)

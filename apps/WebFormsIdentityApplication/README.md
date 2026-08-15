@@ -74,7 +74,7 @@ committed connection string (`127.0.0.1,14333`) needs no second copy:
 
 ```text
 docker run -d --name rehost-identity-sql-linux -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Rehost!Dev2026' -e MSSQL_TCP_PORT=14333 mcr.microsoft.com/mssql/server:2022-latest
-eng/identity-linux-smoke.sh   # builds and smokes the committed HEAD in that namespace
+eng/app-linux-smoke.sh WebFormsIdentityApplication 5082   # builds and smokes the committed HEAD in that namespace
 ```
 
 ## web.config
