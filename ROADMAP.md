@@ -11,50 +11,33 @@ compiles and runs dynamic pages, and serves representative request, response,
 page, control, async, upload, static-file, and IIS-derived configuration paths.
 The former slices 0–4 are implementation history, not the roadmap.
 
-## Current — Milestone 1: stock Visual Studio application
+## Completed — Milestone 1: stock Visual Studio applications
 
-Run the unmodified .NET Framework 4.8.1 Visual Studio Web Forms template as a
-real Web Application Project on .NET 10.
+Both .NET Framework 4.8.1 Visual Studio Web Forms templates run unmodified as
+real Web Application Projects on .NET 10, from locally produced NuGet packages,
+on Windows x64, Linux, and macOS arm64:
 
-Application C#, markup, `Web.config`, and template assets are imported into this
-repository and frozen. Sidecar SDK projects, host code, package substitutions,
-and ported dependency assemblies are allowed. The application consumes locally
-produced NuGet packages; project references into the runtime are not allowed.
+- [`apps/WebFormsApplication`](apps/WebFormsApplication/README.md) — the plain
+  template. `smoke.sh` walks the browser journey (default document and its
+  postback target, Friendly URLs, the `.aspx` redirect, script and style
+  bundles, static assets, mobile master and view switching).
+- [`apps/WebFormsIdentityApplication`](apps/WebFormsIdentityApplication/README.md)
+  — the "Individual User Accounts" template: OWIN (Katana recompiled as
+  `Rehost.WebForms.Owin.Host.SystemWeb`), ASP.NET Identity 2.2 and Entity
+  Framework 6.4 consumed from nuget.org, SQL Server in a container. `smoke.sh`
+  matches every row of the IIS Express baseline (register, log in, log off,
+  URL authorization challenge, cookies).
 
-Work follows the browser journey:
+Each app is a frozen tree plus a sidecar `.App`/`.Host` pair; the packages it
+consumes are packed from `src/` into a shared local feed. Boundaries recorded
+along the way: LocalDb is a Windows-only engine (the connection string is the
+one app-visible change); auto-generated machine keys are process-scoped, so
+logins do not survive a restart without an explicit `<machineKey>`; the
+`ListView`/`DataPager` family joined the Extensions closure and Dynamic Data
+stays absent (ledger P69). The gap analysis and its closure live in
+[`docs/research/webforms-identity-application-gaps.md`](docs/research/webforms-identity-application-gaps.md).
 
-1. Package the runtime and compile the WAP code-behind, designer files, and
-   `Global.asax` through an SDK-style sidecar.
-2. Cold-start `/` and render the default page through normal handler mapping and
-   default-document behavior.
-3. Restore bundles, scripts, styles, and static assets.
-4. Restore Friendly URLs and routing.
-5. Restore mobile master selection and view switching.
-6. Gate the same browser-visible journey on Windows x64, Linux, and macOS
-   arm64.
-
-The local `Rehost.WebForms.FriendlyUrls` package covers steps 4–5 in a focused
-hosted fixture. The frozen application's package build now consumes ported
-ScriptManager and Optimization relatives and renders its full-page script/style
-path on macOS. Continue with the automated browser journey and Windows/Linux
-gates; port other managed relatives only as reached.
-
-The current vertical slice keeps the frozen application tree unchanged and
-restores only its full-page script/style path. It adds a source-compatible
-`Rehost.WebForms.Extensions` ScriptManager closure, attempts a full compile of
-the official ASP.NET Web Optimization source, ports its small WebForms
-`BundleReference`, and replaces the two legacy ScriptManager startup helpers
-with one `Rehost.WebForms.ScriptManager.Bundles` package. The existing physical
-JS/CSS files remain application-owned. General AJAX, embedded script delivery,
-and unrelated `System.Web.Extensions` APIs stay deferred. Detailed boundaries
-and evidence are in the
-[stock template script-stack plan](docs/follow-ups/stock-template-script-stack.md).
-
-Done means the frozen template application builds from local packages and its
-complete journey passes automatically on all three platforms. The existing
-custom sample remains a personal visual playground, not milestone evidence.
-
-## Next — Milestone 2: eShopLegacyWebForms
+## Current — Milestone 2: eShopLegacyWebForms
 
 Run Microsoft's eShopLegacyWebForms application with its C#, markup, and
 `Web.config` frozen. Start with deterministic mock data so runtime compatibility

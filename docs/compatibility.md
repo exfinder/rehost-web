@@ -28,7 +28,7 @@ Evidence: `ApplicationBootstrapTests`, `ApplicationConfigurationPublicationTests
 | Full trust | Supported | Partial trust and CAS policy are unsupported |
 | `<httpRuntime targetFramework="4.5" />` or later | Required | Lower values select unassessed quirks and native crypto; startup fails naming the fix |
 | Web Site runtime-compilation model | Partial | Exercised by fixtures and the sample; consumer build/publish packaging remains incomplete |
-| Web Application Project model | Unassessed | The sample exercises one WAP-shaped page manually; Milestone 1 adds the automated package-built contract |
+| Web Application Project model | Supported | Both Visual Studio templates build as frozen WAP trees through the `RehostAppContentRoot`/`RehostSiteContentRoot` sidecar contract from packages, and their `smoke.sh` journeys pass on all three platforms; publish payload and designer-file policy remain open in the backlog |
 | Microsoft `System.Web` binary identity | Unsupported | Source/API compatibility after rebuild is the target; strong-name/binary interchangeability is not promised |
 | Native ASP.NET/IIS libraries | Unsupported | `UnsafeNativeMethods` fails explicitly when an unported path reaches it |
 

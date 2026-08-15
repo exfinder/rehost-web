@@ -6,7 +6,16 @@ updates [`../ROADMAP.md`](../ROADMAP.md) when milestone scope changes.
 
 ## Current
 
-Milestone 1 owns these outcomes:
+Milestone 1 (both Visual Studio templates on all three platforms) is complete;
+its remaining detail moved below. Milestone 2 owns these outcomes:
+
+- Import eShopLegacyWebForms with frozen application sources and a sidecar host.
+- Establish deterministic mock-data journeys before database integration.
+- Recompile/replace only the managed dependency closure reached by eShop.
+- Keep EF6 consumption separate from real SQL deployment, which belongs to
+  Milestone 3.
+
+Carried from Milestone 1 as unresolved detail:
 
 - WAP sidecar build, publish payload, designer-file policy, and package-only
   consumption: [Web Site vs WAP](follow-ups/web-site-vs-wap-project-models.md).
@@ -15,24 +24,28 @@ Milestone 1 owns these outcomes:
   [IIS configuration layers](follow-ups/iis-integration-plan.md).
 - Friendly URL behavior and escaping:
   [route URL escaping](follow-ups/route-url-escaping.md).
-- Restore the frozen template's physical script/style path without changing its
-  sources: [script-stack plan](follow-ups/stock-template-script-stack.md).
+- ~~Restore the frozen template's physical script/style path~~ — done; the
+  production combination/minification breadth of Web Optimization remains
+  claimed only for the reached bundle/debug paths:
+  [script-stack plan](follow-ups/stock-template-script-stack.md).
 - ~~Ship the companion assemblies the root configuration names~~ — done: the
   [`Rehost.WebForms` metapackage](follow-ups/runtime-metapackage.md) owns the
   root configuration and its companions.
-- Attempt the complete ASP.NET Web Optimization source compile, but validate and
-  claim only the bundle/debug paths reached by the template.
-- Restore remaining static-asset behavior and mobile master/view switching.
-- Add one package-built browser journey on Windows x64, Linux, and macOS
-  arm64.
+- ~~Restore static-asset behavior and mobile master/view switching~~ — done,
+  pinned by `apps/WebFormsApplication/smoke.sh`.
+- ~~Add one package-built browser journey on Windows x64, Linux, and macOS
+  arm64~~ — done: `smoke.sh` in both `apps/*` folders, run on all three.
+- A host-owned machine-key store so auto-generated keys survive restart and
+  scale-out (the Identity template makes the process-scoped default visible as
+  "every restart logs everyone out"); ASP.NET Core Data Protection's key ring
+  is the candidate substrate: [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
 
 ## Next
 
-- Import eShopLegacyWebForms with frozen application sources and a sidecar host.
-- Establish deterministic mock-data journeys before database integration.
-- Recompile/replace only the managed dependency closure reached by eShop.
-- Keep EF6 consumption separate from real SQL deployment, which belongs to
-  Milestone 3.
+- Milestone 3 (production baseline): real SQL, deterministic Windows/Linux
+  publish, containers, graceful lifecycle, readiness/health, metrics and
+  diagnostics, external configuration and secrets, multi-instance operation —
+  see [`../ROADMAP.md`](../ROADMAP.md).
 
 ## Later
 
