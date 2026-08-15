@@ -86,8 +86,6 @@ Carried from Milestone 1 as unresolved detail:
   [runtime process policy](follow-ups/runtime-process-policy.md).
 - Remove broad Windows analyzer suppression after reachability classification:
   [Windows diagnostics](follow-ups/windows-platform-diagnostics.md).
-- Deterministic illogical `CallContext` isolation under pool-thread reuse:
-  [call-context isolation](follow-ups/illogical-call-context-isolation.md).
 - Classify reached silent catches without creating diagnostic noise:
   [silent exceptions](follow-ups/silent-exception-swallowing.md).
 

@@ -19,8 +19,12 @@ internal sealed class CallContext
     private static readonly AsyncLocal<IllogicalState?> IllogicalStateSlot =
         new(OnIllogicalContextChanged);
 
+    // Weak on purpose: a suspended state can only ever be resumed by a captured ExecutionContext
+    // that still references it, so once nothing does, the entry is dead and is pruned on the next
+    // transition. Strong entries never left the stack (most flows resume elsewhere) and grew by
+    // roughly one per request per pool thread for the life of the process.
     [ThreadStatic]
-    private static Stack<IllogicalState>? _suspendedIllogicalStates;
+    private static Stack<WeakReference<IllogicalState>>? _suspendedIllogicalStates;
 
     // ExecutionContext.Run wipes the illogical state, and modern .NET has no
     // HostExecutionContextManager through which a host could re-establish it inside the run the
@@ -126,22 +130,38 @@ internal sealed class CallContext
         if (!args.ThreadContextChanged)
             return;
 
-        if (args.CurrentValue is not null &&
-            _suspendedIllogicalStates?.TryPeek(out var suspended) == true &&
-            ReferenceEquals(suspended, args.CurrentValue))
+        var suspended = PruneDeadSuspendedStates();
+        if (args.CurrentValue is not null && ReferenceEquals(suspended, args.CurrentValue))
         {
-            _suspendedIllogicalStates.Pop();
+            _suspendedIllogicalStates!.Pop();
             return;
         }
 
         if (args.PreviousValue is not null)
-            (_suspendedIllogicalStates ??= new Stack<IllogicalState>()).Push(args.PreviousValue);
+            (_suspendedIllogicalStates ??= new Stack<WeakReference<IllogicalState>>())
+                .Push(new WeakReference<IllogicalState>(args.PreviousValue));
 
         if (args.CurrentValue is not null)
         {
             var restored = _hostContextRestorer?.Invoke(args.CurrentValue.HostContext);
             IllogicalStateSlot.Value = restored is null ? null : new IllogicalState(restored);
         }
+    }
+
+    private static IllogicalState? PruneDeadSuspendedStates()
+    {
+        var stack = _suspendedIllogicalStates;
+        if (stack is null)
+            return null;
+
+        while (stack.TryPeek(out var top))
+        {
+            if (top.TryGetTarget(out var state))
+                return state;
+            stack.Pop();
+        }
+
+        return null;
     }
 
     private sealed class IllogicalState

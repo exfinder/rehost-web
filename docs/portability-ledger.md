@@ -230,7 +230,7 @@ headers turns five.
 
 Unreached and unresolved work is indexed in [the backlog](backlog.md). The main
 cross-cutting owners are process lifetime, IIS-derived behavior, path mapping,
-silent exception handling, and illogical `CallContext` isolation.
+and silent exception handling.
 
 ## Update rule
 

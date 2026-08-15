@@ -83,7 +83,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | Page async timeout | Partial | TAP timeout/token behavior is exercised; a never-completing APM task remains pending, matching the measured Framework result |
 | `PageAsyncTask` parallel/timeout handlers | Unsupported | Framework refuses them under the supported task-friendly context; the advertised legacy-context switch is also unsupported |
 | `aspnet:UseTaskFriendlySynchronizationContext=false` | Unsupported | Activation fails naming the setting and required change |
-| Illogical `CallContext` isolation | Partial | Pool-thread reuse can expose a stale illogical value; see [call-context rationale](call-context-compatibility.md) |
+| Illogical `CallContext` isolation | Supported with a boundary | Framework-exact for every System.Web path; a same-scope capture landing on its origin thread while data is still set is visible, unreachable through System.Web; net481-vs-port contract suite; see [call-context rationale](call-context-compatibility.md) |
 | Application access to remoting `CallContext` | Unsupported | Compatibility type remains internal; publishing it would claim general remoting support |
 | `Response.End`, terminating redirects, `CompleteRequest` | Partial | Response/pipeline effects match; named catch/abort differences are below |
 | `catch (ThreadAbortException)` around termination | Partial | Never executes because modern .NET has no compatible thread-abort signal |

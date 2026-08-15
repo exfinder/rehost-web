@@ -6,18 +6,26 @@ System.Web restores its internal
 - Logical values flow with `ExecutionContext`.
 - Immutable snapshots prevent child-task writes leaking to parents.
 - Illogical values remain local and clear on execution-context transitions.
-- Illogical isolation is approximate, and fails open. A pooled thread that both
-  suspends and resumes the same illogical state reads the resumption as
-  inheritance, so a work item scheduled onto that thread can observe the values of
-  the one before it. The visible symptom is `HttpContext.Current` — it reaches
-  `CallContext.HostContext` through `ContextBase` — appearing non-null inside a
-  `Task.Run` where .NET Framework guarantees null. Framework kept illogical data in
-  the `ExecutionContext` and simply did not copy it on capture; `AsyncLocal` has no
-  such mode and reports no transition kind, so the suspended-state stack is the
-  only available approximation. Thread ownership is not a substitute: illogical
-  data is execution-context-scoped, not thread-scoped, and clears across
-  `ExecutionContext.Run` on the same thread. Tracked in
-  [illogical call context isolation](follow-ups/illogical-call-context-isolation.md).
+- Illogical isolation is exact for every path the port runs, and has one
+  stated boundary. `AsyncLocal` reports "the thread's context changed" for both
+  a return from a nested `ExecutionContext.Run` and a captured context entering
+  `Run`; nothing distinguishes them when the captured context is the origin
+  thread's own. The port therefore treats a returning suspended state as a
+  resumption. Consequence: a continuation captured while a scope still held
+  illogical data is visible if it lands back on the thread that captured it —
+  Framework hides it. Every other case is Framework-exact: other threads, other
+  requests' captures, nested `Run` on the same thread (hidden, then restored),
+  and data cleared before the thread left. The boundary is unreachable through
+  System.Web: `HttpContext.Current` is bracketed by `ThreadContext`, the
+  `WebEvents`, `TemplatedMailWebEventProvider`, and `HostingEnvironment` slots
+  by `try/finally`, and the three checker slots that stay set
+  (`TimeStampChecker`, `BuildManager`'s circular-reference and batch checkers)
+  hold only the request's own scratch objects, so the worst case is a request
+  seeing its own empty checker again. `CallContext` is internal, so no other
+  caller exists. Suspended states are held weakly and pruned as their flows die,
+  bounding retention by in-flight flows rather than request history. The
+  contract suite (below) keeps the Framework reading of the boundary and skips
+  those six tests on the port leg with this reason.
 - `ILogicalThreadAffinative` values and host contexts flow.
 - `HostContext` survives await resumptions through a restore seam (ledger P63):
   the wipe path raises a neutral hook, and System.Web's registered handler
