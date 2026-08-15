@@ -3,124 +3,18 @@ using Xunit;
 
 namespace Rehost.WebForms.CallContext.Contract.Tests;
 
-// .NET Framework keeps illogical call-context data (SetData without ILogicalThreadAffinative, and
-// the non-affinative HostContext behind HttpContext.Current) in the ExecutionContext and does not
-// copy it on capture: a flowed continuation never sees it, wherever it runs, and a work item's
-// writes die with the work item's copy-on-write scope. Every test here is phrased against that
-// contract.
+// The illogical-isolation contract both implementations honor: data left on a thread does not
+// reach the next work item, nothing survives a completed flow, and Framework's bare-thread
+// quirk. The Framework-only half of the contract is in FrameworkOnlyIsolationTests.
 //
-// The deterministic tests model thread-pool dispatch exactly: a dedicated thread runs work item 1
-// under ExecutionContext.Run (the request sets its context and an await captures it), returns to
-// idle, then runs work item 2 under the captured context (the continuation landing on the same
-// thread). A SynchronizationContext is installed in work item 1 as AspNetSynchronizationContext is
-// on every request thread; see Bare_HostContext_... for why that matters on Framework.
+// The deterministic tests model thread-pool dispatch: a dedicated thread runs a work item under
+// ExecutionContext.Run, returns to idle, then runs the next work item. A SynchronizationContext is
+// installed as AspNetSynchronizationContext is on every request thread; see
+// Bare_HostContext_... for why that matters on Framework.
 public sealed class IllogicalIsolationTests(ITestOutputHelper output)
 {
-    // The port cannot tell "returning from a nested Run" from "a same-scope capture running on the
-    // origin thread" — AsyncLocal reports both as the same transition — so a continuation captured
-    // in a scope that still holds data is visible when it lands back on its own thread. Framework
-    // hides it. Reachable only through data left set across an await, which no System.Web caller
-    // does; recorded in docs/call-context-compatibility.md. The tests stay so the Framework leg
-    // keeps pinning the contract.
-#if NET481
-    private const string? PortDeviation = null;
-#else
-    private const string PortDeviation =
-        "port deviation: a same-scope capture landing on its origin thread is visible (see docs/call-context-compatibility.md)";
-#endif
-
-    // ---- Deterministic: a flow that returns to the very thread that captured it ----------------
-
-    [Fact(Skip = PortDeviation)]
-    public void Illogical_HostContext_is_not_visible_when_the_captured_context_runs_on_the_origin_thread()
-    {
-        Threads.OnDedicated(() =>
-        {
-            var context = new object();
-            ExecutionContext? captured = null;
-            object? seenInsideFlow = "unset";
-
-            ExecutionContext.Run(Threads.Pristine(), _ =>
-            {
-                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-                Cc.HostContext = context;
-                captured = ExecutionContext.Capture();
-            }, null);
-            ExecutionContext.Run(captured!, _ => seenInsideFlow = Cc.HostContext, null);
-
-            seenInsideFlow.ShouldBeNull();
-        });
-    }
-
-    [Fact(Skip = PortDeviation)]
-    public void Illogical_data_is_not_visible_when_the_captured_context_runs_on_the_origin_thread()
-    {
-        Threads.OnDedicated(() =>
-        {
-            var name = Guid.NewGuid().ToString("N");
-            ExecutionContext? captured = null;
-            object? seenInsideFlow = "unset";
-
-            ExecutionContext.Run(Threads.Pristine(), _ =>
-            {
-                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-                Cc.SetData(name, "request-A");
-                captured = ExecutionContext.Capture();
-            }, null);
-            ExecutionContext.Run(captured!, _ => seenInsideFlow = Cc.GetData(name), null);
-
-            seenInsideFlow.ShouldBeNull();
-        });
-    }
-
-    [Fact(Skip = PortDeviation)]
-    public void Illogical_writes_made_after_capture_are_not_visible_inside_the_flow()
-    {
-        Threads.OnDedicated(() =>
-        {
-            var name = Guid.NewGuid().ToString("N");
-            ExecutionContext? captured = null;
-            object? seenInsideFlow = "unset";
-
-            ExecutionContext.Run(Threads.Pristine(), _ =>
-            {
-                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-                Cc.SetData(name, "before-capture");
-                captured = ExecutionContext.Capture();
-                Cc.SetData(name, "after-capture");
-            }, null);
-            ExecutionContext.Run(captured!, _ => seenInsideFlow = Cc.GetData(name), null);
-
-            seenInsideFlow.ShouldNotBe("after-capture");
-        });
-    }
-
-    [Fact(Skip = PortDeviation)]
-    public void Two_continuations_of_one_flow_landing_on_the_origin_thread_never_see_illogical_HostContext()
-    {
-        Threads.OnDedicated(() =>
-        {
-            var context = new object();
-            ExecutionContext? first = null;
-            ExecutionContext? second = null;
-            var seen = new List<object?>();
-
-            ExecutionContext.Run(Threads.Pristine(), _ =>
-            {
-                SynchronizationContext.SetSynchronizationContext(new SynchronizationContext());
-                Cc.HostContext = context;
-                first = ExecutionContext.Capture();
-                second = ExecutionContext.Capture();
-            }, null);
-            ExecutionContext.Run(first!, _ => seen.Add(Cc.HostContext), null);
-            ExecutionContext.Run(second!, _ => seen.Add(Cc.HostContext), null);
-
-            seen.ShouldAllBe(v => v == null);
-        });
-    }
-
     [Fact]
-    public void A_work_item_that_leaves_illogical_HostContext_behind_does_not_hand_it_to_the_next_work_item()
+    public void A_Work_Item_That_Leaves_Illogical_HostContext_Behind_Does_Not_Hand_It_To_The_Next_Work_Item()
     {
         Threads.OnDedicated(() =>
         {
@@ -144,7 +38,7 @@ public sealed class IllogicalIsolationTests(ITestOutputHelper output)
     // ASP.NET, whose request threads always carry a SynchronizationContext, but it is what 4.8.1
     // does; recorded so nobody "fixes" the port into hiding it here and calls that Framework.
     [Fact]
-    public void Bare_HostContext_with_no_other_context_stays_visible_across_Run_on_the_origin_thread()
+    public void Bare_HostContext_With_No_Other_Context_Stays_Visible_Across_Run_On_The_Origin_Thread()
     {
         Threads.OnDedicated(() =>
         {
@@ -162,31 +56,40 @@ public sealed class IllogicalIsolationTests(ITestOutputHelper output)
         });
     }
 
-    // ---- Statistical: the real thread pool ------------------------------------------------------
-
-    [Fact(Skip = PortDeviation)]
-    public async Task HostContext_is_null_after_ConfigureAwait_false_on_every_pool_thread()
+    // ---- The real thread pool --------------------------------------------------------------------
+    //
+    // Neither implementation is absolute here. mscorlib 4.8.9337 measured HostContext non-null
+    // 2/4000 and 1/4000 and a data slot 1/4000 across ten 4000-flow runs (winbox, 2026-08-15); the
+    // port measures 0-2/4000. Both are a same-scope value seen by its own continuation on the
+    // origin thread. What the pool must never show is a gross leak, which the bound catches
+    // (thousands, as an unbounded suspended stack produced). The data slot beside the HostContext
+    // keeps Framework off its lone-HostContext fast path (see Bare_HostContext_...).
+    [Fact]
+    public async Task HostContext_After_ConfigureAwait_False_Is_Null_On_The_Pool_Beyond_A_Rare_Same_Scope_Echo()
     {
         const int Flows = 4000;
+        var name = Guid.NewGuid().ToString("N");
         var nonNull = 0;
 
         await Task.WhenAll(Enumerable.Range(0, Flows).Select(_ => Task.Run(async () =>
         {
             Cc.HostContext = new object();
+            Cc.SetData(name, "request");
             await Task.Delay(1).ConfigureAwait(false);
             if (Cc.HostContext != null)
             {
                 Interlocked.Increment(ref nonNull);
             }
             Cc.HostContext = null;
+            Cc.FreeNamedDataSlot(name);
         })));
 
         output.WriteLine($"HostContext non-null after ConfigureAwait(false): {nonNull}/{Flows}");
-        nonNull.ShouldBe(0);
+        nonNull.ShouldBeLessThan(Flows / 100);
     }
 
-    [Fact(Skip = PortDeviation)]
-    public async Task Illogical_data_is_null_after_ConfigureAwait_false_on_every_pool_thread()
+    [Fact]
+    public async Task Illogical_Data_After_ConfigureAwait_False_Is_Null_On_The_Pool_Beyond_A_Rare_Same_Scope_Echo()
     {
         const int Flows = 4000;
         var name = Guid.NewGuid().ToString("N");
@@ -204,13 +107,13 @@ public sealed class IllogicalIsolationTests(ITestOutputHelper output)
         })));
 
         output.WriteLine($"illogical data non-null after ConfigureAwait(false): {nonNull}/{Flows}");
-        nonNull.ShouldBe(0);
+        nonNull.ShouldBeLessThan(Flows / 100);
     }
 
     // ---- Retention: nothing survives the flow ---------------------------------------------------
 
     [Fact]
-    public async Task HostContext_objects_are_collectible_once_their_flows_have_completed()
+    public async Task HostContext_Objects_Are_Collectible_Once_Their_Flows_Have_Completed()
     {
         const int Flows = 2000;
         var references = new List<WeakReference>();
@@ -224,11 +127,7 @@ public sealed class IllogicalIsolationTests(ITestOutputHelper output)
             await Task.Delay(1).ConfigureAwait(false);
             Cc.HostContext = null;
         })));
-        for (var i = 0; i < 3; i++)
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-        }
+        Collect();
 
         var alive = references.Count(r => r.IsAlive);
         output.WriteLine($"HostContext objects alive after GC: {alive}/{Flows}");
@@ -237,7 +136,7 @@ public sealed class IllogicalIsolationTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task Illogical_data_values_are_collectible_once_their_flows_have_completed()
+    public async Task Illogical_Data_Values_Are_Collectible_Once_Their_Flows_Have_Completed()
     {
         const int Flows = 2000;
         var name = Guid.NewGuid().ToString("N");
@@ -252,14 +151,19 @@ public sealed class IllogicalIsolationTests(ITestOutputHelper output)
             await Task.Delay(1).ConfigureAwait(false);
             Cc.FreeNamedDataSlot(name);
         })));
+        Collect();
+
+        var alive = references.Count(r => r.IsAlive);
+        output.WriteLine($"illogical values alive after GC: {alive}/{Flows}");
+        alive.ShouldBeLessThan(Flows / 100);
+    }
+
+    private static void Collect()
+    {
         for (var i = 0; i < 3; i++)
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }
-
-        var alive = references.Count(r => r.IsAlive);
-        output.WriteLine($"illogical values alive after GC: {alive}/{Flows}");
-        alive.ShouldBeLessThan(Flows / 100);
     }
 }

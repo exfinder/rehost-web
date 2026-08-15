@@ -9,11 +9,11 @@ namespace Rehost.WebForms.CallContext.Contract.Tests;
 public sealed class SharedContractTests(ITestOutputHelper output)
 {
     [Fact]
-    public void Reports_the_implementation_under_test() =>
+    public void Reports_The_Implementation_Under_Test() =>
         output.WriteLine("CallContext implementation: " + Cc.Implementation);
 
     [Fact]
-    public void Illogical_data_is_visible_to_synchronous_callees_on_the_same_thread()
+    public void Illogical_Data_Is_Visible_To_Synchronous_Callees_On_The_Same_Thread()
     {
         Threads.OnDedicated(() =>
         {
@@ -27,7 +27,7 @@ public sealed class SharedContractTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void Illogical_data_does_not_reach_a_new_thread()
+    public void Illogical_Data_Does_Not_Reach_A_New_Thread()
     {
         var name = Guid.NewGuid().ToString("N");
         Cc.SetData(name, "parent");
@@ -38,7 +38,7 @@ public sealed class SharedContractTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void Illogical_HostContext_does_not_reach_a_new_thread()
+    public void Illogical_HostContext_Does_Not_Reach_A_New_Thread()
     {
         Cc.HostContext = "parent";
 
@@ -48,7 +48,7 @@ public sealed class SharedContractTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public async Task Logical_data_flows_into_a_task_and_child_writes_do_not_leak_back()
+    public async Task Logical_Data_Flows_Into_A_Task_And_Child_Writes_Do_Not_Leak_Back()
     {
         var name = Guid.NewGuid().ToString("N");
         Cc.LogicalSetData(name, "parent");
@@ -66,7 +66,7 @@ public sealed class SharedContractTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void Parent_illogical_data_is_restored_after_a_nested_execution_context_run()
+    public void Parent_Illogical_Data_Is_Restored_After_A_Nested_Execution_Context_Run()
     {
         Threads.OnDedicated(() =>
         {
@@ -84,7 +84,7 @@ public sealed class SharedContractTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void FreeNamedDataSlot_clears_logical_and_illogical_storage()
+    public void FreeNamedDataSlot_Clears_Logical_And_Illogical_Storage()
     {
         var name = Guid.NewGuid().ToString("N");
         Cc.LogicalSetData(name, "logical");

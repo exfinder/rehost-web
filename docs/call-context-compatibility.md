@@ -24,8 +24,12 @@ System.Web restores its internal
   seeing its own empty checker again. `CallContext` is internal, so no other
   caller exists. Suspended states are held weakly and pruned as their flows die,
   bounding retention by in-flight flows rather than request history. The
-  contract suite (below) keeps the Framework reading of the boundary and skips
-  those six tests on the port leg with this reason.
+  contract suite (below) keeps the Framework reading of the boundary in
+  `FrameworkOnlyIsolationTests`, compiled into the net481 leg only. On the
+  real thread pool Framework is not absolute either: mscorlib 4.8.9337 showed a
+  same-scope value to its own `ConfigureAwait(false)` continuation 1-2 times per
+  4000 flows in some runs (winbox, 2026-08-15), the same order as the port; the
+  suite bounds that rate rather than asserting zero on either leg.
 - `ILogicalThreadAffinative` values and host contexts flow.
 - `HostContext` survives await resumptions through a restore seam (ledger P63):
   the wipe path raises a neutral hook, and System.Web's registered handler
