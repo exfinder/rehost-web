@@ -276,6 +276,45 @@ candidate probe; only the dir-exists check precedes the section.
     remain the `httpErrors` story's decision — including the stub HTML body
     IIS attaches to the courtesy 301, which the port's redirect omits.
 
+## Readings — `Response.Headers` (taken 2026-08-15, IIS Express 10.0.26013 on winbox)
+
+Rig: integrated Clr4 pool, one `.ashx` (`?case=`) that applies the stimulus,
+then dumps `Response.Headers` (`Count`, every key/value), `ContentType`,
+`RedirectLocation`, `StatusCode` into the body while still inside the handler;
+`curl -i` captures the wire. IIS's own `Server` header is present in the
+collection from the start and is elided below.
+
+| # | Stimulus (inside the handler) | Collection before send | Wire |
+| --- | --- | --- | --- |
+| H1 | nothing | empty | `Cache-Control: private`, `Content-Type: text/html; charset=utf-8`, `X-AspNet-Version` |
+| H2 | `Response.ContentType = "text/plain"` | empty | `Content-Type: text/plain; charset=utf-8` |
+| H3 | `Response.Cookies.Add(a)`, then `Add(b)` | empty | `Set-Cookie: a=1; path=/` (+ `b=2`) |
+| H4 | `Response.Redirect("/x", false)` | empty; `RedirectLocation=/x`, `StatusCode=302` | 302, `Location: /x`, redirect body |
+| H5 | `Response.Cache.SetCacheability(Public)` (+ `SetMaxAge(30)`) | empty | `Cache-Control: public` (`public, max-age=30`) |
+| H6 | `AppendHeader("X-Custom","v1")`, `("X-Custom","v2")` | `X-Custom=v1`, `X-Custom=v2` | both sent |
+| H7 | `Headers.Set("Location","/y")` (status left 200 / set 302) | `Location=/y`; **`RedirectLocation` stays null** | `Location: /y` with 200 / 302 |
+| H8 | `Headers.Set("Content-Type","text/csv")` (also `Add`) | `Content-Type=text/csv`; `ContentType` stays `text/html` | **`Content-Type: text/html; charset=utf-8`** — the managed field wins at send |
+| H9 | `Headers.Set("Cache-Control","no-store")` | `Cache-Control=no-store` | **`Cache-Control: private`** — the cache policy wins at send |
+| H10 | `Cookies.Add(a)` then `Headers.Remove("Set-Cookie")` (then `Add(b)`) | empty | `Set-Cookie: a=1` (and `b=2`) still sent — cookies are generated at send |
+| H11 | `Redirect("/x", false)` then `Headers.Remove("Location")` | empty; `RedirectLocation=/x` | 302, `Location: /x` still sent |
+| H12 | `Headers.Remove("Cache-Control")`, `Remove("X-AspNet-Version")` before send | empty | both still sent |
+| H13 | `AppendHeader("X-Custom")` then `Headers.Remove("X-Custom")` | empty | not sent |
+| H14 | `Headers.Add("Set-Cookie","z=9; path=/")` | `Set-Cookie=z=9; path=/` | sent |
+| H15 | `Response.Write; Flush;` then `Headers.Add` / `Remove` / `Get` | after flush the collection shows `Cache-Control=private`, `Content-Type=text/html; charset=utf-8` | `Add` → `HttpException` "Server cannot append header after HTTP headers have been sent."; `Remove` no throw, no effect; `Get` works |
+| H16 | `AppendHeader` then `ClearHeaders()` | `Count=0` (even `Server`) | `Server`, `Cache-Control: private`, `X-AspNet-Version` re-emitted at send |
+
+Model the readings pin: before send, `Response.Headers` holds only what was
+written through the collection — `AppendHeader` routes there (H6), the field
+APIs do not (H2–H5) — and only those entries answer to `Remove` (H13 vs
+H10–H12). At send, ASP.NET's own generation runs on top of the collection:
+`ContentType`, the cache policy, and `RedirectLocation` win over same-named
+collection entries (H8, H9, H11) while a collection `Location` with no
+`RedirectLocation` goes out as written (H7); cookies from `Response.Cookies`
+are appended regardless (H10). After the first flush the collection mirrors the
+native block, `Add` throws, `Remove` is inert (H15). No sync from a managed
+`Headers.Set` back into `RedirectLocation`/`ContentType` is observable inside
+the same handler (H7, H8).
+
 ## Relationship to existing work
 
 The [IIS-role audit](iis-role-behaviors.md) enumerates tenants; this plan
