@@ -77,6 +77,16 @@ WAP, database renamed per run, 2026-08-15 (`Set-Cookie` values elided):
 | `POST /Account/Login` wrong password | 200; body contains `Invalid login attempt` |
 | `POST /Account/Login` right password | 302 → `/`; same three-cookie `Set-Cookie` as register |
 
+**.NET 10 probe (2026-08-15, macOS arm64, SQL Server 2022 in Docker, packages
+as shipped from nuget.org under `NU1701`)**: all eight `net45` assemblies load;
+EF 6.4.4 creates the Identity schema; `UserManager` create/validate/lockout,
+`DataProtectorTokenProvider` round-trips, `SignInManager` reaches
+`SignInStatus.Success` over a bare `OwinContext`; cookie middleware turns a 401
+into the same absolute `Location: …/Account/Login?ReturnUrl=%2FAccount%2FManage`
+as the Framework baseline and round-trips `.AspNet.ApplicationCookie`. Only
+failure: the DPAPI default protector (row below). Nothing needs recompiling for
+portability; the System.Web host is the one port.
+
 Not exercised by the template as generated: external providers (all four
 `app.Use…Authentication` calls are commented out), e-mail/SMS (stub services),
 account confirmation and password reset (links commented out), two-factor.
@@ -90,13 +100,13 @@ shipped binary as-is on .NET 10 (`net45` assemblies load under `NU1701`).
 | Component (packages.config) | What the app touches | Ported | Runs off Windows as shipped | Proposed direction | Size |
 | --- | --- | --- | --- | --- | --- |
 | `Microsoft.Owin` 4.2.2, `Owin` 1.0 | `IAppBuilder`, `IOwinContext`, `PathString`, `OwinStartupAttribute` | No | Yes — pure managed, no System.Web reference | Consume as-is from nuget.org | — |
-| `Microsoft.Owin.Security` 4.2.2, `.Security.Cookies` | `UseCookieAuthentication`, `CookieAuthenticationProvider`, `IAuthenticationManager` (`SignOut`, `Challenge`, `GetExternalLoginInfo`) | No | Mostly — but its *default* `IDataProtectionProvider` is DPAPI (`ProtectedData`), which throws off Windows; only the SystemWeb host swaps in `MachineKey` | Consume as-is; the recompiled host must keep supplying the MachineKey protector | — |
+| `Microsoft.Owin.Security` 4.2.2, `.Security.Cookies` | `UseCookieAuthentication`, `CookieAuthenticationProvider`, `IAuthenticationManager` (`SignOut`, `Challenge`, `GetExternalLoginInfo`) | No | Yes, given a protector. Its *default* `IDataProtectionProvider` derives from `System.Security.Cryptography.DpapiDataProtector`, a type absent from .NET on every OS: `TypeLoadException` at `app.Build()`, before any request. Transitively pins `Newtonsoft.Json` 6.0.4 (NU1903) — pin 13.x | Consume as-is; the recompiled host must call `SetDataProtectionProvider` with the MachineKey protector **unconditionally** | — |
 | `Microsoft.Owin.Host.SystemWeb` 4.2.2 | `HttpContext.GetOwinContext()`, `OwinHttpModule`, `MachineKeyDataProtector`, `HttpContext.User` bridging | No | **No** — references Microsoft's `System.Web` 4.0.0.0 by strong name; also `Microsoft.Web.Infrastructure` | **Port**: `Rehost.WebForms.Owin.Host` recompiled from Katana source against `Rehost.WebForms.Runtime`, dropping `Microsoft.Web.Infrastructure` exactly as the Optimization port did (`docs/provenance/aspnet-web-optimization.md`) | S–M (~40 files; the module, call context, environment dictionary, data protector) |
 | `Microsoft.Owin.Security.OAuth`, `.Google`, `.Facebook`, `.Twitter`, `.MicrosoftAccount` | Referenced; not called (commented out) | No | Yes | Consume as-is; behaviour unassessed until an app enables one | — |
 | `Microsoft.AspNet.Identity.Core` 2.2.4 | `UserManager<T>`, `IdentityResult`, `PasswordValidator`, token providers, `IIdentityMessageService` | No | Yes — pure managed | Consume as-is | — |
 | `Microsoft.AspNet.Identity.Owin` 2.2.4 | `SignInManager`, `CreatePerOwinContext`, `GetUserManager<T>`, `SecurityStampValidator`, `DataProtectorTokenProvider`, `IdentityFactoryOptions.DataProtectionProvider` | No | Yes — depends on Owin.Security.*, not System.Web | Consume as-is | — |
 | `Microsoft.AspNet.Identity.EntityFramework` 2.2.4 | `IdentityDbContext<T>`, `IdentityUser`, `UserStore<T>` | No | Yes — depends on EF ≥ 6.1 | Consume as-is | — |
-| `EntityFramework` 6.4.4 (+ `EntityFramework.SqlServer`) | `DbContext("DefaultConnection")`, code-first create, `entityFramework` config section, `providers` | No | Yes — 6.3+ ships `netstandard2.1`; SqlServer provider uses `System.Data.SqlClient`, which the runtime already depends on (`Directory.Packages.props`) | Consume as-is. **Open point**: EF reads `<connectionStrings>` and `<entityFramework>` through static `System.Configuration.ConfigurationManager`. On Framework that sees `web.config` because ASP.NET makes it the AppDomain's config file; the port opens `web.config` through `WebConfigurationManager` (`ApplicationBootstrap.cs`), so `ConfigurationManager` sees the host exe's config instead. Needs a bridge or a documented host-config placement | S code, one seam decision |
+| `EntityFramework` 6.4.4 (+ `EntityFramework.SqlServer`) | `DbContext("DefaultConnection")`, code-first create, `entityFramework` config section, `providers` | No | Yes — 6.3+ ships `netstandard2.1`; SqlServer provider uses `System.Data.SqlClient`, which the runtime already depends on (`Directory.Packages.props`) | Consume as-is (probe: schema created, name-based `base("DefaultConnection")` works). EF reads `<connectionStrings>` and `<entityFramework>` through static `System.Configuration.ConfigurationManager`, which on .NET 10 reads `<host>.dll.config`, not the site `web.config` the port opens via `WebConfigurationManager`. Placement question only: copy the sections into the host config, or bridge | S code, one seam decision |
 | LocalDb (`(LocalDb)\MSSQLLocalDB`, `AttachDbFilename=|DataDirectory|\…mdf`) | Database engine + file-attach on first `DbContext` use | n/a | **No** — LocalDb is a Windows-only SQL Server flavour | **Out of contract**: state the boundary; the app-visible fix is a connection string pointing at a reachable SQL Server (container/service). `|DataDirectory|` itself is fine — the port sets it to `App_Data` (`HttpRuntime.SetUpDataDirectory`) | S code, one design note |
 | `Microsoft.Web.Infrastructure` 2.0 | Only as Katana's dependency (`DynamicModuleUtility`); Katana 4.x calls `HttpApplication.RegisterModule` directly | No | No — binds Microsoft System.Web | Drop in the recompiled host (precedent: Optimization) | — |
 | `Newtonsoft.Json` 13 | Katana dependency | n/a | Yes | Consume as-is | — |
@@ -125,10 +135,9 @@ following from `Rehost.WebForms.Runtime`. Status from `docs/compatibility.md`.
 
 ## Proposed order (proposal)
 
-1. **Storage boundary first, on Windows**: point `DefaultConnection` at a SQL
-   Server reachable from all three OSes and confirm EF 6.4 + Identity.EF work
-   on .NET 10 with the shipped binaries. No port work; answers "does the data
-   layer even run?" and settles the LocalDb boundary text.
+1. ~~Storage boundary first~~ — done by the probe above: EF 6.4 + Identity.EF
+   run on .NET 10 off Windows against SQL Server; LocalDb is the only
+   non-portable piece and the fix is a connection string.
 2. **`Rehost.WebForms.Owin.Host`**: recompile Katana's SystemWeb host against
    the runtime (provenance record, `Microsoft.Web.Infrastructure` dropped,
    `MachineKey` protector kept). Unit-test the module registration and the
