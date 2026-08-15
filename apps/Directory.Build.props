@@ -1,0 +1,4 @@
+<Project>
+  <!-- Frozen legacy WAPs under apps/*/ are not SDK projects and must inherit nothing. -->
+  <Import Project="LocalFeed.props" Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
+</Project>

@@ -6,7 +6,7 @@ apps/WebFormsApplication/**/*.user
 artifacts/build/**/*.binlog
 artifacts/build/**/*.log
 artifacts/roslyn-r2r/
-artifacts/webforms-application/
+artifacts/apps/
 
 .DS_Store
 

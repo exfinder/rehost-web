@@ -27,8 +27,8 @@ dotnet publish apps/WebFormsApplication/WebFormsApplication.Host -c Release
 ```
 
 One command is always enough. Building packs any changed `src/` project into
-the local feed (`artifacts/webforms-application/feed/`) before restore
-resolves, so the app can never run against a stale runtime; builds that skip
+the local feed (`artifacts/apps/feed/`, shared by every app under `apps/`)
+before restore resolves, so the app can never run against a stale runtime; builds that skip
 restore fail loudly instead of building stale. Packages are always packed
 `Release`; `-c` governs only the app and host projects.
 
@@ -55,6 +55,6 @@ transforms, exactly like F5 on Framework.
 - Host project: `RehostSiteContentRoot` (hosting package targets) turns on
   staging, the XDT pipeline, the `dotnet run` redirection, and the publish
   site layout.
-- `LocalFeed.props` + `Directory.*.targets` in this folder are repo-internal
+- `apps/LocalFeed.props` + `apps/Directory.*` are repo-internal
   freshness machinery, not part of the consumer story; a real consumer
   restores from nuget.org and needs none of it.

@@ -1,6 +1,0 @@
-<Project>
-  <!-- Gated so the frozen legacy WAP under WebFormsApplication/ inherits nothing. -->
-  <Import
-    Project="LocalFeed.props"
-    Condition="'$(MSBuildProjectName)' == 'WebFormsApplication.App' or '$(MSBuildProjectName)' == 'WebFormsApplication.Host'" />
-</Project>

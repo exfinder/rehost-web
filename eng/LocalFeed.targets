@@ -1,9 +1,9 @@
 <Project>
-  <!-- Auto-pack-on-restore for apps/* package consumers. Imported from an app's
+  <!-- Auto-pack-on-restore for apps/* package consumers. Imported from apps/
        Directory.Build.targets (direct project builds) and Directory.Solution.targets
        (solution builds) — restore fires through a different project in each flow, so
        both imports are required. Before restore resolves, changed src/ packages are
-       re-packed into the app's local feed and the extracted copies are purged, so a
+       re-packed into the shared local feed and the extracted copies are purged, so a
        plain `dotnet build` is always current from any starting state.
 
        Packages are always packed Release; $(Configuration) governs only the app and
