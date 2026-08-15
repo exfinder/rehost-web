@@ -69,6 +69,39 @@ Auto-generated keys are process-scoped:
 Explicit `<machineKey>` remains the stable restart/scale-out contract. A
 host-supplied key source is not yet designed.
 
+The Identity template makes the default visible: Katana's cookie middleware
+protects `.AspNet.ApplicationCookie` through `MachineKey.Protect`, so every
+process restart logs every user out until the application declares a literal
+`<machineKey>`.
+
+## Candidate substrate: ASP.NET Core Data Protection
+
+Framework's persistence for auto-generated keys was the worker process's
+DPAPI-protected registry store under the pool identity — one master key per
+identity, per-application isolation applied at load time by `IsolateApps`
+(virtual path) or `IsolateByAppId`. `System.Security.Cryptography.ProtectedData`
+is Windows-only on .NET, so DPAPI is not the portable answer.
+
+`Microsoft.AspNetCore.DataProtection` ships in the shared framework the host
+already runs on and is Microsoft's cross-platform replacement for exactly this
+pattern: a persisted key ring (per-user directory by default on every OS, or an
+explicit directory, Redis, blob, database), optional at-rest protection (DPAPI
+on Windows, X.509 elsewhere), `SetApplicationName` for isolation, and rotation.
+The narrow design question is which layer it feeds:
+
+- **key material only** — the ring supplies the master bytes that
+  `MachineKeySection` treats as its auto-generated key, keeping every ASP.NET
+  wire format (view state, forms tickets, `MachineKey.Protect`) unchanged and
+  the `IsolateApps` derivation intact; restart and scale-out stability follow
+  from sharing the ring;
+- **protector directly** — an `IDataProtectionProvider` handed to Katana in
+  place of `MachineKeyDataProtectionProvider`, which changes the cookie
+  payload format and leaves view state on the old path.
+
+The first keeps one crypto model and is the recommended starting point; neither
+makes keys interchangeable with a Framework machine, since the `IsolateApps`
+hash already differs by design (P38/P48).
+
 ## `__VIEWSTATEGENERATOR` cannot agree with Framework
 
 Found while scoping the page slice, and it decides one of the questions below.
