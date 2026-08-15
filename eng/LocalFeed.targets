@@ -54,6 +54,9 @@
     </ItemGroup>
 
     <PropertyGroup>
+      <!-- Stamp time is when packing began, not ended: a source edited while the pack ran
+           must compare newer than the stamp, or the next build believes it is current. -->
+      <_RehostPackStarted>$([System.DateTime]::UtcNow.ToString('o'))</_RehostPackStarted>
       <!-- The hook runs inside the caller's restore pass, whose global properties are
            restore-only optimizations (the CLI disables default item globs and package
            imports there). Children here are real builds; those globals must not leak. -->
@@ -83,7 +86,7 @@
     <!-- Same version string every pack, so the extracted copies must go; restore then
          re-extracts from the fresh feed. -->
     <RemoveDir Directories="@(_RehostLocalCacheEntry)" />
-    <Touch Files="$(RehostLocalPackageStamp)" AlwaysCreate="true" />
+    <Touch Files="$(RehostLocalPackageStamp)" AlwaysCreate="true" Time="$(_RehostPackStarted)" />
   </Target>
 
   <!-- Guard belt: a restore that resolved older extractions than the feed means the
