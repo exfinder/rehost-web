@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -342,7 +343,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
             return;
         }
 
-        Deliver(Response.FlushAsync(_context, _context.RequestAborted));
+        Deliver(() => Response.FlushAsync(_context, _context.RequestAborted));
     }
 
     public override bool SupportsAsyncFlush => true;
@@ -350,7 +351,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     public override IAsyncResult BeginFlush(AsyncCallback callback, object state)
     {
         var flush = _statusSent
-            ? DeliverAsync(Response.FlushAsync(_context, _context.RequestAborted))
+            ? DeliverAsync(() => Response.FlushAsync(_context, _context.RequestAborted))
             : Task.CompletedTask;
         return TaskToAsyncResult.Begin(flush, callback, state);
     }
@@ -361,14 +362,32 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     }
 
     // The pipeline thread waits for Kestrel's transport to take the bytes, the same trade the
-    // request body makes in the other direction. A transport failure is what Framework's flush
-    // raised on a vanished client: an HttpException into the page, the connection gone.
-    private void Deliver(Task flush)
+    // request body makes in the other direction. The chain runs with no ambient synchronization
+    // context: System.Web's is current on this thread, and the awaits inside ASP.NET Core's
+    // sendfile and buffer-drain helpers would post their continuations to it — behind the very
+    // thread waiting here (measured: a TransmitFile between flushes hung on Windows, where the
+    // file read completes asynchronously). A transport failure is what Framework's flush raised
+    // on a vanished client: an HttpException into the page, the connection gone.
+    private void Deliver(Func<Task> flush)
     {
         DeliverAsync(flush).GetAwaiter().GetResult();
     }
 
-    private async Task DeliverAsync(Task flush)
+    private Task DeliverAsync(Func<Task> flush)
+    {
+        var context = SynchronizationContext.Current;
+        SynchronizationContext.SetSynchronizationContext(null);
+        try
+        {
+            return DeliverCoreAsync(flush());
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(context);
+        }
+    }
+
+    private async Task DeliverCoreAsync(Task flush)
     {
         try
         {
