@@ -27,12 +27,17 @@ directory's order off Framework, and the wildcard `bin` scan matches `.DLL` on
 every filesystem and skips non-assembly files before loading — every other
 load failure surfaces as Framework surfaced it.
 
-## Remaining
+The value rules for URL, virtual, configuration, and physical paths are the
+"Path value rules" section of [filesystem semantics](../filesystem-semantics.md);
+the verification matrix (root/sub-app mapping, mixed case, dot segments, encoded
+and repeated separators, sibling prefixes, trailing separators, symlink
+containment) is `RequestPathCanonicalizerTests`, `RequestPathInfoTests`,
+`AspNetCoreWorkerRequestTests`, and `CanonicalCasePathTests`; NFD on APFS is a
+documented trait. This follow-up is closed; what is below stays only as
+recorded boundaries.
 
-- Separate URL, virtual, configuration, and physical path value rules — the
-  current rules are in [filesystem semantics](../filesystem-semantics.md)
-  ("Physical or virtual", "Enumeration order"); a consolidated value-rule
-  section is owed when a new seam needs one.
+## Recorded boundaries
+
 - `CodeDirectoryCompiler`'s `BuildProviderSet` (`HybridDictionary`) keeps
   insertion order only to eight entries, and `ProcessDependencies` buckets by
   object identity — App_Code compile order past eight files is deterministic

@@ -61,9 +61,8 @@ Carried from Milestone 1 as unresolved detail:
   [request termination](follow-ups/request-termination-and-timeouts.md).
 - Slow-upload thread-pool cliff:
   [request-body concurrency](follow-ups/request-body-concurrency.md).
-- ~~Cross-filesystem enumeration order and wildcard `bin` loading failures~~
-  (done: ledger P73); path value rules and the App_Code past-eight-files
-  order remain on [path mapping](follow-ups/portable-path-mapping-and-containment.md).
+- ~~Path mapping and containment~~ — closed (ledger P57/P70–P73); boundaries
+  recorded on [path mapping](follow-ups/portable-path-mapping-and-containment.md).
 - Response diagnostics and failure preservation:
   [request diagnostics](follow-ups/portable-request-diagnostics.md).
 

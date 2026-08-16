@@ -28,9 +28,8 @@ rejects relative paths, backslashes, query/fragment text, and literal traversal
 segments. The compilation temp directory is normalized without a trailing
 separator and must not name a file.
 
-Bootstrap does not resolve symlinks or establish descendant containment;
-[portable path mapping](follow-ups/portable-path-mapping-and-containment.md)
-owns that boundary.
+Bootstrap does not resolve symlinks or establish descendant containment; the
+adapter does, per [filesystem semantics](filesystem-semantics.md) (ledger P72).
 
 ## One-shot state and publication
 

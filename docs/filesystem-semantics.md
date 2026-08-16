@@ -22,6 +22,26 @@ ext4 miss (nothing handler-visible differs); and `Request.PhysicalPath` on a
 case-sensitive filesystem carries the file's real casing, where Framework
 returned the URL's casing (whichever spelling its map-path cache saw first).
 
+## Path value rules
+
+Four kinds of path, each with its own rule; a new seam picks the one for the
+value it holds and never converts by string surgery:
+
+- **URL path** — what the client sent. Canonicalized once at the adapter as
+  http.sys did (`\\`→`/`, `%2F` decoded, repeated separators collapsed,
+  `.`/`..` resolved, a climb above the root 403) and then split by handler
+  mapping into `FilePath`/`PathInfo`; `Request.Path` and `RawUrl` keep the
+  client's casing (`RequestPathCanonicalizer`, `RequestPathInfo`, ledger P72).
+- **Virtual path** — `/`-rooted or `~/` application-relative, `/`-separated,
+  compared ignore-case; every path-taking API reads a `/`-rooted string as
+  virtual (`UrlPath.IsAbsolutePhysicalPath`, "Physical or virtual" below).
+- **Configuration path** — a lowercased virtual path; the map to disk folds
+  case at `UserMapPath.GetPhysicalPathForPath` (P70).
+- **Physical path** — platform separators, produced only by a map-path seam,
+  folded to the filesystem's real casing below the nearest existing directory
+  (P57/P71); containment is decided on the canonical URL path, not by prefix
+  tests on physical strings (`AspNetCoreWorkerRequestTests`).
+
 ## Enumeration order
 
 Every directory listing the runtime takes is in NTFS order — names compared
