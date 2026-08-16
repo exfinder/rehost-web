@@ -11,8 +11,16 @@ namespace Rehost.WebForms.Hosting.Tests;
 // the callback sees Framework's slimmed context over an AspNetWebSocket, frames echo, both close
 // directions complete, sub-protocol and same-origin refusals keep Framework's status and text.
 public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
-    : IClassFixture<PageLiveScenario>
+    : IClassFixture<PageLiveScenario>, IDisposable
 {
+    // A handshake or frame answers over loopback in well under this; longer means the server
+    // wedged (the WebSocket callback runs the classic pipeline), and a wedge must fail its test
+    // rather than hang the run on a ClientWebSocket receive that never returns.
+    private readonly CancellationTokenSource _deadline =
+        new(TimeSpan.FromSeconds(20));
+
+    public void Dispose() => _deadline.Dispose();
+
     private Uri WsUri(string query) => new UriBuilder(scenario.Address)
     {
         Scheme = "ws",
@@ -20,10 +28,10 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
         Query = query,
     }.Uri;
 
-    private static async Task<string> ReceiveTextAsync(ClientWebSocket socket)
+    private async Task<string> ReceiveTextAsync(ClientWebSocket socket)
     {
         var buffer = new byte[8192];
-        var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+        var result = await socket.ReceiveAsync(buffer, _deadline.Token);
         result.MessageType.ShouldBe(WebSocketMessageType.Text);
         return Encoding.UTF8.GetString(buffer, 0, result.Count);
     }
@@ -33,7 +41,7 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
     {
         using var socket = new ClientWebSocket();
         socket.Options.CollectHttpResponseDetails = true;
-        await socket.ConnectAsync(WsUri(""), CancellationToken.None);
+        await socket.ConnectAsync(WsUri(""), _deadline.Token);
 
         socket.HttpStatusCode.ShouldBe(HttpStatusCode.SwitchingProtocols);
         socket.HttpResponseHeaders!["Set-Cookie"].ShouldContain("wscookie=v1; path=/");
@@ -48,10 +56,10 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
             "type=System.Web.WebSockets.AspNetWebSocket;sub=<null>;current=set;items=kept;origin=<null>;user=null;"
             + "resp-ex=HttpException:Response is not available in this context.;session=null");
 
-        await socket.SendAsync("hello"u8.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
+        await socket.SendAsync("hello"u8.ToArray(), WebSocketMessageType.Text, true, _deadline.Token);
         (await ReceiveTextAsync(socket)).ShouldBe("echo:hello:Text:True");
 
-        await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "client-bye", CancellationToken.None);
+        await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "client-bye", _deadline.Token);
         socket.State.ShouldBe(WebSocketState.Closed);
         socket.CloseStatus.ShouldBe(WebSocketCloseStatus.NormalClosure);
         socket.CloseStatusDescription.ShouldBe("bye:NormalClosure:client-bye");
@@ -61,16 +69,16 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
     public async Task A_Server_Initiated_Close_Completes()
     {
         using var socket = new ClientWebSocket();
-        await socket.ConnectAsync(WsUri(""), CancellationToken.None);
+        await socket.ConnectAsync(WsUri(""), _deadline.Token);
         await ReceiveTextAsync(socket);
 
-        await socket.SendAsync("close-me"u8.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);
-        var close = await socket.ReceiveAsync(new byte[16], CancellationToken.None);
+        await socket.SendAsync("close-me"u8.ToArray(), WebSocketMessageType.Text, true, _deadline.Token);
+        var close = await socket.ReceiveAsync(new byte[16], _deadline.Token);
 
         close.MessageType.ShouldBe(WebSocketMessageType.Close);
         close.CloseStatus.ShouldBe(WebSocketCloseStatus.NormalClosure);
         close.CloseStatusDescription.ShouldBe("server-close");
-        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "ack", CancellationToken.None);
+        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "ack", _deadline.Token);
     }
 
     [Fact]
@@ -79,11 +87,11 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
         using var socket = new ClientWebSocket();
         socket.Options.AddSubProtocol("chat");
         socket.Options.AddSubProtocol("superchat");
-        await socket.ConnectAsync(WsUri("mode=sub"), CancellationToken.None);
+        await socket.ConnectAsync(WsUri("mode=sub"), _deadline.Token);
 
         socket.SubProtocol.ShouldBe("chat");
         (await ReceiveTextAsync(socket)).ShouldContain(";sub=chat;");
-        await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+        await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", _deadline.Token);
     }
 
     // Body bytes written after the accept were raw noise between IIS's 101 and the first frame
@@ -92,10 +100,10 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
     public async Task Body_Written_After_The_Accept_Is_Discarded()
     {
         using var socket = new ClientWebSocket();
-        await socket.ConnectAsync(WsUri("mode=junk"), CancellationToken.None);
+        await socket.ConnectAsync(WsUri("mode=junk"), _deadline.Token);
 
         (await ReceiveTextAsync(socket)).ShouldStartWith("type=System.Web.WebSockets.AspNetWebSocket");
-        await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
+        await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", _deadline.Token);
     }
 
     [Fact]
