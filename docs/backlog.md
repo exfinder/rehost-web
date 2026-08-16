@@ -63,8 +63,7 @@ Carried from Milestone 1 as unresolved detail:
   [request-body concurrency](follow-ups/request-body-concurrency.md).
 - Path containment, symlinks, encoded traversal, and Windows-shaped inputs:
   [path mapping](follow-ups/portable-path-mapping-and-containment.md).
-- Cross-filesystem enumeration order, wildcard `bin` loading failures, and
-  known-physical seams at the remaining reached call sites:
+- Cross-filesystem enumeration order and wildcard `bin` loading failures:
   [path mapping](follow-ups/portable-path-mapping-and-containment.md).
 - Response diagnostics and failure preservation:
   [request diagnostics](follow-ups/portable-request-diagnostics.md).

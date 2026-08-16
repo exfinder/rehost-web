@@ -81,13 +81,35 @@ public sealed class CanonicalCasePathTests : IClassFixture<CanonicalCasePathTest
     }
 
     [Fact]
-    public void A_Path_Outside_The_Application_Root_Is_Left_Alone()
+    public void A_Path_Outside_The_Application_Root_Folds_Below_Its_Nearest_Existing_Directory()
     {
         var root = RequireRoot();
-        var outside = Path.Combine(root, "..", "elsewhere", "x.aspx");
+        var app = Path.Combine(root, "app");
+        Directory.CreateDirectory(Path.Combine(root, "Shared", "Inc"));
+        File.WriteAllText(Path.Combine(root, "Shared", "Inc", "Banner.inc"), "");
 
-        CanonicalCasePath.Resolve(outside, Path.Combine(root, "deeper"))
-            .ShouldBe(outside);
+        var resolved = CanonicalCasePath.Resolve(
+            Path.Combine(root, "shared", "inc", "banner.inc"), app);
+
+        resolved.ShouldBe(Path.Combine(root, "Shared", "Inc", "Banner.inc"));
+    }
+
+    [Fact]
+    public void A_Missing_Path_Outside_The_Application_Root_Is_Returned_Unchanged()
+    {
+        var root = RequireRoot();
+        var missing = Path.Combine(root, "shared", "gone.inc");
+
+        CanonicalCasePath.Resolve(missing, Path.Combine(root, "app")).ShouldBe(missing);
+    }
+
+    [Fact]
+    public void A_Relative_Path_Is_Returned_Unchanged()
+    {
+        RequireRoot();
+        var relative = Path.Combine("shared", "banner.inc");
+
+        CanonicalCasePath.Resolve(relative, null).ShouldBe(relative);
     }
 
     [Fact]

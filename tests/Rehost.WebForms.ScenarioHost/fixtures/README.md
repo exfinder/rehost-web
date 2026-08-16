@@ -43,6 +43,10 @@ other classes' requests interleaving:
   probes seed directories like `App_Browsers/` that the port refuses at
   startup, benign only while file-change notification stays inert and the
   host never restarts.
+- writes *beside* the application copy are the one sanctioned mutation:
+  `ssi/` includes `../../shared/Banner.inc`, which `OutsideInclude.Write`
+  places in the host's disposable root, outside the application, before the
+  first `/ssi/` request; nothing else reads that directory.
 
 Every other fixture keeps one host per test class. Single-tenant by necessity,
 beyond the per-fixture conflicts above:

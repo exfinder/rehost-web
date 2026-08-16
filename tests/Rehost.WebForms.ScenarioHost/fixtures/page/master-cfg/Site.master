@@ -1,0 +1,1 @@
+<%@ Master Language="C#" %>cfg-master[<asp:ContentPlaceHolder ID="c" runat="server" />]

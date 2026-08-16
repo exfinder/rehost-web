@@ -15,6 +15,10 @@ state.
 - Host restart notification and shutdown reason contract.
 - Behavior when the host cannot replace the process.
 - Diagnostics and loop protection for repeatedly invalid replacement config.
+- `FileChangesMonitor`'s six `UrlPath.IsAbsolutePhysicalPath(alias)` checks
+  (past today's `IsFCNDisabled` return) refuse every Unix-rooted alias with
+  `E_INVALIDARG`; enabling notification needs a rooted-path test there
+  (ledger P71).
 
 ## Done when
 
