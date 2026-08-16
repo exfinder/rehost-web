@@ -15,6 +15,11 @@
             Response.Write("module|");
             Response.End();
         }
+        if (Request.QueryString["ws-begin"] != null)
+        {
+            try { Response.AppendHeader("X-Ws-Begin", "ok:" + Context.IsWebSocketRequest); }
+            catch (Exception ex) { Response.AppendHeader("X-Ws-Begin", ex.GetType().Name + ":" + ex.Message); }
+        }
     }
 
     void Application_PreRequestHandlerExecute(object sender, EventArgs e)

@@ -115,6 +115,14 @@ namespace System.Web {
 
         // execution steps
         private StepManager _stepManager;
+#if !NETFRAMEWORK
+        internal bool IsInBeginRequestStep {
+            get {
+                ApplicationStepManager classic = _stepManager as ApplicationStepManager;
+                return classic != null && classic.IsInBeginRequestStep;
+            }
+        }
+#endif
 
         // callback for Application ResumeSteps
         #pragma warning disable 0649
@@ -3793,6 +3801,15 @@ namespace System.Web {
             private int _numStepCalls;
             private int _numSyncStepCalls;
             private int _endRequestStepIndex;
+#if !NETFRAMEWORK
+            private int _beginRequestStepEndIndex;
+
+            // The classic pipeline has no notification context; the WebSocket accept asks whether
+            // it is being called from BeginRequest, which IIS's integrated pipeline refuses.
+            internal bool IsInBeginRequestStep {
+                get { return _currentStepIndex >= 0 && _currentStepIndex < _beginRequestStepEndIndex; }
+            }
+#endif
 
             internal ApplicationStepManager(HttpApplication app): base(app) {
             }
@@ -3812,6 +3829,9 @@ namespace System.Web {
                     steps.Add(new UrlMappingsExecutionStep(app)); // url mappings
 
                 app.CreateEventExecutionSteps(HttpApplication.EventBeginRequest, steps);
+#if !NETFRAMEWORK
+                _beginRequestStepEndIndex = steps.Count;
+#endif
                 app.CreateEventExecutionSteps(HttpApplication.EventAuthenticateRequest, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventDefaultAuthentication, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPostAuthenticateRequest, steps);

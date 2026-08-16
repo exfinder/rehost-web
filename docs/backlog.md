@@ -42,8 +42,6 @@ Carried from Milestone 1 as unresolved detail:
 
 ## Next
 
-- WebSockets (`IsWebSocketRequest`/`AcceptWebSocketRequest` over Kestrel), high
-  priority: [WebSockets](follow-ups/websockets.md).
 - Milestone 3 (production baseline): real SQL, deterministic Windows/Linux
   publish, containers, graceful lifecycle, readiness/health, metrics and
   diagnostics, external configuration and secrets, multi-instance operation —
@@ -53,9 +51,10 @@ Carried from Milestone 1 as unresolved detail:
 
 ### Hosting and request boundary
 
-- Adapter residuals: client-visible streaming, HTTP/3, proxied client
-  certificates, integrated-mode server variables:
-  [host adapter](follow-ups/aspnet-core-host-adapter.md).
+- Adapter residuals: HTTP/3, proxied client certificates, integrated-mode
+  server variables: [host adapter](follow-ups/aspnet-core-host-adapter.md);
+  ~~streaming~~ (P79) and ~~WebSockets~~ (P80,
+  [boundaries](follow-ups/websockets.md)) are done.
 - Terminal-event and cancellation coverage:
   [request completion](follow-ups/request-completion-failure-and-cancellation.md).
 - Abort the client connection when a timed-out synchronous step cannot return:

@@ -802,6 +802,41 @@ public sealed class AspNetCoreWorkerRequestTests
         Should.Throw<InvalidOperationException>(() => request.SendStatus(500, "Late"));
     }
 
+    [Fact]
+    public void Web_Socket_Detection_Reports_The_Module_Missing_Without_The_Feature()
+    {
+        var request = Create();
+
+        request.SupportsWebSocketUpgrade.ShouldBeTrue();
+        Should.Throw<PlatformNotSupportedException>(() => request.IsWebSocketUpgradeRequest())
+            .Message.ShouldStartWith("The IIS WebSocket module is not enabled.");
+    }
+
+    // Once the accept is recorded the response body is the upgrade's, not the pipeline's: bytes
+    // and a calculated length written afterwards are dropped (reading R-WS2), and a flush pushes
+    // nothing.
+    [Fact]
+    public void Body_And_Length_After_A_Web_Socket_Accept_Are_Discarded()
+    {
+        var context = Context();
+        context.Features.Set<IHttpWebSocketFeature>(new WebSocketFeature(isWebSocketRequest: true));
+        context.Response.Body = new MemoryStream();
+        var request = Create(context);
+
+        request.IsWebSocketUpgradeRequest().ShouldBeTrue();
+        request.SendStatus(101, "Switching Protocols");
+        request.SendUnknownResponseHeader("X-App-Header", "before-accept");
+        request.AcceptWebSocketUpgrade(null!, _ => Task.CompletedTask, "chat");
+        request.SendResponseFromMemory("junk"u8.ToArray(), 4);
+        request.SendCalculatedContentLength(4);
+        request.FlushResponse(finalFlush: false);
+
+        request.WebSocketAccept!.Value.SubProtocol.ShouldBe("chat");
+        request.Response.ContentLength.ShouldBeNull();
+        request.Response.HeadCommitted.ShouldBeFalse();
+        context.Response.HasStarted.ShouldBeFalse();
+    }
+
     private static DefaultHttpContext Context(
         string path = "/oracle",
         string pathBase = "",
@@ -857,6 +892,14 @@ public sealed class AspNetCoreWorkerRequestTests
             virtualRoot,
             PhysicalRoot,
             Path.GetTempPath);
+    }
+
+    private sealed class WebSocketFeature(bool isWebSocketRequest) : IHttpWebSocketFeature
+    {
+        public bool IsWebSocketRequest { get; } = isWebSocketRequest;
+
+        public Task<System.Net.WebSockets.WebSocket> AcceptAsync(WebSocketAcceptContext context) =>
+            throw new NotSupportedException();
     }
 
     private sealed class BodyDetectionFeature(bool canHaveBody) : IHttpRequestBodyDetectionFeature

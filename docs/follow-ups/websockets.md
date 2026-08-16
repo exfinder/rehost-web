@@ -1,26 +1,19 @@
 # WebSockets
 
-## Problem
+Done: ledger P80. `AcceptWebSocketRequest` runs on the classic pipeline over
+ASP.NET Core's WebSocket middleware; the accept, handshake headers,
+sub-protocol, same-origin, close handling, and callback context match the IIS
++ Framework readings (R-WS1–R-WS6 in
+[the research](../research/websockets-and-streaming.md)).
 
-`HttpContext.IsWebSocketRequest` and `AcceptWebSocketRequest` ride IIS's native
-WebSocket module through `IIS7WorkerRequest`; every other worker request,
-this port's adapter included, is refused with Framework's own
-`PlatformNotSupportedException` ("This operation requires IIS integrated
-pipeline mode"), pinned by `HttpContextWebSocketsTests` (ledger P78). SignalR
-1.x/2.x and hand-written WebSocket handlers reach it.
+## Recorded boundaries
 
-## Required decisions
-
-- Wire `AcceptWebSocketRequest` over Kestrel's `IHttpWebSocketFeature`: the
-  adapter reports the upgrade request, the accept hands System.Web's
-  `AspNetWebSocket` a Kestrel `WebSocket`, and the response commit path yields
-  to the upgraded connection instead of the single sealed commit (ADR 0003).
-- `IsWebSocketRequest` from the `Upgrade: websocket` handshake without a native
-  module; the "cannot call from BeginRequest" ordering rule.
-- The substitute meanwhile: ASP.NET Core's WebSockets middleware beside the
-  port for new endpoints.
-
-## Done when
-
-A fixture handler accepts a WebSocket over Kestrel, echoes frames, and closes,
-on all three platforms; the refusal test flips to the working path.
+- Body bytes written after `AcceptWebSocketRequest` are dropped; IIS wrote them
+  raw between the 101 and the first frame (R-WS2), which no client parses.
+- `AspNetWebSocketContext.User` is null on the shipped module set where IIS's
+  `DefaultAuthenticationModule` supplied an anonymous principal — the
+  [shipped-modules follow-up](shipped-http-modules.md) owns that.
+- The integrated-only "cannot be called after the handler executed" ordering
+  check is not carried; the BeginRequest refusal is.
+- Kestrel's `WebSocketOptions` (keep-alive interval, allowed origins) are the
+  host's to configure; Framework had no equivalent surface.

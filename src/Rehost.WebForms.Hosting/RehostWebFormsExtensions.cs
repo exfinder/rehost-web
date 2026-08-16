@@ -62,6 +62,11 @@ public static class RehostWebFormsExtensions
             app.UseForwardedHeaders();
         }
 
+        // AcceptWebSocketRequest rides ASP.NET Core's WebSocket middleware (Kestrel alone exposes
+        // only the raw upgrade); registered here so a consumer never has to remember it, options
+        // overridable through WebSocketOptions in DI.
+        app.UseWebSockets();
+
         var middleware = new RehostWebFormsMiddleware(activation);
         app.Run(middleware.InvokeAsync);
 

@@ -752,6 +752,20 @@ namespace System.Web {
         // Returns true if async flush is supported; otherwise false.
         public virtual bool SupportsAsyncFlush { get { return false; } }
 
+#if !NETFRAMEWORK
+        // WebSocket capability of a host other than IIS's integrated pipeline, which HttpContext
+        // otherwise reaches only by casting to IIS7WorkerRequest. The defaults reproduce that
+        // refusal; a host that answers true takes the accept and runs the callback once the
+        // pipeline has finished (ledger P80).
+        internal virtual bool SupportsWebSocketUpgrade { get { return false; } }
+
+        internal virtual bool IsWebSocketUpgradeRequest() { return false; }
+
+        internal virtual void AcceptWebSocketUpgrade(HttpContext context, Func<System.Web.WebSockets.AspNetWebSocketContext, System.Threading.Tasks.Task> userFunc, String subProtocol) {
+            throw new NotSupportedException();
+        }
+#endif
+
         // Sends the currently buffered response to the client asynchronously.  To support this, 
         // the worker request buffers the status, headers, and resonse body until an asynchronous 
         // flush operation is initiated.

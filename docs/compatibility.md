@@ -75,7 +75,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | HTTP/2 | Supported | The request-body surfaces run over cleartext HTTP/2 (`Http2OverKestrelTests`); System.Web sees its usual HTTP/1.1-shaped request (ledger P78) |
 | HTTP/3 | Unassessed | No transport gate |
 | Client certificates | Unsupported | `Request.ClientCertificate` reports not present; behind a TLS-terminating proxy Kestrel never sees one, and forwarded-certificate translation into `CERT_*` is the recorded design when a consumer needs it (ledger P78) |
-| WebSockets (`IsWebSocketRequest`, `AcceptWebSocketRequest`) | Unsupported | Framework's own "requires IIS integrated pipeline mode" is thrown; high-priority [follow-up](follow-ups/websockets.md) |
+| WebSockets (`IsWebSocketRequest`, `AcceptWebSocketRequest`, `AspNetWebSocket`) | Supported | Over ASP.NET Core's WebSocket middleware, registered by `UseRehostWebForms`; handshake headers, sub-protocol negotiation, `RequireSameOrigin`, both close directions, and Framework's slimmed callback context as measured on IIS; body written after the accept is dropped (IIS sent it raw); `User` follows the shipped module set (ledger P80) |
 | Mid-request `Response.Flush` / `FlushAsync` | Supported | Head and buffered bytes reach the client at each flush as on IIS (System.Web's own chunked framing over HTTP/1.1); late head changes, `End` after a flush, and errors after a flush behave as measured on Framework (ledger P79) |
 | `TransmitFile`/`WriteFile` over 2 GB | Supported | `SupportsLongTransmitFile` is on; the native-handle overload is unsupported (ledger P78) |
 | Forms, postback, view state, control state | Supported | URL-encoded and multipart parsing, event ordering, MAC enforcement, event validation, and request validation |

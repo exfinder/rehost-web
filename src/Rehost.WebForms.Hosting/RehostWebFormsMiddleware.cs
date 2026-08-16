@@ -56,6 +56,18 @@ internal sealed class RehostWebFormsMiddleware
         }
 
         await workerRequest.Completion;
+
+        // A request that accepted a WebSocket and finished with the 101 hands its connection over;
+        // any other status (an error page, a redirect) is committed as usual, as IIS's transition
+        // step no-op'd unless the status was still 101.
+        if (workerRequest.WebSocketAccept is { } accept
+            && workerRequest.Response.StatusCode == StatusCodes.Status101SwitchingProtocols)
+        {
+            await WebSocketHandoff.RunAsync(
+                context, accept.Context, workerRequest, workerRequest.Response, accept.UserFunc, accept.SubProtocol);
+            return;
+        }
+
         await workerRequest.Response.CommitAsync(context, context.RequestAborted);
     }
 

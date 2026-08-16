@@ -183,6 +183,15 @@ namespace System.Web {
         private WebSocketInitStatus GetWebSocketInitStatus() {
             IIS7WorkerRequest iis7wr =_wr as IIS7WorkerRequest;
             if (iis7wr == null) {
+#if !NETFRAMEWORK
+                if (_wr != null && _wr.SupportsWebSocketUpgrade) {
+                    if (ApplicationInstance != null && ApplicationInstance.IsInBeginRequestStep) {
+                        return WebSocketInitStatus.CannotCallFromBeginRequest;
+                    }
+
+                    return _wr.IsWebSocketUpgradeRequest() ? WebSocketInitStatus.Success : WebSocketInitStatus.NotAWebSocketRequest;
+                }
+#endif
                 return WebSocketInitStatus.RequiresIntegratedMode;
             }
 
@@ -327,17 +336,24 @@ namespace System.Web {
                     throw new HttpException(SR.GetString(SR.WebSockets_UnknownErrorWhileAccepting));
             }
 
+#if !NETFRAMEWORK
+            IIS7WorkerRequest wr = _wr as IIS7WorkerRequest;
+            if (wr != null && CurrentNotification > RequestNotification.ExecuteRequestHandler) {
+#else
             if (CurrentNotification > RequestNotification.ExecuteRequestHandler) {
+#endif
                 // it is too late to call this method
                 throw new InvalidOperationException(SR.GetString(SR.WebSockets_CannotBeCalledAfterHandlerExecute));
             }
             // End argument & state checking
 
+#if NETFRAMEWORK
             IIS7WorkerRequest wr = (IIS7WorkerRequest)_wr;
+#endif
 
             // Begin options checking and parsing
             if (options != null && options.RequireSameOrigin) {
-                if (!WebSocketUtil.IsSameOriginRequest(wr)) {
+                if (!WebSocketUtil.IsSameOriginRequest(_wr)) {
                     // use Forbidden (HTTP 403) since it's not an authentication error; it's a usage error
                     throw new HttpException((int)HttpStatusCode.Forbidden, SR.GetString(SR.WebSockets_OriginCheckFailed));
                 }
@@ -359,6 +375,20 @@ namespace System.Web {
             }
             // End options checking and parsing
 
+#if !NETFRAMEWORK
+            if (wr == null) {
+                // The host takes over once the pipeline has finished; the transition steps that
+                // IIS's integrated pipeline runs (TransitionStarted, TransitionCompleted) are its.
+                TransitionToWebSocketState(WebSocketTransitionState.AcceptWebSocketRequestCalled);
+                Response.StatusCode = (int)HttpStatusCode.SwitchingProtocols; // 101
+                if (subprotocol != null) {
+                    Response.AppendHeader("Sec-WebSocket-Protocol", subprotocol);
+                    _webSocketNegotiatedProtocol = subprotocol;
+                }
+                _wr.AcceptWebSocketUpgrade(this, userFunc, subprotocol);
+                return;
+            }
+#endif
             wr.AcceptWebSocket();
 
             // transition: Inactive -> AcceptWebSocketRequestCalled

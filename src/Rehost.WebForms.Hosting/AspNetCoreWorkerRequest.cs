@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
 using HttpException = System.Web.HttpException;
 using System.Web.Hosting;
+using System.Web.WebSockets;
 using HttpWorkerRequest = System.Web.HttpWorkerRequest;
 
 internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
@@ -26,6 +27,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     private (string FilePath, string PathInfo)? _split;
     private bool _statusSent;
     private bool _clientGone;
+    private (System.Web.HttpContext Context, Func<AspNetWebSocketContext, Task> UserFunc, string? SubProtocol)? _webSocketAccept;
 
     internal AspNetCoreWorkerRequest(
         HttpContext context,
@@ -46,6 +48,30 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     }
 
     internal ResponseSpool Response { get; }
+
+    // Set by AcceptWebSocketRequest; the middleware hands the connection over once the pipeline
+    // has finished with a 101.
+    internal (System.Web.HttpContext Context, Func<AspNetWebSocketContext, Task> UserFunc, string? SubProtocol)? WebSocketAccept =>
+        _webSocketAccept;
+
+    internal override bool SupportsWebSocketUpgrade => true;
+
+    // Framework's own "module not enabled" refusal when the WebSocket middleware is absent.
+    internal override bool IsWebSocketUpgradeRequest()
+    {
+        var feature = _context.Features.Get<IHttpWebSocketFeature>()
+            ?? throw new PlatformNotSupportedException(
+                System.Web.SR.GetString(System.Web.SR.WebSockets_WebSocketModuleNotEnabled));
+        return feature.IsWebSocketRequest;
+    }
+
+    internal override void AcceptWebSocketUpgrade(
+        System.Web.HttpContext context,
+        Func<AspNetWebSocketContext, Task> userFunc,
+        string subProtocol)
+    {
+        _webSocketAccept = (context, userFunc, subProtocol);
+    }
 
     internal Task Completion => _completion.Task;
 
@@ -306,22 +332,33 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override void SendCalculatedContentLength(int contentLength)
     {
-        Response.SetContentLength(contentLength);
+        SendCalculatedContentLength((long)contentLength);
     }
 
     public override void SendCalculatedContentLength(long contentLength)
     {
-        Response.SetContentLength(contentLength);
+        if (_webSocketAccept == null)
+        {
+            Response.SetContentLength(contentLength);
+        }
     }
 
+    // Body bytes written after AcceptWebSocketRequest are discarded: IIS put them on the wire
+    // between the 101 and the first frame (reading R-WS2), which no client can parse.
     public override void SendResponseFromMemory(byte[] data, int length)
     {
-        Response.Write(data, length);
+        if (_webSocketAccept == null)
+        {
+            Response.Write(data, length);
+        }
     }
 
     public override void SendResponseFromFile(string filename, long offset, long length)
     {
-        Response.WriteFile(filename, offset, length);
+        if (_webSocketAccept == null)
+        {
+            Response.WriteFile(filename, offset, length);
+        }
     }
 
     internal override bool SupportsLongTransmitFile => true;
@@ -338,7 +375,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     // nothing; the final flush leaves the commit to the middleware, off the pipeline thread.
     public override void FlushResponse(bool finalFlush)
     {
-        if (finalFlush || !_statusSent)
+        if (finalFlush || !_statusSent || _webSocketAccept != null)
         {
             return;
         }
@@ -350,7 +387,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override IAsyncResult BeginFlush(AsyncCallback callback, object state)
     {
-        var flush = _statusSent
+        var flush = _statusSent && _webSocketAccept == null
             ? DeliverAsync(() => Response.FlushAsync(_context, _context.RequestAborted))
             : Task.CompletedTask;
         return TaskToAsyncResult.Begin(flush, callback, state);

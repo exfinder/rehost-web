@@ -86,6 +86,42 @@ internal static class RawSocketProbe
         return arrivals;
     }
 
+    // A request whose response may leave the connection open (an upgrade, a kept-alive error):
+    // whatever arrives until the server closes or goes quiet for two seconds.
+    internal static async Task<byte[]> SendRawUntilQuietAsync(Uri address, byte[] request)
+    {
+        using var client = new System.Net.Sockets.TcpClient();
+        await client.ConnectAsync(address.Host, address.Port);
+        await using var stream = client.GetStream();
+        await stream.WriteAsync(request);
+        await stream.FlushAsync();
+
+        using var received = new MemoryStream();
+        var buffer = new byte[65536];
+        while (true)
+        {
+            using var quiet = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            int read;
+            try
+            {
+                read = await stream.ReadAsync(buffer, quiet.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
+
+            if (read == 0)
+            {
+                break;
+            }
+
+            received.Write(buffer, 0, read);
+        }
+
+        return received.ToArray();
+    }
+
     // The request exactly as given, for a Host, forwarded headers, or header bytes no managed
     // client would send.
     internal static async Task<byte[]> SendRawAsync(Uri address, byte[] request)

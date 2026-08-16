@@ -8,7 +8,10 @@ Evidence behind two open items: client-visible streaming (a mid-request
 Unsupported rows in the [compatibility map](../compatibility.md) (WebSockets;
 mid-request `Response.Flush`) and ledger P78.
 
-Nothing here is a decision. Section 8 lists what needs deciding. Line
+Outcome (2026-08-16): streaming landed as ledger P79 (decisions 1–8 as
+recommended), WebSockets as P80 (9–18 as recommended, plus a fourth imported
+edit for the BeginRequest rule and "discard body after accept" for R-WS2); the
+readings at the end are the evidence. Section 8 lists what needed deciding. Line
 references are `file:line` against the tree at the time of writing. Statements
 marked **inference** are reasoning from source, not a reading; statements marked
 **reading needed** name a Windows/IIS observation the design should not guess.
