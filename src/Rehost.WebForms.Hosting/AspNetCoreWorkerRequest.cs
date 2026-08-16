@@ -97,9 +97,25 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return _context.Connection.LocalIpAddress?.ToString() ?? "";
     }
 
+    // IIS answered SERVER_PORT with the listening port and Request.Url is built from it; behind a
+    // TLS-terminating proxy the port the client used is the Host header's, which the forwarded
+    // headers restore, so the header decides and the socket is the fallback.
     public override int GetLocalPort()
     {
-        return _context.Connection.LocalPort;
+        return _context.Request.Host.Port ?? (_context.Request.IsHttps ? 443 : 80);
+    }
+
+    // The Host header's host, as IIS reported SERVER_NAME and built Request.Url (reading R1: a
+    // request with Host: shop.example.com answered Url=http://shop.example.com:8112/...).
+    public override string GetServerName()
+    {
+        var host = _context.Request.Host.Host;
+        return string.IsNullOrEmpty(host) ? GetLocalAddress() : host;
+    }
+
+    public override bool IsSecure()
+    {
+        return _context.Request.IsHttps;
     }
 
     public override string GetAppPath()
@@ -186,25 +202,28 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return unknown.ToArray();
     }
 
-    // Unsupported variables answer null rather than an empty string: System.Web treats null as
-    // "the server does not provide this", while "" claims the server provided nothing.
+    // HttpRequest fills its collection from the worker-request members for most names and asks
+    // here only for the IIS-native ones; every one of those was present on IIS (reading R1: 45
+    // variables, unset ones ""), so none is null. Site topology takes IIS's shape for a single
+    // site; the certificate and TLS-strength set is "" as on an IIS site without client
+    // certificates (the negotiated strengths have no non-obsolete source on Kestrel).
     public override string? GetServerVariable(string name)
     {
         return name switch
         {
-            "SERVER_NAME" => _context.Request.Host.Host,
-            "SERVER_PORT" => ServerPort().ToString(CultureInfo.InvariantCulture),
-            "SERVER_PORT_SECURE" => _context.Request.IsHttps ? "1" : "0",
-            "SERVER_PROTOCOL" => _context.Request.Protocol,
-            "REQUEST_METHOD" => _context.Request.Method,
-            "QUERY_STRING" => GetQueryString(),
-            "SCRIPT_NAME" => GetFilePath(),
-            "PATH_INFO" => GetPathInfo(),
-            "APPL_PHYSICAL_PATH" => GetAppPathTranslated(),
-            "REMOTE_ADDR" or "REMOTE_HOST" => GetRemoteAddress(),
+            "APPL_MD_PATH" => "/LM/W3SVC/1/ROOT",
+            "INSTANCE_ID" => "1",
+            "INSTANCE_META_PATH" => "/LM/W3SVC/1",
+            "GATEWAY_INTERFACE" => "CGI/1.1",
+            "SERVER_SOFTWARE" => "Kestrel",
+            "HTTPS" => IsSecure() ? "on" : "off",
             "REMOTE_PORT" => GetRemotePort().ToString(CultureInfo.InvariantCulture),
-            "LOCAL_ADDR" => GetLocalAddress(),
-            "HTTPS" => _context.Request.IsHttps ? "on" : "off",
+            "AUTH_PASSWORD" or "LOGON_USER"
+                or "CERT_COOKIE" or "CERT_FLAGS" or "CERT_ISSUER" or "CERT_KEYSIZE"
+                or "CERT_SECRETKEYSIZE" or "CERT_SERIALNUMBER" or "CERT_SERVER_ISSUER"
+                or "CERT_SERVER_SUBJECT" or "CERT_SUBJECT"
+                or "HTTPS_KEYSIZE" or "HTTPS_SECRETKEYSIZE"
+                or "HTTPS_SERVER_ISSUER" or "HTTPS_SERVER_SUBJECT" => "",
             _ => name.StartsWith("HTTP_", StringComparison.Ordinal)
                 ? ReadHeader(name.Substring(5).Replace('_', '-'))
                 : null,
@@ -298,6 +317,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         Response.WriteFile(filename, offset, length);
     }
 
+    internal override bool SupportsLongTransmitFile => true;
+
     public override void SendResponseFromFile(IntPtr handle, long offset, long length)
     {
         throw new NotSupportedException(
@@ -359,11 +380,6 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
             && _context.Request.Headers.TryGetValue(name, out var values)
                 ? JoinValues(values)
                 : null;
-    }
-
-    private int ServerPort()
-    {
-        return _context.Request.Host.Port ?? (_context.Request.IsHttps ? 443 : 80);
     }
 
     private string? StripVirtualRoot(string virtualPath)

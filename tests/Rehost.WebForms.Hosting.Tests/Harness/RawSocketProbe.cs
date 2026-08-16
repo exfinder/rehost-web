@@ -35,15 +35,21 @@ internal static class RawSocketProbe
 
     // Byte-true view of a response: HttpClient decodes header values as Latin-1, which would
     // disguise the wire encoding under assertion.
-    internal static async Task<byte[]> GetRawResponseAsync(Uri address, string path)
+    internal static Task<byte[]> GetRawResponseAsync(Uri address, string path)
+    {
+        return SendRawAsync(address, System.Text.Encoding.ASCII.GetBytes(
+            "GET " + path + " HTTP/1.1\r\nHost: " + address.Authority
+            + "\r\nConnection: close\r\n\r\n"));
+    }
+
+    // The request exactly as given, for a Host, forwarded headers, or header bytes no managed
+    // client would send.
+    internal static async Task<byte[]> SendRawAsync(Uri address, byte[] request)
     {
         using var client = new System.Net.Sockets.TcpClient();
         await client.ConnectAsync(address.Host, address.Port);
         await using var stream = client.GetStream();
 
-        var request = System.Text.Encoding.ASCII.GetBytes(
-            "GET " + path + " HTTP/1.1\r\nHost: " + address.Authority
-            + "\r\nConnection: close\r\n\r\n");
         await stream.WriteAsync(request);
         await stream.FlushAsync();
 

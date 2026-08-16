@@ -23,6 +23,8 @@ Evidence: `ApplicationBootstrapTests`, `ApplicationConfigurationPublicationTests
 | --- | --- | --- |
 | Classic managed request pipeline over Kestrel | Supported | Enters `HttpRuntime.ProcessRequest(HttpWorkerRequest)`; IIS native notification scheduling is not used |
 | One application per process/current AppDomain | Supported | Reinitialization and in-process replacement are unavailable; restart means process replacement |
+| Request scheme, host, and server variables | Supported | `IsSecureConnection`, `Request.Url`, `SERVER_NAME`/`SERVER_PORT` come from TLS and the Host header as on IIS; all 45 Framework server variables are present, IIS-native ones with fixed single-site shapes (`APPL_MD_PATH=/LM/W3SVC/1/ROOT`, `SERVER_SOFTWARE=Kestrel`), certificate/TLS-strength ones `""`; `UNENCODED_URL`/`HTTP_URL`-class integrated-mode variables and `ServerVariables.Set` are unavailable (ledger P76) |
+| Behind a TLS-terminating proxy or load balancer | Supported | `UseRehostWebForms` registers ASP.NET Core's forwarded-headers middleware (`X-Forwarded-For/Proto/Host`); trust is the framework default — loopback proxies only — so a container behind a proxy sets `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` (not set by the official `mcr.microsoft.com/dotnet/aspnet` images) or configures `ForwardedHeadersOptions`; without that, forwarded values are ignored and the app sees the proxy's scheme and address (ledger P76) |
 | Host registration and activation lifecycle | Partial | Static one-shot bootstrap mutates current-AppDomain state before listen; first-request activation is lazy and shared; bootstrap failure is terminal |
 | Runtime-originated shutdown/restart notification | Unsupported | Only host-initiated shutdown is wired; runtime restart requests do not stop the ASP.NET Core host |
 | Full trust | Supported | Partial trust and CAS policy are unsupported |
@@ -70,14 +72,17 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | Capability | State | Boundary |
 | --- | --- | --- |
 | HTTP/1.1 request bodies | Supported | Fixed-length/chunked, sync/APM reads, buffered/bufferless input, async preload, abort, drain, and independent host/System.Web size limits |
-| HTTP/2 and HTTP/3 | Unassessed | No real transport gate |
-| Client certificates | Unassessed | The host adapter does not expose a tested certificate contract |
+| HTTP/2 | Supported | The request-body surfaces run over cleartext HTTP/2 (`Http2OverKestrelTests`); System.Web sees its usual HTTP/1.1-shaped request (ledger P78) |
+| HTTP/3 | Unassessed | No transport gate |
+| Client certificates | Unsupported | `Request.ClientCertificate` reports not present; behind a TLS-terminating proxy Kestrel never sees one, and forwarded-certificate translation into `CERT_*` is the recorded design when a consumer needs it (ledger P78) |
+| WebSockets (`IsWebSocketRequest`, `AcceptWebSocketRequest`) | Unsupported | Framework's own "requires IIS integrated pipeline mode" is thrown; high-priority [follow-up](follow-ups/websockets.md) |
+| `TransmitFile`/`WriteFile` over 2 GB | Supported | `SupportsLongTransmitFile` is on; the native-handle overload is unsupported (ledger P78) |
 | Forms, postback, view state, control state | Supported | URL-encoded and multipart parsing, event ordering, MAC enforcement, event validation, and request validation |
 | Uploaded-file and raw-request `SaveAs` | Supported | Memory/disk-spill paths; Windows-rooted paths fail actionably off Windows rather than being misinterpreted |
 | `Request.Filter` and raw-header grouping parity | Unassessed | No filter scenario; `HttpRequest.SaveAs` header grouping is not compared to IIS |
 | Request/response cookies | Supported | Subkeys, defaults, validation, repeated `Set-Cookie`, attributes, mutation, and UTF-8 default response-header bytes |
 | `Response.Headers` read/`Add`/`Set`/`Remove` off IIS | Supported | The managed collection is the response-header store: it holds what was written through it, `AppendHeader` included, and nothing else; at send, `ContentType`, the cache policy, and a set `RedirectLocation` outrank a same-named entry while `Set-Cookie` is additive, and after the first flush `Add` throws and `Remove` is inert (readings H1-H16). No IIS `Server` header exists to hold or re-emit, and the post-flush collection mirrors this host's single-shot generated block rather than the partial native block IIS showed |
-| Configured non-default response-header encoding | Partial | Kestrel is pinned to Framework's UTF-8 default; `<globalization responseHeaderEncoding>` is not translated; non-ASCII request-header decoding is unassessed |
+| Request- and response-header byte encodings | Supported | Request-header bytes decode as IIS did (UTF-8, Latin-1 fallback, never 400); response headers leave in `<globalization responseHeaderEncoding>` (UTF-8 default; `iso-8859-1` exercised), read once the application has activated (ledger P77) |
 | `aspnet:MaxHttpCollectionKeys` | Supported | Opt-in: absent by default as on measured Framework 4.8.1; when configured it caps query, URL-encoded, multipart-field, and posted-file collections |
 | Kestrel and `httpRuntime.maxRequestLength` limits | Supported | Each owner keeps its limit and error path; the smaller effective limit wins; legacy `system.webServer` limit translation is unassessed |
 | Async pages, async module events, custom async handlers | Supported | Task-friendly synchronization context only; expected `HttpContext.Current` restoration is exercised |

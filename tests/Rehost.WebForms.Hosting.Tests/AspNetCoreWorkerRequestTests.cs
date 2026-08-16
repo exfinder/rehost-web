@@ -106,10 +106,23 @@ public sealed class AspNetCoreWorkerRequestTests
         request.GetLocalAddress().ShouldBe("");
     }
 
+    // IIS answered every one of Framework's 45 static variables, the site-topology ones with
+    // metabase shapes and the unset ones with "" (reading R1); a null here would surface as a
+    // null entry in Request.ServerVariables where Framework never had one.
     [Fact]
-    public void Server_Variables_Outside_The_Supported_Set_Report_Null()
+    public void Iis_Native_Server_Variables_Are_Never_Null()
     {
-        Create().GetServerVariable("APPL_MD_PATH").ShouldBeNull();
+        var request = Create();
+
+        request.GetServerVariable("APPL_MD_PATH").ShouldBe("/LM/W3SVC/1/ROOT");
+        request.GetServerVariable("INSTANCE_ID").ShouldBe("1");
+        request.GetServerVariable("INSTANCE_META_PATH").ShouldBe("/LM/W3SVC/1");
+        request.GetServerVariable("GATEWAY_INTERFACE").ShouldBe("CGI/1.1");
+        request.GetServerVariable("SERVER_SOFTWARE").ShouldBe("Kestrel");
+        request.GetServerVariable("CERT_FLAGS").ShouldBe("");
+        request.GetServerVariable("LOGON_USER").ShouldBe("");
+        request.GetServerVariable("HTTPS_SERVER_SUBJECT").ShouldBe("");
+        request.GetServerVariable("NOT_A_VARIABLE").ShouldBeNull();
     }
 
     [Fact]
@@ -121,19 +134,47 @@ public sealed class AspNetCoreWorkerRequestTests
         Create(context).GetServerVariable("HTTP_X_PARITY_REQUEST").ShouldBe("cold-sync");
     }
 
+    // SERVER_NAME and Request.Url take the Host header's host, SERVER_PORT its port; IIS built
+    // Url=http://shop.example.com:8112/... from Host: shop.example.com on a port-8112 binding
+    // (reading R1).
     [Fact]
-    public void Supported_Server_Variables_Describe_The_Request()
+    public void Server_Name_And_Port_Come_From_The_Host_Header()
     {
-        var context = Context(path: "/oracle", query: "?a=1");
-        context.Request.Host = new HostString("example.invalid", 8080);
+        var context = Context();
+        context.Request.Host = new HostString("shop.example.com", 8080);
 
         var request = Create(context);
 
-        request.GetServerVariable("SERVER_NAME").ShouldBe("example.invalid");
-        request.GetServerVariable("SERVER_PORT").ShouldBe("8080");
-        request.GetServerVariable("QUERY_STRING").ShouldBe("a=1");
-        request.GetServerVariable("SCRIPT_NAME").ShouldBe("/oracle");
+        request.GetServerName().ShouldBe("shop.example.com");
+        request.GetLocalPort().ShouldBe(8080);
+        request.IsSecure().ShouldBeFalse();
+        request.GetProtocol().ShouldBe("http");
         request.GetServerVariable("HTTPS").ShouldBe("off");
+    }
+
+    [Fact]
+    public void A_Tls_Request_Is_Secure_With_The_Scheme_Default_Port()
+    {
+        var context = Context();
+        context.Request.Scheme = "https";
+        context.Request.Host = new HostString("shop.example.com");
+
+        var request = Create(context);
+
+        request.IsSecure().ShouldBeTrue();
+        request.GetProtocol().ShouldBe("https");
+        request.GetLocalPort().ShouldBe(443);
+        request.GetServerVariable("HTTPS").ShouldBe("on");
+    }
+
+    [Fact]
+    public void Server_Name_Falls_Back_To_The_Local_Address_Without_A_Host()
+    {
+        var context = Context();
+        context.Request.Host = new HostString("");
+        context.Connection.LocalIpAddress = System.Net.IPAddress.Loopback;
+
+        Create(context).GetServerName().ShouldBe("127.0.0.1");
     }
 
     [Fact]

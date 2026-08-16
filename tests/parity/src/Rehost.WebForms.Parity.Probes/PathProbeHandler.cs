@@ -26,11 +26,45 @@ public sealed class PathProbeHandler : IHttpHandler
         Append(text, "mapdot", () => context.Server.MapPath("."));
         Append(text, "apppath", () => request.ApplicationPath);
         Append(text, "query", () => request.Url.Query);
+        Append(text, "url", () => request.Url.ToString());
+        Append(text, "secure", () => request.IsSecureConnection ? "true" : "false");
+        Append(text, "servername", () => request.ServerVariables["SERVER_NAME"] ?? "<null>");
+        Append(text, "serverport", () => request.ServerVariables["SERVER_PORT"] ?? "<null>");
+        Append(text, "https", () => request.ServerVariables["HTTPS"] ?? "<null>");
+        Append(text, "applmd", () => request.ServerVariables["APPL_MD_PATH"] ?? "<null>");
+        Append(text, "software", () => request.ServerVariables["SERVER_SOFTWARE"] ?? "<null>");
+        Append(text, "remoteaddr", () => request.UserHostAddress);
+        Append(text, "xprobe", () => CharCodes(request.Headers["X-Probe"]));
+
+        context.Response.AppendHeader("X-Accent", "caf\u00e9");
 
         var body = Encoding.UTF8.GetBytes(text.ToString());
         context.Response.StatusCode = 200;
         context.Response.ContentType = "text/plain; charset=utf-8";
         context.Response.OutputStream.Write(body, 0, body.Length);
+    }
+
+    // Header bytes as the application saw them, one code per character, so a decoding difference
+    // survives the response's own encoding.
+    private static string CharCodes(string? value)
+    {
+        if (value == null)
+        {
+            return "<null>";
+        }
+
+        var codes = new StringBuilder();
+        foreach (var c in value)
+        {
+            if (codes.Length > 0)
+            {
+                codes.Append(',');
+            }
+
+            codes.Append((int)c);
+        }
+
+        return codes.ToString();
     }
 
     private static void Append(StringBuilder text, string name, Func<string> read)

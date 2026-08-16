@@ -2,6 +2,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 internal sealed class ScenarioResponse
 {
+    internal required Version Version { get; init; }
+
     internal required int StatusCode { get; init; }
 
     internal required string ReasonPhrase { get; init; }

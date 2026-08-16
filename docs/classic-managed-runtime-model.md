@@ -56,8 +56,9 @@ factory, event, or callback dependencies.
 1. Host calls `AddRehostWebForms` with application options.
 2. Static bootstrap validates configuration, binds current-AppDomain identity,
    publishes the IIS baseline, and becomes `Initialized` before listen.
-3. `UseRehostWebForms` wires host-stop cleanup and installs terminal
-   middleware.
+3. `UseRehostWebForms` wires host-stop cleanup, registers the forwarded-headers
+   middleware (framework trust default; `ASPNETCORE_FORWARDEDHEADERS_ENABLED`
+   widens it behind a proxy), and installs terminal middleware.
 4. The first routed request evaluates the activation service's thread-safe
    lazy dispatcher; concurrent requests share its result.
 5. Activation opens `ApplicationManager` and calls its public `CreateObject`

@@ -1,8 +1,9 @@
 namespace Rehost.WebForms.Hosting;
 
 using System;
-using System.Text;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,12 +25,21 @@ public static class RehostWebFormsExtensions
         WebFormsApplication.Initialize(options);
         builder.Services.AddSingleton(new ClassicPipelineActivation(options));
 
-        // Framework writes response headers in HttpResponse.HeaderEncoding, UTF-8 by default
-        // (IIS7WorkerRequest encodes every header name and value with it); Kestrel's default
-        // refuses non-ASCII header values outright. A non-default
-        // <globalization responseHeaderEncoding> stays a documented residual gap.
-        builder.Services.Configure<KestrelServerOptions>(
-            kestrel => kestrel.ResponseHeaderEncodingSelector = _ => Encoding.UTF8);
+        builder.Services.Configure<KestrelServerOptions>(kestrel =>
+        {
+            kestrel.ResponseHeaderEncodingSelector = ResponseHeaderEncoding.Select;
+            kestrel.RequestHeaderEncodingSelector = _ => RequestHeaderEncoding.Instance;
+        });
+
+        // Behind a TLS-terminating proxy the scheme, host, and client address a Framework
+        // application reads (IsSecureConnection, Url, UserHostAddress) arrive as X-Forwarded-*.
+        // Registered here so a consumer never has to remember it; trust stays ASP.NET Core's —
+        // loopback proxies unless ASPNETCORE_FORWARDEDHEADERS_ENABLED (which the framework's own
+        // setup turns into "trust all" for For/Proto) or ForwardedHeadersOptions widens it.
+        builder.Services.Configure<ForwardedHeadersOptions>(forwarded =>
+            forwarded.ForwardedHeaders |= ForwardedHeaders.XForwardedFor
+                | ForwardedHeaders.XForwardedProto
+                | ForwardedHeaders.XForwardedHost);
 
         return builder;
     }
@@ -43,6 +53,14 @@ public static class RehostWebFormsExtensions
         var activation = app.ApplicationServices.GetRequiredService<ClassicPipelineActivation>();
         var lifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
         lifetime.ApplicationStopping.Register(activation.Shutdown);
+
+        // With ASPNETCORE_FORWARDEDHEADERS_ENABLED the framework's startup filter has already put
+        // the middleware at the head of the pipeline; a second pass would re-read what it left.
+        var configuration = app.ApplicationServices.GetService<IConfiguration>();
+        if (!string.Equals(configuration?["ForwardedHeaders_Enabled"], "true", StringComparison.OrdinalIgnoreCase))
+        {
+            app.UseForwardedHeaders();
+        }
 
         var middleware = new RehostWebFormsMiddleware(activation);
         app.Run(middleware.InvokeAsync);

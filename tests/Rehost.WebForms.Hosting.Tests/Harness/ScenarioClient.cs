@@ -12,10 +12,13 @@ internal sealed class ScenarioClient : IDisposable
 {
     private readonly HttpClient _client;
     private readonly bool _freshConnectionPerRequest;
+    private readonly bool _http2;
 
-    internal ScenarioClient(Uri baseAddress, int? maxConnectionsPerServer = null)
+    // http2 speaks h2c with prior knowledge over the plain endpoint (exact version, no upgrade).
+    internal ScenarioClient(Uri baseAddress, int? maxConnectionsPerServer = null, bool http2 = false)
     {
-        _freshConnectionPerRequest = maxConnectionsPerServer == null;
+        _freshConnectionPerRequest = maxConnectionsPerServer == null && !http2;
+        _http2 = http2;
         var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
@@ -32,7 +35,7 @@ internal sealed class ScenarioClient : IDisposable
         {
             BaseAddress = baseAddress,
             Timeout = TimeSpan.FromSeconds(60),
-            DefaultRequestVersion = HttpVersion.Version11,
+            DefaultRequestVersion = http2 ? HttpVersion.Version20 : HttpVersion.Version11,
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact,
         };
     }
@@ -112,6 +115,11 @@ internal sealed class ScenarioClient : IDisposable
             request.Headers.ConnectionClose = true;
         }
 
+        // HttpRequestMessage carries its own version; the client's default covers only the
+        // convenience overloads.
+        request.Version = _http2 ? HttpVersion.Version20 : HttpVersion.Version11;
+        request.VersionPolicy = HttpVersionPolicy.RequestVersionExact;
+
         using (request)
         using (var response = await _client.SendAsync(request, HttpCompletionOption.ResponseContentRead))
         {
@@ -125,6 +133,7 @@ internal sealed class ScenarioClient : IDisposable
 
             return new ScenarioResponse
             {
+                Version = response.Version,
                 StatusCode = (int)response.StatusCode,
                 ReasonPhrase = response.ReasonPhrase ?? "",
                 Headers = headers,

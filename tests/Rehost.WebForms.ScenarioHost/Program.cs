@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -118,6 +119,14 @@ public static class Program
             if (options.KestrelMaxBodyBytes is { } maxBody)
             {
                 kestrel.Limits.MaxRequestBodySize = maxBody;
+            }
+
+            // Cleartext HTTP/2 has no ALPN to choose by, so Kestrel serves h2c only on an
+            // endpoint that speaks nothing else.
+            if (options.Http2)
+            {
+                kestrel.ConfigureEndpointDefaults(endpoint =>
+                    endpoint.Protocols = HttpProtocols.Http2);
             }
         });
         builder.WebHost.UseUrls("http://127.0.0.1:0");
@@ -324,10 +333,12 @@ internal sealed class ScenarioOptions
         string? machineConfigurationPath,
         bool serve,
         long? kestrelMaxBodyBytes,
+        bool http2,
         List<string> requests,
         List<string> postbacks)
     {
         KestrelMaxBodyBytes = kestrelMaxBodyBytes;
+        Http2 = http2;
         MachineConfigurationPath = machineConfigurationPath;
         Serve = serve;
         HoldGate = holdGate;
@@ -358,6 +369,8 @@ internal sealed class ScenarioOptions
 
     internal long? KestrelMaxBodyBytes { get; }
 
+    internal bool Http2 { get; }
+
     internal List<string> Requests { get; }
 
     internal List<string> Postbacks { get; }
@@ -373,6 +386,7 @@ internal sealed class ScenarioOptions
         string? machineConfigurationPath = null;
         var serve = false;
         long? kestrelMaxBodyBytes = null;
+        var http2 = false;
         var requests = new List<string>();
         var postbacks = new List<string>();
 
@@ -416,6 +430,9 @@ internal sealed class ScenarioOptions
                     kestrelMaxBodyBytes = long.Parse(Require(value, "--kestrel-max-body"));
                     i++;
                     break;
+                case "--http2":
+                    http2 = true;
+                    break;
                 case "--request":
                     requests.Add(Require(value, "--request"));
                     i++;
@@ -446,6 +463,7 @@ internal sealed class ScenarioOptions
             machineConfigurationPath,
             serve,
             kestrelMaxBodyBytes,
+            http2,
             requests,
             postbacks);
     }

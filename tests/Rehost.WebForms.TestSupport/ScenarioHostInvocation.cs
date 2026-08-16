@@ -36,6 +36,8 @@ public sealed class ScenarioHostInvocation
     public ScenarioHostInvocation KestrelMaxBody(long bytes) =>
         Add("--kestrel-max-body", bytes.ToString());
 
+    public ScenarioHostInvocation Http2() => Add("--http2");
+
     public ScenarioHostInvocation Request(string url) => Add("--request", url);
 
     public ScenarioHostInvocation Postback(string probe) => Add("--postback", probe);

@@ -25,16 +25,18 @@ public sealed class LiveScenario : IDisposable
         ScenarioFixture fixture,
         IsolationReason reason,
         string? rootPath = null,
-        long? kestrelMaxBody = null)
+        long? kestrelMaxBody = null,
+        bool http2 = false)
     {
         _ = reason;
-        return new(fixture, rootPath, kestrelMaxBody);
+        return new(fixture, rootPath, kestrelMaxBody, http2);
     }
 
     private LiveScenario(
         ScenarioFixture fixture,
         string? rootPath = null,
-        long? kestrelMaxBody = null)
+        long? kestrelMaxBody = null,
+        bool http2 = false)
     {
         _root = rootPath == null
             ? Directory.CreateTempSubdirectory("rehost-live-kestrel-")
@@ -62,10 +64,15 @@ public sealed class LiveScenario : IDisposable
             invocation.KestrelMaxBody(kestrelMaxBody.Value);
         }
 
+        if (http2)
+        {
+            invocation.Http2();
+        }
+
         _process = invocation.Start();
 
         Address = new Uri(WaitForAddress());
-        Client = new ScenarioClient(Address);
+        Client = new ScenarioClient(Address, http2: http2);
     }
 
     internal string ApplicationPath { get; }

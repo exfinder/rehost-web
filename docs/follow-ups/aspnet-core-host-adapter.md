@@ -6,19 +6,24 @@ The implemented boundary is recorded in
 
 ## Remaining work
 
-- Exercise the response-spill path with a body above the in-memory threshold,
-  including cleanup after success, disconnect, and commit failure.
-- Inventory server variables needed by representative applications. IIS-only
-  variables must be translated, rejected, or explicitly left unassessed.
-- ~~Derive `PathInfo` and the file/path-info split without filename heuristics~~ — done, IIS's handler-mapping rule (ledger P72).
-- Translate `<globalization responseHeaderEncoding>` and determine non-ASCII
-  request-header decoding. The current host pins Framework's UTF-8 response
-  default.
-- Define client-certificate, compression, and protocol-upgrade/WebSocket
-  behavior instead of inheriting empty worker-request defaults.
-- Gate real HTTP/2 and HTTP/3 request bodies and completion.
-- Define public streaming and file-send behavior beyond the internal known-file
-  paths already used by static serving.
+Ledger P72 and P76–P78 closed the path-info split, the server-variable
+inventory, request scheme/host, forwarded headers, both header encodings, the
+response-spill tests, HTTP/2, the long-file flag, and recorded WebSockets
+([follow-up](websockets.md)) and client certificates as unsupported
+([research](../research/host-adapter-residuals.md)).
+
+- Client-visible streaming: a mid-request `Flush` reaches the client only at
+  the single commit after `EndOfRequest` (ADR 0003); a scenario asserting
+  first-flush timing is the next step, and honoring it means committing headers
+  at the first flush and streaming the rest.
+- HTTP/3: no transport gate.
+- Compression is IIS's module and its configuration; on the
+  [IIS-role follow-up](iis-role-behaviors.md).
+- Client certificates behind a proxy: forwarded-certificate header into `CERT_*`
+  when a consumer needs it.
+- Integrated-mode server variables (`UNENCODED_URL`, `HTTP_URL`, native-module
+  values) and `ServerVariables.Set`: `HttpServerVarsCollection` reaches only an
+  `IIS7WorkerRequest` for them; unassessed.
 
 ## Done when
 

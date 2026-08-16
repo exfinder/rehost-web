@@ -65,8 +65,12 @@ each and classify:
   URL with a trailing space runs on the port and is unmappable on IIS.
 - Error shapes IIS owned: `httpErrors` versus `customErrors` boundaries for
   400/404/413-class responses that never reached ASP.NET.
+- Compression (`StaticCompressionModule`/`DynamicCompressionModule`,
+  `<urlCompression>`/`<httpCompression>`): today only if the host adds
+  ASP.NET Core's response-compression middleware, which the adapter's sendfile
+  path bypasses for `TransmitFile`/static files; decide restore-or-exclude here.
 - Explicit exclusions to record: Windows/anonymous auth beyond current
-  support, compression, W3C logging, kernel/output caching at the IIS tier,
+  support, W3C logging, kernel/output caching at the IIS tier,
   ISAPI filters, application warm-up.
 
 ## Done when
