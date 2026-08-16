@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Text;
+using System.Web.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
@@ -320,35 +320,17 @@ internal sealed class RoslynCSharpCompiler : ICodeCompiler
             var deployed = Path.Combine(AppContext.BaseDirectory, Path.GetFileName(path));
             var selected = File.Exists(deployed) ? deployed : path;
 
-            if (HasManagedMetadata(selected))
+            // The shared framework ships native libraries beside managed assemblies, and only on
+            // Windows do they carry the .dll extension. MetadataReference.CreateFromFile defers
+            // reading the image, so an unmanaged file would be rejected at compilation instead, as
+            // CS0009 against every reference.
+            if (PortableExecutableFile.HasManagedMetadata(selected))
             {
                 references.Add(MetadataReference.CreateFromFile(selected));
             }
         }
 
         return [.. references];
-    }
-
-    // The shared framework ships native libraries beside managed assemblies, and only on Windows
-    // do they carry the .dll extension. MetadataReference.CreateFromFile defers reading the image,
-    // so an unmanaged file is rejected at compilation instead, as CS0009 against every reference.
-    private static bool HasManagedMetadata(string path)
-    {
-        try
-        {
-            using var stream = File.OpenRead(path);
-            using var peReader = new PEReader(stream);
-
-            return peReader.HasMetadata;
-        }
-        catch (BadImageFormatException)
-        {
-            return false;
-        }
-        catch (IOException)
-        {
-            return false;
-        }
     }
 
     private static IEnumerable<ResourceDescription> CreateManifestResources(CompilerParameters options)

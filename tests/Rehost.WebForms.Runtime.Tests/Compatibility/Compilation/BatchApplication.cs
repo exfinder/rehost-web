@@ -30,6 +30,8 @@ internal sealed class BatchApplication : IDisposable
 
     internal string TracePath => Path.Combine(_root.FullName, "trace.txt");
 
+    private string ResponseDirectory => Path.Combine(_root.FullName, "responses");
+
     // One segment per application directory, named for a digest of that directory.
     internal string Segment => Directory.GetDirectories(
         Path.Combine(CodegenRoot, "root")).Single();
@@ -64,6 +66,15 @@ internal sealed class BatchApplication : IDisposable
         File.SetLastWriteTimeUtc(path, DateTime.UtcNow.AddSeconds(_runs + 1));
     }
 
+    internal void AddAppCode(string fileName, string source)
+    {
+        File.WriteAllText(Path.Combine(ApplicationPath, "App_Code", fileName), source);
+    }
+
+    // The full body of the run's Nth request, where the trace keeps a summary.
+    internal string ResponseBody(int index) =>
+        File.ReadAllText(Path.Combine(ResponseDirectory, index + ".body"));
+
     internal void BreakAppCode()
     {
         File.AppendAllText(
@@ -88,10 +99,12 @@ internal sealed class BatchApplication : IDisposable
             File.Delete(TracePath);
         }
 
+        Directory.CreateDirectory(ResponseDirectory);
         var invocation = new ScenarioHostInvocation()
             .Application(ApplicationPath)
             .CompilationTemp(CodegenRoot)
-            .Trace(TracePath);
+            .Trace(TracePath)
+            .ResponseDirectory(ResponseDirectory);
         if (holdGate != null)
         {
             invocation.HoldGate(holdGate);

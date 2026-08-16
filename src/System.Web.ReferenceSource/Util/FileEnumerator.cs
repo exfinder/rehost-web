@@ -168,7 +168,9 @@ internal class FileEnumerator: FileData, IEnumerable, IEnumerator, IDisposable {
 #else
             if (_entries == null) {
                 try {
-                    _entries = new DirectoryInfo(_path).EnumerateFileSystemInfos().GetEnumerator();
+                    // NTFS index order, which FindNextFile returned and consumers inherited; see DirectoryOrder.
+                    _entries = ((IEnumerable<FileSystemInfo>)DirectoryOrder.Sort(
+                        new DirectoryInfo(_path).EnumerateFileSystemInfos())).GetEnumerator();
                 }
                 catch (DirectoryNotFoundException) {
                     // Empty enumeration case

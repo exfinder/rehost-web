@@ -42,6 +42,7 @@ Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
 | --- | --- | --- |
 | Pre-application start, C# `App_Code`, `Global.asax` | Supported | Includes `AppInitialize`, `Application_Start`, generated assembly reuse, and compile-error pages |
 | `<codeSubDirectories>` and `App_GlobalResources` | Supported | Neutral resources and one culture satellite are exercised |
+| Directory order and `<add assembly="*"/>` | Supported | Every listing is in NTFS order on every filesystem, so duplicate-type blame, theme `<link>` order, and codegen reuse are deterministic (not Framework's exact batch sequence); the `bin` scan matches `.DLL` on Linux and ignores non-assembly files as Framework did, while an x86-only or identity-duplicated assembly still fails activation as on Framework (ledger P73) |
 | C# page compilation | Supported | Roslyn provider; default language version 7.3; mapped diagnostics |
 | Visual Basic | Unsupported | Configured provider fails with an actionable message |
 | Custom CodeDOM providers and advanced batching | Unassessed | Provider options, batch limits, post-processors, and reproducible emission remain open |

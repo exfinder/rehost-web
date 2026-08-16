@@ -2868,6 +2868,9 @@ namespace System.Web.Compilation {
 
             if (Directory.Exists(appPhysicalDir)) {
                 string[] themeDirs = Directory.GetDirectories(appPhysicalDir);
+#if !NETFRAMEWORK
+                DirectoryOrder.SortPaths(themeDirs);
+#endif
 
                 foreach (string themeDirPath in themeDirs) {
                     string themeDirName = Path.GetFileName(themeDirPath);

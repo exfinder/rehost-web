@@ -846,7 +846,11 @@ namespace System.Web.Configuration {
             else {
                 DirectoryInfo binPathDirectory = new DirectoryInfo(binPath);
                 // Get a list of all the DLL's in the bin directory
+#if NETFRAMEWORK
                 binDlls = binPathDirectory.GetFiles("*.dll");
+#else
+                binDlls = BinDirectoryScan.ManagedAssemblyFiles(binPathDirectory);
+#endif
 
                 if (binDlls.Length > 0) {
                     list = new ArrayList(binDlls.Length);

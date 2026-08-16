@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Shouldly;
 using Rehost.WebForms.Parity.Contracts;
 using Xunit;
@@ -22,5 +23,27 @@ public sealed class CodegenCompileErrorTests
         diagnostics.Count.ShouldBe(2);
         diagnostics[0].ShouldContain("Compilation Error");
         diagnostics[1].ShouldBe(diagnostics[0]);
+    }
+
+    // The compiler names a duplicate at every declaration after the first it saw, and it sees
+    // App_Code in directory order: NTFS order on Framework, sorted here on every filesystem. The
+    // first file in that order is the one never blamed.
+    [Fact]
+    public void Blames_Duplicate_App_Code_Types_In_Directory_Order()
+    {
+        using var application = BatchApplication.Create();
+        foreach (var name in new[] { "Zulu", "Golf", "bravo", "Foxtrot", "Delta", "Echo" })
+        {
+            application.AddAppCode(name + ".cs", "public class Twice { }");
+        }
+
+        var trace = application.Run("/default");
+
+        trace.ShouldContain("request:/default:500");
+        var blamed = Regex.Matches(application.ResponseBody(0), @"App_Code[\\/](\w+)\.cs\(")
+            .Select(match => match.Groups[1].Value)
+            .Distinct()
+            .ToList();
+        blamed.ShouldBe(["Delta", "Echo", "Foxtrot", "Golf", "Zulu"]);
     }
 }

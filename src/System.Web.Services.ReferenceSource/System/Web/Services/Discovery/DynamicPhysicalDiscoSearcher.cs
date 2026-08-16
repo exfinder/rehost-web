@@ -49,7 +49,7 @@ namespace System.Web.Services.Discovery {
                 if (subDir.Name == "." || subDir.Name == ".." ) {
                     continue;
                 }
-                ScanDirectory( localDir + '\\' + subDir.Name );
+                ScanDirectory( localDir + Path.DirectorySeparatorChar + subDir.Name );
             }
         }
 

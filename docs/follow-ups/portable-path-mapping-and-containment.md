@@ -20,14 +20,25 @@ Windows-name rules as portable application rules. Remaining differences are
 IIS-native-tier and recorded on the
 [IIS-role follow-up](iis-role-behaviors.md).
 
-## Required decisions
+Ledger P73 and the
+[enumeration research](../research/enumeration-order-and-bin-wildcard.md):
+every directory listing sorts in NTFS order, batch page compilation keeps the
+directory's order off Framework, and the wildcard `bin` scan matches `.DLL` on
+every filesystem and skips non-assembly files before loading — every other
+load failure surfaces as Framework surfaced it.
 
-- Separate URL, virtual, configuration, and physical path value rules.
-- Cross-filesystem enumeration ordering and wildcard `bin` assembly-loading
-  failures, without swallowing unrelated load errors.
+## Remaining
 
-## Done when
-
-Enumeration order and `bin` wildcard loading are deterministic across
-filesystems, and the value rules are written down where a new seam can find
-them.
+- Separate URL, virtual, configuration, and physical path value rules — the
+  current rules are in [filesystem semantics](../filesystem-semantics.md)
+  ("Physical or virtual", "Enumeration order"); a consolidated value-rule
+  section is owed when a new seam needs one.
+- `CodeDirectoryCompiler`'s `BuildProviderSet` (`HybridDictionary`) keeps
+  insertion order only to eight entries, and `ProcessDependencies` buckets by
+  object identity — App_Code compile order past eight files is deterministic
+  per name set only as far as the runtime's `HybridDictionary` is; Framework
+  had the same behavior. Reopen only if a consumer observes it.
+- The OWIN `Startup` scanner (`Owin.Host.SystemWeb/Loader/DefaultLoader.cs`)
+  enumerates `bin` unsorted; Katana provenance rules apply.
+- Truncated managed images: the pre-load metadata probe skips a file
+  `PEReader` cannot open, where Framework reported `COR_E_BADIMAGEFORMAT`.
