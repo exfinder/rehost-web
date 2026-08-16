@@ -17,10 +17,15 @@ deliberate boundary, not a gap to close later:
 
 - **No mechanism.** `Thread.Abort` is gone on modern .NET
   (`PlatformNotSupportedException`); there is no supported way to force-unwind a
-  managed thread. `Thread.Interrupt` only throws at a *managed* blocking wait
-  (`Monitor.Wait`/`Sleep`/`WaitOne`) — it does nothing to a CPU-spin, a native/
-  P-Invoke block, or code that catches `ThreadInterruptedException`, so it does
-  not reliably break a real application deadlock.
+  managed thread. `Thread.Interrupt` is safer than Abort — it throws only at a
+  *managed* blocking wait (`Monitor.Wait`/`Sleep`/`WaitOne`), not at an arbitrary
+  instruction — but it is still unsafe as a general kill and unreliable besides:
+  a latched interrupt can surface at an unrelated later wait deep in a library,
+  it hands the wait site a `ThreadInterruptedException` almost no code is written
+  to handle (the awaited condition is left unmet), and it does nothing to a
+  CPU-spin, a native/P-Invoke block, or code that catches it. It is a
+  cooperative wake-up for a thread you own that opts into interruption, not a way
+  to terminate arbitrary application code.
 - **Unsafe by design.** Aborting mid-execution leaves locks held, `finally`
   blocks unrun, and shared state half-mutated. Framework tolerated this only
   because it could recycle the AppDomain to contain the damage. This runtime is
