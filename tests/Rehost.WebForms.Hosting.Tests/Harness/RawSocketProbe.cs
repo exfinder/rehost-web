@@ -49,6 +49,43 @@ internal static class RawSocketProbe
         return SendRawAsync(address, Encoding.ASCII.GetBytes(request));
     }
 
+    // The response as it arrives: one entry per socket read with the elapsed time since the
+    // request went out, so a test can tell what reached the client before a server-side delay
+    // elapsed. HttpClient would buffer that timing away.
+    internal static async Task<List<(TimeSpan Elapsed, byte[] Bytes)>> ReadTimedAsync(
+        Uri address, string path)
+    {
+        var request = $"""
+            GET {path} HTTP/1.1
+            Host: {address.Authority}
+            Connection: close
+
+
+            """.ReplaceLineEndings("\r\n");
+        using var client = new System.Net.Sockets.TcpClient();
+        await client.ConnectAsync(address.Host, address.Port);
+        await using var stream = client.GetStream();
+
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        await stream.WriteAsync(Encoding.ASCII.GetBytes(request));
+        await stream.FlushAsync();
+
+        var arrivals = new List<(TimeSpan, byte[])>();
+        var buffer = new byte[65536];
+        while (true)
+        {
+            var read = await stream.ReadAsync(buffer);
+            if (read == 0)
+            {
+                break;
+            }
+
+            arrivals.Add((clock.Elapsed, buffer[..read]));
+        }
+
+        return arrivals;
+    }
+
     // The request exactly as given, for a Host, forwarded headers, or header bytes no managed
     // client would send.
     internal static async Task<byte[]> SendRawAsync(Uri address, byte[] request)

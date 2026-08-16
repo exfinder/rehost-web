@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
+using HttpException = System.Web.HttpException;
 using System.Web.Hosting;
 using HttpWorkerRequest = System.Web.HttpWorkerRequest;
 
@@ -22,6 +23,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         new(TaskCreationOptions.RunContinuationsAsynchronously);
     private string? _uriPath;
     private (string FilePath, string PathInfo)? _split;
+    private bool _statusSent;
+    private bool _clientGone;
 
     internal AspNetCoreWorkerRequest(
         HttpContext context,
@@ -232,7 +235,9 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override bool IsClientConnected()
     {
-        return !_context.RequestAborted.IsCancellationRequested && !_body.ClientDisconnected;
+        return !_clientGone
+            && !_context.RequestAborted.IsCancellationRequested
+            && !_body.ClientDisconnected;
     }
 
     public override byte[]? GetPreloadedEntityBody()
@@ -284,6 +289,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override void SendStatus(int statusCode, string statusDescription)
     {
+        _statusSent = true;
         Response.SetStatus(statusCode, statusDescription);
     }
 
@@ -325,10 +331,56 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
             "Sending a response from a native file handle is not supported on this host.");
     }
 
-    // The response is committed once, after EndOfRequest seals it, so an intermediate flush has
-    // nothing to push. Client-visible streaming is outside the first-slice envelope.
+    // Framework's Flush put the headers and everything buffered on the wire at once (reading
+    // R-S1: 200 + Transfer-Encoding: chunked + the first chunk in one packet). Response.End's
+    // deferred flush arrives here before any header was generated (P55) and must publish
+    // nothing; the final flush leaves the commit to the middleware, off the pipeline thread.
     public override void FlushResponse(bool finalFlush)
     {
+        if (finalFlush || !_statusSent)
+        {
+            return;
+        }
+
+        Deliver(Response.FlushAsync(_context, _context.RequestAborted));
+    }
+
+    public override bool SupportsAsyncFlush => true;
+
+    public override IAsyncResult BeginFlush(AsyncCallback callback, object state)
+    {
+        var flush = _statusSent
+            ? DeliverAsync(Response.FlushAsync(_context, _context.RequestAborted))
+            : Task.CompletedTask;
+        return TaskToAsyncResult.Begin(flush, callback, state);
+    }
+
+    public override void EndFlush(IAsyncResult asyncResult)
+    {
+        TaskToAsyncResult.End(asyncResult);
+    }
+
+    // The pipeline thread waits for Kestrel's transport to take the bytes, the same trade the
+    // request body makes in the other direction. A transport failure is what Framework's flush
+    // raised on a vanished client: an HttpException into the page, the connection gone.
+    private void Deliver(Task flush)
+    {
+        DeliverAsync(flush).GetAwaiter().GetResult();
+    }
+
+    private async Task DeliverAsync(Task flush)
+    {
+        try
+        {
+            await flush.ConfigureAwait(false);
+        }
+        catch (Exception exception) when (exception is IOException or OperationCanceledException
+            or ObjectDisposedException)
+        {
+            _clientGone = true;
+            _context.Abort();
+            throw new HttpException("The remote host closed the connection.", exception);
+        }
     }
 
     public override void EndOfRequest()

@@ -56,7 +56,7 @@ internal sealed class RehostWebFormsMiddleware
         }
 
         await workerRequest.Completion;
-        await CommitAsync(context, workerRequest.Response);
+        await workerRequest.Response.CommitAsync(context, context.RequestAborted);
     }
 
     private static bool ExceedsHostBodyLimit(HttpContext context)
@@ -64,31 +64,5 @@ internal sealed class RehostWebFormsMiddleware
         return context.Request.ContentLength is long declared
             && context.Features.Get<IHttpMaxRequestBodySizeFeature>()?.MaxRequestBodySize is long limit
             && declared > limit;
-    }
-
-    private static async Task CommitAsync(HttpContext context, ResponseSpool spool)
-    {
-        var response = context.Response;
-        response.StatusCode = spool.StatusCode;
-
-        // Without this the server substitutes the standard reason for the status code, and a
-        // handler's own description is lost.
-        var responseFeature = context.Features.Get<IHttpResponseFeature>();
-        if (responseFeature != null)
-        {
-            responseFeature.ReasonPhrase = spool.ReasonPhrase;
-        }
-
-        foreach (var header in spool.Headers)
-        {
-            response.Headers.Append(header.Name, header.Value);
-        }
-
-        if (spool.ContentLength.HasValue)
-        {
-            response.ContentLength = spool.ContentLength;
-        }
-
-        await spool.CommitBodyAsync(response, context.RequestAborted);
     }
 }

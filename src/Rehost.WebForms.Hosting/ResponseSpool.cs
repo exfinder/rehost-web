@@ -6,15 +6,18 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
 
 internal readonly record struct ResponseHeader(string Name, string Value);
 
 // System.Web writes a response through callbacks that assume a synchronous transport, which
-// Kestrel does not offer. Output is therefore collected here and committed once, after
-// EndOfRequest seals it. The body is an ordered list of segments: buffered byte runs, and file
-// ranges held by reference so the commit can hand them to the server's sendfile path instead of
-// copying them through the buffer.
+// Kestrel does not offer. Output is therefore collected here as an ordered list of segments —
+// buffered byte runs, and file ranges held by reference so the commit can hand them to the
+// server's sendfile path instead of copying them through the buffer — and delivered in commits:
+// the head (status, headers) once, then every segment not yet delivered. A response that never
+// flushes is committed once after EndOfRequest seals it; a response System.Web flushes
+// mid-request is committed at each flush, so its bytes reach the client when Framework's did.
 internal sealed class ResponseSpool : IDisposable
 {
     internal const int DefaultMemoryThreshold = 32 * 1024;
@@ -26,6 +29,7 @@ internal sealed class ResponseSpool : IDisposable
     private readonly List<object> _segments = new();
     private readonly List<ResponseHeader> _headers = new();
     private FileBufferingWriteStream? _currentRun;
+    private int _delivered;
 
     internal ResponseSpool(
         Func<string> temporaryDirectoryAccessor,
@@ -48,22 +52,24 @@ internal sealed class ResponseSpool : IDisposable
 
     internal bool IsSealed { get; private set; }
 
+    internal bool HeadCommitted { get; private set; }
+
     internal void SetStatus(int statusCode, string? reasonPhrase)
     {
-        RequireUnsealed();
+        RequireHeadOpen();
         StatusCode = statusCode;
         ReasonPhrase = reasonPhrase ?? "";
     }
 
     internal void AddHeader(string name, string value)
     {
-        RequireUnsealed();
+        RequireHeadOpen();
         _headers.Add(new ResponseHeader(name, value));
     }
 
     internal void SetContentLength(long contentLength)
     {
-        RequireUnsealed();
+        RequireHeadOpen();
         ContentLength = contentLength;
     }
 
@@ -98,36 +104,84 @@ internal sealed class ResponseSpool : IDisposable
         IsSealed = true;
     }
 
-    internal async Task CommitBodyAsync(HttpResponse response, CancellationToken cancellationToken)
+    // A mid-request flush: the head goes out even when no bytes are pending, as IIS sent
+    // Framework's headers on the first Flush.
+    internal async Task FlushAsync(HttpContext context, CancellationToken cancellationToken)
     {
-        if (!IsSealed)
+        await CommitAsync(context, cancellationToken).ConfigureAwait(false);
+        if (!context.Response.HasStarted)
         {
-            throw new InvalidOperationException(
-                "The response cannot be committed before EndOfRequest seals it.");
+            await context.Response.StartAsync(cancellationToken).ConfigureAwait(false);
+            await context.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    // Publishes the head on the first call and every segment collected since the previous call.
+    // The head alone does not start the response: a body-less commit keeps the server's own
+    // Content-Length: 0 ending.
+    internal async Task CommitAsync(HttpContext context, CancellationToken cancellationToken)
+    {
+        var response = context.Response;
+        if (!HeadCommitted)
+        {
+            response.StatusCode = StatusCode;
+
+            // Without this the server substitutes the standard reason for the status code, and a
+            // handler's own description is lost.
+            var responseFeature = context.Features.Get<IHttpResponseFeature>();
+            if (responseFeature != null)
+            {
+                responseFeature.ReasonPhrase = ReasonPhrase;
+            }
+
+            foreach (var header in _headers)
+            {
+                response.Headers.Append(header.Name, header.Value);
+            }
+
+            if (ContentLength.HasValue)
+            {
+                response.ContentLength = ContentLength;
+            }
+
+            HeadCommitted = true;
         }
 
-        // Re-validate every range before the first byte leaves: a file that shrank since it was
-        // spooled fails while a status can still be produced, not mid-body under sent headers.
-        foreach (var segment in _segments)
+        // Re-validate every pending range before the first of them leaves: a file that shrank
+        // since it was spooled fails while a status can still be produced, not mid-body under
+        // sent headers.
+        for (var i = _delivered; i < _segments.Count; i++)
         {
-            if (segment is FileRange range)
+            if (_segments[i] is FileRange range)
             {
                 RequireRange(range.Path, range.Offset, range.Length);
             }
         }
 
-        foreach (var segment in _segments)
+        var pending = _delivered < _segments.Count;
+        while (_delivered < _segments.Count)
         {
+            var segment = _segments[_delivered];
             if (segment is FileRange range)
             {
                 await response.SendFileAsync(
-                    range.Path, range.Offset, range.Length, cancellationToken);
+                    range.Path, range.Offset, range.Length, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await ((FileBufferingWriteStream)segment)
-                    .DrainBufferAsync(response.Body, cancellationToken);
+                var run = (FileBufferingWriteStream)segment;
+                await run.DrainBufferAsync(response.Body, cancellationToken).ConfigureAwait(false);
+                run.Dispose();
             }
+
+            _delivered++;
+        }
+
+        // A run delivered mid-request is closed; later writes open a new one.
+        _currentRun = null;
+        if (pending)
+        {
+            await response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -162,6 +216,18 @@ internal sealed class ResponseSpool : IDisposable
         {
             throw new InvalidOperationException(
                 "The response was already sealed by EndOfRequest and cannot be modified.");
+        }
+    }
+
+    // System.Web refuses status and header changes after its own headers went out; a call here
+    // past the head commit is the adapter's mistake, not the application's.
+    private void RequireHeadOpen()
+    {
+        RequireUnsealed();
+        if (HeadCommitted)
+        {
+            throw new InvalidOperationException(
+                "The response head was already committed by a flush and cannot be modified.");
         }
     }
 }

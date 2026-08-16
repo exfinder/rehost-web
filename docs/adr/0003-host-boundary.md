@@ -20,9 +20,13 @@ response. Translation, transport, commit, or pre-pipeline escapes are adapter
 failures. A disconnect is exposed to System.Web but does not abandon a pipeline
 that may still access request state.
 
-Responses spool status, headers, memory/file fragments, and logical flush state;
-`EndOfRequest` seals managed output, then the adapter commits asynchronously.
-Kestrel synchronous I/O stays disabled.
+Responses spool status, headers, and memory/file fragments, and are committed
+incrementally: a mid-request flush that follows System.Web's own header
+generation publishes the head once and every fragment collected since the last
+flush, on the pipeline thread waiting for the transport (the request-body trade
+in the other direction; amended 2026-08-16, ledger P79); `EndOfRequest` seals
+managed output, then the adapter commits what remains asynchronously. A flush
+before the head exists publishes nothing. Kestrel synchronous I/O stays disabled.
 
 ## Consequences
 

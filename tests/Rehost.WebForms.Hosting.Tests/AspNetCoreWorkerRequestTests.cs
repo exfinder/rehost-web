@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using HttpWorkerRequest = System.Web.HttpWorkerRequest;
 using Rehost.WebForms.Hosting;
 using Shouldly;
 using Xunit;
@@ -602,7 +603,7 @@ public sealed class AspNetCoreWorkerRequestTests
             using var drained = new MemoryStream();
             var commitContext = new DefaultHttpContext();
             commitContext.Response.Body = drained;
-            await request.Response.CommitBodyAsync(commitContext.Response, CancellationToken.None);
+            await request.Response.CommitAsync(commitContext, CancellationToken.None);
 
             Encoding.ASCII.GetString(drained.ToArray()).ShouldBe("before|23456|after");
         }
@@ -630,7 +631,7 @@ public sealed class AspNetCoreWorkerRequestTests
             using var drained = new MemoryStream();
             var commitContext = new DefaultHttpContext();
             commitContext.Response.Body = drained;
-            await request.Response.CommitBodyAsync(commitContext.Response, CancellationToken.None);
+            await request.Response.CommitAsync(commitContext, CancellationToken.None);
 
             Encoding.ASCII.GetString(drained.ToArray()).ShouldBe("rewritten-");
         }
@@ -725,14 +726,80 @@ public sealed class AspNetCoreWorkerRequestTests
         request.IsClientConnected().ShouldBeFalse();
     }
 
+    // Response.End's deferred flush reaches the adapter before any header was generated (P55);
+    // publishing then would seal a bare 200 with no headers.
     [Fact]
-    public void A_Response_Cannot_Be_Committed_Before_It_Is_Sealed()
+    public void A_Flush_Before_The_Status_Was_Sent_Publishes_Nothing()
     {
-        var request = Create();
+        var context = Context();
+        var request = Create(context);
+        request.SendResponseFromMemory("early"u8.ToArray(), 5);
 
-        Should.Throw<InvalidOperationException>(
-            () => request.Response.CommitBodyAsync(
-                new DefaultHttpContext().Response, CancellationToken.None));
+        request.FlushResponse(finalFlush: false);
+
+        request.Response.HeadCommitted.ShouldBeFalse();
+        context.Response.HasStarted.ShouldBeFalse();
+    }
+
+    // Framework's Flush put the head and everything buffered on the wire; a later flush sends
+    // only what was written since (reading R-S1: one chunk per flush).
+    [Fact]
+    public async Task A_Flush_After_The_Status_Publishes_The_Head_And_Only_The_New_Bytes()
+    {
+        var context = Context();
+        using var delivered = new MemoryStream();
+        context.Response.Body = delivered;
+        var request = Create(context);
+
+        request.SendStatus(201, "Made");
+        request.SendKnownResponseHeader(HttpWorkerRequest.HeaderContentType, "text/plain");
+        request.SendResponseFromMemory("first|"u8.ToArray(), 6);
+        request.FlushResponse(finalFlush: false);
+
+        request.Response.HeadCommitted.ShouldBeTrue();
+        context.Response.StatusCode.ShouldBe(201);
+        context.Response.Headers.ContentType.ToString().ShouldBe("text/plain");
+        Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("first|");
+
+        request.SendResponseFromMemory("second"u8.ToArray(), 6);
+        request.FlushResponse(finalFlush: false);
+        Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("first|second");
+
+        request.EndOfRequest();
+        await request.Response.CommitAsync(context, CancellationToken.None);
+        Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("first|second");
+    }
+
+    [Fact]
+    public async Task An_Async_Flush_Round_Trips_Through_Begin_And_End()
+    {
+        var context = Context();
+        using var delivered = new MemoryStream();
+        context.Response.Body = delivered;
+        var request = Create(context);
+        request.SupportsAsyncFlush.ShouldBeTrue();
+
+        request.SendStatus(200, "OK");
+        request.SendResponseFromMemory("async"u8.ToArray(), 5);
+        var completed = new TaskCompletionSource<IAsyncResult>();
+        var begun = request.BeginFlush(result => completed.TrySetResult(result), state: new object());
+
+        request.EndFlush(await completed.Task);
+        begun.IsCompleted.ShouldBeTrue();
+        Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("async");
+    }
+
+    [Fact]
+    public void A_Header_After_The_Head_Was_Committed_Is_Refused()
+    {
+        var context = Context();
+        context.Response.Body = new MemoryStream();
+        var request = Create(context);
+        request.SendStatus(200, "OK");
+        request.FlushResponse(finalFlush: false);
+
+        Should.Throw<InvalidOperationException>(() => request.SendUnknownResponseHeader("X-Late", "1"));
+        Should.Throw<InvalidOperationException>(() => request.SendStatus(500, "Late"));
     }
 
     private static DefaultHttpContext Context(

@@ -76,7 +76,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | HTTP/3 | Unassessed | No transport gate |
 | Client certificates | Unsupported | `Request.ClientCertificate` reports not present; behind a TLS-terminating proxy Kestrel never sees one, and forwarded-certificate translation into `CERT_*` is the recorded design when a consumer needs it (ledger P78) |
 | WebSockets (`IsWebSocketRequest`, `AcceptWebSocketRequest`) | Unsupported | Framework's own "requires IIS integrated pipeline mode" is thrown; high-priority [follow-up](follow-ups/websockets.md) |
-| Mid-request `Response.Flush` visible to the client | Unsupported | The response is committed once after the request ends (ADR 0003); a flush before that pushes nothing to the wire. Streaming is a follow-up slice on the [host adapter](follow-ups/aspnet-core-host-adapter.md) |
+| Mid-request `Response.Flush` / `FlushAsync` | Supported | Head and buffered bytes reach the client at each flush as on IIS (System.Web's own chunked framing over HTTP/1.1); late head changes, `End` after a flush, and errors after a flush behave as measured on Framework (ledger P79) |
 | `TransmitFile`/`WriteFile` over 2 GB | Supported | `SupportsLongTransmitFile` is on; the native-handle overload is unsupported (ledger P78) |
 | Forms, postback, view state, control state | Supported | URL-encoded and multipart parsing, event ordering, MAC enforcement, event validation, and request validation |
 | Uploaded-file and raw-request `SaveAs` | Supported | Memory/disk-spill paths; Windows-rooted paths fail actionably off Windows rather than being misinterpreted |

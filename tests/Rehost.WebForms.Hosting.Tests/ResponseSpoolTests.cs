@@ -30,7 +30,7 @@ public sealed class ResponseSpoolTests
                 temp.GetFiles().ShouldNotBeEmpty();
 
                 spool.Seal();
-                await spool.CommitBodyAsync(context.Response, CancellationToken.None);
+                await spool.CommitAsync(context, CancellationToken.None);
             }
 
             delivered.ToArray().ShouldBe(body);
@@ -77,7 +77,7 @@ public sealed class ResponseSpoolTests
                 spool.Seal();
 
                 await Should.ThrowAsync<IOException>(
-                    () => spool.CommitBodyAsync(context.Response, CancellationToken.None));
+                    () => spool.CommitAsync(context, CancellationToken.None));
                 temp.GetFiles().ShouldNotBeEmpty();
             }
 
@@ -105,7 +105,7 @@ public sealed class ResponseSpoolTests
                 spool.Write(body, body.Length);
                 temp.GetFiles().ShouldBeEmpty();
                 spool.Seal();
-                await spool.CommitBodyAsync(context.Response, CancellationToken.None);
+                await spool.CommitAsync(context, CancellationToken.None);
             }
 
             delivered.Length.ShouldBe(body.Length);
