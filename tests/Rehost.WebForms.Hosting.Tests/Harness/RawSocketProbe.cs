@@ -14,12 +14,14 @@ internal static class RawSocketProbe
         await client.ConnectAsync(address.Host, address.Port, timeout.Token);
         await using var stream = client.GetStream();
 
-        var headers =
-            "POST " + path + " HTTP/1.1\r\n"
-            + "Host: " + address.Authority + "\r\n"
-            + "Content-Length: 100\r\n"
-            + "Expect: 100-continue\r\n"
-            + "\r\n";
+        var headers = $"""
+            POST {path} HTTP/1.1
+            Host: {address.Authority}
+            Content-Length: 100
+            Expect: 100-continue
+
+
+            """.ReplaceLineEndings("\r\n");
         await stream.WriteAsync(Encoding.ASCII.GetBytes(headers), timeout.Token);
         await stream.FlushAsync(timeout.Token);
 
@@ -37,9 +39,14 @@ internal static class RawSocketProbe
     // disguise the wire encoding under assertion.
     internal static Task<byte[]> GetRawResponseAsync(Uri address, string path)
     {
-        return SendRawAsync(address, System.Text.Encoding.ASCII.GetBytes(
-            "GET " + path + " HTTP/1.1\r\nHost: " + address.Authority
-            + "\r\nConnection: close\r\n\r\n"));
+        var request = $"""
+            GET {path} HTTP/1.1
+            Host: {address.Authority}
+            Connection: close
+
+
+            """.ReplaceLineEndings("\r\n");
+        return SendRawAsync(address, Encoding.ASCII.GetBytes(request));
     }
 
     // The request exactly as given, for a Host, forwarded headers, or header bytes no managed
