@@ -6,7 +6,7 @@ Background research for the two open items on
 failures, without swallowing unrelated load errors"
 ([backlog](../backlog.md), ledger P56/P57/P71/P72).
 
-Status: decided and landed as ledger P73 (2026-08-16); the
+Decided and landed as ledger P73 (2026-08-16); the
 [Framework readings](#framework-readings) and [decisions](#decisions-needed)
 at the end record the outcome. The audit below is the evidence.
 
