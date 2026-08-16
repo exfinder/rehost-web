@@ -82,7 +82,7 @@ namespace System.Web.Services.Discovery {
         // -------------------------------------------------------------------------------
         // Makes exclusion path absolute for quick comparision on search.
         protected override string MakeAbsExcludedPath(string pathRelativ) {
-            return startDir + '\\' + pathRelativ.Replace('/', '\\' );
+            return startDir + Path.DirectorySeparatorChar + pathRelativ.Replace('/', Path.DirectorySeparatorChar);
         }
     
         // -------------------------------------------------------------------------------

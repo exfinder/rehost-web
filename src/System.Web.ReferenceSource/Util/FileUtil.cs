@@ -207,22 +207,27 @@ internal class FileUtil {
         // it work for virtual path provider scenarios
 
         // first a few simple checks:
+#if NETFRAMEWORK
         if (physicalPath.IndexOf('/') >= 0) {
             return true;
         }
         
         string slashDots = "\\..";
+#else
+        // Off Windows '/' is the separator, so the alternate-separator refusal above has no subject.
+        string slashDots = Path.DirectorySeparatorChar + "..";
+#endif
         int idxSlashDots = physicalPath.IndexOf(slashDots, StringComparison.Ordinal);
         if (idxSlashDots >= 0
             && (physicalPath.Length == idxSlashDots + slashDots.Length
-                || physicalPath[idxSlashDots + slashDots.Length] == '\\')) {
+                || physicalPath[idxSlashDots + slashDots.Length] == Path.DirectorySeparatorChar)) {
             return true;
         }
 
         // the real check is to go right to left until there is no longer path-too-long
         // and see if the canonicalization check fails then
 
-        int pos = physicalPath.LastIndexOf('\\');
+        int pos = physicalPath.LastIndexOf(Path.DirectorySeparatorChar);
 
         while (pos >= 0) {
             string path = physicalPath.Substring(0, pos);
@@ -238,7 +243,7 @@ internal class FileUtil {
             }
 
             // trim the path some more
-            pos = physicalPath.LastIndexOf('\\', pos-1);
+            pos = physicalPath.LastIndexOf(Path.DirectorySeparatorChar, pos-1);
         }
 
         // backtracted to the end without reaching a non-suspicious path

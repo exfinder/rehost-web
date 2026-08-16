@@ -94,8 +94,13 @@ notification is enabled (configuration-reload follow-up).
 Remaining work is indexed under path mapping and filesystem-related capability
 rows in [the backlog](backlog.md) and [compatibility map](compatibility.md).
 
-Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, P71, P72, and
-P73; `FileUtilTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
+Every remaining backslash literal in compiled code is classified in the
+[backslash audit](research/backslash-literal-audit.md) (ledger P74): physical
+compositions are on `Path.DirectorySeparatorChar`; `\\`→`/` normalization of
+virtual paths and the `X:\\`/UNC shape checks stay by contract.
+
+Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, P71, P72, P73,
+and P74; `FileUtilTests`, `SimpleWorkerRequestTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
 `CodegenCompileErrorTests`, `CanonicalCasePathTests`, `CaseInsensitiveUrlOverKestrelTests`,
 `CaseSensitiveDirectoryConfigOverKestrelTests`, `PathCasingOverKestrelTests`,
 `PathClassificationOverKestrelTests`, `PathCanonicalizationOverKestrelTests`,

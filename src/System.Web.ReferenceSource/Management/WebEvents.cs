@@ -1832,6 +1832,7 @@ namespace System.Web.Management {
         internal WebProcessInformation() {
             // Can't use Process.ProcessName because it requires the running
             // account to be part of the Performance Monitor Users group.
+#if NETFRAMEWORK
             StringBuilder buf = new StringBuilder(256);
             if (UnsafeNativeMethods.GetModuleFileName(IntPtr.Zero, buf, 256) == 0) {
                 _processName = String.Empty;
@@ -1845,6 +1846,10 @@ namespace System.Web.Management {
                     _processName = _processName.Substring(lastIndex + 1);
                 }
             }
+#else
+            string processPath = Environment.ProcessPath;
+            _processName = processPath == null ? String.Empty : System.IO.Path.GetFileName(processPath);
+#endif
 
             _processId = SafeNativeMethods.GetCurrentProcessId() ;
             _accountName = HttpRuntime.WpUserId;

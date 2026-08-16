@@ -133,4 +133,30 @@ public sealed class FileUtilTests
             root.Delete(recursive: true);
         }
     }
+
+    // Past MAX_PATH the check cannot canonicalize the whole string, so it walks back one
+    // separator at a time until a prefix canonicalizes; the walk has to be on the platform's
+    // separator, and '/' cannot itself be the refusal.
+    [Fact]
+    public void A_Canonical_Path_Past_Max_Path_Is_Not_Suspicious()
+    {
+        var root = Directory.CreateTempSubdirectory("rehost-long-path-");
+        try
+        {
+            var path = root.FullName;
+            while (path.Length <= 300)
+            {
+                path = Path.Combine(path, new string('d', 40));
+            }
+
+            FileUtil.IsSuspiciousPhysicalPath(path).ShouldBeFalse();
+            FileUtil.IsSuspiciousPhysicalPath(
+                Path.Combine(root.FullName, "..", Path.GetFileName(root.FullName), path[(root.FullName.Length + 1)..]))
+                .ShouldBeTrue();
+        }
+        finally
+        {
+            root.Delete(recursive: true);
+        }
+    }
 }

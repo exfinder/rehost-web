@@ -465,9 +465,9 @@ namespace System.Resources {
             string modifiedBasePath = BasePath;
             
             if (!String.IsNullOrEmpty(modifiedBasePath)) {
-                if (!(modifiedBasePath.EndsWith("\\")))
+                if (!Path.EndsInDirectorySeparator(modifiedBasePath))
                 {
-                    modifiedBasePath += "\\";
+                    modifiedBasePath += Path.DirectorySeparatorChar;
                 }
                 if (fileRef != null) {
                     fileRef.MakeFilePathRelative(modifiedBasePath);

@@ -131,7 +131,9 @@ Carried from Milestone 1 as unresolved detail:
   `MachineKeySessionSecurityTokenHandler`, and third-party SAML modules
   depend on it transitively; any answer drags `machineKey` crypto
   compatibility with it.
-- Define Windows-authentication and native health-provider boundaries.
+- Define Windows-authentication and native health-provider boundaries
+  (`WebProcessInformation` is portable since ledger P75; providers and
+  `HealthMonitoringSection` rules remain unassessed).
 - Extend mixed Framework/port view-state evidence beyond the one captured root
   page only if a real multi-node consumer needs it.
 - Portable protection wire format and key management:
