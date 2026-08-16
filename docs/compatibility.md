@@ -101,7 +101,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | Static files through System.Web | Partial | IIS-derived extension/type map, hidden segments, normal ranges, HEAD, validators, 304, and sendfile-backed commit are exercised; `If-Range` is unassessed |
 | Path-taking APIs: server includes, `<pages masterPageFile>`, XML site map, `XmlDataSource`/`MailDefinition`/`Control.OpenFile`, `WriteFile`/`TransmitFile`, `Server.MapPath` | Supported | Strings classify as on Framework (`/`-rooted and relative are virtual, climbing above the root is refused, `//server/share` is UNC-physical) and wrong casing folds on case-sensitive filesystems, including a server include composed above the application root (ledger P71); an absolute physical path has no Unix spelling in these APIs — use a virtual path. `AccessDataSource` (Jet/OLEDB) is Windows-only and out of scope |
 | Friendly URLs and application routing | Partial | Extensionless pages/handlers, segments, physical redirects, route ordering, mobile selection/switching, and direct/routed authorization are exercised; route escaping breadth and real upstream rewrite variables remain open |
-| Client-visible streaming, compression, WebSockets/upgrades | Unassessed | No transport contract or end-to-end gate exists |
+| Response compression, HTTP/3 | Unassessed | Compression is IIS's own module ([IIS-role follow-up](follow-ups/iis-role-behaviors.md)); HTTP/3 has no transport gate. Client-visible streaming and WebSockets are now Supported (rows above, ledger P79/P80) |
 
 ## Configuration and IIS-derived behavior
 
