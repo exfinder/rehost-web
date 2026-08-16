@@ -48,9 +48,21 @@ each and classify:
   default-doc-or-403 with directory browsing off.
 - Request filtering beyond hidden segments: double-escaping rejection, URL
   and query-string length limits, verb rules, high-bit characters,
-  `maxAllowedContentLength` versus `maxRequestLength` interplay.
-- URL normalization IIS performed before ASP.NET looked: trailing
-  dots/spaces, `.` and `..` collapsing, `%`-decoding order.
+  `maxAllowedContentLength` versus `maxRequestLength` interplay. Read
+  (ledger P72, [readings](../research/iis-url-canonicalization-readings.md)):
+  `fileExtensions` denial answers 404.7 where the golden forbidden handler
+  answers 403 (`/web.config`, `/x.config`); double escaping (`%252e`) and
+  invalid Windows name characters (`%25 %3C %3E * %3F`, bad UTF-8) in a
+  static URL are 404 from the native static tier where the port's managed
+  `ValidatePath` answers 400; a static file with a trailing separator is
+  IIS 500.0 (`ERROR_DIRECTORY`) versus 404; a raw `#` or non-ASCII byte is
+  http.sys 400 versus Kestrel/ASP.NET 404/400. Nothing is served on either
+  side of any of these.
+- ~~URL normalization IIS performed before ASP.NET looked: `.` and `..`
+  collapsing, `%`-decoding order, `\\` and repeated separators, above-root
+  refusal, path-info split~~ — restored (ledger P72). Trailing dots/spaces
+  stay: 404 on both for static and page URLs; an existence-agnostic handler
+  URL with a trailing space runs on the port and is unmappable on IIS.
 - Error shapes IIS owned: `httpErrors` versus `customErrors` boundaries for
   400/404/413-class responses that never reached ASP.NET.
 - Explicit exclusions to record: Windows/anonymous auth beyond current

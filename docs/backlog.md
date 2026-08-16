@@ -52,7 +52,7 @@ Carried from Milestone 1 as unresolved detail:
 ### Hosting and request boundary
 
 - Adapter residuals: response-spill exercise, server-variable inventory,
-  `PathInfo`, configurable header encoding, client certificates, HTTP/2 and
+  configurable header encoding, client certificates, HTTP/2 and
   HTTP/3, streaming, compression/upgrades, and file-send surface:
   [host adapter](follow-ups/aspnet-core-host-adapter.md).
 - Terminal-event and cancellation coverage:
@@ -61,8 +61,6 @@ Carried from Milestone 1 as unresolved detail:
   [request termination](follow-ups/request-termination-and-timeouts.md).
 - Slow-upload thread-pool cliff:
   [request-body concurrency](follow-ups/request-body-concurrency.md).
-- Path containment, symlinks, encoded traversal, and Windows-shaped inputs:
-  [path mapping](follow-ups/portable-path-mapping-and-containment.md).
 - Cross-filesystem enumeration order and wildcard `bin` loading failures:
   [path mapping](follow-ups/portable-path-mapping-and-containment.md).
 - Response diagnostics and failure preservation:

@@ -666,8 +666,9 @@ namespace System.Web {
             CachedPathData pathData = GetConfigurationPathData();
             pathData.ValidatePath(_request.PhysicalPathInternal);
 #if !NETFRAMEWORK
-            // IIS request filtering owned this refusal; this host replaces IIS (ledger P59).
-            HiddenSegments.CheckVirtualPath(_request.Path);
+            // IIS request filtering owned this refusal; this host replaces IIS (ledger P59). It
+            // judged the script path only; path info passes (ledger P72).
+            HiddenSegments.CheckVirtualPath(_request.FilePath);
 #endif
         }
 

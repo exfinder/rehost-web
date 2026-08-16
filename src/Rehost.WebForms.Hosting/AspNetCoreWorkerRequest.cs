@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Primitives;
+using System.Web.Hosting;
 using HttpWorkerRequest = System.Web.HttpWorkerRequest;
 
 internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
@@ -19,6 +20,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     private readonly bool _canHaveBody;
     private readonly TaskCompletionSource _completion =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private string? _uriPath;
+    private (string FilePath, string PathInfo)? _split;
 
     internal AspNetCoreWorkerRequest(
         HttpContext context,
@@ -44,8 +47,15 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     public override string GetUriPath()
     {
-        var path = _context.Request.PathBase.Add(_context.Request.Path).Value;
-        return string.IsNullOrEmpty(path) ? "/" : path;
+        if (_uriPath == null)
+        {
+            var path = _context.Request.PathBase.Add(_context.Request.Path).Value;
+            _uriPath = string.IsNullOrEmpty(path)
+                ? "/"
+                : RequestPathCanonicalizer.Canonicalize(path, out _);
+        }
+
+        return _uriPath;
     }
 
     public override string GetQueryString()
@@ -54,14 +64,10 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return string.IsNullOrEmpty(query) ? "" : query.TrimStart('?');
     }
 
+    // http.sys handed ASP.NET the canonical, decoded path as the "raw" URL and only the query
+    // verbatim (IIS reading, ledger P72).
     public override string GetRawUrl()
     {
-        var rawTarget = _context.Features.Get<IHttpRequestFeature>()?.RawTarget;
-        if (!string.IsNullOrEmpty(rawTarget))
-        {
-            return rawTarget;
-        }
-
         var queryString = GetQueryString();
         return queryString.Length == 0 ? GetUriPath() : GetUriPath() + "?" + queryString;
     }
@@ -110,13 +116,16 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     // which the first slice does not do; every request maps wholly to its file path.
     public override string GetPathInfo()
     {
-        return "";
+        return Split.PathInfo;
     }
 
     public override string GetFilePath()
     {
-        return GetUriPath();
+        return Split.FilePath;
     }
+
+    private (string FilePath, string PathInfo) Split =>
+        _split ??= RequestPathInfo.Split(GetHttpVerbName(), GetUriPath());
 
     public override string? GetFilePathTranslated()
     {

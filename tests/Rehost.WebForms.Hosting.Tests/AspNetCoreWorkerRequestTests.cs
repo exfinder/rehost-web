@@ -38,22 +38,32 @@ public sealed class AspNetCoreWorkerRequestTests
         request.GetQueryString().ShouldBe("a=1&b=2");
     }
 
+    // http.sys handed ASP.NET the decoded, canonical path as RawUrl and only the query verbatim
+    // (IIS reading, ledger P72); the request target as sent is not what Framework code saw.
     [Fact]
-    public void Raw_Url_Preserves_The_Encoded_Request_Target()
+    public void Raw_Url_Is_The_Canonical_Decoded_Path_Plus_The_Verbatim_Query()
     {
-        var context = Context(path: "/a b/c");
+        var context = Context(path: "/a b/c", query: "?x=%2F");
         context.Features.Get<IHttpRequestFeature>()!.RawTarget = "/a%20b/c?x=%2F";
 
-        Create(context).GetRawUrl().ShouldBe("/a%20b/c?x=%2F");
+        Create(context).GetRawUrl().ShouldBe("/a b/c?x=%2F");
     }
 
     [Fact]
-    public void Raw_Url_Is_Reconstructed_When_The_Feature_Reports_No_Target()
+    public void Raw_Url_Collapses_Dot_Segments_And_Repeated_Separators()
     {
-        var context = Context(path: "/oracle", query: "?a=1");
-        context.Features.Get<IHttpRequestFeature>()!.RawTarget = null!;
+        var context = Context(path: "/sub//./x", query: "?a=1");
+        context.Features.Get<IHttpRequestFeature>()!.RawTarget = "/sub//./x?a=1";
 
-        Create(context).GetRawUrl().ShouldBe("/oracle?a=1");
+        Create(context).GetRawUrl().ShouldBe("/sub/x?a=1");
+    }
+
+    // Kestrel leaves %2F encoded in Request.Path; http.sys decoded it into a separator.
+    [Fact]
+    public void Uri_Path_Decodes_An_Encoded_Slash()
+    {
+        Create(path: "/sub%2Fecho.probe").GetUriPath().ShouldBe("/sub/echo.probe");
+        Create(path: "/echo.probe%2fextra").GetUriPath().ShouldBe("/echo.probe/extra");
     }
 
     [Fact]

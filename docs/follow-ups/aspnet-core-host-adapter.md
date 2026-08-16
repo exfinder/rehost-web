@@ -10,7 +10,7 @@ The implemented boundary is recorded in
   including cleanup after success, disconnect, and commit failure.
 - Inventory server variables needed by representative applications. IIS-only
   variables must be translated, rejected, or explicitly left unassessed.
-- Derive `PathInfo` and the file/path-info split without filename heuristics.
+- ~~Derive `PathInfo` and the file/path-info split without filename heuristics~~ — done, IIS's handler-mapping rule (ledger P72).
 - Translate `<globalization responseHeaderEncoding>` and determine non-ASCII
   request-header decoding. The current host pins Framework's UTF-8 response
   default.

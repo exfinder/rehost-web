@@ -11,8 +11,21 @@ path unchanged. `Request.Path` retains the client's casing.
 
 Windows-strict name rules remain portable application rules. Trailing dots or
 spaces, embedded colons, and equivalent invalid shapes do not become supported
-because a Unix filesystem accepts them. A file is hidden only when its
+because a Unix filesystem accepts them; a URL with a trailing space still
+runs an existence-agnostic handler here where IIS's mapping never matched it,
+and that is the recorded extent of the leniency. A file is hidden only when its
 filesystem `Hidden` attribute says so; dot-prefixed names remain ordinary.
+
+Two filesystem traits are documented rather than masked. APFS folds Unicode
+normalization, so an NFD spelling finds an NFC file on macOS where NTFS and
+ext4 miss (nothing handler-visible differs); and `Request.PhysicalPath` on a
+case-sensitive filesystem carries the file's real casing, where Framework
+returned the URL's casing (whichever spelling its map-path cache saw first).
+
+URL canonicalization ahead of mapping — `\\`, `%2F`, repeated separators, dot
+segments, the above-root 403, and the handler-mapping path-info split — is the
+adapter's job and is decided by ledger P72 and the
+[IIS readings](research/iis-url-canonicalization-readings.md).
 
 Portable separator, enumeration, stable-hash, and parent-walk repairs live in
 the imported `FileUtil` path. Case canonicalization occurs once per path-producing
@@ -44,8 +57,9 @@ notification is enabled (configuration-reload follow-up).
 Remaining work is indexed under path mapping and filesystem-related capability
 rows in [the backlog](backlog.md) and [compatibility map](compatibility.md).
 
-Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, and P71;
+Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, P71, and P72;
 `FileUtilTests`, `CanonicalCasePathTests`, `CaseInsensitiveUrlOverKestrelTests`,
 `CaseSensitiveDirectoryConfigOverKestrelTests`, `PathCasingOverKestrelTests`,
-`PathClassificationOverKestrelTests`, `ServerIncludesOverKestrelTests`,
+`PathClassificationOverKestrelTests`, `PathCanonicalizationOverKestrelTests`,
+`RequestPathCanonicalizerTests`, `RequestPathInfoTests`, `ServerIncludesOverKestrelTests`,
 `StaticFilesOverKestrelTests`, and `ServerTransferOverKestrelTests`.

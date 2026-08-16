@@ -26,6 +26,15 @@ internal sealed class RehostWebFormsMiddleware
             return;
         }
 
+        // http.sys refused a URL whose '..' climbs above the root before IIS or ASP.NET saw it;
+        // Kestrel resolves it silently, so only the raw target still shows the climb.
+        if (RequestPathCanonicalizer.EscapesRoot(
+                context.Features.Get<IHttpRequestFeature>()?.RawTarget))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+
         var dispatcher = _activation.Dispatcher;
 
         using var workerRequest = new AspNetCoreWorkerRequest(
