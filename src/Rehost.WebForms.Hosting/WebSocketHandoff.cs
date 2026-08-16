@@ -51,12 +51,15 @@ internal sealed class WebSocketHandoff : ISyncContext
             context.Response.Headers.Append(header.Name, header.Value);
         }
 
-        var socket = await feature.AcceptAsync(new WebSocketAcceptContext { SubProtocol = subProtocol });
-        var webSocket = new AspNetWebSocket(new KestrelWebSocketPipe(socket, context), subProtocol);
-        var handoff = new WebSocketHandoff(httpContext);
-
+        AspNetWebSocket? webSocket = null;
         try
         {
+            // A client that abandons the handshake faults AcceptAsync; there is no socket to
+            // clean up and nothing to surface but the connection loss.
+            var socket = await feature.AcceptAsync(new WebSocketAcceptContext { SubProtocol = subProtocol });
+            webSocket = new AspNetWebSocket(new KestrelWebSocketPipe(socket, context), subProtocol);
+            var handoff = new WebSocketHandoff(httpContext);
+
             // The response cookie collection stays reachable from the request once the response
             // is gone (DevDiv 273639, the integrated transition step).
             httpContext.Request.StoreReferenceToResponseCookies(httpContext.Response.GetCookiesNoCreate());
@@ -91,8 +94,11 @@ internal sealed class WebSocketHandoff : ISyncContext
             WebBaseEvent.RaiseRuntimeError(exception, null);
         }
 
-        // Pending I/O has to finish before the connection is torn down under it.
-        await webSocket.AbortAsync().ConfigureAwait(false);
+        if (webSocket != null)
+        {
+            // Pending I/O has to finish before the connection is torn down under it.
+            await webSocket.AbortAsync().ConfigureAwait(false);
+        }
     }
 
     HttpContext? ISyncContext.HttpContext => _processingComplete ? null : _httpContext;

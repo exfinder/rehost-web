@@ -837,6 +837,23 @@ public sealed class AspNetCoreWorkerRequestTests
         context.Response.HasStarted.ShouldBeFalse();
     }
 
+    // A mid-stream flush onto a vanished client is the HttpException Framework raised, and the
+    // request is disconnected from then on.
+    [Fact]
+    public void A_Transport_Failure_During_A_Flush_Surfaces_As_HttpException_And_Disconnects()
+    {
+        var context = Context();
+        context.Response.Body = new ThrowingBody();
+        var request = Create(context);
+        request.SendStatus(200, "OK");
+        request.SendResponseFromMemory("part1"u8.ToArray(), 5);
+
+        Should.Throw<System.Web.HttpException>(() => request.FlushResponse(finalFlush: false))
+            .Message.ShouldBe("The remote host closed the connection.");
+        request.IsClientConnected().ShouldBeFalse();
+        request.Response.DeliveryFaulted.ShouldBeTrue();
+    }
+
     private static DefaultHttpContext Context(
         string path = "/oracle",
         string pathBase = "",
@@ -900,6 +917,22 @@ public sealed class AspNetCoreWorkerRequestTests
 
         public Task<System.Net.WebSockets.WebSocket> AcceptAsync(WebSocketAcceptContext context) =>
             throw new NotSupportedException();
+    }
+
+    private sealed class ThrowingBody : Stream
+    {
+        public override bool CanRead => false;
+        public override bool CanSeek => false;
+        public override bool CanWrite => true;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => 0; set { } }
+        public override void Flush() { }
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) { }
+        public override void Write(byte[] buffer, int offset, int count) => throw new IOException("client gone");
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => throw new IOException("client gone");
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default) => throw new IOException("client gone");
     }
 
     private sealed class BodyDetectionFeature(bool canHaveBody) : IHttpRequestBodyDetectionFeature

@@ -116,6 +116,35 @@ public sealed class ResponseSpoolTests
         }
     }
 
+    // A flush that fails on the transport marks the spool faulted so the terminal commit does not
+    // re-enter the half-drained segment (the mid-stream-disconnect path).
+    [Fact]
+    public async Task A_Faulted_Delivery_Makes_Later_Commits_No_Op_Instead_Of_Re_Draining()
+    {
+        var temp = Directory.CreateTempSubdirectory("rehost-spool-");
+        try
+        {
+            var context = new DefaultHttpContext();
+            context.Response.Body = new FailingStream();
+            using var spool = new ResponseSpool(() => temp.FullName, Threshold);
+
+            spool.Write(new byte[Threshold * 4], Threshold * 4);
+            await Should.ThrowAsync<IOException>(() => spool.CommitAsync(context, CancellationToken.None));
+            spool.DeliveryFaulted.ShouldBeTrue();
+
+            // A second commit (the middleware's terminal one) must not touch the stream again.
+            var deliveredAfter = new MemoryStream();
+            var terminal = new DefaultHttpContext();
+            terminal.Response.Body = deliveredAfter;
+            await Should.NotThrowAsync(() => spool.CommitAsync(terminal, CancellationToken.None));
+            deliveredAfter.Length.ShouldBe(0);
+        }
+        finally
+        {
+            temp.Delete(recursive: true);
+        }
+    }
+
     private sealed class FailingStream : Stream
     {
         public override bool CanRead => false;

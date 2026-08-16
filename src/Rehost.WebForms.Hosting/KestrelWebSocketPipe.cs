@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Http;
 // the cancellation; this only moves fragments.
 internal sealed class KestrelWebSocketPipe(WebSocket socket, HttpContext context) : IWebSocketPipe
 {
+    // The rude-close path (AspNetWebSocket.Abort). After a graceful close this also fires from
+    // the handoff's final AbortAsync, aborting an already-closed connection — a no-op on the
+    // wire, matching Framework's teardown.
     public void CloseTcpConnection()
     {
         socket.Abort();

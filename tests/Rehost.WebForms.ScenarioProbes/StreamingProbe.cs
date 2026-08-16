@@ -47,12 +47,6 @@ public sealed class StreamingProbe : IHttpHandler
                 response.Write("part1\n");
                 response.Flush();
                 throw new InvalidOperationException("boom after flush");
-            case "async":
-                response.Write("part1\n");
-                response.FlushAsync().GetAwaiter().GetResult();
-                Thread.Sleep(delay);
-                response.Write("part2\n");
-                break;
             default:
                 response.Write("part1\n");
                 response.Flush();

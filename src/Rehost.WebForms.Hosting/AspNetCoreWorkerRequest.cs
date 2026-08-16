@@ -375,7 +375,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     // nothing; the final flush leaves the commit to the middleware, off the pipeline thread.
     public override void FlushResponse(bool finalFlush)
     {
-        if (finalFlush || !_statusSent || _webSocketAccept != null)
+        if (finalFlush || !CanDeliver)
         {
             return;
         }
@@ -383,11 +383,15 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         Deliver(() => Response.FlushAsync(_context, _context.RequestAborted));
     }
 
+    // A flush delivers only once System.Web has produced its status and headers, and never after
+    // a WebSocket accept has claimed the response body.
+    private bool CanDeliver => _statusSent && _webSocketAccept == null;
+
     public override bool SupportsAsyncFlush => true;
 
     public override IAsyncResult BeginFlush(AsyncCallback callback, object state)
     {
-        var flush = _statusSent && _webSocketAccept == null
+        var flush = CanDeliver
             ? DeliverAsync(() => Response.FlushAsync(_context, _context.RequestAborted))
             : Task.CompletedTask;
         return TaskToAsyncResult.Begin(flush, callback, state);

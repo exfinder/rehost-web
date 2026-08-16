@@ -68,7 +68,17 @@ internal sealed class RehostWebFormsMiddleware
             return;
         }
 
-        await workerRequest.Response.CommitAsync(context, context.RequestAborted);
+        try
+        {
+            await workerRequest.Response.CommitAsync(context, context.RequestAborted);
+        }
+        catch (Exception exception) when (ResponseSpool.IsTransportFailure(exception))
+        {
+            // The client disconnected before the terminal commit finished; there is nothing left
+            // to deliver. (A disconnect during an application flush already surfaced to the page
+            // as an HttpException, and the spool no-ops here.)
+            context.Abort();
+        }
     }
 
     private static bool ExceedsHostBodyLimit(HttpContext context)

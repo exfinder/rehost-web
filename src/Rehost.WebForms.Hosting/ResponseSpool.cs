@@ -54,6 +54,10 @@ internal sealed class ResponseSpool : IDisposable
 
     internal bool HeadCommitted { get; private set; }
 
+    // A delivery that failed on the transport (the client vanished mid-stream) leaves segments
+    // half-drained; a later commit must not re-enter that stream. Once set, every commit no-ops.
+    internal bool DeliveryFaulted { get; private set; }
+
     internal void SetStatus(int statusCode, string? reasonPhrase)
     {
         RequireHeadOpen();
@@ -106,21 +110,22 @@ internal sealed class ResponseSpool : IDisposable
 
     // A mid-request flush: the head goes out even when no bytes are pending, as IIS sent
     // Framework's headers on the first Flush.
-    internal async Task FlushAsync(HttpContext context, CancellationToken cancellationToken)
+    internal Task FlushAsync(HttpContext context, CancellationToken cancellationToken)
     {
-        await CommitAsync(context, cancellationToken).ConfigureAwait(false);
-        if (!context.Response.HasStarted)
-        {
-            await context.Response.StartAsync(cancellationToken).ConfigureAwait(false);
-            await context.Response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
-        }
+        return CommitAsync(context, cancellationToken, startWithoutBody: true);
     }
 
     // Publishes the head on the first call and every segment collected since the previous call.
-    // The head alone does not start the response: a body-less commit keeps the server's own
-    // Content-Length: 0 ending.
-    internal async Task CommitAsync(HttpContext context, CancellationToken cancellationToken)
+    // The head alone does not start the response unless a flush asked for it: a body-less commit
+    // keeps the server's own Content-Length: 0 ending.
+    internal async Task CommitAsync(
+        HttpContext context, CancellationToken cancellationToken, bool startWithoutBody = false)
     {
+        if (DeliveryFaulted)
+        {
+            return;
+        }
+
         var response = context.Response;
         if (!HeadCommitted)
         {
@@ -159,29 +164,44 @@ internal sealed class ResponseSpool : IDisposable
         }
 
         var pending = _delivered < _segments.Count;
-        while (_delivered < _segments.Count)
+        try
         {
-            var segment = _segments[_delivered];
-            if (segment is FileRange range)
+            while (_delivered < _segments.Count)
             {
-                await response.SendFileAsync(
-                    range.Path, range.Offset, range.Length, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                var run = (FileBufferingWriteStream)segment;
-                await run.DrainBufferAsync(response.Body, cancellationToken).ConfigureAwait(false);
-                run.Dispose();
+                var segment = _segments[_delivered];
+                if (segment is FileRange range)
+                {
+                    await response.SendFileAsync(
+                        range.Path, range.Offset, range.Length, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    var run = (FileBufferingWriteStream)segment;
+                    await run.DrainBufferAsync(response.Body, cancellationToken).ConfigureAwait(false);
+                    run.Dispose();
+                }
+
+                _delivered++;
             }
 
-            _delivered++;
+            // A run delivered mid-request is closed; later writes open a new one.
+            _currentRun = null;
+            if (pending)
+            {
+                await response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else if (startWithoutBody && !response.HasStarted)
+            {
+                await response.StartAsync(cancellationToken).ConfigureAwait(false);
+                await response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
-
-        // A run delivered mid-request is closed; later writes open a new one.
-        _currentRun = null;
-        if (pending)
+        catch (Exception exception) when (IsTransportFailure(exception))
         {
-            await response.Body.FlushAsync(cancellationToken).ConfigureAwait(false);
+            // The client is gone; the half-drained segment must never be re-entered by the
+            // terminal commit. The adapter turns this into the HttpException Framework raised.
+            DeliveryFaulted = true;
+            throw;
         }
     }
 
@@ -209,6 +229,10 @@ internal sealed class ResponseSpool : IDisposable
                 + " bytes before the requested range; it changed after its length was read.");
         }
     }
+
+    // A transport-layer failure — the client vanished — rather than an application or spool error.
+    internal static bool IsTransportFailure(Exception exception) =>
+        exception is IOException or OperationCanceledException or ObjectDisposedException;
 
     private void RequireUnsealed()
     {

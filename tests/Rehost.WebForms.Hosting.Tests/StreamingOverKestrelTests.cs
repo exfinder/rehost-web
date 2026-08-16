@@ -48,12 +48,17 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
         var arrivals = await RawSocketProbe.ReadTimedAsync(
             scenario.Address, "/stream/flush?delay=" + (int)Delay.TotalMilliseconds);
 
-        var first = Encoding.ASCII.GetString(arrivals[0].Bytes);
-        arrivals[0].Elapsed.ShouldBeLessThan(Delay / 2, first);
-        first.ShouldStartWith("HTTP/1.1 200 OK\r\n");
-        first.ShouldContain("Transfer-Encoding: chunked\r\n");
-        first.ShouldNotContain("Content-Length:");
-        first.ShouldContain("\r\n\r\n6\r\npart1\n\r\n");
+        // Everything the client held before the handler's first delay elapsed. Whether the head
+        // and the first chunk land in one TCP segment or two is the transport's call, so this
+        // asserts on the accumulated bytes, not on a single read.
+        var beforeDelay = Encoding.ASCII.GetString(
+            arrivals.TakeWhile(arrival => arrival.Elapsed < Delay / 2)
+                .SelectMany(arrival => arrival.Bytes).ToArray());
+        beforeDelay.ShouldStartWith("HTTP/1.1 200 OK\r\n");
+        beforeDelay.ShouldContain("Transfer-Encoding: chunked\r\n");
+        beforeDelay.ShouldNotContain("Content-Length:");
+        beforeDelay.ShouldContain("6\r\npart1\n\r\n");
+        beforeDelay.ShouldNotContain("part2");
 
         var (_, body) = SplitAndDechunk(arrivals.SelectMany(arrival => arrival.Bytes).ToArray());
         body.ShouldBe("part1\npart2\npart3\n");
@@ -107,14 +112,19 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
         response.Text.ShouldContain("boom after flush");
     }
 
+    // An asynchronous handler past its first await is off the cancellable period, so
+    // Response.FlushAsync takes the worker request's BeginFlush/EndFlush arm rather than the
+    // synchronous flush; the bytes still reach the client at the flush.
     [Fact]
-    public async Task An_Async_Flush_Reaches_The_Client_Before_The_Handler_Continues()
+    public async Task An_Async_Handlers_FlushAsync_Reaches_The_Client_Before_It_Continues()
     {
         var arrivals = await RawSocketProbe.ReadTimedAsync(
-            scenario.Address, "/stream/flush?case=async&delay=" + (int)Delay.TotalMilliseconds);
+            scenario.Address, "/stream/asyncflush?delay=" + (int)Delay.TotalMilliseconds);
 
-        arrivals[0].Elapsed.ShouldBeLessThan(Delay / 2);
-        Encoding.ASCII.GetString(arrivals[0].Bytes).ShouldContain("6\r\npart1\n\r\n");
+        var beforeDelay = arrivals.TakeWhile(arrival => arrival.Elapsed < Delay / 2)
+            .SelectMany(arrival => arrival.Bytes).ToArray();
+        Encoding.ASCII.GetString(beforeDelay).ShouldContain("6\r\npart1\n\r\n");
+
         var (_, body) = SplitAndDechunk(arrivals.SelectMany(arrival => arrival.Bytes).ToArray());
         body.ShouldBe("part1\npart2\n");
     }
