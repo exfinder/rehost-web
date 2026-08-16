@@ -58,6 +58,31 @@ The reclaimable surface is the async paths the runtime controls: the more
 "only a recycle can save it" zone. It cannot be eliminated for classic
 synchronous Web Forms, but it can be kept from growing.
 
+### Bound the sync-bridge waits (candidate hardening)
+
+Every place the runtime blocks a pipeline thread on a Kestrel async operation —
+the `Response.Flush` bridge (`AspNetCoreWorkerRequest.Deliver`), and entity-body
+reads — waits today with an unconditional `GetAwaiter().GetResult()`. Making
+those honor `RequestAborted`/`TimedOutToken` (`Task.Wait(token)`, which returns
+when the token fires even if the operation has not completed) would bound a
+wedged step to the timeout budget instead of an infinite hang, so the client is
+aborted rather than held forever. This is defense-in-depth, subject to three
+rules so it is a backstop, not a crutch:
+
+- **It bounds, it does not repair.** The wait unblocks and the client is freed,
+  but the underlying operation is abandoned (orphaned continuation/bytes) and the
+  server step may still be leaked — so it must feed the leaked-thread accounting
+  and recycle, not stand alone.
+- **It must not mask a root-cause bug.** A known deadlock is eliminated at the
+  source (e.g. the sync-over-async flush deadlock, ledger P79, fixed by nulling
+  the `SynchronizationContext`, not by a timeout). A bounded wait would have
+  turned that permanent hang into "110s then 500", which reads like slow CI and
+  could ship; the wedge must surface loudly (leaked-thread count, a recycle), not
+  hide as latency.
+- **It only covers waits we own.** A deadlock inside application code is not
+  waiting on our token; the bounded wait shrinks the "hangs forever" surface to
+  the app-code zone, and the recycle covers the rest.
+
 ## Required work
 
 - Define the owner and timing of connection abort relative to response seal,
@@ -69,6 +94,9 @@ synchronous Web Forms, but it can be kept from growing.
   count into the recycle policy ([runtime process
   policy](runtime-process-policy.md), [process
   lifetime](process-lifetime-shutdown-and-recycle.md)).
+- Bound the sync-bridge waits (`AspNetCoreWorkerRequest.Deliver`, entity-body
+  reads) on `RequestAborted`/`TimedOutToken` so a wedged step aborts the client
+  at the budget rather than hanging forever (see above).
 
 ## Done when
 
