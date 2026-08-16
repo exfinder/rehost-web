@@ -34,7 +34,11 @@ internal sealed class ScenarioClient : IDisposable
         _client = new HttpClient(handler)
         {
             BaseAddress = baseAddress,
-            Timeout = TimeSpan.FromSeconds(60),
+
+            // A request over loopback answers in well under this; longer means the server wedged,
+            // and a wedge must fail its own test rather than stall the run (the raw-socket probe
+            // holds the same ceiling). Cold-start waits and witness-poll budgets live elsewhere.
+            Timeout = TimeSpan.FromSeconds(20),
             DefaultRequestVersion = http2 ? HttpVersion.Version20 : HttpVersion.Version11,
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact,
         };

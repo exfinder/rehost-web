@@ -7,6 +7,27 @@ namespace Rehost.WebForms.Hosting.Tests;
 // linger-zero close mid-body. Returns the interim status so the caller asserts the handshake.
 internal static class RawSocketProbe
 {
+    // A well-behaved response — streamed, chunked, or an upgrade handshake — completes in well
+    // under this. Reading past it means the server hung (the sync-over-async deadlock did exactly
+    // that), and a hung server must fail its own test in seconds rather than stall the whole run
+    // waiting on a socket that never closes.
+    private static readonly TimeSpan ReadDeadline = TimeSpan.FromSeconds(20);
+
+    private static async ValueTask<int> ReadWithDeadlineAsync(
+        NetworkStream stream, Memory<byte> buffer, CancellationToken deadline)
+    {
+        try
+        {
+            return await stream.ReadAsync(buffer, deadline);
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The server sent no more of its response within {ReadDeadline.TotalSeconds:0}s; "
+                + "it is likely wedged.");
+        }
+    }
+
     internal static async Task<int> AbortMidBodyAsync(Uri address, string path)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -70,11 +91,12 @@ internal static class RawSocketProbe
         await stream.WriteAsync(Encoding.ASCII.GetBytes(request));
         await stream.FlushAsync();
 
+        using var deadline = new CancellationTokenSource(ReadDeadline);
         var arrivals = new List<(TimeSpan, byte[])>();
         var buffer = new byte[65536];
         while (true)
         {
-            var read = await stream.ReadAsync(buffer);
+            var read = await ReadWithDeadlineAsync(stream, buffer, deadline.Token);
             if (read == 0)
             {
                 break;
@@ -96,15 +118,23 @@ internal static class RawSocketProbe
         await stream.WriteAsync(request);
         await stream.FlushAsync();
 
+        using var deadline = new CancellationTokenSource(ReadDeadline);
         using var received = new MemoryStream();
         var buffer = new byte[65536];
         while (true)
         {
-            using var quiet = new CancellationTokenSource(TimeSpan.FromSeconds(2));
+            using var quiet = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
+            quiet.CancelAfter(TimeSpan.FromSeconds(2));
             int read;
             try
             {
                 read = await stream.ReadAsync(buffer, quiet.Token);
+            }
+            catch (OperationCanceledException) when (deadline.IsCancellationRequested)
+            {
+                throw new TimeoutException(
+                    $"The server streamed for more than {ReadDeadline.TotalSeconds:0}s without "
+                    + "closing; it is likely wedged.");
             }
             catch (OperationCanceledException)
             {
@@ -133,8 +163,19 @@ internal static class RawSocketProbe
         await stream.WriteAsync(request);
         await stream.FlushAsync();
 
+        using var deadline = new CancellationTokenSource(ReadDeadline);
         using var buffer = new MemoryStream();
-        await stream.CopyToAsync(buffer);
+        try
+        {
+            await stream.CopyToAsync(buffer, deadline.Token);
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The server did not close the connection within {ReadDeadline.TotalSeconds:0}s; "
+                + "it is likely wedged.");
+        }
+
         return buffer.ToArray();
     }
 
