@@ -12,10 +12,12 @@ response-spill tests, HTTP/2, the long-file flag, and recorded WebSockets
 ([follow-up](websockets.md)) and client certificates as unsupported
 ([research](../research/host-adapter-residuals.md)).
 
-- Client-visible streaming: a mid-request `Flush` reaches the client only at
-  the single commit after `EndOfRequest` (ADR 0003); a scenario asserting
-  first-flush timing is the next step, and honoring it means committing headers
-  at the first flush and streaming the rest.
+- Client-visible streaming (its own slice, ADR 0003 amendment): a mid-request
+  `Flush` reaches the client only at the single commit after `EndOfRequest`;
+  honoring it means committing headers at the first flush and streaming the
+  rest concurrently with the running request. Recorded Unsupported in the
+  compatibility map meanwhile; the slice starts with a raw-socket timing
+  scenario (write, flush, delay, write) that is red today.
 - HTTP/3: no transport gate.
 - Compression is IIS's module and its configuration; on the
   [IIS-role follow-up](iis-role-behaviors.md).
