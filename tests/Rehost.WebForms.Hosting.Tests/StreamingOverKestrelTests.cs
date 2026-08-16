@@ -54,7 +54,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
 
         var all = Encoding.ASCII.GetString(arrivals.SelectMany(arrival => arrival.Bytes).ToArray());
         all[(all.IndexOf("\r\n\r\n", StringComparison.Ordinal) + 4)..]
-            .ShouldBe("6\r\npart1\n\r\n1a\r\nFILEDATA-0123456789\npart2\n\r\n6\r\npart3\n\r\n0\r\n\r\n");
+            .ShouldBe("6\r\npart1\n\r\n19\r\nFILEDATA-0123456789part2\n\r\n6\r\npart3\n\r\n0\r\n\r\n");
     }
 
     [Fact]

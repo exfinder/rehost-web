@@ -45,7 +45,7 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
         // module the shipped root configuration does not carry yet (shipped-modules follow-up).
         var report = await ReceiveTextAsync(socket);
         report.ShouldBe(
-            "type=System.Web.WebSockets.AspNetWebSocket;sub=<null>;current=set;items=1;origin=<null>;user=null;"
+            "type=System.Web.WebSockets.AspNetWebSocket;sub=<null>;current=set;items=kept;origin=<null>;user=null;"
             + "resp-ex=HttpException:Response is not available in this context.;session=null");
 
         await socket.SendAsync("hello"u8.ToArray(), WebSocketMessageType.Text, true, CancellationToken.None);

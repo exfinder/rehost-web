@@ -67,7 +67,7 @@ public sealed class WebSocketProbe : IHttpHandler
         var report = "type=" + socket.GetType().FullName
             + ";sub=" + (socket.SubProtocol ?? "<null>")
             + ";current=" + (current == null ? "null" : "set")
-            + ";items=" + context.Items.Count
+            + ";items=" + (context.Items == null ? "null" : "kept")
             + ";origin=" + (context.Origin ?? "<null>")
             + ";user=" + (context.User == null ? "null" : "obj")
             + ";" + Attempt(() => { _ = current!.Response; return "resp=obj"; }, "resp-ex")
