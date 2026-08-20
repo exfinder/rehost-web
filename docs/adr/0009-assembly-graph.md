@@ -15,13 +15,20 @@ config-only leaf supplying `<webServices>`. That compiled, and it silently made
 the ASMX surface unreachable: `WebService` exposes `Context`, `Application`,
 `Session`, and `Server`, so the assembly holding it has to see `System.Web`.
 
-`WebServicesSection` is the one type the old direction existed for, and it now
-lives in the runtime under `Compatibility/WebServices`, keeping its
-`System.Web.Services.Configuration` namespace. Only the containing assembly
-moved, which the compatibility contract does not claim. The runtime is its sole
-owner: an ASMX slice importing Reference Source must leave
-`System/Web/Services/Configuration/WebServicesSection.cs` out of its closure, or
-the two definitions collide.
+`WebServicesSection` is the one type the old direction existed for. It first
+moved into the runtime under `Compatibility/WebServices` as a minimal
+hand-written stand-in, and the runtime was its sole owner while the satellite
+stayed config-only. The ASMX port (2026-08) reversed that: the reference-source
+section is the assembly's wiring hub — it instantiates the server protocol
+factories and exposes `internal` members the protocol machinery consumes — so
+it can only compile alongside that machinery. The full section now lives in
+`Rehost.WebForms.WebServices`, imported unmodified; the runtime carries no
+`System.Web.Services.Configuration` types at all. The runtime's single
+compile-time need, the typed `SystemWebSectionGroup.WebServices` getter, is
+disabled surgically; the root-config `<section>` entry names the satellite and
+resolves lazily, so only applications that touch `webServices` configuration
+or serve `.asmx` load it — the same promise shape as a `validate="False"`
+handler entry.
 
 Naming an assembly in the root configuration is a deployment promise. In
 `<compilation><assemblies>` a named entry is a hard `Assembly.Load`, failing

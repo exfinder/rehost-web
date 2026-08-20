@@ -21,10 +21,18 @@ precedent) — a separate decision, still backlog.
   `DynamicVirtualDiscoSearcher`) are left out of the compile, not shimmed.
   Reference points get `#if`/`PlatformNotSupportedException`. Encoded-style
   `?wsdl` generation throws actionable PNSE; serving encoded requests works.
-- Full 17-file `<webServices>` config section lives in the runtime
-  ([ADR-0009](../adr/0009-assembly-graph.md) direction); the satellite excludes
-  `Configuration/` from its import closure. Graph stays acyclic:
-  Extensions → WebServices → Runtime.
+- Full 17-file `<webServices>` config section lives in the satellite,
+  imported unmodified (revised from "runtime owns" during implementation: the
+  reference-source section is the assembly's wiring hub — it instantiates
+  protocol factories and exposes `internal` members the ASMX machinery
+  consumes, so it cannot compile apart from that machinery without heavy
+  surgery or `InternalsVisibleTo`). The runtime drops its minimal
+  `WebServicesSection` and the three borrowed `Configuration/` files; its one
+  compile-time consumer (`SystemWebSectionGroup.WebServices`) is surgically
+  disabled; the baseline machine.config section line points at the satellite,
+  resolved lazily like `validate="False"` handlers.
+  [ADR-0009](../adr/0009-assembly-graph.md) records the amendment. Graph stays
+  acyclic: Extensions → WebServices → Runtime.
 - Runtime's `Transactions`/`WorkItem` shims and the
   `System.EnterpriseServices.TransactionOption` enum go public, matching the
   netfx public shape. No `InternalsVisibleTo`.
