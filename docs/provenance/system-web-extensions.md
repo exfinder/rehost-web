@@ -6,11 +6,12 @@ object is `4980d036e77731ef47248b6c5d849acb5b69cefe`; all 368 files are copied t
 `src/System.Web.Extensions.ReferenceSource`. The shared Reference Source MIT
 license remains at `third_party/microsoft/referencesource/LICENSE.txt`.
 
-One file differs from that tree:
+Two files differ from that tree:
 
 | File | Change | Reason |
 | --- | --- | --- |
 | `ui/ScriptControlManager.cs` | qualify six `OrderedDictionary<,>` uses as `System.Web.Util.` | .NET 9 added `System.Collections.Generic.OrderedDictionary<TKey,TValue>`; both namespaces are imported, so the bare name is ambiguous. A `using` alias cannot name an open generic. |
+| `Script/Services/WebServiceData.cs` | the three built-in `*_JSON_AppService.axd` mappings sit behind `#if NETFRAMEWORK` | `ProfileService`/`AuthenticationService`/`RoleService` are WCF-hosted and not compiled; the names resolve to no service. |
 
 ## Generated Microsoft AJAX scripts
 
@@ -56,7 +57,12 @@ the drop. `ScriptReference.ShouldUseDebugScript` falls back to the release
 script under the default `ScriptMode.Auto`, so an absent debug resource degrades
 quietly where a preprocessed-but-unvalidated one would mislead.
 
-`Rehost.WebForms.Extensions` compiles the closure the frozen templates reach.
+`Rehost.WebForms.Extensions` compiles the closure the frozen templates reach,
+plus `Script/Services` (the ASMX JSON chain: `ScriptHandlerFactory`,
+`RestHandler`, the client proxy generators) against
+`Rehost.WebForms.WebServices`. `Script/Services/ProxyGenerator.cs` stays out:
+it generates proxies for WCF service endpoints and only the uncompiled
+`WCFBuildProvider` reaches it.
 `WebFormsIdentityApplication` added the second slice: `ListView` and the
 `DataPager` family it names (`ListView*`, `DataPager*`, the three pager fields,
 `IPageableItemContainer`, `InsertItemPosition`, `PageEventArgs`,

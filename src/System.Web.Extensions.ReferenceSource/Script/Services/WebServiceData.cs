@@ -60,6 +60,7 @@ namespace System.Web.Script.Services {
                 // it is a root file. Now see if its one of the two built in services
                 string name = Path.GetFileName(appRelativePath);
 
+#if NETFRAMEWORK // the JSON application services are WCF-hosted and not compiled
                 if (name.Equals(_profileServiceFileName, StringComparison.OrdinalIgnoreCase)) {
                     return new WebServiceData(typeof(System.Web.Profile.ProfileService), false);
                 }
@@ -69,6 +70,7 @@ namespace System.Web.Script.Services {
                 else if (name.Equals(_roleServiceFileName, StringComparison.OrdinalIgnoreCase)) {
                     return new WebServiceData(typeof(System.Web.Security.RoleService), false);
                 }
+#endif
             }
 
             return null;

@@ -5,7 +5,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <NoWarn>$(NoWarn);CS0108;CS0612;CS0618;CS0649;CS0672;CS3021;CS9191;SYSLIB0003;SYSLIB0004;SYSLIB0005;SYSLIB0051</NoWarn>
+    <NoWarn>$(NoWarn);CS0108;CS0612;CS0618;CS0649;CS0672;CS3021;CS9191;SYSLIB0003;SYSLIB0004;SYSLIB0005;SYSLIB0044;SYSLIB0051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +30,9 @@
     <Compile Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.Designer.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Script/AjaxFrameworkAssemblyAttribute.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Serialization/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Services/*.cs" />
+    <!-- WCF service-endpoint proxy generation; only WCFBuildProvider (not compiled) uses it. -->
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/Script/Services/ProxyGenerator.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Util/HeaderUtility.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Util/HexParser.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Util/ListEqualityComparer.cs" />
@@ -51,6 +54,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
     <ProjectReference
       Include="../../eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj"
       Private="false"
