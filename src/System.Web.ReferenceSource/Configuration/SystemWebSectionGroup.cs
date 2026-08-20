@@ -264,12 +264,23 @@ namespace System.Web.Configuration {
             }
         }
 
+#if NETFRAMEWORK
         [ConfigurationProperty("webServices")]
         public System.Web.Services.Configuration.WebServicesSection WebServices {
             get {
                 return (System.Web.Services.Configuration.WebServicesSection) Sections["webServices"];
             }
         }
+#else
+        // WebServicesSection lives in Rehost.WebForms.WebServices, which references this
+        // assembly; the typed getter would recreate Framework's assembly cycle (ADR-0009).
+        [ConfigurationProperty("webServices")]
+        public ConfigurationSection WebServices {
+            get {
+                return Sections["webServices"];
+            }
+        }
+#endif
 
         [ConfigurationProperty("xhtmlConformance")]
         public XhtmlConformanceSection XhtmlConformance {

@@ -61,6 +61,13 @@
    ],
    "reason": "case-folding the configuration system's mapped directory and composed web.config name on a case-sensitive filesystem (ledger P70)",
    "record": "docs/portability-ledger.md P70"
+  },
+  {
+   "files": [
+    "Configuration/SystemWebSectionGroup.cs"
+   ],
+   "reason": "the typed WebServices getter would recreate Framework's System.Web <-> System.Web.Services assembly cycle; it returns ConfigurationSection here (ADR-0009 amendment)",
+   "record": "docs/adr/0009-assembly-graph.md"
   }
  ]
 }

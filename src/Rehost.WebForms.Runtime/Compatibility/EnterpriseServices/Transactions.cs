@@ -3,18 +3,18 @@ using System.EnterpriseServices;
 
 namespace System.Web.Util;
 
-internal delegate void TransactedCallback();
+public delegate void TransactedCallback();
 
 internal delegate int TransactedExecCallback();
 
-internal class Transactions
+public class Transactions
 {
     private const string Message = "COM+ page transactions are not supported by Rehost.WebForms.";
 
-    internal static void InvokeTransacted(TransactedCallback callback, TransactionOption mode) =>
+    public static void InvokeTransacted(TransactedCallback callback, TransactionOption mode) =>
         throw new PlatformNotSupportedException(Message);
 
-    internal static void InvokeTransacted(
+    public static void InvokeTransacted(
         TransactedCallback callback,
         TransactionOption mode,
         ref bool transactionAborted) =>

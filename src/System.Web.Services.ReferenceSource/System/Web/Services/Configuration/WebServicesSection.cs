@@ -259,6 +259,7 @@ namespace System.Web.Services.Configuration {
                             WebServiceProtocols enabledProtocols = this.EnabledProtocols;
                             List<Type> protocolImporterList = new List<Type>();
 
+#if NETFRAMEWORK // the SOAP importers are not compiled; ServiceDescriptionImporter fails fast before reading this list
                                 // order is important for soap: 1.2 must come after 1.1
                                 if ((enabledProtocols & WebServiceProtocols.HttpSoap) != 0) {
                                     protocolImporterList.Add(typeof(SoapProtocolImporter));
@@ -266,6 +267,7 @@ namespace System.Web.Services.Configuration {
                             if ((enabledProtocols & WebServiceProtocols.HttpSoap12) != 0) {
                                 protocolImporterList.Add(typeof(Soap12ProtocolImporter));
                             }
+#endif
                             if ((enabledProtocols & WebServiceProtocols.HttpGet) != 0) {
                                 protocolImporterList.Add(typeof(HttpGetProtocolImporter));
                             }
@@ -429,6 +431,7 @@ namespace System.Web.Services.Configuration {
             get { return (TypeElementCollection)base[this.soapTransportImporterTypes]; }
         }
 
+#if NETFRAMEWORK // SoapHttpTransportImporter is not compiled (WSDL proxy generation is unsupported)
         internal Type[] SoapTransportImporters {
             get {
                 Type[] retval = new Type[1 + this.SoapTransportImporterTypes.Count];
@@ -439,6 +442,17 @@ namespace System.Web.Services.Configuration {
                 return retval;
             }
         }
+#else
+        internal Type[] SoapTransportImporters {
+            get {
+                Type[] retval = new Type[this.SoapTransportImporterTypes.Count];
+                for (int i = 0; i < SoapTransportImporterTypes.Count; ++i) {
+                    retval[i] = SoapTransportImporterTypes[i].Type;
+                }
+                return retval;
+            }
+        }
+#endif
 
         void TurnOnGetAndPost() {
             bool needPost = (this.EnabledProtocols & WebServiceProtocols.HttpPost) == 0;
@@ -507,7 +521,11 @@ namespace System.Web.Services.Configuration {
         Type[] discoveryReferenceTypes = new Type[] { typeof(DiscoveryDocumentReference), typeof(ContractReference), typeof(SchemaReference), typeof(System.Web.Services.Discovery.SoapBinding) };
         XmlSerializer discoveryDocumentSerializer = null;
         WebServiceProtocols enabledProtocols = WebServiceProtocols.Unknown;
+#if NETFRAMEWORK // MimeXmlImporter is not compiled (WSDL proxy generation is unsupported)
         Type[] mimeImporterTypes = new Type[] { typeof(MimeXmlImporter), typeof(MimeFormImporter), typeof(MimeTextImporter) };
+#else
+        Type[] mimeImporterTypes = new Type[] { typeof(MimeFormImporter), typeof(MimeTextImporter) };
+#endif
         Type[] mimeReflectorTypes = new Type[] { typeof(MimeXmlReflector), typeof(MimeFormReflector) };
         Type[] parameterReaderTypes = new Type[] { typeof(UrlParameterReader), typeof(HtmlFormParameterReader) };
         Type[] protocolImporterTypes = new Type[0];

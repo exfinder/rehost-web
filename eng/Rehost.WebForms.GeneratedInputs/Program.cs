@@ -21,6 +21,12 @@ internal static class Program
         "System.Web.resources",
     ];
 
+    private static readonly string[] ServicesArtifactNames =
+    [
+        "Res.g.cs",
+        "System.Web.Services.resources",
+    ];
+
     public static int Main(string[] args)
     {
         try
@@ -28,6 +34,12 @@ internal static class Program
             if (args.Length == 3 && args[0] == "generate")
             {
                 Generate(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
+                return 0;
+            }
+
+            if (args.Length == 3 && args[0] == "generate-services")
+            {
+                GenerateServices(Path.GetFullPath(args[1]), Path.GetFullPath(args[2]));
                 return 0;
             }
 
@@ -39,6 +51,7 @@ internal static class Program
 
             Console.Error.WriteLine(
                 "Usage: Rehost.WebForms.GeneratedInputs generate <repository-root> <output-directory>\n" +
+                "       Rehost.WebForms.GeneratedInputs generate-services <repository-root> <output-directory>\n" +
                 "       Rehost.WebForms.GeneratedInputs verify <repository-root>");
             return 2;
         }
@@ -91,6 +104,16 @@ internal static class Program
             GenerateRegularExpressions(regularExpressions));
     }
 
+    private static void GenerateServices(string repositoryRoot, string outputDirectory)
+    {
+        string sourceRoot = Path.Combine(repositoryRoot, "src", "System.Web.Services.ReferenceSource");
+        SortedDictionary<string, string> resources = ReadResources(Path.Combine(sourceRoot, "System.Web.Services.txt"));
+
+        Directory.CreateDirectory(outputDirectory);
+        WriteText(Path.Combine(outputDirectory, "Res.g.cs"), GenerateRes(resources));
+        WriteResources(Path.Combine(outputDirectory, "System.Web.Services.resources"), resources);
+    }
+
     private static void Verify(string repositoryRoot)
     {
         string temporaryRoot = Path.Combine(
@@ -103,8 +126,10 @@ internal static class Program
         {
             Generate(repositoryRoot, first);
             Generate(repositoryRoot, second);
+            GenerateServices(repositoryRoot, first);
+            GenerateServices(repositoryRoot, second);
 
-            foreach (string artifactName in ArtifactNames)
+            foreach (string artifactName in ArtifactNames.Concat(ServicesArtifactNames))
             {
                 byte[] firstBytes = File.ReadAllBytes(Path.Combine(first, artifactName));
                 byte[] secondBytes = File.ReadAllBytes(Path.Combine(second, artifactName));
@@ -130,8 +155,13 @@ internal static class Program
                 Path.Combine(first, "CacheExpires.g.cs"));
             VerifyRegularExpressions(Path.Combine(first, "RegularExpressions.g.cs"), regularExpressions);
 
-            Console.WriteLine($"Verified {ArtifactNames.Length} deterministic generated artifacts.");
-            foreach (string artifactName in ArtifactNames)
+            SortedDictionary<string, string> expectedServicesResources = ReadResources(
+                Path.Combine(repositoryRoot, "src", "System.Web.Services.ReferenceSource", "System.Web.Services.txt"));
+            VerifyServicesResources(Path.Combine(first, "System.Web.Services.resources"), expectedServicesResources);
+            VerifyRes(Path.Combine(first, "Res.g.cs"), expectedServicesResources);
+
+            Console.WriteLine($"Verified {ArtifactNames.Length + ServicesArtifactNames.Length} deterministic generated artifacts.");
+            foreach (string artifactName in ArtifactNames.Concat(ServicesArtifactNames))
             {
                 byte[] bytes = File.ReadAllBytes(Path.Combine(first, artifactName));
                 Console.WriteLine($"{artifactName}\t{Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant()}");
@@ -304,6 +334,57 @@ internal static class Program
         output.AppendLine();
         output.AppendLine("        public static object GetObject(string name) {");
         output.AppendLine("            return GetLoader().resources.GetObject(name, Culture);");
+        output.AppendLine("        }");
+        output.AppendLine("    }");
+        output.AppendLine("}");
+        return output.ToString();
+    }
+
+    private static string GenerateRes(SortedDictionary<string, string> resources)
+    {
+        StringBuilder output = GeneratedHeader("System.Web.Services.txt -> Res.g.cs");
+        output.AppendLine("using System.Globalization;");
+        output.AppendLine("using System.Resources;");
+        output.AppendLine("using System.Threading;");
+        output.AppendLine();
+        output.AppendLine("namespace System.Web.Services {");
+        output.AppendLine("    internal sealed class Res {");
+
+        foreach (string name in resources.Keys)
+        {
+            Require(Regex.IsMatch(name, @"^[_\p{L}][\p{L}\p{Nd}_]*$", RegexOptions.CultureInvariant),
+                $"Resource key '{name}' is not a valid C# identifier.");
+            output.Append("        internal const string ").Append(name).Append(" = ")
+                .Append(CSharpString(name)).AppendLine(";");
+        }
+
+        output.AppendLine();
+        output.AppendLine("        private static Res loader;");
+        output.AppendLine("        private readonly ResourceManager resources;");
+        output.AppendLine("        private static CultureInfo Culture => null;");
+        output.AppendLine();
+        output.AppendLine("        internal Res() {");
+        output.AppendLine("            resources = new ResourceManager(\"System.Web.Services\", typeof(Res).Assembly);");
+        output.AppendLine("        }");
+        output.AppendLine();
+        output.AppendLine("        private static Res GetLoader() {");
+        output.AppendLine("            if (loader == null) {");
+        output.AppendLine("                Res value = new Res();");
+        output.AppendLine("                Interlocked.CompareExchange(ref loader, value, null);");
+        output.AppendLine("            }");
+        output.AppendLine("            return loader;");
+        output.AppendLine("        }");
+        output.AppendLine();
+        output.AppendLine("        public static string GetString(string name, params object[] args) {");
+        output.AppendLine("            string value = GetLoader().resources.GetString(name, Culture);");
+        output.AppendLine("            if (args != null && args.Length != 0) {");
+        output.AppendLine("                return string.Format(CultureInfo.CurrentCulture, value, args);");
+        output.AppendLine("            }");
+        output.AppendLine("            return value;");
+        output.AppendLine("        }");
+        output.AppendLine();
+        output.AppendLine("        public static string GetString(string name) {");
+        output.AppendLine("            return GetLoader().resources.GetString(name, Culture);");
         output.AppendLine("        }");
         output.AppendLine("    }");
         output.AppendLine("}");
@@ -796,6 +877,31 @@ internal static class Program
         Require(source.Contains($"new ResourceManager(\"{identities.Resource.BaseName}\"", StringComparison.Ordinal),
             "SR uses an unexpected resource base name.");
         Require(!source.Contains("Portable.System.Web", StringComparison.Ordinal), "SR inherited the POC resource identity.");
+    }
+
+    private static void VerifyServicesResources(string path, SortedDictionary<string, string> expected)
+    {
+        Dictionary<string, string> actual = new(StringComparer.Ordinal);
+        using ResourceReader reader = new(path);
+        foreach (DictionaryEntry entry in reader)
+        {
+            actual.Add((string)entry.Key, (string)entry.Value!);
+        }
+        Require(actual.Count == expected.Count, "Resource count differs from System.Web.Services.txt.");
+        foreach ((string name, string value) in expected)
+        {
+            Require(actual.TryGetValue(name, out string? actualValue) && actualValue == value,
+                $"Resource '{name}' does not match System.Web.Services.txt.");
+        }
+    }
+
+    private static void VerifyRes(string path, SortedDictionary<string, string> resources)
+    {
+        string source = File.ReadAllText(path, Encoding.UTF8);
+        int constantCount = Regex.Matches(source, "internal const string \\w+ = \\\"", RegexOptions.CultureInvariant).Count;
+        Require(constantCount == resources.Count, "Res constant count does not match the resource key count.");
+        Require(source.Contains("new ResourceManager(\"System.Web.Services\"", StringComparison.Ordinal),
+            "Res uses an unexpected resource base name.");
     }
 
     private static void VerifyAssemblyRef(string path, string sourceRoot, IdentityManifest identities)

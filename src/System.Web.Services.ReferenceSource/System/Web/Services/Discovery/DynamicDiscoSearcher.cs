@@ -10,7 +10,9 @@ namespace System.Web.Services.Discovery {
     using System.Collections;
     using System.Diagnostics;
     using System.Text;
+#if NETFRAMEWORK // DynamicVirtualDiscoSearcher (ADSI) is not compiled
     using System.DirectoryServices;
+#endif
     using System.Web.Services.Configuration;
     using System.ComponentModel;
     using System.Globalization;

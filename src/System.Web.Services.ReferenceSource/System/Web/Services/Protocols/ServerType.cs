@@ -28,12 +28,14 @@ namespace System.Web.Services.Protocols {
             get { return type; }
         }
 
+#if NETFRAMEWORK // Assembly.Evidence was cut from modern .NET; consumers sat on the dead non-homogenous branch
         internal Evidence Evidence {
             get {
                 new SecurityPermission(SecurityPermissionFlag.ControlEvidence).Assert();
                 return Type.Assembly.Evidence;
             }
         }
+#endif
     }
 
 }

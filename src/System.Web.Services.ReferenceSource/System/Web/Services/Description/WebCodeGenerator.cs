@@ -126,7 +126,13 @@ namespace System.Web.Services.Description {
         }
 
         internal static string FullTypeName(XmlMemberMapping mapping, CodeDomProvider codeProvider) {
+#if NETFRAMEWORK
             return mapping.GenerateTypeName(codeProvider);
+#else
+            // GenerateTypeName was System.Xml friend API and does not exist on modern
+            // .NET; the CLR type name differs only for language keywords.
+            return mapping.TypeFullName;
+#endif
         }
 
         static string MakeFieldName(string name) {

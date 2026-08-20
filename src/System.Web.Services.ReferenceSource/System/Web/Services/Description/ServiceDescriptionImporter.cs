@@ -123,12 +123,20 @@ namespace System.Web.Services.Description {
         ///    <para>[To be supplied.]</para>
         /// </devdoc>
         public ServiceDescriptionImporter() {
+#if !NETFRAMEWORK
+            // The SOAP WSDL importers need System.Xml.Serialization code-export APIs that
+            // were cut from modern .NET (SoapSchemaImporter, XmlCodeExporter, ...).
+            throw new PlatformNotSupportedException(
+                "WSDL proxy generation is not supported by Rehost.WebForms. " +
+                "Generate the client with dotnet-svcutil (or reuse a committed Reference.cs) and compile it with the application.");
+#else
             Type[] importerTypes = WebServicesSection.Current.ProtocolImporterTypes;
             importers = new ProtocolImporter[importerTypes.Length];
             for (int i = 0; i < importers.Length; i++) {
                 importers[i] = (ProtocolImporter)Activator.CreateInstance(importerTypes[i]);
                 importers[i].Initialize(this);
             }
+#endif
         }
 
         internal ServiceDescriptionImporter(CodeCompileUnit codeCompileUnit) : this() {

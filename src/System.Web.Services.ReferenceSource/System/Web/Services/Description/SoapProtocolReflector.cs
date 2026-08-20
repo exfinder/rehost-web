@@ -45,6 +45,7 @@ namespace System.Web.Services.Description {
             }
         }
 
+#if NETFRAMEWORK // SoapSchemaExporter was cut from modern .NET
         internal SoapSchemaExporter SoapExporter {
             get { 
                 SoapSchemaExporter soapExporter = ReflectionContext[typeof(SoapSchemaExporter)] as SoapSchemaExporter;
@@ -55,6 +56,15 @@ namespace System.Web.Services.Description {
                 return soapExporter;
             }
         }
+#else
+        // Serving encoded requests never passes through here; only WSDL *generation*
+        // for Use=Encoded services is lost.
+        static Exception EncodedWsdlNotSupported() {
+            return new PlatformNotSupportedException(
+                "Generating WSDL for SOAP-encoded services is not supported by Rehost.WebForms. " +
+                "Serve a static WSDL document or convert the service to document/literal.");
+        }
+#endif
 
         protected override bool ReflectMethod() {
             soapMethod = ReflectionContext[Method] as SoapReflectedMethod;
@@ -88,9 +98,13 @@ namespace System.Web.Services.Description {
         void CreateHeaderMessages(string methodName, SoapBindingUse use, XmlMembersMapping inHeaderMappings, XmlMembersMapping outHeaderMappings, SoapReflectedHeader[] headers, bool rpc) {
             // 
             if (use == SoapBindingUse.Encoded) {
+#if NETFRAMEWORK
                 SoapExporter.ExportMembersMapping(inHeaderMappings, false);
                 if (outHeaderMappings != null)
                     SoapExporter.ExportMembersMapping(outHeaderMappings, false);
+#else
+                throw EncodedWsdlNotSupported();
+#endif
             }
             else {
                 SchemaExporter.ExportMembersMapping(inHeaderMappings);
@@ -151,6 +165,9 @@ namespace System.Web.Services.Description {
         }
 
         void CreateEncodedMessage(Message message, MessageBinding messageBinding, XmlMembersMapping members, bool wrapped) {
+#if !NETFRAMEWORK
+            throw EncodedWsdlNotSupported();
+#else
             SoapExporter.ExportMembersMapping(members, wrapped);
 
             if (wrapped) {
@@ -170,6 +187,7 @@ namespace System.Web.Services.Description {
             }
 
             messageBinding.Extensions.Add(CreateSoapBodyBinding(SoapBindingUse.Encoded, members.Namespace));
+#endif
         }
 
         void CreateLiteralMessage(Message message, MessageBinding messageBinding, XmlMembersMapping members, bool wrapped, bool rpc) {

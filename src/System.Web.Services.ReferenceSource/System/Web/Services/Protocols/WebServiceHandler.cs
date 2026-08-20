@@ -14,7 +14,9 @@ namespace System.Web.Services.Protocols {
     using System.Collections;
     using System.Web;
     using System.Web.SessionState;
+#if NETFRAMEWORK // the VS debugger-causality COM channel is not compiled
     using System.Web.Services.Interop;
+#endif
     using System.Configuration;
     using Microsoft.Win32;
     using System.Threading;

@@ -73,7 +73,11 @@ namespace System.Web.Services.Protocols {
             // Most of the fields in this class are ----ed in from the reflected information
             //
             ImportReflectedMethod(soapMethod);
+#if NETFRAMEWORK // Assembly.Evidence was cut from modern .NET; IsHomogenous is constant true
             ImportSerializers(soapMethod, GetServerTypeEvidence(serverType));
+#else
+            ImportSerializers(soapMethod);
+#endif
             ImportHeaderSerializers(soapMethod);
         }
 
@@ -181,10 +185,12 @@ namespace System.Web.Services.Protocols {
             }
         }
 
+#if NETFRAMEWORK
         [SecurityPermission(SecurityAction.Assert, ControlEvidence = true)]
         private Evidence GetServerTypeEvidence(Type type) {
             return type.Assembly.Evidence;
         }
+#endif
 
         private List<XmlMapping> GetXmlMappingsForMethod(SoapReflectedMethod soapMethod) {
             List<XmlMapping> mappings = new List<XmlMapping>();
@@ -238,7 +244,11 @@ namespace System.Web.Services.Protocols {
                 this.outHeaderMappings = outHeaders.ToArray();
         }
 
+#if NETFRAMEWORK
         private void ImportSerializers(SoapReflectedMethod soapMethod, Evidence serverEvidence) {
+#else
+        private void ImportSerializers(SoapReflectedMethod soapMethod) {
+#endif
             //
             // Keep track of all XmlMapping instances we need for this method.
             //
@@ -250,6 +260,7 @@ namespace System.Web.Services.Protocols {
 
             XmlMapping[] xmlMappings = mappings.ToArray();
             TraceMethod caller = Tracing.On ? new TraceMethod(this, "ImportSerializers") : null;
+#if NETFRAMEWORK // Assembly.Evidence was cut from modern .NET; IsHomogenous is constant true
             if (Tracing.On) Tracing.Enter(Tracing.TraceId(Res.TraceCreateSerializer), caller, new TraceMethod(typeof(XmlSerializer), "FromMappings", xmlMappings, serverEvidence));
             XmlSerializer[] serializers = null;
             if (AppDomain.CurrentDomain.IsHomogenous) {
@@ -260,6 +271,10 @@ namespace System.Web.Services.Protocols {
                 serializers = XmlSerializer.FromMappings(xmlMappings, serverEvidence);
 #pragma warning restore 618
             }
+#else
+            if (Tracing.On) Tracing.Enter(Tracing.TraceId(Res.TraceCreateSerializer), caller, new TraceMethod(typeof(XmlSerializer), "FromMappings", xmlMappings));
+            XmlSerializer[] serializers = XmlSerializer.FromMappings(xmlMappings);
+#endif
             if (Tracing.On) Tracing.Exit(Tracing.TraceId(Res.TraceCreateSerializer), caller);
 
             int i = 0;

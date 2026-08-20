@@ -88,8 +88,15 @@ namespace System.Web.Services.Discovery {
                     if ( strLocalPath.Length == 0 ||       // no subdir present, host only
                          CompModSwitches.DynamicDiscoveryVirtualSearch.Enabled    // virtual search forced (for test suites).
                        ) {
+#if NETFRAMEWORK
                        discoFileName = GetFilePartOfPath( escapedUri );
                        searcher = new DynamicVirtualDiscoSearcher( discoFileDirectory, excludeList, searchStartUrlDir);
+#else
+                       // DynamicVirtualDiscoSearcher walked the IIS metabase over ADSI and
+                       // is not compiled; there is no metabase to search here.
+                       throw new PlatformNotSupportedException(
+                           "IIS-metabase (virtual) dynamic discovery is not supported by Rehost.WebForms.");
+#endif
                     }
                     else
                         searcher = new DynamicPhysicalDiscoSearcher(discoFileDirectory, excludeList, searchStartUrlDir);

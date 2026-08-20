@@ -3,7 +3,7 @@ using System;
 namespace System.EnterpriseServices;
 
 [Serializable]
-internal enum TransactionOption
+public enum TransactionOption
 {
     Disabled = 0,
     NotSupported = 1,

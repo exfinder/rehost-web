@@ -111,6 +111,7 @@ namespace System.Web.Services.Protocols {
             
             XmlMapping[] xmlMappings = (XmlMapping[])mappings.ToArray(typeof(XmlMapping));
             TraceMethod caller = Tracing.On ? new TraceMethod(this, ".ctor", type, protocolsSupported) : null;
+#if NETFRAMEWORK // Assembly.Evidence was cut from modern .NET; IsHomogenous is constant true
             if (Tracing.On) Tracing.Enter(Tracing.TraceId(Res.TraceCreateSerializer), caller, new TraceMethod(typeof(XmlSerializer), "FromMappings", xmlMappings, this.Evidence));
             XmlSerializer[] serializers = null;
             if (AppDomain.CurrentDomain.IsHomogenous) {
@@ -121,6 +122,10 @@ namespace System.Web.Services.Protocols {
                 serializers = XmlSerializer.FromMappings((xmlMappings), this.Evidence);
 #pragma warning restore 618
             }
+#else
+            if (Tracing.On) Tracing.Enter(Tracing.TraceId(Res.TraceCreateSerializer), caller, new TraceMethod(typeof(XmlSerializer), "FromMappings", xmlMappings));
+            XmlSerializer[] serializers = XmlSerializer.FromMappings(xmlMappings);
+#endif
             if (Tracing.On) Tracing.Exit(Tracing.TraceId(Res.TraceCreateSerializer), caller);
             
             int count = 0;

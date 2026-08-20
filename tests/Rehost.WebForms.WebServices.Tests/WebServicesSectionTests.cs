@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.Web.Services;
 using System.Web.Services.Configuration;
 
 using Shouldly;
@@ -37,8 +38,11 @@ public sealed class WebServicesSectionTests
 
             WebServicesSection section = (WebServicesSection)configuration.GetSection("system.web/webServices");
 
-            section.Protocols.Count.ShouldBe(2);
-            section.EnabledProtocols.ShouldBe(WebServiceProtocols.HttpGet | WebServiceProtocols.HttpPost);
+            section.Protocols.Count.ShouldBe(6);
+            section.EnabledProtocols.ShouldBe(
+                WebServiceProtocols.HttpSoap | WebServiceProtocols.HttpSoap12 |
+                WebServiceProtocols.HttpPostLocalhost | WebServiceProtocols.Documentation |
+                WebServiceProtocols.HttpGet | WebServiceProtocols.HttpPost);
         }
         finally
         {
@@ -47,11 +51,38 @@ public sealed class WebServicesSectionTests
     }
 
     [Fact]
-    public void Empty_Configuration_Has_No_Implicit_Protocols_In_Initial_Profile()
+    public void Empty_Configuration_Enables_Framework_Default_Protocols()
     {
-        WebServicesSection section = new();
+        string configurationPath = Path.Combine(Path.GetTempPath(), $"rehost-web-services-{Guid.NewGuid():N}.config");
+        try
+        {
+            File.WriteAllText(configurationPath, $$"""
+                <?xml version="1.0" encoding="utf-8" ?>
+                <configuration>
+                  <configSections>
+                    <sectionGroup name="system.web">
+                      <section name="webServices" type="{{typeof(WebServicesSection).AssemblyQualifiedName}}" />
+                    </sectionGroup>
+                  </configSections>
+                  <system.web>
+                    <webServices />
+                  </system.web>
+                </configuration>
+                """);
+            ExeConfigurationFileMap map = new() { ExeConfigFilename = configurationPath };
+            Configuration configuration = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
 
-        section.Protocols.Count.ShouldBe(0);
-        section.EnabledProtocols.ShouldBe(WebServiceProtocols.Unknown);
+            WebServicesSection section = (WebServicesSection)configuration.GetSection("system.web/webServices");
+
+            section.EnabledProtocols.ShouldBe(
+                WebServiceProtocols.HttpSoap | WebServiceProtocols.HttpSoap12 |
+                WebServiceProtocols.HttpPostLocalhost | WebServiceProtocols.Documentation);
+            section.ConformanceWarnings.Cast<WsiProfilesElement>()
+                .ShouldContain(element => element.Name == WsiProfiles.BasicProfile1_1);
+        }
+        finally
+        {
+            File.Delete(configurationPath);
+        }
     }
 }

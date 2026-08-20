@@ -43,6 +43,7 @@ namespace System.Web.Services.Protocols {
                 return new object[0];
 
             XmlMapping[] xmlMappings = (XmlMapping[])mappings.ToArray(typeof(XmlMapping));
+#if NETFRAMEWORK // Assembly.Evidence was cut from modern .NET; IsHomogenous is constant true
             Evidence evidence = GetEvidenceForType(methodInfos[0].DeclaringType);
 
             TraceMethod caller = Tracing.On ? new TraceMethod(typeof(XmlReturn), "GetInitializers", methodInfos) : null;
@@ -58,6 +59,11 @@ namespace System.Web.Services.Protocols {
                 serializers = XmlSerializer.FromMappings(xmlMappings, evidence);
 #pragma warning restore 618
             }
+#else
+            TraceMethod caller = Tracing.On ? new TraceMethod(typeof(XmlReturn), "GetInitializers", methodInfos) : null;
+            if (Tracing.On) Tracing.Enter(Tracing.TraceId(Res.TraceCreateSerializer), caller, new TraceMethod(typeof(XmlSerializer), "FromMappings", xmlMappings));
+            XmlSerializer[] serializers = XmlSerializer.FromMappings(xmlMappings);
+#endif
 
             if (Tracing.On) Tracing.Exit(Tracing.TraceId(Res.TraceCreateSerializer), caller);
 
@@ -79,6 +85,7 @@ namespace System.Web.Services.Protocols {
             return GetInitializers(new LogicalMethodInfo[] { methodInfo });
         }
 
+#if NETFRAMEWORK
         // Asserts full-trust permission-set.
         // Reason: Assembly.Evidence demands SecurityPermission and/or other permissions.
         // Justification: The type returned is only used to get the GetInitializers method.
@@ -87,6 +94,7 @@ namespace System.Web.Services.Protocols {
         {
             return type.Assembly.Evidence;
         }
+#endif
     }
 
     /// <include file='doc\XmlReturnReader.uex' path='docs/doc[@for="XmlReturnReader"]/*' />
