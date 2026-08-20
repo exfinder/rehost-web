@@ -21,7 +21,7 @@
        that names them. -->
   <ItemGroup>
     <None
-      Include="../Rehost.WebForms.Runtime/configs/*.config"
+      Include="../Rehost.WebForms.Runtime/configs/*.config;../Rehost.WebForms.Runtime/configs/DefaultWsdlHelpGenerator.aspx"
       Pack="true"
       PackagePath="contentFiles/any/any/configs/"
       PackageCopyToOutput="true" />
