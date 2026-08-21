@@ -77,6 +77,32 @@ public sealed class AjaxScriptResourceTests
     }
 
     [Fact]
+    public void NoMinifierPlaceholderSurvivesGeneration()
+    {
+        // AjaxMin renders any node it synthesized without source text as the literal
+        // "[generated code]", which is a syntax error in the shipped script.
+        var corrupted = DeclaredNames()
+            .Where(name => ReadResource(name).Contains("[generated code]"))
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        corrupted.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void ReleaseBooleanParseMatchesFrameworksOwnEmission()
+    {
+        // The one site the IfElseReturnToReturnConditional kill bit exists for: a
+        // function whose ##DEBUG-stripped body ends in a bare if-return. Framework's
+        // own release build keeps the two ifs.
+        var core = ReadResource("MicrosoftAjaxCore.js");
+
+        core.ShouldContain(
+            "Boolean.parse=function(b){var a=b.trim().toLowerCase();"
+            + "if(a===\"false\")return false;if(a===\"true\")return true}");
+    }
+
+    [Fact]
     public void NoDebugScriptIsShipped()
     {
         // ScriptMode.Auto falls back to the release script when the debug one is

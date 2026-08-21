@@ -18,12 +18,14 @@ if (!Directory.Exists(scriptRoot))
 Directory.CreateDirectory(outputRoot);
 
 // Framework's own output keeps hex literals but not exponent notation, plain
-// booleans, unfolded `if`, and `var` outside the `for` initializer.
+// booleans, unfolded `if`, `var` outside the `for` initializer, and trailing
+// if-returns (IfElseReturnToReturnConditional invents a `void <missing>` else
+// branch that AjaxMin renders as the literal text `[generated code]`).
 var settings = new CodeSettings
 {
     LocalRenaming = LocalRenaming.CrunchAll,
     OutputMode = OutputMode.SingleLine,
-    KillSwitch = (TreeModifications)(0x400000000UL | 0x200000UL | 0x2000UL | 0x400UL),
+    KillSwitch = (TreeModifications)(0x400000000UL | 0x200000UL | 0x4000UL | 0x2000UL | 0x400UL),
 };
 
 var written = 0;
