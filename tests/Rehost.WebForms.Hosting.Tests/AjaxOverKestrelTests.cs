@@ -215,6 +215,31 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     }
 
     [Fact]
+    public async Task Builtin_Authentication_AppService_Maps_And_Reports_Disabled()
+    {
+        var response = await scenario.Client.PostWithHeadersAsync(
+            "/Authentication_JSON_AppService.axd/IsLoggedIn",
+            Encoding.UTF8.GetBytes("{}"),
+            "application/json; charset=utf-8");
+
+        response.StatusCode.ShouldBe(500);
+        response.Headers["Content-Type"].ShouldStartWith("application/json");
+        response.Text.ShouldContain("AuthenticationService is disabled.");
+    }
+
+    [Fact]
+    public async Task Builtin_Role_AppService_Maps_And_Reports_Disabled()
+    {
+        var response = await scenario.Client.PostWithHeadersAsync(
+            "/Role_JSON_AppService.axd/GetRolesForCurrentUser",
+            Encoding.UTF8.GetBytes("{}"),
+            "application/json; charset=utf-8");
+
+        response.StatusCode.ShouldBe(500);
+        response.Text.ShouldContain("RoleService is disabled.");
+    }
+
+    [Fact]
     public async Task QueryExtender_Filters_And_Orders_The_Queryable_Source()
     {
         var response = await scenario.Client.GetAsync("/ajax/Query.aspx");
