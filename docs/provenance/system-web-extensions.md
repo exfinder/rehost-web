@@ -6,12 +6,19 @@ object is `4980d036e77731ef47248b6c5d849acb5b69cefe`; all 368 files are copied t
 `src/System.Web.Extensions.ReferenceSource`. The shared Reference Source MIT
 license remains at `third_party/microsoft/referencesource/LICENSE.txt`.
 
-Two files differ from that tree:
+One file differs from that tree:
 
 | File | Change | Reason |
 | --- | --- | --- |
 | `ui/ScriptControlManager.cs` | qualify six `OrderedDictionary<,>` uses as `System.Web.Util.` | .NET 9 added `System.Collections.Generic.OrderedDictionary<TKey,TValue>`; both namespaces are imported, so the bare name is ambiguous. A `using` alias cannot name an open generic. |
-| `Script/Services/WebServiceData.cs` | the three built-in `*_JSON_AppService.axd` mappings sit behind `#if NETFRAMEWORK` | `ProfileService`/`AuthenticationService`/`RoleService` are WCF-hosted and not compiled; the names resolve to no service. |
+
+`Script/Services/WebServiceData.cs` carried a second deviation from 2026-08 —
+the three built-in `*_JSON_AppService.axd` mappings behind `#if NETFRAMEWORK`,
+recorded as "WCF-hosted and not compiled". The
+[portability analysis](../research/system-web-extensions-portability.md)
+disproved that reason (they map to the internal `[ScriptService]` classes in
+`Profile/` and `Security/`, served through the ASMX JSON chain); the gate was
+reverted and the file matches the tree again.
 
 ## Generated Microsoft AJAX scripts
 
@@ -67,8 +74,28 @@ it generates proxies for WCF service endpoints and only the uncompiled
 `DataPager` family it names (`ListView*`, `DataPager*`, the three pager fields,
 `IPageableItemContainer`, `InsertItemPosition`, `PageEventArgs`,
 `PagePropertiesChangingEventArgs`), which the account pages declare through
-`OpenAuthProviders.ascx`. The remaining `ui/WebControls` files — the LINQ,
-context, and query data sources — stay out. Excluded
+`OpenAuthProviders.ascx`.
+
+The [AJAX activation plan](../follow-ups/extensions-ajax-activation.md)
+(2026-08-21) added the third slice: `ScriptModule`, the internal JSON
+application services (`Profile/ProfileService.cs`,
+`Security/{Authentication,Role}Service.cs`) with their ApplicationServices
+event-args siblings, `Management/WebServiceErrorEvent.cs`, and the query
+stack (`ui/WebControls/Expressions/*`, `Query*`, `ContextDataSource*`,
+`DataSourceHelper`, `Dynamic`, `DynamicQueryableWrapper`, `IDynamicQueryable`,
+`IQueryableDataSource`, `DynamicData/*`). `Dynamic.cs` binds
+`AppDomain.DefineDynamicAssembly`, which modern .NET removed; the assembly's
+own `AppDomainDynamicAssembly.cs` extension method maps the call to the
+static `AssemblyBuilder.DefineDynamicAssembly`, keeping the imported file
+byte-identical.
+
+Still out, per the plan's exclusions: the `LinqDataSource` family plus
+`ILinqToSql`/`LinqToSqlWrapper` (`System.Data.Linq` has no modern
+implementation), `Compilation/**` (WCF `.svcmap` proxy generation), the WCF
+`.svc` application-service hosts (`ApplicationServices/{ApplicationServicesHostFactory,AuthenticationService,ProfileService,RoleService}.cs`),
+`ClientServices/**` (Windows-desktop stack), `PermaLink.cs` (fully commented
+out upstream), and `LinqDataSourceContextData.cs` (duplicate definition of
+`ContextDataSourceContextData`). Excluded
 public APIs are absent rather than stubbed. Design-time metadata the closure
 still names is carried by internal shapes in the runtime's
 `Compatibility/DesignTime`, which keeps the control declarations byte-for-byte;

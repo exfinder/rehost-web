@@ -5,18 +5,29 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <NoWarn>$(NoWarn);CS0108;CS0612;CS0618;CS0649;CS0672;CS3021;CS9191;SYSLIB0003;SYSLIB0004;SYSLIB0005;SYSLIB0044;SYSLIB0051</NoWarn>
+    <NoWarn>$(NoWarn);CS0108;CS0612;CS0618;CS0649;CS0672;CS3021;CS9191;SYSLIB0003;SYSLIB0004;SYSLIB0005;SYSLIB0044;SYSLIB0050;SYSLIB0051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ApplicationServiceHelper.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/AuthenticatingEventArgs.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/CreatingCookieEventArgs.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/KnownTypesProvider.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ProfilePropertyMetadata.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/SelectingProviderEventArgs.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ValidatingPropertiesEventArgs.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Configuration/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/DynamicData/*.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Globalization/ClientCultureInfo.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/HttpResponseInternalBase.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/HttpResponseInternalWrapper.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/IScriptResourceHandler.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/ScriptModule.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/ScriptResourceHandler.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Management/WebServiceErrorEvent.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Profile/ProfileService.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Security/AuthenticationService.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/Security/RoleService.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/*.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/ListView*.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IPageableItemContainer.cs" />
@@ -27,6 +38,14 @@
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/NextPreviousPagerField.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/NumericPagerField.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/TemplatePagerField.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/ContextDataSource*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/DataSourceHelper.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/Dynamic.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/DynamicQueryableWrapper.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/Expressions/*.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IDynamicQueryable.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IQueryableDataSource.cs" />
+    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/Query*.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.Designer.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Script/AjaxFrameworkAssemblyAttribute.cs" />
     <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Serialization/*.cs" />
