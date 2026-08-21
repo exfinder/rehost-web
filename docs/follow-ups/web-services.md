@@ -1,66 +1,32 @@
 # Web Services scope
 
-Plan agreed 2026-08-20, grounded in
-[system-web-services-portability](../research/system-web-services-portability.md).
+The T1–T3 + script-services port planned here landed 2026-08-21 (see
+[web-services-compatibility](../web-services-compatibility.md) for the shipped
+profile and [system-web-services-portability](../research/system-web-services-portability.md)
+for the analysis that grounded it). What remains is deliberate backlog:
 
-## Scope
-
-Port T1 (ASMX server runtime), T2 (client runtime for committed generated
-proxies), and T3 (WS-I conformance checker) into
-`Rehost.WebForms.WebServices`, plus the `Script/Services` JSON chain
-(`ScriptHandlerFactory`, `RestHandler`, ~2.6k lines) into
-`Rehost.WebForms.Extensions`. T4 (WSDL→proxy generation) stays excluded: it
-needs eleven `System.Xml.Serialization` codegen APIs cut from modern .NET, and
-restoring them means vendoring a serialization-stack fork (dotnet-svcutil
-precedent) — a separate decision, still backlog.
-
-## Decisions
-
-- Excluded files (`SoapProtocolImporter`, `MimeXmlImporter`,
-  `WebCodeGenerator`'s missing call, `RemoteDebugger`/`Interop`,
-  `DynamicVirtualDiscoSearcher`) are left out of the compile, not shimmed.
-  Reference points get `#if`/`PlatformNotSupportedException`. Encoded-style
-  `?wsdl` generation throws actionable PNSE; serving encoded requests works.
-- Full 17-file `<webServices>` config section lives in the satellite,
-  imported unmodified (revised from "runtime owns" during implementation: the
-  reference-source section is the assembly's wiring hub — it instantiates
-  protocol factories and exposes `internal` members the ASMX machinery
-  consumes, so it cannot compile apart from that machinery without heavy
-  surgery or `InternalsVisibleTo`). The runtime drops its minimal
-  `WebServicesSection` and the three borrowed `Configuration/` files; its one
-  compile-time consumer (`SystemWebSectionGroup.WebServices`) is surgically
-  disabled; the baseline machine.config section line points at the satellite,
-  resolved lazily like `validate="False"` handlers.
-  [ADR-0009](../adr/0009-assembly-graph.md) records the amendment. Graph stays
-  acyclic: Extensions → WebServices → Runtime.
-- Runtime's `Transactions`/`WorkItem` shims and the
-  `System.EnterpriseServices.TransactionOption` enum go public, matching the
-  netfx public shape. No `InternalsVisibleTo`.
-- Baseline config migrates the Framework-exact chain: `*.asmx` →
-  `ScriptHandlerFactory, Rehost.WebForms.Extensions`, `validate="False"`,
-  delegating to `WebServiceHandlerFactory`; the `.asmx` build-provider entry
-  swaps from the PNSE stub to the real provider.
-- Framework protocol defaults restored: empty config enables `HttpSoap`,
-  `HttpSoap12`, `HttpPostLocalhost`, `Documentation`. The current
-  "empty = none" stance was a placeholder for the config-only slice.
-- Permanently excluded, unchanged from the research: VS debugger COM channel,
-  COM+ web-method transactions (PNSE via the runtime shim), ADSI `.vsdisco`
-  discovery.
-
-## Mechanics
-
-Generate `Res` from `System.Web.Services.txt`; identity-remap
-`System.Web.Services, ... b03f5f7f11d50a3a` config type names to the
-satellite; seekable request body seam for `SoapServerProtocol`; ScenarioHost
-fixture deployment carries the satellite (no new test host process). Landing
-order keeps main green: runtime config expansion → server core → client →
-script services → baseline config lines last.
-
-## Done when
-
-Scenario suite covers invoke, SOAP headers, sessions, faults, `?wsdl`, help
-page, and a JSON script service; winbox IIS wire readings byte-diff SOAP
-1.1/1.2 request/response, `?wsdl`, help page, and fault shapes; 3-OS rounds
-pass. Excluded layers remain actionably unsupported
-([web-services-compatibility](../web-services-compatibility.md) updated to the
-new profile).
+- **T4 — WSDL→proxy generation** (`ServiceDescriptionImporter`, the `.wsdl`
+  build provider, `App_WebReferences`, encoded `?wsdl`). Blocked on eleven
+  `System.Xml.Serialization` code-export APIs cut from modern .NET. Restoring
+  it means vendoring an importer/exporter slice of the serialization stack
+  internal to the satellite (dotnet-svcutil's `FrameworkFork` precedent; the
+  pinned referencesource carries the sources under the same MIT license). If
+  vendored, the BCL serializer stays on the wire, and the frozen-mapping-rules
+  assumption (fork importers vs. live runtime serializer) gets recorded in the
+  compatibility doc. Typed-DataSet import additionally needs
+  `System.Design`'s `TypedDataSetSchemaImporterExtension` — a separate
+  decision. Trigger: a real application that ships raw `.wsdl` under
+  `App_WebReferences` or needs encoded WSDL generation.
+- **JSON application services** (`Profile_JSON_AppService.axd` and siblings,
+  plus Framework's `*_AppService.axd` handler mapping, not migrated into the
+  baseline). The service classes are WCF-hosted
+  (`System.ServiceModel.Activation`); the built-in names resolve to no
+  service today.
+- **Framework config identity remapping** — application configs or
+  `.discomap` files carrying assembly-qualified type names
+  (`System.Web.Services, … b03f5f7f11d50a3a`) resolve against the Framework
+  identity and fail. No general remapping facility exists; decide when a real
+  application carries such strings.
+- **rpc/encoded fixtures** — serving encoded requests was probe-verified in
+  the research; no standing scenario exercises it, and encoded `?wsdl`
+  fail-fast has no test.
