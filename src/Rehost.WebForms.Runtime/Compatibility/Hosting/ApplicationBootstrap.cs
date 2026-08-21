@@ -53,6 +53,9 @@ internal sealed class ApplicationBootstrap
                 configuration.ApplicationConfigurationFilePath);
             _environment.Preflight(configuration);
             _environment.Bind(configuration);
+            System.Web.Configuration.HttpConfigurationSystem.SetConfigurationFilePaths(
+                configuration.MachineConfigurationFilePath,
+                configuration.RootWebConfigurationFilePath);
             System.Web.IisConfig.IisServerConfiguration.Publish(serverConfiguration);
             Volatile.Write(ref _configuration, configuration);
             Volatile.Write(ref _state, (int)ApplicationBootstrapState.Initialized);

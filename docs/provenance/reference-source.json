@@ -68,6 +68,20 @@
    ],
    "reason": "the typed WebServices getter would recreate Framework's System.Web <-> System.Web.Services assembly cycle; it returns ConfigurationSection here (ADR-0009 amendment)",
    "record": "docs/adr/0009-assembly-graph.md"
+  },
+  {
+   "files": [
+    "Util/WorkItem.cs"
+   ],
+   "reason": "WorkItem.Post refused every non-Win32NT platform, a Win9x-era guard; the post lands on the ordinary thread pool, so the guard is fenced NETFRAMEWORK for one-way web methods off Windows",
+   "record": "docs/follow-ups/web-services.md"
+  },
+  {
+   "files": [
+    "Configuration/HttpConfigurationSystem.cs"
+   ],
+   "reason": "SetConfigurationFilePaths seam (fenced !NETFRAMEWORK): the host publishes the machine/root config locations at bootstrap; the Framework fallback resolves against MsCorLibDirectory, which has no Config subdirectory on modern .NET, breaking consumers such as the WSDL help page path",
+   "record": "docs/follow-ups/web-services.md"
   }
  ]
 }

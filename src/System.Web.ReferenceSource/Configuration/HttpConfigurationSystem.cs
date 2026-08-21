@@ -322,6 +322,18 @@ namespace System.Web.Configuration {
             }
         }
 
+#if !NETFRAMEWORK
+        // The host owns the configuration file locations (explicit ownership over ambient
+        // discovery); the Framework fallbacks above resolve against MsCorLibDirectory, which
+        // has no Config subdirectory on modern .NET.
+        static internal void SetConfigurationFilePaths(
+                string machineConfigurationFilePath, string rootWebConfigurationFilePath) {
+            s_MachineConfigurationFilePath = machineConfigurationFilePath;
+            s_MachineConfigurationDirectory = Path.GetDirectoryName(machineConfigurationFilePath);
+            s_RootWebConfigurationFilePath = rootWebConfigurationFilePath;
+        }
+#endif
+
         static internal string RootWebConfigurationFilePath {
             get {
                 if (s_RootWebConfigurationFilePath == null) {

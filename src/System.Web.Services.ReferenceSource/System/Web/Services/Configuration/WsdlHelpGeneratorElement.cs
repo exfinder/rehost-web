@@ -160,10 +160,18 @@ namespace System.Web.Services.Configuration
             {
                 this.virtualPath += "/";
             }
+#if NETFRAMEWORK
             if ((this.actualPath != null) && (!this.actualPath.EndsWith(@"\", StringComparison.Ordinal)))
             {
                 this.actualPath += "\\";
             }
+#else
+            // A literal backslash embeds into the help-page path on Unix and no file matches.
+            if ((this.actualPath != null) && (!Path.EndsInDirectorySeparator(this.actualPath)))
+            {
+                this.actualPath += Path.DirectorySeparatorChar;
+            }
+#endif
             this.Href = "DefaultWsdlHelpGenerator.aspx";
             CheckIOReadPermission(this.actualPath, this.Href);
             this.needToValidateHref = true;

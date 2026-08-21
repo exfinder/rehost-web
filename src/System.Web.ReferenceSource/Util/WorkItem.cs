@@ -36,12 +36,14 @@ public class WorkItem {
 
     [SecurityPermission(SecurityAction.Demand, Unrestricted=true)]
     public static void Post(WorkItemCallback callback) {
+#if NETFRAMEWORK // a Win9x-era guard; the post lands on the ordinary thread pool
 #if !FEATURE_PAL // ROTORTODO
         if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             throw new PlatformNotSupportedException(SR.GetString(SR.RequiresNT));
 #else // !FEATURE_PAL
         throw new NotImplementedException("ROTORTODO");
 #endif // !FEATURE_PAL
+#endif
         PostInternal(callback);
     }
 

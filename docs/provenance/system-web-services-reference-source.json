@@ -55,6 +55,13 @@
       ],
       "reason": "DynamicVirtualDiscoSearcher (IIS-metabase discovery over ADSI) is not compiled; the virtual-search path throws PlatformNotSupportedException",
       "record": "docs/follow-ups/web-services.md"
+    },
+    {
+      "files": [
+        "System/Web/Services/Configuration/WsdlHelpGeneratorElement.cs"
+      ],
+      "reason": "SetDefaults appends a literal backslash to the machine-config directory; on Unix that embeds into the help-page physical path and no file matches (help page 404). Path.DirectorySeparatorChar behind #if !NETFRAMEWORK",
+      "record": "docs/follow-ups/web-services.md"
     }
   ]
 }

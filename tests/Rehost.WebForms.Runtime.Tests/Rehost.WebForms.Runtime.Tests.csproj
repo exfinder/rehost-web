@@ -6,6 +6,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <!-- The baseline <compilation><assemblies> names these; activation hard-loads them. -->
+    <ProjectReference Include="../../src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
+    <ProjectReference Include="../../src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
     <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
     <ProjectReference Include="../Rehost.WebForms.TestSupport/Rehost.WebForms.TestSupport.csproj" />
     <!-- Built, not referenced: scenarios run in their own process. -->

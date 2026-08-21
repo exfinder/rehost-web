@@ -85,6 +85,22 @@ internal sealed class ScenarioClient : IDisposable
         return SendAsync(request);
     }
 
+    internal Task<ScenarioResponse> PostWithHeadersAsync(
+        string path, byte[] body, string contentType, params (string Name, string Value)[] headers)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = new ByteArrayContent(body),
+        };
+        request.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+        foreach (var (name, value) in headers)
+        {
+            request.Headers.TryAddWithoutValidation(name, value);
+        }
+
+        return SendAsync(request);
+    }
+
     // A browser sends no charset here, so the default request encoding decides the reading.
     internal Task<ScenarioResponse> PostFormAsync(string path, string body) =>
         PostAsync(path, Encoding.UTF8.GetBytes(body), "application/x-www-form-urlencoded");
