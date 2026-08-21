@@ -139,7 +139,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Async_Error_Rides_The_Error_Token_On_A_200()
     {
-        var response = await AsyncPostAsync("/ajax/PanelError.aspx", "Panel|Fail", ("Fail", "Fail"));
+        var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|Fail", ("Fail", "Fail"));
 
         response.StatusCode.ShouldBe(200);
         response.Headers["Content-Type"].ShouldStartWith("text/plain");
@@ -152,7 +152,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     public async Task AsyncPostBackErrorMessage_Replaces_The_Exception_Text()
     {
         var response = await AsyncPostAsync(
-            "/ajax/PanelError.aspx", "Panel|Fail", ("Fail", "Fail"), ("Friendly", "yes"));
+            "/ajax/Panel.aspx", "Panel|Fail", ("Fail", "Fail"), ("Friendly", "yes"));
 
         response.StatusCode.ShouldBe(200);
         var error = ParseDelta(response.Text).Single(s => s.Type == "error");
@@ -163,7 +163,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Redirect_During_Async_Post_Becomes_A_PageRedirect_Token()
     {
-        var response = await AsyncPostAsync("/ajax/PanelRedirect.aspx", "Panel|Go", ("Go", "Go"));
+        var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|Go", ("Go", "Go"));
 
         response.StatusCode.ShouldBe(200);
         ParseDelta(response.Text).Single(s => s.Type == "pageRedirect")
@@ -173,7 +173,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Timer_Tick_Drives_The_Panel_Update()
     {
-        var response = await AsyncPostAsync("/ajax/Tick.aspx", "Panel|T", ("__EVENTTARGET", "T"));
+        var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|T", ("__EVENTTARGET", "T"));
 
         response.StatusCode.ShouldBe(200);
         ParseDelta(response.Text)
@@ -184,7 +184,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Page_Renders_The_PageMethods_Proxy()
     {
-        var response = await GetAsBrowserAsync("/ajax/Methods.aspx");
+        var response = await GetAsBrowserAsync("/ajax/Panel.aspx");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("PageMethods");
@@ -195,7 +195,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     public async Task Page_Method_Post_Answers_In_The_D_Wrapper()
     {
         var response = await scenario.Client.PostWithHeadersAsync(
-            "/ajax/Methods.aspx/Echo",
+            "/ajax/Panel.aspx/Echo",
             Encoding.UTF8.GetBytes("{\"text\":\"hello\"}"),
             "application/json; charset=utf-8");
 
@@ -207,7 +207,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Page_Method_Path_Without_Json_Renders_The_Page()
     {
-        var response = await scenario.Client.GetAsync("/ajax/Methods.aspx/Echo");
+        var response = await scenario.Client.GetAsync("/ajax/Panel.aspx/Echo");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("<html");
