@@ -26,6 +26,8 @@ namespace Sample
         {
             new FeaturePage("Postback", "~/Postback.aspx",
                 "View state, control state, and event routing: three counters that survive differently."),
+            new FeaturePage("Ajax", "~/Ajax.aspx",
+                "UpdatePanel over async postbacks: a timer and a button refresh the panel without reloading the page."),
             new FeaturePage("Cookies", "~/Cookies.aspx",
                 "Set, read, and delete cookies; watch the raw Set-Cookie semantics."),
             new FeaturePage("Upload", "~/Upload.aspx",
