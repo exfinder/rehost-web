@@ -3,9 +3,8 @@ using System.Web;
 
 namespace System.Web.Services.Protocols;
 
-// Stands in for the imported RemoteDebugger, whose Visual Studio step-into
-// channel is a Windows COM server; the gates are permanently closed here, which
-// is also Framework's behavior whenever the COM activation fails.
+// The imported RemoteDebugger is a Windows COM channel for VS step-into; closed
+// gates are also Framework's behavior whenever that COM activation fails.
 internal class RemoteDebugger
 {
     internal RemoteDebugger()

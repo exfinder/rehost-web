@@ -92,8 +92,8 @@ namespace System.Web.Services.Discovery {
                        discoFileName = GetFilePartOfPath( escapedUri );
                        searcher = new DynamicVirtualDiscoSearcher( discoFileDirectory, excludeList, searchStartUrlDir);
 #else
-                       // DynamicVirtualDiscoSearcher walked the IIS metabase over ADSI and
-                       // is not compiled; there is no metabase to search here.
+                       // DynamicVirtualDiscoSearcher (ADSI) is not compiled; there is no
+                       // IIS metabase to search here.
                        throw new PlatformNotSupportedException(
                            "IIS-metabase (virtual) dynamic discovery is not supported by Rehost.WebForms.");
 #endif

@@ -9,16 +9,15 @@
 
   <ItemGroup>
     <Compile Include="../System.Web.Services.ReferenceSource/**/*.cs" />
-    <!-- WSDL proxy generation (T4): blocked on System.Xml.Serialization code-export
-         APIs cut from modern .NET. -->
+    <!-- WSDL proxy generation: needs System.Xml.Serialization code-export APIs cut
+         from modern .NET. -->
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Description/SoapProtocolImporter.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Description/Soap12ProtocolImporter.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Description/SoapExtensionImporter.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Description/SoapTransportImporter.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Description/SoapHttpTransportImporter.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Description/MimeXmlImporter.cs" />
-    <!-- Visual Studio debugger-causality COM channel (Windows-only, obsolete);
-         RemoteDebugger.cs in this project stands in. -->
+    <!-- VS debugger-causality COM channel; RemoteDebugger.cs here stands in. -->
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Protocols/RemoteDebugger.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Interop/**/*.cs" />
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/UnsafeNativeMethods.cs" />

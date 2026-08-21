@@ -431,7 +431,7 @@ namespace System.Web.Services.Configuration {
             get { return (TypeElementCollection)base[this.soapTransportImporterTypes]; }
         }
 
-#if NETFRAMEWORK // SoapHttpTransportImporter is not compiled (WSDL proxy generation is unsupported)
+#if NETFRAMEWORK // SoapHttpTransportImporter is not compiled
         internal Type[] SoapTransportImporters {
             get {
                 Type[] retval = new Type[1 + this.SoapTransportImporterTypes.Count];
@@ -521,7 +521,7 @@ namespace System.Web.Services.Configuration {
         Type[] discoveryReferenceTypes = new Type[] { typeof(DiscoveryDocumentReference), typeof(ContractReference), typeof(SchemaReference), typeof(System.Web.Services.Discovery.SoapBinding) };
         XmlSerializer discoveryDocumentSerializer = null;
         WebServiceProtocols enabledProtocols = WebServiceProtocols.Unknown;
-#if NETFRAMEWORK // MimeXmlImporter is not compiled (WSDL proxy generation is unsupported)
+#if NETFRAMEWORK // MimeXmlImporter is not compiled
         Type[] mimeImporterTypes = new Type[] { typeof(MimeXmlImporter), typeof(MimeFormImporter), typeof(MimeTextImporter) };
 #else
         Type[] mimeImporterTypes = new Type[] { typeof(MimeFormImporter), typeof(MimeTextImporter) };
