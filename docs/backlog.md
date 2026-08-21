@@ -206,6 +206,9 @@ Carried from Milestone 1 as unresolved detail:
 - Enterprise Services directive/API scope:
   [Enterprise Services](follow-ups/enterprise-services.md).
 - ASMX/SOAP scope: [Web Services](follow-ups/web-services.md).
+- Extensions AJAX activation (UpdatePanel, page methods, JSON application
+  services, query stack) and its excluded stacks:
+  [Extensions AJAX activation](follow-ups/extensions-ajax-activation.md).
 - Framework-oracle CI automation. Current integration tests are primary; keep
   the frozen golden gate, prefer captured fixtures or ad-hoc Framework readings,
   and do not recreate historical experiments unless evidence is missing or
