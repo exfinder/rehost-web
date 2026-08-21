@@ -271,6 +271,28 @@ What 4.8.1 registers for this assembly versus the portable baseline today:
 - No `Encoding.Default`, `ThreadAbortException`, or `TraceSource`
   dependencies anywhere in the tree (unlike `System.Web.Services`).
 
+## Source availability for the blocked stacks
+
+"Blocked" means blocked-as-reference, not blocked-as-source. The pinned
+sibling referencesource checkout carries most of the missing implementations:
+
+| Blocked stack | Source in referencesource | Size |
+|---|---|---|
+| `System.ServiceModel` (incl. `WsdlImporter.cs`, `ServiceContractGenerator.cs`, `MetadataSection.cs`, `ServiceHost`) | yes | 1,722 files / 456k lines |
+| `System.ServiceModel.Activation` (`ServiceHostFactory`, AspNetCompatibility) | yes | 53 files / 12.6k lines |
+| `System.Data.Linq` (full LINQ-to-SQL runtime) | yes | 98 files / 43k lines |
+| `System.Data.Services.Client` / `.Design` (`DataServiceContext`, `EntityClassGenerator`) | **no** | — |
+| `System.Design` (`TypedDataSetSchemaImporterExtension`) | **no** (only the Entity `*.Design` trees) | — |
+
+Consequences for the tiers: T3/T4 are "possible via vendoring, trigger = a
+real application", not "impossible". The WCF codegen slice would be a
+`FrameworkFork`-style vendoring of the importer/generator closure out of a
+456k-line mutually-coupled stack; hosting is bigger still and CoreWCF already
+occupies that ground. LINQ to SQL is self-contained at 43k lines but is a
+full ORM runtime (SQL generation, change tracking) — its own porting project
+with its own compatibility story, not an Extensions increment. Data Services
+codegen stays excluded regardless: no published source exists.
+
 ## Prior art
 
 - [WebFormsForCore](https://github.com/webformsforcore/WebFormsForCore)
