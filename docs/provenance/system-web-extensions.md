@@ -6,11 +6,12 @@ object is `4980d036e77731ef47248b6c5d849acb5b69cefe`; all 368 files are copied t
 `src/System.Web.Extensions.ReferenceSource`. The shared Reference Source MIT
 license remains at `third_party/microsoft/referencesource/LICENSE.txt`.
 
-One file differs from that tree:
+Two files differ from that tree:
 
 | File | Change | Reason |
 | --- | --- | --- |
 | `ui/ScriptControlManager.cs` | qualify six `OrderedDictionary<,>` uses as `System.Web.Util.` | .NET 9 added `System.Collections.Generic.OrderedDictionary<TKey,TValue>`; both namespaces are imported, so the bare name is ambiguous. A `using` alias cannot name an open generic. |
+| `ClientServices/Providers/ClientData.cs` | isolated-storage cache filename built with `Path.Combine` instead of a `"\\"` concat | A literal backslash is not a separator off Windows. The file is not compiled; fixed during the 2026-08-21 backslash sweep so a ClientServices port does not inherit it. |
 
 `Script/Services/WebServiceData.cs` carried a second deviation from 2026-08 —
 the three built-in `*_JSON_AppService.axd` mappings behind `#if NETFRAMEWORK`,
