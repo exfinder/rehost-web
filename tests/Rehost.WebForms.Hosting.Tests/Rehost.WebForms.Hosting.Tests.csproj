@@ -10,9 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
-    <!-- The baseline <compilation><assemblies> names these; activation hard-loads them. -->
-    <ProjectReference Include="../../src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
-    <ProjectReference Include="../../src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
     <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
     <ProjectReference Include="../Rehost.WebForms.TestSupport/Rehost.WebForms.TestSupport.csproj" />
     <!--
@@ -34,4 +31,6 @@
 
 
   <Import Project="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+
+  <Import Project="../BaselineNamedAssemblies.props" />
 </Project>
