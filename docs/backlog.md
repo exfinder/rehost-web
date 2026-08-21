@@ -83,6 +83,10 @@ Carried from Milestone 1 as unresolved detail:
   [runtime process policy](follow-ups/runtime-process-policy.md).
 - Remove broad Windows analyzer suppression after reachability classification:
   [Windows diagnostics](follow-ups/windows-platform-diagnostics.md).
+- Classify the dormant environment-derived statics in
+  `HttpRuntime`/`HttpConfigurationSystem`/`HostingEnvironment`; feed or
+  fail-fast the ones with reachable consumers:
+  [ambient statics audit](follow-ups/ambient-statics-audit.md).
 - Classify reached silent catches without creating diagnostic noise:
   [silent exceptions](follow-ups/silent-exception-swallowing.md).
 
