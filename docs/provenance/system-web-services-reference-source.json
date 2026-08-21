@@ -10,7 +10,7 @@
   },
   "import": {
     "path": "src/System.Web.Services.ReferenceSource",
-    "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' — original Framework-only code is retained behind #if NETFRAMEWORK, which never compiles in this repo",
+    "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' — behavior forks keep the original behind #if NETFRAMEWORK (never compiles here); trivial mechanical fixes such as path separators may replace lines directly",
     "verification": "Files not named under 'deviations' must match upstream.sourceTree; deviating files are accounted for individually. The product project compiles the full tree minus the excluded files listed in Rehost.WebForms.WebServices.csproj."
   },
   "license": {
@@ -62,6 +62,13 @@
       ],
       "reason": "SetDefaults appends a literal backslash to the machine-config directory; on Unix that embeds into the help-page physical path and no file matches (help page 404). Path.DirectorySeparatorChar behind #if !NETFRAMEWORK",
       "record": "docs/follow-ups/web-services.md"
+    },
+    {
+      "files": [
+        "System/Web/Services/Discovery/DiscoveryClientProtocol.cs"
+      ],
+      "reason": "GetRelativePath built .discomap relative paths with literal backslashes; off Windows results carried rooted or absolute paths. Path.DirectorySeparatorChar, direct replacement",
+      "record": "tests/Rehost.WebForms.WebServices.Tests/Discovery/DiscoveryClientProtocolGetRelativePathTests.cs"
     }
   ]
 }
