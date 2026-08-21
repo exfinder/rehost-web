@@ -10,7 +10,14 @@ bodies; do not treat them as the standard. Do not add `Co-Authored-By` footers.
 
 For C# code outside imported Reference Source, prefer `var` over explicit local variable types.
 
-Default to writing no comments. Only add one when the WHY is non-obvious: a hidden constraint, a subtle invariant, a workaround for a specific bug, behavior that would surprise a reader. If removing the comment wouldn't confuse a future reader, don't write it. Don't explain WHAT the code does, since well-named identifiers already do that. Don't reference the current task, fix, or callers ("used by X", "added for the Y flow", "handles the case from issue #123"), since those belong in the PR description and rot as the codebase evolves.
+DEFAULT: NO COMMENTS. A comment exists only to stop the next reader from
+making a mistake — deleting a load-bearing line, "fixing" deliberate behavior.
+Findings, justifications, and context from the current task go in the commit
+message, provenance, or docs, never in code. Never write a comment that argues
+the change is correct — that is PR-description content. Don't explain WHAT the
+code does, and don't reference the current task, fix, or callers ("used by X",
+"added for the Y flow"). Before committing, list every comment line the diff
+adds; each either names a hidden constraint or gets deleted.
 
 New test files mirror the folder of the source they cover, so a test for
 `src/System.Web.ReferenceSource/Compilation/BuildManager.cs` belongs in
