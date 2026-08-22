@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Rehost.WebForms.ScenarioProtocol;
 
 namespace Rehost.WebForms.TestSupport;
 
@@ -21,17 +22,17 @@ public abstract class ScenarioHostInvocation<TInvocation>
 {
     private readonly List<string> _arguments = [];
 
-    public TInvocation Application(string path) => Add("--app", path);
+    public TInvocation Application(string path) => Add(ScenarioHostGrammar.App, path);
 
-    public TInvocation ApplicationId(string id) => Add("--id", id);
+    public TInvocation ApplicationId(string id) => Add(ScenarioHostGrammar.Id, id);
 
-    public TInvocation CompilationTemp(string path) => Add("--temp", path);
+    public TInvocation CompilationTemp(string path) => Add(ScenarioHostGrammar.Temp, path);
 
-    public TInvocation Trace(string path) => Add("--trace", path);
+    public TInvocation Trace(string path) => Add(ScenarioHostGrammar.Trace, path);
 
-    public TInvocation ResponseDirectory(string path) => Add("--response-dir", path);
+    public TInvocation ResponseDirectory(string path) => Add(ScenarioHostGrammar.ResponseDir, path);
 
-    public TInvocation Request(string url) => Add("--request", url);
+    public TInvocation Request(string url) => Add(ScenarioHostGrammar.Request, url);
 
     public ScenarioHostProcess Start()
     {
@@ -65,19 +66,19 @@ public abstract class ScenarioHostInvocation<TInvocation>
 
 public sealed class ServeInvocation : ScenarioHostInvocation<ServeInvocation>
 {
-    public ServeInvocation() => Add("--serve");
+    public ServeInvocation() => Add(ScenarioHostGrammar.Serve);
 
     public ServeInvocation KestrelMaxBody(long bytes) =>
-        Add("--kestrel-max-body", bytes.ToString());
+        Add(ScenarioHostGrammar.KestrelMaxBody, bytes.ToString());
 
-    public ServeInvocation Http2() => Add("--http2");
+    public ServeInvocation Http2() => Add(ScenarioHostGrammar.Http2);
 
-    public ServeInvocation Postback(string probe) => Add("--postback", probe);
+    public ServeInvocation Postback(string probe) => Add(ScenarioHostGrammar.Postback, probe);
 }
 
 public sealed class BatchInvocation : ScenarioHostInvocation<BatchInvocation>
 {
-    public BatchInvocation MachineConfig(string path) => Add("--machine-config", path);
+    public BatchInvocation MachineConfig(string path) => Add(ScenarioHostGrammar.MachineConfig, path);
 
-    public BatchInvocation HoldGate(string mutexName) => Add("--hold-gate", mutexName);
+    public BatchInvocation HoldGate(string mutexName) => Add(ScenarioHostGrammar.HoldGate, mutexName);
 }

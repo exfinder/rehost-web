@@ -26,7 +26,7 @@ public static class Program
         try
         {
             var scan = ArgumentScan.Scan(args);
-            if (scan.Flag("--serve"))
+            if (scan.Flag(ScenarioHostGrammar.Serve))
             {
                 var options = ServeOptions.From(scan);
                 Environment.SetEnvironmentVariable(TraceChannel.TraceVariable, options.TracePath);
@@ -326,19 +326,16 @@ public static class Program
 
 internal abstract class ScenarioOptionsCore
 {
-    private protected static readonly string[] CoreOptions =
-        ["--app", "--temp", "--trace", "--id", "--response-dir", "--request"];
-
     private protected ScenarioOptionsCore(ArgumentScan scan)
     {
-        ApplicationId = scan.Value("--id") ?? "scenario";
-        ApplicationPath = Path.GetFullPath(scan.Required("--app"));
-        CompilationTempDirectory = Path.GetFullPath(scan.Required("--temp"));
-        TracePath = Path.GetFullPath(scan.Required("--trace"));
-        ResponseDirectory = scan.Value("--response-dir") is { } responses
+        ApplicationId = scan.Value(ScenarioHostGrammar.Id) ?? "scenario";
+        ApplicationPath = Path.GetFullPath(scan.Required(ScenarioHostGrammar.App));
+        CompilationTempDirectory = Path.GetFullPath(scan.Required(ScenarioHostGrammar.Temp));
+        TracePath = Path.GetFullPath(scan.Required(ScenarioHostGrammar.Trace));
+        ResponseDirectory = scan.Value(ScenarioHostGrammar.ResponseDir) is { } responses
             ? Path.GetFullPath(responses)
             : null;
-        Requests = scan.Repeated("--request");
+        Requests = scan.Repeated(ScenarioHostGrammar.Request);
     }
 
     internal string ApplicationId { get; }
@@ -359,11 +356,11 @@ internal sealed class ServeOptions : ScenarioOptionsCore
     private ServeOptions(ArgumentScan scan)
         : base(scan)
     {
-        KestrelMaxBodyBytes = scan.Value("--kestrel-max-body") is { } maxBody
+        KestrelMaxBodyBytes = scan.Value(ScenarioHostGrammar.KestrelMaxBody) is { } maxBody
             ? long.Parse(maxBody)
             : null;
-        Http2 = scan.Flag("--http2");
-        Postbacks = scan.Repeated("--postback");
+        Http2 = scan.Flag(ScenarioHostGrammar.Http2);
+        Postbacks = scan.Repeated(ScenarioHostGrammar.Postback);
     }
 
     internal long? KestrelMaxBodyBytes { get; }
@@ -374,13 +371,12 @@ internal sealed class ServeOptions : ScenarioOptionsCore
 
     internal static ServeOptions From(ArgumentScan scan)
     {
-        scan.AssertHonored(
-            "--serve",
-            [.. CoreOptions, "--serve", "--kestrel-max-body", "--http2", "--postback"]);
-        if (scan.Repeated("--request").Count != 0 && scan.Repeated("--postback").Count != 0)
+        scan.AssertHonored(ScenarioHostGrammar.Serve, ScenarioHostGrammar.HonoredIn(ScenarioModes.Serve));
+        if (scan.Repeated(ScenarioHostGrammar.Request).Count != 0 && scan.Repeated(ScenarioHostGrammar.Postback).Count != 0)
         {
             throw new ArgumentException(
-                "--request and --postback cannot be combined in --serve mode.");
+                ScenarioHostGrammar.Request + " and " + ScenarioHostGrammar.Postback
+                + " cannot be combined in " + ScenarioHostGrammar.Serve + " mode.");
         }
 
         return new ServeOptions(scan);
@@ -392,8 +388,8 @@ internal sealed class BatchOptions : ScenarioOptionsCore
     private BatchOptions(ArgumentScan scan)
         : base(scan)
     {
-        HoldGate = scan.Value("--hold-gate");
-        MachineConfigurationPath = scan.Value("--machine-config") is { } machineConfig
+        HoldGate = scan.Value(ScenarioHostGrammar.HoldGate);
+        MachineConfigurationPath = scan.Value(ScenarioHostGrammar.MachineConfig) is { } machineConfig
             ? Path.GetFullPath(machineConfig)
             : null;
 
@@ -409,7 +405,7 @@ internal sealed class BatchOptions : ScenarioOptionsCore
 
     internal static BatchOptions From(ArgumentScan scan)
     {
-        scan.AssertHonored("batch", [.. CoreOptions, "--hold-gate", "--machine-config"]);
+        scan.AssertHonored(ScenarioHostGrammar.BatchModeName, ScenarioHostGrammar.HonoredIn(ScenarioModes.Batch));
         return new BatchOptions(scan);
     }
 }
@@ -419,13 +415,9 @@ internal sealed class BatchOptions : ScenarioOptionsCore
 // requireds. An option added here but honored by neither mode fails every invocation passing it.
 internal sealed class ArgumentScan
 {
-    private static readonly string[] Flags = ["--serve", "--http2"];
-    private static readonly string[] Repeatable = ["--request", "--postback"];
-    private static readonly string[] Valued =
-    [
-        "--app", "--temp", "--trace", "--id", "--hold-gate", "--response-dir",
-        "--machine-config", "--kestrel-max-body",
-    ];
+    private static readonly string[] Flags = ScenarioHostGrammar.Names(ScenarioOptionArity.Flag);
+    private static readonly string[] Repeatable = ScenarioHostGrammar.Names(ScenarioOptionArity.Repeatable);
+    private static readonly string[] Valued = ScenarioHostGrammar.Names(ScenarioOptionArity.Valued);
 
     private readonly Dictionary<string, string> _values = [];
     private readonly Dictionary<string, List<string>> _lists = [];
