@@ -51,7 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <_FixtureFile Include="fixtures/**" />
+    <FixtureTreeRoot Include="fixtures" />
     <FixturePayloadProject
       Include="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
       MustNotLeakBesideHost="true" />
@@ -64,85 +64,9 @@
       Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
   </ItemGroup>
 
-  <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageScenarioFixtures;PruneStaleScenarioFixtures;StageFixtureBinPayload" />
+  <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageFixtures;StageFixtureBinPayload" />
 
-  <!-- No Inputs/Outputs: a staged copy mutated in place is newer than its source, which the
-       target-level up-to-date check reads as nothing to do. The Copy itself stays incremental
-       through SkipUnchangedFiles, and re-copies exactly the files whose size or timestamp
-       drifted from source. -->
-  <Target Name="StageScenarioFixtures">
-    <Copy
-      SourceFiles="@(_FixtureFile)"
-      DestinationFiles="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)')"
-      SkipUnchangedFiles="true" />
-  </Target>
-
-  <!-- Without pruning, a fixture or page deleted from source keeps serving from the
-       staged copy until a clean build. Directories are compared by bare name; separator
-       differences cannot misclassify them. -->
-  <Target Name="PruneStaleScenarioFixtures" DependsOnTargets="StageScenarioFixtures">
-    <ItemGroup>
-      <_FixtureSourceDir Include="$([System.IO.Directory]::GetDirectories('$(MSBuildProjectDirectory)/fixtures'))" />
-      <_StagedFixtureDir
-        Include="$([System.IO.Directory]::GetDirectories('$(TargetDir)fixtures'))"
-        Condition="Exists('$(TargetDir)fixtures')" />
-      <_StaleFixtureDirName
-        Include="@(_StagedFixtureDir->'%(Filename)')"
-        Exclude="@(_FixtureSourceDir->'%(Filename)')" />
-      <_StaleFixtureFile
-        Include="$(TargetDir)fixtures/**"
-        Exclude="@(_FixtureFile->'$(TargetDir)fixtures/%(RecursiveDir)%(Filename)%(Extension)');$(TargetDir)fixtures/*/bin/**" />
-    </ItemGroup>
-
-    <Delete Files="@(_StaleFixtureFile)" />
-    <RemoveDir Directories="@(_StaleFixtureDirName->'$(TargetDir)fixtures/%(Identity)')" />
-
-    <!-- A nested directory deleted from source must not survive in the staged tree, where a
-         directory-request scenario would see it; the top-level comparison above cannot reach
-         it. Staleness is by relative path: staged nested directories with no source
-         counterpart are removed, bins excepted (payload-owned, staged-only). Enumeration is
-         per level because MSBuild exposes no recursive GetDirectories; four levels is one
-         deeper than any fixture nests, and the guard below fails the build rather than
-         silently under-pruning a deeper tree. -->
-    <PropertyGroup>
-      <_Sep>$([System.IO.Path]::DirectorySeparatorChar)</_Sep>
-    </PropertyGroup>
-    <ItemGroup Condition="Exists('$(TargetDir)fixtures')">
-      <_StagedDirL1 Include="$([System.IO.Directory]::GetDirectories('$(TargetDir)fixtures'))" />
-      <_StagedDirL2
-        Include="$([System.IO.Directory]::GetDirectories('%(_StagedDirL1.Identity)'))"
-        Condition="'@(_StagedDirL1)' != ''" />
-      <_StagedDirL3
-        Include="$([System.IO.Directory]::GetDirectories('%(_StagedDirL2.Identity)'))"
-        Condition="'@(_StagedDirL2)' != ''" />
-      <_StagedDirL4
-        Include="$([System.IO.Directory]::GetDirectories('%(_StagedDirL3.Identity)'))"
-        Condition="'@(_StagedDirL3)' != ''" />
-      <_StagedDirL5
-        Include="$([System.IO.Directory]::GetDirectories('%(_StagedDirL4.Identity)'))"
-        Condition="'@(_StagedDirL4)' != ''" />
-      <_SourceDirL1 Include="$([System.IO.Directory]::GetDirectories('$(MSBuildProjectDirectory)/fixtures'))" />
-      <_SourceDirL2
-        Include="$([System.IO.Directory]::GetDirectories('%(_SourceDirL1.Identity)'))"
-        Condition="'@(_SourceDirL1)' != ''" />
-      <_SourceDirL3
-        Include="$([System.IO.Directory]::GetDirectories('%(_SourceDirL2.Identity)'))"
-        Condition="'@(_SourceDirL2)' != ''" />
-      <_SourceDirL4
-        Include="$([System.IO.Directory]::GetDirectories('%(_SourceDirL3.Identity)'))"
-        Condition="'@(_SourceDirL3)' != ''" />
-      <_StagedNestedRel Include="@(_StagedDirL2->Replace('$(TargetDir)fixtures$(_Sep)', ''));@(_StagedDirL3->Replace('$(TargetDir)fixtures$(_Sep)', ''));@(_StagedDirL4->Replace('$(TargetDir)fixtures$(_Sep)', ''))" />
-      <_LiveNestedRel Include="@(_SourceDirL2->Replace('$(MSBuildProjectDirectory)/fixtures$(_Sep)', ''));@(_SourceDirL3->Replace('$(MSBuildProjectDirectory)/fixtures$(_Sep)', ''));@(_SourceDirL4->Replace('$(MSBuildProjectDirectory)/fixtures$(_Sep)', ''))" />
-      <_LiveNestedRel Include="@(_StagedDirL1->'%(Filename)$(_Sep)bin')" />
-      <_StaleNestedRel Include="@(_StagedNestedRel)" Exclude="@(_LiveNestedRel)" />
-    </ItemGroup>
-    <Error
-      Condition="'@(_StagedDirL5)' != ''"
-      Text="Fixture tree nests deeper than the pruning enumeration: @(_StagedDirL5)" />
-    <RemoveDir Directories="@(_StaleNestedRel->'$(TargetDir)fixtures$(_Sep)%(Identity)')" />
-  </Target>
-
-  <Target Name="StageScenarioFixtureBins" BeforeTargets="StageFixtureBinPayload" DependsOnTargets="PruneStaleScenarioFixtures">
+  <Target Name="StageScenarioFixtureBins" BeforeTargets="StageFixtureBinPayload" DependsOnTargets="StageFixtures">
     <MSBuild
       Projects="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
       Targets="GetTargetPath">
@@ -170,6 +94,7 @@
       Text="OWIN fixture payload missing: %(_OwinFixtureAssembly.Identity)" />
 
     <ItemGroup>
+      <_FixtureSourceDir Include="$([System.IO.Directory]::GetDirectories('$(MSBuildProjectDirectory)/fixtures'))" />
       <!-- The probe assembly leans on the shared journal, so its dependency ships too. -->
       <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.ScenarioProtocol.dll" />
       <!-- Not Update: inside a target, Update applies metadata to every item. -->

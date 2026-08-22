@@ -31,6 +31,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Rehost.WebForms.CallContext.Contract.Tests/Rehost.WebForms.CallContext.Contract.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Extensions.Tests/Rehost.WebForms.Extensions.Tests.csproj" />
+    <Project Path="tests/Rehost.WebForms.FixtureStaging.Tasks/Rehost.WebForms.FixtureStaging.Tasks.csproj" />
     <Project Path="tests/Rehost.WebForms.FriendlyUrls.Tests/Rehost.WebForms.FriendlyUrls.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Owin.Host.SystemWeb.Tests/Rehost.WebForms.Owin.Host.SystemWeb.Tests.csproj" />

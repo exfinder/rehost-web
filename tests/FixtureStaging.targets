@@ -1,6 +1,8 @@
 <Project>
   <!--
-    Shared fixture-bin staging. Consumers declare, from a target so $(TargetDir) is set:
+    Shared fixture staging. Consumers declare, from a target so $(TargetDir) is set:
+      FixtureTreeRoot        a source tree mirrored under $(TargetDir)<name>, with
+                             copy-on-difference and pruning owned by StageFixtureTree
       FixturePayloadProject  built into every bin; MustNotLeakBesideHost guards against
                              the assembly resolving beside the host instead of the bin
       FixtureBinPayload      already-built files for every bin
@@ -8,6 +10,26 @@
     Anything else in a warm bin is a leftover that would keep resolving; leftovers are
     deleted so the copies stay incremental without wipe-and-recopy.
   -->
+
+  <UsingTask
+    TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageFixtureTree"
+    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
+
+  <ItemGroup>
+    <ProjectReference
+      Include="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/Rehost.WebForms.FixtureStaging.Tasks.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all"
+      SetTargetFramework="TargetFramework=net10.0" />
+  </ItemGroup>
+
+  <Target Name="StageFixtures">
+    <StageFixtureTree
+      Condition="'@(FixtureTreeRoot)' != ''"
+      SourceRoot="%(FixtureTreeRoot.FullPath)"
+      TargetRoot="$(TargetDir)%(FixtureTreeRoot.Filename)%(FixtureTreeRoot.Extension)"
+      ProtectedSubtrees="*/bin" />
+  </Target>
 
   <Target Name="ResolveFixtureBinPayload">
     <MSBuild Projects="@(FixturePayloadProject)" Targets="GetTargetPath">

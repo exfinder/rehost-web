@@ -57,9 +57,10 @@ public sealed class FixtureStagingTests : IDisposable
         };
         startInfo.ArgumentList.Add("msbuild");
         startInfo.ArgumentList.Add(project);
-        startInfo.ArgumentList.Add("-t:PruneStaleScenarioFixtures");
+        startInfo.ArgumentList.Add("-t:StageFixtures");
         startInfo.ArgumentList.Add(
             "-p:TargetDir=" + _target.Path("") + Path.DirectorySeparatorChar);
+        startInfo.ArgumentList.Add("-p:Configuration=" + TestOutputPaths.Configuration());
         startInfo.ArgumentList.Add("-nr:false");
 
         using var process = Process.Start(startInfo)!;
