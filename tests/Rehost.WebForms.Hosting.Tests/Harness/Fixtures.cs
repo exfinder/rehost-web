@@ -18,4 +18,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture DefDocDisabled = new("defdoc-disabled");
     internal static readonly ScenarioFixture Session = new("session");
     internal static readonly ScenarioFixture SessionCustom = new("session-custom");
+    internal static readonly ScenarioFixture Auth = new("auth");
 }

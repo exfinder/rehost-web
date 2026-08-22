@@ -592,6 +592,13 @@ namespace System.Web {
             response.Cache.SetETag(etag); 
             // always set Cache-Control to public
             response.Cache.SetCacheability(HttpCacheability.Public);
+#if !NETFRAMEWORK
+            // Ledger P58: IIS served static files from its native module, before any managed
+            // module could store the response. Registering OutputCacheModule here would replay it
+            // and defeat the revalidation above, since a cached entry requires every present
+            // condition to match. The wire headers are unaffected.
+            response.Cache.SetNoServerCaching();
+#endif
         }
 
         private static void SendBadRequest(HttpResponse response) {

@@ -96,6 +96,13 @@
    ],
    "reason": "AddIdentityAttachingRoles builds a DeferredRoleClaimsIdentity (fenced !NETFRAMEWORK) because ClaimsIdentity.ExternalClaims holds List<Claim> on modern .NET where Framework held IEnumerable<Claim>, so role claims cannot be parked unevaluated on a stock ClaimsIdentity",
    "record": "docs/portability-ledger.md P82"
+  },
+  {
+   "files": [
+    "StaticFileHandler.cs"
+   ],
+   "reason": "static responses opt out of server caching (fenced !NETFRAMEWORK): IIS served them from its native module before any managed module could store one, so replaying them through the registered OutputCacheModule would defeat the revalidation the handler sets",
+   "record": "docs/portability-ledger.md P58"
   }
  ]
 }
