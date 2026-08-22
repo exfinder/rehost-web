@@ -14,6 +14,9 @@
     binaries do.
   -->
 
+  <!-- Warm MSBuild nodes cache this assembly once loaded: after editing the task source, run
+       `dotnet build-server shutdown` or a stale task keeps running (silently on Unix, as a
+       file lock on Windows). -->
   <UsingTask
     TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageFixtureTree"
     AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
