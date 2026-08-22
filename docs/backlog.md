@@ -109,6 +109,9 @@ Carried from Milestone 1 as unresolved detail:
 
 ### State, security, and providers
 
+- Register Framework's authentication modules, carry the default provider
+  entries, refuse Windows authentication at activation, and prove the sign-in
+  journey: [forms authentication](follow-ups/forms-authentication.md).
 - `Session_End` on expiry, and cookieless identity: InProc and custom providers
   are delivered, so what remains is the cache sweep thread reaching the expiry
   callback, and `UseUri`/`AutoDetect`/`UseDeviceProfile`:
