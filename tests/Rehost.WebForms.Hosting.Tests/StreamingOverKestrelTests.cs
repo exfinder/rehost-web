@@ -51,9 +51,14 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
 
         // Everything the client held before the handler's first delay elapsed. Whether the head
         // and the first chunk land in one TCP segment or two is the transport's call, so this
-        // asserts on the accumulated bytes, not on a single read.
+        // asserts on the accumulated bytes, not on a single read. The window opens at the first
+        // arrival rather than at the request, because how long the server takes to reach the
+        // handler is cold start and machine load; a buffered-to-the-end implementation still
+        // fails, since part2 then lands inside the window.
+        arrivals.ShouldNotBeEmpty();
+        var windowEnd = arrivals[0].Elapsed + (Delay / 2);
         var beforeDelay = Encoding.ASCII.GetString(
-            arrivals.TakeWhile(arrival => arrival.Elapsed < Delay / 2)
+            arrivals.TakeWhile(arrival => arrival.Elapsed < windowEnd)
                 .SelectMany(arrival => arrival.Bytes).ToArray());
         beforeDelay.ShouldStartWith("HTTP/1.1 200 OK\r\n");
         beforeDelay.ShouldContain("Transfer-Encoding: chunked\r\n");
