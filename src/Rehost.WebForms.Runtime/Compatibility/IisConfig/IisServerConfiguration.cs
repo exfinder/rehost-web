@@ -23,6 +23,7 @@ internal sealed class IisServerConfiguration
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new DefaultDocuments(enabled: true, Array.Empty<string>()),
         Array.Empty<IisRegistration>(),
+        runAllManagedModulesForAllRequests: false,
         Array.Empty<IisRegistration>());
 
     private readonly Dictionary<string, string> _staticContent;
@@ -33,12 +34,14 @@ internal sealed class IisServerConfiguration
         Dictionary<string, string> hiddenSegments,
         DefaultDocuments defaultDocuments,
         IReadOnlyList<IisRegistration> modules,
+        bool runAllManagedModulesForAllRequests,
         IReadOnlyList<IisRegistration> handlers)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
         DefaultDocuments = defaultDocuments;
         Modules = modules;
+        RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
         Handlers = handlers;
     }
 
@@ -47,6 +50,10 @@ internal sealed class IisServerConfiguration
     internal DefaultDocuments DefaultDocuments { get; }
 
     internal IReadOnlyList<IisRegistration> Modules { get; }
+
+    // The flag nullifies the managedHandler condition for the whole collection (MH17), so the
+    // dynamic registry's implicit condition falls with the configured ones.
+    internal bool RunAllManagedModulesForAllRequests { get; }
 
     internal IReadOnlyList<IisRegistration> Handlers { get; }
 
@@ -76,6 +83,7 @@ internal sealed class IisServerConfiguration
             sections.HiddenSegments,
             sections.DefaultDocuments.Build(),
             sections.Modules.Build(),
+            sections.Modules.RunAllManagedModules,
             sections.Handlers.Build());
     }
 

@@ -41,6 +41,10 @@
     <FixturePayloadProject
       Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <FixturePayloadProject
+      Include="../Rehost.WebForms.ScenarioProbes.Dynamic/Rehost.WebForms.ScenarioProbes.Dynamic.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="modules;modules-rammfar" />
+    <FixturePayloadProject
       Include="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
       Bins="friendlyurls" />
     <FixturePayloadProject

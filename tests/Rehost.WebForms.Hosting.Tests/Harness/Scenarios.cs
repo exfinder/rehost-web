@@ -141,6 +141,12 @@ public sealed class DefDocDisabledLiveScenario(ScenarioHostRegistry registry)
 public sealed class WebServerLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.WebServer));
 
+public sealed class ModulesLiveScenario(ScenarioHostRegistry registry)
+    : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.Modules));
+
+public sealed class ModulesRunAllLiveScenario(ScenarioHostRegistry registry)
+    : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.ModulesRunAll));
+
 // The timeout probes hang and expire their requests, so the host is damaged goods: one private
 // process per consuming class, never the registry.
 public sealed class TimeoutLiveScenario()

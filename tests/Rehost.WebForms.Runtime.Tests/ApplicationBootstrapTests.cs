@@ -298,7 +298,7 @@ public sealed class ApplicationBootstrapTests
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
         exception.Message.ShouldContain("mode=\"Windows\"");
-        exception.Message.ShouldContain("WindowsAuthenticationModule");
+        exception.Message.ShouldContain("Windows login");
     }
 
     [Fact]

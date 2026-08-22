@@ -27,12 +27,33 @@ namespace System.Web.Security {
 
         private WindowsAuthenticationEventHandler _eventHandler;
 
+#if NETFRAMEWORK
         private static bool             _fAuthChecked;
         private static bool             _fAuthRequired;
+#endif
 
         // anonymous identity + principal are static for easy referencing + reuse
+#if NETFRAMEWORK
         private static readonly WindowsIdentity AnonymousIdentity = WindowsIdentity.GetAnonymous();
         internal static readonly WindowsPrincipal AnonymousPrincipal = new WindowsPrincipal(AnonymousIdentity);
+#else
+        // WindowsIdentity.GetAnonymous throws off Windows. As fields of this type they would refuse
+        // the module itself, and the module is registered in every application's collection; a
+        // nested holder defers the throw to the Windows-only paths that read it, none of which run
+        // unless <authentication mode="Windows">, which activation refuses.
+        private static class Anonymous {
+            internal static readonly WindowsIdentity Identity = WindowsIdentity.GetAnonymous();
+            internal static readonly WindowsPrincipal Principal = new WindowsPrincipal(Identity);
+        }
+
+        private static WindowsIdentity AnonymousIdentity {
+            get { return Anonymous.Identity; }
+        }
+
+        internal static WindowsPrincipal AnonymousPrincipal {
+            get { return Anonymous.Principal; }
+        }
+#endif
 
 
         /// <devdoc>
@@ -170,11 +191,20 @@ namespace System.Web.Security {
 
         internal static bool IsEnabled {
             get {
+#if NETFRAMEWORK
                 if (!_fAuthChecked) {
                     _fAuthRequired = (AuthenticationConfig.Mode == AuthenticationMode.Windows);
                     _fAuthChecked = true;
                 }
                 return _fAuthRequired;
+#else
+                // The section default is Windows, so answering the mode would enable this for every
+                // application that declares no <authentication> element — and off Windows the
+                // anonymous identity it then builds does not exist. No worker request here carries
+                // a Windows login and a declared mode="Windows" refuses activation, so the module
+                // registers per the IIS golden and never acts.
+                return false;
+#endif
             }
         }
     }

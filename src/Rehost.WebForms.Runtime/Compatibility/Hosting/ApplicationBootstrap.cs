@@ -517,9 +517,8 @@ internal static class ApplicationConfigurationPreflight
         }
 
         throw new PlatformNotSupportedException(
-            "<authentication mode=\"Windows\"> is not supported. The rehosted runtime does not " +
-            "register WindowsAuthenticationModule and no host supplies a Windows login, so every " +
-            "request would stay anonymous and authorization rules would not apply. Use " +
+            "<authentication mode=\"Windows\"> is not supported. No host supplies a Windows login, " +
+            "so every request would stay anonymous and authorization rules would not apply. Use " +
             "mode=\"Forms\" or mode=\"None\".");
     }
 

@@ -103,6 +103,20 @@
    ],
    "reason": "static responses opt out of server caching (fenced !NETFRAMEWORK): IIS served them from its native module before any managed module could store one, so replaying them through the registered OutputCacheModule would defeat the revalidation the handler sets",
    "record": "docs/portability-ledger.md P58"
+  },
+  {
+   "files": [
+    "HttpApplication.cs"
+   ],
+   "reason": "the module collection is built from the merged system.webServer/modules snapshot through the integrated-mode builder already present here, with per-request managedHandler conditioning wrapped around the classic execution steps (fenced !NETFRAMEWORK); GetHandlerMapping widened to internal so the seam reuses the cached classic mapping instead of duplicating it, and the classic UrlMappingsExecutionStep retired in favour of the golden's UrlMappingsModule row",
+   "record": "docs/portability-ledger.md P83"
+  },
+  {
+   "files": [
+    "Security/WindowsAuthenticationModule.cs"
+   ],
+   "reason": "the golden registers this module in every application, so the anonymous WindowsIdentity/WindowsPrincipal statics move into a nested holder that defers their platform failure, and IsEnabled answers false (fenced !NETFRAMEWORK) rather than the authentication section's default, which is Windows",
+   "record": "docs/portability-ledger.md P84"
   }
  ]
 }

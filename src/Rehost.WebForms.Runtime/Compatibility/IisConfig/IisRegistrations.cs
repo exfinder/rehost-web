@@ -113,6 +113,8 @@ internal sealed class IisRegistrationSection
             runAllManagedModulesHonored: false,
             HandlerRequiredAttributes);
 
+    internal bool RunAllManagedModules => _runAllManagedModules;
+
     internal void SealInheritance()
     {
         _inherited.RemoveAll(slot => slot.Row == null);

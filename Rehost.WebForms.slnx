@@ -41,6 +41,7 @@
     <Project Path="tests/Rehost.WebForms.ScenarioHost/Rehost.WebForms.ScenarioHost.csproj" />
     <Project Path="tests/Rehost.WebForms.TestSupport/Rehost.WebForms.TestSupport.csproj" />
     <Project Path="tests/Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj" />
+    <Project Path="tests/Rehost.WebForms.ScenarioProbes.Dynamic/Rehost.WebForms.ScenarioProbes.Dynamic.csproj" />
     <Project Path="tests/Rehost.WebForms.WebServices.Tests/Rehost.WebForms.WebServices.Tests.csproj" />
   </Folder>
 </Solution>

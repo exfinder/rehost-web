@@ -79,6 +79,9 @@ namespace System.Web {
         // list of modules
         private static readonly DynamicModuleRegistry _dynamicModuleRegistry = new DynamicModuleRegistry();
         private HttpModuleCollection  _moduleCollection;
+#if !NETFRAMEWORK
+        private System.Web.IisConfig.ManagedHandlerModules _managedHandlerModules;
+#endif
 
         // event handlers
         private static readonly object EventDisposed = new object();
@@ -724,6 +727,10 @@ namespace System.Web {
             // this keeps non-pipeline ASP.NET hosts working
             Events.AddHandler(key, handler);
 
+#if !NETFRAMEWORK
+            TrackManagedHandlerEvent(handler);
+#endif
+
             // For integrated pipeline mode, add events to the IExecutionStep containers only if
             // InitSpecial has completed and InitInternal has not completed.
             if (IsContainerInitalizationAllowed) {
@@ -1249,7 +1256,7 @@ namespace System.Web {
             return WindowsIdentity.GetCurrent();
         }
 
-        private HttpHandlerAction GetHandlerMapping(HttpContext context, String requestType, VirtualPath path, bool useAppConfig) {
+        internal HttpHandlerAction GetHandlerMapping(HttpContext context, String requestType, VirtualPath path, bool useAppConfig) {
             CachedPathData pathData = null;
             HandlerMappingMemo memo = null;
             HttpHandlerAction mapping = null;
@@ -1742,7 +1749,12 @@ namespace System.Web {
                 Delegate[] handlers = handler.GetInvocationList();
 
                 for (int i = 0; i < handlers.Length; i++)  {
+#if NETFRAMEWORK
                     steps.Add(new SyncEventExecutionStep(this, (EventHandler)handlers[i]));
+#else
+                    steps.Add(ConditionManagedHandlerStep(
+                        new SyncEventExecutionStep(this, (EventHandler)handlers[i]), handlers[i]));
+#endif
                 }
             }
         }
@@ -2338,6 +2350,7 @@ namespace System.Web {
         }
 
         private void InitModules() {
+#if NETFRAMEWORK
             HttpModulesSection pconfig = RuntimeConfig.GetAppConfig().HttpModules;
 
             // get the static list, then add the dynamic members
@@ -2346,9 +2359,47 @@ namespace System.Web {
 
             moduleCollection.AppendCollection(dynamicModules);
             _moduleCollection = moduleCollection; // don't assign until all ops have succeeded
+#else
+            // The merged system.webServer/modules snapshot is the module authority, as it was in an
+            // integrated pool; <httpModules> no longer reaches the pipeline. The dynamic registry
+            // keeps appending after it with the implicit managedHandler condition.
+            System.Web.IisConfig.IisServerConfiguration serverConfig =
+                System.Web.IisConfig.IisServerConfiguration.Current;
+            System.Web.IisConfig.ManagedHandlerModules conditioned =
+                new System.Web.IisConfig.ManagedHandlerModules();
+            List<ModuleConfigurationInfo> moduleList =
+                System.Web.IisConfig.IntegratedModules.ConfigInfo(serverConfig.Modules, conditioned);
+
+            foreach (ModuleConfigurationInfo dynamicModule in GetConfigInfoForDynamicModules()) {
+                if (!serverConfig.RunAllManagedModulesForAllRequests) {
+                    conditioned.Add(dynamicModule.Name);
+                }
+
+                moduleList.Add(dynamicModule);
+            }
+
+            _managedHandlerModules = conditioned;
+            _moduleCollection = BuildIntegratedModuleCollection(moduleList);
+#endif
 
             InitModulesCommon();
         }
+
+#if !NETFRAMEWORK
+        // Subscriptions made while a module's Init runs belong to that module, which is how
+        // integrated mode routes them into per-module containers.
+        internal void TrackManagedHandlerEvent(Delegate handler) {
+            if (_managedHandlerModules != null) {
+                _managedHandlerModules.Track(_currentModuleCollectionKey, handler);
+            }
+        }
+
+        internal IExecutionStep ConditionManagedHandlerStep(IExecutionStep step, Delegate handler) {
+            return (_managedHandlerModules == null)
+                ? step
+                : _managedHandlerModules.Condition(this, step, handler);
+        }
+#endif
 
         // instantiates modules that have been added to the dynamic registry (classic pipeline)
         private HttpModuleCollection CreateDynamicModules() {
@@ -2973,11 +3024,15 @@ namespace System.Web {
 
             internal void CreateExecutionSteps(HttpApplication app, ArrayList steps) {
                 for (int i = 0; i < _count; i++) {
-                    steps.Add(new AsyncEventExecutionStep(
+                    IExecutionStep step = new AsyncEventExecutionStep(
                         app,
                         (BeginEventHandler)_beginHandlers[i],
                         (EndEventHandler)_endHandlers[i],
-                        _stateObjects[i]));
+                        _stateObjects[i]);
+#if !NETFRAMEWORK
+                    step = app.ConditionManagedHandlerStep(step, (Delegate)_beginHandlers[i]);
+#endif
+                    steps.Add(step);
                 }
             }
         }
@@ -3000,6 +3055,10 @@ namespace System.Web {
                 }
 
                 asyncHandler.Add(beginHandler, endHandler, state);
+
+#if !NETFRAMEWORK
+                app.TrackManagedHandlerEvent(beginHandler);
+#endif
 
                 if (HttpRuntime.UseIntegratedPipeline) {
                     AsyncEventExecutionStep step =
@@ -3818,15 +3877,22 @@ namespace System.Web {
                 ArrayList steps = new ArrayList();
                 HttpApplication app = _application;
 
+#if NETFRAMEWORK
                 bool urlMappingsEnabled = false;
                 UrlMappingsSection urlMappings = RuntimeConfig.GetConfig().UrlMappings;
                 urlMappingsEnabled = urlMappings.IsEnabled && ( urlMappings.UrlMappings.Count > 0 );
+#endif
 
                 steps.Add(new ValidateRequestExecutionStep(app));
                 steps.Add(new ValidatePathExecutionStep(app));
 
+#if NETFRAMEWORK
                 if (urlMappingsEnabled)
                     steps.Add(new UrlMappingsExecutionStep(app)); // url mappings
+#else
+                // UrlMappingsModule is a registered module here, as it is in an integrated pool,
+                // and this step is the classic alternative to it. Keeping both rewrites twice.
+#endif
 
                 app.CreateEventExecutionSteps(HttpApplication.EventBeginRequest, steps);
 #if !NETFRAMEWORK
