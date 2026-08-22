@@ -67,8 +67,6 @@ host:port normalized:
 - **COM+ web-method transactions** — `[WebMethod(TransactionOption=…)]` other
   than `Disabled` reaches the runtime's `Transactions` shim, which throws
   ([enterprise-services-compatibility](enterprise-services-compatibility.md)).
-- **JSON application services** (`*_JSON_AppService.axd`) — WCF-hosted, not
-  compiled; the built-in names resolve to no service.
 
 Original Framework-only code is retained behind `#if NETFRAMEWORK`; each
 deviation is listed in

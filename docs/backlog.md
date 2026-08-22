@@ -151,28 +151,15 @@ Carried from Milestone 1 as unresolved detail:
 
 ### System.Web companion assemblies and client assets
 
-- Add default `ScriptManager` embedded-resource delivery through
-  `ScriptResource.axd`, including protected URLs, debug/release selection,
-  localization, caching, and deterministic generated Microsoft AJAX assets.
 - Complete general `System.Web` embedded-resource delivery beyond the eight
   release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
   `Rehost.WebForms.ScriptManager.Bundles`; its first slice registers names only
   and expects application-owned physical files.
-- Port partial rendering (`UpdatePanel`, `UpdateProgress`, server `Timer`, and
-  the async-postback wire protocol) when a milestone application reaches it.
-- Keep PageMethods, AJAX ASMX/application services, JSON service plumbing,
-  ListView/DataPager/query controls, LINQ-to-SQL, Dynamic Data, Entity, WCF/Data
-  Services build providers, Windows-coupled Client Services, and design-time
-  stacks outside the initial Extensions compile closure.
-- Adopting that slice ends at WCF. Dropping the `Handlers` and `Script.Services`
-  stubs pulls the real `WebServiceData`, whose `typeof(ProfileService)`,
-  `typeof(AuthenticationService)`, and `typeof(RoleService)` name
-  `[ServiceContract]` types from `System.ServiceModel`, which modern .NET does
-  not host, and a `typeof` cannot be stubbed around. Everything short of that is
-  reachable: measured, the remainder is roughly 25 imported files, a per-assembly
-  `Res` table, a five-value `TransactionOption`, and one unused
-  `using System.Web.Util` in `WebMethodAttribute`.
+- Remaining Extensions scope after the 2026-08-22 AJAX activation (enabled
+  application services, `customErrors`-On async errors, debug/localized
+  scripts, and the excluded LINQ-to-SQL/WCF/Client Services stacks):
+  [Extensions](follow-ups/extensions-ajax-activation.md).
 - Validate production Optimization combination, caching, request handling, and
   minification separately from the frozen template's debug-mode expansion.
 - Assess WebGrease image assembly/spriting separately; those paths use legacy
@@ -206,9 +193,6 @@ Carried from Milestone 1 as unresolved detail:
 - Enterprise Services directive/API scope:
   [Enterprise Services](follow-ups/enterprise-services.md).
 - ASMX/SOAP scope: [Web Services](follow-ups/web-services.md).
-- Extensions AJAX activation (UpdatePanel, page methods, JSON application
-  services, query stack) and its excluded stacks:
-  [Extensions AJAX activation](follow-ups/extensions-ajax-activation.md).
 - Framework-oracle CI automation. Current integration tests are primary; keep
   the frozen golden gate, prefer captured fixtures or ad-hoc Framework readings,
   and do not recreate historical experiments unless evidence is missing or

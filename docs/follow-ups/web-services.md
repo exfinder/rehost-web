@@ -17,11 +17,6 @@ for the analysis that grounded it). What remains is deliberate backlog:
   `System.Design`'s `TypedDataSetSchemaImporterExtension` — a separate
   decision. Trigger: a real application that ships raw `.wsdl` under
   `App_WebReferences` or needs encoded WSDL generation.
-- **JSON application services** (`Profile_JSON_AppService.axd` and siblings,
-  plus Framework's `*_AppService.axd` handler mapping, not migrated into the
-  baseline). The service classes are WCF-hosted
-  (`System.ServiceModel.Activation`); the built-in names resolve to no
-  service today.
 - **Framework config identity remapping** — application configs or
   `.discomap` files carrying assembly-qualified type names
   (`System.Web.Services, … b03f5f7f11d50a3a`) resolve against the Framework
