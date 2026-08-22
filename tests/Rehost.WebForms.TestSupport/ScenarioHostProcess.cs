@@ -8,7 +8,7 @@ public sealed class ScenarioHostProcess : IDisposable
     private readonly Task<string> _standardOutput;
     private readonly Task<string> _standardError;
 
-    internal ScenarioHostProcess(Process process)
+    public ScenarioHostProcess(Process process)
     {
         _process = process;
         _standardOutput = process.StandardOutput.ReadToEndAsync();

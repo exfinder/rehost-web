@@ -63,10 +63,9 @@ public sealed class FixtureStagingTests : IDisposable
         startInfo.ArgumentList.Add("-p:Configuration=" + TestOutputPaths.Configuration());
         startInfo.ArgumentList.Add("-nr:false");
 
-        using var process = Process.Start(startInfo)!;
-        var output = process.StandardOutput.ReadToEnd() + process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        process.ExitCode.ShouldBe(0, output);
+        using var host = new ScenarioHostProcess(Process.Start(startInfo)!);
+        host.WaitForExit();
+        host.ExitCode.ShouldBe(0, host.StandardOutput + host.StandardError);
     }
 
     public void Dispose() => _target.Dispose();

@@ -52,10 +52,9 @@ public sealed class ScenarioHostModeTests
             startInfo.ArgumentList.Add(argument);
         }
 
-        using var process = Process.Start(startInfo)!;
-        var standardError = process.StandardError.ReadToEnd();
-        process.WaitForExit();
+        using var host = new ScenarioHostProcess(Process.Start(startInfo)!);
+        host.WaitForExit();
 
-        return (process.ExitCode, standardError);
+        return (host.ExitCode, host.StandardError);
     }
 }
