@@ -49,8 +49,8 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
         socket.HttpResponseHeaders["X-After-Accept"].ShouldContain("1");
         socket.HttpResponseHeaders.ContainsKey("Content-Length").ShouldBeFalse();
 
-        // IIS reported user=obj: its DefaultAuthenticationModule gives an anonymous principal, a
-        // module the shipped root configuration does not carry yet (shipped-modules follow-up).
+        // IIS reported user=obj: the anonymous principal survived inside RootedObjects, which the
+        // classic path never creates, so the transition's reset nulls it here (ledger P80).
         var report = await ReceiveTextAsync(socket);
         report.ShouldBe(
             "type=System.Web.WebSockets.AspNetWebSocket;sub=<null>;current=set;items=kept;origin=<null>;user=null;"

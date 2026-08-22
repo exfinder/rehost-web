@@ -4,10 +4,11 @@
 
 Framework's root web configuration registers fourteen modules
 (`third_party/microsoft/framework-config/web.config:229-244`). The port now
-registers `UrlAuthorization` and `UrlRoutingModule-4.0` at their Framework
-positions. The remaining entries are still classified here.
+registers `Session`, `UrlAuthorization`, `UrlRoutingModule-4.0`, and
+`ScriptModule-4.0` at their Framework positions. The remaining entries are
+still classified here.
 
-Three of the fourteen are explained by the rule the compatibility map already
+Two of the fourteen are explained by the rule the compatibility map already
 applies to `httpHandlers` — their types live in assemblies this port does not
 carry:
 
@@ -15,12 +16,15 @@ carry:
 | --- | --- |
 | `ErrorHandlerModule` | `System.Web.Mobile` |
 | `ServiceModel` | `System.ServiceModel.Activation` |
-| `ScriptModule-4.0` | `System.Web.Extensions` |
 
-`Session` has since landed with the session-state story. The other eight are
-types the port **does** carry, absent with no recorded reason: `OutputCache`,
-`WindowsAuthentication`, `FormsAuthentication`, `PassportAuthentication`,
-`RoleManager`, `FileAuthorization`, `AnonymousIdentification`, and `Profile`.
+The other eight are types the port **does** carry, absent with no recorded
+reason: `OutputCache`, `WindowsAuthentication`, `FormsAuthentication`,
+`PassportAuthentication`, `RoleManager`, `FileAuthorization`,
+`AnonymousIdentification`, and `Profile`.
+
+`DefaultAuthentication` is not one of the fourteen and is not at stake here:
+`HttpModulesSection.CreateModules` appends it to every module collection, as on
+Framework, so requests already get its anonymous principal.
 
 The [compatibility map](../compatibility.md) documents omissions from
 `buildProviders`, `pages/namespaces`, `pages/controls`, and `httpHandlers`.
@@ -41,10 +45,12 @@ precedent cannot simply be extended.
 
 ## The decision
 
-The general policy remains undecided. Three entries have landed —
-`UrlAuthorization`, `UrlRoutingModule-4.0`, and now `Session` — each because a
-behavior story reached and tested it, preserving Framework order. That is the
-pattern so far, not a decision that the remaining baseline should land whole.
+The general policy remains undecided. Four entries have landed —
+`UrlAuthorization`, `UrlRoutingModule-4.0`, `Session`, and `ScriptModule-4.0`
+(which left the assembly-absent class when `Rehost.WebForms.Extensions` was
+carried) — each because a behavior story reached and tested it, preserving
+Framework order. That is the pattern so far, not a decision that the remaining
+baseline should land whole.
 
 `Session` carries one lesson for whoever decides the general policy: a module
 name in this collection is not only an identifier. `Global.asax` binds
