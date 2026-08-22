@@ -62,4 +62,56 @@ public sealed class HandlersOverKestrelTests(HandlersLiveScenario scenario)
         response.StatusCode.ShouldBe(404);
         response.Text.ShouldNotContain("STATIC-OK");
     }
+
+    // The security case: a folder maps everything to the forbidden handler, and that mapping
+    // reaches requests into the folder and nothing outside it.
+    [Fact]
+    public async Task A_Folder_Scoped_Forbidden_Mapping_Blocks_Inside_The_Folder_Only()
+    {
+        var blocked = await scenario.Client.GetAsync("/guarded/secret.aspx");
+
+        blocked.StatusCode.ShouldBe(403);
+        blocked.Text.ShouldNotContain("secret-page");
+
+        var outside = await scenario.Client.GetAsync("/secret.aspx");
+
+        outside.StatusCode.ShouldBe(200);
+        outside.Text.ShouldContain("secret-page");
+    }
+
+    // MH27a: the folder's own add is consulted ahead of the application root's for the same URL,
+    // and the page on disk beside it is not what answered.
+    [Fact]
+    public async Task A_Folder_Add_Beats_The_Application_Root_For_The_Same_Pattern()
+    {
+        var inside = await scenario.Client.GetAsync("/deep/Default.aspx");
+
+        inside.StatusCode.ShouldBe(200);
+        inside.Text.ShouldBe("HANDLED-BY:B");
+
+        (await scenario.Client.GetAsync("/Default.aspx")).Text.ShouldBe("HANDLED-BY:A");
+    }
+
+    // The SCRIPT_NAME/PATH_INFO split asks the folder's list as well: only inside the folder does
+    // a mapping claim the .axd prefix, so only there does the URL continuing past it reach that
+    // handler instead of staying one file path.
+    [Fact]
+    public async Task The_Path_Info_Split_Consults_The_Folder_List()
+    {
+        (await scenario.Client.GetAsync("/deep/thing.axd/extra")).Text.ShouldBe("HANDLED-BY:A");
+        (await scenario.Client.GetAsync("/thing.axd/extra")).Text.ShouldBe("HANDLED-BY:B");
+    }
+
+    // MH27b: the folder removes the application root's add, matching there falls back to the
+    // inherited page factory, and the root keeps its own mapping.
+    [Fact]
+    public async Task A_Folder_Remove_Falls_Back_To_The_Inherited_Page_Factory()
+    {
+        var inside = await scenario.Client.GetAsync("/sub/Default.aspx");
+
+        inside.StatusCode.ShouldBe(200);
+        inside.Text.ShouldContain("sub-page");
+
+        (await scenario.Client.GetAsync("/Default.aspx")).Text.ShouldBe("HANDLED-BY:A");
+    }
 }

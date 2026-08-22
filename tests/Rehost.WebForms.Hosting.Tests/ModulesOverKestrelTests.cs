@@ -48,6 +48,20 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
         stages.ShouldBe(ModuleStages.Interleaved("unconditioned", "webserver-copy"));
     }
 
+    // MH10 through the folder list (MH27): the extension the root serves natively is mapped to a
+    // managed handler inside this folder, and the conditioned module runs there. The condition is
+    // decided against the request's own directory, not the application root's list.
+    [Fact]
+    public async Task A_Folder_Mapping_Decides_The_Managed_Handler_Condition()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/managed/asset.txt");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe("HANDLED-BY:A");
+        stages.ShouldBe(ModuleStages.Interleaved(
+            "unconditioned", "managed-handler", "webserver-copy", "dynamic"));
+    }
+
     // MH3 and MH7: the name registered in both sections runs once, from the webServer type, and a
     // classic-only registration never runs at all (MH4).
     [Fact]

@@ -9,16 +9,21 @@ namespace System.Web.IisConfig;
 // IIS's ConfigurationValidationModule rule (MH5, MH6, MH23): app-level classic registration
 // content of any kind, or impersonation, fails every request with 500.22/500.23/500.24 unless the
 // application declares validateIntegratedModeConfiguration="false". Only the application's own
-// file is examined; the inherited classic defaults IIS ships are exempt.
+// files are examined; the inherited classic defaults IIS ships are exempt.
+//
+// A folder web.config below the application root is examined the same way, with the waiver
+// inherited from above unless the folder restates it. MH5 measured the application root; a
+// folder-level classic section under the same rule is unmeasured.
 internal static class ClassicSectionValidation
 {
     private const string ValidationAttribute = "validateIntegratedModeConfiguration";
 
-    internal static void Validate(XmlDocument document, string configPath)
+    internal static bool Validate(
+        XmlDocument document, string configPath, bool inheritedWaiver = false)
     {
-        if (IsWaived(document, configPath))
+        if (IsWaived(document, configPath) ?? inheritedWaiver)
         {
-            return;
+            return true;
         }
 
         var entries = new List<string>();
@@ -28,7 +33,7 @@ internal static class ClassicSectionValidation
 
         if (entries.Count == 0)
         {
-            return;
+            return false;
         }
 
         throw new ConfigurationErrorsException(
@@ -40,13 +45,18 @@ internal static class ClassicSectionValidation
             + " <system.webServer> to keep the sections as dead text.");
     }
 
-    private static bool IsWaived(XmlDocument document, string configPath)
+    private static bool? IsWaived(XmlDocument document, string configPath)
     {
         var value = document
             .SelectSingleNode("/configuration/system.webServer/validation")
             ?.Attributes?[ValidationAttribute]?.Value;
 
-        if (value == null || string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
+        if (value == null)
+        {
+            return null;
+        }
+
+        if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }

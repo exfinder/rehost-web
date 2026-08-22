@@ -15,15 +15,19 @@ internal sealed class IisRegistration
 
     internal IisRegistration(
         string name,
+        string configPath,
         Dictionary<string, string> attributes,
         IisPreCondition preConditionOutcome)
     {
         Name = name;
+        ConfigPath = configPath;
         _attributes = attributes;
         _preConditionOutcome = preConditionOutcome;
     }
 
     internal string Name { get; }
+
+    internal string ConfigPath { get; }
 
     internal bool PreConditionSatisfied => _preConditionOutcome.Satisfied;
 
@@ -33,7 +37,8 @@ internal sealed class IisRegistration
 
     internal IisRegistration WithoutManagedHandlerCondition() =>
         RequiresManagedHandler
-            ? new IisRegistration(Name, _attributes, _preConditionOutcome.WithoutManagedHandler())
+            ? new IisRegistration(
+                Name, ConfigPath, _attributes, _preConditionOutcome.WithoutManagedHandler())
             : this;
 
     internal string? Type => Attribute("type");
@@ -61,6 +66,10 @@ internal enum IisRegistrationPlacement
 // The measured merge semantics (MH1, MH2, MH8, MH9v, MH13-MH15, MH18-MH20). An inherited name
 // keeps its position across a remove and re-add, so removal empties its slot instead of dropping
 // it. Names compare with Ordinal: IIS_schema.xml declares the key caseSensitive.
+//
+// Fresh adds are kept one list per configuration level - the application root, then a folder
+// web.config for each directory below it - because the deeper level's adds are consulted first
+// (MH27).
 internal sealed class IisRegistrationSection
 {
     private static readonly string[] ModuleRequiredAttributes = { "name" };
@@ -69,7 +78,7 @@ internal sealed class IisRegistrationSection
     private const string RunAllManagedModulesAttribute = "runAllManagedModulesForAllRequests";
 
     private readonly List<Slot> _inherited = new();
-    private readonly List<IisRegistration> _fresh = new();
+    private readonly List<List<IisRegistration>> _levels = new() { new List<IisRegistration>() };
     private readonly string _sectionName;
     private readonly string _entryKind;
     private readonly IisRegistrationPlacement _placement;
@@ -93,6 +102,30 @@ internal sealed class IisRegistrationSection
         _clearHonored = clearHonored;
         _runAllManagedModulesHonored = runAllManagedModulesHonored;
         _requiredAttributes = requiredAttributes;
+    }
+
+    private IisRegistrationSection(IisRegistrationSection source)
+        : this(
+            source._sectionName,
+            source._entryKind,
+            source._placement,
+            source._clearHonored,
+            source._runAllManagedModulesHonored,
+            source._requiredAttributes)
+    {
+        foreach (var slot in source._inherited)
+        {
+            _inherited.Add(new Slot(slot.Name) { Row = slot.Row });
+        }
+
+        _levels.Clear();
+        foreach (var level in source._levels)
+        {
+            _levels.Add(new List<IisRegistration>(level));
+        }
+
+        _inheritanceSealed = source._inheritanceSealed;
+        _runAllManagedModules = source._runAllManagedModules;
     }
 
     internal static IisRegistrationSection ForModules() =>
@@ -121,13 +154,23 @@ internal sealed class IisRegistrationSection
         _inheritanceSealed = true;
     }
 
+    // One more configuration level below this one, holding its own fresh adds and its own view of
+    // everything above: a folder's <remove> of a parent add empties the slot for that folder only
+    // (MH27).
+    internal IisRegistrationSection Nested()
+    {
+        var nested = new IisRegistrationSection(this);
+        nested._levels.Add(new List<IisRegistration>());
+        return nested;
+    }
+
     internal IReadOnlyList<IisRegistration> Build()
     {
-        var effective = new List<IisRegistration>(_inherited.Count + _fresh.Count);
+        var effective = new List<IisRegistration>();
 
         if (_placement == IisRegistrationPlacement.Head)
         {
-            AddEffective(effective, _fresh);
+            AddLevels(effective, deepestFirst: true);
         }
 
         foreach (var slot in _inherited)
@@ -140,7 +183,7 @@ internal sealed class IisRegistrationSection
 
         if (_placement == IisRegistrationPlacement.Tail)
         {
-            AddEffective(effective, _fresh);
+            AddLevels(effective, deepestFirst: false);
         }
 
         return effective.ToArray();
@@ -181,11 +224,14 @@ internal sealed class IisRegistrationSection
         }
     }
 
-    private void AddEffective(List<IisRegistration> effective, List<IisRegistration> rows)
+    private void AddLevels(List<IisRegistration> effective, bool deepestFirst)
     {
-        foreach (var row in rows)
+        for (var index = 0; index < _levels.Count; index++)
         {
-            AddEffective(effective, row);
+            foreach (var row in _levels[deepestFirst ? _levels.Count - 1 - index : index])
+            {
+                AddEffective(effective, row);
+            }
         }
     }
 
@@ -235,16 +281,22 @@ internal sealed class IisRegistrationSection
         }
 
         _inherited.Clear();
-        _fresh.Clear();
+        foreach (var level in _levels)
+        {
+            level.Clear();
+        }
     }
 
     private void ApplyRemove(string name)
     {
-        var fresh = _fresh.FindIndex(row => Matches(row.Name, name));
-        if (fresh >= 0)
+        for (var level = _levels.Count - 1; level >= 0; level--)
         {
-            _fresh.RemoveAt(fresh);
-            return;
+            var fresh = _levels[level].FindIndex(row => Matches(row.Name, name));
+            if (fresh >= 0)
+            {
+                _levels[level].RemoveAt(fresh);
+                return;
+            }
         }
 
         var slot = _inherited.Find(candidate => Matches(candidate.Name, name));
@@ -256,7 +308,7 @@ internal sealed class IisRegistrationSection
 
     private void ApplyAdd(IisRegistration row, string configPath)
     {
-        if (_fresh.Exists(existing => Matches(existing.Name, row.Name))
+        if (_levels.Exists(level => level.Exists(existing => Matches(existing.Name, row.Name)))
             || _inherited.Exists(slot => slot.Row != null && Matches(slot.Name, row.Name)))
         {
             throw new ConfigurationErrorsException(
@@ -278,7 +330,7 @@ internal sealed class IisRegistrationSection
             return;
         }
 
-        _fresh.Add(row);
+        _levels[^1].Add(row);
     }
 
     private IisRegistration ReadRow(XmlNode node, string configPath)
@@ -302,6 +354,7 @@ internal sealed class IisRegistrationSection
 
         return new IisRegistration(
             name,
+            configPath,
             attributes,
             IisPreConditions.Evaluate(_entryKind, name, preCondition, configPath));
     }

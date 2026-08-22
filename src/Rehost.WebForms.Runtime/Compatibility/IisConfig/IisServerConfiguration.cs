@@ -8,8 +8,8 @@ namespace System.Web.IisConfig;
 
 // Shipped applicationHost baseline merged with the app root's <system.webServer> amendments,
 // published atomically at activation. Unhonored sections are ignored, as Framework ignored the
-// whole group. The app root is the only application file read: IIS ignores a subfolder <modules>
-// section outright (MH24).
+// whole group. Only <handlers> is read from folder web.configs below the root, where IIS resolves
+// it per folder (MH27) and ignores everything else it finds there, <modules> included (MH24).
 internal sealed class IisServerConfiguration
 {
     private static readonly IisCollectionSchema MimeMapSchema =
@@ -33,6 +33,7 @@ internal sealed class IisServerConfiguration
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
     private readonly Dictionary<string, string> _fileExtensions;
+    private IisFolderHandlers? _folderHandlers;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
@@ -50,14 +51,7 @@ internal sealed class IisServerConfiguration
         Modules = modules;
         RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
         Handlers = handlers;
-
-        var routes = new IisHandlerRoute[handlers.Count];
-        for (var index = 0; index < handlers.Count; index++)
-        {
-            routes[index] = new IisHandlerRoute(handlers[index]);
-        }
-
-        HandlerRoutes = routes;
+        HandlerRoutes = IisHandlerRoute.Build(handlers);
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -73,6 +67,9 @@ internal sealed class IisServerConfiguration
     internal IReadOnlyList<IisRegistration> Handlers { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutes { get; }
+
+    internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
+        _folderHandlers == null ? HandlerRoutes : _folderHandlers.RoutesFor(path);
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
@@ -91,7 +88,8 @@ internal sealed class IisServerConfiguration
 
     internal static IisServerConfiguration Load(
         string baselineConfigPath,
-        string applicationConfigPath)
+        string applicationConfigPath,
+        string applicationVirtualPath = "/")
     {
         var sections = new Sections();
 
@@ -100,7 +98,7 @@ internal sealed class IisServerConfiguration
         sections.Handlers.SealInheritance();
         ApplyFile(applicationConfigPath, required: false, application: true, sections);
 
-        return new IisServerConfiguration(
+        var configuration = new IisServerConfiguration(
             sections.StaticContent,
             sections.HiddenSegments,
             sections.FileExtensions,
@@ -108,6 +106,15 @@ internal sealed class IisServerConfiguration
             sections.Modules.Build(),
             sections.Modules.RunAllManagedModules,
             sections.Handlers.Build());
+
+        configuration._folderHandlers = IisFolderHandlers.Load(
+            sections.Handlers,
+            configuration.HandlerRoutes,
+            Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
+            applicationVirtualPath,
+            sections.ClassicSectionsWaived);
+
+        return configuration;
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -138,7 +145,8 @@ internal sealed class IisServerConfiguration
 
         if (application)
         {
-            ClassicSectionValidation.Validate(document, configPath);
+            sections.ClassicSectionsWaived =
+                ClassicSectionValidation.Validate(document, configPath);
         }
 
         var staticContentNode = document.SelectSingleNode(
@@ -195,6 +203,8 @@ internal sealed class IisServerConfiguration
 
         internal Dictionary<string, string> FileExtensions { get; } =
             new(StringComparer.OrdinalIgnoreCase);
+
+        internal bool ClassicSectionsWaived { get; set; }
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();
 

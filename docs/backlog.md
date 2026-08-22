@@ -92,11 +92,10 @@ Carried from Milestone 1 as unresolved detail:
 
 ### IIS-derived behavior and modules
 
-- Per-folder `<handlers>` resolution — deepest add wins, a child may remove a
-  parent's mapping, and a folder-scoped forbidden mapping must actually block
-  (MH27): [issue #7](https://github.com/exfinder/rehost-webforms/issues/7).
-  A per-folder `<modules>` section stays inert, which is IIS's own behavior
-  (MH24). Other honored sections are unassessed per folder.
+- ~~Per-folder `<handlers>` resolution~~ — closed (ledger P87, MH27). A
+  per-folder `<modules>` section stays inert, which is IIS's own behavior
+  (MH24). The other honored `system.webServer` sections are still merged from
+  the application root alone and are unassessed per folder.
 - Request-filtering limits, custom headers, and error shaping — the tenants the
   modules/handlers work did not touch:
   [IIS configuration layers](follow-ups/iis-integration-plan.md) and

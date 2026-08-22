@@ -8,14 +8,16 @@ namespace System.Web.IisConfig;
 
 // Handler selection over the merged system.webServer/handlers snapshot: first match in document
 // order, no specificity ranking (MH8, MH9v2), a verb-mismatched row skipped rather than answered
-// with 405 (MH21), and 404 when the list runs out (MH18).
+// with 405 (MH21), and 404 when the list runs out (MH18). The list is the one resolved for the
+// request path's own directory (MH27).
 internal static class IntegratedHandlers
 {
     // The row IIS would name in its error page, which is also the row whose managed-or-native
     // nature answers preCondition="managedHandler". A transparent TransferRequestHandler row is
     // the selection here even though dispatch walks past it.
     internal static IisHandlerRoute? Selected(string requestType, VirtualPath path) =>
-        Selected(IisServerConfiguration.Current.HandlerRoutes, requestType, path);
+        Selected(
+            IisServerConfiguration.Current.HandlerRoutesFor(path), requestType, path);
 
     internal static IisHandlerRoute? Selected(
         IReadOnlyList<IisHandlerRoute> routes, string requestType, VirtualPath path)
@@ -63,7 +65,10 @@ internal static class IntegratedHandlers
         out IHttpHandlerFactory? factory)
     {
         var route = Resolve(
-            IisServerConfiguration.Current.HandlerRoutes, requestType, path, pathTranslated);
+            IisServerConfiguration.Current.HandlerRoutesFor(path),
+            requestType,
+            path,
+            pathTranslated);
 
         if (route.Bridge != IisNativeBridge.None)
         {

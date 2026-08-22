@@ -61,6 +61,17 @@ internal sealed class IisHandlerRoute
         Bridge = registration.Type == null ? ParseBridge(registration) : IisNativeBridge.None;
     }
 
+    internal static IReadOnlyList<IisHandlerRoute> Build(IReadOnlyList<IisRegistration> handlers)
+    {
+        var routes = new IisHandlerRoute[handlers.Count];
+        for (var index = 0; index < handlers.Count; index++)
+        {
+            routes[index] = new IisHandlerRoute(handlers[index]);
+        }
+
+        return routes;
+    }
+
     internal IisRegistration Registration { get; }
 
     internal IisResourceType ResourceType { get; }
@@ -100,9 +111,9 @@ internal sealed class IisHandlerRoute
         }
 
         throw new ConfigurationErrorsException(
-            "<add name=\"" + registration.Name + "\"> in <system.webServer><handlers> carries"
-            + " resourceType=\"" + value + "\", which is not one of Unspecified, File, Directory"
-            + " or Either.");
+            "<add name=\"" + registration.Name + "\"> in '" + registration.ConfigPath
+            + "' carries resourceType=\"" + value + "\", which is not one of Unspecified, File,"
+            + " Directory or Either.");
     }
 
     private static IisNativeBridge ParseBridge(IisRegistration registration)
@@ -120,8 +131,9 @@ internal sealed class IisHandlerRoute
         if (names.Count == 0)
         {
             throw new ConfigurationErrorsException(
-                "<add name=\"" + registration.Name + "\"> in <system.webServer><handlers> carries"
-                + " neither type= nor modules=, so nothing can serve the requests it matches.");
+                "<add name=\"" + registration.Name + "\"> in '" + registration.ConfigPath
+                + "' carries neither type= nor modules=, so nothing can serve the requests it"
+                + " matches.");
         }
 
         if (names.Count == 1 && names[0] == ProtocolSupportModuleName)
@@ -134,8 +146,8 @@ internal sealed class IisHandlerRoute
             if (!StaticFileModules.Contains(name))
             {
                 throw new ConfigurationErrorsException(
-                    "<add name=\"" + registration.Name + "\"> in <system.webServer><handlers>"
-                    + " names the native IIS module \"" + name + "\", which this runtime does not"
+                    "<add name=\"" + registration.Name + "\"> in '" + registration.ConfigPath
+                    + "' names the native IIS module \"" + name + "\", which this runtime does not"
                     + " reimplement. Only StaticFileModule, DefaultDocumentModule,"
                     + " DirectoryListingModule and ProtocolSupportModule are bridged; a managed"
                     + " row carries type= instead.");

@@ -50,7 +50,8 @@ internal sealed class ApplicationBootstrap
             var configuration = ApplicationBootstrapConfiguration.Create(options, _environment.BaseDirectory);
             var serverConfiguration = System.Web.IisConfig.IisServerConfiguration.Load(
                 configuration.ServerConfigurationFilePath,
-                configuration.ApplicationConfigurationFilePath);
+                configuration.ApplicationConfigurationFilePath,
+                configuration.VirtualRootPath);
             _environment.Preflight(configuration);
             _environment.Bind(configuration);
             System.Web.Configuration.HttpConfigurationSystem.SetConfigurationFilePaths(

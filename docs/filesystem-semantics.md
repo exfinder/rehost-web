@@ -36,7 +36,9 @@ value it holds and never converts by string surgery:
   compared ignore-case; every path-taking API reads a `/`-rooted string as
   virtual (`UrlPath.IsAbsolutePhysicalPath`, "Physical or virtual" below).
 - **Configuration path** — a lowercased virtual path; the map to disk folds
-  case at `UserMapPath.GetPhysicalPathForPath` (P70).
+  case at `UserMapPath.GetPhysicalPathForPath` (P70). Two directories differing
+  only by case are therefore one configuration path, so an application holding
+  both with a `web.config` in each refuses activation naming both files (P87).
 - **Physical path** — platform separators, produced only by a map-path seam,
   folded to the filesystem's real casing below the nearest existing directory
   (P57/P71); containment is decided on the canonical URL path, not by prefix
@@ -100,9 +102,9 @@ compositions are on `Path.DirectorySeparatorChar`; `\\`→`/` normalization of
 virtual paths and the `X:\\`/UNC shape checks stay by contract.
 
 Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, P71, P72, P73,
-and P74; `FileUtilTests`, `SimpleWorkerRequestTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
+P74, and P87; `FileUtilTests`, `SimpleWorkerRequestTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
 `CodegenCompileErrorTests`, `CanonicalCasePathTests`, `CaseInsensitiveUrlOverKestrelTests`,
-`CaseSensitiveDirectoryConfigOverKestrelTests`, `PathCasingOverKestrelTests`,
+`CaseSensitiveDirectoryConfigOverKestrelTests`, `IisFolderHandlersTests`, `PathCasingOverKestrelTests`,
 `PathClassificationOverKestrelTests`, `PathCanonicalizationOverKestrelTests`,
 `RequestPathCanonicalizerTests`, `RequestPathInfoTests`, `ServerIncludesOverKestrelTests`,
 `StaticFilesOverKestrelTests`, and `ServerTransferOverKestrelTests`.

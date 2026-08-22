@@ -21,8 +21,8 @@ actually coming:
 - `<handlers>` and `<modules>` — integrated-mode registrations with
   `remove`-by-name against inherited defaults and `preCondition` filters;
   the modules include third-party authentication and the async session
-  provider. Delivered (P83/P85/P86); per-folder `<handlers>` is the one
-  piece still open, as [issue #7](https://github.com/exfinder/rehost-webforms/issues/7).
+  provider. Delivered (P83/P85/P86), per-folder
+  `<handlers>` included (P87).
 - `<security><requestFiltering><requestLimits>` — body and query-string
   limits that must reconcile with `system.web maxRequestLength` and
   Kestrel's own limit.
@@ -129,7 +129,7 @@ not a rebuilt integrated pipeline (decision 0).
 | `defaultDocument` | honored — ledger P67; Layer-2 directory-request seam consuming the Layer-0 tenant (readings D1–D15, decisions 6–11 below) |
 | `security/requestFiltering` limits | staged — three-way reconciliation with `maxRequestLength` and Kestrel. Production configs deliberately pair `maxAllowedContentLength` with an aligned `maxRequestLength`; the reconciliation must treat the pair as one intent, not refuse twice with two shapes |
 | `httpErrors` | staged — governs Layer-1 error shaping; readings first. The observed production stance is `errorMode="Custom" existingResponse="PassThrough"` — IIS steps aside — which the port's app-shaped responses already satisfy; pin that mode first |
-| `handlers`, `modules` | honored — ledger P83/P85, [readings MH1-MH28](../research/iis-modules-handlers-readings.md). The merged baseline-plus-application list is the registration authority for both collections and the classic `system.web` sections are dead text; the shipped classic tables are retired. Application-root only: per-folder `<handlers>` resolution is [issue #7](https://github.com/exfinder/rehost-webforms/issues/7), and a per-folder `<modules>` section is inert here as it was on IIS (MH24) |
+| `handlers`, `modules` | honored — ledger P83/P85, [readings MH1-MH28](../research/iis-modules-handlers-readings.md). The merged baseline-plus-application list is the registration authority for both collections and the classic `system.web` sections are dead text; the shipped classic tables are retired. `<handlers>` also resolves per folder (ledger P87, MH27), while a per-folder `<modules>` section is inert here as it was on IIS (MH24) |
 | `validation`, `asp` | tolerated no-ops, recorded |
 | everything else | ignored silently, Framework-style |
 
