@@ -354,8 +354,14 @@ namespace System.Web.Security {
 
 
         protected RolePrincipal(SerializationInfo info, StreamingContext context)
+#if NETFRAMEWORK
             :base(info, context)
+#endif
         {
+#if !NETFRAMEWORK
+            // ClaimsPrincipal's serialization ctor throws PlatformNotSupportedException off Framework.
+            RequireCookieShapedPayload(info);
+#endif
             _Version = info.GetInt32("_Version");
             _ExpireDate = info.GetDateTime("_ExpireDate");
             _IssueDate = info.GetDateTime("_IssueDate");
@@ -391,6 +397,28 @@ namespace System.Web.Security {
             }
         }
 
+#if !NETFRAMEWORK
+        private static void RequireCookieShapedPayload(SerializationInfo info) {
+            foreach (SerializationEntry entry in info) {
+                switch (entry.Name) {
+                    case "_Version":
+                    case "_ExpireDate":
+                    case "_IssueDate":
+                    case "_Identity":
+                    case "_ProviderName":
+                    case "_Username":
+                    case "_IsRoleListCached":
+                    case "_AllRoles":
+                        break;
+                    default:
+                        throw new PlatformNotSupportedException(
+                            "Rehost.WebForms restores RolePrincipal only from a role cookie payload. Entry '" + entry.Name +
+                            "' comes from ClaimsPrincipal.GetObjectData, and ClaimsPrincipal cannot be deserialized on this platform.");
+                }
+            }
+        }
+
+#endif
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
             GetObjectData(info, context);

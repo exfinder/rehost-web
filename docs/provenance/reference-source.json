@@ -82,6 +82,13 @@
    ],
    "reason": "SetConfigurationFilePaths seam (fenced !NETFRAMEWORK): the host publishes the machine/root config locations at bootstrap; the Framework fallback resolves against MsCorLibDirectory, which has no Config subdirectory on modern .NET, breaking consumers such as the WSDL help page path",
    "record": "docs/follow-ups/web-services.md"
+  },
+  {
+   "files": [
+    "Security/RolePrincipal.cs"
+   ],
+   "reason": "the deserialization ctor chains to ClaimsPrincipal(SerializationInfo, StreamingContext), a throwing stub on modern .NET (SYSLIB0051); the base call is fenced NETFRAMEWORK and a payload guard refuses anything but a role-cookie ticket",
+   "record": "docs/portability-ledger.md P81"
   }
  ]
 }
