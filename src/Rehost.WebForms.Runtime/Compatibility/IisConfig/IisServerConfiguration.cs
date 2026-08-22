@@ -8,7 +8,8 @@ namespace System.Web.IisConfig;
 
 // Shipped applicationHost baseline merged with the app root's <system.webServer> amendments,
 // published atomically at activation. Unhonored sections are ignored, as Framework ignored the
-// whole group.
+// whole group. The app root is the only application file read: IIS ignores a subfolder <modules>
+// section outright (MH24).
 internal sealed class IisServerConfiguration
 {
     private static readonly IisCollectionSchema MimeMapSchema =
@@ -20,7 +21,9 @@ internal sealed class IisServerConfiguration
     private static volatile IisServerConfiguration _current = new(
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-        new DefaultDocuments(enabled: true, Array.Empty<string>()));
+        new DefaultDocuments(enabled: true, Array.Empty<string>()),
+        Array.Empty<IisRegistration>(),
+        Array.Empty<IisRegistration>());
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -28,16 +31,24 @@ internal sealed class IisServerConfiguration
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
         Dictionary<string, string> hiddenSegments,
-        DefaultDocuments defaultDocuments)
+        DefaultDocuments defaultDocuments,
+        IReadOnlyList<IisRegistration> modules,
+        IReadOnlyList<IisRegistration> handlers)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
         DefaultDocuments = defaultDocuments;
+        Modules = modules;
+        Handlers = handlers;
     }
 
     internal static IisServerConfiguration Current => _current;
 
     internal DefaultDocuments DefaultDocuments { get; }
+
+    internal IReadOnlyList<IisRegistration> Modules { get; }
+
+    internal IReadOnlyList<IisRegistration> Handlers { get; }
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
@@ -53,14 +64,19 @@ internal sealed class IisServerConfiguration
         string baselineConfigPath,
         string applicationConfigPath)
     {
-        var staticContent = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var hiddenSegments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var defaultDocuments = new DefaultDocumentSection();
+        var sections = new Sections();
 
-        ApplyFile(baselineConfigPath, required: true, staticContent, hiddenSegments, defaultDocuments);
-        ApplyFile(applicationConfigPath, required: false, staticContent, hiddenSegments, defaultDocuments);
+        ApplyFile(baselineConfigPath, required: true, sections);
+        sections.Modules.SealInheritance();
+        sections.Handlers.SealInheritance();
+        ApplyFile(applicationConfigPath, required: false, sections);
 
-        return new IisServerConfiguration(staticContent, hiddenSegments, defaultDocuments.Build());
+        return new IisServerConfiguration(
+            sections.StaticContent,
+            sections.HiddenSegments,
+            sections.DefaultDocuments.Build(),
+            sections.Modules.Build(),
+            sections.Handlers.Build());
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -68,12 +84,7 @@ internal sealed class IisServerConfiguration
         _current = configuration;
     }
 
-    private static void ApplyFile(
-        string configPath,
-        bool required,
-        Dictionary<string, string> staticContent,
-        Dictionary<string, string> hiddenSegments,
-        DefaultDocumentSection defaultDocuments)
+    private static void ApplyFile(string configPath, bool required, Sections sections)
     {
         if (!File.Exists(configPath))
         {
@@ -94,7 +105,8 @@ internal sealed class IisServerConfiguration
             "/configuration/system.webServer/staticContent");
         if (staticContentNode != null)
         {
-            IisCollectionReader.Apply(staticContentNode, MimeMapSchema, staticContent, configPath);
+            IisCollectionReader.Apply(
+                staticContentNode, MimeMapSchema, sections.StaticContent, configPath);
         }
 
         var hiddenSegmentsNode = document.SelectSingleNode(
@@ -102,14 +114,41 @@ internal sealed class IisServerConfiguration
         if (hiddenSegmentsNode != null)
         {
             IisCollectionReader.Apply(
-                hiddenSegmentsNode, HiddenSegmentSchema, hiddenSegments, configPath);
+                hiddenSegmentsNode, HiddenSegmentSchema, sections.HiddenSegments, configPath);
         }
 
         var defaultDocumentNode = document.SelectSingleNode(
             "/configuration/system.webServer/defaultDocument");
         if (defaultDocumentNode != null)
         {
-            defaultDocuments.Apply(defaultDocumentNode, configPath);
+            sections.DefaultDocuments.Apply(defaultDocumentNode, configPath);
         }
+
+        var modulesNode = document.SelectSingleNode("/configuration/system.webServer/modules");
+        if (modulesNode != null)
+        {
+            sections.Modules.Apply(modulesNode, configPath);
+        }
+
+        var handlersNode = document.SelectSingleNode("/configuration/system.webServer/handlers");
+        if (handlersNode != null)
+        {
+            sections.Handlers.Apply(handlersNode, configPath);
+        }
+    }
+
+    private sealed class Sections
+    {
+        internal Dictionary<string, string> StaticContent { get; } =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        internal Dictionary<string, string> HiddenSegments { get; } =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        internal DefaultDocumentSection DefaultDocuments { get; } = new();
+
+        internal IisRegistrationSection Modules { get; } = IisRegistrationSection.ForModules();
+
+        internal IisRegistrationSection Handlers { get; } = IisRegistrationSection.ForHandlers();
     }
 }

@@ -75,7 +75,7 @@ internal static class IisCollectionReader
         }
     }
 
-    private static string RequireAttribute(XmlNode node, string name, string configPath)
+    internal static string RequireAttribute(XmlNode node, string name, string configPath)
     {
         var value = node.Attributes?[name]?.Value;
         if (string.IsNullOrEmpty(value))
