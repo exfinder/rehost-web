@@ -38,12 +38,19 @@ public sealed class FixtureStagingTests : IDisposable
     private string Staged(params string[] parts) =>
         Path.Combine([_target.Path("fixtures"), .. parts]);
 
+    // PATH's dotnet can lack the SDK global.json pins; the muxer that launched this test run is
+    // the one that has it.
+    private static string DotnetPath() =>
+        Path.GetFileNameWithoutExtension(Environment.ProcessPath) == "dotnet"
+            ? Environment.ProcessPath!
+            : Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") ?? "dotnet";
+
     private void RunStaging()
     {
         var project = Path.Combine(
             RepositoryLocator.FindRoot(AppContext.BaseDirectory),
             "tests", "Rehost.WebForms.ScenarioHost", "Rehost.WebForms.ScenarioHost.csproj");
-        var startInfo = new ProcessStartInfo("dotnet")
+        var startInfo = new ProcessStartInfo(DotnetPath())
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
