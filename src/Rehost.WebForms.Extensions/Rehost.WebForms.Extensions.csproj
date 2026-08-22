@@ -9,53 +9,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ApplicationServiceHelper.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/AuthenticatingEventArgs.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/CreatingCookieEventArgs.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/KnownTypesProvider.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ProfilePropertyMetadata.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/SelectingProviderEventArgs.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ApplicationServices/ValidatingPropertiesEventArgs.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Configuration/*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/DynamicData/*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Globalization/ClientCultureInfo.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/HttpResponseInternalBase.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/HttpResponseInternalWrapper.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/IScriptResourceHandler.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/ScriptModule.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Handlers/ScriptResourceHandler.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Management/WebServiceErrorEvent.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Profile/ProfileService.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Security/AuthenticationService.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Security/RoleService.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/ListView*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IPageableItemContainer.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/InsertItemPosition.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/PageEventArgs.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/PagePropertiesChangingEventArgs.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/DataPager*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/NextPreviousPagerField.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/NumericPagerField.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/TemplatePagerField.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/ContextDataSource*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/DataSourceHelper.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/Dynamic.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/DynamicQueryableWrapper.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/Expressions/*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IDynamicQueryable.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/IQueryableDataSource.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/ui/WebControls/Query*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Resources/AtlasWeb.Designer.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Script/AjaxFrameworkAssemblyAttribute.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Serialization/*.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Script/Services/*.cs" />
-    <!-- WCF service-endpoint proxy generation; only WCFBuildProvider (not compiled) uses it. -->
+    <Compile Include="../System.Web.Extensions.ReferenceSource/**/*.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/Properties/AssemblyInfo.cs" />
+    <!-- Windows-desktop client stack: wininet, WindowsIdentity, WinForms paths, OleDb. -->
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ClientServices/**/*.cs" />
+    <!-- VS .svcmap/.datasvcmap WCF proxy generation; needs cut System.ServiceModel codegen. -->
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/Compilation/**/*.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/Resources/WCFModelStrings.Designer.cs" />
     <Compile Remove="../System.Web.Extensions.ReferenceSource/Script/Services/ProxyGenerator.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Util/HeaderUtility.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Util/HexParser.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Util/ListEqualityComparer.cs" />
-    <Compile Include="../System.Web.Extensions.ReferenceSource/Util/OrderedDictionary.cs" />
+    <!-- WCF-hosted .svc application services; the JSON siblings in Profile/ and Security/ compile. -->
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ApplicationServices/ApplicationServicesHostFactory.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ApplicationServices/AuthenticationService.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ApplicationServices/ProfileService.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ApplicationServices/RoleService.cs" />
+    <!-- System.Data.Linq has no modern implementation. LinqDataSource* also covers
+         LinqDataSourceContextData.cs, a duplicate of ContextDataSourceContextData. -->
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ui/WebControls/ILinqToSql.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ui/WebControls/LinqDataSource*.cs" />
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ui/WebControls/LinqToSqlWrapper.cs" />
+    <!-- Fully commented out upstream. -->
+    <Compile Remove="../System.Web.Extensions.ReferenceSource/ui/WebControls/PermaLink.cs" />
   </ItemGroup>
 
   <ItemGroup>
