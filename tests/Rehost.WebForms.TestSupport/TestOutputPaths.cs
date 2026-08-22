@@ -10,14 +10,16 @@ public static class TestOutputPaths
             Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory)))!;
     }
 
-    public static string TestProjectOutput(string projectName)
+    public static string ProjectOutput(string repoRelativeProjectDirectory)
     {
         return Path.Combine(
             RepositoryLocator.FindRoot(AppContext.BaseDirectory),
-            "tests",
-            projectName,
+            repoRelativeProjectDirectory,
             "bin",
             Configuration(),
             "net10.0");
     }
+
+    public static string TestProjectOutput(string projectName) =>
+        ProjectOutput("tests/" + projectName);
 }

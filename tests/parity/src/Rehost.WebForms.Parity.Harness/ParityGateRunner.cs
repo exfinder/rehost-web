@@ -18,9 +18,7 @@ public sealed class ParityGateRunner
     {
         RepositoryRoot = RepositoryLocator.FindRoot(AppContext.BaseDirectory);
 
-        HostDirectory = Path.Combine(
-            RepositoryRoot, "tests", "parity", "src", hostProjectName,
-            "bin", TestOutputPaths.Configuration(), "net10.0");
+        HostDirectory = TestOutputPaths.ProjectOutput("tests/parity/src/" + hostProjectName);
         HostAssemblyPath = Path.Combine(HostDirectory, hostProjectName + ".dll");
         ManifestPath = Path.Combine(RepositoryRoot, "tests", "parity", "sessions.json");
         GoldenPath = Path.Combine(
