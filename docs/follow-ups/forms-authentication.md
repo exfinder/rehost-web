@@ -13,9 +13,9 @@ slice's, where Framework registers `FormsAuthentication`, `RoleManager`,
 `AnonymousIdentification`, and `Profile`
 (`third_party/microsoft/framework-config/web.config:232-239`).
 
-`DefaultAuthenticationModule` is registered implicitly
-(`Configuration/HttpModulesSection.cs:57`), so requests already carried an
-anonymous principal and URL authorization worked against it. The visible
+`DefaultAuthenticationModule` was registered implicitly by
+`HttpModulesSection.CreateModules` — it comes from its golden row since ledger
+P83 — so requests already carried an anonymous principal and URL authorization worked against it. The visible
 failure was narrower: the `.ASPXAUTH` cookie was never read,
 `Request.IsAuthenticated` was always false, and a denied request ended as a
 bare 401 instead of the redirect to `loginUrl`, because that conversion lives

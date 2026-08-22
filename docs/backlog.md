@@ -92,18 +92,30 @@ Carried from Milestone 1 as unresolved detail:
 
 ### IIS-derived behavior and modules
 
-- Per-folder IIS configuration, request filtering, custom headers, default
-  documents, error shaping, handlers, and modules:
+- Per-folder `<handlers>` resolution — deepest add wins, a child may remove a
+  parent's mapping, and a folder-scoped forbidden mapping must actually block
+  (MH27): [issue #7](https://github.com/exfinder/rehost-webforms/issues/7).
+  A per-folder `<modules>` section stays inert, which is IIS's own behavior
+  (MH24). Other honored sections are unassessed per folder.
+- Request-filtering limits, custom headers, and error shaping — the tenants the
+  modules/handlers work did not touch:
   [IIS configuration layers](follow-ups/iis-integration-plan.md) and
   [`system.webServer` mapping](follow-ups/system-webserver-configuration-compatibility.md).
-- Classify and register or reject every Framework root `httpModules` entry:
-  [shipped modules](follow-ups/shipped-http-modules.md).
-- Replace catch-all/ignored behavior for omitted handlers and build providers
-  with explicit diagnostics where the current request or compilation path hides
-  an unsupported feature. Concrete case from production candidates: ReportViewer
-  registers an `.rdlc` build provider and an `.axd` handler backed by a
-  closed-source GDI+-bound assembly with no recompile path — that must surface
-  as a named unsupported boundary, not a silent compilation or handler failure.
+- `Server.TransferRequest` and the extensionless-URL handler's child-request
+  semantics. The baseline carries the `ExtensionlessUrlHandler-Integrated-4.0`
+  row and dispatch is transparent through it (ledger P85), but the API itself
+  is deferred; friendly URLs are the expected trigger.
+- Classify the remaining shipped registrations against reached behavior:
+  [shipped modules](follow-ups/shipped-http-modules.md). The golden's module and
+  handler rows now register wholesale, so what is open is feature-level support
+  behind them, not registration.
+- Replace catch-all/ignored behavior for omitted build providers with explicit
+  diagnostics where the current compilation path hides an unsupported feature.
+  Concrete case from production candidates: ReportViewer registers an `.rdlc`
+  build provider and an `.axd` handler backed by a closed-source GDI+-bound
+  assembly with no recompile path — that must surface as a named unsupported
+  boundary, not a silent compilation failure. A handler row whose type will not
+  load already fails its own URLs with the entry named (MH22a).
 - Exercise `StaticFileHandler` `If-Range` behavior before widening the static
   file claim.
 

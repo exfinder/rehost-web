@@ -18,7 +18,7 @@ for the analysis that grounded it). What remains is deliberate backlog:
 - **Async error format under `customErrors` On** — only the Off shape is
   exercised; the On variant needs a fixture whose `web.config` differs from
   the shared host's, and the existing `body-customerrors` fixture cannot host
-  `.aspx` (`<httpHandlers><clear/>`). Same no-new-process constraint as above.
+  `.aspx` (its `<handlers>` section keeps no page mapping). Same no-new-process constraint as above.
 - **`LinqDataSource`** plus `ILinqToSql`/`LinqToSqlWrapper` —
   `System.Data.Linq` has no modern implementation; the referencesource pin
   carries 43k lines if vendoring is ever warranted. Trigger: a real

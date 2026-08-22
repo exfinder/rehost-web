@@ -9,13 +9,10 @@ and the shipped module list are owned elsewhere: [SQL mode](session-sql.md),
 
 The implementation is imported and compiled — `State/`, 7,959 lines, none of it
 removed by the runtime project (`Rehost.WebForms.Runtime.csproj:17-30`). Nothing
-runs it. The shipped root web configuration carries `<httpHandlers>`
-(`configs/rehost-webforms.web.config:107-157`) and **no `<httpModules>`
-collection at all**, so `SessionStateModule` is never registered and
-`HttpContext.Session` is null on every request. Framework's root configuration
-registers it (`third_party/microsoft/framework-config/web.config:231`). Only the
-section handlers are declared here
-(`configs/rehost-webforms.machine.config:28,40-41`).
+runs it. The shipped root web configuration registered no module collection at
+all, so `SessionStateModule` was never registered and `HttpContext.Session` was
+null on every request, where Framework's root configuration registers it
+(`third_party/microsoft/framework-config/web.config:231`).
 
 An application configured for session state therefore gets silence, which the
 project contract rules out.
@@ -24,7 +21,7 @@ project contract rules out.
 
 In:
 
-- registering `Session` in the shipped root `<httpModules>`;
+- registering `Session` in the shipped module baseline;
 - `mode="InProc"`: the cache-backed store, session identity over the
   `ASP.NET_SessionId` cookie, the 20-minute sliding timeout;
 - `mode="Custom"`: the `SessionStateStoreProviderBase` seam and the call
@@ -266,8 +263,8 @@ has a 1-minute floor and the sweep runs on 20-second buckets, so the test is
 
 ## Delivered
 
-`Session` is registered in the shipped root `<httpModules>` at Framework's
-position, preflight refuses both out-of-process modes, and the three evidence
+`Session` is registered by the shipped IIS baseline `<modules>` at the
+position the golden gives it, preflight refuses both out-of-process modes, and the three evidence
 claims are covered by `SessionStateOverKestrelTests` and
 `CustomSessionStoreOverKestrelTests` over the `session` and `session-custom`
 fixtures.

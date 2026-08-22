@@ -1,79 +1,43 @@
 # Shipped HTTP modules
 
-## The gap
+## Where registration stands
 
-Framework's root web configuration registers fourteen modules
-(`third_party/microsoft/framework-config/web.config:229-244`). The port now
-registers `Session`, `UrlAuthorization`, `UrlRoutingModule-4.0`, and
-`ScriptModule-4.0` at their Framework positions. The remaining entries are
-still classified here.
+The registration question is settled. The port models an integrated application
+pool, so the shipped `applicationHost.config` baseline carries the IIS golden's
+`<modules>` collection whole, in its measured order (MH1), and the classic
+`<httpModules>` table it used to ship is retired (ledger P83). Framework's
+fourteen classic entries are no longer the list to reconcile against: the golden
+names thirteen managed modules, and every one of them registers.
 
-Two of the fourteen are explained by the rule the compatibility map already
-applies to `httpHandlers` — their types live in assemblies this port does not
-carry:
+Two consequences are carried deliberately:
 
-| Module | Assembly |
-| --- | --- |
-| `ErrorHandlerModule` | `System.Web.Mobile` |
-| `ServiceModel` | `System.ServiceModel.Activation` |
+- `WindowsAuthentication` and `FileAuthorization` register faithfully and are
+  inert (ledger P84). Reaching their Windows-bound behavior fails actionably
+  rather than diverging silently; `<authentication mode="Windows">` is refused
+  at activation.
+- `DefaultAuthentication` comes from its golden row rather than from
+  `HttpModulesSection.CreateModules`' implicit append.
 
-The other eight are types the port **does** carry. `OutputCache`,
-`FormsAuthentication`, `RoleManager`, `AnonymousIdentification`, and `Profile`
-are now registered by the [forms authentication](forms-authentication.md)
-slice. `WindowsAuthentication`, `PassportAuthentication`, and
-`FileAuthorization` stay out with the reasons recorded there, and
-`<authentication mode="Windows">` is refused at activation rather than being
-silently inert.
+`ErrorHandlerModule` (`System.Web.Mobile`) and `ServiceModel`
+(`System.ServiceModel.Activation`) are absent from the golden's managed set and
+from this port, for the same reason: their assemblies are not carried.
 
-`DefaultAuthentication` is not one of the fourteen and is not at stake here:
-`HttpModulesSection.CreateModules` appends it to every module collection, as on
-Framework, so requests already get its anonymous principal.
+## What registration does not settle
 
-The [compatibility map](../compatibility.md) documents omissions from
-`buildProviders`, `pages/namespaces`, `pages/controls`, and `httpHandlers`.
-Dropping an entire collection is a larger divergence; the rest of the product
-baseline is Framework-derived, while this collection is the known exception.
+A module in the collection runs on every request, so registration is a
+behavioral claim in a way handler registration is not — but it is not a *feature*
+claim. What the authentication, roles, profile and anonymous-identity modules
+actually support is stated by the [compatibility map](../compatibility.md)'s own
+rows and by [forms authentication](forms-authentication.md); the rows behind
+them stay Partial until a real application reaches them.
 
-## Why the existing rule does not transfer
-
-The port ships Framework's `buildProviders` and `httpHandlers` collections whole,
-minus assembly-absent entries, and the map states the justification directly: a
-registered build provider "states nothing about whether the slice that compiles
-it exists yet." That holds because a provider or handler only executes when a
-matching file or URL arrives.
-
-**A module in `<httpModules>` runs on every request.** Registration is therefore
-a behavioral claim in a way handler registration is not, and the "ship it whole"
-precedent cannot simply be extended.
-
-## The decision
-
-The general policy remains undecided. Four entries have landed —
-`UrlAuthorization`, `UrlRoutingModule-4.0`, `Session`, and `ScriptModule-4.0`
-(which left the assembly-absent class when `Rehost.WebForms.Extensions` was
-carried) — each because a behavior story reached and tested it, preserving
-Framework order. That is the pattern so far, not a decision that the remaining
-baseline should land whole.
-
-`Session` carries one lesson for whoever decides the general policy: a module
-name in this collection is not only an identifier. `Global.asax` binds
-`Session_Start`/`Session_End` by matching it, so the registered name is part of
-the behavior, not merely a label.
-
-## What it costs today
-
-Session state, output caching, and forms authentication were each the worked
-example of the cost, and each is now fixed: the modules that would serve them
-were not registered and no diagnostic said so, which the project contract does
-not permit.
-
-What remains is the general policy. Each absent module needs classifying the
-way the IIS-role audit classifies its candidates — covered elsewhere,
-deliberately excluded, or missing and worth restoring — rather than being
-absent by accident.
+One lesson worth keeping for anyone amending the baseline: a name in this
+collection is not only an identifier. `Global.asax` binds
+`Session_Start`/`Session_End` by matching the registered module name, so the name
+is part of the behavior. The same is why an application's `remove`/re-add of
+`Session` puts a foreign type in the inherited slot without renaming it (MH2).
 
 ## Done when
 
-- Every one of Framework's fourteen entries is either registered, recorded as
-  assembly-absent, or recorded as a deliberate exclusion with a reason.
-- The compatibility map's shipped-configuration row is updated.
+- The feature rows behind the registered modules carry their own claims, or the
+  modules are recorded as deliberate exclusions with reasons.
