@@ -9,17 +9,10 @@ namespace Rehost.WebForms.Hosting.Tests;
 // composed name, and the subtree's rules — here an authorization deny — vanish (ledger P70).
 public sealed class CaseSensitiveDirectoryConfigOverKestrelTests(CaseSensitiveLiveScenario scenario)
 {
-    private LiveScenario RequireLive()
-    {
-        Assert.SkipWhen(
-            scenario.Live == null, "No case-sensitive filesystem is available on this platform.");
-        return scenario.Live!;
-    }
-
     [Fact]
     public async Task A_Directory_Web_Config_Denies_The_Request()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         var response = await live.Client.GetAsync("/Guarded/Secret.aspx");
 

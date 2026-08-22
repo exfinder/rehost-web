@@ -8,21 +8,9 @@ namespace Rehost.WebForms.Runtime.Tests.Util;
 // The order is NTFS's: names compared code unit by code unit after upper-casing, so digits sort
 // before letters, '_' after 'Z', and directories interleave with files. ext4 and APFS return hash
 // order, so an unsorted enumerator fails this on both.
-public sealed class FileEnumeratorTests : IClassFixture<FileEnumeratorTests.Volume>
+public sealed class FileEnumeratorTests(CaseSensitiveVolume volume)
+    : IClassFixture<CaseSensitiveVolume>
 {
-    public sealed class Volume : IDisposable
-    {
-        internal CaseSensitiveDirectory Directory { get; } = CaseSensitiveDirectory.Create();
-
-        public void Dispose() => Directory.Dispose();
-    }
-
-    private readonly string? _caseSensitiveRoot;
-
-    public FileEnumeratorTests(Volume volume)
-    {
-        _caseSensitiveRoot = volume.Directory.Path;
-    }
 
     [Fact]
     public void Enumerates_Entries_In_Ntfs_Order()
@@ -56,8 +44,7 @@ public sealed class FileEnumeratorTests : IClassFixture<FileEnumeratorTests.Volu
     [Fact]
     public void Names_Differing_Only_By_Case_Sort_Uppercase_First()
     {
-        Assert.SkipWhen(_caseSensitiveRoot == null, "No case-sensitive filesystem is available on this platform.");
-        var directory = Path.Combine(_caseSensitiveRoot!, "enum-" + Guid.NewGuid().ToString("N"));
+        var directory = Path.Combine(volume.RequirePath(), "enum-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         foreach (var name in new[] { "b.cs", "a.cs", "B.cs", "A.cs" })
         {

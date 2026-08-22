@@ -8,26 +8,12 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Util;
 
 // Every case needs a filesystem that treats File.txt and file.txt as distinct; the fixture
 // provides one or the test skips (Windows/NTFS cannot express the situation).
-public sealed class CanonicalCasePathTests : IClassFixture<CanonicalCasePathTests.Volume>
+public sealed class CanonicalCasePathTests(CaseSensitiveVolume volume)
+    : IClassFixture<CaseSensitiveVolume>
 {
-    public sealed class Volume : IDisposable
-    {
-        internal CaseSensitiveDirectory Directory { get; } = CaseSensitiveDirectory.Create();
-
-        public void Dispose() => Directory.Dispose();
-    }
-
-    private readonly string? _root;
-
-    public CanonicalCasePathTests(Volume volume)
-    {
-        _root = volume.Directory.Path;
-    }
-
     private string RequireRoot()
     {
-        Assert.SkipWhen(_root == null, "No case-sensitive filesystem is available on this platform.");
-        var root = Path.Combine(_root!, "app-" + Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(volume.RequirePath(), "app-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
         return root;
     }

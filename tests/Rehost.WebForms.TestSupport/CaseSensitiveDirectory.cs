@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Xunit;
 
 namespace Rehost.WebForms.TestSupport;
 
@@ -12,6 +13,13 @@ public sealed class CaseSensitiveDirectory : IDisposable
     private readonly string? _imagePath;
 
     public string? Path { get; }
+
+    public string RequirePath()
+    {
+        Assert.SkipWhen(
+            Path == null, "No case-sensitive filesystem is available on this platform.");
+        return Path!;
+    }
 
     private CaseSensitiveDirectory(DirectoryInfo? plainRoot, string? mountPoint, string? imagePath)
     {

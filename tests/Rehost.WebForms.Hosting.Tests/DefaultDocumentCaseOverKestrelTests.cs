@@ -9,17 +9,10 @@ namespace Rehost.WebForms.Hosting.Tests;
 // directory request answers 403 instead.
 public sealed class DefaultDocumentCaseOverKestrelTests(CaseSensitiveLiveScenario scenario)
 {
-    private LiveScenario RequireLive()
-    {
-        Assert.SkipWhen(
-            scenario.Live == null, "No case-sensitive filesystem is available on this platform.");
-        return scenario.Live!;
-    }
-
     [Fact]
     public async Task The_Root_Default_Document_Serves_On_A_Case_Sensitive_Filesystem()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         var response = await live.Client.GetAsync("/");
 
@@ -30,7 +23,7 @@ public sealed class DefaultDocumentCaseOverKestrelTests(CaseSensitiveLiveScenari
     [Fact]
     public async Task A_Differently_Cased_Candidate_Still_Serves()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
         var directory = Path.Combine(live.ApplicationPath, "CasedSub");
         Directory.CreateDirectory(directory);
         File.WriteAllText(Path.Combine(directory, "INDEX.html"), "cased-candidate");

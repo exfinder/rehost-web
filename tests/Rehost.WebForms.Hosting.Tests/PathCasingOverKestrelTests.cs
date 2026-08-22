@@ -9,17 +9,10 @@ namespace Rehost.WebForms.Hosting.Tests;
 // the nearest existing directory (ledger P71). Skips where no such filesystem exists.
 public sealed class PathCasingOverKestrelTests(CaseSensitiveLiveScenario scenario)
 {
-    private LiveScenario RequireLive()
-    {
-        Assert.SkipWhen(
-            scenario.Live == null, "No case-sensitive filesystem is available on this platform.");
-        return scenario.Live!;
-    }
-
     [Fact]
     public async Task A_Wrongly_Cased_Include_Above_The_Root_Folds_To_The_Real_File()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
         OutsideInclude.Write(live.ApplicationPath);
 
         var response = await live.Client.GetAsync("/ssi/EscapeLower.aspx");
@@ -31,7 +24,7 @@ public sealed class PathCasingOverKestrelTests(CaseSensitiveLiveScenario scenari
     [Fact]
     public async Task A_Wrongly_Cased_Configured_Master_Page_Composes_The_Page()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         var response = await live.Client.GetAsync("/master-cfg/Page.aspx");
 
@@ -43,7 +36,7 @@ public sealed class PathCasingOverKestrelTests(CaseSensitiveLiveScenario scenari
     [Fact]
     public async Task The_Site_Map_File_Is_Found_Under_Its_Real_Casing()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         var response = await live.Client.GetAsync("/sitemap/Show.aspx");
 
@@ -54,7 +47,7 @@ public sealed class PathCasingOverKestrelTests(CaseSensitiveLiveScenario scenari
     [Fact]
     public async Task Wrongly_Cased_Rooted_Paths_Fold_At_Data_Source_Mail_And_File_Sites()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         (await Probe(live, "xml", "/paths/data.xml")).ShouldBe("xml=<r><i n=\"site\" /></r>");
         (await Probe(live, "mail", "/paths/body.txt")).ShouldBe("body=site-body");

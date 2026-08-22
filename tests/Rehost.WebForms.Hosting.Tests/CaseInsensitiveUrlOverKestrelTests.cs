@@ -10,13 +10,6 @@ namespace Rehost.WebForms.Hosting.Tests;
 // insensitive behavior natively.
 public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario scenario)
 {
-    private LiveScenario RequireLive()
-    {
-        Assert.SkipWhen(
-            scenario.Live == null, "No case-sensitive filesystem is available on this platform.");
-        return scenario.Live!;
-    }
-
     // The page is created here and requested wrongly-cased first, so no other request in the
     // class can have warmed a cache under any casing: once one casing compiles, the build
     // cache's own case-insensitive key serves the rest without touching the filesystem, which
@@ -24,7 +17,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
     [Fact]
     public async Task A_Wrongly_Cased_Url_Serves_The_Page()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
         File.WriteAllText(
             Path.Combine(live.ApplicationPath, "Folded.aspx"),
             "<%@ Page Language=\"C#\" %>folded-page");
@@ -42,7 +35,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
     [Fact]
     public async Task A_Case_Collision_Fails_With_Both_Names_Rather_Than_Guessing()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
         File.WriteAllText(
             Path.Combine(live.ApplicationPath, "Extra.aspx"),
             "<%@ Page Language=\"C#\" %>upper");
@@ -63,7 +56,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
     [Fact]
     public async Task A_Genuinely_Missing_Page_Still_Renders_The_404()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         var response = await live.Client.GetAsync("/nothere.aspx");
 
@@ -75,7 +68,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
     [Fact]
     public async Task A_Wrongly_Cased_Static_File_Url_Serves()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
         var directory = Path.Combine(live.ApplicationPath, "Assets", "Inner");
         Directory.CreateDirectory(directory);
         File.WriteAllText(Path.Combine(directory, "Site.js"), "//static-body");
@@ -94,7 +87,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
     [Fact]
     public async Task A_Static_File_Case_Collision_Fails_With_Both_Names()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
         File.WriteAllText(Path.Combine(live.ApplicationPath, "Dup.js"), "//upper");
         File.WriteAllText(Path.Combine(live.ApplicationPath, "dup.js"), "//lower");
 
@@ -111,7 +104,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
     [Fact]
     public async Task A_Genuinely_Missing_Static_File_Still_Answers_404()
     {
-        var live = RequireLive();
+        var live = scenario.RequireLive();
 
         var response = await live.Client.GetAsync("/Assets/nothere.js");
 
