@@ -1,3 +1,6 @@
+using System.Runtime.CompilerServices;
+using Rehost.WebForms.Parity.Contracts;
+
 namespace Rehost.WebForms.Hosting.Tests;
 
 // Markers over the two host doors: classes keep IClassFixture wiring while every class on a
@@ -21,17 +24,54 @@ public abstract class Scenario
     internal ScenarioClient Client => Host.Client;
 }
 
-public abstract class ScopedWitnessScenario : Scenario
+// A traced request is one module: token minting, the request, and the stage read cannot drift
+// apart, and a stage array that comes back empty fails here rather than letting a negative
+// assertion pass vacuously.
+public abstract class WitnessScenario : Scenario
+{
+    private protected WitnessScenario(LiveScenario host)
+        : base(host)
+    {
+    }
+
+    internal async Task<(ScenarioResponse Response, string[] Stages)> TracedGetAsync(
+        object testClass, string pathAndQuery, [CallerMemberName] string method = "")
+    {
+        var token = TracedToken.For(testClass, method);
+        var response = await Client.GetAsync(TracedToken.Append(pathAndQuery, token));
+        return (response, await StagesOrThrowAsync(token, pathAndQuery));
+    }
+
+    internal async Task<(byte[] Raw, string[] Stages)> TracedRawGetAsync(
+        object testClass, string pathAndQuery, [CallerMemberName] string method = "")
+    {
+        var token = TracedToken.For(testClass, method);
+        var raw = await RawSocketProbe.GetRawResponseAsync(
+            Address, TracedToken.Append(pathAndQuery, token));
+        return (raw, await StagesOrThrowAsync(token, pathAndQuery));
+    }
+
+    private async Task<string[]> StagesOrThrowAsync(string token, string pathAndQuery)
+    {
+        var stages = await Host.Witness.StagesAsync(token);
+        return stages.Length > 0
+            ? stages
+            : throw new InvalidOperationException(
+                "The witness recorded no stages for " + token + " on " + pathAndQuery
+                + ": the request never entered the pipeline, or the fixture does not register"
+                + " the stage-recording module.");
+    }
+}
+
+public abstract class ScopedWitnessScenario : WitnessScenario
 {
     private protected ScopedWitnessScenario(LiveScenario host)
         : base(host)
     {
     }
-
-    internal ScopedWitness Witness => new(Host.Witness);
 }
 
-public abstract class WholeWitnessScenario : Scenario
+public abstract class WholeWitnessScenario : WitnessScenario
 {
     private protected WholeWitnessScenario(LiveScenario host)
         : base(host)
@@ -39,6 +79,30 @@ public abstract class WholeWitnessScenario : Scenario
     }
 
     internal HostWitness Witness => Host.Witness;
+}
+
+// Class + method makes tokens collision-free between classes interleaving on a shared host; a
+// bare literal reused by two classes would silently pool their stages. Method name alone is not
+// enough: classes legitimately repeat method names.
+file static class TracedToken
+{
+    internal static string For(object testClass, string method)
+    {
+        if (testClass is LiveScenario or Scenario)
+        {
+            throw new ArgumentException(
+                "Pass the test class, not the scenario: the token must carry the class whose"
+                + " stages it keys.",
+                nameof(testClass));
+        }
+
+        return testClass.GetType().Name + "." + method;
+    }
+
+    internal static string Append(string pathAndQuery, string token) =>
+        pathAndQuery
+        + (pathAndQuery.Contains('?') ? "&" : "?")
+        + WitnessProtocol.TokenKey + "=" + token;
 }
 
 public sealed class PageLiveScenario(ScenarioHostRegistry registry)

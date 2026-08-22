@@ -15,10 +15,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task EndRequest_Header_And_Cookie_Survive_Response_End()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=end&stamp=1&" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Amend.aspx?mode=end&stamp=1");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("amend-start|");
@@ -30,10 +27,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task EndRequest_Header_Survives_A_Terminating_Redirect()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=redirect&stamp=1&" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Amend.aspx?mode=redirect&stamp=1");
 
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe(PageRequests.RedirectTarget);
@@ -45,10 +39,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task EndRequest_Header_Survives_CompleteRequest()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=complete&stamp=1&" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Amend.aspx?mode=complete&stamp=1");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("amend-start|amend-tail|");
@@ -66,9 +57,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task An_Ended_Response_States_Its_Exact_Content_Length()
     {
-        var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address,
-            "/Amend.aspx?mode=end&stamp=1&" + WitnessToken.Query(WitnessToken.For(this)));
+        var (raw, _) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=end&stamp=1");
         var (headers, body) = SplitRaw(raw);
 
         headers.ShouldStartWith("HTTP/1.1 200");
@@ -81,9 +70,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task A_Terminating_Redirect_States_Its_Exact_Content_Length()
     {
-        var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address,
-            "/Amend.aspx?mode=redirect&stamp=1&" + WitnessToken.Query(WitnessToken.For(this)));
+        var (raw, _) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=redirect&stamp=1");
         var (headers, body) = SplitRaw(raw);
 
         headers.ShouldStartWith("HTTP/1.1 302");
@@ -97,11 +84,8 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task A_Flush_After_End_In_EndRequest_Seals_And_Forfeits_The_Length()
     {
-        var token = WitnessToken.For(this);
-        var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address, "/Amend.aspx?mode=end&stamp=1&fae=1&" + WitnessToken.Query(token));
+        var (raw, stages) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=end&stamp=1&fae=1");
         var (headers, body) = SplitRaw(raw);
-        var stages = await scenario.Witness.StagesAsync(token);
 
         headers.ShouldStartWith("HTTP/1.1 200");
         body.ShouldContain("amend-start|");
@@ -114,10 +98,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task An_Application_Flush_Still_Seals_The_Headers()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync(
-            "/Amend.aspx?mode=flush&stamp=1&" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Amend.aspx?mode=flush&stamp=1");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("amend-start|amend-tail|");

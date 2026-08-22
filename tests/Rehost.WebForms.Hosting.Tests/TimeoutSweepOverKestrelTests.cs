@@ -14,10 +14,7 @@ public sealed class TimeoutSweepOverKestrelTests(SweepLiveScenario scenario)
     [Fact]
     public async Task Sweep_Delivers_The_Timeout_At_The_Step_Boundary()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/TimeoutSweep.aspx?" + WitnessToken.Query(token))
-            .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/TimeoutSweep.aspx");
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("Request timed out.");
@@ -34,10 +31,7 @@ public sealed class TimeoutSweepOverKestrelTests(SweepLiveScenario scenario)
     [Fact]
     public async Task ThreadAbortOnTimeout_False_Suppresses_Delivery_But_Cancels_The_Token()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/TimeoutSweep.aspx?optout=1&" + WitnessToken.Query(token))
-            .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/TimeoutSweep.aspx?optout=1");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("sweep-page|");

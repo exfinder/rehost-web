@@ -17,9 +17,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task End_Stops_The_Page_And_Skips_To_EndRequest()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/End.aspx?" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/End.aspx");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before-end|");
@@ -37,9 +35,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Swallowing_Catch_Cannot_Unlock_The_Response()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/EndSwallow.aspx?" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/EndSwallow.aspx");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before|");
@@ -53,9 +49,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Catch_By_ThreadAbortException_Name_Never_Observes_Termination()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/CatchTae.aspx?" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/CatchTae.aspx");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before|");
@@ -67,9 +61,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Redirect_Emits_Object_Moved_And_Terminates()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/Redirect.aspx?" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Redirect.aspx");
 
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe(PageRequests.RedirectTarget);
@@ -85,9 +77,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task End_In_A_Module_Event_Skips_The_Handler()
     {
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/Default.aspx?module-end=1&" + WitnessToken.Query(token));
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Default.aspx?module-end=1");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("module|");

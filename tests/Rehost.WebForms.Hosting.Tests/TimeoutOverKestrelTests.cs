@@ -14,10 +14,7 @@ public sealed class TimeoutOverKestrelTests(TimeoutLiveScenario scenario)
     {
         await scenario.Client.GetAsync("/Slow.aspx?ms=0");
 
-        var token = WitnessToken.For(this);
-        var response = await scenario.Client.GetAsync("/Slow.aspx?ms=5000&" + WitnessToken.Query(token))
-            .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
-        var stages = await scenario.Witness.StagesAsync(token);
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Slow.aspx?ms=5000");
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("Request timed out.");
