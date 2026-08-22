@@ -446,6 +446,27 @@ internal sealed class ScenarioOptions
             }
         }
 
+        var ignoredByMode = serve
+            ? new (bool Present, string Option)[]
+            {
+                (machineConfigurationPath != null, "--machine-config"),
+                (holdGate != null, "--hold-gate"),
+            }
+            : [
+                (kestrelMaxBodyBytes != null, "--kestrel-max-body"),
+                (http2, "--http2"),
+                (postbacks.Count != 0, "--postback"),
+            ];
+        foreach (var (present, option) in ignoredByMode)
+        {
+            if (present)
+            {
+                throw new ArgumentException(
+                    option + " is not honored in " + (serve ? "--serve" : "batch")
+                    + " mode; remove it or switch the mode.");
+            }
+        }
+
         // The run mode always issues at least one request; a serve mode with nothing declared is
         // passive and driven by the test's own client.
         if (!serve && requests.Count == 0)
