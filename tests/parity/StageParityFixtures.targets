@@ -10,27 +10,25 @@
                                       would relocate output instead of failing quietly.
        Staged, not Content: the payload must not flow into consumers' output. -->
 
-  <Import Project="$(MSBuildThisFileDirectory)../FixtureStaging.targets" />
-
   <PropertyGroup>
     <ParityProbeTargetFramework Condition="'$(ParityProbeTargetFramework)' == ''">$(TargetFramework)</ParityProbeTargetFramework>
     <ParityStageGoldenSessions Condition="'$(ParityStageGoldenSessions)' == ''">true</ParityStageGoldenSessions>
     <ParityClearErrorsTempDirectory Condition="'$(ParityClearErrorsTempDirectory)' == ''">false</ParityClearErrorsTempDirectory>
   </PropertyGroup>
 
+  <!-- Declared before the import: the shared module derives the payload's build-graph edge
+       from this item, and item evaluation is file-ordered. -->
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
     <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
-    <ProjectReference
-      Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all" />
     <FixturePayloadProject
       Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
       AdditionalProperties="TargetFramework=$(ParityProbeTargetFramework)"
       MustNotLeakBesideHost="true" />
   </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)../FixtureStaging.targets" />
 
   <Target Name="StageParityPayload" AfterTargets="Build" DependsOnTargets="PrepareParityStaging;StageFixtures;StageFixtureBinPayload" />
 

@@ -6,9 +6,12 @@
       FixturePayloadProject  built into every bin; MustNotLeakBesideHost guards against
                              the assembly resolving beside the host instead of the bin
       FixtureBinPayload      already-built files for every bin
-      FixtureBinDir          the bin directories; ExtraPayload names per-bin additions
-    Anything else in a warm bin is a leftover that would keep resolving; leftovers are
-    deleted so the copies stay incremental without wipe-and-recopy.
+      FixtureBinFile         already-built files for some bins; Bins names them
+      FixtureBinDir          the bin directories
+    A payload's Bins metadata scopes it to the named fixtures. Build-graph edges for
+    payload projects are derived below; payload assemblies stay out of consumers' own
+    outputs and reach the application only through the fixture bin, as an application's
+    binaries do.
   -->
 
   <UsingTask
@@ -17,6 +20,9 @@
   <UsingTask
     TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageMappedFiles"
     AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
+  <UsingTask
+    TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageFixtureBins"
+    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
 
   <ItemGroup>
     <ProjectReference
@@ -24,6 +30,17 @@
       ReferenceOutputAssembly="false"
       PrivateAssets="all"
       SetTargetFramework="TargetFramework=net10.0" />
+    <_FixturePayloadPinned Include="@(FixturePayloadProject->HasMetadata('AdditionalProperties'))" />
+    <_FixturePayloadUnpinned Include="@(FixturePayloadProject)" Exclude="@(_FixturePayloadPinned)" />
+    <ProjectReference
+      Include="@(_FixturePayloadPinned)"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all"
+      SetTargetFramework="%(_FixturePayloadPinned.AdditionalProperties)" />
+    <ProjectReference
+      Include="@(_FixturePayloadUnpinned)"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
   </ItemGroup>
 
   <Target Name="StageFixtures">
@@ -44,31 +61,11 @@
     </MSBuild>
 
     <Error
-      Condition="!Exists('%(FixtureBinPayload.Identity)')"
-      Text="Fixture payload build output missing: %(FixtureBinPayload.Identity)" />
-    <Error
       Condition="'%(FixturePayloadProject.MustNotLeakBesideHost)' == 'true' And Exists('$(TargetDir)%(FixturePayloadProject.Filename).dll')"
       Text="%(FixturePayloadProject.Filename) must not be copied beside the host." />
   </Target>
 
-  <Target
-    Name="StageFixtureBinPayload"
-    DependsOnTargets="ResolveFixtureBinPayload"
-    Outputs="%(FixtureBinDir.Identity)">
-    <PropertyGroup>
-      <_FixtureBin>%(FixtureBinDir.Identity)</_FixtureBin>
-    </PropertyGroup>
-    <ItemGroup>
-      <_BinPayload Remove="@(_BinPayload)" />
-      <_BinPayload Include="@(FixtureBinPayload);%(FixtureBinDir.ExtraPayload)" />
-      <_StaleFixtureBinFile Remove="@(_StaleFixtureBinFile)" />
-      <_StaleFixtureBinFile
-        Include="$(_FixtureBin)/**"
-        Exclude="@(_BinPayload->'$(_FixtureBin)/%(Filename)%(Extension)')" />
-    </ItemGroup>
-
-    <Delete Files="@(_StaleFixtureBinFile)" />
-    <MakeDir Directories="$(_FixtureBin)" />
-    <Copy SourceFiles="@(_BinPayload)" DestinationFolder="$(_FixtureBin)" SkipUnchangedFiles="true" />
+  <Target Name="StageFixtureBinPayload" DependsOnTargets="ResolveFixtureBinPayload">
+    <StageFixtureBins BinDirs="@(FixtureBinDir)" Payload="@(FixtureBinPayload);@(FixtureBinFile)" />
   </Target>
 </Project>

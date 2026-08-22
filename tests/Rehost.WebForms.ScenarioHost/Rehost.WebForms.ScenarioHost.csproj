@@ -14,31 +14,7 @@
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <ProjectReference Include="../../src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
     <ProjectReference Include="../../src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
-    <ProjectReference
-      Include="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all" />
-    <ProjectReference
-      Include="../../src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all" />
     <ProjectReference Include="../Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
-    <!--
-      Built but not referenced: the probe assembly must reach the application through the
-      fixture's own bin directory, as an application's binaries do. Loading it beside the host
-      would prove nothing about bin resolution.
-    -->
-    <ProjectReference
-      Include="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all" />
-    <!-- The parity probes compile against real Framework too; the path probe is the same bytes
-         on both sides of a reading. -->
-    <ProjectReference
-      Include="../parity/src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
-      ReferenceOutputAssembly="false"
-      PrivateAssets="all"
-      SetTargetFramework="TargetFramework=net10.0" />
   </ItemGroup>
 
   <!-- Not referenced by the host: the OWIN assemblies are staged into the friendlyurls
@@ -55,6 +31,8 @@
     <FixturePayloadProject
       Include="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj"
       MustNotLeakBesideHost="true" />
+    <!-- The parity probes compile against real Framework too; the path probe is the same bytes
+         on both sides of a reading. -->
     <FixturePayloadProject
       Include="../parity/src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
       MustNotLeakBesideHost="true"
@@ -62,48 +40,25 @@
     <!-- The parity probe assembly resolves its contracts in-bin, as an application's would. -->
     <FixturePayloadProject
       Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
+      Bins="friendlyurls" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj"
+      Bins="friendlyurls" />
   </ItemGroup>
 
   <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageFixtures;StageFixtureBinPayload" />
 
   <Target Name="StageScenarioFixtureBins" BeforeTargets="StageFixtureBinPayload" DependsOnTargets="StageFixtures">
-    <MSBuild
-      Projects="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj"
-      Targets="GetTargetPath">
-      <Output TaskParameter="TargetOutputs" PropertyName="_FriendlyUrlsAssembly" />
-    </MSBuild>
-    <Error
-      Condition="!Exists('$(_FriendlyUrlsAssembly)')"
-      Text="FriendlyUrls build output missing: $(_FriendlyUrlsAssembly)" />
-
-    <MSBuild
-      Projects="../../src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj"
-      Targets="GetTargetPath">
-      <Output TaskParameter="TargetOutputs" PropertyName="_OwinHostAssembly" />
-    </MSBuild>
-
-    <ItemGroup>
-      <_OwinFixtureAssembly Include="$(_OwinHostAssembly)" />
-      <_OwinFixtureAssembly Include="$(TargetDir)Owin.dll" />
-      <_OwinFixtureAssembly Include="$(TargetDir)Microsoft.Owin.dll" />
-      <_OwinFixtureAssembly Include="$(TargetDir)Microsoft.Owin.Security.dll" />
-      <_OwinFixtureAssembly Include="$(TargetDir)Microsoft.Owin.Security.Cookies.dll" />
-    </ItemGroup>
-    <Error
-      Condition="!Exists('%(_OwinFixtureAssembly.Identity)')"
-      Text="OWIN fixture payload missing: %(_OwinFixtureAssembly.Identity)" />
-
     <ItemGroup>
       <_FixtureSourceDir Include="$([System.IO.Directory]::GetDirectories('$(MSBuildProjectDirectory)/fixtures'))" />
       <!-- The probe assembly leans on the shared journal, so its dependency ships too. -->
       <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.ScenarioProtocol.dll" />
-      <!-- Not Update: inside a target, Update applies metadata to every item. -->
-      <FixtureBinDir
-        Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')"
-        Exclude="$(TargetDir)fixtures/friendlyurls/bin" />
-      <FixtureBinDir
-        Include="$(TargetDir)fixtures/friendlyurls/bin"
-        ExtraPayload="$(_FriendlyUrlsAssembly);@(_OwinFixtureAssembly)" />
+      <FixtureBinFile
+        Include="$(TargetDir)Owin.dll;$(TargetDir)Microsoft.Owin.dll;$(TargetDir)Microsoft.Owin.Security.dll;$(TargetDir)Microsoft.Owin.Security.Cookies.dll"
+        Bins="friendlyurls" />
+      <FixtureBinDir Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')" />
     </ItemGroup>
   </Target>
 
