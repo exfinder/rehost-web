@@ -1,7 +1,4 @@
-using System;
-using System.IO;
-
-namespace Rehost.WebForms.Parity.Harness;
+namespace Rehost.WebForms.TestSupport;
 
 public static class RepositoryLocator
 {

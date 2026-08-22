@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Shouldly;
 using Xunit;
-using Rehost.WebForms.Parity.Harness;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Serialization;
 

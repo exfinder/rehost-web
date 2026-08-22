@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Parity.Harness;
 

@@ -1,8 +1,4 @@
-#if NET
-using System;
-using System.IO;
-
-namespace Rehost.WebForms.Parity.Harness;
+namespace Rehost.WebForms.TestSupport;
 
 public static class TestOutputPaths
 {
@@ -25,4 +21,3 @@ public static class TestOutputPaths
             "net10.0");
     }
 }
-#endif
