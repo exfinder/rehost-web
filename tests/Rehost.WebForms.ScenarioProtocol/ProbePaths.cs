@@ -22,4 +22,5 @@ public static class ProbePaths
     public const string AuthProfile = "/auth-profile";
     public const string Secret = "/Secret/secret";
     public const string ScenarioDefault = "/default";
+    public const string ModuleList = "/module-list.axd";
 }

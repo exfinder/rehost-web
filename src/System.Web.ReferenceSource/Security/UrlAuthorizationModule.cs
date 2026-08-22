@@ -76,6 +76,23 @@ namespace System.Web.Security {
                 throw new ArgumentException(SR.GetString(SR.Virtual_path_outside_application_not_supported), "virtualPath");
 
             if (!s_EnabledDetermined) {
+#if !NETFRAMEWORK
+                // The port models an integrated pool, so the merged system.webServer/modules
+                // snapshot answers this and the retired classic section cannot (P83). The list
+                // exists only once an application has initialized; an earlier caller must leave
+                // the answer undetermined rather than latch "not registered".
+                List<ModuleConfigurationInfo> integratedModules = HttpApplication.IntegratedModuleList;
+                if (integratedModules != null) {
+                    foreach (ModuleConfigurationInfo mod in integratedModules) {
+                        if (Type.GetType(mod.Type, false) == typeof(UrlAuthorizationModule)) {
+                            s_Enabled = true;
+                            break;
+                        }
+                    }
+
+                    s_EnabledDetermined = true;
+                }
+#else
                 if( !HttpRuntime.UseIntegratedPipeline) {
                     HttpModulesSection modulesSection = RuntimeConfig.GetConfig().HttpModules;
                     int len = modulesSection.Modules.Count;
@@ -97,6 +114,7 @@ namespace System.Web.Security {
                     }
                 }
                 s_EnabledDetermined = true;
+#endif
             }
             if (!s_Enabled)
                 return true;

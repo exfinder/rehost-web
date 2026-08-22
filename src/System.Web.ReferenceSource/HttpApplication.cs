@@ -2393,6 +2393,9 @@ namespace System.Web {
             }
 
             _managedHandlerModules = conditioned;
+            // IntegratedModuleList is how the rest of the runtime asks what registered; on IIS
+            // only the native wireup path filled it.
+            _moduleConfigInfo = moduleList;
             _moduleCollection = BuildIntegratedModuleCollection(moduleList);
 #endif
 

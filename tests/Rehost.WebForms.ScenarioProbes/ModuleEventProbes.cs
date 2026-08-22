@@ -18,14 +18,22 @@ public abstract class ModuleEventProbe : IHttpModule
         application.PostRequestHandlerExecute += (sender, _) =>
             Record(sender, "PostRequestHandlerExecute");
         application.EndRequest += (sender, _) => Record(sender, "EndRequest");
+        Extend(application);
+    }
+
+    private protected virtual void Extend(HttpApplication application)
+    {
     }
 
     public void Dispose()
     {
     }
 
+    private protected void Record(HttpContext context, string stage) =>
+        Witness.Stage(context.Request, _name + ":" + stage);
+
     private void Record(object? sender, string stage) =>
-        Witness.Stage(((HttpApplication)sender!).Context.Request, _name + ":" + stage);
+        Record(((HttpApplication)sender!).Context, stage);
 }
 
 public sealed class UnconditionedModuleProbe() : ModuleEventProbe("unconditioned");

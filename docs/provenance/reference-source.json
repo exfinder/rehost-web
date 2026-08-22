@@ -132,6 +132,14 @@
    ],
    "reason": "IIS request filtering's <fileExtensions> deny list is checked beside the hidden-segment rule in ValidatePath (fenced !NETFRAMEWORK), because the retired classic <httpHandlers> table was what had been refusing those extensions",
    "record": "docs/portability-ledger.md P86"
+  },
+  {
+   "files": [
+    "HttpApplication.cs",
+    "Security/UrlAuthorizationModule.cs"
+   ],
+   "reason": "with the shipped classic <httpModules> table retired, InitModules publishes the merged module list through IntegratedModuleList, which only IIS's native wireup used to fill, and UrlAuthorizationModule.CheckUrlAccessForPrincipal reads it instead of scanning the classic section (fenced !NETFRAMEWORK)",
+   "record": "docs/portability-ledger.md P83"
   }
  ]
 }

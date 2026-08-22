@@ -24,6 +24,11 @@ meet the same bar.
 | `defdoc-disabled` | `<defaultDocument enabled="false" />` app-wide: directory requests must 403 with the courtesy redirect suppressed (readings D12/D14), so no directory URL in it can ever serve. |
 | `session` | A `Session_Start` handler in `Global.asax` is app-global in a way that is easy to miss: it is one of the four conditions under which `SessionStateModule` *stops* discarding an unused new session (`SessionStateModule.cs:1285-1298`), so declaring it makes every session-enabled request in the application store a session and answer with `Set-Cookie` (reading S15). Hosting these tests on `page` would add that header to every `.aspx` response there permanently. Weaker than the other rows and recorded as such: measured against the suite as it stands, nothing breaks — the exact-cookie assertions run against probes, which take no session, and the one page-based cookie assertion is tolerant. |
 | `session-custom` | `<sessionState mode="Custom" customProvider="…">` conflicts with the default InProc mode, and a `sessionState` section names exactly one mode, so it cannot share an application with the InProc scenarios. |
+| `auth` | Forms authentication, roles and profile providers are app-global: every request through the host carries the authentication mode and provider set under test. |
+| `modules` | `<modules>` amendments are the claim, and the probe modules record a stage on every request in the application, which no other fixture's stage assertions could tolerate. |
+| `modules-rammfar` | `runAllManagedModulesForAllRequests="true"` nullifies the `managedHandler` condition for the whole collection, which is the opposite claim to `modules`. |
+| `migrated` | The surveyed production shape as one application: webServer-only modules including an auth gate that 403s a whole directory, `Session` swapped for a foreign type, and a handler `remove`/re-add. Every one of those is app-global. |
+| `classic-unflagged` | Classic registrations without the validation flag: activation is refused, so this application can never serve a request. |
 
 ## Host tenancy
 
