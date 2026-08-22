@@ -12,13 +12,10 @@ internal sealed class DeferredRoleClaimsIdentity : ClaimsIdentity
     {
     }
 
+    // Framework's Clone drops ClaimsIdentity.ExternalClaims, so a copy carries no deferred claims.
     internal DeferredRoleClaimsIdentity(ClaimsIdentity other)
         : base(other)
     {
-        if (other is DeferredRoleClaimsIdentity source)
-        {
-            deferred.AddRange(source.deferred);
-        }
     }
 
     // ClaimsIdentity.ExternalClaims takes List<Claim> here, not Framework's

@@ -78,6 +78,20 @@ in-memory classes. Literal `<machineKey>` (the `fixtures/farm` pair),
 The fixture, providers, and the script that produced this are not committed;
 the journey is reproducible from the table above.
 
+## Role-cookie readings
+
+Taken on winbox against shipped 4.8.1 binaries: `mscorlib.dll` and `System.dll`
+from `Framework64\v4.0.30319`, `System.Web.dll` from the GAC. Decompiled with
+`ilspycmd`, and R-RC1/R-RC3 also run as a probe against the live runtime.
+
+| # | Question | Reading |
+| --- | --- | --- |
+| R-RC1 | `ClaimsPrincipal(SerializationInfo, StreamingContext)` given only the eight entries `RolePrincipal.GetObjectData` writes for a cookie | No throw, `Identities` and `Claims` both empty. `Deserialize` walks `SerializationInfo`'s enumerator and matches two names, `System.Security.ClaimsPrincipal.Identities` and `.Version`; anything else is ignored and absence is not an error |
+| R-RC2 | Where `DynamicRoleClaimProvider` lives | `System.dll`, not `mscorlib`. Body is one line, `claimsIdentity.ExternalClaims.Add(claims)`, so the sequence is parked unevaluated |
+| R-RC3 | `ClaimsIdentity.ExternalClaims` | `internal Collection<IEnumerable<Claim>>`, reached from `System.dll` through `[FriendAccessAllowed]`. Parking an iterator does not walk it; `Claims` yields instance claims then walks the externals, re-walking on every enumeration. `HasClaim` and `ClaimsPrincipal.IsInRole` see them |
+| R-RC4 | `ClaimsIdentity.Clone()` and external claims | Dropped. `Clone` builds from `m_instanceClaims` and copies the scalar fields; it never reads `m_externalClaims` |
+| R-RC5 | `ClaimsPrincipal.DeserializeIdentities` | Reads each identity with `BinaryFormatter`, which is why a payload carrying `ClaimsPrincipal` state cannot be rebuilt here: `ClaimsIdentity`'s serialization ctor is stubbed the same way `ClaimsPrincipal`'s is |
+
 ## Done when
 
 - The five modules are registered and the four behaviors in R-FA1, R-FA4/R-FA5,
