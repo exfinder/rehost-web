@@ -280,6 +280,46 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Preflight_Rejects_A_Declared_Windows_Authentication_Mode()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <system.web>
+                <authentication mode="Windows" />
+              </system.web>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        var exception = Should.Throw<PlatformNotSupportedException>(
+            () => ApplicationConfigurationPreflight.Validate(configuration));
+
+        exception.Message.ShouldContain("mode=\"Windows\"");
+        exception.Message.ShouldContain("WindowsAuthenticationModule");
+    }
+
+    [Fact]
+    public void Preflight_Accepts_An_Application_That_Declares_No_Authentication_Mode()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <system.web>
+                <compilation debug="false" />
+              </system.web>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+    }
+
+    [Fact]
     public void Preflight_Rejects_State_Server_Session_Mode()
     {
         using var application = TemporaryApplication.Create();
