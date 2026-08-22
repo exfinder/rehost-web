@@ -4,28 +4,27 @@ Scope: registering Framework's authentication modules in the shipped root
 configuration and proving the sign-in journey. The module collection itself is
 owned by [shipped HTTP modules](shipped-http-modules.md).
 
-## Why nothing works today
+## Why nothing worked
 
-`Security/` and `Profile/` are imported and compiled — no `Compile Remove`
+`Security/` and `Profile/` were imported and compiled — no `Compile Remove`
 touches either tree (`Rehost.WebForms.Runtime.csproj:18-28`). Nothing runs
-them. The shipped root `<httpModules>` carries four entries
-(`configs/rehost-webforms.web.config:184-189`) and none of this slice's, where
-Framework registers `FormsAuthentication`, `RoleManager`,
+them. The shipped root `<httpModules>` carried four entries and none of this
+slice's, where Framework registers `FormsAuthentication`, `RoleManager`,
 `AnonymousIdentification`, and `Profile`
 (`third_party/microsoft/framework-config/web.config:232-239`).
 
 `DefaultAuthenticationModule` is registered implicitly
-(`Configuration/HttpModulesSection.cs:57`), so requests do carry an anonymous
-principal and URL authorization works against it. The visible failure is
-narrower: the `.ASPXAUTH` cookie is never read, `Request.IsAuthenticated` is
-always false, and a denied request ends as a bare 401 instead of the redirect
-to `loginUrl`, because that conversion lives in `FormsAuthenticationModule`
-(`Security/FormsAuthenticationModule.cs:76-82`). Silent, with no diagnostic.
+(`Configuration/HttpModulesSection.cs:57`), so requests already carried an
+anonymous principal and URL authorization worked against it. The visible
+failure was narrower: the `.ASPXAUTH` cookie was never read,
+`Request.IsAuthenticated` was always false, and a denied request ended as a
+bare 401 instead of the redirect to `loginUrl`, because that conversion lives
+in `FormsAuthenticationModule` (`Security/FormsAuthenticationModule.cs:76-82`).
+Silent, with no diagnostic.
 
-The shipped `machine.config` also declares the five section handlers
-(`:14,15,32,36,38`) while shipping no providers and no `LocalSqlServer`
-connection string, where Framework ships both
-(`framework-config/machine.config:153,244-261`).
+The shipped `machine.config` also declared the five section handlers while
+shipping no providers and no `LocalSqlServer` connection string, where
+Framework ships both (`framework-config/machine.config:153,244-261`).
 
 ## Scope
 
@@ -94,11 +93,21 @@ from `Framework64\v4.0.30319`, `System.Web.dll` from the GAC. Decompiled with
 
 ## Done when
 
+Landed:
+
 - The five modules are registered and the four behaviors in R-FA1, R-FA4/R-FA5,
   R-FA6, and R-FA8 are covered by standing scenario tests, plus R-FA9 for
-  caching.
+  caching (`FormsAuthenticationOverKestrelTests`).
 - `<authentication mode="Windows">` is refused at activation, with a test.
+- The compatibility map states partial support and names what is unproven.
+
+Open:
+
 - A sample application under `apps/` completes register, sign in, role check,
   and sign out through the built-in login controls against SQL Server, with its
   own Framework baseline, on all three operating systems.
-- The compatibility map states partial support and names what is unproven.
+- `InitFromEncryptedTicket` still discards the reason a ticket failed to
+  restore. Readings R-RC1 to R-RC5 exist because a platform failure there was
+  visible only as an extra role-store fetch per request. Framework's silence is
+  correct for a tampered cookie, so the question is whether to raise a
+  diagnostic beside it, not whether to stop swallowing.

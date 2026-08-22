@@ -17,10 +17,13 @@ carry:
 | `ErrorHandlerModule` | `System.Web.Mobile` |
 | `ServiceModel` | `System.ServiceModel.Activation` |
 
-The other eight are types the port **does** carry, absent with no recorded
-reason: `OutputCache`, `WindowsAuthentication`, `FormsAuthentication`,
-`PassportAuthentication`, `RoleManager`, `FileAuthorization`,
-`AnonymousIdentification`, and `Profile`.
+The other eight are types the port **does** carry. `OutputCache`,
+`FormsAuthentication`, `RoleManager`, `AnonymousIdentification`, and `Profile`
+are now registered by the [forms authentication](forms-authentication.md)
+slice. `WindowsAuthentication`, `PassportAuthentication`, and
+`FileAuthorization` stay out with the reasons recorded there, and
+`<authentication mode="Windows">` is refused at activation rather than being
+silently inert.
 
 `DefaultAuthentication` is not one of the fourteen and is not at stake here:
 `HttpModulesSection.CreateModules` appends it to every module collection, as on
@@ -59,14 +62,15 @@ the behavior, not merely a label.
 
 ## What it costs today
 
-Output caching and forms authentication still answer with silence: the modules
-that would serve them are not registered, and no diagnostic says so. The
-project contract does not permit that silent fallback. Session state was the
-worked example of the cost and is now fixed.
+Session state, output caching, and forms authentication were each the worked
+example of the cost, and each is now fixed: the modules that would serve them
+were not registered and no diagnostic said so, which the project contract does
+not permit.
 
-Each absent module needs classifying the way the IIS-role audit classifies its
-candidates — covered elsewhere, deliberately excluded, or missing and worth
-restoring — rather than being absent by accident.
+What remains is the general policy. Each absent module needs classifying the
+way the IIS-role audit classifies its candidates — covered elsewhere,
+deliberately excluded, or missing and worth restoring — rather than being
+absent by accident.
 
 ## Done when
 
