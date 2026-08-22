@@ -1,4 +1,4 @@
-namespace Rehost.WebForms.Parity.Contracts;
+namespace Rehost.WebForms.ScenarioProtocol;
 
 // Line prefixes of the trace file, shared by writers (host, staged probes, fixture
 // App_Code) and the readers that select by prefix. Complete expected lines stay literal

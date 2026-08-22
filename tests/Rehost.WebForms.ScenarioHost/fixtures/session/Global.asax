@@ -1,6 +1,6 @@
 <%@ Application Language="C#" %>
 <%@ Import Namespace="Rehost.WebForms.ScenarioProbes" %>
-<%@ Import Namespace="Rehost.WebForms.Parity.Contracts" %>
+<%@ Import Namespace="Rehost.WebForms.ScenarioProtocol" %>
 <script runat="server">
 
     void Session_Start(object sender, EventArgs e)

@@ -6,5 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
   </ItemGroup>
 </Project>

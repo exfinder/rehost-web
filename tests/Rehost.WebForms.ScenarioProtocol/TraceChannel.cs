@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
-using System.Threading;
 
-namespace Rehost.WebForms.Parity.Contracts;
+namespace Rehost.WebForms.ScenarioProtocol;
 
 // Scenario events come from places that share no stream — a bin assembly before the application
 // starts, generated App_Code and Global.asax, and the host process itself — so they meet in one
@@ -14,7 +10,7 @@ public static class TraceChannel
 {
     public const string TraceVariable = "REHOST_SCENARIO_TRACE";
 
-    private static readonly object Gate = new object();
+    private static readonly object Gate = new();
 
     public static void Record(string entry)
     {
@@ -72,7 +68,7 @@ public static class TraceChannel
     {
         if (!File.Exists(path))
         {
-            return new List<string>();
+            return [];
         }
 
         using var stream = new FileStream(

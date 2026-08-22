@@ -1,6 +1,6 @@
 using System.Text;
 using Shouldly;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using Xunit;
 using Rehost.WebForms.TestSupport;
 

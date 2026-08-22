@@ -1,5 +1,5 @@
 using Shouldly;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Hosting.Tests;

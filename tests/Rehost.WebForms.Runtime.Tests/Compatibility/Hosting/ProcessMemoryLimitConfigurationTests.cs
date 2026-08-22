@@ -1,4 +1,4 @@
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using System.Web.Hosting;
 using Shouldly;
 using Rehost.WebForms.Hosting;

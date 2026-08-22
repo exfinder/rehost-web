@@ -1,5 +1,5 @@
 using System.Web;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 
 namespace Rehost.WebForms.ScenarioProbes;
 

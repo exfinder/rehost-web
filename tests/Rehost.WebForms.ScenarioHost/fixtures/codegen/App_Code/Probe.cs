@@ -1,5 +1,5 @@
 using System;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using Rehost.WebForms.ScenarioProbes;
 
 // Compiled at runtime into the App_Code assembly. It references a type from the sub-directory

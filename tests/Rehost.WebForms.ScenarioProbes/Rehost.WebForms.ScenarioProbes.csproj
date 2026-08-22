@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
-    <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
   </ItemGroup>
 
   <Import Project="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />

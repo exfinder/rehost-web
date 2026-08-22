@@ -22,7 +22,7 @@
       Include="../../src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj"
       ReferenceOutputAssembly="false"
       PrivateAssets="all" />
-    <ProjectReference Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
     <!--
       Built but not referenced: the probe assembly must reach the application through the
       fixture's own bin directory, as an application's binaries do. Loading it beside the host
@@ -59,6 +59,9 @@
       Include="../parity/src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
       MustNotLeakBesideHost="true"
       AdditionalProperties="TargetFramework=net10.0" />
+    <!-- The parity probe assembly resolves its contracts in-bin, as an application's would. -->
+    <FixturePayloadProject
+      Include="../parity/src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
   </ItemGroup>
 
   <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageScenarioFixtures;PruneStaleScenarioFixtures;StageFixtureBinPayload" />
@@ -123,7 +126,7 @@
 
     <ItemGroup>
       <!-- The probe assembly leans on the shared journal, so its dependency ships too. -->
-      <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.Parity.Contracts.dll" />
+      <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.ScenarioProtocol.dll" />
       <!-- Not Update: inside a target, Update applies metadata to every item. -->
       <FixtureBinDir
         Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')"

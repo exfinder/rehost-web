@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Shouldly;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using Xunit;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;

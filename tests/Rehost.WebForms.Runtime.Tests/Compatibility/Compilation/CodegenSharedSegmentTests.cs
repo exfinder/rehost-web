@@ -1,4 +1,4 @@
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using Shouldly;
 using Xunit;
 using Rehost.WebForms.TestSupport;

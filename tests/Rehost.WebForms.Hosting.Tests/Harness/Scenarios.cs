@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 
 namespace Rehost.WebForms.Hosting.Tests;
 

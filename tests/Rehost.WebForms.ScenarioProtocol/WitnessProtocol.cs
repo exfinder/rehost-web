@@ -1,4 +1,4 @@
-namespace Rehost.WebForms.Parity.Contracts;
+namespace Rehost.WebForms.ScenarioProtocol;
 
 // Grammar of the live witness channel: the query key that tags a request with its test's
 // token, and the event prefixes the witness readers select by.

@@ -1,4 +1,4 @@
-namespace Rehost.WebForms.Parity.Contracts;
+namespace Rehost.WebForms.ScenarioProtocol;
 
 public static class ProbeHeaders
 {

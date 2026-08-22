@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Web;
 using System.Web.SessionState;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 
 namespace Rehost.WebForms.ScenarioProbes;
 

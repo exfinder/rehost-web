@@ -1,4 +1,4 @@
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 
 [assembly: System.Web.PreApplicationStartMethod(
     typeof(Rehost.WebForms.ScenarioProbes.PreStartProbe),

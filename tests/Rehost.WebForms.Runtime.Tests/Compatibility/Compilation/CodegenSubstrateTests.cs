@@ -1,5 +1,5 @@
 using Shouldly;
-using Rehost.WebForms.Parity.Contracts;
+using Rehost.WebForms.ScenarioProtocol;
 using Xunit;
 using static Rehost.WebForms.Runtime.Tests.Compatibility.Compilation.BatchTrace;
 
