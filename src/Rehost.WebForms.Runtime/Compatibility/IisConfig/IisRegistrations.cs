@@ -11,14 +11,30 @@ namespace System.Web.IisConfig;
 internal sealed class IisRegistration
 {
     private readonly Dictionary<string, string> _attributes;
+    private readonly IisPreCondition _preConditionOutcome;
 
-    internal IisRegistration(string name, Dictionary<string, string> attributes)
+    internal IisRegistration(
+        string name,
+        Dictionary<string, string> attributes,
+        IisPreCondition preConditionOutcome)
     {
         Name = name;
         _attributes = attributes;
+        _preConditionOutcome = preConditionOutcome;
     }
 
     internal string Name { get; }
+
+    internal bool PreConditionSatisfied => _preConditionOutcome.Satisfied;
+
+    // Per-request, not decided here: the pipeline runs the entry only for a managed handler
+    // (MH10). The preCondition attribute text stays verbatim even when this reads false.
+    internal bool RequiresManagedHandler => _preConditionOutcome.RequiresManagedHandler;
+
+    internal IisRegistration WithoutManagedHandlerCondition() =>
+        RequiresManagedHandler
+            ? new IisRegistration(Name, _attributes, _preConditionOutcome.WithoutManagedHandler())
+            : this;
 
     internal string? Type => Attribute("type");
 
@@ -50,31 +66,52 @@ internal sealed class IisRegistrationSection
     private static readonly string[] ModuleRequiredAttributes = { "name" };
     private static readonly string[] HandlerRequiredAttributes = { "name", "path", "verb" };
 
+    private const string RunAllManagedModulesAttribute = "runAllManagedModulesForAllRequests";
+
     private readonly List<Slot> _inherited = new();
     private readonly List<IisRegistration> _fresh = new();
     private readonly string _sectionName;
+    private readonly string _entryKind;
     private readonly IisRegistrationPlacement _placement;
     private readonly bool _clearHonored;
+    private readonly bool _runAllManagedModulesHonored;
     private readonly string[] _requiredAttributes;
     private bool _inheritanceSealed;
+    private bool _runAllManagedModules;
 
     private IisRegistrationSection(
         string sectionName,
+        string entryKind,
         IisRegistrationPlacement placement,
         bool clearHonored,
+        bool runAllManagedModulesHonored,
         string[] requiredAttributes)
     {
         _sectionName = sectionName;
+        _entryKind = entryKind;
         _placement = placement;
         _clearHonored = clearHonored;
+        _runAllManagedModulesHonored = runAllManagedModulesHonored;
         _requiredAttributes = requiredAttributes;
     }
 
     internal static IisRegistrationSection ForModules() =>
-        new("modules", IisRegistrationPlacement.Tail, clearHonored: false, ModuleRequiredAttributes);
+        new(
+            "modules",
+            "Module",
+            IisRegistrationPlacement.Tail,
+            clearHonored: false,
+            runAllManagedModulesHonored: true,
+            ModuleRequiredAttributes);
 
     internal static IisRegistrationSection ForHandlers() =>
-        new("handlers", IisRegistrationPlacement.Head, clearHonored: true, HandlerRequiredAttributes);
+        new(
+            "handlers",
+            "Handler",
+            IisRegistrationPlacement.Head,
+            clearHonored: true,
+            runAllManagedModulesHonored: false,
+            HandlerRequiredAttributes);
 
     internal void SealInheritance()
     {
@@ -88,20 +125,20 @@ internal sealed class IisRegistrationSection
 
         if (_placement == IisRegistrationPlacement.Head)
         {
-            effective.AddRange(_fresh);
+            AddEffective(effective, _fresh);
         }
 
         foreach (var slot in _inherited)
         {
             if (slot.Row != null)
             {
-                effective.Add(slot.Row);
+                AddEffective(effective, slot.Row);
             }
         }
 
         if (_placement == IisRegistrationPlacement.Tail)
         {
-            effective.AddRange(_fresh);
+            AddEffective(effective, _fresh);
         }
 
         return effective.ToArray();
@@ -109,6 +146,11 @@ internal sealed class IisRegistrationSection
 
     internal void Apply(XmlNode sectionNode, string configPath)
     {
+        if (_runAllManagedModulesHonored)
+        {
+            ApplyRunAllManagedModules(sectionNode, configPath);
+        }
+
         foreach (XmlNode node in sectionNode.ChildNodes)
         {
             if (node.NodeType != XmlNodeType.Element)
@@ -134,6 +176,49 @@ internal sealed class IisRegistrationSection
                     "'" + configPath + "' contains unsupported element <" + node.Name
                     + "> inside <" + _sectionName + ">.");
             }
+        }
+    }
+
+    private void AddEffective(List<IisRegistration> effective, List<IisRegistration> rows)
+    {
+        foreach (var row in rows)
+        {
+            AddEffective(effective, row);
+        }
+    }
+
+    private void AddEffective(List<IisRegistration> effective, IisRegistration row)
+    {
+        if (!row.PreConditionSatisfied)
+        {
+            return;
+        }
+
+        effective.Add(_runAllManagedModules ? row.WithoutManagedHandlerCondition() : row);
+    }
+
+    private void ApplyRunAllManagedModules(XmlNode sectionNode, string configPath)
+    {
+        var value = sectionNode.Attributes?[RunAllManagedModulesAttribute]?.Value;
+        if (value == null)
+        {
+            return;
+        }
+
+        if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            _runAllManagedModules = true;
+        }
+        else if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
+        {
+            _runAllManagedModules = false;
+        }
+        else
+        {
+            throw new ConfigurationErrorsException(
+                "<" + _sectionName + " " + RunAllManagedModulesAttribute + "=\"" + value
+                + "\"> in '" + configPath + "' is not a boolean; IIS accepts only \"true\" or"
+                + " \"false\".");
         }
     }
 
@@ -210,7 +295,13 @@ internal sealed class IisRegistrationSection
             }
         }
 
-        return new IisRegistration(attributes["name"], attributes);
+        var name = attributes["name"];
+        attributes.TryGetValue("preCondition", out var preCondition);
+
+        return new IisRegistration(
+            name,
+            attributes,
+            IisPreConditions.Evaluate(_entryKind, name, preCondition, configPath));
     }
 
     private static bool Matches(string entry, string name) =>

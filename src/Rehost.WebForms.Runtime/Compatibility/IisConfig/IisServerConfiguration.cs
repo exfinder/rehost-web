@@ -66,10 +66,10 @@ internal sealed class IisServerConfiguration
     {
         var sections = new Sections();
 
-        ApplyFile(baselineConfigPath, required: true, sections);
+        ApplyFile(baselineConfigPath, required: true, application: false, sections);
         sections.Modules.SealInheritance();
         sections.Handlers.SealInheritance();
-        ApplyFile(applicationConfigPath, required: false, sections);
+        ApplyFile(applicationConfigPath, required: false, application: true, sections);
 
         return new IisServerConfiguration(
             sections.StaticContent,
@@ -84,7 +84,11 @@ internal sealed class IisServerConfiguration
         _current = configuration;
     }
 
-    private static void ApplyFile(string configPath, bool required, Sections sections)
+    private static void ApplyFile(
+        string configPath,
+        bool required,
+        bool application,
+        Sections sections)
     {
         if (!File.Exists(configPath))
         {
@@ -100,6 +104,11 @@ internal sealed class IisServerConfiguration
 
         var document = new XmlDocument();
         document.Load(configPath);
+
+        if (application)
+        {
+            ClassicSectionValidation.Validate(document, configPath);
+        }
 
         var staticContentNode = document.SelectSingleNode(
             "/configuration/system.webServer/staticContent");

@@ -83,6 +83,17 @@ public sealed class ShippedRegistrationBaselineTests
         page.PreCondition.ShouldBe("integratedMode,runtimeVersionv4.0");
     }
 
+    // Reading MH10: every golden module row carries preCondition="managedHandler", so the shipped
+    // defaults sit out the requests a native handler serves, while no handler row does.
+    [Fact]
+    public void Every_Baseline_Module_Row_Is_Marked_Per_Request_Conditional()
+    {
+        var configuration = ShippedBaseline();
+
+        configuration.Modules.ShouldAllBe(module => module.RequiresManagedHandler);
+        configuration.Handlers.ShouldAllBe(handler => !handler.RequiresManagedHandler);
+    }
+
     // The native rows' modules= names stay unresolved text; the bridge to the port's
     // reimplementations is not this seam's business.
     [Fact]
