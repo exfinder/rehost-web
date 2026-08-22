@@ -19,108 +19,44 @@ namespace Rehost.WebForms.Parity.AdapterHost;
 
 internal static class Program
 {
-    private const int SchemaVersion = 2;
-
     // The asynchronous handler parks until its gate opens. Releasing after the request is in
     // flight keeps the completion on a thread the pipeline has already let go of; overshooting
     // only makes the request more asynchronous.
     private static readonly TimeSpan GateReleaseDelay = TimeSpan.FromMilliseconds(100);
     private static readonly TimeSpan ClientTimeout = TimeSpan.FromSeconds(30);
 
-    private static readonly ParityOperation[] SupportedOperations =
-    {
-        ParityOperation.Run,
-        ParityOperation.Verify,
-        ParityOperation.RunSession
-    };
-
-    public static async Task<int> Main(string[] args)
-    {
-        using var diagnostics = new RuntimeDiagnosticListener();
-
-        try
+    public static Task<int> Main(string[] args) => ParityHostProgram.RunAsync(
+        args,
+        new ParityHostDefinition
         {
-            var command = ParityCommandLine.Parse(
-                args,
-                SupportedOperations,
-                "dotnet Rehost.WebForms.Parity.AdapterHost.dll");
-            var basePath = AppContext.BaseDirectory;
-            var manifestPath = command.ManifestPath
-                ?? Path.Combine(basePath, "metadata", "sessions.json");
-            var fixtureRoot = command.FixtureRoot ?? Path.Combine(basePath, "fixture");
-            var manifest = PhaseRunner.InPhase(
-                "manifest",
-                () => ManifestLoader.Load(manifestPath));
-
-            if (command.Operation == ParityOperation.RunSession)
+            ExecutableName = "dotnet Rehost.WebForms.Parity.AdapterHost.dll",
+            SchemaVersion = 2,
+            // Frozen: compared against the committed golden.
+            Provenance = new TraceProvenance
             {
-                var session = ManifestLoader.FindSession(manifest, command.SessionName!);
-                var sessionObservation = await RunSessionAsync(session, fixtureRoot);
-                Console.Out.WriteLine(ParityJson.Serialize(sessionObservation));
-                return 0;
-            }
-
-            var trace = new PipelineTrace
-            {
-                SchemaVersion = SchemaVersion,
-                // Frozen: compared against the committed golden.
-                Provenance = new TraceProvenance
-                {
-                    Oracle = "Rehost WebForms ASP.NET Core adapter",
-                    TargetFramework = "net10.0",
-                    RuntimeRequirement = ".NET 10",
-                    ManagedEntryPoint =
-                        "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
-                    ActivationEntryPoint =
-                        "AddRehostWebForms + UseRehostWebForms over Kestrel",
-                    Fixture = "precompiled-handler-and-request-body-v2"
-                },
-                Sessions = manifest.Sessions
-                    .Select(session => PhaseRunner.InPhase(
-                        "session:" + session.Name,
-                        () => SessionChildProcess.Run(
-                            typeof(Program).Assembly,
-                            session,
-                            manifestPath,
-                            fixtureRoot)))
-                    .ToList()
-            };
-
-            if (command.Operation == ParityOperation.Verify)
-            {
-                PhaseRunner.InPhase(
-                    "verification",
-                    () =>
-                    {
-                        GoldenTrace.Verify(
-                            command.ExpectedPath
-                                ?? Path.Combine(basePath, "oracle", "sessions.json"),
-                            trace,
-                            TraceComparison.Adapter);
-                        Console.Error.WriteLine(
-                            "Adapter observation matches the Framework golden trace across "
-                            + trace.Sessions.Count
-                            + " session(s).");
-                    });
-            }
-            else
-            {
-                Console.Out.WriteLine(ParityJson.Serialize(trace));
-            }
-
-            return 0;
-        }
-        catch (PhaseException exception)
-        {
-            DiagnosticWriter.Write(exception.Phase, exception.InnerException!);
-            return 1;
-        }
-        catch (Exception exception)
-        {
-            DiagnosticWriter.Write("command-line", exception);
-            return 1;
-        }
-    }
+                Oracle = "Rehost WebForms ASP.NET Core adapter",
+                TargetFramework = "net10.0",
+                RuntimeRequirement = ".NET 10",
+                ManagedEntryPoint =
+                    "System.Web.HttpRuntime.ProcessRequest(HttpWorkerRequest)",
+                ActivationEntryPoint =
+                    "AddRehostWebForms + UseRehostWebForms over Kestrel",
+                Fixture = "precompiled-handler-and-request-body-v2"
+            },
+            SupportedOperations =
+            [
+                ParityOperation.Run,
+                ParityOperation.Verify,
+                ParityOperation.RunSession
+            ],
+            Comparison = TraceComparison.Adapter,
+            VerifiedMessage = (trace, expected) =>
+                "Adapter observation matches the Framework golden trace across "
+                + trace.Sessions.Count
+                + " session(s).",
+            HostAssembly = typeof(Program).Assembly,
+            RunSession = RunSessionAsync
+        });
 
     private static async Task<SessionObservation> RunSessionAsync(
         SessionSpecification session,
