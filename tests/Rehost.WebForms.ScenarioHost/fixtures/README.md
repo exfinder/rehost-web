@@ -31,11 +31,11 @@ reaches one host process through `ScenarioHostRegistry` (an assembly fixture),
 and `PageHostSharingTests` pins that contract. Classes on it must tolerate
 other classes' requests interleaving:
 
-- witness tokens come from `WitnessToken.For`, whose class-plus-method
-  derivation keeps stage streams collision-free;
+- stage reads go through `TracedGetAsync`, whose class-plus-method token keeps
+  streams collision-free;
 - the unfiltered witness readers (`EventsAsync`, `HandlerEntriesAsync`,
-  `WaitForAsync`) return process-wide events — dedicated-host tools, never for
-  a shared-host assertion;
+  `WaitForAsync`) return process-wide events, so only markers whose base class
+  grants the whole-process witness (`Scenarios.cs`) can spell them;
 - the shared façade exposes no trace view: the trace file cannot be
   filtered by class;
 - no write into the application directory may change application startup
@@ -54,6 +54,6 @@ beyond the per-fixture conflicts above:
 - `TimeoutSweepOverKestrelTests` runs a dedicated host over the `page` payload
   (`SweepLiveScenario`): its probe presents every registered request as
   expired, so any co-tenant's in-flight request would be spuriously timed out.
-- `timeout`, `postback`, `body`, and the collection fixtures stay dedicated for
-  the reasons in the table: their configuration or process-global claims are
-  what is under test.
+- `timeout` and the collection fixtures stay dedicated for the reasons in the
+  table: their configuration or process-global claims are what is under test.
+  `postback` and `body` are registry-shared like `page`.

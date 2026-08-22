@@ -40,8 +40,9 @@ Walk down; stop at the first rung that fits.
    exercises page machinery, since every page costs the host a compilation
    episode at startup.
    Write every scenario to stay correct with other classes' requests
-   interleaved on the same host — witness reads filtered by a
-   `WitnessToken.For` token, in-application state (page statics, cache
+   interleaved on the same host — stage reads through
+   `scenario.TracedGetAsync(this, …)`, whose class-plus-method token keeps
+   streams collision-free, in-application state (page statics, cache
    entries) keyed per request, and no assertion that the host saw only this
    class's traffic. A scenario that cannot meet this has a structural reason
    for isolation; record it with the fixture.
@@ -68,8 +69,11 @@ response.Text.ShouldContain("...");
 - Evidence recording must never be able to fail the request being observed:
   a probe that throws from its own recording turns the evidence channel into
   the failure (the lost-reset post-mortem).
-- Assertion hierarchy: the typed response first; server-side facts through the
-  fixture's witness endpoint (`scenario.Witness`). Nothing may poll the trace
+- Assertion hierarchy: the typed response first; server-side facts through a
+  traced request — `scenario.TracedGetAsync(this, …)` returns the response
+  together with its stage stream and throws on an empty one, so a stage
+  negative cannot pass vacuously — or, on markers whose base class grants the
+  whole-process witness, `scenario.Witness`. Nothing may poll the trace
   file for assertions — a polled shared file once lost an abort marker to
   Windows sharing semantics. Raw trace strings never appear in tests —
   string negatives over a trace can pass vacuously.

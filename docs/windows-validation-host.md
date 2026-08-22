@@ -85,7 +85,8 @@ needs an interactive desktop session.
 
 Drive PowerShell Core with `pwsh -NoProfile -EncodedCommand <base64 UTF-16LE>`;
 plain quoting is mangled by the ssh shell before `pwsh` sees it. `pwsh` is Core
-7.6.3 (not `powershell.exe` 5.1); the dotnet SDK is 10.0.302.
+7.6.3 (not `powershell.exe` 5.1); global.json pins SDK 10.0.302 as a floor and
+rolls forward within 10.0.
 
 The scp-style URL matters for the push: `ssh://host/C:/...` fails to parse,
 `host:C:/...` works.
