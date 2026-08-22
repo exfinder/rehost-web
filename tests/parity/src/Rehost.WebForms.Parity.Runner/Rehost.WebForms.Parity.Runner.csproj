@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net481'">

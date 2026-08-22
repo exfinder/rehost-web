@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Hosting;
 using Rehost.WebForms.Parity.Contracts;
@@ -55,12 +54,13 @@ internal static class Program
             Path.Combine(fixtureRoot, session.Fixture));
         var applicationId = "portable-parity:" + session.Name;
 
-        PhaseRunner.InPhase(
-            "fixture-validation",
-            () => FixtureValidator.Validate(applicationPath, typeof(Program).Assembly));
-        PhaseRunner.InPhase(
-            "host-registration",
-            () => WebFormsApplication.Initialize(new WebFormsApplicationOptions
+        return ClassicPipelineSession.Run(
+            session,
+            applicationId,
+            applicationPath,
+            typeof(PortableSessionRunner),
+            typeof(Program).Assembly,
+            beforeActivation: () => WebFormsApplication.Initialize(new WebFormsApplicationOptions
             {
                 ApplicationId = applicationId,
                 PhysicalRootPath = applicationPath,
@@ -79,78 +79,5 @@ internal static class Program
                 CompilationTempDirectory = Path.GetFullPath(
                     Path.Combine(fixtureRoot, "temp"))
             }));
-
-        var manager = PhaseRunner.InPhase(
-            "application-activation",
-            ApplicationManager.GetApplicationManager);
-        var applicationActivated = false;
-        PhaseRunner.InPhase("application-activation", manager.Open);
-
-        try
-        {
-            var registered = PhaseRunner.InPhase(
-                "application-activation",
-                () => manager.CreateObject(
-                    applicationId,
-                    typeof(PortableSessionRunner),
-                    "/",
-                    PathUtilities.EnsureTrailingDirectorySeparator(applicationPath),
-                    true,
-                    true));
-            applicationActivated = true;
-
-            if (registered is not IClassicPipelineRunner runner)
-            {
-                throw new InvalidOperationException(
-                    "ApplicationManager did not return an IClassicPipelineRunner.");
-            }
-
-            var observation = new SessionObservation { Name = session.Name };
-
-            foreach (var step in session.Steps)
-            {
-                observation.Requests.AddRange(
-                    PhaseRunner.InPhase(
-                        "step:" + string.Join(",", step.Select(request => request.Name)),
-                        () => runner.RunStep(step)));
-            }
-
-            // StopObject runs the registered object's shutdown notification while the
-            // application is still callable; ShutdownApplication is what tears it down.
-            PhaseRunner.InPhase(
-                "application-cleanup",
-                () => manager.StopObject(applicationId, typeof(PortableSessionRunner)));
-            observation.ApplicationEvents = PhaseRunner.InPhase(
-                "application-cleanup",
-                runner.DrainApplicationEvents);
-            observation.SessionEvents = PhaseRunner.InPhase(
-                "application-cleanup",
-                runner.DrainSessionEvents);
-            applicationActivated = false;
-
-            PhaseRunner.InPhase(
-                "application-cleanup",
-                () =>
-                {
-                    manager.ShutdownApplication(applicationId);
-                    manager.Close();
-                });
-
-            return observation;
-        }
-        finally
-        {
-            if (applicationActivated)
-            {
-                PhaseRunner.InPhase(
-                    "application-cleanup",
-                    () =>
-                    {
-                        manager.StopObject(applicationId, typeof(PortableSessionRunner));
-                        manager.ShutdownApplication(applicationId);
-                        manager.Close();
-                    });
-            }
-        }
     }
 }
