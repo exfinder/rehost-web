@@ -32,55 +32,38 @@
       MustNotLeakBesideHost="true" />
   </ItemGroup>
 
-  <Target Name="StageParityPayload" AfterTargets="Build" DependsOnTargets="StageParityFixtures;StageFixtureBinPayload" />
+  <Target Name="StageParityPayload" AfterTargets="Build" DependsOnTargets="PrepareParityStaging;StageFixtures;StageFixtureBinPayload" />
 
   <Target Name="PrepareParityStaging">
     <PropertyGroup>
       <_FixtureTemp>$(TargetDir)fixture/temp</_FixtureTemp>
+      <_TempDirectoryQuery>/configuration/system.web/compilation/@tempDirectory</_TempDirectoryQuery>
     </PropertyGroup>
     <ItemGroup>
       <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.Parity.Contracts.dll;$(TargetDir)Rehost.WebForms.Parity.Runner.dll" />
       <FixtureBinDir Include="$(TargetDir)fixture/app/bin;$(TargetDir)fixture/app-errors/bin" />
-      <_ParityStageInput Include="$(MSBuildThisFileDirectory)fixture/web.config;$(MSBuildThisFileDirectory)fixture/errors.web.config;$(MSBuildThisFileDirectory)sessions.json" />
-      <_ParityStageOutput Include="$(TargetDir)fixture/app/web.config;$(TargetDir)fixture/app-errors/web.config;$(TargetDir)metadata/sessions.json" />
-      <_ParityStageInput Include="$(MSBuildThisFileDirectory)artifacts/golden/sessions.json" Condition="'$(ParityStageGoldenSessions)' == 'true'" />
-      <_ParityStageOutput Include="$(TargetDir)oracle/sessions.json" Condition="'$(ParityStageGoldenSessions)' == 'true'" />
+      <FixtureStagedFile Include="$(MSBuildThisFileDirectory)fixture/web.config" StagedAs="$(TargetDir)fixture/app/web.config" />
+      <FixtureStagedFile Include="$(MSBuildThisFileDirectory)fixture/errors.web.config" StagedAs="$(TargetDir)fixture/app-errors/web.config" />
+      <FixtureStagedFile Include="$(MSBuildThisFileDirectory)sessions.json" StagedAs="$(TargetDir)metadata/sessions.json" />
+      <FixtureStagedFile
+        Include="$(MSBuildThisFileDirectory)artifacts/golden/sessions.json"
+        StagedAs="$(TargetDir)oracle/sessions.json"
+        Condition="'$(ParityStageGoldenSessions)' == 'true'" />
+      <FixtureConfigEdit
+        Include="$(TargetDir)fixture/app/web.config"
+        XPath="$(_TempDirectoryQuery)"
+        Value="$(_FixtureTemp)" />
+      <FixtureConfigEdit
+        Include="$(TargetDir)fixture/app-errors/web.config"
+        XPath="$(_TempDirectoryQuery)"
+        Value="$(_FixtureTemp)"
+        Condition="'$(ParityClearErrorsTempDirectory)' != 'true'" />
+      <FixtureConfigEdit
+        Include="$(TargetDir)fixture/app-errors/web.config"
+        XPath="$(_TempDirectoryQuery)"
+        Value=""
+        Condition="'$(ParityClearErrorsTempDirectory)' == 'true'" />
     </ItemGroup>
     <MakeDir Directories="$(_FixtureTemp)" />
-  </Target>
-
-  <!-- Gated as one unit: the poke makes the staged config differ from its source, so an
-       ungated copy re-clobbers it and both re-run every build. -->
-  <Target
-    Name="StageParityFixtures"
-    DependsOnTargets="PrepareParityStaging"
-    Inputs="@(_ParityStageInput)"
-    Outputs="@(_ParityStageOutput)">
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)fixture/web.config" DestinationFiles="$(TargetDir)fixture/app/web.config" />
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)fixture/errors.web.config" DestinationFiles="$(TargetDir)fixture/app-errors/web.config" />
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)sessions.json" DestinationFiles="$(TargetDir)metadata/sessions.json" />
-    <Copy
-      Condition="'$(ParityStageGoldenSessions)' == 'true'"
-      SourceFiles="$(MSBuildThisFileDirectory)artifacts/golden/sessions.json"
-      DestinationFiles="$(TargetDir)oracle/sessions.json" />
-    <XmlPoke
-      XmlInputPath="$(TargetDir)fixture/app/web.config"
-      Query="/configuration/system.web/compilation/@tempDirectory"
-      Value="$(_FixtureTemp)" />
-    <XmlPoke
-      Condition="'$(ParityClearErrorsTempDirectory)' != 'true'"
-      XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
-      Query="/configuration/system.web/compilation/@tempDirectory"
-      Value="$(_FixtureTemp)" />
-    <XmlPoke
-      Condition="'$(ParityClearErrorsTempDirectory)' == 'true'"
-      XmlInputPath="$(TargetDir)fixture/app-errors/web.config"
-      Query="/configuration/system.web/compilation/@tempDirectory"
-      Value="" />
-
-    <!-- Copy preserves source timestamps, and the gate compares newest input against oldest
-         output across unrelated pairs; stamping the outputs at staging time keeps the check
-         meaningful. -->
-    <Touch Files="@(_ParityStageOutput)" />
   </Target>
 </Project>
