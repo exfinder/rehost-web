@@ -89,6 +89,13 @@
    ],
    "reason": "the deserialization ctor chains to ClaimsPrincipal(SerializationInfo, StreamingContext), a throwing stub on modern .NET (SYSLIB0051); the base call is fenced NETFRAMEWORK and a payload guard refuses anything but a role-cookie ticket",
    "record": "docs/portability-ledger.md P81"
+  },
+  {
+   "files": [
+    "Security/RolePrincipal.cs"
+   ],
+   "reason": "AddIdentityAttachingRoles builds a DeferredRoleClaimsIdentity (fenced !NETFRAMEWORK) because ClaimsIdentity.ExternalClaims holds List<Claim> on modern .NET where Framework held IEnumerable<Claim>, so role claims cannot be parked unevaluated on a stock ClaimsIdentity",
+   "record": "docs/portability-ledger.md P82"
   }
  ]
 }

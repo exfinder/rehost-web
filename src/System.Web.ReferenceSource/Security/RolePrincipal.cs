@@ -181,6 +181,7 @@ namespace System.Web.Security {
         {
             ClaimsIdentity claimsIdentity = null;
 
+#if NETFRAMEWORK
             if (identity is ClaimsIdentity)
             {
                 claimsIdentity = (identity as ClaimsIdentity).Clone();
@@ -189,6 +190,11 @@ namespace System.Web.Security {
             {
                 claimsIdentity = new ClaimsIdentity(identity);
             }
+#else
+            claimsIdentity = identity is ClaimsIdentity other
+                ? new DeferredRoleClaimsIdentity(other)
+                : new DeferredRoleClaimsIdentity(identity);
+#endif
 
             AttachRoleClaims(claimsIdentity);
             base.AddIdentity(claimsIdentity);
