@@ -1,3 +1,4 @@
+using Rehost.WebForms.ScenarioProtocol;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,7 +27,7 @@ public sealed class Http2OverKestrelTests : IDisposable
                  })
         {
             var response = await _scenario.Client.PostBodyAsync(
-                "/body?mode=" + mode, Encoding.UTF8.GetBytes("body:" + probe), framing);
+                ProbePaths.Body + "?mode=" + mode, Encoding.UTF8.GetBytes("body:" + probe), framing);
 
             response.Version.ShouldBe(HttpVersion.Version20, probe);
             response.StatusCode.ShouldBe(200, probe);
@@ -38,7 +39,7 @@ public sealed class Http2OverKestrelTests : IDisposable
     public async Task A_Spilled_Upload_Round_Trips_Over_Http2()
     {
         var response = await _scenario.Client.PostBodyAsync(
-            "/body?mode=spill", Encoding.UTF8.GetBytes(new string('s', 2048)));
+            ProbePaths.Body + "?mode=spill", Encoding.UTF8.GetBytes(new string('s', 2048)));
 
         response.Version.ShouldBe(HttpVersion.Version20);
         response.StatusCode.ShouldBe(200);

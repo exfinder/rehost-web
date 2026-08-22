@@ -1,3 +1,4 @@
+using Rehost.WebForms.ScenarioProtocol;
 using Shouldly;
 using Xunit;
 
@@ -206,5 +207,5 @@ public sealed class ResponseHeadersOverKestrelTests(PageLiveScenario scenario)
     }
 
     private async Task<ScenarioResponse> Probe(string probeCase) =>
-        await scenario.Client.GetAsync("/headers?case=" + probeCase);
+        await scenario.Client.GetAsync(ProbePaths.Headers + "?case=" + probeCase);
 }

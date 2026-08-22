@@ -15,10 +15,10 @@ public sealed class CustomSessionStoreOverKestrelTests(SessionCustomLiveScenario
     [Fact]
     public async Task A_Configured_Provider_Serves_The_Session_And_Is_Driven_Exclusively()
     {
-        var written = await scenario.Client.GetAsync("/session?mode=write&v=custom");
+        var written = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=custom");
         var cookie = SessionCookie(written);
 
-        var read = await scenario.Client.GetWithCookiesAsync("/session", cookie);
+        var read = await scenario.Client.GetWithCookiesAsync(ProbePaths.Session, cookie);
         Field(read, "v").ShouldBe("custom");
         Field(read, "mode").ShouldBe("Custom");
 
@@ -30,11 +30,11 @@ public sealed class CustomSessionStoreOverKestrelTests(SessionCustomLiveScenario
     [Fact]
     public async Task A_Read_Only_Handler_Takes_The_Shared_Acquire()
     {
-        await scenario.Client.GetAsync("/session?mode=write&v=shared");
-        var cookie = SessionCookie(await scenario.Client.GetAsync("/session?mode=write&v=shared"));
+        await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=shared");
+        var cookie = SessionCookie(await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=shared"));
 
         var before = (await StoreCallsAsync()).Count;
-        await scenario.Client.GetWithCookiesAsync("/session-readonly", cookie);
+        await scenario.Client.GetWithCookiesAsync(ProbePaths.SessionReadOnly, cookie);
         var added = (await StoreCallsAsync()).Skip(before).ToArray();
 
         added.ShouldContain("GetItem");

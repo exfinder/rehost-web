@@ -16,13 +16,13 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
     [Fact]
     public async Task A_Written_Value_Round_Trips_Under_The_Issued_Cookie()
     {
-        var written = await scenario.Client.GetAsync("/session?mode=write&v=hello");
+        var written = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=hello");
 
         written.StatusCode.ShouldBe(200);
         var cookie = SessionCookie(written);
         Field(written, "isnew").ShouldBe("True");
 
-        var read = await scenario.Client.GetWithCookiesAsync("/session", cookie);
+        var read = await scenario.Client.GetWithCookiesAsync(ProbePaths.Session, cookie);
 
         Field(read, "id").ShouldBe(Field(written, "id"));
         Field(read, "isnew").ShouldBe("False");
@@ -33,22 +33,22 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
     [Fact]
     public async Task Session_Identity_And_Handler_Opt_In_Behave_As_Framework_Does()
     {
-        var first = await scenario.Client.GetAsync("/session?mode=write&v=a");
+        var first = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=a");
         var cookie = SessionCookie(first);
 
-        var second = await scenario.Client.GetWithCookiesAsync("/session", cookie);
+        var second = await scenario.Client.GetWithCookiesAsync(ProbePaths.Session, cookie);
         Field(second, "id").ShouldBe(Field(first, "id"));
         Field(second, "starts").ShouldBe("1");
 
-        var plain = await scenario.Client.GetWithCookiesAsync("/session-plain", cookie);
+        var plain = await scenario.Client.GetWithCookiesAsync(ProbePaths.SessionPlain, cookie);
         Field(plain, "session").ShouldBe("null");
 
-        var readOnly = await scenario.Client.GetWithCookiesAsync("/session-readonly", cookie);
+        var readOnly = await scenario.Client.GetWithCookiesAsync(ProbePaths.SessionReadOnly, cookie);
         Field(readOnly, "session").ShouldBe("present");
         Field(readOnly, "readonly").ShouldBe("True");
         Field(readOnly, "id").ShouldBe(Field(first, "id"));
 
-        var writable = await scenario.Client.GetWithCookiesAsync("/session", cookie);
+        var writable = await scenario.Client.GetWithCookiesAsync(ProbePaths.Session, cookie);
         Field(writable, "readonly").ShouldBe("False");
         Field(writable, "mode").ShouldBe("InProc");
         Field(writable, "cookieless").ShouldBe("False");
@@ -61,7 +61,7 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
     [Fact]
     public async Task A_Read_Only_Page_Directive_Reads_Without_Locking_And_Its_Write_Persists()
     {
-        var seeded = await scenario.Client.GetAsync("/session?mode=write&v=seed");
+        var seeded = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=seed");
         var cookie = SessionCookie(seeded);
 
         var page = await scenario.Client.GetWithCookiesAsync("/ReadOnly.aspx?write=from-readonly", cookie);
@@ -71,25 +71,25 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
         page.Text.ShouldContain("v=seed");
         page.Text.ShouldContain("write=ok");
 
-        var after = await scenario.Client.GetWithCookiesAsync("/session", cookie);
+        var after = await scenario.Client.GetWithCookiesAsync(ProbePaths.Session, cookie);
         Field(after, "v").ShouldBe("from-readonly");
     }
 
     [Fact]
     public async Task Abandon_Empties_The_Session_And_Raises_Session_End()
     {
-        var seeded = await scenario.Client.GetAsync("/session?mode=write&v=doomed");
+        var seeded = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=doomed");
         var cookie = SessionCookie(seeded);
         var id = Field(seeded, "id");
 
-        await scenario.Client.GetWithCookiesAsync("/session?mode=abandon", cookie);
+        await scenario.Client.GetWithCookiesAsync(ProbePaths.Session + "?mode=abandon", cookie);
 
         var ended = await scenario.Witness.WaitForAsync(
             WitnessProtocol.SessionEnded + id,
             TimeSpan.FromSeconds(10));
         ended.ShouldContain("context=null");
 
-        var after = await scenario.Client.GetWithCookiesAsync("/session", cookie);
+        var after = await scenario.Client.GetWithCookiesAsync(ProbePaths.Session, cookie);
         Field(after, "id").ShouldBe(id);
         Field(after, "isnew").ShouldBe("True");
         Field(after, "v").ShouldBe("null");
@@ -101,7 +101,7 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
     [Fact]
     public async Task Two_Requests_Sharing_A_Session_Serialize_While_Separate_Sessions_Overlap()
     {
-        var first = await scenario.Client.GetAsync("/session?mode=write&v=x");
+        var first = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=x");
         var shared = SessionCookie(first);
 
         var held = Dispatch(shared, "A");
@@ -115,7 +115,7 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
         serialized.IndexOf(WitnessProtocol.SessionEntered + "B")
             .ShouldBeGreaterThan(serialized.IndexOf(WitnessProtocol.SessionExited + "A"));
 
-        var other = await scenario.Client.GetAsync("/session?mode=write&v=y");
+        var other = await scenario.Client.GetAsync(ProbePaths.Session + "?mode=write&v=y");
         var separate = SessionCookie(other);
         SessionIdOf(separate).ShouldNotBe(SessionIdOf(shared));
 
@@ -136,7 +136,7 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
 
     private Task<ScenarioResponse> Dispatch(string cookie, string tag) =>
         scenario.Client.GetWithCookiesAsync(
-            "/session?mode=hold&ms=" + HoldMilliseconds + "&tag=" + tag,
+            ProbePaths.Session + "?mode=hold&ms=" + HoldMilliseconds + "&tag=" + tag,
             cookie);
 
     private async Task<List<string>> SessionMarkersAsync() =>

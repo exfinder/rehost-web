@@ -1,3 +1,4 @@
+using Rehost.WebForms.ScenarioProtocol;
 using Shouldly;
 using Xunit;
 
@@ -15,7 +16,7 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
     public async Task Reads_The_Cookie_Header_Into_The_Request_Collection()
     {
         var response = await scenario.Client.GetWithCookiesAsync(
-            "/cookies?mode=read",
+            ProbePaths.Cookies + "?mode=read",
             "a=1; b=x&y=2; c");
 
         response.StatusCode.ShouldBe(200);
@@ -29,7 +30,7 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
     [Fact]
     public async Task Emits_One_Set_Cookie_Line_Per_Response_Cookie()
     {
-        var response = await scenario.Client.GetAsync("/cookies?mode=pair");
+        var response = await scenario.Client.GetAsync(ProbePaths.Cookies + "?mode=pair");
 
         response.SetCookies.ShouldBe(["first=1; path=/", "second=2; path=/"]);
     }
@@ -41,7 +42,7 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
     [Fact]
     public async Task Renders_Cookie_Attributes_As_Framework_Writes_Them()
     {
-        var response = await scenario.Client.GetAsync("/cookies?mode=attributes");
+        var response = await scenario.Client.GetAsync(ProbePaths.Cookies + "?mode=attributes");
 
         response.SetCookies.ShouldBe([
             "marked=value; domain=example.test; expires=Tue, 02-Jan-2035 03:04:05 GMT"
@@ -56,7 +57,7 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
     [Fact]
     public async Task Re_Issuing_A_Received_Cookie_Adds_No_Same_Site_Attribute()
     {
-        var response = await scenario.Client.GetWithCookiesAsync("/cookies?mode=reissue", "a=1");
+        var response = await scenario.Client.GetWithCookiesAsync(ProbePaths.Cookies + "?mode=reissue", "a=1");
 
         response.SetCookies.ShouldBe(["a=1; path=/"]);
     }
@@ -67,11 +68,11 @@ public sealed class CookiesOverKestrelTests(BodyLiveScenario scenario)
     [Fact]
     public async Task Encodes_A_Non_Ascii_Cookie_Value_As_Utf8_Header_Bytes()
     {
-        var response = await scenario.Client.GetAsync("/cookies?mode=unicode");
+        var response = await scenario.Client.GetAsync(ProbePaths.Cookies + "?mode=unicode");
         response.StatusCode.ShouldBe(200);
 
         var raw = await RawSocketProbe.GetRawResponseAsync(
-            scenario.Address, "/cookies?mode=unicode");
+            scenario.Address, ProbePaths.Cookies + "?mode=unicode");
         var setCookie = "place=caf\u00e9"u8.ToArray();
         raw.AsSpan().IndexOf(setCookie).ShouldBeGreaterThanOrEqualTo(
             0, "the UTF-8 bytes of the cookie value must appear in the Set-Cookie line");

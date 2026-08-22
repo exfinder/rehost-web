@@ -21,7 +21,7 @@ public sealed class RawRequestSaveOverKestrelTests(BodyLiveScenario scenario)
 
         var fields = new Dictionary<string, string>(StringComparer.Ordinal);
         var response = await scenario.Client.PostAsync(
-            "/save?mode=file&to=" + Uri.EscapeDataString(target),
+            ProbePaths.Save + "?mode=file&to=" + Uri.EscapeDataString(target),
             PostbackForm.EncodeMultipart(
                 fields,
                 [new MultipartFile("Picked", "spilled.bin", "application/octet-stream", Spilled)]),
@@ -42,7 +42,7 @@ public sealed class RawRequestSaveOverKestrelTests(BodyLiveScenario scenario)
         var body = Encoding.UTF8.GetBytes("a direct binary upload");
 
         var response = await scenario.Client.PostAsync(
-            "/save?mode=raw&to=" + Uri.EscapeDataString(target),
+            ProbePaths.Save + "?mode=raw&to=" + Uri.EscapeDataString(target),
             body,
             "application/octet-stream");
 
@@ -58,7 +58,7 @@ public sealed class RawRequestSaveOverKestrelTests(BodyLiveScenario scenario)
         var body = Encoding.UTF8.GetBytes("a direct binary upload");
 
         var response = await scenario.Client.PostAsync(
-            "/save?mode=raw-headers&to=" + Uri.EscapeDataString(target),
+            ProbePaths.Save + "?mode=raw-headers&to=" + Uri.EscapeDataString(target),
             body,
             "application/octet-stream");
 

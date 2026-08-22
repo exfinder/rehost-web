@@ -1,3 +1,4 @@
+using Rehost.WebForms.ScenarioProtocol;
 using System.Net;
 using System.Net.WebSockets;
 using System.Text;
@@ -24,7 +25,7 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
     private Uri WsUri(string query) => new UriBuilder(scenario.Address)
     {
         Scheme = "ws",
-        Path = "/ws/echo",
+        Path = ProbePaths.WebSocketEcho,
         Query = query,
     }.Uri;
 
@@ -121,16 +122,16 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
             .ShouldStartWith("HTTP/1.1 101 ");
 
         // a plain GET is not a WebSocket request (R-WS6)
-        var info = await scenario.Client.GetAsync("/ws/echo?mode=info");
+        var info = await scenario.Client.GetAsync(ProbePaths.WebSocketEcho + "?mode=info");
         info.Text.ShouldBe("IsWebSocketRequest=False\n");
-        (await scenario.Client.GetAsync("/ws/echo")).StatusCode.ShouldBe(400);
+        (await scenario.Client.GetAsync(ProbePaths.WebSocketEcho)).StatusCode.ShouldBe(400);
     }
 
     // Framework refuses the question during BeginRequest; the classic pipeline reports the same.
     [Fact]
     public async Task Asking_During_Begin_Request_Is_Refused()
     {
-        var response = await scenario.Client.GetAsync("/ws/echo?mode=info&ws-begin=1");
+        var response = await scenario.Client.GetAsync(ProbePaths.WebSocketEcho + "?mode=info&ws-begin=1");
 
         response.Header("X-Ws-Begin").ShouldBe(
             "InvalidOperationException:This method cannot be called during or before BeginRequest.");

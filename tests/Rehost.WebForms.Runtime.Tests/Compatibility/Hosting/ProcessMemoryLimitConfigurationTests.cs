@@ -52,7 +52,7 @@ public sealed class ProcessMemoryLimitConfigurationTests
 
         using var process = staged.Batch()
             .MachineConfig(machineConfig)
-            .Request("/quirks")
+            .Request(ProbePaths.Quirks)
             .Start();
         process.WaitForExit();
 

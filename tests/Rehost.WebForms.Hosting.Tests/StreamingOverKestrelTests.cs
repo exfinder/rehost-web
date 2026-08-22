@@ -1,3 +1,4 @@
+using Rehost.WebForms.ScenarioProtocol;
 using System.Text;
 using Shouldly;
 using Xunit;
@@ -46,7 +47,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
     public async Task The_First_Flush_Reaches_The_Client_Before_The_Handler_Continues()
     {
         var arrivals = await RawSocketProbe.ReadTimedAsync(
-            scenario.Address, "/stream/flush?delay=" + (int)Delay.TotalMilliseconds);
+            scenario.Address, ProbePaths.StreamFlush + "?delay=" + (int)Delay.TotalMilliseconds);
 
         // Everything the client held before the handler's first delay elapsed. Whether the head
         // and the first chunk land in one TCP segment or two is the transport's call, so this
@@ -70,7 +71,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Response_End_After_A_Flush_Terminates_The_Chunked_Body()
     {
-        var arrivals = await RawSocketProbe.ReadTimedAsync(scenario.Address, "/stream/flush?case=end&delay=300");
+        var arrivals = await RawSocketProbe.ReadTimedAsync(scenario.Address, ProbePaths.StreamFlush + "?case=end&delay=300");
 
         var (headers, body) = SplitAndDechunk(arrivals.SelectMany(arrival => arrival.Bytes).ToArray());
         headers.ShouldStartWith("HTTP/1.1 200 OK\r\n");
@@ -81,7 +82,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task A_File_Sent_Between_Flushes_Streams_In_Order()
     {
-        var arrivals = await RawSocketProbe.ReadTimedAsync(scenario.Address, "/stream/flush?case=file&delay=300");
+        var arrivals = await RawSocketProbe.ReadTimedAsync(scenario.Address, ProbePaths.StreamFlush + "?case=file&delay=300");
 
         var (_, body) = SplitAndDechunk(arrivals.SelectMany(arrival => arrival.Bytes).ToArray());
         body.ShouldBe("part1\nFILEDATA-0123456789part2\npart3\n");
@@ -90,7 +91,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Head_Changes_After_A_Flush_Are_Refused_As_On_Framework()
     {
-        var response = await scenario.Client.GetAsync("/stream/flush?case=lateheader");
+        var response = await scenario.Client.GetAsync(ProbePaths.StreamFlush + "?case=lateheader");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe(
@@ -105,7 +106,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task An_Error_After_A_Flush_Keeps_The_Sent_Status_And_Appends_The_Error()
     {
-        var response = await scenario.Client.GetAsync("/stream/flush?case=error");
+        var response = await scenario.Client.GetAsync(ProbePaths.StreamFlush + "?case=error");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldStartWith("part1\n");
@@ -121,7 +122,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
     public async Task An_Async_Handlers_FlushAsync_Produces_A_Chunked_Streamed_Response()
     {
         var arrivals = await RawSocketProbe.ReadTimedAsync(
-            scenario.Address, "/stream/asyncflush?delay=200");
+            scenario.Address, ProbePaths.StreamAsyncFlush + "?delay=200");
 
         var raw = arrivals.SelectMany(arrival => arrival.Bytes).ToArray();
         Encoding.ASCII.GetString(raw).ShouldContain("Transfer-Encoding: chunked\r\n");

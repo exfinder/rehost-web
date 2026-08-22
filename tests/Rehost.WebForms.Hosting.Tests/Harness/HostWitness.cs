@@ -9,7 +9,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 internal sealed class HostWitness(ScenarioClient client)
 {
     internal async Task<string[]> EventsAsync() =>
-        (await client.GetAsync("/witness")).Text
+        (await client.GetAsync(ProbePaths.Witness)).Text
             .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
     internal async Task<string[]> HandlerEntriesAsync() =>

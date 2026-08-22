@@ -37,7 +37,7 @@ public sealed class RequestBodyOverKestrelTests(
         foreach (var surface in surfaces)
         {
             var response = await Client.PostBodyAsync(
-                "/body?mode=" + surface.Mode,
+                ProbePaths.Body + "?mode=" + surface.Mode,
                 Encoding.UTF8.GetBytes("body:" + surface.Probe),
                 surface.Framing,
                 expectContinue: surface.ExpectContinue);
@@ -51,7 +51,7 @@ public sealed class RequestBodyOverKestrelTests(
     public async Task Buffered_Input_Spills_Above_The_Configured_Threshold()
     {
         var response = await Client.PostBodyAsync(
-            "/body?mode=spill",
+            ProbePaths.Body + "?mode=spill",
             Encoding.UTF8.GetBytes(new string('s', 2048)));
 
         response.StatusCode.ShouldBe(200);
@@ -63,7 +63,7 @@ public sealed class RequestBodyOverKestrelTests(
     public async Task SystemWeb_Rejects_A_Body_Above_MaxRequestLength()
     {
         var response = await Client.PostBodyAsync(
-            "/body?mode=input",
+            ProbePaths.Body + "?mode=input",
             Enumerable.Repeat((byte)'l', 5000).ToArray());
 
         response.StatusCode.ShouldBe(500);
@@ -74,7 +74,7 @@ public sealed class RequestBodyOverKestrelTests(
     public async Task SystemWeb_Rejects_An_Unknown_Length_Body_Above_MaxRequestLength()
     {
         var response = await Client.PostBodyAsync(
-            "/body?mode=input",
+            ProbePaths.Body + "?mode=input",
             Enumerable.Repeat((byte)'c', 5000).ToArray(),
             BodyFraming.DelayedChunked);
 
@@ -90,7 +90,7 @@ public sealed class RequestBodyOverKestrelTests(
             Fixtures.BodyPreload, IsolationReason.ColdActivation);
 
         var response = await run.Client.PostBodyAsync(
-            "/body?mode=preload",
+            ProbePaths.Body + "?mode=preload",
             Encoding.UTF8.GetBytes("body:preload-delayed"),
             BodyFraming.DelayedChunked);
 
@@ -107,10 +107,10 @@ public sealed class RequestBodyOverKestrelTests(
         using var client = new ScenarioClient(scenario.Address, maxConnectionsPerServer: 1);
 
         var unread = await client.PostBodyAsync(
-            "/body?mode=unread",
+            ProbePaths.Body + "?mode=unread",
             Encoding.UTF8.GetBytes("body:unread"));
         var followUp = await client.PostBodyAsync(
-            "/body?mode=input",
+            ProbePaths.Body + "?mode=input",
             Encoding.UTF8.GetBytes("body:fixed-input"));
 
         unread.Text.ShouldBe("unread");
@@ -122,7 +122,7 @@ public sealed class RequestBodyOverKestrelTests(
     [Fact]
     public async Task A_Client_Abort_During_A_Synchronous_Bufferless_Read_Becomes_HttpException()
     {
-        var interim = await RawSocketProbe.AbortMidBodyAsync(aborts.Address, "/body?mode=abort");
+        var interim = await RawSocketProbe.AbortMidBodyAsync(aborts.Address, ProbePaths.Body + "?mode=abort");
         var detection = Stopwatch.StartNew();
 
         interim.ShouldBe(100);
@@ -138,7 +138,7 @@ public sealed class RequestBodyOverKestrelTests(
     {
         var interim = await RawSocketProbe.AbortMidBodyAsync(
             aborts.Address,
-            "/body?mode=abort-apm");
+            ProbePaths.Body + "?mode=abort-apm");
         var detection = Stopwatch.StartNew();
 
         interim.ShouldBe(100);
@@ -158,7 +158,7 @@ public sealed class RequestBodyOverKestrelTests(
             Fixtures.Body, IsolationReason.HostConfiguration, kestrelMaxBody: 1024);
 
         var response = await run.Client.PostBodyAsync(
-            "/body?mode=input",
+            ProbePaths.Body + "?mode=input",
             Enumerable.Repeat((byte)'k', 2048).ToArray());
 
         response.StatusCode.ShouldBe(413);
@@ -174,7 +174,7 @@ public sealed class RequestBodyOverKestrelTests(
             Fixtures.Body, IsolationReason.HostConfiguration, kestrelMaxBody: 1024);
 
         var response = await run.Client.PostBodyAsync(
-            "/body?mode=input",
+            ProbePaths.Body + "?mode=input",
             Enumerable.Repeat((byte)'K', 2048).ToArray(),
             BodyFraming.Chunked);
 
@@ -190,7 +190,7 @@ public sealed class RequestBodyOverKestrelTests(
             Fixtures.BodyCustomErrors, IsolationReason.HostConfiguration, kestrelMaxBody: 1024);
 
         var response = await run.Client.PostBodyAsync(
-            "/body?mode=input",
+            ProbePaths.Body + "?mode=input",
             Enumerable.Repeat((byte)'C', 2048).ToArray(),
             BodyFraming.Chunked);
 
