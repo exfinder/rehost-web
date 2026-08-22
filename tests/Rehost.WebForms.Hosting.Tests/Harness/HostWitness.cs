@@ -5,8 +5,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // Typed view over the fixture's /witness endpoint: in-memory server-side facts fetched over
 // HTTP. Nothing here touches the trace file. Every reader except StagesAsync sees every request
-// the process served, so only dedicated hosts expose this type; shared hosts hand out
-// ScopedWitness.
+// the process served; the Scenarios.cs marker bases decide which fixtures may expose that.
 internal sealed class HostWitness(ScenarioClient client)
 {
     internal async Task<string[]> EventsAsync() =>

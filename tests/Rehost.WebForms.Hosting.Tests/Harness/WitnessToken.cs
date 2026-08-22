@@ -10,7 +10,7 @@ internal static class WitnessToken
 {
     internal static string For(object testClass, [CallerMemberName] string method = "")
     {
-        if (testClass is LiveScenario or PageLiveScenario)
+        if (testClass is LiveScenario or Scenario)
         {
             throw new ArgumentException(
                 "Pass the test class, not the scenario: the token must carry the class whose"
