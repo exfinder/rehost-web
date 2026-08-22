@@ -104,7 +104,7 @@ internal sealed class BatchApplication : IDisposable
         }
 
         Directory.CreateDirectory(ResponseDirectory);
-        var invocation = new ScenarioHostInvocation()
+        var invocation = new BatchInvocation()
             .Application(ApplicationPath)
             .CompilationTemp(CodegenRoot)
             .Trace(TracePath)

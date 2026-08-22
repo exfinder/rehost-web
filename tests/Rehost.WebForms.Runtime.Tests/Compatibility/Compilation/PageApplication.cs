@@ -62,7 +62,7 @@ internal sealed class PageApplication : IDisposable
         _runs++;
         _staged.ResetTrace();
 
-        var invocation = _staged.Invocation();
+        var invocation = _staged.Batch();
         foreach (var request in requests)
         {
             invocation.Request(request);

@@ -42,7 +42,12 @@ public sealed class StagedApplication : IDisposable
 
     public string TracePath { get; }
 
-    public ScenarioHostInvocation Invocation() => new ScenarioHostInvocation()
+    public ServeInvocation Serve() => Wire(new ServeInvocation());
+
+    public BatchInvocation Batch() => Wire(new BatchInvocation());
+
+    private TInvocation Wire<TInvocation>(TInvocation invocation)
+        where TInvocation : ScenarioHostInvocation<TInvocation> => invocation
         .Application(ApplicationPath)
         .CompilationTemp(CompilationTempDirectory)
         .Trace(TracePath)

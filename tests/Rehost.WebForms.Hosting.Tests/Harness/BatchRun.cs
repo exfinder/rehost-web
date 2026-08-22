@@ -70,7 +70,7 @@ internal sealed class BatchRun : IDisposable
     {
         var staged = StagedApplication.Stage(Fixtures.Farm.Name);
 
-        var invocation = staged.Invocation().Serve();
+        var invocation = staged.Serve();
         foreach (var probe in probes)
         {
             invocation.Postback(probe);

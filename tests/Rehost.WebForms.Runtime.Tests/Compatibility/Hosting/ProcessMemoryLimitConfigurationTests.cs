@@ -50,7 +50,7 @@ public sealed class ProcessMemoryLimitConfigurationTests
                 "rehost-webforms.applicationHost.config"),
             Path.Combine(staged.RootPath, "rehost-webforms.applicationHost.config"));
 
-        using var process = staged.Invocation()
+        using var process = staged.Batch()
             .MachineConfig(machineConfig)
             .Request("/quirks")
             .Start();

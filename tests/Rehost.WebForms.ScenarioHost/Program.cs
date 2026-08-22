@@ -25,8 +25,20 @@ public static class Program
     {
         try
         {
-            var options = ScenarioOptions.Parse(args);
-            Run(options);
+            var scan = ArgumentScan.Scan(args);
+            if (scan.Flag("--serve"))
+            {
+                var options = ServeOptions.From(scan);
+                Environment.SetEnvironmentVariable(TraceChannel.TraceVariable, options.TracePath);
+                ServeAsync(options).GetAwaiter().GetResult();
+            }
+            else
+            {
+                var options = BatchOptions.From(scan);
+                Environment.SetEnvironmentVariable(TraceChannel.TraceVariable, options.TracePath);
+                RunBatch(options);
+            }
+
             return 0;
         }
         catch (Exception exception)
@@ -36,16 +48,8 @@ public static class Program
         }
     }
 
-    private static void Run(ScenarioOptions options)
+    private static void RunBatch(BatchOptions options)
     {
-        Environment.SetEnvironmentVariable(TraceChannel.TraceVariable, options.TracePath);
-
-        if (options.Serve)
-        {
-            ServeAsync(options).GetAwaiter().GetResult();
-            return;
-        }
-
         WebFormsApplication.Initialize(new WebFormsApplicationOptions
         {
             ApplicationId = options.ApplicationId,
@@ -76,7 +80,6 @@ public static class Program
 
         try
         {
-            TraceChannel.Record("codegen-dir:" + HttpRuntime.CodegenDir);
             TraceChannel.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
 
             for (var i = 0; i < options.Requests.Count; i++)
@@ -109,7 +112,7 @@ public static class Program
 
     // The same application, reached over a socket through the production adapter rather than by
     // calling HttpRuntime.ProcessRequest directly.
-    private static async Task ServeAsync(ScenarioOptions options)
+    private static async Task ServeAsync(ServeOptions options)
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
@@ -203,7 +206,7 @@ public static class Program
     // ships with the fixture because it is only valid for that page under that key.
     private static async Task<int> RunCapturedPostbackAsync(
         HttpClient client,
-        ScenarioOptions options,
+        ServeOptions options,
         string probe,
         int index)
     {
@@ -258,7 +261,7 @@ public static class Program
     }
 
     private static async Task RecordResponseAsync(
-        ScenarioOptions options,
+        ServeOptions options,
         string label,
         HttpResponseMessage response,
         int index)
@@ -321,34 +324,21 @@ public static class Program
 
 }
 
-internal sealed class ScenarioOptions
+internal abstract class ScenarioOptionsCore
 {
-    private ScenarioOptions(
-        string applicationId,
-        string applicationPath,
-        string compilationTempDirectory,
-        string tracePath,
-        string? holdGate,
-        string? responseDirectory,
-        string? machineConfigurationPath,
-        bool serve,
-        long? kestrelMaxBodyBytes,
-        bool http2,
-        List<string> requests,
-        List<string> postbacks)
+    private protected static readonly string[] CoreOptions =
+        ["--app", "--temp", "--trace", "--id", "--response-dir", "--request"];
+
+    private protected ScenarioOptionsCore(ArgumentScan scan)
     {
-        KestrelMaxBodyBytes = kestrelMaxBodyBytes;
-        Http2 = http2;
-        MachineConfigurationPath = machineConfigurationPath;
-        Serve = serve;
-        HoldGate = holdGate;
-        ApplicationId = applicationId;
-        ApplicationPath = applicationPath;
-        CompilationTempDirectory = compilationTempDirectory;
-        TracePath = tracePath;
-        ResponseDirectory = responseDirectory;
-        Requests = requests;
-        Postbacks = postbacks;
+        ApplicationId = scan.Value("--id") ?? "scenario";
+        ApplicationPath = Path.GetFullPath(scan.Required("--app"));
+        CompilationTempDirectory = Path.GetFullPath(scan.Required("--temp"));
+        TracePath = Path.GetFullPath(scan.Required("--trace"));
+        ResponseDirectory = scan.Value("--response-dir") is { } responses
+            ? Path.GetFullPath(responses)
+            : null;
+        Requests = scan.Repeated("--request");
     }
 
     internal string ApplicationId { get; }
@@ -359,134 +349,146 @@ internal sealed class ScenarioOptions
 
     internal string TracePath { get; }
 
-    internal string? HoldGate { get; }
-
     internal string? ResponseDirectory { get; }
 
-    internal string? MachineConfigurationPath { get; }
+    internal List<string> Requests { get; }
+}
 
-    internal bool Serve { get; }
+internal sealed class ServeOptions : ScenarioOptionsCore
+{
+    private ServeOptions(ArgumentScan scan)
+        : base(scan)
+    {
+        KestrelMaxBodyBytes = scan.Value("--kestrel-max-body") is { } maxBody
+            ? long.Parse(maxBody)
+            : null;
+        Http2 = scan.Flag("--http2");
+        Postbacks = scan.Repeated("--postback");
+    }
 
     internal long? KestrelMaxBodyBytes { get; }
 
     internal bool Http2 { get; }
 
-    internal List<string> Requests { get; }
-
     internal List<string> Postbacks { get; }
 
-    internal static ScenarioOptions Parse(string[] args)
+    internal static ServeOptions From(ArgumentScan scan)
     {
-        var applicationId = "scenario";
-        string? applicationPath = null;
-        string? compilationTempDirectory = null;
-        string? tracePath = null;
-        string? holdGate = null;
-        string? responseDirectory = null;
-        string? machineConfigurationPath = null;
-        var serve = false;
-        long? kestrelMaxBodyBytes = null;
-        var http2 = false;
-        var requests = new List<string>();
-        var postbacks = new List<string>();
+        scan.AssertHonored(
+            "--serve",
+            [.. CoreOptions, "--serve", "--kestrel-max-body", "--http2", "--postback"]);
+        if (scan.Repeated("--request").Count != 0 && scan.Repeated("--postback").Count != 0)
+        {
+            throw new ArgumentException(
+                "--request and --postback cannot be combined in --serve mode.");
+        }
 
+        return new ServeOptions(scan);
+    }
+}
+
+internal sealed class BatchOptions : ScenarioOptionsCore
+{
+    private BatchOptions(ArgumentScan scan)
+        : base(scan)
+    {
+        HoldGate = scan.Value("--hold-gate");
+        MachineConfigurationPath = scan.Value("--machine-config") is { } machineConfig
+            ? Path.GetFullPath(machineConfig)
+            : null;
+
+        if (Requests.Count == 0)
+        {
+            Requests.Add("/default");
+        }
+    }
+
+    internal string? HoldGate { get; }
+
+    internal string? MachineConfigurationPath { get; }
+
+    internal static BatchOptions From(ArgumentScan scan)
+    {
+        scan.AssertHonored("batch", [.. CoreOptions, "--hold-gate", "--machine-config"]);
+        return new BatchOptions(scan);
+    }
+}
+
+// The scan owns option arity; each mode's options type declares what it honors and AssertHonored
+// runs before any value is required, so a cross-mode option is reported ahead of missing
+// requireds. An option added here but honored by neither mode fails every invocation passing it.
+internal sealed class ArgumentScan
+{
+    private static readonly string[] Flags = ["--serve", "--http2"];
+    private static readonly string[] Repeatable = ["--request", "--postback"];
+    private static readonly string[] Valued =
+    [
+        "--app", "--temp", "--trace", "--id", "--hold-gate", "--response-dir",
+        "--machine-config", "--kestrel-max-body",
+    ];
+
+    private readonly Dictionary<string, string> _values = [];
+    private readonly Dictionary<string, List<string>> _lists = [];
+    private readonly HashSet<string> _flags = [];
+
+    private ArgumentScan()
+    {
+    }
+
+    internal static ArgumentScan Scan(string[] args)
+    {
+        var scan = new ArgumentScan();
         for (var i = 0; i < args.Length; i++)
         {
+            var option = args[i];
             var value = i + 1 < args.Length ? args[i + 1] : null;
-            switch (args[i])
+            if (Flags.Contains(option))
             {
-                case "--app":
-                    applicationPath = Require(value, "--app");
-                    i++;
-                    break;
-                case "--temp":
-                    compilationTempDirectory = Require(value, "--temp");
-                    i++;
-                    break;
-                case "--trace":
-                    tracePath = Require(value, "--trace");
-                    i++;
-                    break;
-                case "--id":
-                    applicationId = Require(value, "--id");
-                    i++;
-                    break;
-                case "--hold-gate":
-                    holdGate = Require(value, "--hold-gate");
-                    i++;
-                    break;
-                case "--response-dir":
-                    responseDirectory = Path.GetFullPath(Require(value, "--response-dir"));
-                    i++;
-                    break;
-                case "--machine-config":
-                    machineConfigurationPath = Path.GetFullPath(Require(value, "--machine-config"));
-                    i++;
-                    break;
-                case "--serve":
-                    serve = true;
-                    break;
-                case "--kestrel-max-body":
-                    kestrelMaxBodyBytes = long.Parse(Require(value, "--kestrel-max-body"));
-                    i++;
-                    break;
-                case "--http2":
-                    http2 = true;
-                    break;
-                case "--request":
-                    requests.Add(Require(value, "--request"));
-                    i++;
-                    break;
-                case "--postback":
-                    postbacks.Add(Require(value, "--postback"));
-                    i++;
-                    break;
-                default:
-                    throw new ArgumentException("Unrecognized argument: " + args[i]);
+                scan._flags.Add(option);
+            }
+            else if (Repeatable.Contains(option))
+            {
+                (scan._lists.TryGetValue(option, out var list)
+                    ? list
+                    : scan._lists[option] = []).Add(Require(value, option));
+                i++;
+            }
+            else if (Valued.Contains(option))
+            {
+                scan._values[option] = Require(value, option);
+                i++;
+            }
+            else
+            {
+                throw new ArgumentException("Unrecognized argument: " + option);
             }
         }
 
-        var ignoredByMode = serve
-            ? new (bool Present, string Option)[]
-            {
-                (machineConfigurationPath != null, "--machine-config"),
-                (holdGate != null, "--hold-gate"),
-            }
-            : [
-                (kestrelMaxBodyBytes != null, "--kestrel-max-body"),
-                (http2, "--http2"),
-                (postbacks.Count != 0, "--postback"),
-            ];
-        foreach (var (present, option) in ignoredByMode)
+        return scan;
+    }
+
+    internal bool Flag(string option) => _flags.Contains(option);
+
+    internal string? Value(string option) => _values.GetValueOrDefault(option);
+
+    internal string Required(string option) =>
+        Value(option) ?? throw new ArgumentException(option + " is required.");
+
+    internal List<string> Repeated(string option) => _lists.GetValueOrDefault(option) ?? [];
+
+    internal void AssertHonored(string mode, string[] honored)
+    {
+        var leftover = _flags
+            .Concat(_values.Keys)
+            .Concat(_lists.Keys)
+            .Where(option => !honored.Contains(option))
+            .OrderBy(option => option, StringComparer.Ordinal)
+            .FirstOrDefault();
+        if (leftover != null)
         {
-            if (present)
-            {
-                throw new ArgumentException(
-                    option + " is not honored in " + (serve ? "--serve" : "batch")
-                    + " mode; remove it or switch the mode.");
-            }
+            throw new ArgumentException(
+                leftover + " is not honored in " + mode + " mode; remove it or switch the mode.");
         }
-
-        // The run mode always issues at least one request; a serve mode with nothing declared is
-        // passive and driven by the test's own client.
-        if (!serve && requests.Count == 0)
-        {
-            requests.Add("/default");
-        }
-
-        return new ScenarioOptions(
-            applicationId,
-            Path.GetFullPath(Require(applicationPath, "--app")),
-            Path.GetFullPath(Require(compilationTempDirectory, "--temp")),
-            Path.GetFullPath(Require(tracePath, "--trace")),
-            holdGate,
-            responseDirectory,
-            machineConfigurationPath,
-            serve,
-            kestrelMaxBodyBytes,
-            http2,
-            requests,
-            postbacks);
     }
 
     private static string Require(string? value, string name)

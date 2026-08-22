@@ -39,7 +39,7 @@ public sealed class LiveScenario : IDisposable
     {
         _staged = StagedApplication.Stage(fixture.Name, rootPath);
 
-        var invocation = _staged.Invocation().Serve();
+        var invocation = _staged.Serve();
         if (kestrelMaxBody != null)
         {
             invocation.KestrelMaxBody(kestrelMaxBody.Value);

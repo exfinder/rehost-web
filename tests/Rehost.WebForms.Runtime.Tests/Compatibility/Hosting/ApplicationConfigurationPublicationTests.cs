@@ -43,7 +43,7 @@ public sealed class ApplicationConfigurationPublicationTests
     {
         using var staged = StagedApplication.Stage(fixture);
 
-        using var process = staged.Invocation()
+        using var process = staged.Batch()
             .Request("/quirks")
             .Start();
         process.WaitForExit();

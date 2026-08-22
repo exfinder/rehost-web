@@ -3,11 +3,8 @@ using Rehost.WebForms.Parity.Harness;
 
 namespace Rehost.WebForms.TestSupport;
 
-// Every ScenarioHost CLI option has its typed method here and nowhere else.
-public sealed class ScenarioHostInvocation
+public static class ScenarioHostInvocation
 {
-    private readonly List<string> _arguments = [];
-
     public static string HostDirectory { get; } =
         TestOutputPaths.TestProjectOutput("Rehost.WebForms.ScenarioHost");
 
@@ -16,35 +13,30 @@ public sealed class ScenarioHostInvocation
 
     public static string FixturePath(string fixtureName) =>
         Path.Combine(HostDirectory, "fixtures", fixtureName);
+}
 
-    public ScenarioHostInvocation Serve() => Add("--serve");
+// The host refuses an option its mode does not honor; the builders make that unspellable from
+// tests, because an option method exists only on the mode that honors it.
+public abstract class ScenarioHostInvocation<TInvocation>
+    where TInvocation : ScenarioHostInvocation<TInvocation>
+{
+    private readonly List<string> _arguments = [];
 
-    public ScenarioHostInvocation Application(string path) => Add("--app", path);
+    public TInvocation Application(string path) => Add("--app", path);
 
-    public ScenarioHostInvocation ApplicationId(string id) => Add("--id", id);
+    public TInvocation ApplicationId(string id) => Add("--id", id);
 
-    public ScenarioHostInvocation CompilationTemp(string path) => Add("--temp", path);
+    public TInvocation CompilationTemp(string path) => Add("--temp", path);
 
-    public ScenarioHostInvocation Trace(string path) => Add("--trace", path);
+    public TInvocation Trace(string path) => Add("--trace", path);
 
-    public ScenarioHostInvocation ResponseDirectory(string path) => Add("--response-dir", path);
+    public TInvocation ResponseDirectory(string path) => Add("--response-dir", path);
 
-    public ScenarioHostInvocation MachineConfig(string path) => Add("--machine-config", path);
-
-    public ScenarioHostInvocation HoldGate(string mutexName) => Add("--hold-gate", mutexName);
-
-    public ScenarioHostInvocation KestrelMaxBody(long bytes) =>
-        Add("--kestrel-max-body", bytes.ToString());
-
-    public ScenarioHostInvocation Http2() => Add("--http2");
-
-    public ScenarioHostInvocation Request(string url) => Add("--request", url);
-
-    public ScenarioHostInvocation Postback(string probe) => Add("--postback", probe);
+    public TInvocation Request(string url) => Add("--request", url);
 
     public ScenarioHostProcess Start()
     {
-        if (!File.Exists(HostAssemblyPath))
+        if (!File.Exists(ScenarioHostInvocation.HostAssemblyPath))
         {
             throw new InvalidOperationException(
                 "Build the scenario host first: dotnet build tests/Rehost.WebForms.ScenarioHost");
@@ -54,9 +46,9 @@ public sealed class ScenarioHostInvocation
         {
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            WorkingDirectory = HostDirectory,
+            WorkingDirectory = ScenarioHostInvocation.HostDirectory,
         };
-        startInfo.ArgumentList.Add(HostAssemblyPath);
+        startInfo.ArgumentList.Add(ScenarioHostInvocation.HostAssemblyPath);
         foreach (var argument in _arguments)
         {
             startInfo.ArgumentList.Add(argument);
@@ -65,9 +57,28 @@ public sealed class ScenarioHostInvocation
         return new ScenarioHostProcess(Process.Start(startInfo)!);
     }
 
-    private ScenarioHostInvocation Add(params string[] arguments)
+    protected TInvocation Add(params string[] arguments)
     {
         _arguments.AddRange(arguments);
-        return this;
+        return (TInvocation)this;
     }
+}
+
+public sealed class ServeInvocation : ScenarioHostInvocation<ServeInvocation>
+{
+    public ServeInvocation() => Add("--serve");
+
+    public ServeInvocation KestrelMaxBody(long bytes) =>
+        Add("--kestrel-max-body", bytes.ToString());
+
+    public ServeInvocation Http2() => Add("--http2");
+
+    public ServeInvocation Postback(string probe) => Add("--postback", probe);
+}
+
+public sealed class BatchInvocation : ScenarioHostInvocation<BatchInvocation>
+{
+    public BatchInvocation MachineConfig(string path) => Add("--machine-config", path);
+
+    public BatchInvocation HoldGate(string mutexName) => Add("--hold-gate", mutexName);
 }
