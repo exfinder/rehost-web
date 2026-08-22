@@ -3,34 +3,36 @@ using Shouldly;
 using Rehost.WebForms.TestSupport;
 
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
+
 // Activating an application permanently mutates process-global state, so every scenario driven from
 // here runs in its own child process through Rehost.WebForms.ScenarioHost. The slice-2 gate is
 // port-local; see ADR 0043.
 internal sealed class BatchApplication : IDisposable
 {
-    private readonly DirectoryInfo _root;
-    private readonly bool _ownsRoot;
+    private readonly IDisposable _owner;
     private int _runs;
 
     private BatchApplication(
-        DirectoryInfo root,
+        IDisposable owner,
         string applicationPath,
         string codegenRoot,
-        bool ownsRoot)
+        string tracePath,
+        string responseDirectory)
     {
-        _root = root;
-        _ownsRoot = ownsRoot;
+        _owner = owner;
         ApplicationPath = applicationPath;
         CodegenRoot = codegenRoot;
+        TracePath = tracePath;
+        ResponseDirectory = responseDirectory;
     }
 
     internal string ApplicationPath { get; }
 
     internal string CodegenRoot { get; }
 
-    internal string TracePath => Path.Combine(_root.FullName, "trace.txt");
+    internal string TracePath { get; }
 
-    private string ResponseDirectory => Path.Combine(_root.FullName, "responses");
+    private string ResponseDirectory { get; }
 
     // One segment per application directory, named for a digest of that directory.
     internal string Segment => Directory.GetDirectories(
@@ -38,24 +40,26 @@ internal sealed class BatchApplication : IDisposable
 
     internal static BatchApplication Create()
     {
-        var root = Directory.CreateTempSubdirectory("rehost-codegen-");
-        var applicationPath = Path.Combine(root.FullName, "app");
-        TestFiles.CopyDirectory(ScenarioHostInvocation.FixturePath("codegen"), applicationPath);
-        Directory.CreateDirectory(Path.Combine(root.FullName, "temp"));
-
+        var staged = StagedApplication.Stage("codegen");
         return new BatchApplication(
-            root,
-            applicationPath,
-            Path.Combine(root.FullName, "temp"),
-            ownsRoot: true);
+            staged,
+            staged.ApplicationPath,
+            staged.CompilationTempDirectory,
+            staged.TracePath,
+            staged.ResponseDirectory);
     }
 
     // A second application directory pointed at the same codegen root: two processes, one
     // segment is impossible from one directory because the segment is derived from it.
     internal BatchApplication CloneApplicationSharingCodegenRoot()
     {
-        var root = Directory.CreateTempSubdirectory("rehost-codegen-peer-");
-        return new BatchApplication(root, ApplicationPath, CodegenRoot, ownsRoot: true);
+        var root = new TempDirectory("rehost-codegen-peer-");
+        return new BatchApplication(
+            root,
+            ApplicationPath,
+            CodegenRoot,
+            root.Path("trace.txt"),
+            root.Path("responses"));
     }
 
     internal void EditAppCode()
@@ -144,22 +148,5 @@ internal sealed class BatchApplication : IDisposable
         throw new TimeoutException($"'{entry}' never appeared in {path}.");
     }
 
-    public void Dispose()
-    {
-        if (!_ownsRoot)
-        {
-            return;
-        }
-
-        try
-        {
-            _root.Delete(recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
-    }
+    public void Dispose() => _owner.Dispose();
 }

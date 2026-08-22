@@ -1,4 +1,3 @@
-using Rehost.WebForms.Parity.Contracts;
 using Shouldly;
 using Rehost.WebForms.TestSupport;
 
@@ -9,47 +8,26 @@ namespace Rehost.WebForms.Runtime.Tests.Compatibility.Compilation;
 // see ADR 0044.
 internal sealed class PageApplication : IDisposable
 {
-    private readonly DirectoryInfo _root;
+    private readonly StagedApplication _staged;
     private int _runs;
 
-    private PageApplication(DirectoryInfo root)
-    {
-        _root = root;
-        ApplicationPath = Path.Combine(root.FullName, "app");
-        CodegenRoot = Path.Combine(root.FullName, "temp");
-        ResponseDirectory = Path.Combine(root.FullName, "responses");
-    }
+    private PageApplication(StagedApplication staged) => _staged = staged;
 
-    internal string ApplicationPath { get; }
+    internal string ApplicationPath => _staged.ApplicationPath;
 
-    internal string CodegenRoot { get; }
+    internal string CodegenRoot => _staged.CompilationTempDirectory;
 
-    internal string ResponseDirectory { get; }
-
-    internal string TracePath => Path.Combine(_root.FullName, "trace.txt");
+    internal string TracePath => _staged.TracePath;
 
     internal byte[] ExpectedResponse =>
         File.ReadAllBytes(Path.Combine(ApplicationPath, "Default.expected.html"));
 
-    internal static PageApplication Create()
-    {
-        var root = Directory.CreateTempSubdirectory("rehost-page-");
-        var application = new PageApplication(root);
+    internal static PageApplication Create() =>
+        new(StagedApplication.Stage("page"));
 
-        TestFiles.CopyDirectory(
-            ScenarioHostInvocation.FixturePath("page"),
-            application.ApplicationPath);
-        Directory.CreateDirectory(application.CodegenRoot);
-        Directory.CreateDirectory(application.ResponseDirectory);
+    internal byte[] ReadResponse(int index) => _staged.Response(index);
 
-        return application;
-    }
-
-    internal byte[] ReadResponse(int index) =>
-        File.ReadAllBytes(Path.Combine(ResponseDirectory, index + ".body"));
-
-    internal string ReadResponseText(int index) =>
-        File.ReadAllText(Path.Combine(ResponseDirectory, index + ".body"));
+    internal string ReadResponseText(int index) => _staged.ResponseText(index);
 
     // Generated page assemblies carry a random suffix, so identity is the file name rather
     // than a timestamp: a recompile produces a differently named assembly.
@@ -82,16 +60,9 @@ internal sealed class PageApplication : IDisposable
     internal List<string> Run(params string[] requests)
     {
         _runs++;
-        if (File.Exists(TracePath))
-        {
-            File.Delete(TracePath);
-        }
+        _staged.ResetTrace();
 
-        var invocation = new ScenarioHostInvocation()
-            .Application(ApplicationPath)
-            .CompilationTemp(CodegenRoot)
-            .Trace(TracePath)
-            .ResponseDirectory(ResponseDirectory);
+        var invocation = _staged.Invocation();
         foreach (var request in requests)
         {
             invocation.Request(request);
@@ -101,21 +72,8 @@ internal sealed class PageApplication : IDisposable
         process.WaitForExit();
         process.ExitCode.ShouldBe(0, process.StandardError);
 
-        return TraceChannel.ReadLines(TracePath);
+        return _staged.Trace();
     }
 
-    public void Dispose()
-    {
-        try
-        {
-            _root.Delete(recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
-    }
-
+    public void Dispose() => _staged.Dispose();
 }

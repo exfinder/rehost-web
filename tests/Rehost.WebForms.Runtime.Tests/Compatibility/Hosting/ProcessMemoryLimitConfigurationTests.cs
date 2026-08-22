@@ -32,52 +32,33 @@ public sealed class ProcessMemoryLimitConfigurationTests
 
     private static List<string> Run(int memoryLimitPercent)
     {
-        var root = Directory.CreateTempSubdirectory("rehost-memory-limit-");
-        try
-        {
-            var tracePath = Path.Combine(root.FullName, "trace.txt");
-            var temp = Path.Combine(root.FullName, "temp");
-            Directory.CreateDirectory(temp);
+        using var staged = StagedApplication.Stage("modern-target");
 
-            var machineConfig = Path.Combine(root.FullName, "machine.config");
-            var shipped = Path.Combine(
-                ScenarioHostInvocation.HostDirectory, "configs", WebFormsApplicationOptions.DefaultMachineConfigurationFileName);
-            var text = File.ReadAllText(shipped);
-            text.ShouldContain("memoryLimit=\"80\"", Case.Sensitive);
-            File.WriteAllText(
-                machineConfig,
-                text.Replace("memoryLimit=\"80\"", $"memoryLimit=\"{memoryLimitPercent}\"", StringComparison.Ordinal));
-            // The IIS baseline is resolved beside the machine config and is required.
-            File.Copy(
-                Path.Combine(
-                    ScenarioHostInvocation.HostDirectory,
-                    "configs",
-                    "rehost-webforms.applicationHost.config"),
-                Path.Combine(root.FullName, "rehost-webforms.applicationHost.config"));
+        var machineConfig = Path.Combine(staged.RootPath, "machine.config");
+        var shipped = Path.Combine(
+            ScenarioHostInvocation.HostDirectory, "configs", WebFormsApplicationOptions.DefaultMachineConfigurationFileName);
+        var text = File.ReadAllText(shipped);
+        text.ShouldContain("memoryLimit=\"80\"", Case.Sensitive);
+        File.WriteAllText(
+            machineConfig,
+            text.Replace("memoryLimit=\"80\"", $"memoryLimit=\"{memoryLimitPercent}\"", StringComparison.Ordinal));
+        // The IIS baseline is resolved beside the machine config and is required.
+        File.Copy(
+            Path.Combine(
+                ScenarioHostInvocation.HostDirectory,
+                "configs",
+                "rehost-webforms.applicationHost.config"),
+            Path.Combine(staged.RootPath, "rehost-webforms.applicationHost.config"));
 
-            using var process = new ScenarioHostInvocation()
-                .Application(ScenarioHostInvocation.FixturePath("modern-target"))
-                .CompilationTemp(temp)
-                .Trace(tracePath)
-                .MachineConfig(machineConfig)
-                .Request("/quirks")
-                .Start();
-            process.WaitForExit();
+        using var process = staged.Invocation()
+            .MachineConfig(machineConfig)
+            .Request("/quirks")
+            .Start();
+        process.WaitForExit();
 
-            process.ExitCode.ShouldBe(0, process.StandardError);
+        process.ExitCode.ShouldBe(0, process.StandardError);
 
-            return TraceChannel.ReadLines(tracePath);
-        }
-        finally
-        {
-            try
-            {
-                root.Delete(recursive: true);
-            }
-            catch (IOException)
-            {
-            }
-        }
+        return staged.Trace();
     }
 
 }

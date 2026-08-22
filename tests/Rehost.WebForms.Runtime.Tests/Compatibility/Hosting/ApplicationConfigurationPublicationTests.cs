@@ -41,33 +41,14 @@ public sealed class ApplicationConfigurationPublicationTests
 
     private static (int ExitCode, string StandardError, List<string> Trace) Start(string fixture)
     {
-        var root = Directory.CreateTempSubdirectory("rehost-quirks-");
-        try
-        {
-            var tracePath = Path.Combine(root.FullName, "trace.txt");
-            var temp = Path.Combine(root.FullName, "temp");
-            Directory.CreateDirectory(temp);
+        using var staged = StagedApplication.Stage(fixture);
 
-            using var process = new ScenarioHostInvocation()
-                .Application(ScenarioHostInvocation.FixturePath(fixture))
-                .CompilationTemp(temp)
-                .Trace(tracePath)
-                .Request("/quirks")
-                .Start();
-            process.WaitForExit();
+        using var process = staged.Invocation()
+            .Request("/quirks")
+            .Start();
+        process.WaitForExit();
 
-            return (process.ExitCode, process.StandardError, TraceChannel.ReadLines(tracePath));
-        }
-        finally
-        {
-            try
-            {
-                root.Delete(recursive: true);
-            }
-            catch (IOException)
-            {
-            }
-        }
+        return (process.ExitCode, process.StandardError, staged.Trace());
     }
 
 }

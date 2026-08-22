@@ -6,24 +6,21 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 internal sealed class BatchRun : IDisposable
 {
-    private readonly DirectoryInfo _root;
+    private readonly StagedApplication _staged;
 
-    private BatchRun(DirectoryInfo root, string applicationPath, List<string> trace)
+    private BatchRun(StagedApplication staged, List<string> trace)
     {
-        _root = root;
-        ApplicationPath = applicationPath;
+        _staged = staged;
         Trace = trace;
     }
 
-    internal string ApplicationPath { get; }
+    internal string ApplicationPath => _staged.ApplicationPath;
 
     private List<string> Trace { get; }
 
-    internal byte[] Response(int index) =>
-        File.ReadAllBytes(Path.Combine(_root.FullName, "responses", index + ".body"));
+    internal byte[] Response(int index) => _staged.Response(index);
 
-    internal string ResponseText(int index) =>
-        File.ReadAllText(Path.Combine(_root.FullName, "responses", index + ".body"));
+    internal string ResponseText(int index) => _staged.ResponseText(index);
 
     internal byte[] Response(string label, int occurrence = 0) => Response(Find(label, occurrence).Index);
 
@@ -71,24 +68,9 @@ internal sealed class BatchRun : IDisposable
     // Responses are numbered in order across probes: one render, then one per postback round.
     internal static BatchRun Farm(params string[] probes)
     {
-        var root = Directory.CreateTempSubdirectory("rehost-page-kestrel-");
-        var applicationPath = Path.Combine(root.FullName, "app");
-        var responses = Path.Combine(root.FullName, "responses");
-        var temp = Path.Combine(root.FullName, "temp");
-        var tracePath = Path.Combine(root.FullName, "trace.txt");
+        var staged = StagedApplication.Stage(Fixtures.Farm.Name);
 
-        TestFiles.CopyDirectory(
-            ScenarioHostInvocation.FixturePath(Fixtures.Farm.Name),
-            applicationPath);
-        Directory.CreateDirectory(responses);
-        Directory.CreateDirectory(temp);
-
-        var invocation = new ScenarioHostInvocation()
-            .Serve()
-            .Application(applicationPath)
-            .CompilationTemp(temp)
-            .Trace(tracePath)
-            .ResponseDirectory(responses);
+        var invocation = staged.Invocation().Serve();
         foreach (var probe in probes)
         {
             invocation.Postback(probe);
@@ -98,21 +80,8 @@ internal sealed class BatchRun : IDisposable
         process.WaitForExit();
         process.ExitCode.ShouldBe(0, process.StandardError);
 
-        return new BatchRun(root, applicationPath, TraceChannel.ReadLines(tracePath));
+        return new BatchRun(staged, staged.Trace());
     }
 
-    public void Dispose()
-    {
-        try
-        {
-            _root.Delete(recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
-    }
-
+    public void Dispose() => _staged.Dispose();
 }

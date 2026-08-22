@@ -14,9 +14,8 @@ public sealed class LiveScenario : IDisposable
 {
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
 
-    private readonly DirectoryInfo _root;
+    private readonly StagedApplication _staged;
     private readonly ScenarioHostProcess _process;
-    private readonly string _tracePath;
 
     // ScenarioHostRegistry's door only; every other caller goes through StartIsolated.
     internal static LiveScenario StartPooled(ScenarioFixture fixture) => new(fixture);
@@ -38,27 +37,9 @@ public sealed class LiveScenario : IDisposable
         long? kestrelMaxBody = null,
         bool http2 = false)
     {
-        _root = rootPath == null
-            ? Directory.CreateTempSubdirectory("rehost-live-kestrel-")
-            : Directory.CreateDirectory(
-                Path.Combine(rootPath, "live-" + Guid.NewGuid().ToString("N")));
-        ApplicationPath = Path.Combine(_root.FullName, "app");
-        _tracePath = Path.Combine(_root.FullName, "trace.txt");
-        var temp = Path.Combine(_root.FullName, "temp");
-        var responses = Path.Combine(_root.FullName, "responses");
+        _staged = StagedApplication.Stage(fixture.Name, rootPath);
 
-        TestFiles.CopyDirectory(
-            ScenarioHostInvocation.FixturePath(fixture.Name),
-            ApplicationPath);
-        Directory.CreateDirectory(temp);
-        Directory.CreateDirectory(responses);
-
-        var invocation = new ScenarioHostInvocation()
-            .Serve()
-            .Application(ApplicationPath)
-            .CompilationTemp(temp)
-            .Trace(_tracePath)
-            .ResponseDirectory(responses);
+        var invocation = _staged.Invocation().Serve();
         if (kestrelMaxBody != null)
         {
             invocation.KestrelMaxBody(kestrelMaxBody.Value);
@@ -75,7 +56,7 @@ public sealed class LiveScenario : IDisposable
         Client = new ScenarioClient(Address, http2: http2);
     }
 
-    internal string ApplicationPath { get; }
+    internal string ApplicationPath => _staged.ApplicationPath;
 
     internal int HostProcessId => _process.Id;
 
@@ -115,7 +96,7 @@ public sealed class LiveScenario : IDisposable
             + _process.StandardError);
     }
 
-    private string? ReadAddress() => TraceChannel.ReadLines(_tracePath)
+    private string? ReadAddress() => _staged.Trace()
         .Where(line => line.StartsWith(TraceEvents.Address, StringComparison.Ordinal))
         .Select(line => line[TraceEvents.Address.Length..])
         .FirstOrDefault();
@@ -124,16 +105,6 @@ public sealed class LiveScenario : IDisposable
     {
         Client?.Dispose();
         _process.Dispose();
-
-        try
-        {
-            _root.Delete(recursive: true);
-        }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
+        _staged.Dispose();
     }
 }
