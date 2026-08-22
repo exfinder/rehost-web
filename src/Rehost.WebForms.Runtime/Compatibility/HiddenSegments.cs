@@ -18,10 +18,7 @@ internal static class HiddenSegments
         var configuration = IisServerConfiguration.Current;
         foreach (var segment in virtualPath.Split('/'))
         {
-            // web.config stays with the golden forbidden-handler 403 (ledger P59).
-            if (segment.Length != 0
-                && !string.Equals(segment, "web.config", StringComparison.OrdinalIgnoreCase)
-                && configuration.IsHiddenSegment(segment))
+            if (segment.Length != 0 && configuration.IsHiddenSegment(segment))
             {
                 throw new HttpException(404, string.Empty);
             }

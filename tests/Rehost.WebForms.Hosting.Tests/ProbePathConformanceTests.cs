@@ -29,6 +29,14 @@ public sealed class ProbePathConformanceTests
         ["ScenarioHandler"] = ProbePaths.ScenarioDefault,
     };
 
+    // The handler-walk markers report which row of the merged list won, so the path they sit at
+    // is the variable under test and no single one can be typed for them.
+    private static readonly HashSet<string> PathIsUnderTest = new()
+    {
+        "MarkerAHandler",
+        "MarkerBHandler",
+    };
+
     [Fact]
     public void Every_Fixture_Registers_Probe_Handlers_At_Their_Typed_Paths()
     {
@@ -54,8 +62,13 @@ public sealed class ProbePathConformanceTests
                     continue;
                 }
 
-                seen++;
                 var handler = type.Split(',')[0].Split('.')[^1];
+                if (PathIsUnderTest.Contains(handler))
+                {
+                    continue;
+                }
+
+                seen++;
                 HandlerPaths.ShouldContainKey(
                     handler,
                     $"{Path.GetFileName(fixture)} registers a probe handler with no typed path");

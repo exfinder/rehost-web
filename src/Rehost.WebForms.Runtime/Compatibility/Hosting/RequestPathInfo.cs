@@ -1,6 +1,6 @@
 #nullable enable
 
-using System.Web.Configuration;
+using System.Web.IisConfig;
 
 namespace System.Web.Hosting;
 
@@ -48,14 +48,14 @@ internal static class RequestPathInfo
 
     // A prefix the configuration system cannot even address (a ':' segment, say) claims nothing:
     // the whole URL stays the file path and the request fails where Framework failed it, on the
-    // pipeline's own configuration lookup rather than inside the worker request.
+    // pipeline's own configuration lookup rather than inside the worker request. The catch-all
+    // rows claim nothing either, which is what leaves an unmapped URL whole.
     private static bool IsClaimedByHandler(string verb, string prefix)
     {
         try
         {
-            var path = VirtualPath.Create(prefix);
-            var mapping = RuntimeConfig.GetConfig(path).HttpHandlers.FindMapping(verb, path);
-            return mapping != null && mapping.Path != "*";
+            var route = IntegratedHandlers.Selected(verb, VirtualPath.Create(prefix));
+            return route != null && route.Registration.Path != "*";
         }
         catch (Exception exception) when (exception is HttpException or ArgumentException)
         {

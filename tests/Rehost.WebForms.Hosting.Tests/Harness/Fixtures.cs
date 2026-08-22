@@ -21,4 +21,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture Auth = new("auth");
     internal static readonly ScenarioFixture Modules = new("modules");
     internal static readonly ScenarioFixture ModulesRunAll = new("modules-rammfar");
+    internal static readonly ScenarioFixture Handlers = new("handlers");
 }

@@ -10,7 +10,7 @@
  },
  "import": {
   "path": "src/System.Web.ReferenceSource",
-  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' — shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
+  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' \u2014 shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
   "verification": "Files not named under 'deviations' must match upstream.sourceTree; deviating files are accounted for individually."
  },
  "license": {
@@ -108,7 +108,7 @@
    "files": [
     "HttpApplication.cs"
    ],
-   "reason": "the module collection is built from the merged system.webServer/modules snapshot through the integrated-mode builder already present here, with per-request managedHandler conditioning wrapped around the classic execution steps (fenced !NETFRAMEWORK); GetHandlerMapping widened to internal so the seam reuses the cached classic mapping instead of duplicating it, and the classic UrlMappingsExecutionStep retired in favour of the golden's UrlMappingsModule row",
+   "reason": "the module collection is built from the merged system.webServer/modules snapshot through the integrated-mode builder already present here, with per-request managedHandler conditioning wrapped around the classic execution steps (fenced !NETFRAMEWORK), and the classic UrlMappingsExecutionStep retired in favour of the golden's UrlMappingsModule row",
    "record": "docs/portability-ledger.md P83"
   },
   {
@@ -117,6 +117,21 @@
    ],
    "reason": "the golden registers this module in every application, so the anonymous WindowsIdentity/WindowsPrincipal statics move into a nested holder that defers their platform failure, and IsEnabled answers false (fenced !NETFRAMEWORK) rather than the authentication section's default, which is Windows",
    "record": "docs/portability-ledger.md P84"
+  },
+  {
+   "files": [
+    "HttpApplication.cs",
+    "Handlers/AssemblyResourceLoader.cs"
+   ],
+   "reason": "handler selection walks the merged system.webServer/handlers snapshot instead of the classic <httpHandlers> mapping (fenced !NETFRAMEWORK): MapHttpHandler asks the walk for the handler and keeps the factory-recycling bookkeeping around it, and AssemblyResourceLoader asks the same list whether WebResource.axd is still mapped to it",
+   "record": "docs/portability-ledger.md P85"
+  },
+  {
+   "files": [
+    "HttpContext.cs"
+   ],
+   "reason": "IIS request filtering's <fileExtensions> deny list is checked beside the hidden-segment rule in ValidatePath (fenced !NETFRAMEWORK), because the retired classic <httpHandlers> table was what had been refusing those extensions",
+   "record": "docs/portability-ledger.md P86"
   }
  ]
 }

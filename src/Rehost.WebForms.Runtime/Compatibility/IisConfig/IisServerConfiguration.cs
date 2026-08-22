@@ -18,7 +18,11 @@ internal sealed class IisServerConfiguration
     private static readonly IisCollectionSchema HiddenSegmentSchema =
         new("add", "segment", null);
 
+    private static readonly IisCollectionSchema FileExtensionSchema =
+        new("add", "fileExtension", "allowed");
+
     private static volatile IisServerConfiguration _current = new(
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new DefaultDocuments(enabled: true, Array.Empty<string>()),
@@ -28,10 +32,12 @@ internal sealed class IisServerConfiguration
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
+    private readonly Dictionary<string, string> _fileExtensions;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
         Dictionary<string, string> hiddenSegments,
+        Dictionary<string, string> fileExtensions,
         DefaultDocuments defaultDocuments,
         IReadOnlyList<IisRegistration> modules,
         bool runAllManagedModulesForAllRequests,
@@ -39,10 +45,19 @@ internal sealed class IisServerConfiguration
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
+        _fileExtensions = fileExtensions;
         DefaultDocuments = defaultDocuments;
         Modules = modules;
         RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
         Handlers = handlers;
+
+        var routes = new IisHandlerRoute[handlers.Count];
+        for (var index = 0; index < handlers.Count; index++)
+        {
+            routes[index] = new IisHandlerRoute(handlers[index]);
+        }
+
+        HandlerRoutes = routes;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -57,6 +72,8 @@ internal sealed class IisServerConfiguration
 
     internal IReadOnlyList<IisRegistration> Handlers { get; }
 
+    internal IReadOnlyList<IisHandlerRoute> HandlerRoutes { get; }
+
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
 
@@ -66,6 +83,11 @@ internal sealed class IisServerConfiguration
             : null;
 
     internal bool IsHiddenSegment(string segment) => _hiddenSegments.ContainsKey(segment);
+
+    internal bool IsForbiddenExtension(string? extension) =>
+        !string.IsNullOrEmpty(extension)
+        && _fileExtensions.TryGetValue(extension!, out var allowed)
+        && string.Equals(allowed, "false", StringComparison.OrdinalIgnoreCase);
 
     internal static IisServerConfiguration Load(
         string baselineConfigPath,
@@ -81,6 +103,7 @@ internal sealed class IisServerConfiguration
         return new IisServerConfiguration(
             sections.StaticContent,
             sections.HiddenSegments,
+            sections.FileExtensions,
             sections.DefaultDocuments.Build(),
             sections.Modules.Build(),
             sections.Modules.RunAllManagedModules,
@@ -126,6 +149,14 @@ internal sealed class IisServerConfiguration
                 staticContentNode, MimeMapSchema, sections.StaticContent, configPath);
         }
 
+        var fileExtensionsNode = document.SelectSingleNode(
+            "/configuration/system.webServer/security/requestFiltering/fileExtensions");
+        if (fileExtensionsNode != null)
+        {
+            IisCollectionReader.Apply(
+                fileExtensionsNode, FileExtensionSchema, sections.FileExtensions, configPath);
+        }
+
         var hiddenSegmentsNode = document.SelectSingleNode(
             "/configuration/system.webServer/security/requestFiltering/hiddenSegments");
         if (hiddenSegmentsNode != null)
@@ -160,6 +191,9 @@ internal sealed class IisServerConfiguration
             new(StringComparer.OrdinalIgnoreCase);
 
         internal Dictionary<string, string> HiddenSegments { get; } =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        internal Dictionary<string, string> FileExtensions { get; } =
             new(StringComparer.OrdinalIgnoreCase);
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();

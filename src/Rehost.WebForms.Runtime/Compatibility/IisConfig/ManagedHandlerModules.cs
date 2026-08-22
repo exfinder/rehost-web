@@ -38,44 +38,22 @@ internal sealed class ManagedHandlerModules
             : step;
 
     // The engine below this seam is the classic pipeline, which maps the handler halfway through
-    // the request; IIS knew the mapping before BeginRequest. The answer is predicted from the same
-    // classic mapping table, which memoizes its own lookup per path on the request's CachedPathData.
-    // The webServer handler walk replaces this input, not the seam.
+    // the request; IIS knew the mapping before BeginRequest. The answer is the same walk the
+    // pipeline will run over the merged handler list, asked early: a row carrying type= is a
+    // managed handler and a native-bridged row is not. A routed request never reaches the walk,
+    // and its remapped instance is managed.
     private static bool IsManagedRequest(HttpApplication application)
     {
         var context = application.Context;
-        if (context == null)
+        if (context == null || context.RemapHandlerInstance != null)
         {
             return true;
         }
 
-        var path = context.Request.FilePathObject;
+        var route = IntegratedHandlers.Selected(
+            context.Request.RequestType, context.Request.FilePathObject);
 
-        HttpHandlerAction? mapping;
-        try
-        {
-            mapping = application.GetHandlerMapping(
-                context, context.Request.RequestType, path, false /*useAppConfig*/);
-        }
-        catch
-        {
-            // A mapping this cannot resolve is reported where the pipeline maps for real, with the
-            // diagnostic and the pipeline position Framework gives it.
-            return true;
-        }
-
-        var type = mapping?.TypeInternal;
-        if (type == null
-            || !(typeof(StaticFileHandler).IsAssignableFrom(type)
-                || typeof(DefaultHttpHandler).IsAssignableFrom(type)))
-        {
-            return true;
-        }
-
-        // The classic table ends in one catch-all where the webServer list has two rows: the
-        // managed ExtensionlessUrlHandler-Integrated-4.0 ("*.") ahead of the native StaticFile
-        // ("*"). An extensionless URL is the first one's, so it is a managed handler.
-        return string.IsNullOrEmpty(path.Extension);
+        return route != null && route.IsManaged;
     }
 
     private sealed class ConditionedStep : HttpApplication.IExecutionStep

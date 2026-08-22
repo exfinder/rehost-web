@@ -58,13 +58,15 @@ public sealed class PageOverKestrelTests(PageLiveScenario scenario) : IClassFixt
         response.StatusCode.ShouldBe(404);
     }
 
+    // The code-behind is on disk and its extension is on IIS request filtering's deny list, so
+    // the file exists and the answer is still 404 — the shape IIS gave it (404.7), where the
+    // retired classic <httpHandlers> table gave System.Web's 403.
     [Fact]
-    public async Task Refuses_A_Path_Framework_Maps_To_The_Forbidden_Handler()
+    public async Task Refuses_A_Path_On_The_Request_Filtering_Deny_List()
     {
-        // The page is routed by the shipped root configuration, so this also covers the *.aspx
-        // httpHandlers mapping reaching PageHandlerFactory.
         var response = await scenario.Client.GetAsync("/Default.aspx.cs");
 
-        response.StatusCode.ShouldBe(403);
+        response.StatusCode.ShouldBe(404);
+        response.Text.ShouldNotContain("class");
     }
 }

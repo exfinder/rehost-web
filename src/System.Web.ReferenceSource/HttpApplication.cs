@@ -1256,7 +1256,7 @@ namespace System.Web {
             return WindowsIdentity.GetCurrent();
         }
 
-        internal HttpHandlerAction GetHandlerMapping(HttpContext context, String requestType, VirtualPath path, bool useAppConfig) {
+        private HttpHandlerAction GetHandlerMapping(HttpContext context, String requestType, VirtualPath path, bool useAppConfig) {
             CachedPathData pathData = null;
             HandlerMappingMemo memo = null;
             HttpHandlerAction mapping = null;
@@ -1378,6 +1378,19 @@ namespace System.Web {
                     return handler;
                 }
 
+#if !NETFRAMEWORK
+                // The port models an integrated pool, where the merged system.webServer/handlers
+                // list selects the handler and the classic table is dead text (ledger P85).
+                IHttpHandlerFactory selectedFactory;
+                handler = IisConfig.IntegratedHandlers.Map(
+                    context, requestType, path, pathTranslated, GetFactory, out selectedFactory);
+
+                if (selectedFactory != null) {
+                    if (_handlerRecycleList == null)
+                        _handlerRecycleList = new ArrayList();
+                    _handlerRecycleList.Add(new HandlerWithFactory(handler, selectedFactory));
+                }
+#else
                 // Map new handler
                 HttpHandlerAction mapping = GetHandlerMapping(context, requestType, path, useAppConfig);
 
@@ -1430,6 +1443,7 @@ namespace System.Web {
                 if (_handlerRecycleList == null)
                     _handlerRecycleList = new ArrayList();
                 _handlerRecycleList.Add(new HandlerWithFactory(handler, factory));
+#endif
             }
 
             return handler;

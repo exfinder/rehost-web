@@ -147,6 +147,9 @@ public sealed class ModulesLiveScenario(ScenarioHostRegistry registry)
 public sealed class ModulesRunAllLiveScenario(ScenarioHostRegistry registry)
     : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.ModulesRunAll));
 
+public sealed class HandlersLiveScenario(ScenarioHostRegistry registry)
+    : Scenario(registry.GetOrAdd(Fixtures.Handlers));
+
 // The timeout probes hang and expire their requests, so the host is damaged goods: one private
 // process per consuming class, never the registry.
 public sealed class TimeoutLiveScenario()

@@ -18,6 +18,7 @@ meet the same bar.
 | `legacy-target` / `modern-target` | `<httpRuntime targetFramework>` divergence is the claim; activation is what is under test. |
 | `timeout` | `executionTimeout="1"` plus a 2-second `rehost:RequestTimeoutScanSeconds` would time out any other fixture's slow requests; the real-timer chain firing is the claim. |
 | `webserver` | `<system.webServer>` amendments over the shipped IIS baseline are the claim: removed and added extensions, extended and un-hidden segments, and an unhonored section tolerated. |
+| `handlers` | `<handlers>` amendments that take the catch-all away: with `StaticFile` removed no static file, default document or unmapped URL in the application can ever serve, and a deliberately broken row 500s. No other fixture can host that. |
 | `asyncapp` | An async `AddOnBeginRequestAsync` module event is app-global — every request through the host awaits it — which would perturb every other fixture's scenarios; hosts the truly-pending `IHttpAsyncHandler` beside it. |
 | `friendlyurls` | Route-table registration is app-global, and later cache-mode scenarios mutate its file inventory. Also hosts the OWIN module (`FixtureOwinStartup`, cookie authentication) — an app-global `HttpModule` that runs on every request. |
 | `defdoc-disabled` | `<defaultDocument enabled="false" />` app-wide: directory requests must 403 with the courtesy redirect suppressed (readings D12/D14), so no directory URL in it can ever serve. |

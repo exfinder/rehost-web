@@ -101,11 +101,28 @@ namespace System.Web.Handlers {
                         _handlerExists = (typeof(AssemblyResourceLoader) == BuildManager.GetType(handlerTypeString, true /*throwOnFail*/, false /*ignoreCase*/));
                     }
                 }
+#if !NETFRAMEWORK
+                else {
+                    // The merged <handlers> list is this port's mapping authority (ledger P85), so
+                    // the row is matched there and its type compared by name: the row resolves
+                    // lazily and asking whether WebResource.axd is mapped must not force it.
+                    IisConfig.IisHandlerRoute route = IisConfig.IntegratedHandlers.Selected(
+                        "GET", VirtualPath.Create(_webResourceUrl));
+                    _handlerExists = route != null
+                        && route.Registration.Type != null
+                        && BuildManager.GetType(
+                               IisConfig.IisTypeIdentities.Retarget(route.Registration.Type),
+                               false /*throwOnFail*/,
+                               false /*ignoreCase*/) == typeof(AssemblyResourceLoader);
+                }
+#else
                 else {
                     // check the <httpHandlers> section
                     HttpHandlerAction httpHandler = RuntimeConfig.GetConfig(VirtualPath.Create(webResourcePath)).HttpHandlers.FindMapping("GET", VirtualPath.Create(_webResourceUrl));
                     _handlerExists = (httpHandler != null) && (httpHandler.TypeInternal == typeof(AssemblyResourceLoader));
-                }                
+                }
+#endif
+
                 _handlerExistenceChecked = true;
             }
         }
