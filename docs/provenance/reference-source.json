@@ -106,9 +106,10 @@
   },
   {
    "files": [
-    "HttpApplication.cs"
+    "HttpApplication.cs",
+    "HttpContext.cs"
    ],
-   "reason": "the module collection is built from the merged system.webServer/modules snapshot through the integrated-mode builder already present here, with per-request managedHandler conditioning wrapped around the classic execution steps (fenced !NETFRAMEWORK), and the classic UrlMappingsExecutionStep retired in favour of the golden's UrlMappingsModule row",
+   "reason": "the module collection is built from the merged system.webServer/modules snapshot through the integrated-mode builder already present here, with per-request managedHandler conditioning wrapped around the classic execution steps (fenced !NETFRAMEWORK), its answer settled once from the URL as it arrived and held on the context for the rest of the request, and the classic UrlMappingsExecutionStep retired in favour of the golden's UrlMappingsModule row",
    "record": "docs/portability-ledger.md P83"
   },
   {
