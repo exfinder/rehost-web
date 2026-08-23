@@ -24,6 +24,17 @@ public sealed class FormsAuthenticationOverKestrelTests(AuthLiveScenario scenari
     }
 
     [Fact]
+    public async Task A_Denied_Folder_Still_Serves_Its_Static_Files_Anonymously()
+    {
+        var page = await scenario.Client.GetAsync(ProbePaths.Secret);
+        var asset = await scenario.Client.GetAsync("/Secret/asset.txt");
+
+        page.StatusCode.ShouldBe(302);
+        asset.StatusCode.ShouldBe(200);
+        asset.Text.Trim().ShouldBe("SECRET-ASSET");
+    }
+
+    [Fact]
     public async Task Signing_In_Authenticates_The_Next_Request()
     {
         var signIn = await scenario.Client.GetAsync(ProbePaths.AuthSignIn + "?u=alice&p=pw");
