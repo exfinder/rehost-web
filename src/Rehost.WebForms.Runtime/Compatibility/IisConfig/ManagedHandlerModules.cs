@@ -40,12 +40,12 @@ internal sealed class ManagedHandlerModules
     // The engine below this seam is the classic pipeline, which maps the handler halfway through
     // the request; IIS knew the mapping before BeginRequest. The answer is the same walk the
     // pipeline will run over the merged handler list, asked early: a row carrying type= is a
-    // managed handler and a native-bridged row is not. A routed request never reaches the walk,
-    // and its remapped instance is managed.
+    // managed handler and a native-bridged row is not. Neither a rewrite nor RemapHandler moves
+    // it afterwards, so a routed static URL keeps the answer its own extension gave.
     private static bool IsManagedRequest(HttpApplication application)
     {
         var context = application.Context;
-        if (context == null || context.RemapHandlerInstance != null)
+        if (context == null)
         {
             return true;
         }

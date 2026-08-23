@@ -1,8 +1,8 @@
 # IIS integrated mode: modules and handlers readings
 
 The evidence behind ledger P83, P85 and P86, and behind the `system.webServer/handlers`
-and `/modules` rows of the [compatibility map](../compatibility.md). Thirty-eight readings
-(MH1-MH38) taken against full IIS 10 on `winbox` in four rounds, 2026-08-22 and
+and `/modules` rows of the [compatibility map](../compatibility.md). Thirty-nine readings
+(MH1-MH39) taken against full IIS 10 on `winbox` in four rounds, 2026-08-22 and
 2026-08-23, one throwaway application per case. Each reading states the configuration
 fragment, the request, the response as `curl` printed it, and the conclusion drawn.
 
@@ -11,9 +11,10 @@ reversed), MH9v (a re-added inherited handler name does not regain top matching
 priority), MH22 (handler types resolve lazily, module types do not), MH24 (a subfolder
 `<modules>` section is ignored rather than refused), MH28 (handler paths match
 case-insensitively while verbs do not), MH33/MH34 (the classic-section validator does not
-reach inside `<location>` but does resolve `configSource`), MH35 (`managedHandler` is
-decided once from the pre-rewrite URL), MH37 (`TRACE` is 501, not 200), and MH38
-(`<customHeaders>` reach responses the application never produces).
+reach inside `<location>` but does resolve `configSource`), MH35/MH39 (`managedHandler` is
+decided once from the arriving URL, and neither a rewrite nor `RemapHandler` revisits it),
+MH37 (`TRACE` is 501, not 200), and MH38 (`<customHeaders>` reach responses the application
+never produces).
 
 Rig: winbox, full IIS 10.0, app pool `MhPool` (v4.0, Integrated), site `MhSite` port 8112,
 one application per case under `C:/Users/sshuser/probes/mh-rig/apps/<case>`. Probe assembly
@@ -1035,6 +1036,33 @@ working simple-request CORS and broken preflight on IIS too.
 Two headers this reading adds to the `OPTIONS` picture of MH37, both hidden by the earlier
 filtered transcript: IIS emits the obsolete `Public` alongside `Allow` with the same list, and
 `X-AspNet-Version` appears on managed responses but not on natively served ones.
+
+## MH39 — `managedHandler` under `RemapHandler`
+
+`LogA` carries `preCondition="managedHandler"`, `LogB` does not, and `Remapper` — listed after
+both — calls `HttpContext.RemapHandler` at `BeginRequest` with a managed `IHttpHandler`
+instance, so the swap lands after the conditioned module's own `BeginRequest` would have run.
+
+```
+GET /g1/remap.txt -> 200, body REMAPPED
+  X-MH: LogB:BeginRequest
+  X-MH: Remapper:remapped
+  X-MH: LogB:AuthenticateRequest
+  X-MH: LogB:AcquireRequestState
+  X-MH: LogB:ExecuteRequestHandler
+  X-MH: LogB:EndRequest
+  (no LogA header on any event, including the four after the remap)
+
+GET /g1/plain.txt -> 200, body STATIC-PLAIN, LogB only
+GET /g1/page.aspx -> 200, body PAGE, LogA and LogB on all five
+```
+
+Conclusion: `RemapHandler` does not revisit the condition either. A managed handler served the
+request — the body is the remapped handler's — and the conditioned module stayed skipped for the
+whole request, because the arriving URL was a static one. Together with MH35 the rule is one
+answer per request, taken from the URL as it arrived, and neither a rewrite nor a handler remap
+moves it. A routed URL therefore carries the answer its own extension gives, not the answer its
+route's handler would give.
 
 ## Teardown (round 4)
 

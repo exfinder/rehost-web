@@ -76,3 +76,33 @@ public sealed class RewriteModuleProbe : IHttpModule
     {
     }
 }
+
+public sealed class RemapTarget : IHttpHandler
+{
+    public bool IsReusable => true;
+
+    public void ProcessRequest(HttpContext context)
+    {
+        context.Response.ContentType = "text/plain";
+        context.Response.Write("REMAPPED");
+    }
+}
+
+public sealed class RemapModuleProbe : IHttpModule
+{
+    private const string Remapped = "/remap-to-handler.txt";
+
+    public void Init(HttpApplication application) =>
+        application.BeginRequest += (sender, _) =>
+        {
+            var context = ((HttpApplication)sender!).Context;
+            if (context.Request.FilePath.EndsWith(Remapped, StringComparison.OrdinalIgnoreCase))
+            {
+                context.RemapHandler(new RemapTarget());
+            }
+        };
+
+    public void Dispose()
+    {
+    }
+}

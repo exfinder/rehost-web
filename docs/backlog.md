@@ -103,7 +103,8 @@ Carried from Milestone 1 as unresolved detail:
   - `<fileExtensions>` is still read from the application root alone, where IIS
     resolves it per path (MH32). The rest of that section is honored: ledger P86.
   Closed since the readings: the `managedHandler` question is asked once per
-  request from the arriving URL (MH35, ledger P83); `allowUnlisted` and a
+  request from the arriving URL, which neither a rewrite nor `RemapHandler`
+  revisits (MH35, MH39, ledger P83); `allowUnlisted` and a
   non-boolean `allowed` are honored and refused respectively (MH29, MH31); a
   classic registration behind `configSource` refuses activation while the same
   registration inside `<location>` stays silent as it does on IIS (MH33, MH34).

@@ -48,6 +48,16 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
         stages.ShouldBe(ModuleStages.Interleaved("unconditioned", "webserver-copy"));
     }
 
+    [Fact]
+    public async Task A_Static_Url_Remapped_To_A_Handler_Keeps_The_Conditioned_Module_Skipped()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/remap-to-handler.txt");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe("REMAPPED");
+        stages.ShouldBe(ModuleStages.Interleaved("unconditioned", "webserver-copy"));
+    }
+
     // The other direction: a native handler serves the bytes and the conditioned module still
     // runs throughout.
     [Fact]
