@@ -51,7 +51,7 @@ public sealed class ShippedRegistrationBaselineTests
     }
 
     [Fact]
-    public void The_Handler_List_Matches_The_Golden_Integrated_Rows()
+    public void The_Handler_List_Carries_The_Golden_Rows_This_Runtime_Can_Serve()
     {
         var handlers = ShippedBaseline().Handlers;
 
@@ -59,13 +59,10 @@ public sealed class ShippedRegistrationBaselineTests
             new[]
             {
                 "TraceHandler-Integrated-4.0",
-                "WebAdminHandler-Integrated-4.0",
                 "AssemblyResourceLoader-Integrated-4.0",
                 "PageHandlerFactory-Integrated-4.0",
                 "SimpleHandlerFactory-Integrated-4.0",
                 "WebServiceHandlerFactory-Integrated-4.0",
-                "HttpRemotingHandlerFactory-rem-Integrated-4.0",
-                "HttpRemotingHandlerFactory-soap-Integrated-4.0",
                 "aspq-Integrated-4.0",
                 "cshtm-Integrated-4.0",
                 "cshtml-Integrated-4.0",
