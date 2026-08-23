@@ -33,6 +33,17 @@ public sealed class IisTypeIdentitiesTests
     }
 
     [Fact]
+    public void The_System_Web_Services_Identity_Becomes_The_Web_Services_Assembly()
+    {
+        IisTypeIdentities.Retarget(
+            "System.Web.Services.Protocols.WebServiceHandlerFactory, System.Web.Services,"
+            + " Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")
+            .ShouldBe(
+                "System.Web.Services.Protocols.WebServiceHandlerFactory,"
+                + " Rehost.WebForms.WebServices");
+    }
+
+    [Fact]
     public void An_Application_Assembly_Is_Untouched()
     {
         IisTypeIdentities.Retarget("Contoso.Auth.TenantModule, Contoso.Auth, Version=2.1.0.0")

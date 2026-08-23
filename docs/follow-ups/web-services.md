@@ -17,11 +17,13 @@ for the analysis that grounded it). What remains is deliberate backlog:
   `System.Design`'s `TypedDataSetSchemaImporterExtension` — a separate
   decision. Trigger: a real application that ships raw `.wsdl` under
   `App_WebReferences` or needs encoded WSDL generation.
-- **Framework config identity remapping** — application configs or
-  `.discomap` files carrying assembly-qualified type names
-  (`System.Web.Services, … b03f5f7f11d50a3a`) resolve against the Framework
-  identity and fail. No general remapping facility exists; decide when a real
-  application carries such strings.
+- **Framework config identity remapping** — `system.webServer` module and
+  handler rows naming `System.Web.Services, … b03f5f7f11d50a3a` are retargeted
+  to this assembly by `IisTypeIdentities`, alongside `System.Web` and
+  `System.Web.Extensions`. Every other carrier of an assembly-qualified type
+  name — other configuration sections, `.discomap` files — still resolves
+  against the Framework identity and fails; decide when a real application
+  carries such strings.
 - **rpc/encoded fixtures** — serving encoded requests was probe-verified in
   the research; no standing scenario exercises it, and encoded `?wsdl`
   fail-fast has no test.

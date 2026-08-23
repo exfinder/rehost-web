@@ -10,7 +10,9 @@ internal static class IisTypeIdentities
 {
     private const string FrameworkWebAssembly = "System.Web";
     private const string FrameworkExtensionsAssembly = "System.Web.Extensions";
+    private const string FrameworkServicesAssembly = "System.Web.Services";
     private const string ExtensionsAssembly = "Rehost.WebForms.Extensions";
+    private const string ServicesAssembly = "Rehost.WebForms.WebServices";
 
     internal static string Retarget(string typeName)
     {
@@ -31,6 +33,11 @@ internal static class IisTypeIdentities
             simpleName, FrameworkExtensionsAssembly, StringComparison.OrdinalIgnoreCase))
         {
             replacement = ExtensionsAssembly;
+        }
+        else if (string.Equals(
+            simpleName, FrameworkServicesAssembly, StringComparison.OrdinalIgnoreCase))
+        {
+            replacement = ServicesAssembly;
         }
 
         return replacement == null
