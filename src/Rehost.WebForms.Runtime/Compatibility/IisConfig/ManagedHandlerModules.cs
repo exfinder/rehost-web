@@ -50,8 +50,16 @@ internal sealed class ManagedHandlerModules
             return true;
         }
 
+        return context.IsManagedHandlerRequest ??= WalkForArrivingPath(context);
+    }
+
+    // The arriving URL, which a rewrite does not move. Reading Request.FilePathObject would let
+    // conditioned modules on either side of a rewrite disagree within one request.
+    private static bool WalkForArrivingPath(HttpContext context)
+    {
         var route = IntegratedHandlers.Selected(
-            context.Request.RequestType, context.Request.FilePathObject);
+            context.Request.RequestType,
+            context.WorkerRequest?.GetFilePathObject() ?? context.Request.FilePathObject);
 
         return route != null && route.IsManaged;
     }

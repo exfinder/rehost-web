@@ -36,6 +36,31 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
             "unconditioned", "managed-handler", "webserver-copy", "dynamic"));
     }
 
+    // A rewrite moves the handler, not the managedHandler answer: the page serves the request
+    // and the conditioned module stays skipped for all five events.
+    [Fact]
+    public async Task A_Static_Url_Rewritten_Onto_A_Page_Keeps_The_Conditioned_Module_Skipped()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/rewrite-to-page.txt");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldContain("modules-fixture");
+        stages.ShouldBe(ModuleStages.Interleaved("unconditioned", "webserver-copy"));
+    }
+
+    // The other direction: a native handler serves the bytes and the conditioned module still
+    // runs throughout.
+    [Fact]
+    public async Task A_Page_Url_Rewritten_Onto_A_Static_File_Keeps_The_Conditioned_Module_Running()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/rewrite-to-asset.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.Trim().ShouldBe("STATIC-OK");
+        stages.ShouldBe(ModuleStages.Interleaved(
+            "unconditioned", "managed-handler", "webserver-copy", "dynamic"));
+    }
+
     // MH10: the unconditioned module sees the static file and the managedHandler one does not. A
     // dynamic registration carries the implicit condition, so it is skipped here too.
     [Fact]

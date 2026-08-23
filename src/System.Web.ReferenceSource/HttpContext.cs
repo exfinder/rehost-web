@@ -141,6 +141,11 @@ namespace System.Web {
         private const int FLAG_CHANGE_IN_RESPONSE_STATUS     =  0x80;
 
         private volatile NotificationContext _notificationContext;
+#if !NETFRAMEWORK
+        // One answer per request, from the URL as it arrived: a rewrite moves the handler,
+        // not the answer.
+        internal bool? IsManagedHandlerRequest;
+#endif
         private bool _isAppInitialized;
         [DoNotReset]
         private bool _isIntegratedPipeline;

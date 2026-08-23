@@ -47,3 +47,32 @@ public sealed class ClassicCopyModuleProbe() : ModuleEventProbe("classic-copy");
 public sealed class ClassicOnlyModuleProbe() : ModuleEventProbe("classic-only");
 
 public sealed class DynamicModuleProbe() : ModuleEventProbe("dynamic");
+
+// Rewrites at BeginRequest, ahead of the conditioned module's own step, so a request crosses the
+// static/managed line mid-pipeline. Records no stages: the order tests here assert exact
+// sequences and a fourth witness would move them.
+public sealed class RewriteModuleProbe : IHttpModule
+{
+    private const string ToPage = "/rewrite-to-page.txt";
+    private const string ToAsset = "/rewrite-to-asset.aspx";
+
+    public void Init(HttpApplication application) =>
+        application.BeginRequest += (sender, _) =>
+        {
+            var context = ((HttpApplication)sender!).Context;
+            var filePath = context.Request.FilePath;
+
+            if (filePath.EndsWith(ToPage, StringComparison.OrdinalIgnoreCase))
+            {
+                context.RewritePath("~/Default.aspx");
+            }
+            else if (filePath.EndsWith(ToAsset, StringComparison.OrdinalIgnoreCase))
+            {
+                context.RewritePath("~/asset.txt");
+            }
+        };
+
+    public void Dispose()
+    {
+    }
+}
