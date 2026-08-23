@@ -118,6 +118,9 @@ public sealed class IisFolderHandlersTests : IDisposable
             return;
         }
 
+        Assert.SkipWhen(
+            Environment.IsPrivilegedProcess, "A privileged process ignores the mode bits.");
+
         Write(string.Empty, RootWildcard);
         var locked = Path.Combine(AppRoot, "locked");
         Directory.CreateDirectory(locked);
