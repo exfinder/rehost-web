@@ -1,8 +1,8 @@
 # IIS integrated mode: modules and handlers readings
 
 The evidence behind ledger P83, P85 and P86, and behind the `system.webServer/handlers`
-and `/modules` rows of the [compatibility map](../compatibility.md). Thirty-seven readings
-(MH1-MH37) taken against full IIS 10 on `winbox` in four rounds, 2026-08-22 and
+and `/modules` rows of the [compatibility map](../compatibility.md). Thirty-eight readings
+(MH1-MH38) taken against full IIS 10 on `winbox` in four rounds, 2026-08-22 and
 2026-08-23, one throwaway application per case. Each reading states the configuration
 fragment, the request, the response as `curl` printed it, and the conclusion drawn.
 
@@ -12,7 +12,8 @@ priority), MH22 (handler types resolve lazily, module types do not), MH24 (a sub
 `<modules>` section is ignored rather than refused), MH28 (handler paths match
 case-insensitively while verbs do not), MH33/MH34 (the classic-section validator does not
 reach inside `<location>` but does resolve `configSource`), MH35 (`managedHandler` is
-decided once from the pre-rewrite URL), and MH37 (`TRACE` is 501, not 200).
+decided once from the pre-rewrite URL), MH37 (`TRACE` is 501, not 200), and MH38
+(`<customHeaders>` reach responses the application never produces).
 
 Rig: winbox, full IIS 10.0, app pool `MhPool` (v4.0, Integrated), site `MhSite` port 8112,
 one application per case under `C:/Users/sshuser/probes/mh-rig/apps/<case>`. Probe assembly
@@ -723,7 +724,7 @@ but not `/app/marker.axd`. Matching runs against the script path with PathInfo s
 `Remove-Website MhSite` + `Remove-WebAppPool MhPool` executed (TEARDOWN-OK). The mh28a-d app
 folders remain under `C:/Users/sshuser/probes/mh-rig/apps/`. No firewall rules were added.
 
-# Round 4 — request filtering, config reach, rewrite, authorization, verbs
+# Round 4 — request filtering, config reach, rewrite, authorization, verbs, headers
 
 Taken 2026-08-23 against the same IIS 10 on `winbox`: site `Mh2Site` on port 8113, pool
 `Mh2Pool` (v4.0, Integrated), one application per case under
@@ -970,6 +971,70 @@ header listing the server's verbs, identically for a static file and an `.aspx` 
 does not run. `TRACE` is **501 by default**, gated on an `EnableTraceMethod` registry value
 that is off in a stock install; it is not a 200. An unmatched verb on either row falls
 through to `StaticFile`, which answers 405 with its own narrower `Allow`.
+
+## MH38 — `<httpProtocol><customHeaders>` reach, and what CORS gets from it
+
+App `f1`, no handler or module configuration:
+
+```xml
+<system.webServer>
+  <httpProtocol>
+    <customHeaders>
+      <add name="Access-Control-Allow-Origin" value="*" />
+      <add name="X-Content-Type-Options" value="nosniff" />
+      <remove name="X-Powered-By" />
+    </customHeaders>
+  </httpProtocol>
+</system.webServer>
+```
+
+Full response heads, nothing filtered:
+
+```
+GET /f1/page.aspx      -> 200  Cache-Control: private / Content-Type: text/html; charset=utf-8
+                               Server: Microsoft-IIS/10.0 / X-AspNet-Version: 4.0.30319
+                               Access-Control-Allow-Origin: * / X-Content-Type-Options: nosniff
+
+GET /f1/static.txt     -> 200  Content-Type: text/plain / Last-Modified / Accept-Ranges: bytes
+                               ETag: W/"c570f4a02733dd1:0" / Server: Microsoft-IIS/10.0
+                               Access-Control-Allow-Origin: * / X-Content-Type-Options: nosniff
+
+OPTIONS /f1/page.aspx  -> 200  Allow: OPTIONS, TRACE, GET, HEAD, POST
+                               Public: OPTIONS, TRACE, GET, HEAD, POST
+                               Access-Control-Allow-Origin: * / X-Content-Type-Options: nosniff
+                               Content-Length: 0
+
+OPTIONS /f1/static.txt -> 200  identical to the page
+
+TRACE /f1/static.txt   -> 501  Access-Control-Allow-Origin: * / X-Content-Type-Options: nosniff
+GET /f1/missing.aspx   -> 404  Access-Control-Allow-Origin: * / X-Content-Type-Options: nosniff
+```
+
+The same `OPTIONS` sent as a CORS preflight:
+
+```
+OPTIONS /f1/page.aspx
+  Origin: https://example.test
+  Access-Control-Request-Method: PUT
+-> 200, byte-identical to the plain OPTIONS above: Allow, Public,
+   Access-Control-Allow-Origin, X-Content-Type-Options.
+   No Access-Control-Allow-Methods, no Access-Control-Allow-Headers, no Vary.
+```
+
+Conclusion: `<customHeaders>` is applied below the managed pipeline — the headers appear on a
+natively served static file, on the `ProtocolSupportModule`'s `OPTIONS` and `TRACE` responses,
+and on an IIS error page, none of which the application produces. `<remove>` reaches the
+inherited defaults the same way: the golden's `X-Powered-By` row is gone from every response.
+
+That reach is not CORS support. IIS does not read `Origin` or `Access-Control-Request-Method`
+and answers a preflight exactly as it answers a bare `OPTIONS`, so a configured
+`Access-Control-Allow-Origin` covers simple cross-origin requests and every preflighted one
+fails for want of `Access-Control-Allow-Methods`. An application carrying this config had
+working simple-request CORS and broken preflight on IIS too.
+
+Two headers this reading adds to the `OPTIONS` picture of MH37, both hidden by the earlier
+filtered transcript: IIS emits the obsolete `Public` alongside `Allow` with the same list, and
+`X-AspNet-Version` appears on managed responses but not on natively served ones.
 
 ## Teardown (round 4)
 
