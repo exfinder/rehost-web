@@ -109,8 +109,9 @@ Carried from Milestone 1 as unresolved detail:
   registration inside `<location>` stays silent as it does on IIS (MH33, MH34).
 - ~~Per-folder `<handlers>` resolution~~ — closed (ledger P87, MH27). A
   per-folder `<modules>` section stays inert, which is IIS's own behavior
-  (MH24). The other honored `system.webServer` sections are still merged from
-  the application root alone and are unassessed per folder.
+  (MH24). `staticContent`, `defaultDocument` and `hiddenSegments` are still
+  merged from the application root alone and are unassessed per folder;
+  `fileExtensions` is measured there and is the entry above.
 - Request-filtering limits, custom headers, and error shaping — the tenants the
   modules/handlers work did not touch:
   [IIS configuration layers](follow-ups/iis-integration-plan.md) and
