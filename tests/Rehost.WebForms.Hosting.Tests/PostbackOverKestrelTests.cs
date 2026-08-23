@@ -27,8 +27,7 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
         render.Text.ShouldContain(
             "name=\"__VIEWSTATEGENERATOR\" id=\"__VIEWSTATEGENERATOR\" value=\"72DAA2F9\"");
         render.Text.ShouldContain(
-            "<p id=\"restored\">postback=False|posted-viewstate=False|clicks=0"
-            + "|note=note-from-initial|carried=carried-from-initial|message=|form=|echo=</p>");
+            """<p id="restored">postback=False|posted-viewstate=False|clicks=0|note=note-from-initial|carried=carried-from-initial|message=|form=|echo=</p>""");
     }
 
     [Fact]
@@ -38,8 +37,7 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain(
-            "<p id=\"restored\">postback=True|posted-viewstate=True|clicks=1|note="
-            + "|carried=carried-from-initial|message=" + Message
+            """<p id="restored">postback=True|posted-viewstate=True|clicks=1|note=|carried=carried-from-initial|message=""" + Message
             + "|form=" + Message + "|echo=applied:" + Message + "</p>");
     }
 
@@ -49,24 +47,24 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
     public async Task Control_State_Survives_A_Control_Whose_View_State_Is_Disabled()
     {
         var render = await RenderAsync();
-        render.ShouldContain("<span id=\"Ticker\">clicks=0 note=note-from-initial</span>");
+        render.ShouldContain("""<span id="Ticker">clicks=0 note=note-from-initial</span>""");
 
         var first = await ApplyAsync(render);
-        first.Text.ShouldContain("<span id=\"Ticker\">clicks=1 note=</span>");
+        first.Text.ShouldContain("""<span id="Ticker">clicks=1 note=</span>""");
 
         var second = await ApplyAsync(first.Text);
-        second.Text.ShouldContain("<span id=\"Ticker\">clicks=2 note=</span>");
+        second.Text.ShouldContain("""<span id="Ticker">clicks=2 note=</span>""");
     }
 
     [Fact]
     public async Task A_Postback_Changes_The_Rendered_Output()
     {
         var render = await RenderAsync();
-        render.ShouldContain("<span id=\"Echo\"></span>");
+        render.ShouldContain("""<span id="Echo"></span>""");
 
         var response = await ApplyAsync(render);
 
-        response.Text.ShouldContain("<span id=\"Echo\">applied:" + Message + "</span>");
+        response.Text.ShouldContain("""<span id="Echo">applied:""" + Message + "</span>");
     }
 
     // A LinkButton posts through __EVENTTARGET rather than by submitting its own name, so it
@@ -85,7 +83,7 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
                 ["__EVENTARGUMENT"] = "",
             });
 
-        response.Text.ShouldContain("<span id=\"Echo\">bumped</span>");
+        response.Text.ShouldContain("""<span id="Echo">bumped</span>""");
         response.Text.ShouldContain("|clicks=1|");
     }
 
@@ -97,9 +95,7 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
         var response = await ApplyAsync(await RenderAsync());
 
         response.Text.ShouldContain(
-            "<p id=\"trace\">page.init>counter.load-control-state>page.load.postback"
-            + ">message.text-changed>apply.click>page.prerender"
-            + ">counter.save-control-state</p>");
+            """<p id="trace">page.init>counter.load-control-state>page.load.postback>message.text-changed>apply.click>page.prerender>counter.save-control-state</p>""");
     }
 
     [Fact]
@@ -147,7 +143,7 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
             }));
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<p id=\"restored\">postback=False|posted-viewstate=True|");
+        response.Text.ShouldContain("""<p id="restored">postback=False|posted-viewstate=True|""");
     }
 
     [Fact]

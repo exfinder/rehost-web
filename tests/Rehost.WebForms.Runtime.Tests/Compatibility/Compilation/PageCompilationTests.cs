@@ -23,7 +23,7 @@ public sealed class PageCompilationTests(PageCompilationFixture fixture)
         // These stages come from App_Code and Global.asax; separate load contexts would render
         // different text rather than fail.
         fixture.FirstResponseText
-            .ShouldContain("<p id=\"stages\">app-initialize|application-start</p>");
+            .ShouldContain("""<p id="stages">app-initialize|application-start</p>""");
     }
 
     // Ledger P39. RoslynCSharpCodeProvider reports no GeneratorSupport.Win32Resources, so

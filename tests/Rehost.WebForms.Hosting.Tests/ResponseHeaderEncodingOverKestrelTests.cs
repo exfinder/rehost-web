@@ -17,7 +17,10 @@ public sealed class ResponseHeaderEncodingOverKestrelTests
         var config = Path.Combine(scenario.ApplicationPath, "web.config");
         File.WriteAllText(config, File.ReadAllText(config).Replace(
             "<system.web>",
-            "<system.web>\n    <globalization responseHeaderEncoding=\"iso-8859-1\" />"));
+            """
+            <system.web>
+                <globalization responseHeaderEncoding="iso-8859-1" />
+            """));
 
         var raw = await RawSocketProbe.GetRawResponseAsync(scenario.Address, "/pi/echo.probe");
 

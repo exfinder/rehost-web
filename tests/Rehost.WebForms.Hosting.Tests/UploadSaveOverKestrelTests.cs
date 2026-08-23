@@ -22,7 +22,7 @@ public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
         var response = await UploadAsync(Content, target);
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<p id=\"save-report\">saved</p>");
+        response.Text.ShouldContain("""<p id="save-report">saved</p>""");
         File.ReadAllBytes(target).ShouldBe(Content);
     }
 
@@ -36,7 +36,7 @@ public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
 
         var response = await UploadAsync([], target);
 
-        response.Text.ShouldContain("<p id=\"save-report\">saved</p>");
+        response.Text.ShouldContain("""<p id="save-report">saved</p>""");
         File.ReadAllBytes(target).ShouldBeEmpty();
     }
 
@@ -47,8 +47,7 @@ public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
         var response = await UploadAsync(Content, "uploads/photo.jpg");
 
         response.Text.ShouldContain(
-            "<p id=\"save-report\">error:System.Web.HttpException:The SaveAs method is configured"
-            + " to require a rooted path, and the path 'uploads/photo.jpg' is not rooted.</p>");
+            """<p id="save-report">error:System.Web.HttpException:The SaveAs method is configured to require a rooted path, and the path 'uploads/photo.jpg' is not rooted.</p>""");
     }
 
     // Windows keeps Framework's behavior exactly; elsewhere the path cannot name a file at all, so
@@ -64,7 +63,7 @@ public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
 
             var accepted = await UploadAsync(Content, target);
 
-            accepted.Text.ShouldContain("<p id=\"save-report\">saved</p>");
+            accepted.Text.ShouldContain("""<p id="save-report">saved</p>""");
             File.ReadAllBytes(target).ShouldBe(Content);
             return;
         }
@@ -72,7 +71,7 @@ public sealed class UploadSaveOverKestrelTests(PostbackLiveScenario scenario)
         var response = await UploadAsync(Content, @"C:\uploads\photo.jpg");
 
         response.Text.ShouldContain(
-            "<p id=\"save-report\">error:System.Web.HttpException:The SaveAs path"
+            """<p id="save-report">error:System.Web.HttpException:The SaveAs path"""
             + @" 'C:\uploads\photo.jpg' is rooted only on Windows, and this process is not running"
             + " on Windows. Supply a path rooted on this platform, or build one with"
             + " Server.MapPath.</p>");

@@ -19,7 +19,7 @@ public sealed class IisRegistrationsTests : IDisposable
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer>"
+            """<?xml version="1.0"?><configuration><system.webServer>"""
             + systemWebServerContent
             + "</system.webServer></configuration>");
         return path;
@@ -27,20 +27,22 @@ public sealed class IisRegistrationsTests : IDisposable
 
     private string Baseline() => WriteConfig(
         "baseline.config",
-        "<modules>"
-        + "<add name=\"OutputCache\" type=\"Base.OutputCacheModule\" preCondition=\"managedHandler\" />"
-        + "<add name=\"Session\" type=\"Base.SessionStateModule\" preCondition=\"managedHandler\" />"
-        + "<add name=\"ScriptModule-4.0\" type=\"Base.ScriptModule\""
-        + " preCondition=\"managedHandler,runtimeVersionv4.0\" />"
-        + "</modules>"
-        + "<handlers>"
-        + "<add name=\"PageHandlerFactory-Integrated-4.0\" path=\"*.aspx\" verb=\"GET,HEAD,POST\""
-        + " type=\"Base.PageHandlerFactory\" preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-        + "<add name=\"ExtensionlessUrlHandler-Integrated-4.0\" path=\"*.\" verb=\"GET,HEAD,POST\""
-        + " type=\"Base.TransferRequestHandler\" preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-        + "<add name=\"StaticFile\" path=\"*\" verb=\"*\" modules=\"StaticFileModule\""
-        + " resourceType=\"Either\" requireAccess=\"Read\" />"
-        + "</handlers>");
+        """
+        <modules>
+          <add name="OutputCache" type="Base.OutputCacheModule" preCondition="managedHandler" />
+          <add name="Session" type="Base.SessionStateModule" preCondition="managedHandler" />
+          <add name="ScriptModule-4.0" type="Base.ScriptModule"
+               preCondition="managedHandler,runtimeVersionv4.0" />
+        </modules>
+        <handlers>
+          <add name="PageHandlerFactory-Integrated-4.0" path="*.aspx" verb="GET,HEAD,POST"
+               type="Base.PageHandlerFactory" preCondition="integratedMode,runtimeVersionv4.0" />
+          <add name="ExtensionlessUrlHandler-Integrated-4.0" path="*." verb="GET,HEAD,POST"
+               type="Base.TransferRequestHandler" preCondition="integratedMode,runtimeVersionv4.0" />
+          <add name="StaticFile" path="*" verb="*" modules="StaticFileModule" resourceType="Either"
+               requireAccess="Read" />
+        </handlers>
+        """);
 
     private static string[] NamesOf(IReadOnlyList<IisRegistration> registrations) =>
         registrations.Select(registration => registration.Name).ToArray();
@@ -71,10 +73,7 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" />"
-            + "<add name=\"LogB\" type=\"Probe.LogB\" />"
-            + "</modules>");
+            """<modules><add name="LogA" type="Probe.LogA" /><add name="LogB" type="Probe.LogB" /></modules>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -88,10 +87,12 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<add name=\"HB\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerB\" />"
-            + "<add name=\"HA\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <add name="HB" path="*.aspx" verb="*" type="Probe.HandlerB" />
+              <add name="HA" path="probe2.aspx" verb="*" type="Probe.HandlerA" />
+            </handlers>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -112,11 +113,13 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<remove name=\"Session\" />"
-            + "<add name=\"Session\" type=\"Probe.LogC\" />"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" />"
-            + "</modules>");
+            """
+            <modules>
+              <remove name="Session" />
+              <add name="Session" type="Probe.LogC" />
+              <add name="LogA" type="Probe.LogA" />
+            </modules>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -131,12 +134,14 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<remove name=\"ExtensionlessUrlHandler-Integrated-4.0\" />"
-            + "<add name=\"ExtensionlessUrlHandler-Integrated-4.0\" path=\"*.\" verb=\"*\""
-            + " type=\"Probe.HandlerB\" preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-            + "<add name=\"ApiHandler\" path=\"api\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <remove name="ExtensionlessUrlHandler-Integrated-4.0" />
+              <add name="ExtensionlessUrlHandler-Integrated-4.0" path="*." verb="*"
+                   type="Probe.HandlerB" preCondition="integratedMode,runtimeVersionv4.0" />
+              <add name="ApiHandler" path="api" verb="*" type="Probe.HandlerA" />
+            </handlers>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -154,7 +159,7 @@ public sealed class IisRegistrationsTests : IDisposable
     [Fact]
     public void A_Removed_Module_Leaves_The_List()
     {
-        var app = WriteConfig("web.config", "<modules><remove name=\"Session\" /></modules>");
+        var app = WriteConfig("web.config", """<modules><remove name="Session" /></modules>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -167,10 +172,7 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"Dup\" type=\"Probe.LogA\" />"
-            + "<add name=\"Dup\" type=\"Probe.LogB\" />"
-            + "</modules>");
+            """<modules><add name="Dup" type="Probe.LogA" /><add name="Dup" type="Probe.LogB" /></modules>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -186,10 +188,12 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<add name=\"Dup\" path=\"dup1.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "<add name=\"Dup\" path=\"dup2.aspx\" verb=\"*\" type=\"Probe.HandlerB\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <add name="Dup" path="dup1.aspx" verb="*" type="Probe.HandlerA" />
+              <add name="Dup" path="dup2.aspx" verb="*" type="Probe.HandlerB" />
+            </handlers>
+            """);
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -205,7 +209,7 @@ public sealed class IisRegistrationsTests : IDisposable
     public void An_Add_Over_An_Inherited_Name_Without_A_Remove_Fails_Activation()
     {
         var app = WriteConfig(
-            "web.config", "<modules><add name=\"Session\" type=\"Probe.LogC\" /></modules>");
+            "web.config", """<modules><add name="Session" type="Probe.LogC" /></modules>""");
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
@@ -218,10 +222,7 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<remove name=\"NoSuchModule\" />"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" />"
-            + "</modules>");
+            """<modules><remove name="NoSuchModule" /><add name="LogA" type="Probe.LogA" /></modules>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -235,10 +236,12 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<remove name=\"NoSuchHandler\" />"
-            + "<add name=\"HA\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <remove name="NoSuchHandler" />
+              <add name="HA" path="probe2.aspx" verb="*" type="Probe.HandlerA" />
+            </handlers>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -258,7 +261,7 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules><clear /><add name=\"LogA\" type=\"Probe.LogA\" /></modules>");
+            """<modules><clear /><add name="LogA" type="Probe.LogA" /></modules>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -274,10 +277,7 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<clear />"
-            + "<add name=\"HA\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</handlers>");
+            """<handlers><clear /><add name="HA" path="probe2.aspx" verb="*" type="Probe.HandlerA" /></handlers>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -292,9 +292,9 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         WriteConfig(
             Path.Combine("sub", "web.config"),
-            "<modules><add name=\"LogA\" type=\"Probe.LogA\" /></modules>");
+            """<modules><add name="LogA" type="Probe.LogA" /></modules>""");
         var app = WriteConfig(
-            "web.config", "<modules><add name=\"LogB\" type=\"Probe.LogB\" /></modules>");
+            "web.config", """<modules><add name="LogB" type="Probe.LogB" /></modules>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -307,7 +307,7 @@ public sealed class IisRegistrationsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers><add name=\"HA\" verb=\"*\" type=\"Probe.HandlerA\" /></handlers>");
+            """<handlers><add name="HA" verb="*" type="Probe.HandlerA" /></handlers>""");
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
@@ -317,7 +317,7 @@ public sealed class IisRegistrationsTests : IDisposable
     [Fact]
     public void A_Module_Add_Without_A_Name_Fails_Activation_Naming_The_Attribute()
     {
-        var app = WriteConfig("web.config", "<modules><add type=\"Probe.LogA\" /></modules>");
+        var app = WriteConfig("web.config", """<modules><add type="Probe.LogA" /></modules>""");
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))

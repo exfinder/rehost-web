@@ -270,7 +270,7 @@ public sealed class ResXResourceReaderTests
         new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter().Serialize(stream, value);
 #pragma warning restore SYSLIB0011
 
-        return $"<data name=\"{name}\" mimetype=\"{ResXResourceWriter.BinSerializedObjectMimeType}\">"
+        return $"""<data name="{name}" mimetype="{ResXResourceWriter.BinSerializedObjectMimeType}">"""
             + $"<value>{Convert.ToBase64String(stream.ToArray())}</value></data>";
     }
 
@@ -293,7 +293,7 @@ public sealed class ResXResourceReaderTests
         var typeAttribute = typeName is null
             ? string.Empty
             : $" type=\"{SecurityElement.Escape(typeName)}\"";
-        return $"<data name=\"{name}\"{typeAttribute}><value>{value}</value></data>";
+        return $"""<data name="{name}"{typeAttribute}><value>{value}</value></data>""";
     }
 
     private static string FileReferenceData(string fileName) =>

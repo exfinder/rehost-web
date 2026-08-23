@@ -72,7 +72,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         var response = await GetAsBrowserAsync("/ajax/Panel.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<div id=\"Panel\">");
+        response.Text.ShouldContain("""<div id="Panel">""");
         response.Text.ShouldContain("inside:initial");
         response.Text.ShouldContain("Sys.WebForms.PageRequestManager._initialize");
         response.Text.ShouldContain("ScriptResource.axd");

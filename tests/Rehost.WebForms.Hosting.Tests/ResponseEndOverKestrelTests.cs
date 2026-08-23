@@ -66,9 +66,12 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe(PageRequests.RedirectTarget);
         response.Text.ShouldBe(
-            "<html><head><title>Object moved</title></head><body>\r\n"
-            + "<h2>Object moved to <a href=\"/Default.aspx?value=r\">here</a>.</h2>\r\n"
-            + "</body></html>\r\n");
+            """
+            <html><head><title>Object moved</title></head><body>
+            <h2>Object moved to <a href="/Default.aspx?value=r">here</a>.</h2>
+            </body></html>
+
+            """.ReplaceLineEndings("\r\n"));
         stages.ShouldNotContain("after-redirect");
         stages.ShouldContain("EndRequest");
         stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));

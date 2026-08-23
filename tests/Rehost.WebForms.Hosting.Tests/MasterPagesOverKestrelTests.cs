@@ -18,10 +18,10 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("<title>\r\n\tFrom content page\r\n</title>");
-        response.Text.ShouldContain("<meta name=\"probe\" content=\"head-content\" />");
-        response.Text.ShouldContain("<span id=\"ChromeLabel\">master-load-ran</span>");
-        response.Text.ShouldContain("<span id=\"MainContent_PageLabel\">content-load-ran</span>");
-        response.Text.ShouldContain("<div id=\"footer\">footer-from-master</div>");
+        response.Text.ShouldContain("""<meta name="probe" content="head-content" />""");
+        response.Text.ShouldContain("""<span id="ChromeLabel">master-load-ran</span>""");
+        response.Text.ShouldContain("""<span id="MainContent_PageLabel">content-load-ran</span>""");
+        response.Text.ShouldContain("""<div id="footer">footer-from-master</div>""");
         response.Text.ShouldNotContain("placeholder-default");
 
         var chrome = response.Text.IndexOf("id=\"chrome\"", StringComparison.Ordinal);
@@ -37,7 +37,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/compose/Composed.aspx?q=42");
 
         response.Text.ShouldContain(
-            "<span id=\"MainContent_TheWidget_WidgetLabel\">widget-load-ran:42</span>");
+            """<span id="MainContent_TheWidget_WidgetLabel">widget-load-ran:42</span>""");
     }
 
     [Fact]
@@ -46,9 +46,9 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/compose/NestedPage.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<span id=\"ChromeLabel\">master-load-ran</span>");
-        response.Text.ShouldContain("<div id=\"section\">section-chrome-from-nested-master</div>");
-        response.Text.ShouldContain("<p id=\"leaf\">leaf-content-through-two-masters</p>");
+        response.Text.ShouldContain("""<span id="ChromeLabel">master-load-ran</span>""");
+        response.Text.ShouldContain("""<div id="section">section-chrome-from-nested-master</div>""");
+        response.Text.ShouldContain("""<p id="leaf">leaf-content-through-two-masters</p>""");
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/compose/Typed.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<span id=\"ChromeLabel\">set-through-typed-master</span>");
+        response.Text.ShouldContain("""<span id="ChromeLabel">set-through-typed-master</span>""");
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain(
-            "<span id=\"MainContent_DynWidget_WidgetLabel\">widget-load-ran:dyn</span>");
+            """<span id="MainContent_DynWidget_WidgetLabel">widget-load-ran:dyn</span>""");
     }
 
     // The field names are pinned literals: ctl00 is the master's generated ID, and losing that
@@ -77,7 +77,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
     {
         var render = (await scenario.Client.GetAsync("/compose/MasterForm.aspx")).Text;
         render.ShouldContain("name=\"ctl00$MainContent$Entry\"");
-        render.ShouldContain("<span id=\"MainContent_Echo\">not-clicked</span>");
+        render.ShouldContain("""<span id="MainContent_Echo">not-clicked</span>""");
 
         // The form action is relative to the page's directory, as a browser resolves it.
         var action = new Uri(
@@ -93,7 +93,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain(
-            "<span id=\"MainContent_Echo\">clicked-with:typed by the client</span>");
+            """<span id="MainContent_Echo">clicked-with:typed by the client</span>""");
         response.Text.ShouldContain("value=\"typed by the client\"");
     }
 
@@ -106,9 +106,9 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
         static (string Page, string Widget) Stamps(string html)
         {
             var page = System.Text.RegularExpressions.Regex.Match(
-                html, "<p id=\"page-stamp\">(?<v>[0-9a-f]{32})</p>");
+                html, """<p id="page-stamp">(?<v>[0-9a-f]{32})</p>""");
             var widget = System.Text.RegularExpressions.Regex.Match(
-                html, "<span id=\"cached-stamp\">(?<v>[0-9a-f]{32})</span>");
+                html, """<span id="cached-stamp">(?<v>[0-9a-f]{32})</span>""");
             page.Success.ShouldBeTrue();
             widget.Success.ShouldBeTrue();
             return (page.Groups["v"].Value, widget.Groups["v"].Value);

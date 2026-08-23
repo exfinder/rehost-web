@@ -18,7 +18,7 @@ public sealed class DefaultDocumentsTests : IDisposable
         var path = Path.Combine(_root.FullName, name);
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer>"
+            """<?xml version="1.0"?><configuration><system.webServer>"""
             + systemWebServerContent
             + "</system.webServer></configuration>");
         return path;
@@ -26,11 +26,15 @@ public sealed class DefaultDocumentsTests : IDisposable
 
     private string Baseline() => WriteConfig(
         "baseline.config",
-        "<defaultDocument enabled=\"true\"><files>"
-        + "<add value=\"Default.htm\" />"
-        + "<add value=\"index.html\" />"
-        + "<add value=\"default.aspx\" />"
-        + "</files></defaultDocument>");
+        """
+        <defaultDocument enabled="true">
+          <files>
+            <add value="Default.htm" />
+            <add value="index.html" />
+            <add value="default.aspx" />
+          </files>
+        </defaultDocument>
+        """);
 
     [Fact]
     public void The_Baseline_List_Keeps_Its_Order()
@@ -48,7 +52,7 @@ public sealed class DefaultDocumentsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<defaultDocument><files><add value=\"custom.htm\" /></files></defaultDocument>");
+            """<defaultDocument><files><add value="custom.htm" /></files></defaultDocument>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -61,10 +65,10 @@ public sealed class DefaultDocumentsTests : IDisposable
     {
         var removed = WriteConfig(
             "removed.config",
-            "<defaultDocument><files><remove value=\"INDEX.HTML\" /></files></defaultDocument>");
+            """<defaultDocument><files><remove value="INDEX.HTML" /></files></defaultDocument>""");
         var cleared = WriteConfig(
             "cleared.config",
-            "<defaultDocument><files><clear /><add value=\"only.htm\" /></files></defaultDocument>");
+            """<defaultDocument><files><clear /><add value="only.htm" /></files></defaultDocument>""");
 
         IisServerConfiguration.Load(Baseline(), removed)
             .DefaultDocuments.Files.ShouldBe(new[] { "Default.htm", "default.aspx" });
@@ -75,7 +79,7 @@ public sealed class DefaultDocumentsTests : IDisposable
     [Fact]
     public void Disabling_Keeps_The_Inherited_List_Intact()
     {
-        var app = WriteConfig("web.config", "<defaultDocument enabled=\"false\" />");
+        var app = WriteConfig("web.config", """<defaultDocument enabled="false" />""");
 
         var documents = IisServerConfiguration.Load(Baseline(), app).DefaultDocuments;
 
@@ -88,7 +92,7 @@ public sealed class DefaultDocumentsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<defaultDocument><files><add value=\"DEFAULT.HTM\" /></files></defaultDocument>");
+            """<defaultDocument><files><add value="DEFAULT.HTM" /></files></defaultDocument>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -111,7 +115,7 @@ public sealed class DefaultDocumentsTests : IDisposable
     [Fact]
     public void A_Non_Boolean_Enabled_Fails_Activation_Naming_The_Value()
     {
-        var app = WriteConfig("web.config", "<defaultDocument enabled=\"yes\" />");
+        var app = WriteConfig("web.config", """<defaultDocument enabled="yes" />""");
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))

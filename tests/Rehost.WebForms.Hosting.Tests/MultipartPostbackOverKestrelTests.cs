@@ -23,8 +23,7 @@ public sealed class MultipartPostbackOverKestrelTests(PostbackLiveScenario scena
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain(
-            "<p id=\"upload-report\">postback=True|note=a note|files=1|key=Picked"
-            + "|name=notes.txt|type=text/plain|length=12|content=hello upload|result=saved</p>");
+            """<p id="upload-report">postback=True|note=a note|files=1|key=Picked|name=notes.txt|type=text/plain|length=12|content=hello upload|result=saved</p>""");
     }
 
     [Fact]

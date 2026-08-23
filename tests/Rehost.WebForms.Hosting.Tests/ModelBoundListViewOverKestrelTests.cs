@@ -16,8 +16,8 @@ public sealed class ModelBoundListViewOverKestrelTests(PageLiveScenario scenario
         var response = await scenario.Client.GetAsync("/ModelBoundListView.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<span class=\"name\">alpha</span>");
-        response.Text.ShouldContain("<span class=\"name\">beta</span>");
+        response.Text.ShouldContain("""<span class="name">alpha</span>""");
+        response.Text.ShouldContain("""<span class="name">beta</span>""");
         response.Text.ShouldNotContain("no names");
     }
 }

@@ -20,7 +20,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
         var live = scenario.RequireLive();
         File.WriteAllText(
             Path.Combine(live.ApplicationPath, "Folded.aspx"),
-            "<%@ Page Language=\"C#\" %>folded-page");
+            """<%@ Page Language="C#" %>folded-page""");
 
         var folded = await live.Client.GetAsync("/folded.aspx");
         var shouting = await live.Client.GetAsync("/FOLDED.ASPX");
@@ -38,10 +38,10 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
         var live = scenario.RequireLive();
         File.WriteAllText(
             Path.Combine(live.ApplicationPath, "Extra.aspx"),
-            "<%@ Page Language=\"C#\" %>upper");
+            """<%@ Page Language="C#" %>upper""");
         File.WriteAllText(
             Path.Combine(live.ApplicationPath, "extra.aspx"),
-            "<%@ Page Language=\"C#\" %>lower");
+            """<%@ Page Language="C#" %>lower""");
 
         var ambiguous = await live.Client.GetAsync("/EXTRA.aspx");
         var exact = await live.Client.GetAsync("/extra.aspx");

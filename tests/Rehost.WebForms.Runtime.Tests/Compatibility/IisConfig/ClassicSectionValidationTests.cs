@@ -18,24 +18,25 @@ public sealed class ClassicSectionValidationTests : IDisposable
         var path = Path.Combine(_root.FullName, name);
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration>" + configurationContent + "</configuration>");
+            """<?xml version="1.0"?><configuration>""" + configurationContent + "</configuration>");
         return path;
     }
 
     private string Baseline() => WriteConfig(
         "baseline.config",
-        "<system.webServer>"
-        + "<modules>"
-        + "<add name=\"Session\" type=\"Base.SessionStateModule\" preCondition=\"managedHandler\" />"
-        + "</modules>"
-        + "<handlers>"
-        + "<add name=\"StaticFile\" path=\"*\" verb=\"*\" modules=\"StaticFileModule\" />"
-        + "</handlers>"
-        + "</system.webServer>");
+        """
+        <system.webServer>
+          <modules>
+            <add name="Session" type="Base.SessionStateModule" preCondition="managedHandler" />
+          </modules>
+          <handlers>
+            <add name="StaticFile" path="*" verb="*" modules="StaticFileModule" />
+          </handlers>
+        </system.webServer>
+        """);
 
     private static string Waiver =>
-        "<system.webServer><validation validateIntegratedModeConfiguration=\"false\" />"
-        + "</system.webServer>";
+        """<system.webServer><validation validateIntegratedModeConfiguration="false" /></system.webServer>""";
 
     // Reading MH5a: 500.22 for every request, static included.
     [Fact]
@@ -43,9 +44,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<system.web><httpModules>"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" />"
-            + "</httpModules></system.web>");
+            """<system.web><httpModules><add name="LogA" type="Probe.LogA" /></httpModules></system.web>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -62,9 +61,13 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<system.web><httpHandlers>"
-            + "<add verb=\"*\" path=\"probe3.axd\" type=\"Probe.HandlerA\" />"
-            + "</httpHandlers></system.web>");
+            """
+            <system.web>
+              <httpHandlers>
+                <add verb="*" path="probe3.axd" type="Probe.HandlerA" />
+              </httpHandlers>
+            </system.web>
+            """);
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -79,7 +82,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
     public void App_Level_Impersonation_Fails_Activation()
     {
         var app = WriteConfig(
-            "web.config", "<system.web><identity impersonate=\"true\" /></system.web>");
+            "web.config", """<system.web><identity impersonate="true" /></system.web>""");
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
@@ -90,7 +93,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
     public void Impersonation_Turned_Off_Is_Not_Classic_Content()
     {
         var app = WriteConfig(
-            "web.config", "<system.web><identity impersonate=\"false\" /></system.web>");
+            "web.config", """<system.web><identity impersonate="false" /></system.web>""");
 
         IisServerConfiguration.Load(Baseline(), app).Modules
             .Select(module => module.Name).ShouldBe(new[] { "Session" });
@@ -102,10 +105,16 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<system.web><httpModules><add name=\"LogA\" type=\"Probe.LogA\" /></httpModules>"
-            + "</system.web>"
-            + "<system.webServer><validation validateIntegratedModeConfiguration=\"true\" />"
-            + "</system.webServer>");
+            """
+            <system.web>
+              <httpModules>
+                <add name="LogA" type="Probe.LogA" />
+              </httpModules>
+            </system.web>
+            <system.webServer>
+              <validation validateIntegratedModeConfiguration="true" />
+            </system.webServer>
+            """);
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
@@ -118,7 +127,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<system.web><httpModules><remove name=\"Session\" /></httpModules></system.web>");
+            """<system.web><httpModules><remove name="Session" /></httpModules></system.web>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -157,12 +166,18 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<system.web>"
-            + "<httpModules><clear /><add name=\"LogA\" type=\"Probe.LogA\" /></httpModules>"
-            + "<httpHandlers><add verb=\"*\" path=\"probe3.axd\" type=\"Probe.HandlerA\" />"
-            + "</httpHandlers>"
-            + "<identity impersonate=\"true\" />"
-            + "</system.web>"
+            """
+            <system.web>
+              <httpModules>
+                <clear />
+                <add name="LogA" type="Probe.LogA" />
+              </httpModules>
+              <httpHandlers>
+                <add verb="*" path="probe3.axd" type="Probe.HandlerA" />
+              </httpHandlers>
+              <identity impersonate="true" />
+            </system.web>
+            """
             + Waiver);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
@@ -178,12 +193,18 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var baseline = WriteConfig(
             "baseline.config",
-            "<system.web>"
-            + "<httpModules><add name=\"Session\" type=\"Base.SessionStateModule\" /></httpModules>"
-            + "</system.web>"
-            + "<system.webServer><modules>"
-            + "<add name=\"Session\" type=\"Base.SessionStateModule\" preCondition=\"managedHandler\" />"
-            + "</modules></system.webServer>");
+            """
+            <system.web>
+              <httpModules>
+                <add name="Session" type="Base.SessionStateModule" />
+              </httpModules>
+            </system.web>
+            <system.webServer>
+              <modules>
+                <add name="Session" type="Base.SessionStateModule" preCondition="managedHandler" />
+              </modules>
+            </system.webServer>
+            """);
         var app = WriteConfig("web.config", "<system.webServer><modules />" + "</system.webServer>");
 
         IisServerConfiguration.Load(baseline, app).Modules
@@ -195,10 +216,16 @@ public sealed class ClassicSectionValidationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<system.web><httpModules><add name=\"LogA\" type=\"Probe.LogA\" /></httpModules>"
-            + "</system.web>"
-            + "<system.webServer><validation validateIntegratedModeConfiguration=\"no\" />"
-            + "</system.webServer>");
+            """
+            <system.web>
+              <httpModules>
+                <add name="LogA" type="Probe.LogA" />
+              </httpModules>
+            </system.web>
+            <system.webServer>
+              <validation validateIntegratedModeConfiguration="no" />
+            </system.webServer>
+            """);
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));

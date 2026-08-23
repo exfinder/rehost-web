@@ -19,7 +19,7 @@ public sealed class IisPreConditionsTests : IDisposable
         var path = Path.Combine(_root.FullName, name);
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer>"
+            """<?xml version="1.0"?><configuration><system.webServer>"""
             + systemWebServerContent
             + "</system.webServer></configuration>");
         return path;
@@ -27,16 +27,18 @@ public sealed class IisPreConditionsTests : IDisposable
 
     private string Baseline() => WriteConfig(
         "baseline.config",
-        "<modules>"
-        + "<add name=\"OutputCache\" type=\"Base.OutputCacheModule\" preCondition=\"managedHandler\" />"
-        + "<add name=\"UrlRoutingModule-4.0\" type=\"Base.UrlRoutingModule\""
-        + " preCondition=\"managedHandler,runtimeVersionv4.0\" />"
-        + "</modules>"
-        + "<handlers>"
-        + "<add name=\"PageHandlerFactory-Integrated-4.0\" path=\"*.aspx\" verb=\"GET,HEAD,POST\""
-        + " type=\"Base.PageHandlerFactory\" preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-        + "<add name=\"StaticFile\" path=\"*\" verb=\"*\" modules=\"StaticFileModule\" />"
-        + "</handlers>");
+        """
+        <modules>
+          <add name="OutputCache" type="Base.OutputCacheModule" preCondition="managedHandler" />
+          <add name="UrlRoutingModule-4.0" type="Base.UrlRoutingModule"
+               preCondition="managedHandler,runtimeVersionv4.0" />
+        </modules>
+        <handlers>
+          <add name="PageHandlerFactory-Integrated-4.0" path="*.aspx" verb="GET,HEAD,POST"
+               type="Base.PageHandlerFactory" preCondition="integratedMode,runtimeVersionv4.0" />
+          <add name="StaticFile" path="*" verb="*" modules="StaticFileModule" />
+        </handlers>
+        """);
 
     private static string[] NamesOf(IReadOnlyList<IisRegistration> registrations) =>
         registrations.Select(registration => registration.Name).ToArray();
@@ -52,10 +54,12 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"classicMode\" />"
-            + "<add name=\"LogB\" type=\"Probe.LogB\" preCondition=\"integratedMode\" />"
-            + "</modules>");
+            """
+            <modules>
+              <add name="LogA" type="Probe.LogA" preCondition="classicMode" />
+              <add name="LogB" type="Probe.LogB" preCondition="integratedMode" />
+            </modules>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -69,12 +73,14 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<add name=\"PC\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\""
-            + " preCondition=\"classicMode\" />"
-            + "<add name=\"W\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerB\""
-            + " preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <add name="PC" path="probe2.aspx" verb="*" type="Probe.HandlerA"
+                   preCondition="classicMode" />
+              <add name="W" path="*.aspx" verb="*" type="Probe.HandlerB"
+                   preCondition="integratedMode,runtimeVersionv4.0" />
+            </handlers>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -88,10 +94,12 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"managedHandler\" />"
-            + "<add name=\"LogB\" type=\"Probe.LogB\" />"
-            + "</modules>");
+            """
+            <modules>
+              <add name="LogA" type="Probe.LogA" preCondition="managedHandler" />
+              <add name="LogB" type="Probe.LogB" />
+            </modules>
+            """);
 
         var modules = IisServerConfiguration.Load(Baseline(), app).Modules;
 
@@ -107,10 +115,12 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules runAllManagedModulesForAllRequests=\"true\">"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"managedHandler\" />"
-            + "<add name=\"LogB\" type=\"Probe.LogB\" />"
-            + "</modules>");
+            """
+            <modules runAllManagedModulesForAllRequests="true">
+              <add name="LogA" type="Probe.LogA" preCondition="managedHandler" />
+              <add name="LogB" type="Probe.LogB" />
+            </modules>
+            """);
 
         var modules = IisServerConfiguration.Load(Baseline(), app).Modules;
 
@@ -126,9 +136,11 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules runAllManagedModulesForAllRequests=\"false\">"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"managedHandler\" />"
-            + "</modules>");
+            """
+            <modules runAllManagedModulesForAllRequests="false">
+              <add name="LogA" type="Probe.LogA" preCondition="managedHandler" />
+            </modules>
+            """);
 
         var modules = IisServerConfiguration.Load(Baseline(), app).Modules;
 
@@ -140,9 +152,7 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules runAllManagedModulesForAllRequests=\"yes\">"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" />"
-            + "</modules>");
+            """<modules runAllManagedModulesForAllRequests="yes"><add name="LogA" type="Probe.LogA" /></modules>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -157,7 +167,7 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules><add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"bogus\" /></modules>");
+            """<modules><add name="LogA" type="Probe.LogA" preCondition="bogus" /></modules>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -174,10 +184,12 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<add name=\"PC\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\""
-            + " preCondition=\"integratedMode,bogus\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <add name="PC" path="probe2.aspx" verb="*" type="Probe.HandlerA"
+                   preCondition="integratedMode,bogus" />
+            </handlers>
+            """);
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -195,10 +207,12 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"Wide\" type=\"Probe.LogA\" preCondition=\"bitness64\" />"
-            + "<add name=\"Narrow\" type=\"Probe.LogB\" preCondition=\"bitness32\" />"
-            + "</modules>");
+            """
+            <modules>
+              <add name="Wide" type="Probe.LogA" preCondition="bitness64" />
+              <add name="Narrow" type="Probe.LogB" preCondition="bitness32" />
+            </modules>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -212,13 +226,14 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"Legacy11\" type=\"Probe.LogA\" preCondition=\"runtimeVersionv1.1\" />"
-            + "<add name=\"Legacy20\" type=\"Probe.LogB\""
-            + " preCondition=\"managedHandler,runtimeVersionv2.0\" />"
-            + "<add name=\"Current\" type=\"Probe.LogC\""
-            + " preCondition=\"managedHandler,runtimeVersionv4.0\" />"
-            + "</modules>");
+            """
+            <modules>
+              <add name="Legacy11" type="Probe.LogA" preCondition="runtimeVersionv1.1" />
+              <add name="Legacy20" type="Probe.LogB"
+                   preCondition="managedHandler,runtimeVersionv2.0" />
+              <add name="Current" type="Probe.LogC" preCondition="managedHandler,runtimeVersionv4.0" />
+            </modules>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -231,9 +246,7 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"managedHandler,classicMode\" />"
-            + "</modules>");
+            """<modules><add name="LogA" type="Probe.LogA" preCondition="managedHandler,classicMode" /></modules>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -245,10 +258,11 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<handlers>"
-            + "<add name=\"HA\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\""
-            + " preCondition=\"\" />"
-            + "</handlers>");
+            """
+            <handlers>
+              <add name="HA" path="probe2.aspx" verb="*" type="Probe.HandlerA" preCondition="" />
+            </handlers>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -263,10 +277,12 @@ public sealed class IisPreConditionsTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<modules>"
-            + "<add name=\"LogA\" type=\"Probe.LogA\" preCondition=\"classicMode\" />"
-            + "<add name=\"LogA\" type=\"Probe.LogB\" />"
-            + "</modules>");
+            """
+            <modules>
+              <add name="LogA" type="Probe.LogA" preCondition="classicMode" />
+              <add name="LogA" type="Probe.LogB" />
+            </modules>
+            """);
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))

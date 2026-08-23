@@ -18,7 +18,7 @@ public sealed class IisServerConfigurationTests : IDisposable
         var path = Path.Combine(_root.FullName, name);
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer>"
+            """<?xml version="1.0"?><configuration><system.webServer>"""
             + systemWebServerContent
             + "</system.webServer></configuration>");
         return path;
@@ -26,26 +26,39 @@ public sealed class IisServerConfigurationTests : IDisposable
 
     private string Baseline() => WriteConfig(
         "baseline.config",
-        "<staticContent>"
-        + "<mimeMap fileExtension=\".css\" mimeType=\"text/css\" />"
-        + "<mimeMap fileExtension=\".js\" mimeType=\"application/javascript\" />"
-        + "</staticContent>"
-        + "<security><requestFiltering><hiddenSegments>"
-        + "<add segment=\"App_Data\" />"
-        + "</hiddenSegments></requestFiltering></security>");
+        """
+        <staticContent>
+          <mimeMap fileExtension=".css" mimeType="text/css" />
+          <mimeMap fileExtension=".js" mimeType="application/javascript" />
+        </staticContent>
+        <security>
+          <requestFiltering>
+            <hiddenSegments>
+              <add segment="App_Data" />
+            </hiddenSegments>
+          </requestFiltering>
+        </security>
+        """);
 
     [Fact]
     public void Amendments_Merge_Over_The_Baseline()
     {
         var app = WriteConfig(
             "web.config",
-            "<staticContent>"
-            + "<remove fileExtension=\".css\" />"
-            + "<mimeMap fileExtension=\".probe\" mimeType=\"application/x-probe\" />"
-            + "</staticContent>"
-            + "<security><requestFiltering><hiddenSegments>"
-            + "<remove segment=\"App_Data\" /><add segment=\"Private\" />"
-            + "</hiddenSegments></requestFiltering></security>");
+            """
+            <staticContent>
+              <remove fileExtension=".css" />
+              <mimeMap fileExtension=".probe" mimeType="application/x-probe" />
+            </staticContent>
+            <security>
+              <requestFiltering>
+                <hiddenSegments>
+                  <remove segment="App_Data" />
+                  <add segment="Private" />
+                </hiddenSegments>
+              </requestFiltering>
+            </security>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -62,7 +75,7 @@ public sealed class IisServerConfigurationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<staticContent><mimeMap fileExtension=\".css\" mimeType=\"text/css\" /></staticContent>");
+            """<staticContent><mimeMap fileExtension=".css" mimeType="text/css" /></staticContent>""");
 
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
@@ -76,7 +89,7 @@ public sealed class IisServerConfigurationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<staticContent><remove fileExtension=\".notthere\" /></staticContent>");
+            """<staticContent><remove fileExtension=".notthere" /></staticContent>""");
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -88,8 +101,12 @@ public sealed class IisServerConfigurationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<staticContent><clear />"
-            + "<mimeMap fileExtension=\".only\" mimeType=\"application/x-only\" /></staticContent>");
+            """
+            <staticContent>
+              <clear />
+              <mimeMap fileExtension=".only" mimeType="application/x-only" />
+            </staticContent>
+            """);
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
@@ -102,7 +119,7 @@ public sealed class IisServerConfigurationTests : IDisposable
     {
         var app = WriteConfig(
             "web.config",
-            "<staticContent><mimeMap fileExtension=\".x\" /></staticContent>");
+            """<staticContent><mimeMap fileExtension=".x" /></staticContent>""");
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))

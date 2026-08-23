@@ -19,7 +19,7 @@ public sealed class IntegratedHandlersTests : IDisposable
         var path = Path.Combine(_root.FullName, name);
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer><handlers>"
+            """<?xml version="1.0"?><configuration><system.webServer><handlers>"""
             + handlers
             + "</handlers></system.webServer></configuration>");
         return path;
@@ -27,16 +27,18 @@ public sealed class IntegratedHandlersTests : IDisposable
 
     private string Baseline() => WriteConfig(
         "baseline.config",
-        "<add name=\"PageHandlerFactory-Integrated-4.0\" path=\"*.aspx\" verb=\"GET,HEAD,POST,DEBUG\""
-        + " type=\"Base.PageHandlerFactory\" preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-        + "<add name=\"OPTIONSVerbHandler\" path=\"*\" verb=\"OPTIONS\""
-        + " modules=\"ProtocolSupportModule\" requireAccess=\"None\" />"
-        + "<add name=\"ExtensionlessUrlHandler-Integrated-4.0\" path=\"*.\" verb=\"GET,HEAD,POST,DEBUG\""
-        + " type=\"System.Web.Handlers.TransferRequestHandler\""
-        + " preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-        + "<add name=\"StaticFile\" path=\"*\" verb=\"*\""
-        + " modules=\"StaticFileModule,DefaultDocumentModule,DirectoryListingModule\""
-        + " resourceType=\"Either\" requireAccess=\"Read\" />");
+        """
+        <add name="PageHandlerFactory-Integrated-4.0" path="*.aspx" verb="GET,HEAD,POST,DEBUG"
+             type="Base.PageHandlerFactory" preCondition="integratedMode,runtimeVersionv4.0" />
+        <add name="OPTIONSVerbHandler" path="*" verb="OPTIONS" modules="ProtocolSupportModule"
+             requireAccess="None" />
+        <add name="ExtensionlessUrlHandler-Integrated-4.0" path="*." verb="GET,HEAD,POST,DEBUG"
+             type="System.Web.Handlers.TransferRequestHandler"
+             preCondition="integratedMode,runtimeVersionv4.0" />
+        <add name="StaticFile" path="*" verb="*"
+             modules="StaticFileModule,DefaultDocumentModule,DirectoryListingModule"
+             resourceType="Either" requireAccess="Read" />
+        """);
 
     private IReadOnlyList<IisHandlerRoute> Routes(string? applicationHandlers = null) =>
         IisServerConfiguration.Load(
@@ -61,8 +63,10 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void First_Match_In_Document_Order_Wins_Over_A_Later_Exact_Path()
     {
         var routes = Routes(
-            "<add name=\"HB\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerB\" />"
-            + "<add name=\"HA\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            """
+            <add name="HB" path="*.aspx" verb="*" type="Probe.HandlerB" />
+            <add name="HA" path="probe2.aspx" verb="*" type="Probe.HandlerA" />
+            """);
 
         Selected(routes, "GET", "/app/probe2.aspx").ShouldBe("HB");
         Selected(routes, "GET", "/app/probe.aspx").ShouldBe("HB");
@@ -72,7 +76,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void An_Application_Add_Beats_The_Inherited_Page_Factory()
     {
         var routes = Routes(
-            "<add name=\"HA\" path=\"probe2.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            """<add name="HA" path="probe2.aspx" verb="*" type="Probe.HandlerA" />""");
 
         Selected(routes, "GET", "/app/probe2.aspx").ShouldBe("HA");
         Selected(routes, "GET", "/app/probe.aspx").ShouldBe("PageHandlerFactory-Integrated-4.0");
@@ -84,10 +88,12 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void A_Re_Added_Inherited_Name_Matches_After_The_Fresh_Adds()
     {
         var routes = Routes(
-            "<remove name=\"ExtensionlessUrlHandler-Integrated-4.0\" />"
-            + "<add name=\"ExtensionlessUrlHandler-Integrated-4.0\" path=\"*.\" verb=\"*\""
-            + " type=\"Probe.HandlerB\" />"
-            + "<add name=\"ApiHandler\" path=\"api\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            """
+            <remove name="ExtensionlessUrlHandler-Integrated-4.0" />
+            <add name="ExtensionlessUrlHandler-Integrated-4.0" path="*." verb="*"
+                 type="Probe.HandlerB" />
+            <add name="ApiHandler" path="api" verb="*" type="Probe.HandlerA" />
+            """);
 
         Selected(routes, "GET", "/app/api").ShouldBe("ApiHandler");
         Selected(routes, "GET", "/app/nosuchthing")
@@ -100,8 +106,10 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void A_Verb_Mismatched_Row_Falls_Through_To_The_Next_Candidate()
     {
         var routes = Routes(
-            "<add name=\"P\" path=\"probe2.aspx\" verb=\"POST\" type=\"Probe.HandlerA\" />"
-            + "<add name=\"W\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerB\" />");
+            """
+            <add name="P" path="probe2.aspx" verb="POST" type="Probe.HandlerA" />
+            <add name="W" path="*.aspx" verb="*" type="Probe.HandlerB" />
+            """);
 
         Selected(routes, "GET", "/app/probe2.aspx").ShouldBe("W");
         Selected(routes, "POST", "/app/probe2.aspx").ShouldBe("P");
@@ -112,8 +120,10 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void A_Path_Pattern_Matches_Regardless_Of_Casing()
     {
         var routes = Routes(
-            "<add name=\"UpperPat\" path=\"*.ASPX\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "<add name=\"Exact\" path=\"Marker.axd\" verb=\"*\" type=\"Probe.HandlerB\" />");
+            """
+            <add name="UpperPat" path="*.ASPX" verb="*" type="Probe.HandlerA" />
+            <add name="Exact" path="Marker.axd" verb="*" type="Probe.HandlerB" />
+            """);
 
         Selected(routes, "GET", "/app/probe.aspx").ShouldBe("UpperPat");
         Selected(routes, "GET", "/app/MARKER.axd").ShouldBe("Exact");
@@ -125,7 +135,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void A_Verb_Token_Is_Compared_Case_Sensitively()
     {
         var routes = Routes(
-            "<add name=\"LowerVerb\" path=\"verbcase.axd\" verb=\"get\" type=\"Probe.HandlerA\" />");
+            """<add name="LowerVerb" path="verbcase.axd" verb="get" type="Probe.HandlerA" />""");
 
         Selected(routes, "get", "/app/verbcase.axd").ShouldBe("LowerVerb");
         Selected(routes, "GET", "/app/verbcase.axd").ShouldBe("StaticFile");
@@ -137,7 +147,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void A_Multi_Segment_Pattern_Matches_On_Segment_Boundaries()
     {
         var routes = Routes(
-            "<add name=\"SubExact\" path=\"sub/marker.axd\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            """<add name="SubExact" path="sub/marker.axd" verb="*" type="Probe.HandlerA" />""");
 
         Selected(routes, "GET", "/app/sub/marker.axd").ShouldBe("SubExact");
         Selected(routes, "GET", "/app/deeper/sub/marker.axd").ShouldBe("SubExact");
@@ -166,7 +176,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     [Fact]
     public void An_Unmatched_Url_Answers_404()
     {
-        var routes = Routes("<remove name=\"StaticFile\" />");
+        var routes = Routes("""<remove name="StaticFile" />""");
 
         var failure = Should.Throw<HttpException>(
             () => IntegratedHandlers.Resolve(routes, "GET", Path_("/app/x.txt"), null));
@@ -180,9 +190,11 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void ResourceType_File_Answers_404_Naming_The_Entry()
     {
         var routes = Routes(
-            "<add name=\"Ghost\" path=\"ghost.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "<add name=\"Phantom\" path=\"phantom.aspx\" verb=\"*\" type=\"Probe.HandlerA\""
-            + " resourceType=\"File\" />");
+            """
+            <add name="Ghost" path="ghost.aspx" verb="*" type="Probe.HandlerA" />
+            <add name="Phantom" path="phantom.aspx" verb="*" type="Probe.HandlerA"
+                 resourceType="File" />
+            """);
 
         var absent = System.IO.Path.Combine(_root.FullName, "no-such-file");
 
@@ -219,8 +231,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     public void A_Directory_Row_Refuses_A_File()
     {
         var routes = Routes(
-            "<add name=\"OnlyDir\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\""
-            + " resourceType=\"Directory\" />");
+            """<add name="OnlyDir" path="*.aspx" verb="*" type="Probe.HandlerA" resourceType="Directory" />""");
 
         Resolved(routes, "GET", "/app/x.aspx", _root.FullName).ShouldBe("OnlyDir");
 
@@ -238,8 +249,10 @@ public sealed class IntegratedHandlersTests : IDisposable
     {
         var failure = Should.Throw<ConfigurationErrorsException>(
             () => Routes(
-                "<add name=\"Isapi\" path=\"*.dll\" verb=\"*\" modules=\"IsapiModule\""
-                + " scriptProcessor=\"C:\\legacy.dll\" />"));
+                """
+                <add name="Isapi" path="*.dll" verb="*" modules="IsapiModule"
+                     scriptProcessor="C:\legacy.dll" />
+                """));
 
         failure.Message.ShouldContain("IsapiModule");
         failure.Message.ShouldContain("Isapi");
@@ -250,8 +263,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     {
         Should.Throw<ConfigurationErrorsException>(
                 () => Routes(
-                    "<add name=\"Odd\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\""
-                    + " resourceType=\"Wherever\" />"))
+                    """<add name="Odd" path="*.aspx" verb="*" type="Probe.HandlerA" resourceType="Wherever" />"""))
             .Message.ShouldContain("Wherever");
     }
 }

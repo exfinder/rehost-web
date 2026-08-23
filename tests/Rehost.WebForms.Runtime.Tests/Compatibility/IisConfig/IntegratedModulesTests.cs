@@ -19,7 +19,7 @@ public sealed class IntegratedModulesTests : IDisposable
         var path = Path.Combine(_root.FullName, "baseline.config");
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer><modules>"
+            """<?xml version="1.0"?><configuration><system.webServer><modules>"""
             + modulesContent
             + "</modules></system.webServer></configuration>");
 
@@ -33,8 +33,7 @@ public sealed class IntegratedModulesTests : IDisposable
     public void An_Unqualified_Golden_Type_Resolves_Against_The_Runtime_Assembly()
     {
         var modules = ConfigInfo(
-            "<add name=\"OutputCache\" type=\"System.Web.Caching.OutputCacheModule\""
-            + " preCondition=\"managedHandler\" />");
+            """<add name="OutputCache" type="System.Web.Caching.OutputCacheModule" preCondition="managedHandler" />""");
 
         modules.Count.ShouldBe(1);
         modules[0].Name.ShouldBe("OutputCache");
@@ -45,9 +44,11 @@ public sealed class IntegratedModulesTests : IDisposable
     public void A_Framework_Extensions_Type_Resolves_Through_The_Ports_Extensions_Assembly()
     {
         var modules = ConfigInfo(
-            "<add name=\"ScriptModule-4.0\" type=\"System.Web.Handlers.ScriptModule,"
-            + " System.Web.Extensions, Version=4.0.0.0, Culture=neutral,"
-            + " PublicKeyToken=31bf3856ad364e35\" preCondition=\"managedHandler\" />");
+            """
+            <add name="ScriptModule-4.0"
+                 type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"
+                 preCondition="managedHandler" />
+            """);
 
         modules[0].Type.ShouldBe("System.Web.Handlers.ScriptModule, Rehost.WebForms.Extensions");
     }
@@ -58,9 +59,11 @@ public sealed class IntegratedModulesTests : IDisposable
     public void The_ManagedHandler_Condition_Rides_Through_And_An_Unconditioned_Row_Carries_None()
     {
         var modules = ConfigInfo(
-            "<add name=\"OutputCache\" type=\"System.Web.Caching.OutputCacheModule\""
-            + " preCondition=\"managedHandler\" />"
-            + "<add name=\"UrlMappingsModule\" type=\"System.Web.UrlMappingsModule\" />");
+            """
+            <add name="OutputCache" type="System.Web.Caching.OutputCacheModule"
+                 preCondition="managedHandler" />
+            <add name="UrlMappingsModule" type="System.Web.UrlMappingsModule" />
+            """);
 
         modules[0].Precondition.ShouldBe("managedHandler");
         modules[1].Precondition.ShouldBe(string.Empty);
@@ -72,7 +75,7 @@ public sealed class IntegratedModulesTests : IDisposable
     public void A_Type_That_Cannot_Load_Refuses_Naming_The_Entry()
     {
         var refusal = Should.Throw<ConfigurationErrorsException>(
-            () => ConfigInfo("<add name=\"BadM\" type=\"No.Such.Type, NoAsm\" />"));
+            () => ConfigInfo("""<add name="BadM" type="No.Such.Type, NoAsm" />"""));
 
         refusal.Message.ShouldContain("name=\"BadM\"");
         refusal.Message.ShouldContain("No.Such.Type, NoAsm");
@@ -83,7 +86,7 @@ public sealed class IntegratedModulesTests : IDisposable
     public void A_Type_That_Is_Not_A_Module_Refuses_Naming_The_Entry()
     {
         var refusal = Should.Throw<ConfigurationErrorsException>(
-            () => ConfigInfo("<add name=\"NotAModule\" type=\"System.Web.HttpContext\" />"));
+            () => ConfigInfo("""<add name="NotAModule" type="System.Web.HttpContext" />"""));
 
         refusal.Message.ShouldContain("name=\"NotAModule\"");
         refusal.Message.ShouldContain("IHttpModule");
@@ -93,7 +96,7 @@ public sealed class IntegratedModulesTests : IDisposable
     public void A_Row_Without_A_Type_Refuses_Naming_The_Entry()
     {
         var refusal = Should.Throw<ConfigurationErrorsException>(
-            () => ConfigInfo("<add name=\"Typeless\" />"));
+            () => ConfigInfo("""<add name="Typeless" />"""));
 
         refusal.Message.ShouldContain("name=\"Typeless\"");
         refusal.Message.ShouldContain("no type=");

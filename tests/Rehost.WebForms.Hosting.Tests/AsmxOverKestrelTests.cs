@@ -37,11 +37,11 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
     public async Task Soap11_Invoke_Returns_The_Wrapped_Result()
     {
         var response = await InvokeSoap11Async(
-            $"<Add xmlns=\"{Ns}\"><a>3</a><b>4</b></Add>", "Add");
+            $"""<Add xmlns="{Ns}"><a>3</a><b>4</b></Add>""", "Add");
 
         response.StatusCode.ShouldBe(200);
         response.Headers["Content-Type"].ShouldBe("text/xml; charset=utf-8");
-        response.Text.ShouldContain($"<AddResponse xmlns=\"{Ns}\">");
+        response.Text.ShouldContain($"""<AddResponse xmlns="{Ns}">""");
         response.Text.ShouldContain("<AddResult>7</AddResult>");
     }
 
@@ -50,7 +50,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await scenario.Client.PostWithHeadersAsync(
             "/Calc.asmx",
-            Soap12($"<Add xmlns=\"{Ns}\"><a>20</a><b>22</b></Add>"),
+            Soap12($"""<Add xmlns="{Ns}"><a>20</a><b>22</b></Add>"""),
             $"application/soap+xml; charset=utf-8; action=\"{Ns}/Add\"");
 
         response.StatusCode.ShouldBe(200);
@@ -63,7 +63,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
     public async Task Complex_Parameter_Deserializes_Through_XmlSerializer()
     {
         var response = await InvokeSoap11Async(
-            $"<Sum xmlns=\"{Ns}\"><pair><First>19</First><Second>23</Second></pair></Sum>",
+            $"""<Sum xmlns="{Ns}"><pair><First>19</First><Second>23</Second></pair></Sum>""",
             "Sum");
 
         response.StatusCode.ShouldBe(200);
@@ -90,7 +90,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Unhandled_Exception_Becomes_A_Soap_Fault()
     {
-        var response = await InvokeSoap11Async($"<Fail xmlns=\"{Ns}\" />", "Fail");
+        var response = await InvokeSoap11Async($"""<Fail xmlns="{Ns}" />""", "Fail");
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("<soap:Fault>");
@@ -101,7 +101,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task Session_Enabled_Method_Keeps_State_Across_The_Cookie()
     {
-        var bump = $"<Bump xmlns=\"{Ns}\" />";
+        var bump = $"""<Bump xmlns="{Ns}" />""";
         var first = await InvokeSoap11Async(bump, "Bump");
 
         first.StatusCode.ShouldBe(200);
@@ -120,7 +120,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
     [Fact]
     public async Task OneWay_Method_Answers_202_And_Runs_Detached()
     {
-        var response = await InvokeSoap11Async($"<Notify xmlns=\"{Ns}\" />", "Notify");
+        var response = await InvokeSoap11Async($"""<Notify xmlns="{Ns}" />""", "Notify");
 
         response.StatusCode.ShouldBe(202);
         response.Bytes.ShouldBeEmpty();
@@ -130,7 +130,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         var seen = "no";
         for (var attempt = 0; attempt < 50 && seen == "no"; attempt++)
         {
-            var check = await InvokeSoap11Async($"<Notified xmlns=\"{Ns}\" />", "Notified");
+            var check = await InvokeSoap11Async($"""<Notified xmlns="{Ns}" />""", "Notified");
             if (check.Text.Contains("<NotifiedResult>yes</NotifiedResult>"))
             {
                 seen = "yes";
@@ -150,7 +150,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Headers["Content-Type"].ShouldBe("text/xml; charset=utf-8");
-        response.Text.ShouldContain($"<int xmlns=\"{Ns}\">42</int>");
+        response.Text.ShouldContain($"""<int xmlns="{Ns}">42</int>""");
     }
 
     [Fact]
@@ -162,7 +162,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         response.Headers["Content-Type"].ShouldBe("text/xml; charset=utf-8");
         response.Text.ShouldContain("<wsdl:definitions");
         response.Text.ShouldContain($"targetNamespace=\"{Ns}\"");
-        response.Text.ShouldContain("<wsdl:operation name=\"Add\">");
+        response.Text.ShouldContain("""<wsdl:operation name="Add">""");
         response.Text.ShouldContain("<soap:address location=");
         response.Text.ShouldContain("<soap12:address location=");
     }

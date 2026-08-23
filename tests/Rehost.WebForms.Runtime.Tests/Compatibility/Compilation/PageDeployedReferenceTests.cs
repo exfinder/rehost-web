@@ -19,6 +19,6 @@ public sealed class PageDeployedReferenceTests
         trace.ShouldContain("request:/Formatter.aspx:200");
         // ObjectStateFormatter must have run, not merely resolved: 13 bytes is the token stream
         // for an ArrayList of one string and one int.
-        application.ReadResponseText(0).ShouldContain("<p id=\"length\">13</p>");
+        application.ReadResponseText(0).ShouldContain("""<p id="length">13</p>""");
     }
 }

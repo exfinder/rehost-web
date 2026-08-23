@@ -21,14 +21,14 @@ public sealed class IisFolderHandlersTests : IDisposable
     private const string AppVirtualPath = "/app";
 
     private const string RootWildcard =
-        "<add name=\"RootW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerB\" />";
+        """<add name="RootW" path="*.aspx" verb="*" type="Probe.HandlerB" />""";
 
     private string WriteRaw(string relativeDirectory, string body)
     {
         var directory = Path.Combine(AppRoot, relativeDirectory);
         Directory.CreateDirectory(directory);
         var path = Path.Combine(directory, "web.config");
-        File.WriteAllText(path, "<?xml version=\"1.0\"?><configuration>" + body + "</configuration>");
+        File.WriteAllText(path, """<?xml version="1.0"?><configuration>""" + body + "</configuration>");
         return path;
     }
 
@@ -41,14 +41,21 @@ public sealed class IisFolderHandlersTests : IDisposable
         var path = Path.Combine(_temp.FullName, "baseline.config");
         File.WriteAllText(
             path,
-            "<?xml version=\"1.0\"?><configuration><system.webServer><handlers>"
-            + "<add name=\"PageHandlerFactory-Integrated-4.0\" path=\"*.aspx\""
-            + " verb=\"GET,HEAD,POST,DEBUG\" type=\"Base.PageHandlerFactory\""
-            + " preCondition=\"integratedMode,runtimeVersionv4.0\" />"
-            + "<add name=\"StaticFile\" path=\"*\" verb=\"*\""
-            + " modules=\"StaticFileModule,DefaultDocumentModule,DirectoryListingModule\""
-            + " resourceType=\"Either\" requireAccess=\"Read\" />"
-            + "</handlers></system.webServer></configuration>");
+            """
+            <?xml version="1.0"?>
+            <configuration>
+              <system.webServer>
+                <handlers>
+                  <add name="PageHandlerFactory-Integrated-4.0" path="*.aspx"
+                       verb="GET,HEAD,POST,DEBUG" type="Base.PageHandlerFactory"
+                       preCondition="integratedMode,runtimeVersionv4.0" />
+                  <add name="StaticFile" path="*" verb="*"
+                       modules="StaticFileModule,DefaultDocumentModule,DirectoryListingModule"
+                       resourceType="Either" requireAccess="Read" />
+                </handlers>
+              </system.webServer>
+            </configuration>
+            """);
         return path;
     }
 
@@ -70,7 +77,7 @@ public sealed class IisFolderHandlersTests : IDisposable
     public void The_Deepest_Add_Wins_For_The_Same_Pattern()
     {
         Write(string.Empty, RootWildcard);
-        Write("sub", "<add name=\"SubW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+        Write("sub", """<add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />""");
 
         var configuration = Load();
 
@@ -85,7 +92,7 @@ public sealed class IisFolderHandlersTests : IDisposable
     public void A_Folder_Remove_Of_A_Parent_Add_Falls_Back_To_The_Inherited_Row()
     {
         Write(string.Empty, RootWildcard);
-        Write("sub", "<remove name=\"RootW\" />");
+        Write("sub", """<remove name="RootW" />""");
 
         var configuration = Load();
 
@@ -100,7 +107,7 @@ public sealed class IisFolderHandlersTests : IDisposable
     public void A_Directory_Below_A_Configured_Folder_Inherits_Its_List()
     {
         Write(string.Empty, RootWildcard);
-        Write("sub", "<add name=\"SubW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+        Write("sub", """<add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />""");
 
         var configuration = Load();
 
@@ -113,8 +120,8 @@ public sealed class IisFolderHandlersTests : IDisposable
     public void Unmeasured_Three_Levels_Are_Consulted_Deepest_First()
     {
         Write(string.Empty, RootWildcard);
-        Write("a", "<add name=\"AW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
-        Write("a/b", "<add name=\"BW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerC\" />");
+        Write("a", """<add name="AW" path="*.aspx" verb="*" type="Probe.HandlerA" />""");
+        Write("a/b", """<add name="BW" path="*.aspx" verb="*" type="Probe.HandlerC" />""");
 
         var configuration = Load();
 
@@ -132,12 +139,13 @@ public sealed class IisFolderHandlersTests : IDisposable
     {
         Write(
             string.Empty,
-            "<add name=\"Wild\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerB\" />"
-            + "<add name=\"Exact\" path=\"probe.aspx\" verb=\"*\" type=\"Probe.HandlerC\" />");
+            """
+            <add name="Wild" path="*.aspx" verb="*" type="Probe.HandlerB" />
+            <add name="Exact" path="probe.aspx" verb="*" type="Probe.HandlerC" />
+            """);
         Write(
             "sub",
-            "<remove name=\"Exact\" />"
-            + "<add name=\"Exact\" path=\"probe.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            """<remove name="Exact" /><add name="Exact" path="probe.aspx" verb="*" type="Probe.HandlerA" />""");
 
         var configuration = Load();
 
@@ -153,10 +161,12 @@ public sealed class IisFolderHandlersTests : IDisposable
         Write(string.Empty, string.Empty);
         Write(
             "sub",
-            "<remove name=\"PageHandlerFactory-Integrated-4.0\" />"
-            + "<add name=\"PageHandlerFactory-Integrated-4.0\" path=\"*.aspx\" verb=\"*\""
-            + " type=\"Probe.HandlerB\" />"
-            + "<add name=\"SubExact\" path=\"probe.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            """
+            <remove name="PageHandlerFactory-Integrated-4.0" />
+            <add name="PageHandlerFactory-Integrated-4.0" path="*.aspx" verb="*"
+                 type="Probe.HandlerB" />
+            <add name="SubExact" path="probe.aspx" verb="*" type="Probe.HandlerA" />
+            """);
 
         var configuration = Load();
 
@@ -183,9 +193,9 @@ public sealed class IisFolderHandlersTests : IDisposable
     [Fact]
     public void Unmeasured_A_Folder_Add_Over_A_Live_Parent_Name_Refuses_Naming_The_Folder_File()
     {
-        Write(string.Empty, "<add name=\"Dup\" path=\"a.axd\" verb=\"*\" type=\"Probe.HandlerB\" />");
+        Write(string.Empty, """<add name="Dup" path="a.axd" verb="*" type="Probe.HandlerB" />""");
         var folder = Write(
-            "sub", "<add name=\"Dup\" path=\"b.axd\" verb=\"*\" type=\"Probe.HandlerA\" />");
+            "sub", """<add name="Dup" path="b.axd" verb="*" type="Probe.HandlerA" />""");
 
         var failure = Should.Throw<ConfigurationErrorsException>(Load);
 
@@ -200,8 +210,7 @@ public sealed class IisFolderHandlersTests : IDisposable
         Write(string.Empty, RootWildcard);
         var folder = Write(
             "sub",
-            "<add name=\"Bogus\" path=\"*.axd\" verb=\"*\" type=\"Probe.HandlerA\""
-            + " preCondition=\"nonsense\" />");
+            """<add name="Bogus" path="*.axd" verb="*" type="Probe.HandlerA" preCondition="nonsense" />""");
 
         var failure = Should.Throw<ConfigurationErrorsException>(Load);
 
@@ -214,7 +223,7 @@ public sealed class IisFolderHandlersTests : IDisposable
     {
         var folder = Write(
             "sub",
-            "<add name=\"Native\" path=\"*\" verb=\"*\" modules=\"CustomNativeModule\" />");
+            """<add name="Native" path="*" verb="*" modules="CustomNativeModule" />""");
 
         var failure = Should.Throw<ConfigurationErrorsException>(Load);
 
@@ -230,11 +239,16 @@ public sealed class IisFolderHandlersTests : IDisposable
         Write(string.Empty, RootWildcard);
         WriteRaw(
             "sub",
-            "<system.webServer><modules>"
-            + "<add name=\"FolderModule\" type=\"Probe.ModuleA\" />"
-            + "</modules>"
-            + "<handlers><add name=\"SubW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</handlers></system.webServer>");
+            """
+            <system.webServer>
+              <modules>
+                <add name="FolderModule" type="Probe.ModuleA" />
+              </modules>
+              <handlers>
+                <add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />
+              </handlers>
+            </system.webServer>
+            """);
 
         var configuration = Load();
 
@@ -247,7 +261,7 @@ public sealed class IisFolderHandlersTests : IDisposable
     public void A_Folder_File_Without_Handlers_Leaves_The_Root_List_In_Place()
     {
         Write(string.Empty, RootWildcard);
-        WriteRaw("sub", "<system.web><pages enableViewState=\"false\" /></system.web>");
+        WriteRaw("sub", """<system.web><pages enableViewState="false" /></system.web>""");
 
         var configuration = Load();
 
@@ -262,9 +276,13 @@ public sealed class IisFolderHandlersTests : IDisposable
         Write(string.Empty, RootWildcard);
         var folder = WriteRaw(
             "sub",
-            "<system.web><httpHandlers>"
-            + "<add path=\"legacy.axd\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</httpHandlers></system.web>");
+            """
+            <system.web>
+              <httpHandlers>
+                <add path="legacy.axd" verb="*" type="Probe.HandlerA" />
+              </httpHandlers>
+            </system.web>
+            """);
 
         var failure = Should.Throw<ConfigurationErrorsException>(Load);
 
@@ -277,13 +295,16 @@ public sealed class IisFolderHandlersTests : IDisposable
     {
         WriteRaw(
             string.Empty,
-            "<system.webServer><validation validateIntegratedModeConfiguration=\"false\" />"
-            + "<handlers>" + RootWildcard + "</handlers></system.webServer>");
+            """<system.webServer><validation validateIntegratedModeConfiguration="false" /><handlers>""" + RootWildcard + "</handlers></system.webServer>");
         WriteRaw(
             "sub",
-            "<system.web><httpHandlers>"
-            + "<add path=\"legacy.axd\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</httpHandlers></system.web>");
+            """
+            <system.web>
+              <httpHandlers>
+                <add path="legacy.axd" verb="*" type="Probe.HandlerA" />
+              </httpHandlers>
+            </system.web>
+            """);
 
         var configuration = Load();
 
@@ -295,15 +316,19 @@ public sealed class IisFolderHandlersTests : IDisposable
     {
         WriteRaw(
             string.Empty,
-            "<system.webServer><validation validateIntegratedModeConfiguration=\"false\" />"
-            + "<handlers>" + RootWildcard + "</handlers></system.webServer>");
+            """<system.webServer><validation validateIntegratedModeConfiguration="false" /><handlers>""" + RootWildcard + "</handlers></system.webServer>");
         var folder = WriteRaw(
             "sub",
-            "<system.web><httpHandlers>"
-            + "<add path=\"legacy.axd\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</httpHandlers></system.web>"
-            + "<system.webServer>"
-            + "<validation validateIntegratedModeConfiguration=\"true\" /></system.webServer>");
+            """
+            <system.web>
+              <httpHandlers>
+                <add path="legacy.axd" verb="*" type="Probe.HandlerA" />
+              </httpHandlers>
+            </system.web>
+            <system.webServer>
+              <validation validateIntegratedModeConfiguration="true" />
+            </system.webServer>
+            """);
 
         Should.Throw<ConfigurationErrorsException>(Load).Message.ShouldContain(folder);
     }
@@ -318,9 +343,16 @@ public sealed class IisFolderHandlersTests : IDisposable
         Directory.CreateDirectory(directory);
         File.WriteAllText(
             Path.Combine(directory, "Web.config"),
-            "<?xml version=\"1.0\"?><configuration><system.webServer><handlers>"
-            + "<add name=\"SubW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />"
-            + "</handlers></system.webServer></configuration>");
+            """
+            <?xml version="1.0"?>
+            <configuration>
+              <system.webServer>
+                <handlers>
+                  <add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />
+                </handlers>
+              </system.webServer>
+            </configuration>
+            """);
 
         Selected(Load(), "/app/sub/probe.aspx").ShouldBe("SubW");
     }
@@ -331,7 +363,7 @@ public sealed class IisFolderHandlersTests : IDisposable
     public void A_Folder_Record_Answers_Whatever_The_Requested_Casing()
     {
         Write(string.Empty, RootWildcard);
-        Write("Sub", "<add name=\"SubW\" path=\"*.aspx\" verb=\"*\" type=\"Probe.HandlerA\" />");
+        Write("Sub", """<add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />""");
 
         var configuration = Load();
 
@@ -355,10 +387,17 @@ public sealed class IisFolderHandlersCaseSensitivityTests(CaseSensitiveVolume vo
         var baseline = Path.Combine(temp, "baseline.config");
         File.WriteAllText(
             baseline,
-            "<?xml version=\"1.0\"?><configuration><system.webServer><handlers>"
-            + "<add name=\"StaticFile\" path=\"*\" verb=\"*\""
-            + " modules=\"StaticFileModule\" resourceType=\"Either\" />"
-            + "</handlers></system.webServer></configuration>");
+            """
+            <?xml version="1.0"?>
+            <configuration>
+              <system.webServer>
+                <handlers>
+                  <add name="StaticFile" path="*" verb="*" modules="StaticFileModule"
+                       resourceType="Either" />
+                </handlers>
+              </system.webServer>
+            </configuration>
+            """);
 
         foreach (var name in new[] { "Sub", "sub" })
         {
@@ -366,9 +405,16 @@ public sealed class IisFolderHandlersCaseSensitivityTests(CaseSensitiveVolume vo
             Directory.CreateDirectory(directory);
             File.WriteAllText(
                 Path.Combine(directory, "web.config"),
-                "<?xml version=\"1.0\"?><configuration><system.webServer><handlers>"
-                + "<add name=\"" + name + "W\" path=\"*.aspx\" verb=\"*\" type=\"Probe.Handler"
-                + name + "\" /></handlers></system.webServer></configuration>");
+                $"""
+                <?xml version="1.0"?>
+                <configuration>
+                  <system.webServer>
+                    <handlers>
+                      <add name="{name}W" path="*.aspx" verb="*" type="Probe.Handler{name}" />
+                    </handlers>
+                  </system.webServer>
+                </configuration>
+                """);
         }
 
         Directory.GetDirectories(appRoot).Length.ShouldBe(2);
