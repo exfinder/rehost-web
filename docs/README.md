@@ -33,6 +33,7 @@ top-level documents in this directory.
 ## Contributor workflow
 
 - [Bringing up an application](bringing-up-an-application.md)
+- [Code style](code-style.md)
 - [Writing tests](writing-tests.md)
 - [Scenario fixture tenancy](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md)
 - [Parity rigs](../tests/parity/README.md)

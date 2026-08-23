@@ -8,8 +8,6 @@ Use concise Conventional Commit subjects (`type: summary`). Add a body only
 where the mechanism is not obvious from the diff. Existing commits carry long
 bodies; do not treat them as the standard. Do not add `Co-Authored-By` footers.
 
-For C# code outside imported Reference Source, prefer `var` over explicit local variable types.
-
 DEFAULT: NO COMMENTS. A comment exists only to stop the next reader from
 making a mistake — deleting a load-bearing line, "fixing" deliberate behavior.
 Findings, justifications, and context from the current task go in the commit
@@ -18,6 +16,9 @@ the change is correct — that is PR-description content. Don't explain WHAT the
 code does, and don't reference the current task, fix, or callers ("used by X",
 "added for the Y flow"). Before committing, list every comment line the diff
 adds; each either names a hidden constraint or gets deleted.
+
+The rest of the authored-C# style rules are in
+[`docs/code-style.md`](docs/code-style.md); read it before writing code.
 
 New test files mirror the folder of the source they cover, so a test for
 `src/System.Web.ReferenceSource/Compilation/BuildManager.cs` belongs in
