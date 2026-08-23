@@ -120,7 +120,8 @@ internal sealed class IisServerConfiguration
             configuration.HandlerRoutes,
             Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
             applicationVirtualPath,
-            sections.ClassicSectionsWaived);
+            sections.ClassicSectionsWaived,
+            sections.HiddenSegments);
 
         return configuration;
     }

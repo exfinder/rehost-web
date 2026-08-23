@@ -45,6 +45,11 @@ public sealed class IisFolderHandlersTests : IDisposable
             <?xml version="1.0"?>
             <configuration>
               <system.webServer>
+                <security>
+                  <requestFiltering>
+                    <hiddenSegments><add segment="App_Data" /></hiddenSegments>
+                  </requestFiltering>
+                </security>
                 <handlers>
                   <add name="PageHandlerFactory-Integrated-4.0" path="*.aspx"
                        verb="GET,HEAD,POST,DEBUG" type="Base.PageHandlerFactory"
@@ -69,6 +74,66 @@ public sealed class IisFolderHandlersTests : IDisposable
         return IntegratedHandlers
             .Selected(configuration.HandlerRoutesFor(virtualPath), verb, virtualPath)
             ?.Registration.Name;
+    }
+
+    // Activation reads every folder file, so the message has to name the one that is broken;
+    // XmlException carries only a line and a position.
+    [Fact]
+    public void A_Malformed_Folder_Config_Fails_Naming_The_File()
+    {
+        Write(string.Empty, RootWildcard);
+        var broken = Path.Combine(AppRoot, "sub", "web.config");
+        Directory.CreateDirectory(Path.GetDirectoryName(broken)!);
+        File.WriteAllText(broken, """<?xml version="1.0"?><configuration><system.webServer>""");
+
+        var exception = Should.Throw<ConfigurationErrorsException>(Load);
+
+        exception.Message.ShouldContain(broken);
+        exception.Message.ShouldContain("not well-formed XML");
+    }
+
+    // A hidden segment refuses every request that touches it, so a folder file underneath one can
+    // never be selected. The malformed file is the detector: reaching it would fail activation.
+    [Fact]
+    public void A_Folder_Below_A_Hidden_Segment_Is_Never_Read()
+    {
+        Write(string.Empty, RootWildcard);
+        var unreachable = Path.Combine(AppRoot, "App_Data", "deep", "web.config");
+        Directory.CreateDirectory(Path.GetDirectoryName(unreachable)!);
+        File.WriteAllText(unreachable, "not xml at all");
+
+        var configuration = Load();
+
+        Selected(configuration, "/app/probe.aspx").ShouldBe("RootW");
+    }
+
+    // A directory the process cannot list would otherwise be skipped in silence, answering its
+    // requests from the nearest readable ancestor - a looser policy than the folder declared.
+    [Fact]
+    public void An_Unreadable_Directory_Fails_Activation()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            Assert.Skip("Read permission is removed with chmod, which NTFS does not model.");
+            return;
+        }
+
+        Write(string.Empty, RootWildcard);
+        var locked = Path.Combine(AppRoot, "locked");
+        Directory.CreateDirectory(locked);
+        File.WriteAllText(Path.Combine(locked, "web.config"), "<configuration />");
+        File.SetUnixFileMode(locked, UnixFileMode.None);
+
+        try
+        {
+            Should.Throw<ConfigurationErrorsException>(Load)
+                .Message.ShouldContain("cannot be read");
+        }
+        finally
+        {
+            File.SetUnixFileMode(
+                locked, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        }
     }
 
     // MH27a: both levels claim *.aspx and the child's add wins inside the folder, while the
@@ -347,6 +412,11 @@ public sealed class IisFolderHandlersTests : IDisposable
             <?xml version="1.0"?>
             <configuration>
               <system.webServer>
+                <security>
+                  <requestFiltering>
+                    <hiddenSegments><add segment="App_Data" /></hiddenSegments>
+                  </requestFiltering>
+                </security>
                 <handlers>
                   <add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />
                 </handlers>
@@ -391,6 +461,11 @@ public sealed class IisFolderHandlersCaseSensitivityTests(CaseSensitiveVolume vo
             <?xml version="1.0"?>
             <configuration>
               <system.webServer>
+                <security>
+                  <requestFiltering>
+                    <hiddenSegments><add segment="App_Data" /></hiddenSegments>
+                  </requestFiltering>
+                </security>
                 <handlers>
                   <add name="StaticFile" path="*" verb="*" modules="StaticFileModule"
                        resourceType="Either" />

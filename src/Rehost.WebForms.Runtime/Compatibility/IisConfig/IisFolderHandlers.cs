@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.IO.Enumeration;
 using System.Web.Configuration;
 using System.Web.Util;
 using System.Xml;
@@ -43,14 +44,15 @@ internal sealed class IisFolderHandlers
         IReadOnlyList<IisHandlerRoute> applicationRoutes,
         string applicationPhysicalRoot,
         string applicationVirtualPath,
-        bool applicationWaiver)
+        bool applicationWaiver,
+        Dictionary<string, string> hiddenSegments)
     {
         var prefix = VirtualPrefix(applicationVirtualPath);
         var folders = new Dictionary<string, IReadOnlyList<IisHandlerRoute>>(
             StringComparer.OrdinalIgnoreCase);
         var records = new Dictionary<string, Record>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var folder in Discover(applicationPhysicalRoot, prefix))
+        foreach (var folder in Discover(applicationPhysicalRoot, prefix, hiddenSegments))
         {
             var parent = NearestAncestor(records, folder.Key, prefix);
             var section = (parent?.Section ?? applicationSection).Nested();
@@ -140,7 +142,17 @@ internal sealed class IisFolderHandlers
     private static bool Apply(string configPath, IisRegistrationSection section, bool waiver)
     {
         var document = new XmlDocument();
-        document.Load(configPath);
+        try
+        {
+            document.Load(configPath);
+        }
+        catch (XmlException failure)
+        {
+            // XmlException carries line and position but never the path, and activation reads
+            // every folder file, so without this the operator cannot tell which one is broken.
+            throw new ConfigurationErrorsException(
+                $"'{configPath}' is not well-formed XML: {failure.Message}", failure);
+        }
 
         var folderWaiver = ClassicSectionValidation.Validate(document, configPath, waiver);
 
@@ -158,7 +170,8 @@ internal sealed class IisFolderHandlers
     // Web.config and the configuration system composes web.config (ledger P70). Enumeration order
     // is the filesystem's, so the chain is ordered here instead: a folder is merged after every
     // ancestor it inherits from.
-    private static List<FolderConfig> Discover(string physicalRoot, string prefix)
+    private static List<FolderConfig> Discover(
+        string physicalRoot, string prefix, Dictionary<string, string> hiddenSegments)
     {
         var found = new List<FolderConfig>();
         if (!Directory.Exists(physicalRoot))
@@ -169,25 +182,50 @@ internal sealed class IisFolderHandlers
         var options = new EnumerationOptions
         {
             RecurseSubdirectories = true,
-            MatchCasing = MatchCasing.CaseInsensitive,
             AttributesToSkip = FileAttributes.None,
-            IgnoreInaccessible = true,
+            IgnoreInaccessible = false,
         };
 
-        foreach (var configPath in Directory.EnumerateFiles(
-            physicalRoot, HttpConfigurationSystem.WebConfigFileName, options))
+        var files = new FileSystemEnumerable<string>(
+            physicalRoot,
+            static (ref FileSystemEntry entry) => entry.ToFullPath(),
+            options)
         {
-            var relative = Path.GetRelativePath(
-                physicalRoot, Path.GetDirectoryName(configPath)!);
-            if (relative == ".")
-            {
-                continue;
-            }
+            ShouldIncludePredicate = static (ref FileSystemEntry entry) =>
+                !entry.IsDirectory
+                && entry.FileName.Equals(
+                    HttpConfigurationSystem.WebConfigFileName, StringComparison.OrdinalIgnoreCase),
 
-            var segments = relative.Split(
-                Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            found.Add(new FolderConfig(
-                prefix + "/" + string.Join('/', segments), segments.Length, configPath));
+            // A request whose path touches a hidden segment is refused, so a folder file below
+            // one could never be selected and descending only costs activation time.
+            ShouldRecursePredicate = (ref FileSystemEntry entry) =>
+                !hiddenSegments.ContainsKey(entry.FileName.ToString()),
+        };
+
+        try
+        {
+            foreach (var configPath in files)
+            {
+                var relative = Path.GetRelativePath(
+                    physicalRoot, Path.GetDirectoryName(configPath)!);
+                if (relative == ".")
+                {
+                    continue;
+                }
+
+                var segments = relative.Split(
+                    Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                found.Add(new FolderConfig(
+                    prefix + "/" + string.Join('/', segments), segments.Length, configPath));
+            }
+        }
+        catch (Exception failure) when (failure is UnauthorizedAccessException or IOException)
+        {
+            // Skipping the directory instead would answer its requests from the nearest ancestor
+            // that was readable, which is a looser handler policy than the folder asked for.
+            throw new ConfigurationErrorsException(
+                $"A directory under '{physicalRoot}' cannot be read, so the handler"
+                + $" configuration below it cannot be resolved: {failure.Message}", failure);
         }
 
         found.Sort(static (left, right) =>
