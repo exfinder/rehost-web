@@ -30,13 +30,15 @@ internal sealed class IisServerConfiguration
         new DefaultDocuments(enabled: true, Array.Empty<string>()),
         Array.Empty<IisRegistration>(),
         runAllManagedModulesForAllRequests: false,
-        Array.Empty<IisRegistration>());
+        Array.Empty<IisRegistration>(),
+        Array.Empty<IisHandlerRoute>(),
+        IisFolderHandlers.Empty);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
     private readonly Dictionary<string, bool> _fileExtensions;
     private readonly bool _allowUnlistedExtensions;
-    private IisFolderHandlers? _folderHandlers;
+    private readonly IisFolderHandlers _folderHandlers;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
@@ -46,7 +48,9 @@ internal sealed class IisServerConfiguration
         DefaultDocuments defaultDocuments,
         IReadOnlyList<IisRegistration> modules,
         bool runAllManagedModulesForAllRequests,
-        IReadOnlyList<IisRegistration> handlers)
+        IReadOnlyList<IisRegistration> handlers,
+        IReadOnlyList<IisHandlerRoute> handlerRoutes,
+        IisFolderHandlers folderHandlers)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -56,7 +60,8 @@ internal sealed class IisServerConfiguration
         Modules = modules;
         RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
         Handlers = handlers;
-        HandlerRoutes = IisHandlerRoute.Build(handlers);
+        HandlerRoutes = handlerRoutes;
+        _folderHandlers = folderHandlers;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -74,7 +79,7 @@ internal sealed class IisServerConfiguration
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutes { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
-        _folderHandlers == null ? HandlerRoutes : _folderHandlers.RoutesFor(path);
+        _folderHandlers.RoutesFor(path);
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
@@ -105,7 +110,10 @@ internal sealed class IisServerConfiguration
         sections.Handlers.SealInheritance();
         ApplyFile(applicationConfigPath, required: false, application: true, sections);
 
-        var configuration = new IisServerConfiguration(
+        var handlers = sections.Handlers.Build();
+        var handlerRoutes = IisHandlerRoute.Build(handlers);
+
+        return new IisServerConfiguration(
             sections.StaticContent,
             sections.HiddenSegments,
             sections.FileExtensionsParsed,
@@ -113,17 +121,15 @@ internal sealed class IisServerConfiguration
             sections.DefaultDocuments.Build(),
             sections.Modules.Build(),
             sections.Modules.RunAllManagedModules,
-            sections.Handlers.Build());
-
-        configuration._folderHandlers = IisFolderHandlers.Load(
-            sections.Handlers,
-            configuration.HandlerRoutes,
-            Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
-            applicationVirtualPath,
-            sections.ClassicSectionsWaived,
-            sections.HiddenSegments);
-
-        return configuration;
+            handlers,
+            handlerRoutes,
+            IisFolderHandlers.Load(
+                sections.Handlers,
+                handlerRoutes,
+                Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
+                applicationVirtualPath,
+                sections.ClassicSectionsWaived,
+                sections.HiddenSegments));
     }
 
     internal static void Publish(IisServerConfiguration configuration)

@@ -39,6 +39,11 @@ internal sealed class IisFolderHandlers
         _virtualPrefix = virtualPrefix;
     }
 
+    internal static IisFolderHandlers Empty { get; } = new(
+        Array.Empty<IisHandlerRoute>(),
+        new Dictionary<string, IReadOnlyList<IisHandlerRoute>>(StringComparer.OrdinalIgnoreCase),
+        string.Empty);
+
     internal static IisFolderHandlers Load(
         IisRegistrationSection applicationSection,
         IReadOnlyList<IisHandlerRoute> applicationRoutes,
