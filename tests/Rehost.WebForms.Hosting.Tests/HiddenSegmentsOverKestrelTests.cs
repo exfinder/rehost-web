@@ -34,6 +34,17 @@ public sealed class HiddenSegmentsOverKestrelTests(PageLiveScenario scenario)
         (await StatusOfExistingAsync("bin/readme.txt", "/bin/readme.txt")).ShouldBe(404);
     }
 
+    // Not written through the helper: this is the application's own web.config, the file the
+    // refusal exists for. Overwriting it would reconfigure the running host.
+    [Fact]
+    public async Task The_Applications_Own_Web_Config_Is_Refused()
+    {
+        File.Exists(Path.Combine(scenario.ApplicationPath, "web.config")).ShouldBeTrue();
+
+        (await scenario.Client.GetAsync("/web.config")).StatusCode.ShouldBe(404);
+        (await scenario.Client.GetAsync("/WEB.CONFIG")).StatusCode.ShouldBe(404);
+    }
+
     [Fact]
     public async Task The_Refusal_Ignores_Casing_And_Depth()
     {

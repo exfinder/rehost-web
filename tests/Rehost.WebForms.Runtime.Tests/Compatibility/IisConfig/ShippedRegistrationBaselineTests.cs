@@ -14,6 +14,15 @@ public sealed class ShippedRegistrationBaselineTests
                 AppContext.BaseDirectory, "configs", "rehost-webforms.applicationHost.config"),
             Path.Combine(AppContext.BaseDirectory, "no-such-application", "web.config"));
 
+    // web.config answers 404 from this rule, not from the .config deny row that also covers it:
+    // both refuse the same URL, so only the rule itself distinguishes them.
+    [Fact]
+    public void Web_Config_Is_A_Hidden_Segment()
+    {
+        ShippedBaseline().IsHiddenSegment("web.config").ShouldBeTrue();
+        ShippedBaseline().IsHiddenSegment("WEB.CONFIG").ShouldBeTrue();
+    }
+
     // MH1's Modules.AllKeys dump, which is the managed module list an application observes.
     [Fact]
     public void The_Module_List_Matches_The_Order_IIS_Reports()
