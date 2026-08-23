@@ -92,6 +92,26 @@ Carried from Milestone 1 as unresolved detail:
 
 ### IIS-derived behavior and modules
 
+- Integrated-mode divergences the [round-4 readings](research/iis-modules-handlers-readings.md)
+  opened, all measured and none yet implemented:
+  - `preCondition="managedHandler"` is asked per wrapped step against the current
+    `FilePath`; IIS asks once before `BeginRequest` against the URL as it arrived
+    and never revisits it (MH35). A rewrite across the static/managed boundary
+    therefore flips the answer mid-request, and the repeated walk costs ~20 passes
+    over the handler list per request. Ledger P83.
+  - `<fileExtensions allowUnlisted="false">` is parsed and ignored, so an
+    application that switches request filtering to an allow list gets no filtering
+    and no diagnostic; a non-boolean `allowed` is a 500.19 on IIS and is served
+    here (MH29, MH31). The section is also read from the application root alone,
+    where IIS resolves it per path (MH32). Ledger P86.
+  - A classic registration behind `configSource` refuses activation on IIS
+    (500.22) and passes silently here; the same registration inside `<location>`
+    is silent on both and needs no change (MH33, MH34). Ledger P83.
+  - `system.webServer/security/authorization` is not read at all. An application
+    that protected a folder with the native section — the only one of the two that
+    reaches a static file (MH36) — gets no protection here and no error.
+  - `OPTIONS` answers 405 where IIS answers 200 with an `Allow` header, and
+    `TRACE` answers 405 where IIS answers 501 (MH37).
 - ~~Per-folder `<handlers>` resolution~~ — closed (ledger P87, MH27). A
   per-folder `<modules>` section stays inert, which is IIS's own behavior
   (MH24). The other honored `system.webServer` sections are still merged from

@@ -1,16 +1,18 @@
 # IIS integrated mode: modules and handlers readings
 
 The evidence behind ledger P83, P85 and P86, and behind the `system.webServer/handlers`
-and `/modules` rows of the [compatibility map](../compatibility.md). Twenty-eight readings
-(MH1-MH28) taken against full IIS 10 on `winbox` in three rounds, 2026-08-22 and
+and `/modules` rows of the [compatibility map](../compatibility.md). Thirty-seven readings
+(MH1-MH37) taken against full IIS 10 on `winbox` in four rounds, 2026-08-22 and
 2026-08-23, one throwaway application per case. Each reading states the configuration
 fragment, the request, the response as `curl` printed it, and the conclusion drawn.
 
 Readings that overturned a design assumption: MH1 (end-side module events are not
 reversed), MH9v (a re-added inherited handler name does not regain top matching
 priority), MH22 (handler types resolve lazily, module types do not), MH24 (a subfolder
-`<modules>` section is ignored rather than refused), and MH28 (handler paths match
-case-insensitively while verbs do not).
+`<modules>` section is ignored rather than refused), MH28 (handler paths match
+case-insensitively while verbs do not), MH33/MH34 (the classic-section validator does not
+reach inside `<location>` but does resolve `configSource`), MH35 (`managedHandler` is
+decided once from the pre-rewrite URL), and MH37 (`TRACE` is 501, not 200).
 
 Rig: winbox, full IIS 10.0, app pool `MhPool` (v4.0, Integrated), site `MhSite` port 8112,
 one application per case under `C:/Users/sshuser/probes/mh-rig/apps/<case>`. Probe assembly
@@ -720,3 +722,257 @@ but not `/app/marker.axd`. Matching runs against the script path with PathInfo s
 
 `Remove-Website MhSite` + `Remove-WebAppPool MhPool` executed (TEARDOWN-OK). The mh28a-d app
 folders remain under `C:/Users/sshuser/probes/mh-rig/apps/`. No firewall rules were added.
+
+# Round 4 — request filtering, config reach, rewrite, authorization, verbs
+
+Taken 2026-08-23 against the same IIS 10 on `winbox`: site `Mh2Site` on port 8113, pool
+`Mh2Pool` (v4.0, Integrated), one application per case under
+`C:/readings/mh2-rig/apps/<case>`, each added with `appcmd add app` so that app-level
+configuration is judged as such. Probe assembly `Mh2Probes.dll`: `LogA`/`LogB` append
+`X-MH: <name>:<notification>:<Request.FilePath>` on `BeginRequest`,
+`AuthenticateRequest`, `AcquireRequestState`, `PostRequestHandlerExecute` and
+`EndRequest`; `Rewriter` calls `RewritePath` at `BeginRequest` from `appSettings`.
+Requests over a raw socket, so the transcripts are the wire.
+
+The applications live outside the ssh user's profile: IIS serves as the pool identity,
+which has no traverse right into another user's profile, and every request there answers
+500.19 `Cannot read configuration file due to insufficient permissions` rather than the
+reading. Case `b4` reproduces MH23 as a standing control; a round where it does not answer
+500.22 is measuring something other than what it claims.
+
+Unless noted, each app config carries
+`<system.web><compilation tempDirectory="C:\readings\mh2-rig\aspnet-temp"/></system.web>`
+(omitted from fragments below), and no `validateIntegratedModeConfiguration` flag.
+
+## MH29 — `allowUnlisted="false"` on `<fileExtensions>`
+
+```xml
+<system.webServer>
+  <security><requestFiltering><fileExtensions allowUnlisted="false" /></requestFiltering></security>
+</system.webServer>
+```
+
+```
+GET /a1/static.txt -> HTTP/1.1 404, HTTP Error 404.7
+  The request filtering module is configured to deny the file extension.  Handler: StaticFile
+GET /a1/page.aspx  -> identical 404.7
+GET /a1/sub        -> identical 404.7   (extensionless path, existing directory)
+```
+
+With `.txt` listed back in:
+
+```xml
+<fileExtensions allowUnlisted="false"><add fileExtension=".txt" allowed="true" /></fileExtensions>
+```
+
+```
+GET /a2/static.txt -> 200, body STATIC-TXT
+GET /a2/data.dat   -> 404.7
+```
+
+Conclusion: `allowUnlisted="false"` turns the section from a deny list into a real allow
+list. Everything not carrying `allowed="true"` is refused — managed extensions and an
+**extensionless path** included, so the rule is not "extension present in the URL" but
+"extension, possibly empty, is on the list".
+
+## MH30 — an application `add`, `remove` and `clear` of `<fileExtensions>`
+
+```
+a3: <add fileExtension=".dat" allowed="false" />
+GET /a3/data.dat        -> 404.7, request filtering
+
+a4: <remove fileExtension=".config" />
+GET /a4/sub/other.config -> HTTP/1.1 404, HTTP Error 404.3, Module: StaticFileModule
+GET /a4/web.config       -> HTTP/1.1 404, HTTP Error 404.8, hiddenSegments
+
+a5: <clear />
+GET /a5/source.cs        -> HTTP/1.1 404, HTTP Error 404.3, Module: StaticFileModule
+```
+
+Conclusion: an application amends the inherited list with the ordinary collection
+semantics, `remove` and `clear` included. Un-denying an extension does **not** make the
+file downloadable: with the filtering row gone the request reaches `StaticFileModule`,
+which has no `staticContent` MIME map for it and answers 404.3. Two independent gates
+cover source extensions, and `web.config` keeps its own 404.8 from `<hiddenSegments>`
+whatever the deny list says.
+
+## MH31 — a non-boolean `allowed` value
+
+```xml
+<fileExtensions><add fileExtension=".dat" allowed="flase" /></fileExtensions>
+```
+
+```
+GET /a6/data.dat -> HTTP/1.1 500, HTTP Error 500.19, Error Code: 0x8007000d
+  Config Error: The 'allowed' attribute is invalid.  Boolean must be either 'true' or 'false'
+  Config File: \\?\C:\readings\mh2-rig\apps\a6\web.config
+```
+
+Conclusion: the schema's `type="bool"` is enforced. A typo is a configuration error naming
+the attribute and the file, not a value that quietly reads as "allowed".
+
+## MH32 — `<fileExtensions>` in a subfolder `web.config`
+
+`sub/web.config` carries `<add fileExtension=".dat" allowed="false" />`; the app root
+carries nothing.
+
+```
+GET /a7/sub/data.dat -> 404.7, request filtering
+GET /a7/data.dat     -> 404.3, Module: StaticFileModule   (root unaffected)
+```
+
+Conclusion: request filtering is resolved per path like the rest of the configuration —
+a folder section binds that folder's subtree and nothing above it. Contrast MH24, where a
+folder `<modules>` section is ignored outright.
+
+## MH33 — classic registrations inside `<location>`
+
+```xml
+<location path="admin">
+  <system.web>
+    <httpModules><add name="LogA" type="Mh2Probes.LogA, Mh2Probes" /></httpModules>
+  </system.web>
+</location>
+```
+
+```
+GET /b1/page.aspx       -> 200, PAGE:/b1/page.aspx,       no X-MH headers
+GET /b1/admin/page.aspx -> 200, PAGE:/b1/admin/page.aspx, no X-MH headers
+```
+
+Same shape with `<identity impersonate="true" />` instead:
+
+```
+GET /b3/page.aspx -> 200, no refusal
+```
+
+Control, the MH23 shape at the app root with no `<location>`:
+
+```
+GET /b4/page.aspx -> HTTP/1.1 500, HTTP Error 500.22, Error Code: 0x80070032
+```
+
+Conclusion: `ConfigurationValidationModule` does **not** reach inside `<location>`. A
+classic registration written there trips nothing, and the module never runs — for requests
+inside the location as much as outside it. The application silently loses it.
+
+## MH34 — classic registrations behind `configSource`
+
+```xml
+<system.web><httpModules configSource="mods.config" /></system.web>
+```
+
+`mods.config` holds `<httpModules><add name="LogA" ... /></httpModules>`.
+
+```
+GET /b2/page.aspx -> HTTP/1.1 500, HTTP Error 500.22, Error Code: 0x80070032
+```
+
+Conclusion: the validator judges the section's **resolved** content, so `configSource`
+does not hide a classic registration the way `<location>` does. MH33 and MH34 are the
+same author intent with opposite outcomes.
+
+## MH35 — `managedHandler` under a URL rewrite
+
+`LogA` carries `preCondition="managedHandler"`, `LogB` does not, `Rewriter` calls
+`RewritePath` at `BeginRequest`. Headers carry the live `Request.FilePath`.
+
+```
+c1: rewrite ~/report.pdf -> ~/gen.aspx
+GET /c1/report.pdf -> 200, PAGE:/c1/gen.aspx
+  X-MH: Rewriter:~/report.pdf->~/gen.aspx
+  X-MH: LogB:BeginRequest:/c1/gen.aspx
+  X-MH: LogB:AuthenticateRequest:/c1/gen.aspx
+  X-MH: LogB:AcquireRequestState:/c1/gen.aspx
+  X-MH: LogB:ExecuteRequestHandler:/c1/gen.aspx
+  X-MH: LogB:EndRequest:/c1/gen.aspx
+  (no LogA header on any event, although a managed page served the request)
+
+c2: rewrite ~/gen.aspx -> ~/report.pdf
+GET /c2/gen.aspx -> 200, body REPORT-PDF
+  X-MH: Rewriter:~/gen.aspx->~/report.pdf
+  X-MH: LogA:BeginRequest:/c2/report.pdf        X-MH: LogB:BeginRequest:/c2/report.pdf
+  X-MH: LogA:AuthenticateRequest:...            X-MH: LogB:AuthenticateRequest:...
+  X-MH: LogA:AcquireRequestState:...            X-MH: LogB:AcquireRequestState:...
+  X-MH: LogA:ExecuteRequestHandler:...          X-MH: LogB:ExecuteRequestHandler:...
+  X-MH: LogA:EndRequest:...                     X-MH: LogB:EndRequest:...
+  (LogA on every event, although a static file served the request)
+
+c3 controls, no Rewriter registered:
+GET /c3/report.pdf -> 200, LogB only
+GET /c3/gen.aspx   -> 200, LogA and LogB on all five
+```
+
+Conclusion: the condition is evaluated **once, from the URL as it arrived**, before
+`BeginRequest`, and is never revisited. A rewrite changes which handler runs but not the
+answer: c1's request is served by a page with the conditioned module absent throughout,
+c2's is served by a static file with it present throughout. Every conditioned module in a
+request therefore sees the same answer — MH10 could not distinguish this from a per-event
+evaluation because nothing moved the path.
+
+## MH36 — `<authorization>` against a static file, managed and native
+
+```xml
+d1: <location path="prot">
+      <system.web><authorization><deny users="?" /></authorization></system.web>
+    </location>
+```
+
+```
+GET /d1/prot/secret.txt -> 200, body SECRET-TXT     (anonymous, served)
+GET /d1/prot/page.aspx  -> HTTP/1.1 401
+```
+
+```xml
+d2: <location path="prot">
+      <system.webServer><security><authorization>
+        <remove users="*" />
+        <add accessType="Allow" roles="Administrators" />
+      </authorization></security></system.webServer>
+    </location>
+```
+
+```
+GET /d2/prot/secret.txt -> HTTP/1.1 401, HTTP Error 401.2, Handler: StaticFile
+GET /d2/prot/page.aspx  -> HTTP/1.1 401, HTTP Error 401.2
+```
+
+Conclusion: the two URL-authorization systems have different reach. `system.web`
+`<authorization>` runs through the `managedHandler`-conditioned `UrlAuthorizationModule`
+and therefore does not protect a natively served static file — a `<deny users="?" />`
+folder hands its `.txt` to an anonymous client. The native
+`system.webServer/security/authorization` section refuses both. An application that locked
+a folder down expecting file protection had to use the native section.
+
+## MH37 — PUT, DELETE, OPTIONS and TRACE
+
+No verb configuration; the shipped `TRACEVerbHandler`/`OPTIONSVerbHandler`
+(`ProtocolSupportModule`) and `StaticFile` rows only.
+
+```
+PUT     /e1/static.txt -> HTTP/1.1 405, Allow: GET, HEAD, OPTIONS, TRACE
+                          HTTP Error 405.0, Module: StaticFileModule, Handler: StaticFile
+DELETE  /e1/static.txt -> identical 405
+OPTIONS /e1/static.txt -> HTTP/1.1 200, Allow: OPTIONS, TRACE, GET, HEAD, POST  (no body)
+TRACE   /e1/static.txt -> HTTP/1.1 501, HTTP Error 501.0
+                          "returned only when the HTTP verb is Trace and the
+                           EnableTraceMethod registry value is not set to 1"
+PUT     /e1/page.aspx  -> 405, Allow: GET, HEAD, OPTIONS, TRACE
+OPTIONS /e1/page.aspx  -> 200, Allow: OPTIONS, TRACE, GET, HEAD, POST
+TRACE   /e1/page.aspx  -> 501
+```
+
+A body-bearing verb sent without `Content-Length` is refused with 411 before any handler
+is consulted, so the reading requires `Content-Length: 0`.
+
+Conclusion: `OPTIONS` is answered by the native protocol handler with 200 and an `Allow`
+header listing the server's verbs, identically for a static file and an `.aspx` — the page
+does not run. `TRACE` is **501 by default**, gated on an `EnableTraceMethod` registry value
+that is off in a stock install; it is not a 200. An unmatched verb on either row falls
+through to `StaticFile`, which answers 405 with its own narrower `Allow`.
+
+## Teardown (round 4)
+
+`Mh2Site` and `Mh2Pool` are left standing on `winbox` for follow-up readings, with the
+applications under `C:/readings/mh2-rig/apps/`. The rig scripts were not committed; the
+fragments and layout above are the reproduction. No firewall rules were added.
