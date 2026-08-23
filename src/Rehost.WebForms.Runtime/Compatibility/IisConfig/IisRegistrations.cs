@@ -247,26 +247,11 @@ internal sealed class IisRegistrationSection
 
     private void ApplyRunAllManagedModules(XmlNode sectionNode, string configPath)
     {
-        var value = sectionNode.Attributes?[RunAllManagedModulesAttribute]?.Value;
-        if (value == null)
+        var value = IisCollectionReader.OptionalBoolean(
+            sectionNode, _sectionName, RunAllManagedModulesAttribute, configPath);
+        if (value != null)
         {
-            return;
-        }
-
-        if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
-        {
-            _runAllManagedModules = true;
-        }
-        else if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
-        {
-            _runAllManagedModules = false;
-        }
-        else
-        {
-            throw new ConfigurationErrorsException(
-                "<" + _sectionName + " " + RunAllManagedModulesAttribute + "=\"" + value
-                + "\"> in '" + configPath + "' is not a boolean; IIS accepts only \"true\" or"
-                + " \"false\".");
+            _runAllManagedModules = value.Value;
         }
     }
 

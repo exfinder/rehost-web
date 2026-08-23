@@ -45,30 +45,16 @@ internal static class ClassicSectionValidation
             + " <system.webServer> to keep the sections as dead text.");
     }
 
+    // Inverted: validation="true" means IIS checks, so the application is NOT waived.
     private static bool? IsWaived(XmlDocument document, string configPath)
     {
-        var value = document
-            .SelectSingleNode("/configuration/system.webServer/validation")
-            ?.Attributes?[ValidationAttribute]?.Value;
+        var validate = IisCollectionReader.OptionalBoolean(
+            document.SelectSingleNode("/configuration/system.webServer/validation"),
+            "validation",
+            ValidationAttribute,
+            configPath);
 
-        if (value == null)
-        {
-            return null;
-        }
-
-        if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        throw new ConfigurationErrorsException(
-            "<validation " + ValidationAttribute + "=\"" + value + "\"> in '" + configPath
-            + "' is not a boolean; IIS accepts only \"true\" or \"false\".");
+        return validate == null ? null : !validate.Value;
     }
 
     private static void CollectSection(

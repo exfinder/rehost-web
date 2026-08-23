@@ -27,6 +27,34 @@ internal sealed class IisCollectionSchema
 
 internal static class IisCollectionReader
 {
+    internal const string BooleanRule =
+        """is not a boolean; IIS accepts only "true" or "false".""";
+
+    // IIS types these attributes as bool in IIS_schema.xml and refuses anything else with a
+    // 500.19 naming the attribute (MH31), so an unparsable value cannot be treated as absent.
+    internal static bool? OptionalBoolean(
+        XmlNode? node, string elementName, string attribute, string configPath)
+    {
+        var value = node?.Attributes?[attribute]?.Value;
+        if (value == null)
+        {
+            return null;
+        }
+
+        if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        throw new ConfigurationErrorsException(
+            $"""<{elementName} {attribute}="{value}"> in '{configPath}' {BooleanRule}""");
+    }
+
     internal static void Apply(
         XmlNode sectionNode,
         IisCollectionSchema schema,

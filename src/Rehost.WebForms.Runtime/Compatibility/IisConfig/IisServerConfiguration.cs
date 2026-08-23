@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Xml;
 
@@ -24,7 +25,8 @@ internal sealed class IisServerConfiguration
     private static volatile IisServerConfiguration _current = new(
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
+        new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase),
+        allowUnlistedExtensions: true,
         new DefaultDocuments(enabled: true, Array.Empty<string>()),
         Array.Empty<IisRegistration>(),
         runAllManagedModulesForAllRequests: false,
@@ -32,13 +34,15 @@ internal sealed class IisServerConfiguration
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
-    private readonly Dictionary<string, string> _fileExtensions;
+    private readonly Dictionary<string, bool> _fileExtensions;
+    private readonly bool _allowUnlistedExtensions;
     private IisFolderHandlers? _folderHandlers;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
         Dictionary<string, string> hiddenSegments,
-        Dictionary<string, string> fileExtensions,
+        Dictionary<string, bool> fileExtensions,
+        bool allowUnlistedExtensions,
         DefaultDocuments defaultDocuments,
         IReadOnlyList<IisRegistration> modules,
         bool runAllManagedModulesForAllRequests,
@@ -47,6 +51,7 @@ internal sealed class IisServerConfiguration
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
         _fileExtensions = fileExtensions;
+        _allowUnlistedExtensions = allowUnlistedExtensions;
         DefaultDocuments = defaultDocuments;
         Modules = modules;
         RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
@@ -81,10 +86,12 @@ internal sealed class IisServerConfiguration
 
     internal bool IsHiddenSegment(string segment) => _hiddenSegments.ContainsKey(segment);
 
+    // allowUnlisted="false" turns the deny list into an allow list, and an extensionless path
+    // is then judged too - it carries the empty extension rather than skipping the rule (MH29).
     internal bool IsForbiddenExtension(string? extension) =>
-        !string.IsNullOrEmpty(extension)
-        && _fileExtensions.TryGetValue(extension!, out var allowed)
-        && string.Equals(allowed, "false", StringComparison.OrdinalIgnoreCase);
+        _fileExtensions.TryGetValue(extension ?? string.Empty, out var allowed)
+            ? !allowed
+            : !_allowUnlistedExtensions;
 
     internal static IisServerConfiguration Load(
         string baselineConfigPath,
@@ -101,7 +108,8 @@ internal sealed class IisServerConfiguration
         var configuration = new IisServerConfiguration(
             sections.StaticContent,
             sections.HiddenSegments,
-            sections.FileExtensions,
+            sections.FileExtensionsParsed,
+            sections.AllowUnlistedExtensions,
             sections.DefaultDocuments.Build(),
             sections.Modules.Build(),
             sections.Modules.RunAllManagedModules,
@@ -163,6 +171,17 @@ internal sealed class IisServerConfiguration
         {
             IisCollectionReader.Apply(
                 fileExtensionsNode, FileExtensionSchema, sections.FileExtensions, configPath);
+
+            var allowUnlisted = IisCollectionReader.OptionalBoolean(
+                fileExtensionsNode, "fileExtensions", "allowUnlisted", configPath);
+            if (allowUnlisted != null)
+            {
+                sections.AllowUnlistedExtensions = allowUnlisted.Value;
+            }
+
+            // Every row is re-parsed after each file so a bad value is reported against the file
+            // that is being read, which is the one the author has to edit.
+            sections.ParseFileExtensions(configPath);
         }
 
         var hiddenSegmentsNode = document.SelectSingleNode(
@@ -203,6 +222,37 @@ internal sealed class IisServerConfiguration
 
         internal Dictionary<string, string> FileExtensions { get; } =
             new(StringComparer.OrdinalIgnoreCase);
+
+        internal Dictionary<string, bool> FileExtensionsParsed { get; } =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        internal bool AllowUnlistedExtensions { get; set; } = true;
+
+        internal void ParseFileExtensions(string configPath)
+        {
+            FileExtensionsParsed.Clear();
+            foreach (var entry in FileExtensions)
+            {
+                FileExtensionsParsed[entry.Key] = ParseAllowed(entry.Key, entry.Value, configPath);
+            }
+        }
+
+        private static bool ParseAllowed(string extension, string value, string configPath)
+        {
+            if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            throw new ConfigurationErrorsException(
+                $"""<add fileExtension="{extension}" allowed="{value}"> in '{configPath}' """
+                + IisCollectionReader.BooleanRule);
+        }
 
         internal bool ClassicSectionsWaived { get; set; }
 

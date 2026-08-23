@@ -15,6 +15,20 @@ Prefer `var` over an explicit local variable type.
 The no-comments rule lives in [`../AGENTS.md`](../AGENTS.md), which every
 session loads. Not repeated here: two copies drift.
 
+## Building a string
+
+Interpolate values; do not splice them with `+`. A message assembled as
+`"<" + name + "=\"" + value + "\">"` hides its own shape, and every escaped
+quote is a chance to lose one.
+
+```csharp
+$"""<{elementName} {attribute}="{value}"> in '{configPath}' {BooleanRule}"""
+```
+
+A raw interpolated literal carries the quotes an IIS or XML message needs
+without escapes. Where a message would then run past the line budget, put the
+invariant tail in a `const` rather than reintroducing value splicing.
+
 ## Multi-line string content
 
 Config XML, markup, HTTP request heads, and expected output are raw string
