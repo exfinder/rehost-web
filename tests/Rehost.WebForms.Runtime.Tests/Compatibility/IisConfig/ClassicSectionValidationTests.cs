@@ -234,6 +234,56 @@ public sealed class ClassicSectionValidationTests : IDisposable
         exception.Message.ShouldContain("web.config");
     }
 
+    // MH34: IIS judges the section's resolved content, so moving the registrations into the file
+    // configSource names does not hide them. The referenced file is never opened here.
+    [Fact]
+    public void An_HttpModules_ConfigSource_Fails_Activation_Naming_The_File_It_Points_At()
+    {
+        WriteConfig(
+            "modules.config",
+            """<httpModules><add name="Audit" type="App.Audit" /></httpModules>""");
+        var app = WriteConfig(
+            "web.config",
+            """<system.web><httpModules configSource="modules.config" /></system.web>""");
+
+        var exception = Should.Throw<ConfigurationErrorsException>(
+            () => IisServerConfiguration.Load(Baseline(), app));
+
+        exception.Message.ShouldContain("httpModules configSource=\"modules.config\"");
+        exception.Message.ShouldContain(app);
+    }
+
+    [Fact]
+    public void An_HttpHandlers_ConfigSource_Fails_Activation()
+    {
+        var app = WriteConfig(
+            "web.config",
+            """<system.web><httpHandlers configSource="handlers.config" /></system.web>""");
+
+        Should.Throw<ConfigurationErrorsException>(
+            () => IisServerConfiguration.Load(Baseline(), app))
+            .Message.ShouldContain("httpHandlers configSource=\"handlers.config\"");
+    }
+
+    // MH33: the same registrations inside <location> trip nothing on IIS, so the port stays
+    // silent too and the application loses the module exactly as it did there.
+    [Fact]
+    public void Classic_Content_Inside_A_Location_Element_Is_Not_Refused()
+    {
+        var app = WriteConfig(
+            "web.config",
+            """
+            <location path="admin">
+              <system.web>
+                <httpModules><add name="Audit" type="App.Audit" /></httpModules>
+              </system.web>
+            </location>
+            """);
+
+        IisServerConfiguration.Load(Baseline(), app).Modules
+            .Select(module => module.Name).ShouldBe(new[] { "Session" });
+    }
+
     // Not covered by a reading: an element declaring no entries registers nothing, so the
     // narrower reading of MH23's "content of any kind" applies.
     [Fact]

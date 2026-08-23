@@ -69,6 +69,15 @@ internal static class ClassicSectionValidation
             return;
         }
 
+        // The referenced file is not opened: IIS refuses on the section being present at all, so
+        // its content decides nothing, and the element carrying configSource has no children.
+        var configSource = section.Attributes?["configSource"]?.Value;
+        if (!string.IsNullOrEmpty(configSource))
+        {
+            entries.Add($"{sectionName} configSource=\"{configSource}\"");
+            return;
+        }
+
         foreach (XmlNode node in section.ChildNodes)
         {
             if (node.NodeType != XmlNodeType.Element)
