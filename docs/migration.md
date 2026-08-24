@@ -65,3 +65,16 @@ sources.
 
 Carrying over from Framework: a `tempDirectory` attribute holding a Windows
 path fails on Linux/macOS — remove it and use the default or the variable.
+
+## Root configuration files
+
+The runtime ships its own machine.config and root web.config (structurally
+derived from Framework 4.8.1) in `configs` beside the host binaries. They are
+frozen: there is no override, matching Framework, where the framework-install
+root configs were outside an application's reach.
+
+Anything your hosting environment carried in machine.config, the server's root
+web.config, or applicationHost.config moves into the application's own
+web.config, which inherits from the shipped baselines section by section —
+the same channel Framework apps already used. The machine-key and codegen
+topics above are instances of this rule.

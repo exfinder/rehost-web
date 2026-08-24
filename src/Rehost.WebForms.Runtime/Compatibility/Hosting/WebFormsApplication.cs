@@ -21,9 +21,11 @@ public sealed class WebFormsApplicationOptions
 
     public string VirtualRootPath { get; set; }
 
-    public string MachineConfigurationFilePath { get; set; }
+    // Deliberately not public: the shipped baselines are frozen and applications customize
+    // through their own web.config (ADR 0004).
+    internal string MachineConfigurationFilePath { get; set; }
 
-    public string RootWebConfigurationFilePath { get; set; }
+    internal string RootWebConfigurationFilePath { get; set; }
 
     public string CompilationTempDirectory { get; set; }
 

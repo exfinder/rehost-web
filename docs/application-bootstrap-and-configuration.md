@@ -15,8 +15,10 @@ Required options:
 - absolute existing physical application root;
 - absolute virtual root (`/` or an application subpath).
 
-Machine and root-web configuration paths are optional. When omitted, they
-default to the `configs` directory under `AppContext.BaseDirectory`.
+Machine and root-web configuration always come from the `configs` directory
+under `AppContext.BaseDirectory`. The shipped baselines are frozen — no public
+override; applications customize through their own web.config (ADR 0004). The
+path properties are internal, for in-repo test hosts only.
 `CompilationTempDirectory` optionally supplies the writable root for generated
 output; the `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable
 supplies the same root from the deployment. Any two of the option, the

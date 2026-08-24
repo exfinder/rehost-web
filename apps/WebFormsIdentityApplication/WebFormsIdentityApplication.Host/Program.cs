@@ -33,14 +33,6 @@ builder.AddRehostWebForms(options =>
     options.ApplicationId = "webforms-identity-application";
     options.PhysicalRootPath = physicalRoot;
     options.VirtualRootPath = "/";
-    options.MachineConfigurationFilePath = Path.Combine(
-        AppContext.BaseDirectory,
-        "configs",
-        "rehost-webforms.machine.config");
-    options.RootWebConfigurationFilePath = Path.Combine(
-        AppContext.BaseDirectory,
-        "configs",
-        "rehost-webforms.web.config");
 });
 
 var app = builder.Build();

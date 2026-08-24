@@ -7,11 +7,16 @@ and the [backlog](../backlog.md).
 
 ## Decision
 
-The host supplies versioned machine, root-web, and IIS-baseline assets by
-explicit absolute path. System.Configuration retains parsing, inheritance,
-validation, caching, and failure timing. Registration validates only host-owned
-inputs; it does not preflight mapped System.Web sections before retained hosting
-initialization consumes them.
+The host supplies versioned machine, root-web, and IIS-baseline assets from
+`configs` beside its binaries. The shipped baselines are frozen: consumers have
+no override — every behavior claim is measured against them, and Framework's
+root configs were equally out of an application's reach — so applications
+customize exclusively through their own web.config. The path seam is internal,
+kept for in-repo test hosts that measure a mutated baseline.
+System.Configuration retains parsing, inheritance, validation, caching, and
+failure timing. Registration validates only host-owned inputs; it does not
+preflight mapped System.Web sections before retained hosting initialization
+consumes them.
 
 Root web configuration is structurally derived from Framework 4.8.1. Application
 configuration may amend it but is never silently rewritten. Unsupported or
