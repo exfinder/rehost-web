@@ -23,10 +23,6 @@ Carried from Milestone 1 as unresolved detail:
   [IIS configuration layers](follow-ups/iis-integration-plan.md).
 - Friendly URL behavior and escaping:
   [route URL escaping](follow-ups/route-url-escaping.md).
-- A host-owned machine-key store so auto-generated keys survive restart and
-  scale-out (the Identity template makes the process-scoped default visible as
-  "every restart logs everyone out"); ASP.NET Core Data Protection's key ring
-  is the candidate substrate: [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
 
 ## Next
 
@@ -131,8 +127,9 @@ Carried from Milestone 1 as unresolved detail:
   `SqlDataSource`'s `ProviderName`, and today every non-SqlClient provider is
   host code (`WebFormsIdentityApplication` registers SQLite that way):
   [provider factories](follow-ups/db-provider-factories-config.md).
-- Persistent/shared machine keys, rotation, isolation suffixes, and fail-closed
-  behavior: [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
+- Machine-key rotation and key-file encryption at rest (persistence and
+  environment keys landed, [ADR 0010](adr/0010-machine-key-persistence.md)):
+  [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
 - Define worker identity and impersonation policy; explicitly refuse
   `<identity impersonate="true">` until a portable identity seam exists.
   Observed in production candidates as likely-vestigial config beside

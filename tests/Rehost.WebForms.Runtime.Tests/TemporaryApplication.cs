@@ -21,6 +21,10 @@ internal sealed class TemporaryApplication : IDisposable
             AppContext.BaseDirectory);
     }
 
+    // The key directory stays inside the disposable root so bootstrap tests never touch the real
+    // per-user default.
+    internal string MachineKeyDirectory => Path.Combine(PhysicalRoot.FullName, ".machine-keys");
+
     internal WebFormsApplicationOptions CreateOptions(string virtualRoot = "/")
     {
         return new WebFormsApplicationOptions
@@ -28,6 +32,7 @@ internal sealed class TemporaryApplication : IDisposable
             ApplicationId = "test-app",
             PhysicalRootPath = PhysicalRoot.FullName,
             VirtualRootPath = virtualRoot,
+            MachineKeyDirectory = MachineKeyDirectory,
         };
     }
 

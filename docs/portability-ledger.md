@@ -17,6 +17,7 @@ Framework/adapter gates cover the managed-pipeline boundary; see
 
 | IDs | Primary gates | Mutation-sensitive contract |
 |---|---|---|
+| P15 | `AutogenKeyStoreTests` + autogen restart/environment scenarios | Ticket outlives its issuing process only through the key file (deleting it invalidates); environment keys interchange with identical config keys. |
 | P22, P34–P38 | `CodegenSubstrateTests` | Real child-process activation; port-local evidence per [ADR 0005](adr/0005-evidence-and-test-strategy.md). |
 | P33 | adapter parity gate | Bench-owned thread proves no post to application synchronization context. |
 | P39 | `PageCompilationTests` | Large literal emits no native resource helper/reference or Win32 resource directory. |
@@ -66,7 +67,7 @@ Framework/adapter gates cover the managed-pipeline boundary; see
 | P12 | `SRef` cache-size sampling | **unsupported.** No modern replacement measures retained object-graph size; `ApproximateSize` remains zero. Reject non-zero `<cache privateBytesLimit>` actionably instead of ignoring it. The template default is unaffected; process pressure uses P18/P44. |
 | P13 | `FileUtil.DirectoryExists` | Use `File.GetAttributes`, preserving file/directory distinction. |
 | P14 | scratch-file naming | Use `Environment.CurrentManagedThreadId`. |
-| P15 | `SetAutogenKeys` | Keep Framework fallback, but keys are process-scoped: restart/scale-out requires literal `<machineKey>`. Preflight emits one diagnostic; response behavior is unchanged. See [machine-key work](follow-ups/machine-key-and-viewstate-bootstrap.md). |
+| P15 | `SetAutogenKeys` | **portable leaf.** The stored-keys supplier is a per-application key file ([ADR 0010](adr/0010-machine-key-persistence.md)) standing in for the ISAPI/DPAPI registry read, so auto-generated keys survive restart on one machine; an unusable store fails preflight. Explicit keys also arrive via `REHOST_WEBFORMS_MACHINEKEY_*` environment variables, substituted before parsing in both `RuntimeDataInitialize` and `MachineKeyMasterKeyProvider`. Cross-machine scale-out still requires explicit keys; one diagnostic names the key file and that boundary. |
 | P16 | `MultiTargetingUtil` validation | Report implemented surface `4.8.1`; higher targets retain the original failure. |
 | P17 | `AspNetMemoryMonitor` totals | Derive total as `HighMemoryLoadThresholdBytes * 100 / GCHighMemPercent`; `TotalAvailableMemoryBytes` is only the heap ceiling and misstates container load. Verified against 16/32 GiB hosts and 512 MiB/1 GiB containers; available before first collection. |
 | P18 | configured process-memory limit | Read `<processModel memoryLimit>` and apply `min(percent * total, total - 256MB)`, flooring reserve at half the total. Ship 80% because Framework's 60%-of-shared-host heuristic is too low for container-local memory. Keep Framework behavior under `NETFRAMEWORK`. |

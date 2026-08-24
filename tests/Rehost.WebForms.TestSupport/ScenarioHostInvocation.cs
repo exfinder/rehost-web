@@ -21,8 +21,15 @@ public abstract class ScenarioHostInvocation<TInvocation>
     where TInvocation : ScenarioHostInvocation<TInvocation>
 {
     private readonly List<string> _arguments = [];
+    private readonly Dictionary<string, string> _environment = [];
 
     public TInvocation Application(string path) => Add(ScenarioHostGrammar.App, path);
+
+    public TInvocation EnvironmentVariable(string name, string value)
+    {
+        _environment[name] = value;
+        return (TInvocation)this;
+    }
 
     public TInvocation ApplicationId(string id) => Add(ScenarioHostGrammar.Id, id);
 
@@ -52,6 +59,11 @@ public abstract class ScenarioHostInvocation<TInvocation>
         foreach (var argument in _arguments)
         {
             startInfo.ArgumentList.Add(argument);
+        }
+
+        foreach (var pair in _environment)
+        {
+            startInfo.Environment[pair.Key] = pair.Value;
         }
 
         return new ScenarioHostProcess(Process.Start(startInfo)!);

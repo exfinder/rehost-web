@@ -150,7 +150,11 @@ namespace System.Web.Security.Cryptography {
             if (_encryptionKey == null) {
                 _encryptionKey = GenerateCryptographicKey(
                     configAttributeName: "decryptionKey",
+#if NETFRAMEWORK
                     configAttributeValue: _machineKeySection.DecryptionKey,
+#else
+                    configAttributeValue: MachineKeyEnvironmentOverrides.EffectiveDecryptionKey(_machineKeySection),
+#endif
                     autogenKeyOffset: AUTOGEN_ENCRYPTION_OFFSET,
                     autogenKeyCount: AUTOGEN_ENCRYPTION_KEYLENGTH,
                     errorResourceString: SR.Invalid_decryption_key);
@@ -162,7 +166,11 @@ namespace System.Web.Security.Cryptography {
             if (_validationKey == null) {
                 _validationKey = GenerateCryptographicKey(
                     configAttributeName: "validationKey",
+#if NETFRAMEWORK
                     configAttributeValue: _machineKeySection.ValidationKey,
+#else
+                    configAttributeValue: MachineKeyEnvironmentOverrides.EffectiveValidationKey(_machineKeySection),
+#endif
                     autogenKeyOffset: AUTOGEN_VALIDATION_OFFSET,
                     autogenKeyCount: AUTOGEN_VALIDATION_KEYLENGTH,
                     errorResourceString: SR.Invalid_validation_key);

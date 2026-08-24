@@ -24,6 +24,8 @@ public static class ScenarioHostGrammar
     // Batch mode has no selector flag; this name is display-only in mode errors.
     public const string BatchModeName = "batch";
 
+    public const string MachineKeysDirectoryName = "machine-keys";
+
     public const string Serve = "--serve";
     public const string App = "--app";
     public const string Temp = "--temp";

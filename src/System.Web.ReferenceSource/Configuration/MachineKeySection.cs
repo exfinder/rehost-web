@@ -308,7 +308,11 @@ namespace System.Web.Configuration
             {
                 byte [] bKeysRandom = null;
                 bool fNonHttpApp = false;
+#if NETFRAMEWORK
                 string strKey = ValidationKey;
+#else
+                string strKey = MachineKeyEnvironmentOverrides.EffectiveValidationKey(this);
+#endif
                 string appName = HttpRuntime.AppDomainAppVirtualPath;
                 string appId = HttpRuntime.AppDomainAppId;
 
@@ -384,7 +388,11 @@ namespace System.Web.Configuration
                     _ValidationKey[7] = (byte)((dwCode & 0xff000000) >> 24);
                 }
 
+#if NETFRAMEWORK
                 strKey = DecryptionKey;
+#else
+                strKey = MachineKeyEnvironmentOverrides.EffectiveDecryptionKey(this);
+#endif
                 fAppIdSpecific = StringUtil.StringEndsWith(strKey, ",IsolateByAppId");
                 if (fAppIdSpecific)
                 {

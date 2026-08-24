@@ -6,6 +6,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 ## Current truth
 
 - [Compatibility and evidence](compatibility.md)
+- [Migrating an application](migration.md)
 - [Unresolved work](backlog.md)
 - [Reached portability edges](portability-ledger.md)
 - [Shared terminology](../CONTEXT.md)

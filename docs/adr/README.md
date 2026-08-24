@@ -12,3 +12,4 @@ history.
 - [Roslyn page compilation](0007-roslyn-page-compilation.md)
 - [Codegen storage](0008-codegen-storage.md)
 - [Assembly graph](0009-assembly-graph.md)
+- [Machine-key persistence](0010-machine-key-persistence.md)

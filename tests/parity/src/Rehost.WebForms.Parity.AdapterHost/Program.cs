@@ -91,6 +91,8 @@ internal static class Program
                     basePath,
                     "configs",
                     WebFormsApplicationOptions.DefaultRootWebConfigurationFileName);
+                options.MachineKeyDirectory = Path.GetFullPath(
+                    Path.Combine(fixtureRoot, "temp", "machine-keys"));
             }));
 
         var app = builder.Build();

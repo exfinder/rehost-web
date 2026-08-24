@@ -56,6 +56,8 @@ public static class Program
             PhysicalRootPath = options.ApplicationPath,
             VirtualRootPath = "/",
             CompilationTempDirectory = options.CompilationTempDirectory,
+            MachineKeyDirectory = Path.Combine(
+                options.CompilationTempDirectory, ScenarioHostGrammar.MachineKeysDirectoryName),
             MachineConfigurationFilePath = options.MachineConfigurationPath ?? Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",
@@ -140,6 +142,8 @@ public static class Program
             configured.PhysicalRootPath = options.ApplicationPath;
             configured.VirtualRootPath = "/";
             configured.CompilationTempDirectory = options.CompilationTempDirectory;
+            configured.MachineKeyDirectory = Path.Combine(
+                options.CompilationTempDirectory, ScenarioHostGrammar.MachineKeysDirectoryName);
             configured.MachineConfigurationFilePath = Path.Combine(
                 AppContext.BaseDirectory,
                 "configs",

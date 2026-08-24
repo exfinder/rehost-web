@@ -77,7 +77,9 @@ internal static class Program
                 // Framework oracle needs because it has no host option. Supplying both exercises
                 // host precedence and the agreement branch of the conflict check.
                 CompilationTempDirectory = Path.GetFullPath(
-                    Path.Combine(fixtureRoot, "temp"))
+                    Path.Combine(fixtureRoot, "temp")),
+                MachineKeyDirectory = Path.GetFullPath(
+                    Path.Combine(fixtureRoot, "temp", "machine-keys"))
             }));
     }
 }

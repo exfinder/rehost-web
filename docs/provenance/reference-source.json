@@ -141,6 +141,15 @@
    ],
    "reason": "with the shipped classic <httpModules> table retired, InitModules publishes the merged module list through IntegratedModuleList, which only IIS's native wireup used to fill, and UrlAuthorizationModule.CheckUrlAccessForPrincipal reads it instead of scanning the classic section (fenced !NETFRAMEWORK)",
    "record": "docs/portability-ledger.md P83"
+  },
+  {
+   "files": [
+    "HttpRuntime.cs",
+    "Configuration/MachineKeySection.cs",
+    "Security/Cryptography/MachineKeyMasterKeyProvider.cs"
+   ],
+   "reason": "persisted autogen-key supplier and environment-supplied machineKey values behind NETFRAMEWORK fences (ledger P15)",
+   "record": "docs/adr/0010-machine-key-persistence.md"
   }
  ]
 }

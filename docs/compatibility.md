@@ -145,7 +145,7 @@ and explicit unsupported-contract tests.
 | --- | --- | --- |
 | View-state protection with explicit literal `<machineKey>` | Supported | Framework-to-port captured postback passes for one root page; reverse direction has an on-demand Framework reading; broader cross-runtime page/type derivation is unassessed |
 | `__VIEWSTATEGENERATOR` across Framework and port | Partial | Stable values differ; valid payload interchange works, but corrupt cross-runtime payloads can take a different error branch |
-| Auto-generated machine keys | Partial | Random process-scoped keys work but do not survive restart or scale out; a diagnostic names the consequence |
+| Auto-generated machine keys | Supported | Persist per application in a host-resolvable key file ([ADR 0010](adr/0010-machine-key-persistence.md)); restart-safe on one machine, proven by forms-ticket restart scenarios. Cross-machine scale-out still needs explicit keys or the `REHOST_WEBFORMS_MACHINEKEY_*` environment variables; a diagnostic names the boundary |
 | `,IsolateApps` / `,IsolateByAppId` key suffixes | Unassessed | Hash derivation differs across runtimes; mixed farms must use bare literal keys |
 | Legacy `MachineKey.Encode`/`Decode` crypto | Unsupported | Requires refused native/pre-4.5 behavior; `Protect`/`Unprotect` are unaffected |
 | `BinaryFormatter` compatibility | Supported | Trusted-input legacy surface only; out-of-band implementation and runtime switch are supplied |

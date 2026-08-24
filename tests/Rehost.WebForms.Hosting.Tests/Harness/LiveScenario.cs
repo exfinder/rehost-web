@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Rehost.WebForms.ScenarioProtocol;
 using Rehost.WebForms.TestSupport;
 
@@ -15,7 +16,10 @@ public sealed class LiveScenario : IDisposable
     private static readonly TimeSpan StartupTimeout = TimeSpan.FromSeconds(60);
 
     private readonly StagedApplication _staged;
-    private readonly ScenarioHostProcess _process;
+    private readonly long? _kestrelMaxBody;
+    private readonly bool _http2;
+    private readonly IReadOnlyDictionary<string, string>? _environment;
+    private ScenarioHostProcess _process;
 
     // ScenarioHostRegistry's door only; every other caller goes through StartIsolated.
     internal static LiveScenario StartPooled(ScenarioFixture fixture) => new(fixture);
@@ -25,44 +29,72 @@ public sealed class LiveScenario : IDisposable
         IsolationReason reason,
         string? rootPath = null,
         long? kestrelMaxBody = null,
-        bool http2 = false)
+        bool http2 = false,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         _ = reason;
-        return new(fixture, rootPath, kestrelMaxBody, http2);
+        return new(fixture, rootPath, kestrelMaxBody, http2, environment);
     }
 
     private LiveScenario(
         ScenarioFixture fixture,
         string? rootPath = null,
         long? kestrelMaxBody = null,
-        bool http2 = false)
+        bool http2 = false,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         _staged = StagedApplication.Stage(fixture.Name, rootPath);
+        _kestrelMaxBody = kestrelMaxBody;
+        _http2 = http2;
+        _environment = environment;
 
+        StartHost();
+    }
+
+    // The staged copy survives; the address and client do not — re-read them after the call.
+    internal void KillAndRestart()
+    {
+        Client.Dispose();
+        _process.Dispose();
+        _staged.ResetTrace();
+
+        StartHost();
+    }
+
+    [MemberNotNull(nameof(_process), nameof(Address), nameof(Client))]
+    private void StartHost()
+    {
         var invocation = _staged.Serve();
-        if (kestrelMaxBody != null)
+        if (_kestrelMaxBody != null)
         {
-            invocation.KestrelMaxBody(kestrelMaxBody.Value);
+            invocation.KestrelMaxBody(_kestrelMaxBody.Value);
         }
 
-        if (http2)
+        if (_http2)
         {
             invocation.Http2();
+        }
+
+        foreach (var pair in _environment ?? new Dictionary<string, string>())
+        {
+            invocation.EnvironmentVariable(pair.Key, pair.Value);
         }
 
         _process = invocation.Start();
 
         Address = new Uri(WaitForAddress());
-        Client = new ScenarioClient(Address, http2: http2);
+        Client = new ScenarioClient(Address, http2: _http2);
     }
 
     internal string ApplicationPath => _staged.ApplicationPath;
 
+    internal string MachineKeyDirectory => _staged.MachineKeyDirectory;
+
     internal int HostProcessId => _process.Id;
 
-    internal Uri Address { get; }
+    internal Uri Address { get; private set; }
 
-    internal ScenarioClient Client { get; }
+    internal ScenarioClient Client { get; private set; }
 
     internal HostWitness Witness => new(Client);
 

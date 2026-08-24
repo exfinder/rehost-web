@@ -1398,6 +1398,12 @@ namespace System.Web {
             if (!fGetStoredKeys)
                 fGetStoredKeys = (UnsafeNativeMethods.EcbCallISAPI(IntPtr.Zero, UnsafeNativeMethods.CallISAPIFunc.GetAutogenKeys,
                                                                    bKeysRandom, bKeysRandom.Length, bKeysStored, bKeysStored.Length) == 1);
+#else
+            byte[] bKeysPersisted = Rehost.WebForms.Hosting.AutogenKeyStore.TryGetPersistedKeys();
+            if (bKeysPersisted != null && bKeysPersisted.Length == bKeysStored.Length) {
+                bKeysStored = bKeysPersisted;
+                fGetStoredKeys = true;
+            }
 #endif
 
             // If we managed to get stored keys, copy them in; else use random keys

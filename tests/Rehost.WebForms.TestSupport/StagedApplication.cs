@@ -38,6 +38,9 @@ public sealed class StagedApplication : IDisposable
 
     public string CompilationTempDirectory { get; }
 
+    public string MachineKeyDirectory =>
+        Path.Combine(CompilationTempDirectory, ScenarioHostGrammar.MachineKeysDirectoryName);
+
     public string ResponseDirectory { get; }
 
     public string TracePath { get; }
