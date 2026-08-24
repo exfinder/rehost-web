@@ -3,7 +3,6 @@ namespace Rehost.WebForms.Hosting;
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using System.Web.Configuration;
 
 // Keyed on the application directory rather than the host application ID, matching
@@ -49,17 +48,8 @@ internal static class AutogenKeyStore
             FileSegment(configuration.PhysicalRootPath) + KeyFileExtension);
     }
 
-    internal static string FileSegment(string physicalApplicationRoot)
-    {
-        var normalized = Path.TrimEndingDirectorySeparator(physicalApplicationRoot ?? String.Empty);
-        if (OperatingSystem.IsWindows())
-        {
-            normalized = normalized.ToLowerInvariant();
-        }
-
-        var digest = SHA256.HashData(Encoding.UTF8.GetBytes(normalized));
-        return Convert.ToHexStringLower(digest.AsSpan(0, 16));
-    }
+    internal static string FileSegment(string physicalApplicationRoot) =>
+        ApplicationPathDigest.Segment(physicalApplicationRoot, byteCount: 16);
 
     internal static byte[] TryGetPersistedKeys()
     {

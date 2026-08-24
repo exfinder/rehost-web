@@ -2,10 +2,7 @@ namespace System.Web.Hosting;
 
 using System;
 using System.Configuration;
-using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using System.Web.Configuration;
 using Rehost.WebForms.Hosting;
 
@@ -92,23 +89,8 @@ internal static class CodegenDirectory
     // The generation segment replaces the identity-derived subdirectories the CLR appended through
     // AppDomain.SetDynamicBase. It is keyed on the application directory rather than on the host
     // application ID, so renaming the host label keeps the previous run's compiled output.
-    internal static string GenerationSegment(string physicalApplicationRoot)
-    {
-        var normalized = Path.TrimEndingDirectorySeparator(physicalApplicationRoot ?? String.Empty);
-        if (OperatingSystem.IsWindows())
-        {
-            normalized = normalized.ToLowerInvariant();
-        }
-
-        var digest = SHA256.HashData(Encoding.UTF8.GetBytes(normalized));
-        var segment = new StringBuilder(8);
-        for (var i = 0; i < 4; i++)
-        {
-            segment.Append(digest[i].ToString("x2", CultureInfo.InvariantCulture));
-        }
-
-        return segment.ToString();
-    }
+    internal static string GenerationSegment(string physicalApplicationRoot) =>
+        ApplicationPathDigest.Segment(physicalApplicationRoot, byteCount: 4);
 
     private static void EnsureWritable(string tempRoot, string source)
     {
