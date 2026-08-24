@@ -7,11 +7,11 @@ namespace Rehost.WebForms.Hosting.Tests;
 // linger-zero close mid-body. Returns the interim status so the caller asserts the handshake.
 internal static class RawSocketProbe
 {
-    // A well-behaved response — streamed, chunked, or an upgrade handshake — completes in well
-    // under this. Reading past it means the server hung (the sync-over-async deadlock did exactly
-    // that), and a hung server must fail its own test in seconds rather than stall the whole run
-    // waiting on a socket that never closes.
-    private static readonly TimeSpan ReadDeadline = TimeSpan.FromSeconds(20);
+    // A wedged-server detector matching ScenarioClient's ceiling: reading past it means the
+    // server hung (the sync-over-async deadlock did exactly that), and a hung server must fail
+    // its own test rather than stall the whole run waiting on a socket that never closes. Kept
+    // wide because first-hit page compilation can run inside the measured request.
+    private static readonly TimeSpan ReadDeadline = TimeSpan.FromSeconds(60);
 
     private static async ValueTask<int> ReadWithDeadlineAsync(
         NetworkStream stream, Memory<byte> buffer, CancellationToken deadline)

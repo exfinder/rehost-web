@@ -35,10 +35,11 @@ internal sealed class ScenarioClient : IDisposable
         {
             BaseAddress = baseAddress,
 
-            // A request over loopback answers in well under this; longer means the server wedged,
-            // and a wedge must fail its own test rather than stall the run (the raw-socket probe
-            // holds the same ceiling). Cold-start waits and witness-poll budgets live elsewhere.
-            Timeout = TimeSpan.FromSeconds(20),
+            // A wedged-server detector, not a performance assertion: matches LiveScenario's
+            // startup timeout (the raw-socket probe holds the same ceiling). First-hit page
+            // compilation runs inside the measured request and spends 10s+ of this budget on an
+            // idle machine, so a tighter ceiling fails one unlucky request under concurrent load.
+            Timeout = TimeSpan.FromSeconds(60),
             DefaultRequestVersion = http2 ? HttpVersion.Version20 : HttpVersion.Version11,
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact,
         };
