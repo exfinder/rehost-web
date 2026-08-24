@@ -1,8 +1,8 @@
 # `System.Web.Services` portability analysis
 
 Analysis of the imported reference source
-(`src/System.Web.Services.ReferenceSource`, pinned
-[ec9fa9ae](https://github.com/microsoft/referencesource/tree/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Services),
+([`src/System.Web.Services.ReferenceSource`](../../src/System.Web.Services.ReferenceSource/),
+pinned at `ec9fa9ae`,
 174 C# files / 43,110 lines + `System.Web.Services.txt`) answering: what is the
 maximum portable surface on .NET 10 without native Windows dependencies, which
 Framework-only assembly slices it touches, and what the native code is for.

@@ -8,11 +8,11 @@ copy. Microsoft Reference Source contains the broad managed implementation:
 11,818 lines. It does not contain a build project or every input embedded in the
 shipped assembly. The pinned source is therefore an implementation baseline,
 not a reproducible 4.8.1 source package
-([source tree](https://github.com/microsoft/referencesource/tree/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions)).
+([source tree](../../src/System.Web.Extensions.ReferenceSource/)).
 
 The assembly is managed MSIL. Metadata shows no native method bodies and two
 P/Invoke declarations, both `wininet.dll` cookie APIs in Client Services
-([source](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ClientServices/Providers/ProxyHelper.cs#L443-L452)).
+([source](../../src/System.Web.Extensions.ReferenceSource/ClientServices/Providers/ProxyHelper.cs#L443-L452)).
 By implementation format it is effectively **100% managed / 0% native**, with
 two managed declarations entering Win32. A conservative source-area classifier
 is **about 93% outside directly Windows-coupled Client Services / 7% inside**:
@@ -32,8 +32,7 @@ Source measurements use the sibling official clone at revision
 `ec9fa9ae770d522a5b5f0607898044b7478574a3`; line counts include comments and
 blank lines. The repository says Reference Source files are MIT unless a file
 states otherwise
-([README](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/README.md#license),
-[license](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/LICENSE.txt)).
+([local license](../../third_party/microsoft/referencesource/LICENSE.txt)).
 
 The API inventory is a read-only reflection/PE-metadata reading of Windows x64
 .NET Framework 4.8.1 file version `4.8.9319.0`, assembly identity
@@ -73,7 +72,7 @@ not a complete build closure:
 - 70 JavaScript fragments and 13 `.jsa` composition manifests, but not the 26
   final debug/release `MicrosoftAjax*`/calendar resources embedded by Framework;
   `AssemblyInfo` says these were linked from an external `AtlasBuildOutput`
-  ([resource declarations](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/Properties/AssemblyInfo.cs#L38-L101));
+  ([resource declarations](../../src/System.Web.Extensions.ReferenceSource/Properties/AssemblyInfo.cs#L38-L101));
 - generated resource designers and WCF XML serializers are present, while
   shared build constants such as `AssemblyRef` are not in this directory;
 - the published snapshot is not guaranteed identical to the serviced 4.8.1
@@ -108,26 +107,26 @@ contract permits removing/replacing them, but that is source adaptation.
 ## `System.Web` coupling
 
 `System.Web` deliberately grants `System.Web.Extensions` friend access
-([friend declaration](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web/Properties/AssemblyInfo.cs#L20-L24)).
+([friend declaration](../../src/System.Web.ReferenceSource/Properties/AssemblyInfo.cs#L20-L24)).
 The source uses that privilege in behavior-critical paths:
 
 - `IScriptManager`, `IScriptResourceDefinition`, `IScriptResourceMapping`, and
   `IUpdatePanel` are internal cross-assembly protocols. `ScriptManager` installs
   itself in the Page items slot during `OnInit`
-  ([registration](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ui/ScriptManager.cs#L1251-L1287));
+  ([registration](../../src/System.Web.Extensions.ReferenceSource/ui/ScriptManager.cs#L1251-L1287));
 - `ClientScriptManager._scriptResourceMapping` is populated by ScriptManager and
   used by System.Web resource/script registration
-  ([mapping](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ui/ScriptManager.cs#L116-L118));
+  ([mapping](../../src/System.Web.Extensions.ReferenceSource/ui/ScriptManager.cs#L116-L118));
 - partial rendering needs internal Page/form render delegation, hidden-field
   inventory, and `HttpResponse.SwitchWriter`
-  ([render interception](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ui/PageRequestManager.cs#L664-L767));
+  ([render interception](../../src/System.Web.Extensions.ReferenceSource/ui/PageRequestManager.cs#L664-L767));
 - script-resource URLs use internal `Page.EncryptString`/`DecryptString`,
   cryptographic `Purpose`, `AssemblyResourceLoader`, `AppSettings`, and resource
   helpers
-  ([handler path](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/Handlers/ScriptResourceHandler.cs#L274-L325));
+  ([handler path](../../src/System.Web.Extensions.ReferenceSource/Handlers/ScriptResourceHandler.cs#L274-L325));
 - assembly/framework selection uses internal `RuntimeConfig` plus BuildManager
   and hosting assembly discovery
-  ([selection](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ui/ScriptManager.cs#L312-L342)).
+  ([selection](../../src/System.Web.Extensions.ReferenceSource/ui/ScriptManager.cs#L312-L342)).
 
 Most of these internals remain in the imported runtime source, but the existing
 strong-named friend declaration does not grant access to a new
@@ -155,7 +154,7 @@ inactive.
 - **Windows desktop:** Client Services uses `WindowsIdentity`/
   `WindowsPrincipal`, `System.Windows.Forms.Application.UserAppDataPath`, OleDb,
   and isolated-storage/file conventions
-  ([offline marker](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ClientServices/ConnectivityStatus.cs#L30-L51)).
+  ([offline marker](../../src/System.Web.Extensions.ReferenceSource/ClientServices/ConnectivityStatus.cs#L30-L51)).
 - **Design-time:** Drawing/Design references mostly toolbox attributes, bitmap
   icons, and editors. These should be isolated or omitted from portable runtime
   behavior, not pull WindowsDesktop into it.
@@ -163,10 +162,10 @@ inactive.
   Services design, LINQ-to-SQL, and `System.Data.Entity` need replacement,
   deliberate exclusion, or separate packages. `WCFBuildProvider` also assumes
   CodeDom and BuildManager compilation
-  ([source](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/Compilation/WCFBuildProvider.cs#L100-L220)).
+  ([source](../../src/System.Web.Extensions.ReferenceSource/Compilation/WCFBuildProvider.cs#L100-L220)).
 - **Deployment/identity:** `ScriptResourceHandler` branches on GAC identity and
   emits assembly identity into protected URLs
-  ([encoding](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/Handlers/ScriptResourceHandler.cs#L672-L706)).
+  ([encoding](../../src/System.Web.Extensions.ReferenceSource/Handlers/ScriptResourceHandler.cs#L672-L706)).
   Portable assembly resolution and app-local deployment need defined semantics.
 - **IIS/config:** `TrySkipIisCustomErrors` is an IIS compatibility hint; the
   module/handler/config-section behavior itself is managed. No registry or COM
@@ -226,8 +225,8 @@ difference that IIS used to absorb.
 `System.Web.Extensions` itself avoids a direct Optimization assembly reference:
 it discovers `System.Web.Optimization.BundleResolver.Current` and three methods
 through BuildManager/reflection
-([adapter](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ui/BundleReflectionHelper.cs#L12-L35),
-[discovery](https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions/ui/BundleReflectionHelper.cs#L111-L136)).
+([adapter](../../src/System.Web.Extensions.ReferenceSource/ui/BundleReflectionHelper.cs#L12-L35),
+[discovery](../../src/System.Web.Extensions.ReferenceSource/ui/BundleReflectionHelper.cs#L111-L136)).
 
 Consequences:
 
@@ -240,27 +239,11 @@ Consequences:
 - the minimum visual-template slice does not require UpdatePanel or the rest of
   the 164-type assembly to prove ordinary full-page rendering.
 
-## Comparable port evidence
-
-WebFormsForCore uses broad Reference Source imports but does not port the whole
-historical dependency graph. Its modern `System.Web.Extensions` project uses
-CoreWCF packages for reached service behavior while its WCF build provider
-explicitly rejects `.datasvcmap` and `.svcmap` generation
-([project](https://github.com/webformsforcore/WebFormsForCore/blob/main/src/WebFormsForCore.Web.Extensions/WebFormsForCore.Web.Extensions.csproj),
-[build provider](https://github.com/webformsforcore/WebFormsForCore/blob/main/src/WebFormsForCore.Web.Extensions/Compilation/WCFBuildProvider.cs)).
-`LinqDataSource` is compiled only for `NETFRAMEWORK`
-([source](https://github.com/webformsforcore/WebFormsForCore/blob/main/src/WebFormsForCore.Web.Extensions/ui/WebControls/LinqDataSource.cs)).
-Its documentation excludes visual designers and describes its `System.Drawing`
-package as an attribute-level compatibility layer
-([documentation](https://webformsforcore.github.io/)). This supports an explicit
-compiled feature boundary rather than dragging WCF, LINQ-to-SQL, Data Services,
-WinForms, and design stacks into ScriptManager work.
-
 ## Optimization and WebGrease findings
 
-ASP.NET Web Optimization is not Reference Source. Its official archived source
-is in [`aspnet/AspNetWebOptimization`](https://github.com/aspnet/AspNetWebOptimization);
-the pinned sibling revision and imported trees are recorded in
+ASP.NET Web Optimization is not Reference Source. Its
+[imported source](../../src/System.Web.Optimization.ReferenceSource/) and
+pinned upstream revision are recorded in
 [`../provenance/aspnet-web-optimization.md`](../provenance/aspnet-web-optimization.md).
 No native imports were found. The main obstacles are managed Framework-era
 dependencies: `System.Web`, `Microsoft.Web.Infrastructure`, configuration,

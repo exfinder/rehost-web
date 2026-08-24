@@ -1,8 +1,8 @@
 # `System.Web.Extensions` portability analysis
 
 Analysis of the imported reference source
-(`src/System.Web.Extensions.ReferenceSource`, pinned
-[ec9fa9ae](https://github.com/microsoft/referencesource/tree/ec9fa9ae770d522a5b5f0607898044b7478574a3/System.Web.Extensions),
+([`src/System.Web.Extensions.ReferenceSource`](../../src/System.Web.Extensions.ReferenceSource/),
+pinned at `ec9fa9ae`,
 271 C# files / 53,089 lines, plus the script sources covered by
 [the inventory](system-web-extensions-inventory.md)) answering: what does the
 rest of the assembly need beyond the 160-file closure
@@ -221,7 +221,7 @@ What 4.8.1 registers for this assembly versus the portable baseline today:
 | JSON application services (`Sys.Services.AuthenticationService` et al.) | uncommon but present in AJAX-era apps | Portable, zero shims (see correction) |
 | History (`EnableHistory`, `Sys.Application` navigation) | rare | Types + script shipped; evidence only |
 | `QueryExtender`/`QueryableDataSource`/Expressions | uncommon | Portable; one-line `AssemblyBuilder` seam in `Dynamic.cs` |
-| `LinqDataSource` | moderate in 2008–2012 apps | Control markup parses only if compiled, but the runtime hard-requires `System.Data.Linq`, which has no modern port — an app using it cannot run regardless; absence (compile-time failure) is the honest boundary. WebFormsForCore reached the same verdict (`NETFRAMEWORK`-only) |
+| `LinqDataSource` | moderate in 2008–2012 apps | Control markup parses only if compiled, but the runtime hard-requires `System.Data.Linq`, which has no modern port — an app using it cannot run regardless; absence (compile-time failure) is the honest boundary |
 | `.svcmap`/`.datasvcmap` WCF proxy generation | rare (VS web-site tooling) | Blocked on the WCF metadata/codegen stack; dead by default |
 | Client Application Services | rare (desktop apps only) | Windows-desktop-coupled; not a web-server workload at all |
 | WCF-hosted application services (`.svc`) | rare | Blocked on server-side WCF; the AJAX-facing equivalents are the portable JSON services |
@@ -295,11 +295,6 @@ codegen stays excluded regardless: no published source exists.
 
 ## Prior art
 
-- [WebFormsForCore](https://github.com/webformsforcore/WebFormsForCore)
-  compiles its `System.Web.Extensions` with CoreWCF packages for reached
-  service behavior, rejects `.svcmap`/`.datasvcmap` generation in its build
-  provider, and compiles `LinqDataSource` only for `NETFRAMEWORK` — the same
-  three cut lines this analysis lands on.
 - [dotnet-svcutil](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-svcutil-guide)
   vendors the WCF metadata-import/codegen stack privately — the existence
   proof and cost signal for T4, exactly parallel to the Web Services T4
