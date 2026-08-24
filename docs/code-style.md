@@ -6,6 +6,14 @@ see [`provenance/`](provenance/).
 Commit-message and comment rules stay in [`../AGENTS.md`](../AGENTS.md);
 test-authoring rules are in [`writing-tests.md`](writing-tests.md).
 
+## Files
+
+One top-level type per file, named for the type. Exception: a type and the
+small types that exist only for it — a config section's child elements, a
+private seam interface with its default implementation, marker/fixture
+clusters — coupled enough that reading one without the others makes no sense.
+Generated files are exempt, as is imported source (above).
+
 ## Locals
 
 Prefer `var` over an explicit local variable type.

@@ -4,71 +4,7 @@ namespace System.Web.Hosting;
 
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Globalization;
-
-internal readonly struct MemoryReading
-{
-    internal MemoryReading(long totalLimitBytes, long loadBytes, long highLoadThresholdBytes, long processFootprintBytes)
-    {
-        TotalLimitBytes = totalLimitBytes;
-        LoadBytes = loadBytes;
-        HighLoadThresholdBytes = highLoadThresholdBytes;
-        ProcessFootprintBytes = processFootprintBytes;
-    }
-
-    // Physical RAM, or the container's limit when one is imposed.
-    internal long TotalLimitBytes { get; }
-
-    // Zero until the first collection.
-    internal long LoadBytes { get; }
-
-    internal long HighLoadThresholdBytes { get; }
-
-    internal long ProcessFootprintBytes { get; }
-}
-
-internal static class RuntimeMemorySampler
-{
-    internal static MemoryReading Sample()
-    {
-        var info = GC.GetGCMemoryInfo();
-
-        return new MemoryReading(
-            MemoryLimits.ResolveTotalLimit(info.HighMemoryLoadThresholdBytes),
-            info.MemoryLoadBytes,
-            info.HighMemoryLoadThresholdBytes,
-            Environment.WorkingSet);
-    }
-}
-
-internal static class UnsupportedCacheOptions
-{
-    internal const string PrivateBytesLimitMessage =
-        """
-        <cache privateBytesLimit> is not supported: this runtime cannot measure cache size, because
-        System.SizedReference has no .NET equivalent. Remove the setting, or bound total process
-        memory with <processModel memoryLimit>.
-        """;
-
-    internal static void RejectPrivateBytesLimit(long privateBytesLimit)
-    {
-        if (privateBytesLimit != 0)
-        {
-            throw new ConfigurationErrorsException(PrivateBytesLimitMessage);
-        }
-    }
-}
-
-internal static class MemoryCollection
-{
-    // Measured in a container: a plain collection returned 31 MB of 200 MB trimmed, because it
-    // leaves the pages committed and a cgroup counts committed pages. Aggressive decommits.
-    internal static void Induce()
-    {
-        GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
-    }
-}
 
 internal static class MemoryLimits
 {
