@@ -144,11 +144,28 @@ public sealed class AutogenKeyStoreTests
 
         var failure = WithEnvironmentKeys(
             validationKey: "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
-            decryptionKey: null,
+            decryptionKey: "5D96763F754B1A37C60A65B3B47C54684BDFE91CB5F56870021D5DA0477F6C3A",
             () => Should.Throw<ConfigurationErrorsException>(
                 () => ApplicationConfigurationPreflight.Validate(application.CreateConfiguration())));
 
         failure.Message.ShouldContain(MachineKeyEnvironmentOverrides.ValidationKeyVariable);
+        failure.Message.ShouldContain("explicitly");
+    }
+
+    [Fact]
+    public void A_Lone_Environment_Key_Fails_Preflight()
+    {
+        using var application = TemporaryApplication.Create();
+
+        var failure = WithEnvironmentKeys(
+            validationKey: "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF",
+            decryptionKey: null,
+            () => Should.Throw<ConfigurationErrorsException>(
+                () => ApplicationConfigurationPreflight.Validate(application.CreateConfiguration())));
+
+        failure.Message.ShouldContain(
+            MachineKeyEnvironmentOverrides.DecryptionKeyVariable + " is missing");
+        Directory.Exists(application.MachineKeyDirectory).ShouldBeFalse();
     }
 
     [Fact]
@@ -175,11 +192,12 @@ public sealed class AutogenKeyStoreTests
 
         var failure = WithEnvironmentKeys(
             validationKey: "not-hex-at-all",
-            decryptionKey: null,
+            decryptionKey: "5D96763F754B1A37C60A65B3B47C54684BDFE91CB5F56870021D5DA0477F6C3A",
             () => Should.Throw<ConfigurationErrorsException>(
                 () => ApplicationConfigurationPreflight.Validate(application.CreateConfiguration())));
 
         failure.Message.ShouldContain(MachineKeyEnvironmentOverrides.ValidationKeyVariable);
+        failure.Message.ShouldContain("hex");
     }
 
     private static T WithEnvironmentKeys<T>(string? validationKey, string? decryptionKey, Func<T> act)

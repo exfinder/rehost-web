@@ -18,8 +18,8 @@ Pick by deployment shape:
   supply the keys through `REHOST_WEBFORMS_MACHINEKEY_VALIDATIONKEY` and
   `REHOST_WEBFORMS_MACHINEKEY_DECRYPTIONKEY`. Each variable substitutes the
   whole attribute string before parsing, exactly as if written in web.config.
-  An explicit configured key alongside a set variable fails at startup;
-  remove one of the two.
+  Set both variables or neither — a lone one fails at startup, as does an
+  explicit configured key alongside a set variable.
 - **Explicit `<machineKey>` keys in web.config** — supported unchanged.
 
 Settings that lived in the server's root web.config (commonly the algorithms)

@@ -50,7 +50,10 @@ included — so it behaves exactly as the same value written in web.config; the
 scenario proof is a forms-ticket interchange against a config-keyed host. A
 variable applies only where the declared attribute auto-generates: an explicit
 configured key alongside a set variable is conflicting ownership and fails
-preflight, the same rule as `CompilationTempDirectory`. Config builders were
+preflight, the same rule as `CompilationTempDirectory`. The variables are also
+a pair: setting one without the other fails preflight naming the missing one —
+a lone variable is almost always a missed or mistyped deployment setting, and
+the symptom (half the payloads invalid) would surface far from the cause. Config builders were
 rejected as the vehicle: the modern `System.Configuration.ConfigurationManager`
 engine never received the Framework-4.7.1 `<configBuilders>` feature, and
 recreating it means forking the config engine.

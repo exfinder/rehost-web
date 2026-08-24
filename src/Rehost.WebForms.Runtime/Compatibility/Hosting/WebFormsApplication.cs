@@ -8,8 +8,8 @@ public sealed class WebFormsApplicationOptions
     public const string DefaultRootWebConfigurationFileName = "rehost-webforms.web.config";
 
     // Each variable substitutes the whole machineKey attribute string, so a value may carry the
-    // isolation suffixes. Set only where the declared attribute auto-generates; an explicit
-    // configured key alongside a set variable fails preflight.
+    // isolation suffixes. Set both or neither. Set only where the declared attribute
+    // auto-generates; an explicit configured key alongside a set variable fails preflight.
     public const string MachineKeyValidationKeyVariable = "REHOST_WEBFORMS_MACHINEKEY_VALIDATIONKEY";
     public const string MachineKeyDecryptionKeyVariable = "REHOST_WEBFORMS_MACHINEKEY_DECRYPTIONKEY";
 

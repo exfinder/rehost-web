@@ -462,6 +462,19 @@ internal static class ApplicationConfigurationPreflight
         ApplicationBootstrapConfiguration configuration,
         Configuration mappedConfiguration)
     {
+        if ((configuration.MachineKeyValidationKeyOverride == null) !=
+            (configuration.MachineKeyDecryptionKeyOverride == null))
+        {
+            throw new ConfigurationErrorsException(
+                $"The {MachineKeyEnvironmentOverrides.ValidationKeyVariable} and " +
+                $"{MachineKeyEnvironmentOverrides.DecryptionKeyVariable} environment variables " +
+                $"must be set together. " +
+                (configuration.MachineKeyValidationKeyOverride == null
+                    ? MachineKeyEnvironmentOverrides.ValidationKeyVariable
+                    : MachineKeyEnvironmentOverrides.DecryptionKeyVariable) +
+                " is missing.");
+        }
+
         if (mappedConfiguration.GetSection("system.web/machineKey") is not MachineKeySection machineKey)
         {
             return;
