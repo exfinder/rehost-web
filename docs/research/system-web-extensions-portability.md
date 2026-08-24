@@ -1,312 +1,142 @@
 # `System.Web.Extensions` portability analysis
 
-Analysis of the imported reference source
-([`src/System.Web.Extensions.ReferenceSource`](../../src/System.Web.Extensions.ReferenceSource/),
-pinned at `ec9fa9ae`,
-271 C# files / 53,089 lines, plus the script sources covered by
-[the inventory](system-web-extensions-inventory.md)) answering: what does the
-rest of the assembly need beyond the 160-file closure
-`Rehost.WebForms.Extensions` compiles today, which Framework-only stacks does
-it touch, and where the clean exclusion lines run. Weighted toward what
-template-era Web Forms applications actually used. Companion to the
-[inventory](system-web-extensions-inventory.md), which measured the assembly;
-this measures the *port distance*.
+Port-distance analysis of the pinned 271-file
+[source tree](../../src/System.Web.Extensions.ReferenceSource/). The companion
+[inventory](system-web-extensions-inventory.md) owns size, assets, dependencies and Windows
+coupling; this document owns compile evidence, clean exclusion lines and staged scope.
 
 ## Result
 
-**All 271 files compile on .NET 10 against `Rehost.WebForms.Runtime` +
-`Rehost.WebForms.WebServices` + `Rehost.WebForms.ApplicationServices` given
-the `WEB_EXTENSIONS_CODE` define, four added packages, one duplicate-type file
-exclusion, and a shim file whose every symbol is a proven-missing API**
-(experiment below). The missing APIs are confined to **16 files in three
-legacy stacks** — WCF hosting/codegen, LINQ to SQL, and desktop Client
-Services — none of which any AJAX-runtime file touches.
+All 271 files compiled on .NET 10 against the three Rehost assemblies with
+`WEB_EXTENSIONS_CODE`, four packages, one duplicate-file exclusion and shims for proven-missing
+APIs. Missing APIs occur in only 16 files across WCF hosting/code generation, LINQ-to-SQL and
+desktop Client Services. No AJAX request-path file uses them.
 
-The headline for scope: the features the compatibility table lists as open —
-async postbacks/partial rendering, page methods, the JSON application
-services, Timer/History — need **zero new API surface**. Their types either
-compile today (`UpdatePanel`, `PageRequestManager`, `Timer`,
-`ScriptManager` history support are all in the shipped closure) or compile
-clean in the experiment (`ScriptModule`, the three internal `[ScriptService]`
-application services, 438 lines total). What is missing is the Framework
-configuration closure (`ScriptModule-4.0`, `*_AppService.axd`, the
-`system.web.extensions` section group), plus evidence.
+The important remaining distinction is activation, not type availability. Partial rendering,
+page methods, JSON application services, Timer and History need no new API surface; relevant
+types either already ship or compiled cleanly. They needed Framework configuration and behavior
+evidence. T1/T2 have since landed; see [current state](#relationship-to-current-state).
 
-## Method
+## Method and build facts
 
-Two evidence streams, no repo changes (experiment in the session scratchpad,
-`swx-compile/`):
+A scratch project named `Rehost.WebForms.Extensions` compiled all sources against `net10.0`, the
+Rehost Runtime/WebServices/ApplicationServices assemblies, the repo facade-removal target, and
+`System.CodeDom`, ConfigurationManager, Security.Permissions, ServiceModel client packages,
+Runtime.Serialization.Schema and OleDb. Iterative shimming ended at zero errors, proving all
+unshimmed references present. A source sweep covered native calls, registry, COM, identity,
+desktop dependencies, CAS and conditional symbols. The existing 160-file closure supplied
+behavioral evidence for already shipped paths.
 
-1. **Brute-force compile** — a scratchpad project named
-   `Rehost.WebForms.Extensions` (for Runtime friend access) compiling all 271
-   files against `net10.0` + the three Rehost assemblies + `System.CodeDom` /
-   `System.Configuration.ConfigurationManager` / `System.Security.Permissions`
-   (the WebServices set) + `System.ServiceModel.Primitives` 8.1.2 /
-   `System.ServiceModel.Http` 8.1.2 / `System.Runtime.Serialization.Schema`
-   10.0.10 / `System.Data.OleDb` 10.0.10, with the repo's `System.Web`
-   facade-removal target. Iterated to **0 errors** by shimming; every shimmed
-   symbol is *proven-missing*, everything else *proven-present*. (Caveat: csc
-   reports declaration-phase errors before binding method bodies, so early
-   waves understate gaps — the green build is the meaningful endpoint.)
-2. **Source sweep** — P/Invoke, registry, COM, Windows identity, desktop
-   dependencies, CAS, and conditional-compilation symbols over the whole tree.
+Build recipe:
 
-The 160-file shipped closure rendering the frozen template and serving the
-ASMX JSON chain on three OSes is standing behavioral evidence for the already
-compiled surface; no new runtime probes were needed because the remaining
-distance is wiring and configuration, not serializer or BCL semantics.
+- Define `WEB_EXTENSIONS_CODE`; otherwise WCF designer-shared files select VS-only namespaces.
+  Leave `INDIGO`, `ATLAS_DEV`, `ORYX_VNEXT`, `ENABLE_WCF_SUPPORT` and
+  `ENABLE_LINQ_PARTIAL_TRUST` undefined.
+- Compile only one of `LinqDataSourceContextData.cs` and
+  `ContextDataSourceContextData.cs`; both define `ContextDataSourceContextData`.
+- Exclude source-tree `AssemblyInfo.cs`; the project owns identity.
+- `ProxyGenerator.cs` also needs the absent build constant
+  `AssemblyRef.SystemServiceModelWeb`; this stays with the WCF cut.
 
-## Build-recipe facts the compile surfaced
+## Proven API boundary
 
-- **`WEB_EXTENSIONS_CODE` must be defined.** The `Compilation/WCFModel` and
-  `Compilation/XmlSerializer` files are VS-designer shared sources; without
-  the symbol they compile as `Microsoft.VSDesigner.*` against VS-only
-  resources. The shipped closure never noticed because it compiles none of
-  them. Other symbols in the tree (`INDIGO`, `ATLAS_DEV`, `ORYX_VNEXT`,
-  `ENABLE_WCF_SUPPORT`, `ENABLE_LINQ_PARTIAL_TRUST`) stay undefined,
-  matching the shipped 4.8.1 assembly.
-- **`ui/WebControls/LinqDataSourceContextData.cs` and
-  `ContextDataSourceContextData.cs` both define
-  `ContextDataSourceContextData`** (same type, same copyright header naming
-  the former; the latter is the trimmed duplicate). Exactly one belongs in
-  any compile list.
-- `Properties/AssemblyInfo.cs` compiles, but the repo project keeps its own
-  `AssemblyInfo.cs`/`AssemblyIdentity.cs`; the tree copy stays excluded.
-- `Script/Services/ProxyGenerator.cs` misses only
-  `AssemblyRef.SystemServiceModelWeb`, a constant the in-repo
-  `Rehost.WebForms.ReferenceSource.BuildInputs` copy does not carry — a
-  repo-side gap, not a BCL gap. The file itself serves `.svc` proxy scripts
-  and stays with the WCF exclusion.
+Modern packages supply ServiceModel contracts/client descriptions and bindings,
+`XsdDataContractImporter`, OleDb types, and everything used by the shipped/AJAX/query paths.
+Missing APIs are localized:
 
-## Empirical .NET 10 findings
-
-Present (proven by the green build, no shim):
-
-| API family | Where it came from |
-|---|---|
-| `ServiceContractAttribute`, `OperationContractAttribute`, `ServiceKnownTypeAttribute`, `ContractDescription`, `ServiceEndpoint`, `System.ServiceModel.Channels.Binding`, `ConcurrencyMode`, `KeyedByTypeCollection<T>` | `System.ServiceModel.Primitives` 8.1.2 |
-| `XsdDataContractImporter` | `System.Runtime.Serialization.Schema` 10.0.10 |
-| OleDb object model (compiles everywhere; Windows-only at runtime) | `System.Data.OleDb` 10.0.10 |
-| Everything the 160-file closure and the ScriptModule/app-services/query stacks consume from `System.Web` internals | Runtime friend access, already in place |
-
-Missing (every shim, grouped by the Framework assembly that owned it):
-
-| Missing API | Framework home | Files touching it |
+| Stack | Missing surface | Files |
 |---|---|---|
-| `ServiceHost`, `ServiceBehaviorAttribute`, `InstanceContextMode` | `System.ServiceModel` (server side; absent from the modern client packages) | `ApplicationServices/{ApplicationServicesHostFactory,AuthenticationService,ProfileService,RoleService}.cs` |
-| `ServiceHostFactory`, `AspNetCompatibilityRequirements(Attribute/Mode)` | `System.ServiceModel.Activation` (no modern equivalent) | same four |
-| `WsdlImporter`, `IWsdlImportExtension`, `IPolicyImportExtension`, `MetadataSet`, `MetadataSection`, `MetadataConversionError`, `Wsdl{Contract,Endpoint}ConversionContext`, `ServiceContractGenerator`, `ServiceContractGenerationOptions`, `XmlSerializer/DataContractSerializer MessageContractImporter`, `FaultImportOptions`, `XmlSerializerImportOptions`, `WrappedOptions` | `System.ServiceModel` metadata/codegen (dotnet-svcutil vendors its own fork) | `Compilation/WCFBuildProvider.cs`, `Compilation/WCFModel/{VSWCFServiceContractGenerator,MetadataFile,HttpBindingExtension,AsmxEndpointPickerExtension,ProxyGenerationError}.cs` |
-| `ServiceModelSectionGroup`, `ClientSection`, `MetadataElement`, `ChannelEndpointElement` | `System.ServiceModel` configuration object model | `VSWCFServiceContractGenerator.cs` |
-| `DataServiceContext` | `System.Data.Services.Client` (WCF Data Services, retired) | `WCFBuildProvider.cs` |
-| `EntityClassGenerator`, `LanguageOption` | `System.Data.Services.Design` (retired) | `WCFBuildProvider.cs` |
-| `DataSetSchemaImporterExtension`, `TypedDataSetSchemaImporterExtensionFx35` | `System.Data`/`System.Design` (same cut the Web Services analysis hit) | `WCFBuildProvider.cs`, `VSWCFServiceContractGenerator.cs` |
-| `DataContext`, `ITable`, `RefreshMode`, `Meta{Model,Table,Type,DataMember}`, `UpdateCheck` | `System.Data.Linq` (LINQ to SQL, never ported) | `ui/WebControls/{ILinqToSql,LinqToSqlWrapper,LinqDataSourceView}.cs` |
-| `System.Windows.Forms.Application.UserAppDataPath` | WinForms | `ClientServices/ConnectivityStatus.cs`, `ClientServices/Providers/SqlHelper.cs` |
-| `AppDomain.DefineDynamicAssembly` | removed API; the modern entry point is static `AssemblyBuilder.DefineDynamicAssembly` — a one-line portable seam, not a gap | `ui/WebControls/Dynamic.cs` |
+| WCF server hosting | `ServiceHost`, behavior/instance attributes, `ServiceHostFactory`, ASP.NET compatibility types | Four public `ApplicationServices/*Service.cs` files and host factory |
+| WCF metadata/codegen/config | `WsdlImporter`, import extensions, metadata models, contract generator/options, importer options, ServiceModel configuration | `WCFBuildProvider.cs` and five `Compilation/WCFModel` files |
+| Retired Data Services/design | `DataServiceContext`, `EntityClassGenerator`, language option, DataSet schema extensions | Same WCF compile path |
+| LINQ-to-SQL | `DataContext`, `ITable`, mapping metadata, refresh/update types | `ILinqToSql.cs`, `LinqToSqlWrapper.cs`, `LinqDataSourceView.cs` |
+| Desktop Client Services | WinForms `Application.UserAppDataPath` | `ConnectivityStatus.cs`, `SqlHelper.cs` |
+| Removed API | `AppDomain.DefineDynamicAssembly` | `Dynamic.cs`; replace with static `AssemblyBuilder.DefineDynamicAssembly` |
 
-`ClientServices/Providers/ClientSettingsProvider.cs` fails only on a dead
-`using System.ServiceModel.Activation;` directive — no Activation type is
-used in the file.
+`ClientSettingsProvider.cs` also has a dead ServiceModel.Activation `using`. Missing APIs do not
+escape these areas.
 
-## The clean cut
+## Clean cut
 
-The 111 files outside today's compile list split as:
+| Group outside the original closure | Size | Verdict |
+|---|---:|---|
+| `ScriptModule` + three internal JSON services | 4 files / 438 lines | Portable, zero shims |
+| Application-service support/event types | 6 / ~300 | Portable, zero shims |
+| Expressions, QueryExtender, query/context sources, DynamicData | ~35 / ~4,700 | Portable; one-line Reflection.Emit seam |
+| `LinqDataSource` family | 15 / 2,154 | Three core files require unavailable LINQ-to-SQL |
+| WCF proxy generation | 30 / 10,064 | Six files contain all missing APIs |
+| WCF-hosted application services | 4 / 662 | Blocked on server-side WCF |
+| Client Services | 14 / 3,810 | Compiles with shims; Windows-desktop-coupled at runtime |
 
-| Group | Files | Lines | Verdict |
-|---|---|---|---|
-| `ScriptModule` + internal JSON application services (`Profile/ProfileService.cs`, `Security/{Authentication,Role}Service.cs`) | 4 | 438 | **Portable, zero shims** — see the correction below |
-| ApplicationServices event args + `KnownTypesProvider`, `Management/WebServiceErrorEvent.cs` | 6 | ~300 | Portable, zero shims |
-| Query stack: `Expressions/*`, `QueryExtender`, `QueryableDataSource*`, `ContextDataSource*`, `DynamicData/*` contracts, `Dynamic.cs`, helper/event-args files | ~35 | ~4,700 | Portable; `Dynamic.cs` needs the one-line `AssemblyBuilder` seam |
-| `LinqDataSource` family | 15 | 2,154 | Control/event-args files portable, but the three files above hard-require `System.Data.Linq`; the control cannot compile without its view |
-| WCF proxy generation: `Compilation/**` | 30 | 10,064 | 24 model files portable (under `WEB_EXTENSIONS_CODE`); 6 files hold every missing WCF/Data-Services/DataSet API |
-| WCF hosting of application services: `ApplicationServices/{HostFactory,Authentication,Profile,Role}Service.cs` | 4 | 662 | Blocked on server-side WCF (`ServiceHost`, Activation) |
-| Client Services: `ClientServices/**` | 14 | 3,810 | Compiles (with the two shims + dead using) but Windows-desktop-coupled at runtime |
-| `Properties/AssemblyInfo.cs`, `Resources/WCFModelStrings.Designer.cs`, `ProxyGenerator.cs`, duplicate-type file | 4 | — | Build-recipe items, not features |
+### JSON services correction
 
-No file outside `ApplicationServices` (WCF half), `Compilation`,
-`ClientServices`, and the three LINQ-to-SQL files touches any missing API.
+AJAX JSON services are not the WCF-hosted public services. `WebServiceData` maps
+`Profile_JSON_AppService.axd`, `Authentication_JSON_AppService.axd` and
+`Role_JSON_AppService.axd` to internal `[ScriptService]` classes under `Profile/` and
+`Security/`. They use the existing `ScriptHandlerFactory`/`RestHandler` chain and compiled
+without shims. Only explicit `.svc` deployments of public
+`System.Web.ApplicationServices.*Service` classes need WCF hosting. Earlier provenance and
+follow-up wording conflated these surfaces; current docs/state use the corrected boundary.
 
-## Correction: the JSON application services are not WCF-hosted
+## Platform and dead-by-default areas
 
-`WebServiceData.GetApplicationService` maps the built-in root names
-(`Profile_JSON_AppService.axd`, `Authentication_JSON_AppService.axd`,
-`Role_JSON_AppService.axd`) to `System.Web.Profile.ProfileService`,
-`System.Web.Security.AuthenticationService`, and
-`System.Web.Security.RoleService`
-(`Script/Services/WebServiceData.cs:63`) — the **internal `[ScriptService]`
-classes** in `Profile/` and `Security/`, served through the same
-`ScriptHandlerFactory`/`RestHandler` chain as any script service, calling
-`Membership`/`Roles`/`ProfileBase` from the runtime. They compile with zero
-shims. The WCF-hosted services are the *public*
-`System.Web.ApplicationServices.{Authentication,Profile,Role}Service`
-classes reached only through an explicit `.svc` + `ApplicationServicesHostFactory`
-deployment, which the port does not carry.
+The [inventory](system-web-extensions-inventory.md#platform-hotspots) records all Windows
+coupling: it is confined to desktop Client Services. Fourteen declarative CAS sites are inert;
+the only imperative asserts are behind undefined `ENABLE_LINQ_PARTIAL_TRUST` or commented out.
 
-The 2026-08 import gated the built-in mappings behind `#if NETFRAMEWORK` with
-the reason "WCF-hosted and not compiled"
-([provenance](../provenance/system-web-extensions.md)); the
-[web-services follow-up](../follow-ups/web-services.md) repeats the claim.
-Both conflate the two surfaces. The AJAX-facing JSON services (what
-`Sys.Services.*` and `MicrosoftAjaxApplicationServices.js` call) are ordinary
-porting work; only the `.svc` WCF hosting is blocked.
+- `WCFBuildProvider` is inactive unless an application registers `.svcmap`/`.datasvcmap`.
+- `ApplicationServicesHostFactory` requires an explicit `.svc` file and handler.
+- Client Services requires explicit desktop-provider configuration.
 
-## Windows-coupled code (all of it)
+These are safe exclusion seams, not hidden runtime fallbacks.
 
-Everything is inside `ClientServices/` — the desktop/offline client-side
-provider stack (WinForms-era "Client Application Services"):
+## Framework configuration closure
 
-- **P/Invoke:** exactly two, `wininet.dll` `InternetGetCookieW`/`InternetSetCookieW`
-  (`Providers/ProxyHelper.cs:446`), sharing IE's cookie jar with the current
-  Windows user session.
-- **Windows identity:** `WindowsIdentity`/`WindowsPrincipal` in
-  `ClientWindowsAuthenticationMembershipProvider`, `ProxyHelper`,
-  `ClientFormsAuthenticationMembershipProvider`.
-- **Desktop paths:** `System.Windows.Forms.Application.UserAppDataPath` for
-  the offline-state and SQL CE cache locations (`ConnectivityStatus.cs:30`,
-  `Providers/SqlHelper.cs`).
-- **OleDb/SQL CE:** the offline credential/role/settings cache speaks OleDb
-  to SQL Server Compact in five provider files, falling back to isolated
-  storage.
-
-The rest of the assembly: no P/Invoke, no registry (zero `Microsoft.Win32`
-uses anywhere in the tree), no COM (`ComVisible(false)`).
-
-## CAS
-
-14 declarative attribute sites in 10 files, inert with the
-`System.Security.Permissions` package. Zero live imperative CAS: both
-`ReflectionPermission.Assert()` calls sit behind the never-defined
-`ENABLE_LINQ_PARTIAL_TRUST` (`ui/WebControls/Dynamic.cs:272,315`), and every
-`PermissionSet.Assert` in Client Services is commented out in the pinned
-source.
-
-## Dead by default
-
-- **`WCFBuildProvider`** — the 4.8.1 root web.config registers **no**
-  `.svcmap`/`.datasvcmap` build provider
-  ([buildProviders](../../third_party/microsoft/framework-config/web.config#L97));
-  Visual Studio's web-site tooling registered it per-application. An
-  application that never carries such a registration never constructs the
-  type.
-- **`ApplicationServicesHostFactory`** — reached only from a `.svc` file
-  naming it; the port maps no `.svc` handler.
-- **Client Services** — activated only by explicit
-  `ClientFormsAuthenticationMembershipProvider` (or sibling) provider
-  registrations in an application config; a web application never carries
-  them (the stack exists for desktop clients).
-
-## Framework configuration closure (the gap that matters)
-
-What 4.8.1 registers for this assembly versus the portable baseline today:
-
-| Framework registration | Framework source | Baseline today |
+| Framework registration | Original source | Initial portable baseline |
 |---|---|---|
-| `system.web.extensions` section group: `scripting/scriptResourceHandler`, `scripting/webServices/{jsonSerialization,profileService,authenticationService,roleService}` | [machine.config](../../third_party/microsoft/framework-config/machine.config#L126) | **absent** — an application web.config carrying the section group (common in AJAX-era apps) fails as an unrecognized section; the section types themselves already compile |
-| `<compilation><assemblies>` entry | [web.config](../../third_party/microsoft/framework-config/web.config#L89) | present (`Rehost.WebForms.Extensions`) |
-| `*_AppService.axd` → `ScriptHandlerFactory`, `validate="False"` | [web.config](../../third_party/microsoft/framework-config/web.config#L173) | **absent** |
-| `ScriptResource.axd` → `ScriptResourceHandler` | web.config L174 | present |
-| `*.asmx` → `ScriptHandlerFactory` | web.config L178 | present |
-| `ScriptModule-4.0` module | [web.config](../../third_party/microsoft/framework-config/web.config#L243) | **absent** — with it absent, async-postback error formatting, page-method routing, and app-service authorization skips never run |
-| `<pages><controls>` for `System.Web.UI` + `System.Web.UI.WebControls` | web.config L348 | present |
-| `<pages><controls>` for `System.Web.UI.WebControls.Expressions` | [web.config](../../third_party/microsoft/framework-config/web.config#L350) | **absent** (namespace not compiled yet) |
+| `system.web.extensions` section group and script/web-service subsections | [machine.config](../../third_party/microsoft/framework-config/machine.config#L126) | Absent |
+| Extensions compilation assembly | [web.config](../../third_party/microsoft/framework-config/web.config#L89) | Present under Rehost identity |
+| `*_AppService.axd` → `ScriptHandlerFactory` | [web.config](../../third_party/microsoft/framework-config/web.config#L173) | Absent |
+| `ScriptResource.axd`, `*.asmx` | same source | Present |
+| `ScriptModule-4.0` | [web.config](../../third_party/microsoft/framework-config/web.config#L243) | Absent |
+| UI/WebControls page controls | [web.config](../../third_party/microsoft/framework-config/web.config#L348) | Present |
+| Expressions page controls | [web.config](../../third_party/microsoft/framework-config/web.config#L350) | Absent |
 
-## Workload weighting
+This explained why compiled types alone did not activate async-postback error handling, page
+method routing, application-service authorization or query-expression markup.
 
-| Workload | Prevalence in template-era apps | Verdict on .NET 10 |
+## Scope tiers
+
+| Tier | Surface | Decision |
 |---|---|---|
-| `UpdatePanel`/async postbacks, `UpdateProgress`, `Timer` | dominant — the signature AJAX feature | **Compiles today**; needs `ScriptModule-4.0` registration + evidence. The wire protocol is `PageRequestManager` (compiled) + `MicrosoftAjaxWebForms.js` (embedded) |
-| Page methods (`[WebMethod]` statics on pages, `PageMethods` proxy) | common | **Compiles today** (RestHandler chain shipped); routing lives in `ScriptModule.OnPostAcquireRequestState` — inactive until the module is registered |
-| ASMX script services (`[ScriptService]`, `/js` proxies) | common | Shipped (2026-08-21) |
-| `JavaScriptSerializer`, `ScriptManager`/references/CDN/bundles, `ListView`/`DataPager` | dominant | Shipped |
-| JSON application services (`Sys.Services.AuthenticationService` et al.) | uncommon but present in AJAX-era apps | Portable, zero shims (see correction) |
-| History (`EnableHistory`, `Sys.Application` navigation) | rare | Types + script shipped; evidence only |
-| `QueryExtender`/`QueryableDataSource`/Expressions | uncommon | Portable; one-line `AssemblyBuilder` seam in `Dynamic.cs` |
-| `LinqDataSource` | moderate in 2008–2012 apps | Control markup parses only if compiled, but the runtime hard-requires `System.Data.Linq`, which has no modern port — an app using it cannot run regardless; absence (compile-time failure) is the honest boundary |
-| `.svcmap`/`.datasvcmap` WCF proxy generation | rare (VS web-site tooling) | Blocked on the WCF metadata/codegen stack; dead by default |
-| Client Application Services | rare (desktop apps only) | Windows-desktop-coupled; not a web-server workload at all |
-| WCF-hosted application services (`.svc`) | rare | Blocked on server-side WCF; the AJAX-facing equivalents are the portable JSON services |
+| T1 | AJAX activation: module, internal JSON services, routes/config | Portable; zero new APIs. Landed. |
+| T2 | Query/data-source stack | Portable after Reflection.Emit seam. Landed. |
+| T3 | `LinqDataSource` | Excluded while LINQ-to-SQL is unavailable; compile-time failure is explicit. |
+| T4 | WCF proxy generation and `.svc` application services | Excluded; requires metadata/codegen fork or adapted server hosting. |
+| T5 | Client Services | Excluded as non-web and Windows-desktop-coupled. |
 
-## Maximum portable surface (tiers)
+The dominant AJAX workloads—UpdatePanel, page methods, ASMX script services, JSON services,
+ScriptManager and controls—fall in landed T1/T2 or the earlier closure. WCF tooling, Client
+Services and `.svc` application services were rare/dead-by-default. `LinqDataSource` requires a
+full LINQ-to-SQL port, not an Extensions-local shim.
 
-- **T1 — AJAX request-path activation** (438 lines: `ScriptModule`,
-  `Profile/ProfileService.cs`, `Security/{Authentication,Role}Service.cs`,
-  reverting the `WebServiceData.cs` `#if NETFRAMEWORK` gate): async
-  postbacks, page methods, JSON application services, plus the four missing
-  baseline-config registrations above. Zero new APIs; the work is config
-  closure, deployment promise, and evidence. First-reach risk: the
-  environment-derived statics pattern
-  ([ambient-statics-audit](../follow-ups/ambient-statics-audit.md)) on the
-  partial-rendering path (`HttpResponse.SwitchWriter`, redirect
-  interception, the section caches `AppLevelCompilationSectionCache` /
-  `DeploymentSectionCache` / `CustomErrorsSectionWrapper`).
-- **T2 — query/data-source stack** (~4,700 lines): Expressions namespace,
-  `QueryExtender`, `QueryableDataSource`, `ContextDataSource`, DynamicData
-  contracts, `Dynamic.cs` with the `AssemblyBuilder` seam. Fully portable;
-  adds the `Expressions` `<controls>` registration.
-- **T3 — `LinqDataSource`** (2,154 lines): excluded while `System.Data.Linq`
-  has no modern implementation; types stay absent so consumers fail at
-  compile time. Trigger: a real application that ships LINQ-to-SQL — which
-  would need a vendored LINQ-to-SQL before this control matters.
-- **T4 — WCF proxy generation** (10,064 lines) and **WCF-hosted application
-  services** (662): excluded; blocked on the WCF metadata/codegen and
-  server-hosting stacks. CoreWCF exists for hosting (different namespaces —
-  source adaptation, not a reference swap); dotnet-svcutil's `FrameworkFork`
-  is the codegen precedent. Trigger: a real application.
-- **T5 — Client Services** (3,810 lines): excluded as non-web,
-  Windows-desktop-coupled (the assembly's only P/Invokes, WinForms paths,
-  Windows identity, OleDb).
+Pinned Reference Source contains LINQ-to-SQL (98 files / 43k lines) and much of WCF
+(1,700+ files), but not Data Services client/design. Vendoring either is a separate product-sized
+compatibility project. [dotnet-svcutil](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-svcutil-guide)
+privately vendors WCF metadata/codegen; [CoreWCF](https://github.com/CoreWCF/CoreWCF) offers
+different-namespace hosting. Both are precedent, not drop-in references.
 
-## Behavioral deltas on .NET 10 (compile-clean but different)
+## Known modern-runtime deltas
 
-- **`ClientCultureInfo`** serializes `DateTimeFormat`/`NumberFormat` for the
-  client (`Sys.CultureInfo`); modern .NET sources culture data from ICU, not
-  NLS, so emitted patterns can differ from Framework and between OSes.
-  Test baselines must not assume byte-identical culture payloads.
-- `ScriptResourceHandler` URL protection rides `Page.EncryptString` — the
-  machine-key seams already shipped; cross-machine URL stability follows the
-  configured keys, as on Framework.
-- `PageRequestManager` writes the async-postback wire format through
-  `HttpResponse.SwitchWriter` and internal hidden-field inventory — Runtime
-  internals already imported; deltas would be defects, not platform facts.
-- No `Encoding.Default`, `ThreadAbortException`, or `TraceSource`
-  dependencies anywhere in the tree (unlike `System.Web.Services`).
-
-## Source availability for the blocked stacks
-
-"Blocked" means blocked-as-reference, not blocked-as-source. The pinned
-sibling referencesource checkout carries most of the missing implementations:
-
-| Blocked stack | Source in referencesource | Size |
-|---|---|---|
-| `System.ServiceModel` (incl. `WsdlImporter.cs`, `ServiceContractGenerator.cs`, `MetadataSection.cs`, `ServiceHost`) | yes | 1,722 files / 456k lines |
-| `System.ServiceModel.Activation` (`ServiceHostFactory`, AspNetCompatibility) | yes | 53 files / 12.6k lines |
-| `System.Data.Linq` (full LINQ-to-SQL runtime) | yes | 98 files / 43k lines |
-| `System.Data.Services.Client` / `.Design` (`DataServiceContext`, `EntityClassGenerator`) | **no** | — |
-| `System.Design` (`TypedDataSetSchemaImporterExtension`) | **no** (only the Entity `*.Design` trees) | — |
-
-Consequences for the tiers: T3/T4 are "possible via vendoring, trigger = a
-real application", not "impossible". The WCF codegen slice would be a
-`FrameworkFork`-style vendoring of the importer/generator closure out of a
-456k-line mutually-coupled stack; hosting is bigger still and CoreWCF already
-occupies that ground. LINQ to SQL is self-contained at 43k lines but is a
-full ORM runtime (SQL generation, change tracking) — its own porting project
-with its own compatibility story, not an Extensions increment. Data Services
-codegen stays excluded regardless: no published source exists.
-
-## Prior art
-
-- [dotnet-svcutil](https://learn.microsoft.com/en-us/dotnet/core/additional-tools/dotnet-svcutil-guide)
-  vendors the WCF metadata-import/codegen stack privately — the existence
-  proof and cost signal for T4, exactly parallel to the Web Services T4
-  finding.
-- [CoreWCF](https://github.com/CoreWCF/CoreWCF) provides modern
-  `ServiceHost`-equivalent hosting under `CoreWCF.*` namespaces; adopting it
-  is a source adaptation of the four hosting files, not a reference swap.
+- Client culture payloads may differ because modern .NET uses ICU rather than Framework NLS.
+- Script-resource URL stability follows configured machine keys, as on Framework.
+- Partial rendering uses imported Runtime writer/hidden-field internals; observed differences
+  there are defects, not accepted platform variation.
 
 ## Relationship to current state
 
-T1/T2 activation landed: ScriptManager, release scripts, async postbacks,
-page methods, and disabled-by-default JSON application-service routes are in
-the [compatibility map](../compatibility.md). Remaining enabled services,
-debug/localized scripts, LINQ-to-SQL, WCF, and Client Services scope lives in
-the [Extensions follow-up](../follow-ups/extensions-ajax-activation.md).
+T1/T2 activation landed: ScriptManager, release scripts, async postbacks, page methods, and
+disabled-by-default JSON application-service routes are listed in the
+[compatibility map](../compatibility.md). Enabled services, debug/localized scripts,
+LINQ-to-SQL, WCF and Client Services remain in the
+[Extensions follow-up](../follow-ups/extensions-ajax-activation.md).
