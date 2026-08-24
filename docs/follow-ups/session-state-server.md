@@ -2,6 +2,9 @@
 
 Split from [session state](session-state.md).
 
+Host/service observations below are a 2026-08-09 snapshot; verify them before
+running the capture or end-to-end work.
+
 ## The blocker
 
 There is no client. `State/OutOfProcStateClientManager.cs` reaches the network
@@ -109,9 +112,9 @@ The capture needs **no** `aspnet_state` service, which is why it comes first.
 
 ## The service question
 
-`aspnet_state.exe` is present on `winbox` at
+At capture time, `aspnet_state.exe` was present on `winbox` at
 `C:/Windows/Microsoft.NET/Framework64/v4.0.30319/aspnet_state.exe`, but
-`Get-Service aspnet_state` finds nothing — it is not registered. Registering it
+`Get-Service aspnet_state` found nothing — it was not registered. Registering it
 is a durable change to the validation host and has not been approved. Only the
 end-to-end tests need it; the capture spike does not.
 

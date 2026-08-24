@@ -45,6 +45,8 @@ missing satellite costs that path rather than every activation.
 Framework could keep such promises because the GAC guaranteed the assemblies.
 This port names `Rehost.WebForms.Extensions` under `<controls>` so that an
 unchanged application parses `<asp:ScriptManager>`, and keeps the promise by
-having every consumer here reference that package explicitly. A metapackage is
-the durable answer; see
-[runtime metapackage](../follow-ups/runtime-metapackage.md).
+having every consumer here reference that package explicitly. The
+`Rehost.WebForms` metapackage guarantees the runtime and named companions and
+owns the root configuration. Runtime consumer targets also ship as
+`buildTransitive/`, because ordinary `build/` assets do not flow through package
+dependencies.

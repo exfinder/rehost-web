@@ -310,13 +310,8 @@ codegen stays excluded regardless: no published source exists.
 
 ## Relationship to current state
 
-[compatibility.md](../compatibility.md) lists the assembly as Partial with
-"async postbacks and cross-platform gates remain open". This analysis grounds
-that: the open features are compiled-but-unwired (T1), not missing. The
-inventory's porting-assessment row "AJAX services/application services —
-hard; ASMX/WCF interaction" splits cleanly: the ASMX half shipped, the JSON
-application services are portable zero-shim work mislabeled as WCF (see
-correction), and only `.svc` hosting is genuinely WCF-blocked. The
-`#if NETFRAMEWORK` gate in `WebServiceData.cs` and the
-[web-services follow-up](../follow-ups/web-services.md) JSON-application-services
-bullet both need their reasons rewritten when T1 lands.
+T1/T2 activation landed: ScriptManager, release scripts, async postbacks,
+page methods, and disabled-by-default JSON application-service routes are in
+the [compatibility map](../compatibility.md). Remaining enabled services,
+debug/localized scripts, LINQ-to-SQL, WCF, and Client Services scope lives in
+the [Extensions follow-up](../follow-ups/extensions-ajax-activation.md).

@@ -1,6 +1,8 @@
 # win-oracle experiments
 
 Findings behind `win-oracle.sh`'s defaults. Script usage: run it with no args.
+Instance shape, timings, and prices are a 2026-08-09 snapshot; verify current
+AWS state before provisioning or cost decisions.
 
 ## Current shape
 
@@ -27,7 +29,8 @@ work beats scattered check-ins. IPv4 $0.005/hr while running, $0 stopped.
 Windows license is per-vCPU, which makes burstable far cheaper than
 fixed-performance: every 4vCPU/8GB shape costs more than t3a.xlarge (4/16).
 
-Spot t3a.xlarge $0.211/hr vs $0.2464 on-demand. Standing when stopped: ~$4.80/mo
+At capture time, Spot t3a.xlarge was $0.211/hr versus $0.2464 on-demand;
+stopped storage was about $4.80/month
 (volume + snapshot).
 
 `standard` credit mode was tried and abandoned — credits do not survive a stop,

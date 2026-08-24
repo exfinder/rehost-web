@@ -1,26 +1,22 @@
 # Request completion, failure, and cancellation
 
-## Problem
+The adapter now seals and completes exactly once at `EndOfRequest`; a dispatcher
+escape faults completion; System.Web-owned failures complete after managed
+formatting; disconnect remains observable without abandoning a pipeline-owned
+request. Unit tests cover duplicate completion, sealed output, body abort, and
+transport failure.
 
-System.Web completion is callback-based while ASP.NET Core awaits a task.
-Failures before `EndOfRequest`, disconnects, host shutdown, or response-write
-errors can otherwise hang middleware forever or lose the original exception.
-Moving processing to `Task.Run` can also change execution and call context.
+## Open
 
-## Required decisions
-
-- System.Web-owned failures complete normally after error formatting.
-- Only exceptions escaping `HttpRuntime.ProcessRequest` fault completion.
-- Disconnect is observable but does not abandon a pipeline-owned request.
-- A pre-pipeline escape explicitly faults worker-request completion.
-- ExecutionContext and logical CallContext flow across the sync/async bridge.
-- Exactly-once final flush and completion.
+- Add full-pipeline cases for escape before pipeline ownership, asynchronous
+  callback failure, cancellation during owned work, and final-commit failure.
+- Prove every terminal branch completes or faults the middleware task without
+  replacing the original exception.
 
 ## Verification
 
-Focused adapter tests cover synchronous throw, asynchronous callback failure,
-write failure, cancellation, duplicate completion, and missing completion.
-Full-pipeline cases may defer to the integration story.
+Keep adapter unit tests for ownership mechanics; use Kestrel integration tests
+for the remaining terminal-event matrix.
 
 ## Done when
 

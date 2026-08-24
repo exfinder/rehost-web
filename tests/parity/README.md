@@ -49,4 +49,4 @@ Rehost.WebForms.Parity.OracleHost.exe generate --output artifacts\generated\sess
 Review the indented diff against `artifacts/golden/sessions.json`, promote by
 copy, and verify with the oracle's `verify --expected` plus both local gates.
 The golden is generated evidence — values are never hand-authored; mechanical
-reformatting is not authoring (ADR 0030).
+reformatting is not authoring ([evidence strategy](../../docs/adr/0005-evidence-and-test-strategy.md)).

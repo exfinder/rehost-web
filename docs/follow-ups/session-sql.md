@@ -2,6 +2,9 @@
 
 Split from [session state](session-state.md), which owns InProc and Custom.
 
+Host, container-image, and service observations below are a 2026-08-09
+snapshot; verify them before running validation.
+
 ## What is already true
 
 The client is transport-clean. `State/sqlstateclientmanager.cs`, 1,533 lines,
@@ -61,7 +64,7 @@ item for whichever infrastructure story picks this up.
   Silicon runs it only under emulation. Microsoft's arm64 answer was Azure SQL
   Edge, which is retired and does not carry the full T-SQL surface these
   procedures need.
-- `winbox` has a working Docker engine. `win-oracle` does not.
+- At capture time, `winbox` had a working Docker engine and `win-oracle` did not.
 - So the macOS leg is either emulation or an SSH tunnel to `winbox`'s engine.
 
 ## Evidence
@@ -122,7 +125,7 @@ two runtimes unproven.
 - An application configured `mode="SQLServer"` reaches a provisioned `ASPState`
   database and the preflight refusal in [session state](session-state.md) is
   removed.
-- The port-local two-host and contention claims pass on Windows x64, Linux x64,
+- The port-local two-host and contention claims pass on Windows x64, Linux,
   and macOS arm64 before the tests are skipped.
 - The provisioning route, its Framework-machine dependency, and the skip
   decision are recorded where an infrastructure story can pick them up.

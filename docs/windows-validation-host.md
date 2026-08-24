@@ -1,5 +1,8 @@
 # Windows validation host
 
+Operational snapshot last recorded 2026-08-22. Verify host address, image,
+tools, and credentials before relying on them; none is a support claim.
+
 Windows x64 validation runs on `sshuser@192.168.1.7` (ssh alias `winbox`, defined
 in `~/.ssh/config` with ControlMaster/ControlPersist so connections are reused),
 in a dedicated persistent clone at `C:\Users\sshuser\source\repos\rehost-webforms`.

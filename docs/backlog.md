@@ -17,24 +17,12 @@ its remaining detail moved below. Milestone 2 owns these outcomes:
 
 Carried from Milestone 1 as unresolved detail:
 
-- WAP sidecar build, publish payload, designer-file policy, and package-only
-  consumption: [Web Site vs WAP](follow-ups/web-site-vs-wap-project-models.md).
-- ~~Default document~~ (done: ledger P67) and remaining IIS request-path
-  behavior: [IIS-role audit](follow-ups/iis-role-behaviors.md) and
+- WAP publish payload, designer-file policy, package-only consumption, and
+  secondary Web Site packaging: [project models](follow-ups/web-site-vs-wap-project-models.md).
+- Remaining IIS request-path behavior: [IIS-role audit](follow-ups/iis-role-behaviors.md) and
   [IIS configuration layers](follow-ups/iis-integration-plan.md).
 - Friendly URL behavior and escaping:
   [route URL escaping](follow-ups/route-url-escaping.md).
-- ~~Restore the frozen template's physical script/style path~~ — done; the
-  production combination/minification breadth of Web Optimization remains
-  claimed only for the reached bundle/debug paths:
-  [script-stack plan](follow-ups/stock-template-script-stack.md).
-- ~~Ship the companion assemblies the root configuration names~~ — done: the
-  [`Rehost.WebForms` metapackage](follow-ups/runtime-metapackage.md) owns the
-  root configuration and its companions.
-- ~~Restore static-asset behavior and mobile master/view switching~~ — done,
-  pinned by `apps/WebFormsApplication/smoke.sh`.
-- ~~Add one package-built browser journey on Windows x64, Linux, and macOS
-  arm64~~ — done: `smoke.sh` in both `apps/*` folders, run on all three.
 - A host-owned machine-key store so auto-generated keys survive restart and
   scale-out (the Identity template makes the process-scoped default visible as
   "every restart logs everyone out"); ASP.NET Core Data Protection's key ring
@@ -52,17 +40,13 @@ Carried from Milestone 1 as unresolved detail:
 ### Hosting and request boundary
 
 - Adapter residuals: HTTP/3, proxied client certificates, integrated-mode
-  server variables: [host adapter](follow-ups/aspnet-core-host-adapter.md);
-  ~~streaming~~ (P79) and ~~WebSockets~~ (P80,
-  [boundaries](follow-ups/websockets.md)) are done.
+  server variables: [host adapter](follow-ups/aspnet-core-host-adapter.md).
 - Terminal-event and cancellation coverage:
   [request completion](follow-ups/request-completion-failure-and-cancellation.md).
 - Abort the client connection when a timed-out synchronous step cannot return:
   [request termination](follow-ups/request-termination-and-timeouts.md).
 - Slow-upload thread-pool cliff:
   [request-body concurrency](follow-ups/request-body-concurrency.md).
-- ~~Path mapping and containment~~ — closed (ledger P57/P70–P73); boundaries
-  recorded on [path mapping](follow-ups/portable-path-mapping-and-containment.md).
 - Response diagnostics and failure preservation:
   [request diagnostics](follow-ups/portable-request-diagnostics.md).
 
@@ -102,15 +86,7 @@ Carried from Milestone 1 as unresolved detail:
     answers 501 unless `EnableTraceMethod` is set (MH37, MH38).
   - `<fileExtensions>` is still read from the application root alone, where IIS
     resolves it per path (MH32). The rest of that section is honored: ledger P86.
-  Closed since the readings: the `managedHandler` question is asked once per
-  request from the arriving URL, which neither a rewrite nor `RemapHandler`
-  revisits (MH35, MH39, ledger P83); `allowUnlisted` and a
-  non-boolean `allowed` are honored and refused respectively (MH29, MH31); a
-  classic registration behind `configSource` refuses activation while the same
-  registration inside `<location>` stays silent as it does on IIS (MH33, MH34).
-- ~~Per-folder `<handlers>` resolution~~ — closed (ledger P87, MH27). A
-  per-folder `<modules>` section stays inert, which is IIS's own behavior
-  (MH24). `staticContent`, `defaultDocument` and `hiddenSegments` are still
+- `staticContent`, `defaultDocument` and `hiddenSegments` are still
   merged from the application root alone and are unassessed per folder;
   `fileExtensions` is measured there and is the entry above.
 - Request-filtering limits, custom headers, and error shaping — the tenants the
@@ -209,6 +185,9 @@ Carried from Milestone 1 as unresolved detail:
   [package license](follow-ups/package-license.md).
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
+- Decide whether a runtime-plus-Extensions bundle is useful beside the
+  template-shaped metapackage, and fail activation clearly when configuration
+  names an absent companion assembly.
 
 ## Parked
 

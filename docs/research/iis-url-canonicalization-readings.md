@@ -24,9 +24,8 @@ Remaining differences and their owners: `..` inside the root and every handler-v
 value match; above-root climbs are 403 on both (host front door). Invalid Windows name
 characters, double escaping and bad UTF-8 in a *static* URL are 404 from IIS's native
 `StaticFileModule`/`RequestFilteringModule` and 400 from Framework's own `ValidatePath`
-in the port, which serves static files through the managed pipeline; `.config` and other
-denied extensions are IIS request-filtering 404.7 versus the golden forbidden handler's
-403; a static file with a trailing separator is an IIS 500.0 (`ERROR_DIRECTORY`) versus
+in the port, which serves static files through the managed pipeline. Denied extensions
+now match IIS's 404 through ledger P86. A static file with a trailing separator is an IIS 500.0 (`ERROR_DIRECTORY`) versus
 404; a raw `#` or raw non-ASCII byte is refused by http.sys (400) and by Kestrel/ASP.NET
 (404/400) — all recorded on the [IIS-role follow-up](../follow-ups/iis-role-behaviors.md).
 An NFD spelling of an NFC file name is found only on APFS (macOS); a trailing space on

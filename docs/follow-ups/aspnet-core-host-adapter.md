@@ -6,13 +6,6 @@ The implemented boundary is recorded in
 
 ## Remaining work
 
-Ledger P72 and P76–P78 closed the path-info split, the server-variable
-inventory, request scheme/host, forwarded headers, both header encodings, the
-response-spill tests, HTTP/2, the long-file flag, and recorded WebSockets
-([follow-up](websockets.md)) and client certificates as unsupported
-([research](../research/host-adapter-residuals.md)).
-
-- ~~Client-visible streaming~~ — done (ledger P79, ADR 0003 amended).
 - HTTP/3: no transport gate.
 - Compression is IIS's module and its configuration; on the
   [IIS-role follow-up](iis-role-behaviors.md).

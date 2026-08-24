@@ -28,5 +28,6 @@ the platform that triggers it.
 - Windows is needed for exceptional oracle readings, not routine test work.
 - Every solution project builds before `dotnet test --no-build`; tests derive
   their configuration from their own output path.
-- Supported behavior passes on Windows x64, Linux x64, and macOS arm64.
+- Supported behavior passes on Windows x64, Linux on the Docker daemon's native
+  architecture, and macOS arm64.
 - Day-to-day rules live in [writing tests](../writing-tests.md).

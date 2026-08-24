@@ -319,52 +319,15 @@ both directions, so it stays — but it is the shape to watch if a custom
 
 ---
 
-## Rows that need a human decision
+## Recorded boundaries
 
-1. **`SimpleWorkerRequest` (A2) — is public API "reached"?** The port's own
-   pipeline never constructs it, but it is ungated public `System.Web.Hosting`
-   API and the canonical Framework way to drive `HttpRuntime.ProcessRequest`
-   out of band. Filed as A on that basis; if the project's position is that
-   only the port's own pipeline counts, it moves to B (the fix is trivial either
-   way).
+- `SqlConnectionHelper.EnsureDBFile` remains Windows-only with LocalDb/user
+  instances; its separator and upper-casing behavior is not a portable path
+  contract.
+- `UrlPath.PathIsDriveRoot` does not recognize `/`; hosting an application at
+  the filesystem root is unsupported.
 
-2. **Ledger P73 vs. `DynamicPhysicalDiscoSearcher` (B16).** P73 states two
-   literal `'\\'` compositions "are `Path.DirectorySeparatorChar` now", naming
-   this file. Commit `cc83624` changed only `ScanDirectory` (line 53);
-   `MakeAbsExcludedPath` (line 85) still writes `'\\'`. Either finish the change
-   or amend the ledger row — the file is in a tree no project compiles, so
-   "record and move on" is defensible, but the ledger should not claim a fix
-   that is not there.
-
-3. **`WebProcessInformation` (B12).** The backslash is the smaller half. The
-   constructor calls `kernel32!GetModuleFileName` and `kernel32!GetCurrentProcessId`
-   from a *static field initialiser* on `WebManagementEvent`, and health
-   monitoring is live in the port. Either that path never fires today (in which
-   case the audit's "unreached" label is right and both halves are B), or it
-   throws `DllNotFoundException` off Windows the first time any management event
-   is raised — which is a separate defect worth its own investigation, not a
-   separator fix.
-
-4. **`SqlConnectionHelper.EnsureDBFile` (B13).** Framework composes the file
-   name here (it strips the separator and calls `Path.Combine`), so by the
-   audit's rule it is not "the user's problem" — but the whole feature is
-   SQL Server user instances / LocalDb, which do not exist off Windows. Fix the
-   leading-separator strip cheaply, or declare the method unsupported and leave
-   it. Note the same method uppercases the file name (`strUpper.Substring`),
-   which is a *case* defect on a case-sensitive filesystem independent of the
-   separator.
-
-5. **`FileUtil.IsSuspiciousPhysicalPath` (A1) — how far to go.** Removing the
-   `IndexOf('/')` early return off Windows is the minimal repair, but the same
-   method also treats any `:` past index 1 as suspicious. `docs/filesystem-semantics.md`
-   already decides that embedded colons stay invalid on every platform, so that
-   part must **not** change; the fix has to be surgical about which of the two
-   tests it relaxes.
-
-6. **`UrlPath.PathIsDriveRoot` (C1).** Off Windows it can never be true, so
-   `HostingEnvironment.MapPathActual` has no guard sparing the filesystem root
-   `/` from trailing-separator surgery. Only reachable with an application root
-   of `/`, which is not a supported deployment — recorded, not fixed.
+All other decision rows landed as ledger P74/P75.
 
 ---
 

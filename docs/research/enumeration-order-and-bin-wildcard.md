@@ -1,14 +1,8 @@
 # Filesystem enumeration order and wildcard `bin` loading
 
-Background research for the two open items on
-[portable path mapping and containment](../follow-ups/portable-path-mapping-and-containment.md):
-"cross-filesystem enumeration ordering and wildcard `bin` assembly-loading
-failures, without swallowing unrelated load errors"
-([backlog](../backlog.md), ledger P56/P57/P71/P72).
-
-Decided and landed as ledger P73 (2026-08-16); the
-[Framework readings](#framework-readings) and [decisions](#decisions-needed)
-at the end record the outcome. The audit below is the evidence.
+Evidence for the enumeration and wildcard-loading outcome recorded as ledger
+P73 (2026-08-16). The audit and [Framework readings](#framework-readings)
+below preserve how the result was derived.
 
 Read-only audit of `src/System.Web.ReferenceSource`,
 `src/System.Web.Services.ReferenceSource`, `src/System.Web.Optimization.ReferenceSource`,
@@ -432,50 +426,6 @@ unrelated load errors".
 
 Pair it with the sort from Seam B so the reference list handed to compilation, and
 the pair named by an ambiguity error, are stable.
-
----
-
-## Decisions needed
-
-1. **Do we sort at `FileEnumerator` (Seam A)?** — *Recommend yes.* One `#else`-branch
-   change covers every reached order-observable consumer in compilation, in code the
-   port has already forked for portability.
-2. **Which comparison?** — *Recommend `OrdinalIgnoreCase`, `Ordinal` tiebreak.* It
-   reproduces NTFS order for ASCII names, is ICU-independent, and matches the path
-   identity rules P57 already uses. Explicitly *not* the linguistic sorts that
-   `BrowserCapabilitiesCodeGenerator.cs:414` and `BuildResult.cs:190` use.
-3. **Do the three direct BCL sites get the same treatment (Seam B)?** — *Recommend
-   yes for the `bin` scan and `PrecompileThemeDirectories`; leave the OWIN scanner to
-   the Katana provenance record* (changing it is a third-party-source edit with its own
-   rules).
-4. **Do we chase determinism through the `Hashtable`/`HybridDictionary` hops (Seam C)?**
-   — *Recommend: not in this change.* Record it on the follow-up. It is a behavioral
-   edit to imported sequencing, not a platform leaf, and it needs its own approval —
-   but note that without it, "which page's compile error is reported" stays
-   nondeterministic **per process**, and any test asserting batch order must keep the
-   directory under the `HybridDictionary` cutover of 9 entries.
-5. **Is the goal Framework parity or determinism?** — *Recommend determinism, stated
-   as the contract.* Framework's own order was not stable past small directories
-   (§1.4), so parity is unachievable and not worth claiming; a ledger row should say
-   so.
-6. **Native `.dll` in `bin`: filter by PE metadata, or widen the swallowed
-   exceptions?** — *Recommend the `PEReader.HasMetadata` filter.* Widening the catch
-   to all `BadImageFormatException` would also hide architecture mismatches and
-   truncated assemblies, which are real deployment errors.
-7. **Does `bin/Foo.DLL` need to load on Linux?** — *Recommend yes*, since a `bin`
-   copied from a Windows deployment is the whole point of the port; the glob needs
-   `MatchCasing.CaseInsensitive` (or an explicit extension check) at the enumeration
-   sites that filter by extension.
-8. **Do we take the six Framework readings in §2.4 before or after landing the
-   filter?** — *Recommend: land the filter and the enumeration sort first (they need
-   no reading), and schedule readings 1–5 as one winbox session before the `bin`
-   behavior is written into `docs/compatibility.md`.*
-9. **Fix `BuildResultCache.cs:825`'s literal `"\\"` and
-   `DynamicPhysicalDiscoSearcher.cs:53` in the same change?** — *Recommend fixing the
-   first (it is on a reached path and is a two-character change) and leaving the
-   second, which is unreached.*
-
----
 
 ## Framework readings
 

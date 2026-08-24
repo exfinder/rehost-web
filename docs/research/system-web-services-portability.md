@@ -311,12 +311,7 @@ What Framework web developers actually shipped, and where each lands:
 
 ## Relationship to current state
 
-[web-services-compatibility](../web-services-compatibility.md) ships T0 only
-and states "the full Framework implementation depends on unavailable XML
-serializer importer/exporter internals". This analysis narrows that claim: the
-unavailable internals gate **only** proxy generation and encoded-WSDL export;
-the server and client runtimes sit on serializer surface that is present and
-verified working on .NET 10. The open scope decision in
-[follow-ups/web-services](../follow-ups/web-services.md) can therefore be
-grounded as: T1–T3 are ordinary porting work against existing runtime seams;
-T4 is the only piece requiring a new architectural mechanism.
+T1-T3 and script services landed; current behavior is in
+[web-services compatibility](../web-services-compatibility.md). T4 proxy
+generation remains blocked on serializer code-export APIs and is tracked by
+the [Web Services follow-up](../follow-ups/web-services.md).

@@ -273,26 +273,13 @@ completed with no reported errors. NuGet emits `NU1701` because WebGrease and
 Antlr expose only Framework assets. WebGrease's image assembly paths reference
 legacy drawing/desktop types; the probe establishes only JS/CSS execution.
 
-## Approved first slice
+## Implemented slice
 
-The unchanged frozen application is the boundary. Import the complete available
-`System.Web.Extensions` tree, but compile only the transitive closure required
-for full-page `ScriptManager`, `ScriptReference`, script mappings, physical
-paths, ordering/deduplication, debug selection, and Optimization discovery.
-Excluded public types are absent rather than stubbed, so recompiled consumers
-using them fail during compilation. Precompiled Framework binaries remain
-outside the compatibility claim.
-
-Use Rehost assembly/package identity, direct Runtime friend access, the physical
-files already in the application, and one
-`Rehost.WebForms.ScriptManager.Bundles` package for the two bundles and 11
-individual Microsoft AJAX startup mappings. The complete Optimization source
-compiles on .NET 10, but only reached behavior is claimed. `ScriptResource.axd`,
-generated and embedded Microsoft AJAX resources, UpdatePanel/async postbacks,
-service/JSON paths, data controls, and the unrelated legacy stacks remain
-explicit backlog.
-The implementation and evidence sequence is in the
-[stock template script-stack plan](../follow-ups/stock-template-script-stack.md).
+The complete available source tree is imported under Rehost identity; the
+compiled closure and supported behavior are recorded in the
+[compatibility map](../compatibility.md). Remaining application-services,
+debug/localization, data-source, and legacy-stack scope is indexed by the
+[Extensions follow-up](../follow-ups/extensions-ajax-activation.md).
 
 ## Porting assessment
 

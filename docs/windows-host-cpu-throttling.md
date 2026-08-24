@@ -1,5 +1,8 @@
 # Windows host CPU throttling over SSH
 
+Operational snapshot last recorded 2026-08-09. Re-measure on another host or
+after Windows/firmware changes.
+
 Anything launched over SSH has no foreground presence, so Windows assigns it
 **EcoQoS**. Two separate penalties follow, and they need separate fixes:
 
@@ -24,7 +27,8 @@ SSH path is no longer the slower one.
 `HKLM\SYSTEM\CurrentControlSet\Control\Power\PowerThrottling` disables the
 frequency clamp machine-wide. It needs an elevated merge and a reboot.
 
-**This is host state, not repo state.** It is already applied to `winbox`. A
+**This is host state, not repo state.** It was applied to `winbox` when this
+snapshot was recorded. A
 different Windows host without it is roughly 2.5x slower with nothing in the
 repository to explain why. `power-throttling-off.reg` and
 `power-throttling-default.reg` sit in `C:\Users\sshuser\`.
