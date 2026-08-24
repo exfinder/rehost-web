@@ -83,6 +83,8 @@ internal sealed class ApplicationBootstrapConfiguration
         string machineConfigurationFilePath,
         string rootWebConfigurationFilePath,
         string compilationTempDirectory,
+        string compilationTempDirectoryOverride,
+        string defaultCompilationTempDirectory,
         string machineKeyDirectory,
         string machineKeyValidationKeyOverride,
         string machineKeyDecryptionKeyOverride)
@@ -93,6 +95,8 @@ internal sealed class ApplicationBootstrapConfiguration
         MachineConfigurationFilePath = machineConfigurationFilePath;
         RootWebConfigurationFilePath = rootWebConfigurationFilePath;
         CompilationTempDirectory = compilationTempDirectory;
+        CompilationTempDirectoryOverride = compilationTempDirectoryOverride;
+        DefaultCompilationTempDirectory = defaultCompilationTempDirectory;
         MachineKeyDirectory = machineKeyDirectory;
         MachineKeyValidationKeyOverride = machineKeyValidationKeyOverride;
         MachineKeyDecryptionKeyOverride = machineKeyDecryptionKeyOverride;
@@ -108,9 +112,13 @@ internal sealed class ApplicationBootstrapConfiguration
 
     internal string RootWebConfigurationFilePath { get; }
 
-    // Null means no host-supplied root; resolution then falls to configured tempDirectory and to
-    // the portable default. See CodegenDirectory.
+    // Null means no host-supplied root; resolution then falls to the environment variable, the
+    // configured tempDirectory, and the default. See CodegenDirectory.
     internal string CompilationTempDirectory { get; }
+
+    internal string CompilationTempDirectoryOverride { get; }
+
+    internal string DefaultCompilationTempDirectory { get; }
 
     // Null means no host-supplied directory; resolution then falls to the per-user default. See
     // AutogenKeyStore.
@@ -163,6 +171,14 @@ internal sealed class ApplicationBootstrapConfiguration
                 options.CompilationTempDirectory,
                 "compilation temporary directory",
                 nameof(WebFormsApplicationOptions.CompilationTempDirectory)),
+            NormalizeDirectoryOption(
+                ReadEnvironmentOverride(WebFormsApplicationOptions.CompilationTempDirectoryVariable),
+                "compilation temporary directory from " +
+                    WebFormsApplicationOptions.CompilationTempDirectoryVariable,
+                WebFormsApplicationOptions.CompilationTempDirectoryVariable),
+            Path.Combine(
+                Path.TrimEndingDirectorySeparator(Path.GetFullPath(baseDirectory)),
+                "codegen"),
             NormalizeDirectoryOption(
                 options.MachineKeyDirectory,
                 "machine-key directory",
@@ -559,9 +575,19 @@ internal static class ApplicationConfigurationPreflight
         ApplicationBootstrapConfiguration configuration,
         CompilationSection compilation)
     {
+        var host = configuration.CompilationTempDirectory;
+        var environment = configuration.CompilationTempDirectoryOverride;
+        if (host != null && environment != null && !PathsEqual(host, environment))
+        {
+            throw new InvalidOperationException(
+                $"The {WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment " +
+                "variable conflicts with the host CompilationTempDirectory option. " +
+                $"Variable='{environment}', Host='{host}'. Remove one of them.");
+        }
+
+        var owner = host ?? environment;
         var configured = compilation?.TempDirectory;
-        if (configuration.CompilationTempDirectory == null ||
-            String.IsNullOrWhiteSpace(configured))
+        if (owner == null || String.IsNullOrWhiteSpace(configured))
         {
             return;
         }
@@ -571,17 +597,23 @@ internal static class ApplicationConfigurationPreflight
             ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(configured))
             : configured;
 
-        if (!String.Equals(
-                normalized,
-                configuration.CompilationTempDirectory,
-                OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+        if (!PathsEqual(normalized, owner))
         {
+            var ownerSource = host != null
+                ? "host CompilationTempDirectory option"
+                : $"{WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment variable";
             throw new InvalidOperationException(
-                "The configured system.web/compilation tempDirectory conflicts with the host " +
-                $"CompilationTempDirectory option. Configured='{configured}', " +
-                $"Host='{configuration.CompilationTempDirectory}'. Remove one of them.");
+                "The configured system.web/compilation tempDirectory conflicts with the " +
+                $"{ownerSource}. Configured='{configured}', " +
+                $"Supplied='{owner}'. Remove one of them.");
         }
     }
+
+    private static bool PathsEqual(string left, string right) =>
+        String.Equals(
+            left,
+            right,
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
     // The two out-of-process stores construct eagerly in SessionStateModule's mode
     // switch, so without this the failure is a native PlatformNotSupportedException

@@ -45,3 +45,23 @@ Carrying over from Framework:
 - `,IsolateApps` / `,IsolateByAppId` suffixes never interoperate across
   runtimes; mixed Framework/port farms must use bare keys
   ([machine key](follow-ups/machine-key-and-viewstate-bootstrap.md)).
+
+## Generated output (codegen)
+
+Framework's `Temporary ASP.NET Files` becomes a per-application directory the
+host resolves at startup. Pick by deployment shape:
+
+- **Local development and plain servers** — declare nothing. Output lands in
+  `codegen` beside the host binaries, next to `configs`; it is safe to delete
+  (the next start recompiles) and an unchanged application restarts without
+  recompiling ([ADR 0008](adr/0008-codegen-storage.md)).
+- **Containers** — a read-only root filesystem refuses the default at boot.
+  Point `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` (or the host
+  `CompilationTempDirectory` option) at a mounted writable path.
+
+Say it in at most one place: the option, the variable, and a web.config
+`<compilation tempDirectory>` that disagree fail at startup naming both
+sources.
+
+Carrying over from Framework: a `tempDirectory` attribute holding a Windows
+path fails on Linux/macOS — remove it and use the default or the variable.

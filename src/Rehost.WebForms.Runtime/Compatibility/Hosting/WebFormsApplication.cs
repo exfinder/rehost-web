@@ -13,6 +13,8 @@ public sealed class WebFormsApplicationOptions
     public const string MachineKeyValidationKeyVariable = "REHOST_WEBFORMS_MACHINEKEY_VALIDATIONKEY";
     public const string MachineKeyDecryptionKeyVariable = "REHOST_WEBFORMS_MACHINEKEY_DECRYPTIONKEY";
 
+    public const string CompilationTempDirectoryVariable = "REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY";
+
     public string ApplicationId { get; set; }
 
     public string PhysicalRootPath { get; set; }

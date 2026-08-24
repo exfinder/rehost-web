@@ -15,7 +15,8 @@ public sealed class CodegenDirectoryTests
             configured: Path.Combine(Path.GetTempPath(), "configured-root"),
             attributeName: "tempDirectory",
             fileName: "web.config",
-            lineNumber: 11);
+            lineNumber: 11,
+            defaultTempRoot: Path.Combine(Path.GetTempPath(), "default-root"));
 
         root.ShouldBe(Path.Combine(Path.GetTempPath(), "host-root"));
     }
@@ -30,25 +31,24 @@ public sealed class CodegenDirectoryTests
             configured: configured + Path.DirectorySeparatorChar,
             attributeName: "tempDirectory",
             fileName: "web.config",
-            lineNumber: 11);
+            lineNumber: 11,
+            defaultTempRoot: Path.Combine(Path.GetTempPath(), "default-root"));
 
         root.ShouldBe(configured);
     }
 
     [Fact]
-    public void Absent_Root_Falls_Back_To_The_Portable_Default()
+    public void Absent_Root_Falls_Back_To_The_Supplied_Default()
     {
         var root = CodegenDirectory.SelectTempRoot(
             hostSupplied: null,
             configured: null,
             attributeName: null,
             fileName: null,
-            lineNumber: 0);
+            lineNumber: 0,
+            defaultTempRoot: Path.Combine(Path.GetTempPath(), "default-root"));
 
-        root.ShouldBe(Path.Combine(
-            Path.TrimEndingDirectorySeparator(Path.GetTempPath()),
-            "rehost-webforms-tempfiles"));
-        Path.IsPathFullyQualified(root).ShouldBeTrue();
+        root.ShouldBe(Path.Combine(Path.GetTempPath(), "default-root"));
     }
 
     [Fact]
@@ -59,7 +59,8 @@ public sealed class CodegenDirectoryTests
             configured: "codegen",
             attributeName: "tempDirectory",
             fileName: "/app/web.config",
-            lineNumber: 11));
+            lineNumber: 11,
+            defaultTempRoot: Path.Combine(Path.GetTempPath(), "default-root")));
 
         exception.Filename.ShouldBe("/app/web.config");
         exception.Line.ShouldBe(11);

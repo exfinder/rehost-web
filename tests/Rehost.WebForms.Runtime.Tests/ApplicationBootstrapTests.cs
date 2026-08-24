@@ -280,6 +280,126 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Default_Compilation_Temp_Directory_Is_Codegen_Beside_The_Host_Binaries()
+    {
+        using var application = TemporaryApplication.Create();
+
+        application.CreateConfiguration().DefaultCompilationTempDirectory.ShouldBe(
+            Path.Combine(
+                Path.TrimEndingDirectorySeparator(Path.GetFullPath(application.OutputDirectory)),
+                "codegen"));
+    }
+
+    [Fact]
+    public void Environment_Variable_Supplies_The_Compilation_Temp_Directory()
+    {
+        using var application = TemporaryApplication.Create();
+        var supplied = Path.Combine(application.PhysicalRoot.FullName, "env-codegen");
+
+        var configuration = WithCompilationTempVariable(
+            supplied + Path.DirectorySeparatorChar,
+            application.CreateConfiguration);
+
+        configuration.CompilationTempDirectoryOverride.ShouldBe(supplied);
+        configuration.CompilationTempDirectory.ShouldBeNull();
+        Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+    }
+
+    [Fact]
+    public void Rejects_A_Relative_Environment_Compilation_Temp_Directory()
+    {
+        using var application = TemporaryApplication.Create();
+
+        var exception = WithCompilationTempVariable(
+            "codegen",
+            () => Should.Throw<ArgumentException>(application.CreateConfiguration));
+
+        exception.Message.ShouldContain("must be absolute");
+        exception.Message.ShouldContain(WebFormsApplicationOptions.CompilationTempDirectoryVariable);
+    }
+
+    [Fact]
+    public void Preflight_Rejects_An_Environment_Temp_Directory_That_Disagrees_With_The_Host()
+    {
+        using var application = TemporaryApplication.Create();
+        var options = application.CreateOptions();
+        options.CompilationTempDirectory = Path.Combine(application.PhysicalRoot.FullName, "host");
+
+        var exception = WithCompilationTempVariable(
+            Path.Combine(application.PhysicalRoot.FullName, "env-codegen"),
+            () =>
+            {
+                var configuration = ApplicationBootstrapConfiguration.Create(
+                    options,
+                    application.OutputDirectory);
+                return Should.Throw<InvalidOperationException>(
+                    () => ApplicationConfigurationPreflight.Validate(configuration));
+            });
+
+        exception.Message.ShouldContain(WebFormsApplicationOptions.CompilationTempDirectoryVariable);
+        exception.Message.ShouldContain("Remove one of them");
+    }
+
+    [Fact]
+    public void Preflight_Accepts_An_Environment_Temp_Directory_That_Agrees_With_The_Host()
+    {
+        using var application = TemporaryApplication.Create();
+        var shared = Path.Combine(application.PhysicalRoot.FullName, "codegen");
+        var options = application.CreateOptions();
+        options.CompilationTempDirectory = shared;
+
+        WithCompilationTempVariable(
+            shared + Path.DirectorySeparatorChar,
+            () =>
+            {
+                var configuration = ApplicationBootstrapConfiguration.Create(
+                    options,
+                    application.OutputDirectory);
+                Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+                return 0;
+            });
+    }
+
+    [Fact]
+    public void Preflight_Rejects_A_Configured_Temp_Directory_That_Disagrees_With_The_Environment()
+    {
+        using var application = TemporaryApplication.Create();
+        var configured = Path.Combine(application.PhysicalRoot.FullName, "configured");
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            $"""
+            <configuration>
+              <system.web>
+                <compilation tempDirectory="{configured}" />
+              </system.web>
+            </configuration>
+            """);
+
+        var exception = WithCompilationTempVariable(
+            Path.Combine(application.PhysicalRoot.FullName, "env-codegen"),
+            () => Should.Throw<InvalidOperationException>(
+                () => ApplicationConfigurationPreflight.Validate(application.CreateConfiguration())));
+
+        exception.Message.ShouldContain(WebFormsApplicationOptions.CompilationTempDirectoryVariable);
+        exception.Message.ShouldContain(configured);
+    }
+
+    private static T WithCompilationTempVariable<T>(string? value, Func<T> act)
+    {
+        Environment.SetEnvironmentVariable(
+            WebFormsApplicationOptions.CompilationTempDirectoryVariable, value);
+        try
+        {
+            return act();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable(
+                WebFormsApplicationOptions.CompilationTempDirectoryVariable, null);
+        }
+    }
+
+    [Fact]
     public void Preflight_Rejects_A_Declared_Windows_Authentication_Mode()
     {
         using var application = TemporaryApplication.Create();

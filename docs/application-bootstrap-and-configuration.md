@@ -18,9 +18,11 @@ Required options:
 Machine and root-web configuration paths are optional. When omitted, they
 default to the `configs` directory under `AppContext.BaseDirectory`.
 `CompilationTempDirectory` optionally supplies the writable root for generated
-output. It overrides `<compilation tempDirectory>`; disagreement fails
-preflight. Absent both, the root is
-`{Path.GetTempPath()}/rehost-webforms-tempfiles`.
+output; the `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable
+supplies the same root from the deployment. Any two of the option, the
+variable, and `<compilation tempDirectory>` that disagree fail preflight.
+Absent all three, the root is `codegen` under `AppContext.BaseDirectory`
+(ADR 0008).
 
 The physical root is normalized with `Path.GetFullPath`, retains filesystem
 casing, and receives a trailing platform directory separator. The virtual root

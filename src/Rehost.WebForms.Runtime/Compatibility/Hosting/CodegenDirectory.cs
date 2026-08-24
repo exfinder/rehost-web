@@ -13,16 +13,15 @@ using Rehost.WebForms.Hosting;
 // finds the output of its previous run.
 internal static class CodegenDirectory
 {
-    internal const string DefaultDirectoryName = "rehost-webforms-tempfiles";
-
     internal const string HostSource = "the host CompilationTempDirectory option";
+
+    internal const string EnvironmentSource =
+        "the " + WebFormsApplicationOptions.CompilationTempDirectoryVariable +
+        " environment variable";
 
     internal const string ConfiguredSource = "system.web/compilation tempDirectory";
 
-    internal const string DefaultSource = "the default temporary directory";
-
-    internal static string DefaultTempRoot =>
-        Path.Combine(Path.TrimEndingDirectorySeparator(Path.GetTempPath()), DefaultDirectoryName);
+    internal const string DefaultSource = "the default codegen directory beside the host binaries";
 
     internal static string ResolveTempRoot(CompilationSection compilationSection)
     {
@@ -37,11 +36,21 @@ internal static class CodegenDirectory
             compilationSection.GetTempDirectoryErrorInfo(out attributeName, out fileName, out lineNumber);
         }
 
-        var hostSupplied = WebFormsApplication.RequireInitialized().CompilationTempDirectory;
-        var source = hostSupplied != null
+        var configuration = WebFormsApplication.RequireInitialized();
+        var hostSupplied = configuration.CompilationTempDirectory
+            ?? configuration.CompilationTempDirectoryOverride;
+        var source = configuration.CompilationTempDirectory != null
             ? HostSource
-            : configured != null ? ConfiguredSource : DefaultSource;
-        var tempRoot = SelectTempRoot(hostSupplied, configured, attributeName, fileName, lineNumber);
+            : configuration.CompilationTempDirectoryOverride != null
+                ? EnvironmentSource
+                : configured != null ? ConfiguredSource : DefaultSource;
+        var tempRoot = SelectTempRoot(
+            hostSupplied,
+            configured,
+            attributeName,
+            fileName,
+            lineNumber,
+            configuration.DefaultCompilationTempDirectory);
 
         EnsureWritable(tempRoot, source);
 
@@ -53,7 +62,8 @@ internal static class CodegenDirectory
         string configured,
         string attributeName,
         string fileName,
-        int lineNumber)
+        int lineNumber,
+        string defaultTempRoot)
     {
         if (hostSupplied != null)
         {
@@ -62,7 +72,7 @@ internal static class CodegenDirectory
 
         if (configured == null)
         {
-            return DefaultTempRoot;
+            return defaultTempRoot;
         }
 
         var tempDirectory = configured.Trim();

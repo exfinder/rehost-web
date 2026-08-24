@@ -6,12 +6,15 @@ append subdirectories derived from AppDomain identity. Neither leaf survives:
 the install directory holds no codegen root and is not writable, and
 `SetDynamicBase` and `DynamicDirectory` are inert outside .NET Framework.
 
-The root resolves in order: the host `CompilationTempDirectory` option, then
-configured `tempDirectory`, then `{Path.GetTempPath()}/rehost-webforms-tempfiles`.
-A configured value that disagrees with the host option fails at preflight as
-conflicting ownership rather than one silently losing. An unwritable root fails
-naming the path and the source that supplied it, instead of Framework's silent
-relocation to `%TEMP%`.
+The root resolves in order: the host `CompilationTempDirectory` option, the
+`REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable, configured
+`tempDirectory`, then `codegen` under `AppContext.BaseDirectory`. The default
+sits beside the host binaries — where the `configs` default already lives, and
+where generated pages are visible during development — rather than in the
+reclaimable system temp root. Any two set sources that disagree fail at
+preflight as conflicting ownership rather than one silently losing. An
+unwritable root fails naming the path and the source that supplied it, instead
+of Framework's silent relocation to `%TEMP%`.
 
 The generation segment is eight hex characters of a digest of the application
 directory, keyed on that directory rather than the host application ID, so
@@ -36,10 +39,11 @@ and the marker is never written.
 
 ## Deployment
 
-Containers are the primary production target. A container's temporary directory
-is per-container, so the default root means every cold start recompiles. Persisting
-reuse requires pointing `CompilationTempDirectory` at a mounted volume, and a
-read-only root filesystem requires the option outright.
+Containers are the primary production target. The default root lives in the
+image's application directory, so every cold start recompiles, and a read-only
+root filesystem refuses it at boot. Both are answered by pointing the
+environment variable (or the host option) at a mounted writable volume — the
+variable exists so the operator can do this without rebuilding the image.
 
 Reuse across image versions is not expected even then: `bin` and `App_Code`
 timestamps feed the top-level hash, so a rebuilt image invalidates it.

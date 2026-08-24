@@ -4,8 +4,6 @@ using Rehost.WebForms.Hosting;
 
 var url = args.Length > 0 ? args[0] : "http://127.0.0.1:5081";
 var physicalRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
-var codegen = Path.Combine(AppContext.BaseDirectory, "codegen");
-Directory.CreateDirectory(codegen);
 
 var builder = WebApplication.CreateBuilder();
 builder.WebHost.UseUrls(url);
@@ -14,7 +12,6 @@ builder.AddRehostWebForms(options =>
     options.ApplicationId = "webforms-application";
     options.PhysicalRootPath = physicalRoot;
     options.VirtualRootPath = "/";
-    options.CompilationTempDirectory = codegen;
     options.MachineConfigurationFilePath = Path.Combine(
         AppContext.BaseDirectory,
         "configs",
