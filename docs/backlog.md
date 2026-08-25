@@ -215,6 +215,15 @@ Carried from Milestone 1 as unresolved detail:
   timing record with a budget, periodic mutation runs over port-owned seams,
   and shrinking `TimeoutOverKestrelTests`' real-clock wait (~7s) if the sweep
   contract allows a shorter fixture timeout.
+- General cache/output-cache breadth beyond basic fragment caching: providers
+  and `VaryBy*` policy remain unassessed
+  ([map](compatibility.md#state-security-and-ancillary-assemblies)).
+- Legacy declarative data stack: `LinqDataSource`, `EntityDataSource`, Dynamic
+  Data, and typed DataSets remain absent or unassessed; `.xsd` build-provider
+  generation fails explicitly
+  ([map](compatibility.md#compilation-and-pages)).
+- Visual Basic runtime page/App_Code compilation; only C# is supported today
+  ([map](compatibility.md#compilation-and-pages)).
 
 ## Rejected
 
