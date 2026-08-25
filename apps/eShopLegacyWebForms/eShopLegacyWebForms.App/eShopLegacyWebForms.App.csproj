@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>eShopLegacyWebForms</AssemblyName>
+    <RootNamespace>eShopLegacyWebForms</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RehostAppContentRoot>../eShopLegacyWebForms/</RehostAppContentRoot>
+    <NoWarn>$(NoWarn);NU1701</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.WebForms.FriendlyUrls" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.WebForms.Optimization" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.WebForms.Optimization.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.WebForms.ScriptManager.Bundles" Version="$(RehostWebFormsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="4.9.1" />
+    <PackageReference Include="EntityFramework" Version="6.5.2" />
+    <PackageReference Include="log4net" Version="2.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Autofac.Integration.Web/Autofac.Integration.Web.csproj" />
+  </ItemGroup>
+</Project>
