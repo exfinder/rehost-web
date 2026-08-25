@@ -24,6 +24,11 @@ exec docker run --rm $TTY \
   -e APP="$APP" -e PORT="$PORT" \
   "mcr.microsoft.com/dotnet/sdk:$SDK_VERSION" \
   bash -ec '
+    # linux-round.sh chowns /work to its non-root user; this script stays root
+    # (it runs no tests, so the run-as-app rationale does not apply) and must
+    # tell git the app-owned clone and the host-owned /src are trusted.
+    git config --global --add safe.directory /src
+    git config --global --add safe.directory /work/repo
     if [ ! -d /work/repo/.git ]; then
       git clone -q /src /work/repo
     fi
