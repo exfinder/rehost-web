@@ -21,7 +21,7 @@ ignored.
 | --- | --- |
 | `security/requestFiltering` limits | Reconcile `maxAllowedContentLength`, `maxRequestLength`, query/URL limits, verbs, and Kestrel ownership without duplicate refusals |
 | `httpProtocol/customHeaders` | Apply configured response headers uniformly to dynamic and System.Web-served static responses |
-| `httpErrors` | Define pre-pipeline error bodies and `existingResponse` interaction with managed `customErrors` |
+| `httpErrors` | Define pre-pipeline error bodies and `existingResponse` interaction with managed `customErrors`. Reading D16: the directory-request 403 (D6) is answered natively and bypasses `customErrors`; the port throws it into the managed pipeline, so `customErrors` redirects instead |
 | `staticContent`, `defaultDocument`, `hiddenSegments` below app root | Decide and test per-folder merge behavior; root behavior already ships |
 | Remaining sections | Explicitly classify as future tenant or tolerated no-op |
 

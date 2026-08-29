@@ -41,6 +41,7 @@ Captured 2026-08-14 on IIS Express 10.0.26013. Golden order:
 | D13 | Root duplicate add | Directory requests fail app-wide; direct files/pages serve |
 | D14 | Slashless missing, empty, disabled directories | 404; 301; 403 respectively |
 | D15 | Root duplicate plus slashless directory | 500, no redirect |
+| D16 | D6 under `customErrors mode="On"` with `defaultRedirect` (2026-08-29) | 403 unchanged; `customErrors` never consulted — the refusal is native. The port's managed 403 currently lands in `customErrors` and redirects to the error page |
 
 The port deliberately validates honored sections at activation instead of
 reproducing IIS's consumption-scoped configuration failures.
