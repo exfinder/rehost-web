@@ -40,7 +40,7 @@ Imported from `C#/WingtipToys` inside that archive, minus `bin/`, `obj/`,
 | --- | --- |
 | `WingtipToys/` | The frozen .NET Framework 4.5.2 WAP. Never modified; byte-identical to the archive. |
 | `WingtipToys.App/` | The port of the app assembly: compiles the legacy folder's `*.cs` into `WingtipToys.dll`, plus the `jquery`/`bootstrap` script-mapping shim. |
-| `WingtipToys.Host/` | The process: a ~20-line Kestrel host, plus the app's own `Web.Rehost.config`. |
+| `WingtipToys.Host/` | The process: a ~20-line Kestrel host, the app's own `Web.Rehost.config`, and the local PayPal NVP responder the checkout journey runs against. |
 | `System.Net.Http.WebRequest/` | A 15-line stand-in for the Framework façade Katana's Google middleware demands. See below — this is the one thing the analysis did not predict. |
 
 ## Commands
@@ -84,9 +84,12 @@ anonymous home with the database-seeded category menu, the two folder
 authorization gates, register, log off, log back in, the product list over
 Friendly URLs, both `MapPageRoute` routes, add-to-cart twice, the cart
 `GridView`, an Update postback that changes one row's quantity, the master
-page's cart count following it, checkout as far as the PayPal boundary, the
-seeded `canEdit` user reaching the admin page, static assets, and both
-production bundles asserted on their minified content.
+page's cart count following it, checkout through `CheckoutReview` and
+`CheckoutComplete` to the written order and the emptied cart, the `customErrors`
+404 row, the seeded `canEdit` user reaching the admin page, static assets, and
+both production bundles asserted on their minified content.
+
+It needs no network beyond the host and the database container.
 
 ## packages.config → PackageReference
 
@@ -152,15 +155,21 @@ reference and never met this, because it never invokes the middleware.
 it repeats the default's `<runtime>` removal and Optimization `<controls>`
 retarget first. (The default's `<system.codedom>` removal is *not* repeated:
 this application predates the DotNetCompilerPlatform template change and has no
-such element, so the rule only produces an XDT warning.) Four app-specific
+such element, so the rule only produces an XDT warning.) Three app-specific
 edits:
 
 | Edit | Justifying failure |
 | --- | --- |
 | Remove the three `Elmah.*` rows from `<system.webServer><modules>` | A module row whose type will not load fails its URLs with the entry named (MH22a). `Elmah.dll` binds Framework's strong-named `System.Web`. |
-| `<customErrors mode="Off">` | Bring-up only. As authored it turns every diagnosable failure into `ErrorPage.aspx` — the `System.Net.Http.WebRequest` diagnosis above depended on this being off. |
 | `DefaultConnection` → `Data Source=127.0.0.1,14333;Initial Catalog=aspnet-WingtipToys;…` | `(LocalDb)\v11.0` is a Windows-only engine. |
 | `WingtipToys` → `Data Source=127.0.0.1,14333;Initial Catalog=WingtipToys;…` | Same, plus `AttachDbFilename=\|DataDirectory\|\wingtiptoys.mdf` has no container equivalent, so the file store becomes a named catalog rather than a renamed data source. |
+
+**`<customErrors>` is as authored.** It was transformed to `mode="Off"` during
+bring-up — the `System.Net.Http.WebRequest` diagnosis above depended on that —
+and the transform is gone: the staged `web.config` carries the application's own
+`mode="On"`, its `defaultRedirect`, and its 404 row. `smoke.sh` asserts that row,
+and asserts a page-specific marker wherever a step could otherwise have passed on
+`ErrorPage.aspx`'s copy of the master page.
 
 **The rest of the ELMAH surface needed no transform.** The `elmah`
 `<configSections>` sectionGroup with its four `Elmah.*` handler types, the
@@ -196,10 +205,55 @@ no `jquery` `ScriptResourceMapping` exists. `Account/Register.aspx` and
 against the files actually in `Scripts/` (1.10.2 and 3.0.0), the eShop pattern
 verbatim.
 
+## The local PayPal NVP responder
+
+`Logic/PayPalFunctions.cs` hard-codes everything: `bSandbox` is a `const bool`,
+`pEndPointURL_SB` is a literal, and `HttpCall` at `:187` does
+`(HttpWebRequest)WebRequest.Create(url)` with no configuration read anywhere in
+the class. There is no application-level seam — no app setting, no XDT-reachable
+element — so the endpoint cannot be redirected through configuration.
+
+The seam that does exist is one level down, in the BCL:
+`WebRequest.RegisterPrefix` is honored by .NET 10's `WebRequest.Create`, the
+prefix list is ordered longest-first so an endpoint-specific prefix outranks the
+built-in `https:` entry, and a creator that returns
+`WebRequest.Create("http://127.0.0.1:<port>/nvp")` still returns an
+`HttpWebRequest`, so the frozen cast holds.
+
+`WingtipToys.Host/PayPalNvpResponder.cs` starts a second Kestrel instance on
+`127.0.0.1:0` before the application host and registers that prefix for
+`https://api-3t.sandbox.paypal.com`. It answers the three methods the checkout
+pages call — `SetExpressCheckout` issues a token and remembers the order total
+verbatim, `GetExpressCheckoutDetails` returns that same `AMT` string plus a
+shipping address, `DoExpressCheckoutPayment` returns a transaction id — and
+`ACK=Failure` with real NVP error fields for anything else. Echoing the amount
+string rather than re-formatting it is what keeps `CheckoutReview`'s
+`Convert.ToDecimal` mismatch guard passing under any host culture.
+
+Nothing about it is a port claim. It is an application-side fixture, the shape
+of `System.Net.Http.WebRequest/` above: it listens on loopback with an ephemeral
+port, needs no hosts entry and no outbound access, and touches no frozen source.
+The real sandbox is never contacted — with the tutorial's placeholder
+credentials it could only ever answer `10002 Security error`.
+
 ## Verified working
 
 In rough order of how unproven each was going in.
 
+- **The whole checkout, through the order write and `EmptyCart`.** Against the
+  responder above: `CheckoutStart` hands off with the issued token,
+  `CheckoutReview` binds the returned shipping address into a `DetailsView`,
+  passes its amount-mismatch guard, writes one `Order` and one `OrderDetail` per
+  line with a `SaveChanges` each, and `CheckoutComplete` re-reads that order by
+  id, stamps the transaction id, and empties the cart. Five session keys cross
+  four requests and an external redirect. This is the surface the milestone
+  exists for and nothing here had run before.
+- **`customErrors mode="On"` end to end, for the 404 row.** A missing page
+  redirects to the authored `ErrorPage.aspx?msg=404&handler=…` URL, Friendly
+  URLs then drops the extension, and `ErrorPage.aspx` renders the friendly
+  message and — `Request.IsLocal` being true for a loopback client — the
+  detailed panel. The `defaultRedirect` branch for an unhandled exception is
+  still unassessed.
 - **Production-mode Optimization on the first render of every page.**
   `BundleConfig.cs:39` sets `EnableOptimizations = true` unconditionally,
   overriding `debug="true"`. `~/bundles/modernizr` returns 11 KB of minified
@@ -252,27 +306,28 @@ In rough order of how unproven each was going in.
 
 ## Boundaries
 
-- **PayPal checkout ends at the handoff.** `Logic/PayPalFunctions.cs:36-38`
-  carries the literal placeholders `<Your API Username>` / `<Your API Password>`
-  / `<Your Signature>`, and `:62-63` hard-code `https://localhost:44300/…` as
-  the return and cancel URLs. `CheckoutStart.aspx` therefore calls the sandbox,
-  is refused, and redirects to
-  `CheckoutError.aspx?ErrorCode=10002&Desc=Security error&Desc2=Security header is not valid`.
-  That exercises the session write, the outbound call and the redirect;
-  `CheckoutReview`, the `Order` + `OrderDetail` write and `EmptyCart` are
-  **unreached**. A local NVP fake responder that would drive them is future
-  work. Note that this one smoke step therefore **needs outbound HTTPS to
-  `api-3t.sandbox.paypal.com`**; with no network the synchronous
-  `HttpWebRequest` throws instead and the step fails differently.
+- **Checkout is driven against a fixture, not PayPal.** The tutorial's
+  placeholder credentials (`Logic/PayPalFunctions.cs:36-38`) make the real
+  sandbox unusable, so what the journey proves is the application's own
+  behavior around the NVP boundary, not interoperability with PayPal. The
+  hard-coded `https://localhost:44300/Checkout/CheckoutReview.aspx` return URL
+  (`:62-63`) is still sent and still ignored: the browser is redirected to
+  `www.sandbox.paypal.com` and the smoke resumes the journey at
+  `CheckoutReview` on this host, exactly as the return URL would have. The
+  `CheckoutCancel` path is not walked.
 - **Google external login fails at Google.** The client id is
   `000000000000.apps.googleusercontent.com`. The button renders on Login and
   Register; clicking it issues an OWIN challenge that Google rejects. Commenting
   it out would be an application-source change the frozen-tree rule forbids.
-- **`customErrors` must be restored before any compatibility claim.** The XDT
-  turns it `Off` for bring-up. As authored it is `mode="On"` with a
-  `defaultRedirect` and a 404 row, and that path — `Application_Error` →
-  `Server.Transfer("ErrorPage.aspx")`, `Server.GetLastError`, `Request.IsLocal`
-  — is assessed by nothing here.
+- **`customErrors` is restored, but only its 404 row is assessed.** The staged
+  config is the application's own `mode="On"`. What runs is the `<error
+  statusCode="404">` redirect and `ErrorPage.aspx` behind it. `Application_Error`
+  → `Server.Transfer("ErrorPage.aspx")` never fires here — `Global.asax.cs:55`
+  only transfers for an `HttpUnhandledException` with an inner exception, and
+  the journey raises none — so `Server.GetLastError`, `Server.ClearError` on a
+  real exception, and the `defaultRedirect` branch remain unassessed. Note that
+  the transfer target is relative, so from a page under `Checkout/` it would
+  resolve to a `Checkout/ErrorPage.aspx` that does not exist.
 - **LocalDb is out of contract,** as in every prior application. Here it is
   reached on *every* page, so the connection-string swap is the one
   application-visible edit that has to happen before anything renders at all.
@@ -288,19 +343,41 @@ In rough order of how unproven each was going in.
   are per-application and host-resolvable (ADR 0010); sign-ins survive a
   restart, but two instances cannot share them.
 
-## Two latent defects in the frozen source
+## What looked like two latent defects
 
-Neither is on the happy path, and both will look like port bugs if hit.
-`Checkout/CheckoutComplete.aspx.cs:47-49` compares `Session["currentOrderId"]`
-(an `int`) to `string.Empty` — always true — then reads
-`Session["currentOrderID"]`, a different key, so `Convert.ToInt32(null)` yields
-order 0. `Logic/ShoppingCartActions.cs:99-107` (`GetCart`) returns a context it
-has already disposed.
+The pre-import analysis called out
+`Checkout/CheckoutComplete.aspx.cs:47-49` as fatal: it compares
+`Session["currentOrderId"]` (an `int`) to `string.Empty`, and then reads
+`Session["currentOrderID"]` — different casing — which was read as a different
+key yielding `Convert.ToInt32(null)` and an order lookup for id 0. Running it
+says otherwise. The comparison is indeed always true, but harmlessly so, and
+**ASP.NET session keys are case-insensitive**
+(`SessionStateItemCollection` is built over
+`Misc.CaseInsensitiveInvariantKeyComparer`), so the second read returns the id
+`CheckoutReview` stored. `_db.Orders.Single(…)` finds the row, the transaction
+id is saved, and the cart empties — the smoke asserts all three.
+
+`Logic/ShoppingCartActions.cs:99-107` (`GetCart`) still returns a context it has
+already disposed. Nothing calls it.
+
+## Rows this evidence backs
+
+The claims themselves live in
+[`docs/compatibility.md`](../../docs/compatibility.md), which names this
+application in five rows.
+
+| Row | What Wingtip Toys adds |
+| --- | --- |
+| Web Application Project model | A frozen WAP tree beyond the two templates, and the stateful commerce journey against SQL Server |
+| Optimization/WebForms and WebGrease | Production combination and minification over real inputs, including a bundle declared only in `Bundle.config` |
+| `customErrors` redirects | The 404 row, and the application's own error page behind it |
+| Session state | InProc session across an OWIN sign-in and a four-request checkout |
+| Forms authentication, roles, profiles, anonymous identity | Role checks resolved from an Identity claims principal with no `RoleProvider` |
 
 ## Not exercised here
 
-`Checkout/CheckoutReview` and `CheckoutComplete` (behind PayPal), the admin
-Remove-product path, `ViewSwitcher.ascx` and `Site.Mobile.Master`,
-`Account/Manage` and the two-factor and external-login pages,
-`ErrorPage.aspx` under `customErrors mode="On"`, and the `elmah.axd` handler
-block that the XDT deliberately left in place.
+The admin Remove-product path, `Checkout/CheckoutCancel`, `ViewSwitcher.ascx`
+and `Site.Mobile.Master`, `Account/Manage` and the two-factor and external-login
+pages, the `customErrors` `defaultRedirect` branch and the `Application_Error`
+transfer behind it, and the `elmah.axd` handler block that the XDT deliberately
+left in place.
