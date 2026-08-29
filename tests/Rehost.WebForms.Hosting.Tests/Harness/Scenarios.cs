@@ -138,6 +138,9 @@ public sealed class AuthLiveScenario(ScenarioHostRegistry registry)
 public sealed class DefDocDisabledLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.DefDocDisabled));
 
+public sealed class CustomErrorsLiveScenario(ScenarioHostRegistry registry)
+    : Scenario(registry.GetOrAdd(Fixtures.BodyCustomErrors));
+
 public sealed class WebServerLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.WebServer));
 

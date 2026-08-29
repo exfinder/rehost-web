@@ -7,7 +7,7 @@ using System.Web.Util;
 namespace System.Web;
 
 // Two IIS modules decided directory requests after routing and before handler mapping, and
-// this host replaces IIS (ledger P67, readings D1-D15): DefaultDocumentModule rewrote to the
+// this host replaces IIS (ledger P67, readings D1-D16): DefaultDocumentModule rewrote to the
 // first existing candidate and redirected slash-less directory URLs; when it declined, the
 // request fell through to DirectoryListingModule, whose browsing-off answer was the 403. The
 // classic engine has no fall-through module, so one step owns both halves. The rewritten
@@ -64,10 +64,14 @@ internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecution
             }
         }
 
-        throw new HttpException(
-            403,
-            "The directory '" + path + "' has no default document and directory browsing is"
-            + " not supported.");
+        // IIS's browsing-off 403 was native, so managed customErrors never converted it
+        // (reading D16): a completed response, not a thrown HttpException, keeps that surface.
+        var refusal = context.Response;
+        refusal.StatusCode = 403;
+        refusal.Write(
+            "The directory '" + HttpUtility.HtmlEncode(path) + "' has no default document and"
+            + " directory browsing is not supported.");
+        _application.CompleteRequest();
     }
 
     // 301 with an absolute Location and the query preserved (reading D5). Built from the raw

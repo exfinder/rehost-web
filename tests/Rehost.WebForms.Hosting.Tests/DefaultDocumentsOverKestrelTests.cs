@@ -83,3 +83,19 @@ public sealed class DefaultDocumentsOverKestrelTests(WebServerLiveScenario scena
         (await scenario.Client.GetAsync("/nope")).StatusCode.ShouldBe(404);
     }
 }
+
+// IIS answered the browsing-off 403 natively, before managed error handling, so an app's
+// customErrors never converts it into the defaultRedirect (reading D16).
+public sealed class DirectoryRefusalOverKestrelTests(CustomErrorsLiveScenario scenario)
+    : IClassFixture<CustomErrorsLiveScenario>
+{
+    [Fact]
+    public async Task Custom_Errors_Do_Not_Convert_The_Directory_Refusal()
+    {
+        Directory.CreateDirectory(Path.Combine(scenario.ApplicationPath, "hollow"));
+
+        var response = await scenario.Client.GetAsync("/hollow/");
+
+        response.StatusCode.ShouldBe(403);
+    }
+}
