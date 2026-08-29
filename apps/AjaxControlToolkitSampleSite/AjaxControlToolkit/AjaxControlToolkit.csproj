@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AjaxControlToolkit</AssemblyName>
+    <RootNamespace>AjaxControlToolkit</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);REHOST</DefineConstants>
+    <NoWarn>$(NoWarn);NU1701;CS1591;CS3001;CS3005;CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="ToolboxIcons\*.bmp" />
+    <EmbeddedResource Include="Images\*" />
+    <EmbeddedResource Include="Styles\*.css" Exclude="Styles\Backgrounds_static.css;Styles\Backgrounds_static.min.css" />
+  </ItemGroup>
+
+  <!-- Upstream logical names: ScriptResource.axd lookups use them verbatim. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\*.min.js">
+      <LogicalName>$([System.String]::Copy('%(FileName)').Replace('.min','')).js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scripts\*.js" Exclude="Scripts\*.min.js">
+      <LogicalName>%(FileName).debug.js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scripts\Localization\*.min.js">
+      <LogicalName>Localization.$([System.String]::Copy('%(FileName)').Replace('.min','').Replace('_','.')).js</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scripts\Localization\*.js" Exclude="Scripts\Localization\*.min.js">
+      <LogicalName>Localization.$([System.String]::Copy('%(FileName)').Replace('_','.')).debug.js</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>
