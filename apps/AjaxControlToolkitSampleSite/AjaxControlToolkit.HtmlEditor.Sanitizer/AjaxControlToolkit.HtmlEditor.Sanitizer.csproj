@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>AjaxControlToolkit.HtmlEditor.Sanitizer</AssemblyName>
+    <RootNamespace>AjaxControlToolkit.HtmlEditor.Sanitizer</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);REHOST</DefineConstants>
+    <NoWarn>$(NoWarn);NU1701;CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <ProjectReference Include="../AjaxControlToolkit/AjaxControlToolkit.csproj" />
+  </ItemGroup>
+</Project>

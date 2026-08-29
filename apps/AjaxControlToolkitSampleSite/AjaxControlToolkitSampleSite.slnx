@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="AjaxControlToolkit/AjaxControlToolkit.csproj" />
+  <Project Path="AjaxControlToolkit.HtmlEditor.Sanitizer/AjaxControlToolkit.HtmlEditor.Sanitizer.csproj" />
+  <Project Path="AjaxControlToolkitSampleSite.Host/AjaxControlToolkitSampleSite.Host.csproj" />
 </Solution>
