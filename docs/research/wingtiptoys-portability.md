@@ -222,6 +222,12 @@ order lookup uses order 0. And `Logic/ShoppingCartActions.cs:99-107`
 (`GetCart`) returns a cart it has already disposed. Neither is reached by the
 happy path as written, but both will look like port bugs if hit.
 
+*Falsified in bring-up:* the first is not a defect. ASP.NET session keys are
+case-insensitive (`SessionStateItemCollection` is built over
+`Misc.CaseInsensitiveInvariantKeyComparer`), so `Session["currentOrderID"]`
+returns the id `CheckoutReview` stored under `currentOrderId`, and the whole
+completion path runs. The always-true comparison is harmless. `GetCart` stands.
+
 ## External-service boundaries
 
 | Boundary | Evidence | Disposition |
@@ -442,6 +448,10 @@ question rather than an application quirk.
    `EmptyCart` — the richest stateful surface in the application, and the one
    the milestone exists for. (c) is the only option that actually tests
    checkout, but it is the only one that adds a fixture.
+
+   *Resolved as (c).* The frozen class exposes no configuration seam, so the
+   redirection is `WebRequest.RegisterPrefix` in the host; the responder and its
+   boundaries are in [`apps/WingtipToys`](../../apps/WingtipToys/README.md).
 3. **ELMAH.** Drop it by XDT (no application code touches it) or recompile
    `elmah.corelibrary` under Rehost identity. Dropping is right on cost; keeping
    it would preserve the tutorial's final chapter as written and prove one more
@@ -461,6 +471,9 @@ question rather than an application quirk.
 6. **`customErrors mode="On"`.** Leave it as authored and diagnose through
    `App_Data/ErrorLog.txt`, or XDT it off for bring-up and restore it before the
    smoke. Prior applications had nothing equivalent.
+
+   *Resolved as the second.* The transform is gone and the smoke asserts the
+   404 row; the `defaultRedirect` branch stays unassessed.
 
 ## Sources
 

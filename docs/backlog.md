@@ -169,15 +169,14 @@ Carried from Milestone 1 as unresolved detail:
   application services, `customErrors`-On async errors, debug/localized
   scripts, and the excluded LINQ-to-SQL/WCF/Client Services stacks):
   [Extensions](follow-ups/extensions-ajax-activation.md).
-- Validate production Optimization combination, caching, request handling, and
-  minification separately from the frozen template's debug-mode expansion.
-  Higher priority than it reads: `EnableOptimizations` defaults to the inverse
-  of `<compilation debug>`, so every deployment with `debug="false"` runs this
-  path — it is the production default, and every smoke so far runs debug-mode.
-  Natural validation point: the production-baseline milestone
-  (`debug="false"` with its real, populated bundles). The AjaxControlToolkit
-  sample site only proved the seam does not crash: production mode over an
-  empty bundle serves a clean empty 200.
+- Remaining production Optimization scope: bundle caching, `VaryBy` breadth,
+  and request handling. Combination and minification are no longer open —
+  Wingtip Toys sets `EnableOptimizations` unconditionally, so its three-platform
+  smoke asserts combined, minified CSS and script bundles over real inputs on
+  every page, including a bundle declared only in `Bundle.config`. The earlier
+  entry rested on "every smoke so far runs debug-mode", which that application
+  falsified; the AjaxControlToolkit sample site had only proved the seam does
+  not crash over an empty bundle.
 - Assess WebGrease image assembly/spriting separately; those paths use legacy
   drawing/desktop types and are not covered by JS/CSS minifier execution.
 
