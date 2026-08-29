@@ -13,7 +13,8 @@ its remaining detail moved below. Milestone 2 owns these outcomes:
 - Establish deterministic mock-data journeys before database integration.
 - Recompile/replace only the managed dependency closure reached by eShop.
 - Keep EF6 consumption separate from real SQL deployment, which belongs to
-  Milestone 3.
+  the production baseline (Milestone 4); Wingtip Toys (Milestone 3) brings
+  the first real SQL Server journeys.
 
 Carried from Milestone 1 as unresolved detail:
 
@@ -26,10 +27,12 @@ Carried from Milestone 1 as unresolved detail:
 
 ## Next
 
-- Milestone 3 (production baseline): real SQL, deterministic Windows/Linux
-  publish, containers, graceful lifecycle, readiness/health, metrics and
-  diagnostics, external configuration and secrets, multi-instance operation —
-  see [`../ROADMAP.md`](../ROADMAP.md).
+- Milestone 3 (Wingtip Toys): stateful commerce breadth — authentication,
+  session, cart, checkout, providers, real SQL Server — then Milestone 4
+  (production baseline): deterministic Windows/Linux publish, containers,
+  graceful lifecycle, readiness/health, metrics and diagnostics, external
+  configuration and secrets, multi-instance operation — see
+  [`../ROADMAP.md`](../ROADMAP.md).
 
 ## Later
 
@@ -171,7 +174,7 @@ Carried from Milestone 1 as unresolved detail:
   Higher priority than it reads: `EnableOptimizations` defaults to the inverse
   of `<compilation debug>`, so every deployment with `debug="false"` runs this
   path — it is the production default, and every smoke so far runs debug-mode.
-  Natural validation point: the Milestone 3 eShop production baseline
+  Natural validation point: the production-baseline milestone
   (`debug="false"` with its real, populated bundles). The AjaxControlToolkit
   sample site only proved the seam does not crash: production mode over an
   empty bundle serves a clean empty 200.

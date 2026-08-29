@@ -37,28 +37,32 @@ logins do not survive a restart without an explicit `<machineKey>`; the
 stays absent (ledger P69). The gap analysis and its closure live in
 [`docs/research/webforms-identity-application-gaps.md`](docs/research/webforms-identity-application-gaps.md).
 
-## Current — Milestone 2: eShopLegacyWebForms
+## Completed — Milestone 2: eShopLegacyWebForms
 
-Run Microsoft's eShopLegacyWebForms application with its C#, markup, and
-`Web.config` frozen. Start with deterministic mock data so runtime compatibility
-is separable from database operations. EF6 may be consumed as a modern NuGet
-dependency; application-specific substitutions remain sidecar/package work.
+Microsoft's eShopLegacyWebForms runs with its C#, markup, and `Web.config`
+frozen, on mock data, from [`apps/eShopLegacyWebForms`](apps/eShopLegacyWebForms/README.md).
+The catalog journeys (the application has no purchase flow) pass on all three
+platforms; closure work landed as two XDT module drops, an
+`Autofac.Integration.Web` recompile, the baseline `expressionBuilders`
+registration, and a script-mapping shim. The AJAX Control Toolkit spike rode
+the same patterns: the toolkit recompiles against the port and its 50-page
+sample site runs as a Web Site project
+([`apps/AjaxControlToolkitSampleSite`](apps/AjaxControlToolkitSampleSite/README.md)).
 
-Done means the application's principal browsing and purchase journeys run on
-all three platforms with mock data and no application-source rewrite.
-
-## Later — Milestone 3: production baseline
-
-Turn the eShop result into a production deployment baseline: real SQL,
-deterministic Windows/Linux publish, containers, graceful lifecycle,
-readiness/health, metrics and diagnostics, external configuration and secrets,
-and multi-instance operation.
-
-## Horizon — Milestone 4
+## Current — Milestone 3: Wingtip Toys
 
 Use Wingtip Toys to drive stateful commerce breadth: authentication, session,
-cart, and related provider behavior. Define exact scope only when Milestone 3 is
-near completion.
+cart, checkout, and related provider behavior, with its application source
+frozen. Real SQL Server arrives with it (the application needs a database);
+the deployment concerns below stay out of its scope.
+
+## Later — Milestone 4: production baseline
+
+Turn a running milestone application into a production deployment baseline:
+real SQL operations, deterministic Windows/Linux publish, containers, graceful
+lifecycle, readiness/health, metrics and diagnostics, external configuration
+and secrets, and multi-instance operation. Production-mode Optimization
+validation lands here if no earlier smoke claims it.
 
 ## Rejected directions
 
@@ -66,4 +70,4 @@ near completion.
 - Binary drop-in compatibility with Microsoft's strong-named assemblies.
 - A Windows-only runtime profile.
 - Rewriting the milestone applications to fit the port.
-- Detailed Milestone 4 planning now.
+- Detailed production-baseline planning before Wingtip Toys runs.
