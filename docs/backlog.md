@@ -168,6 +168,13 @@ Carried from Milestone 1 as unresolved detail:
   [Extensions](follow-ups/extensions-ajax-activation.md).
 - Validate production Optimization combination, caching, request handling, and
   minification separately from the frozen template's debug-mode expansion.
+  Higher priority than it reads: `EnableOptimizations` defaults to the inverse
+  of `<compilation debug>`, so every deployment with `debug="false"` runs this
+  path — it is the production default, and every smoke so far runs debug-mode.
+  Natural validation point: the Milestone 3 eShop production baseline
+  (`debug="false"` with its real, populated bundles). The AjaxControlToolkit
+  sample site only proved the seam does not crash: production mode over an
+  empty bundle serves a clean empty 200.
 - Assess WebGrease image assembly/spriting separately; those paths use legacy
   drawing/desktop types and are not covered by JS/CSS minifier execution.
 
