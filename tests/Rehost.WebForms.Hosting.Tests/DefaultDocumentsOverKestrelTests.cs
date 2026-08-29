@@ -97,5 +97,6 @@ public sealed class DirectoryRefusalOverKestrelTests(CustomErrorsLiveScenario sc
         var response = await scenario.Client.GetAsync("/hollow/");
 
         response.StatusCode.ShouldBe(403);
+        response.Text.ShouldBe("");
     }
 }
