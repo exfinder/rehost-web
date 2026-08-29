@@ -6,17 +6,23 @@ updates [`../ROADMAP.md`](../ROADMAP.md) when milestone scope changes.
 
 ## Current
 
-Milestone 1 (both Visual Studio templates on all three platforms) is complete;
-its remaining detail moved below. Milestone 2 owns these outcomes:
+Milestones 1–3 (both Visual Studio templates, eShopLegacyWebForms, Wingtip
+Toys — each passing its journeys on all three platforms) are complete; their
+remaining detail moved below. Milestone 4 (production baseline) owns these
+outcomes:
 
-- Import eShopLegacyWebForms with frozen application sources and a sidecar host.
-- Establish deterministic mock-data journeys before database integration.
-- Recompile/replace only the managed dependency closure reached by eShop.
-- Keep EF6 consumption separate from real SQL deployment, which belongs to
-  the production baseline (Milestone 4); Wingtip Toys (Milestone 3) brings
-  the first real SQL Server journeys.
+- Deterministic Windows/Linux publish and containers for a running milestone
+  application.
+- Graceful lifecycle, readiness/health, metrics and diagnostics.
+- External configuration and secrets; multi-instance operation.
+- Real SQL operations beyond schema-create-and-seed.
 
-Carried from Milestone 1 as unresolved detail:
+The SQL membership/role/profile provider journey moved out of Milestone 3
+scope: Wingtip Toys clears every provider section and runs roles from
+Identity claims, so it structurally cannot reach providers. The journey
+stays under State, security, and providers below.
+
+Carried from earlier milestones as unresolved detail:
 
 - WAP publish payload, designer-file policy, package-only consumption, and
   secondary Web Site packaging: [project models](follow-ups/web-site-vs-wap-project-models.md).
@@ -27,12 +33,8 @@ Carried from Milestone 1 as unresolved detail:
 
 ## Next
 
-- Milestone 3 (Wingtip Toys): stateful commerce breadth — authentication,
-  session, cart, checkout, providers, real SQL Server — then Milestone 4
-  (production baseline): deterministic Windows/Linux publish, containers,
-  graceful lifecycle, readiness/health, metrics and diagnostics, external
-  configuration and secrets, multi-instance operation — see
-  [`../ROADMAP.md`](../ROADMAP.md).
+- The next representative application after the production baseline;
+  direction and priority live in [`../ROADMAP.md`](../ROADMAP.md).
 
 ## Later
 

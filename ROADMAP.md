@@ -49,14 +49,20 @@ the same patterns: the toolkit recompiles against the port and its 50-page
 sample site runs as a Web Site project
 ([`apps/AjaxControlToolkitSampleSite`](apps/AjaxControlToolkitSampleSite/README.md)).
 
-## Current — Milestone 3: Wingtip Toys
+## Completed — Milestone 3: Wingtip Toys
 
-Use Wingtip Toys to drive stateful commerce breadth: authentication, session,
-cart, checkout, and related provider behavior, with its application source
-frozen. Real SQL Server arrives with it (the application needs a database);
-the deployment concerns below stay out of its scope.
+The frozen Wingtip Toys tutorial store runs its stateful commerce journey on
+all three platforms against containerized SQL Server, from
+[`apps/WingtipToys`](apps/WingtipToys/README.md): Identity 2.2 register and
+sign-in, claims-role authorization, the session-keyed database cart, and
+checkout through the order write against a local NVP responder standing in
+for PayPal — with `customErrors` as authored, zero frozen-source edits, zero
+`src/` changes, and no library recompiles. Provider behavior
+(membership/role/profile providers) proved structurally unreachable here: the
+application clears every provider section and runs roles from Identity
+claims, so the SQL-provider journey stays in the backlog.
 
-## Later — Milestone 4: production baseline
+## Current — Milestone 4: production baseline
 
 Turn a running milestone application into a production deployment baseline:
 real SQL operations, deterministic Windows/Linux publish, containers, graceful
@@ -70,4 +76,3 @@ validation lands here if no earlier smoke claims it.
 - Binary drop-in compatibility with Microsoft's strong-named assemblies.
 - A Windows-only runtime profile.
 - Rewriting the milestone applications to fit the port.
-- Detailed production-baseline planning before Wingtip Toys runs.
