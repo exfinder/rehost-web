@@ -3,6 +3,7 @@ namespace Rehost.WebForms.Hosting;
 using System;
 using System.Configuration;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Web.Configuration;
 using System.Web.SessionState;
 using System.Web.Util;
@@ -70,6 +71,8 @@ internal static class ApplicationConfigurationPreflight
             ValidateAuthenticationMode(RequireSection<AuthenticationSection>(
                 mappedConfiguration,
                 "system.web/authentication"));
+
+            ValidateCompilationTargetFramework(compilation);
 
             ValidateCompilationTempDirectory(configuration, compilation);
             ValidateMachineKey(configuration, mappedConfiguration);
@@ -183,6 +186,41 @@ internal static class ApplicationConfigurationPreflight
                 The {variableName} environment variable must hold an even-length hex key of at least {minimumHexLength} characters, optionally followed by ",IsolateApps" or ",IsolateByAppId".
                 """);
         }
+    }
+
+    // MultiTargetingUtil.ValidateTargetFrameworkMoniker accepts both a bare version and a
+    // full moniker, so both forms carry a version this refusal has to read.
+    private static void ValidateCompilationTargetFramework(CompilationSection compilation)
+    {
+        var configured = compilation.TargetFramework?.Trim();
+        if (String.IsNullOrEmpty(configured))
+        {
+            return;
+        }
+
+        var moniker = Char.IsDigit(configured[0]) && Version.TryParse(configured, out _)
+            ? $".NETFramework,Version=v{configured}"
+            : configured;
+
+        Version version;
+        try
+        {
+            version = new FrameworkName(moniker).Version;
+        }
+        catch (ArgumentException)
+        {
+            return;
+        }
+
+        if (version >= new Version(4, 0))
+        {
+            return;
+        }
+
+        throw new PlatformNotSupportedException(
+            $"""
+            <compilation targetFramework="{configured}"> is not supported. The rehosted runtime supports targetFramework="4.0" and later; remove the attribute or raise its value.
+            """);
     }
 
     // Two owners of one directory is a configuration mistake, not a precedence question, so a

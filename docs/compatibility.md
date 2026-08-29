@@ -29,6 +29,7 @@ Evidence: `ApplicationBootstrapTests`, `ApplicationConfigurationPublicationTests
 | Runtime-originated shutdown/restart notification | Unsupported | Only host-initiated shutdown is wired; runtime restart requests do not stop the ASP.NET Core host |
 | Full trust | Supported | Partial trust and CAS policy are unsupported |
 | `<httpRuntime targetFramework="4.5" />` or later | Required | Lower values select unassessed quirks and native crypto; startup fails naming the fix |
+| `<compilation targetFramework="4.0" />` or later | Supported | 4.x values are inert: the compile surface is the port's own. Values below 4.0 select Framework's multi-targeting machinery and old-compiler probing, which the port has never assessed; startup refuses them naming the value and the floor. An absent attribute keeps Framework's current-version default |
 | Web Site runtime-compilation model | Partial | Exercised by fixtures and the sample; consumer build/publish packaging remains incomplete |
 | Web Application Project model | Supported | Both Visual Studio templates build as frozen WAP trees through the `RehostAppContentRoot`/`RehostSiteContentRoot` sidecar contract from packages, and their `smoke.sh` journeys pass on all three platforms; publish payload and designer-file policy remain open in the backlog |
 | Microsoft `System.Web` binary identity | Unsupported | Source/API compatibility after rebuild is the target; strong-name/binary interchangeability is not promised |

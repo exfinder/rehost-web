@@ -440,6 +440,71 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Preflight_Rejects_A_Compilation_Target_Framework_Below_4()
+    {
+        foreach (var declared in new[] { "3.5", ".NETFramework,Version=v2.0" })
+        {
+            using var application = TemporaryApplication.Create();
+            File.WriteAllText(
+                Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+                $"""
+                <configuration>
+                  <system.web>
+                    <compilation debug="false" targetFramework="{declared}" />
+                  </system.web>
+                </configuration>
+                """);
+            var configuration = application.CreateConfiguration();
+
+            var exception = Should.Throw<PlatformNotSupportedException>(
+                () => ApplicationConfigurationPreflight.Validate(configuration));
+
+            exception.Message.ShouldContain($"targetFramework=\"{declared}\"");
+            exception.Message.ShouldContain("is not supported");
+            exception.Message.ShouldContain("targetFramework=\"4.0\" and later");
+        }
+    }
+
+    [Fact]
+    public void Preflight_Accepts_A_Compilation_Target_Framework_Of_4_Or_Later()
+    {
+        foreach (var declared in new[] { "4.0", "4.8", ".NETFramework,Version=v4.5.2" })
+        {
+            using var application = TemporaryApplication.Create();
+            File.WriteAllText(
+                Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+                $"""
+                <configuration>
+                  <system.web>
+                    <compilation debug="false" targetFramework="{declared}" />
+                  </system.web>
+                </configuration>
+                """);
+            var configuration = application.CreateConfiguration();
+
+            Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+        }
+    }
+
+    [Fact]
+    public void Preflight_Accepts_An_Application_Declaring_No_Compilation_Target_Framework()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <system.web>
+                <compilation debug="false" />
+              </system.web>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        Should.NotThrow(() => ApplicationConfigurationPreflight.Validate(configuration));
+    }
+
+    [Fact]
     public void Preflight_Rejects_State_Server_Session_Mode()
     {
         using var application = TemporaryApplication.Create();
