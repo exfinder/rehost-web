@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="System.Net.Http.WebRequest/System.Net.Http.WebRequest.csproj" />
+  <Project Path="WingtipToys.App/WingtipToys.App.csproj" />
+  <Project Path="WingtipToys.Host/WingtipToys.Host.csproj" />
+</Solution>

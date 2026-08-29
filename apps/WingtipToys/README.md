@@ -1,0 +1,300 @@
+# WingtipToys
+
+Microsoft's Wingtip Toys tutorial store — an ASP.NET 4.5.2 Web Application
+Project with EF6 Code First, Identity 2.x over OWIN, a session-keyed
+database-backed shopping cart, role-gated administration and a PayPal Express
+checkout — running on the ported runtime from packages, against a containerized
+SQL Server. The Milestone 3 application.
+
+Nothing here is a support claim; [`docs/compatibility.md`](../../docs/compatibility.md)
+remains the only one. The pre-import analysis is
+[`docs/research/wingtiptoys-portability.md`](../../docs/research/wingtiptoys-portability.md);
+this file records what actually happened when it ran.
+
+## Provenance
+
+The tutorial's sample download no longer resolves: the `fwlink` in
+`dotnet/AspNetDocs` redirects to a **404** on learn.microsoft.com, and no
+Microsoft-owned GitHub organisation carries the project. What survives is the
+Microsoft-published ZIP itself, captured by the Internet Archive from the MSDN
+Code Gallery before retirement. **That archive capture is the trust anchor —
+there is no publisher digest to verify against.**
+
+| Property | Value |
+| --- | --- |
+| Gallery entry | `Getting-Started-with-221c01f5`, "Getting Started with ASP.NET 4.5 Web Forms and Visual Studio 2013 - Wingtip Toys" |
+| Author / license | Erik Reitan (Microsoft); Apache License 2.0 (`license.rtf` in the package) |
+| Archived URL | `https://code.msdn.microsoft.com/Getting-Started-with-221c01f5/file/107941/11/Getting%20Started%20with%20ASP.NET%204.5%20Web%20Forms%20and%20Visual%20Studio%202013%20-%20Wingtip%20Toys.zip` |
+| Snapshot | `https://web.archive.org/web/20170710030442id_/…` — capture 2017-07-10T03:04:42Z |
+| File version | 11 of `fileId 107941`, the newest the archive holds; gallery "Updated" 2016-01-07, matching every internal timestamp |
+| Bytes / SHA-256 | 17,518,410 / `3b8760a509118992d2b8aedfb95422160262d2c8b342e2a926a3c754a4d67468` |
+| Retrieved | 2026-08-29 |
+
+Imported from `C#/WingtipToys` inside that archive, minus `bin/`, `obj/`,
+`packages/`, `.csproj.user` and the four `App_Data/*.mdf|ldf` LocalDb files.
+`App_Data/ErrorLog.txt` is kept: `Logic/ExceptionUtility.cs` appends to it.
+
+## Layout
+
+| Folder | Role |
+| --- | --- |
+| `WingtipToys/` | The frozen .NET Framework 4.5.2 WAP. Never modified; byte-identical to the archive. |
+| `WingtipToys.App/` | The port of the app assembly: compiles the legacy folder's `*.cs` into `WingtipToys.dll`, plus the `jquery`/`bootstrap` script-mapping shim. |
+| `WingtipToys.Host/` | The process: a ~20-line Kestrel host, plus the app's own `Web.Rehost.config`. |
+| `System.Net.Http.WebRequest/` | A 15-line stand-in for the Framework façade Katana's Google middleware demands. See below — this is the one thing the analysis did not predict. |
+
+## Commands
+
+```text
+docker run -d --name rehost-wingtip-sql -e ACCEPT_EULA=Y \
+  -e MSSQL_SA_PASSWORD='Rehost!Dev2026' -p 14333:1433 \
+  mcr.microsoft.com/mssql/server:2022-latest
+
+dotnet build apps/WingtipToys/WingtipToys.slnx
+dotnet run --project apps/WingtipToys/WingtipToys.Host
+# http://127.0.0.1:5085/ (pass a URL as the first argument to change)
+
+apps/WingtipToys/smoke.sh                    # against the default URL
+apps/WingtipToys/smoke.sh http://127.0.0.1:5085
+
+docker rm -f rehost-wingtip-sql              # when done
+```
+
+`eng/app-linux-smoke.sh` does not yet run this app: it starts the host inside a
+container with no route to a SQL Server on the Docker host, and takes no
+`--network` argument. The Identity application's recipe applies — a SQL
+container started with `MSSQL_TCP_PORT=14333` whose network namespace the smoke
+container joins — but wiring it through the runner is not done here.
+
+Both databases are created and seeded by EF on the first request — nothing
+pre-creates them, and a fresh container plus a fresh host is the validated
+starting state. On an Apple-silicon machine the amd64 image runs emulated; the
+first request takes a few seconds while `DropCreateDatabaseIfModelChanges` and
+`RoleActions.AddUserAndRole` build both schemas.
+
+`smoke.sh` is bash + curl only, and uses no bash-4 builtins, so macOS (still
+bash 3.2), Linux and Git bash on Windows all run it. It walks the full journey:
+anonymous home with the database-seeded category menu, the two folder
+authorization gates, register, log off, log back in, the product list over
+Friendly URLs, both `MapPageRoute` routes, add-to-cart twice, the cart
+`GridView`, an Update postback that changes one row's quantity, the master
+page's cart count following it, checkout as far as the PayPal boundary, the
+seeded `canEdit` user reaching the admin page, static assets, and both
+production bundles asserted on their minified content.
+
+## packages.config → PackageReference
+
+| `packages.config` | Here | Note |
+| --- | --- | --- |
+| `Microsoft.Owin.Host.SystemWeb` 2.1.0 | `Rehost.WebForms.Owin.Host.SystemWeb` | Already landed with the Identity application; **no new recompile** |
+| `Owin`, `Microsoft.Owin`, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Facebook`, `.Twitter`, `.MicrosoftAccount` 2.1.0 | same packages from nuget.org at 4.2.3 | Consumed as shipped under `NU1701`, the Identity-application precedent — with one exception, below |
+| `Microsoft.AspNet.Identity.Core`, `.Owin`, `.EntityFramework` 2.1.0 | same packages at 2.2.4 | Pure managed |
+| `EntityFramework` 6.1.1 | same package at 6.5.2 | 6.3+ ships `netstandard2.1` |
+| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `WebGrease`, `Antlr`, `Newtonsoft.Json` | `Rehost.WebForms.Optimization`, `.Optimization.WebForms` | The `<controls>` assembly rewrite is in the default XDT |
+| `Microsoft.AspNet.FriendlyUrls`, `.Core` | `Rehost.WebForms.FriendlyUrls` | Genuinely active here: `RedirectMode.Permanent` |
+| `Microsoft.AspNet.ScriptManager.MSAjax`, `.WebForms` | `Rehost.WebForms.ScriptManager.Bundles` | Registers `MsAjaxBundle`, `WebFormsBundle` and the MicrosoftAjax names |
+| `AspNet.ScriptManager.jQuery`, `.bootstrap` | `WingtipToys.App/PreApplicationStartCode.cs` | Names only, so the definitions are re-registered by hand; see below |
+| `elmah`, `elmah.corelibrary` 1.2.2 | dropped by XDT | Binds Framework's strong-named `System.Web`, no portable build, and no application code references it |
+| `Microsoft.AspNet.Providers.Core` | dropped | Named only as `<sessionState customProvider>`, which `mode="InProc"` never resolves — parses and activates exactly as on Framework |
+| `Microsoft.Web.Infrastructure` | dropped | Katana 4.x calls `HttpApplication.RegisterModule` directly |
+| `jQuery`, `bootstrap`, `Modernizr`, `Respond` | unchanged content | Committed under `Scripts/`, `Content/`, `fonts/` |
+| — | `System.Data.SqlClient` 4.9.1 | The provider factory EF6 needs off Framework |
+
+**Zero library recompiles.** This is the first application whose entire
+third-party closure was already solved: the App/Host pair built and the home
+page rendered on the first attempt after the one unanticipated fixture below.
+
+## The one unanticipated blocker: `System.Net.Http.WebRequest`
+
+`App_Start/Startup.Auth.cs:62-66` calls `app.UseGoogleAuthentication(...)`
+unconditionally with a placeholder client id. The analysis expected that to
+cost a rendered button that fails at Google. It costs more than that:
+
+```text
+FileNotFoundException: Could not load file or assembly
+'System.Net.Http.WebRequest, Version=4.0.0.0, PublicKeyToken=b03f5f7f11d50a3a'
+   Microsoft.Owin.Security.Google.GoogleOAuth2AuthenticationMiddleware.ResolveHttpMessageHandler
+   …
+   Microsoft.Owin.Host.SystemWeb.OwinHttpModule.Init
+```
+
+`ResolveHttpMessageHandler` constructs `new WebRequestHandler()` before
+consulting anything, and `WebRequestHandler` lives in a Framework façade
+assembly that .NET 10 does not carry. `Microsoft.Owin.Security.Google` ships
+`net45` only — Katana 4.x never produced a `netstandard` build of it — so there
+is no package version that avoids this. The failure is at OWIN pipeline
+construction inside `HttpApplication.InitModules`, so **every request 500s and
+no page renders at all**.
+
+`System.Net.Http.WebRequest/` supplies the identity and the one type, deriving
+from `HttpClientHandler` and forwarding the certificate callback that Katana
+would set if `BackchannelCertificateValidator` were configured (it is not here).
+That is the whole assembly. With it, Google authentication is back to the
+boundary the analysis predicted: the button renders, the challenge fails at
+Google.
+
+This is an application-side fixture, in the shape of
+`apps/eShopLegacyWebForms/Autofac.Integration.Web`, not port surface: nothing in
+`src/` changed for this bring-up. **It is also the first evidence that
+"consumable from nuget.org after recompile" is not a safe classification for the
+Katana security providers** — the Identity application carries the same package
+reference and never met this, because it never invokes the middleware.
+
+## web.config
+
+`WingtipToys.Host/Web.Rehost.config` replaces the package default wholesale, so
+it repeats the default's `<runtime>` removal and Optimization `<controls>`
+retarget first. (The default's `<system.codedom>` removal is *not* repeated:
+this application predates the DotNetCompilerPlatform template change and has no
+such element, so the rule only produces an XDT warning.) Four app-specific
+edits:
+
+| Edit | Justifying failure |
+| --- | --- |
+| Remove the three `Elmah.*` rows from `<system.webServer><modules>` | A module row whose type will not load fails its URLs with the entry named (MH22a). `Elmah.dll` binds Framework's strong-named `System.Web`. |
+| `<customErrors mode="Off">` | Bring-up only. As authored it turns every diagnosable failure into `ErrorPage.aspx` — the `System.Net.Http.WebRequest` diagnosis above depended on this being off. |
+| `DefaultConnection` → `Data Source=127.0.0.1,14333;Initial Catalog=aspnet-WingtipToys;…` | `(LocalDb)\v11.0` is a Windows-only engine. |
+| `WingtipToys` → `Data Source=127.0.0.1,14333;Initial Catalog=WingtipToys;…` | Same, plus `AttachDbFilename=\|DataDirectory\|\wingtiptoys.mdf` has no container equivalent, so the file store becomes a named catalog rather than a renamed data source. |
+
+**The rest of the ELMAH surface needed no transform.** The `elmah`
+`<configSections>` sectionGroup with its four `Elmah.*` handler types, the
+`<elmah><security/>` element, and the `<location path="elmah.axd">` block with
+its `<httpHandlers>`/`<handlers>` entries are all still in the staged
+`web.config` and the application runs. Section-handler types resolve lazily, and
+folder handler lists are built by discovering folder `Web.config` files rather
+than from root `<location>` blocks. The analysis left this unverified and
+proposed dropping the whole surface; measurement says three rows is enough.
+
+**`<entityFramework><defaultConnectionFactory>` was left as authored** —
+`LocalDbConnectionFactory` from `EntityFramework` 6.5.2. Both contexts name a
+connection string explicitly, so the factory is never consulted, and the type
+loads fine off Windows. It is dead configuration, not a portability problem.
+
+Nothing else needed a transform: `<sessionState>` naming an unresolvable
+`System.Web.Providers` type, the unhonored
+`<modules><remove name="FormsAuthentication" />`, the `<httpModules>` classic
+block waived by `<validation validateIntegratedModeConfiguration="false" />`,
+and the three `<membership>`/`<profile>`/`<roleManager>` `<clear />` blocks all
+parse and activate as they do on Framework.
+
+## `jquery` was provably blocking, not speculative
+
+`<httpRuntime targetFramework="4.5.2" />` makes
+`ValidationSettings.UnobtrusiveValidationMode` default to `WebForms`, so every
+validator calls `ClientScriptManager.EnsureJqueryRegistered`, which throws when
+no `jquery` `ScriptResourceMapping` exists. `Account/Register.aspx` and
+`Account/Login.aspx` — the journey's first two pages — carry
+`RequiredFieldValidator`s, and the definition came from
+`AspNet.ScriptManager.jQuery`, which the port replaces with names only.
+`WingtipToys.App/PreApplicationStartCode.cs` registers `jquery` and `bootstrap`
+against the files actually in `Scripts/` (1.10.2 and 3.0.0), the eShop pattern
+verbatim.
+
+## Verified working
+
+In rough order of how unproven each was going in.
+
+- **Production-mode Optimization on the first render of every page.**
+  `BundleConfig.cs:39` sets `EnableOptimizations = true` unconditionally,
+  overriding `debug="true"`. `~/bundles/modernizr` returns 11 KB of minified
+  Modernizr and `~/Content/css` returns 113 KB of combined, minified
+  `bootstrap.css` + `Site.css`. The backlog's unvalidated WebGrease path is now
+  exercised against real inputs, on the critical path of every page.
+- **The `Bundle.config` manifest.** `~/Content/css` exists *only* in
+  `Bundle.config` and reaches the runtime through `BundleTable.EnsureBundleSetup`
+  reading `~/bundle.config` — a lowercase virtual path against an uppercase file
+  on disk. No prior application exercised it; it resolves, and the master page's
+  `<webopt:bundlereference>` renders the versioned link.
+- **Role-based `<authorization>` against an Identity-claims principal.**
+  `Admin/Web.config` allows `roles="canEdit"` with no `RoleProvider` configured
+  anywhere. The `canEditUser@wingtiptoys.com` account that
+  `Application_Start` seeds signs in and reaches `/Admin/AdminPage` with 200,
+  and `Site.Master.cs:74`'s `IsInRole("canEdit")` reveals the Admin link. The
+  analysis marked this unverified and the map calls it Partial.
+- **URL authorization by anonymity on a folder,** including the
+  `<location path="Manage.aspx">` nested inside `Account/Web.config`.
+  `/Checkout` and `/Admin` both 302 anonymous callers to the absolute login URL.
+- **`Application_Start` creating and seeding two databases before the first
+  page.** `Database.SetInitializer` plus `RoleActions.AddUserAndRole()` reaching
+  EF directly, not through the OWIN per-request factory. The Identity
+  application's recorded hazard — reaching EF before `HostingEnvironment`
+  initialises — does not apply, because `Application_Start` runs after
+  activation.
+- **The session-keyed, database-backed cart across a sign-in.** The cart id
+  starts as a session GUID, `MigrateCart` rewrites the rows and the session key
+  on register and again on login, and `Site.Master.cs:82-86` re-queries the
+  count in `Page_PreRender` on every render.
+- **Model binding on `GridView`, `FormView`, `DetailsView` and `DropDownList`,**
+  with `ExtractValuesFromCell` over `GridViewRow` in the cart's Update postback.
+  All four were Unassessed on the map.
+- **Two `MapPageRoute` routes alongside active Friendly URLs**, with Friendly
+  URLs registered first, plus `[RouteData]`/`[QueryString]` value providers on
+  `ProductDetails`. `/Category/Rockets` and `/Product/Convertible%20Car` both
+  bind, and `GetRouteUrl` in markup emits them.
+- **`Server.MapPath` on a trailing-slash virtual path returns a trailing
+  separator off Windows.** The analysis flagged
+  `Server.MapPath("~/Catalog/Images/") + FileName` as an unverified concatenation
+  hazard. An admin `FileUpload` post lands both `SaveAs` calls — `Images/x.png`
+  and `Images/Thumbs/x.png` — at the right paths on macOS.
+- **Event validation.** A hand-built multipart post with an unregistered
+  `DropDownList` value is rejected with the Framework's own
+  `Invalid postback or callback argument` — the ordinary correct behavior, worth
+  recording because the smoke's postbacks all had to satisfy it.
+- **The `MsAjax`/`MSAjax` casing mismatch in `BundleConfig.cs`** folds, under
+  production bundling, on a case-insensitive filesystem. Untested on a
+  case-sensitive one.
+
+## Boundaries
+
+- **PayPal checkout ends at the handoff.** `Logic/PayPalFunctions.cs:36-38`
+  carries the literal placeholders `<Your API Username>` / `<Your API Password>`
+  / `<Your Signature>`, and `:62-63` hard-code `https://localhost:44300/…` as
+  the return and cancel URLs. `CheckoutStart.aspx` therefore calls the sandbox,
+  is refused, and redirects to
+  `CheckoutError.aspx?ErrorCode=10002&Desc=Security error&Desc2=Security header is not valid`.
+  That exercises the session write, the outbound call and the redirect;
+  `CheckoutReview`, the `Order` + `OrderDetail` write and `EmptyCart` are
+  **unreached**. A local NVP fake responder that would drive them is future
+  work. Note that this one smoke step therefore **needs outbound HTTPS to
+  `api-3t.sandbox.paypal.com`**; with no network the synchronous
+  `HttpWebRequest` throws instead and the step fails differently.
+- **Google external login fails at Google.** The client id is
+  `000000000000.apps.googleusercontent.com`. The button renders on Login and
+  Register; clicking it issues an OWIN challenge that Google rejects. Commenting
+  it out would be an application-source change the frozen-tree rule forbids.
+- **`customErrors` must be restored before any compatibility claim.** The XDT
+  turns it `Off` for bring-up. As authored it is `mode="On"` with a
+  `defaultRedirect` and a 404 row, and that path — `Application_Error` →
+  `Server.Transfer("ErrorPage.aspx")`, `Server.GetLastError`, `Request.IsLocal`
+  — is assessed by nothing here.
+- **LocalDb is out of contract,** as in every prior application. Here it is
+  reached on *every* page, so the connection-string swap is the one
+  application-visible edit that has to happen before anything renders at all.
+  `AttachDbFilename` makes the second string a genuine topology change, not a
+  rename: a named catalog on a server instead of an attached file.
+- **Currency rendering follows the host machine's culture.** The application
+  sets no `<globalization>`, and every price goes through
+  `String.Format("{0:c}")`. On a `uk-UA` machine the cart reads `145,45 UAH`.
+  `smoke.sh` compares digits only for that reason. The same culture makes the
+  admin page's `double.Parse("1.00")` throw — an application assumption, not a
+  port defect.
+- **`<machineKey>` is auto-generated.** The application declares none, so keys
+  are per-application and host-resolvable (ADR 0010); sign-ins survive a
+  restart, but two instances cannot share them.
+
+## Two latent defects in the frozen source
+
+Neither is on the happy path, and both will look like port bugs if hit.
+`Checkout/CheckoutComplete.aspx.cs:47-49` compares `Session["currentOrderId"]`
+(an `int`) to `string.Empty` — always true — then reads
+`Session["currentOrderID"]`, a different key, so `Convert.ToInt32(null)` yields
+order 0. `Logic/ShoppingCartActions.cs:99-107` (`GetCart`) returns a context it
+has already disposed.
+
+## Not exercised here
+
+`Checkout/CheckoutReview` and `CheckoutComplete` (behind PayPal), the admin
+Remove-product path, `ViewSwitcher.ascx` and `Site.Mobile.Master`,
+`Account/Manage` and the two-factor and external-login pages,
+`ErrorPage.aspx` under `customErrors mode="On"`, and the `elmah.axd` handler
+block that the XDT deliberately left in place.
