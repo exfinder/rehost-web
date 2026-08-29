@@ -60,11 +60,17 @@ apps/WingtipToys/smoke.sh http://127.0.0.1:5085
 docker rm -f rehost-wingtip-sql              # when done
 ```
 
-`eng/app-linux-smoke.sh` does not yet run this app: it starts the host inside a
-container with no route to a SQL Server on the Docker host, and takes no
-`--network` argument. The Identity application's recipe applies — a SQL
-container started with `MSSQL_TCP_PORT=14333` whose network namespace the smoke
-container joins — but wiring it through the runner is not done here.
+The Linux round joins the smoke container to a SQL container that listens on
+14333 in-container, so the staged connection string works unchanged:
+
+```text
+docker run -d --name rehost-wingtip-sql-linux -e ACCEPT_EULA=Y \
+  -e MSSQL_SA_PASSWORD='Rehost!Dev2026' -e MSSQL_TCP_PORT=14333 \
+  mcr.microsoft.com/mssql/server:2022-latest
+SMOKE_DOCKER_ARGS='--network container:rehost-wingtip-sql-linux' \
+  eng/app-linux-smoke.sh WingtipToys 5085
+docker rm -f rehost-wingtip-sql-linux
+```
 
 Both databases are created and seeded by EF on the first request — nothing
 pre-creates them, and a fresh container plus a fresh host is the validated

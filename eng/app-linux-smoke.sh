@@ -15,8 +15,10 @@ ARCH=$(docker version --format '{{.Server.Arch}}')
 TTY=""
 [ -t 1 ] && TTY="-t"
 
-# shellcheck disable=SC2086 # $TTY is empty or a single flag
-exec docker run --rm $TTY \
+# SMOKE_DOCKER_ARGS: extra docker-run arguments, e.g. --network container:<sql>
+# for an app whose smoke needs a database container reachable at 127.0.0.1.
+# shellcheck disable=SC2086 # $TTY and $SMOKE_DOCKER_ARGS are word-split flags
+exec docker run --rm $TTY ${SMOKE_DOCKER_ARGS:-} \
   -v "$PWD:/src:ro" \
   -v "rehost-linux-$ARCH-work:/work" \
   -v "rehost-linux-$ARCH-nuget:/root/.nuget" \
