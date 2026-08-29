@@ -16,6 +16,15 @@ Runtime targets own SDK exclusions and the
 own staging, XDT transformation, and publish layout. One target cannot infer
 which owner should compile or publish `*.aspx.cs` safely.
 
+The AjaxControlToolkit sample site
+([`apps/AjaxControlToolkitSampleSite`](../../apps/AjaxControlToolkitSampleSite/README.md))
+runs the Web Site model end-to-end: `App_Code`, `CodeFile` pages, inline
+`Global.asax`, and `.asmx` services all compile at runtime on macOS and Linux.
+The gap is confined to staging: the hosting targets exclude `**/*.cs`, so its
+Host carries a local `StageWebSiteSources` target — the reference input for the
+publish-mode decision below. `App_GlobalResources` and Web Site
+publish/precompile remain unexercised.
+
 ## Open
 
 - Define deterministic WAP publish payload and package-only consumption.
