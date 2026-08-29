@@ -26,7 +26,11 @@ step designed to find it.
    .NET 10 referencing the exact `net45` packages under `NU1701`, driving
    their API directly. It answers "consume as-is or recompile?" per package
    before any port work; only assemblies bound to Microsoft's `System.Web`
-   identity need recompiling.
+   identity need recompiling. Probe the code paths the application actually
+   invokes, not the reference: a package proven in one app can still fail in
+   the next through an uninvoked path (Katana's Google provider constructs a
+   Framework-only `System.Net.Http.WebRequest` type that referencing alone
+   never touches).
 5. **Port only proven blockers.** Recompile a System.Web consumer verbatim
    with a provenance record; measure the compile against the runtime first
    (the Katana host was 4 errors in 7.8k lines). A runtime seam the app

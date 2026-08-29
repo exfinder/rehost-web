@@ -286,7 +286,14 @@ whose entire third-party closure is already solved: the OWIN host is
 `Rehost.WebForms.Owin.Host.SystemWeb`, Identity 2.x / EF6 / Owin.Security come
 from nuget.org unchanged, Optimization and FriendlyUrls have `Rehost.*`
 packages, and the one remaining `System.Web`-binding assembly (ELMAH) is
-unreferenced by application code and can be dropped rather than ported. There is
+unreferenced by application code and can be dropped rather than ported.
+
+*Falsified in bring-up:* "Owin.Security unchanged" held for every provider the
+Identity application exercised, but `UseGoogleAuthentication` constructs
+`WebRequestHandler` from the Framework-only `System.Net.Http.WebRequest`
+facade at module init, failing every request. The app-side facade shim in
+[`apps/WingtipToys`](../../apps/WingtipToys/README.md) closes it. Consume-as-is
+ratings are per invoked code path, not per package. There is
 no Autofac, no Application Insights, no telemetry stack, no `System.Design`
 closure, no `App_Code`, no Web Site project model, no build customisation.
 
