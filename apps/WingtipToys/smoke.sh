@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # The shopper's journey against a running WingtipToys.Host: register, log off, log
 # back in, browse the catalog over Friendly URLs and the two MapPageRoute routes,
-# add to the cart, change a quantity, watch the master page's cart count follow,
-# and start checkout as far as the PayPal boundary. bash + curl only, and no bash-4
-# builtins, so the same script runs on macOS, Linux, and Git bash on Windows.
+# add to the cart, change a quantity, watch the master page's cart count follow, and
+# run checkout through to the written order and the emptied cart against the host's
+# local NVP responder. bash + curl only, and no bash-4 builtins, so the same script
+# runs on macOS, Linux, and Git bash on Windows.
 #
 #   apps/WingtipToys/smoke.sh [base-url]
 
@@ -58,8 +59,11 @@ row_quantity_name() { # row_quantity_name <html> <product-name> -- the GridView 
 }
 
 money_digits() { # money_digits <html> <id-suffix> -- a currency label's digits only,
-                 # because the host machine's culture picks the symbol and separators
-  grep -o "id=\"[^\"]*$2\">[^<]*" "$1" | head -1 | tr -cd '0-9'
+                 # because the host machine's culture picks the symbol and separators.
+                 # A non-ASCII symbol leaves an HTML-encoded binding as a numeric
+                 # entity -- invariant culture's currency sign is &#164; -- so drop
+                 # entities before counting digits.
+  grep -o "id=\"[^\"]*$2\">[^<]*" "$1" | head -1 | sed 's/.*>//; s/&#[0-9]*;//g' | tr -cd '0-9'
 }
 
 postback_target() { # the LoginStatus __doPostBack target rendered by Site.Master
@@ -126,6 +130,9 @@ check 'GET /Checkout anonymous -> login Location' \
 
 status=$(get /Admin/AdminPage admin-anon)
 check 'GET /Admin anonymous -> 302 (folder <allow roles="canEdit">)' "$status" 302
+check 'GET /Admin anonymous -> login Location' \
+  "$(location "$work/admin-anon.head")" \
+  "$BASE/Account/Login?ReturnUrl=%2FAdmin%2FAdminPage"
 
 # --- register, log off, log back in ----------------------------------------------
 
@@ -149,6 +156,10 @@ status=$(get / home-registered)
 check 'GET / after register -> 200' "$status" 200
 check_contains 'the master page greets the registered user' "$work/home-registered.html" \
   "Hello, $EMAIL !"
+# The greeting is master-page markup, which ErrorPage.aspx also carries: assert a
+# marker only Default.aspx renders so customErrors cannot mask a failure here.
+check_contains 'GET / after register renders the home page, not ErrorPage' \
+  "$work/home-registered.html" 'Wingtip Toys can help you find the perfect gift.'
 
 read_postback_fields "$work/home-registered.html"
 status=$(post "$(post_url "$work/home-registered.html" /)" logoff \
@@ -160,6 +171,8 @@ check_contains 'log off expires .AspNet.ApplicationCookie' "$work/logoff.head" \
 
 status=$(get /Account/Login login)
 check 'GET /Account/Login -> 200' "$status" 200
+check_contains 'the login page renders its validators' "$work/login.html" \
+  'The password field is required.'
 read_postback_fields "$work/login.html"
 status=$(post "$(post_url "$work/login.html" /Account/Login)" login-post \
   --data-urlencode "ctl00\$MainContent\$Email=$EMAIL" \
@@ -204,6 +217,8 @@ check 'AddToCart redirects to the cart' "$(location "$work/add1.head")" '/Shoppi
 
 status=$(get "/AddToCart?productID=16" add2)
 check 'GET /AddToCart?productID=16 -> 302' "$status" 302
+check 'the second AddToCart redirects to the cart too' \
+  "$(location "$work/add2.head")" '/ShoppingCart.aspx'
 
 status=$(get /ShoppingCart cart)
 check 'GET /ShoppingCart -> 200' "$status" 200
@@ -235,7 +250,7 @@ check 'the quantity change survives into a fresh request' \
 check_contains 'the master page cart count follows the new quantity' \
   "$work/cart-after.html" 'Cart (4)'
 
-# --- checkout, as far as the PayPal boundary ------------------------------------
+# --- checkout: the NVP round trip, the order write, the emptied cart -------------
 
 checkout=$(control_names "$work/cart-after.html" 'CheckoutImageBtn' | sed -n 1p)
 read_postback_fields "$work/cart-after.html"
@@ -247,16 +262,54 @@ check 'Check out redirects into the checkout folder' \
 
 status=$(get /Checkout/CheckoutStart checkout-start)
 check 'GET /Checkout/CheckoutStart signed in -> 302' "$status" 302
-# The tutorial ships placeholder PayPal API credentials, so SetExpressCheckout is
-# rejected and the page takes its own error branch. That is the boundary: the order
-# write beyond it needs credentials this fixture does not have.
+# The host's local NVP responder answers SetExpressCheckout, so the page takes its
+# success branch and hands the shopper off with the token it issued.
 case "$(location "$work/checkout-start.head")" in
-  */Checkout/CheckoutError.aspx\?ErrorCode=*)
-    pass 'CheckoutStart reaches the PayPal boundary and redirects to CheckoutError' ;;
+  https://www.sandbox.paypal.com/cgi-bin/webscr\?cmd=_express-checkout\&token=EC-*)
+    pass 'CheckoutStart hands off to PayPal with the SetExpressCheckout token' ;;
   *)
-    fail 'CheckoutStart reaches the PayPal boundary and redirects to CheckoutError' \
+    fail 'CheckoutStart hands off to PayPal with the SetExpressCheckout token' \
       "actual:   $(location "$work/checkout-start.head")" ;;
 esac
+
+# PayPal returns the shopper to the hard-coded https://localhost:44300 return URL;
+# the journey resumes at the same page on this host.
+status=$(get /Checkout/CheckoutReview review)
+check 'GET /Checkout/CheckoutReview -> 200 (GetExpressCheckoutDetails)' "$status" 200
+check_contains 'the review DetailsView renders the address the NVP call returned' \
+  "$work/review.html" 'Redmond'
+check_contains 'the review GridView lists the first ordered product' "$work/review.html" \
+  'Convertible Car'
+check_contains 'the review GridView lists the second ordered product' "$work/review.html" \
+  'Rocket'
+check 'the written order total matches the cart total carried in session' \
+  "$(money_digits "$work/review.html" Total)" 19045
+
+read_postback_fields "$work/review.html"
+status=$(post "$(post_url "$work/review.html" /Checkout/CheckoutReview)" review-post \
+  --data-urlencode "$(submit_name "$work/review.html")=Complete Order")
+check 'POST /Checkout/CheckoutReview Complete Order -> 302' "$status" 302
+check 'Complete Order redirects to CheckoutComplete' \
+  "$(location "$work/review-post.head")" '/Checkout/CheckoutComplete.aspx'
+
+status=$(get /Checkout/CheckoutComplete complete)
+check 'GET /Checkout/CheckoutComplete -> 200 (DoExpressCheckoutPayment)' "$status" 200
+# The label is written before the order is re-read, so it is the 200 above and the
+# emptied cart below that prove the Single() lookup and both SaveChanges ran.
+txn=$(grep -o 'id="[^"]*TransactionId">[^<]*' "$work/complete.html" | head -1 | sed 's/.*>//')
+if [ ${#txn} -eq 17 ]; then
+  pass 'the completed order carries the transaction id the NVP call returned'
+else
+  fail 'the completed order carries the transaction id the NVP call returned' \
+    "found: [$txn]"
+fi
+
+status=$(get /ShoppingCart cart-empty)
+check 'GET /ShoppingCart after checkout -> 200' "$status" 200
+check_contains 'EmptyCart removed the cart rows' "$work/cart-empty.html" \
+  'Shopping Cart is Empty'
+check_contains 'the master page cart count follows the emptied cart' \
+  "$work/cart-empty.html" 'Cart (0)'
 
 status=$(get "/Checkout/CheckoutError?ErrorCode=10002&Desc=Security+error" checkout-error)
 check 'GET /Checkout/CheckoutError -> 200' "$status" 200
@@ -267,12 +320,16 @@ check_contains 'the checkout error page renders the PayPal error code' \
 
 status=$(get /Account/Login admin-login)
 check 'GET /Account/Login for the seeded admin -> 200' "$status" 200
+check_contains 'the login page renders its validators for the second sign-in' \
+  "$work/admin-login.html" 'The password field is required.'
 read_postback_fields "$work/admin-login.html"
 status=$(post "$(post_url "$work/admin-login.html" /Account/Login)" admin-login-post \
   --data-urlencode 'ctl00$MainContent$Email=canEditUser@wingtiptoys.com' \
   --data-urlencode 'ctl00$MainContent$Password=Pa$$word1' \
   --data-urlencode "$(submit_name "$work/admin-login.html")=Log in")
 check 'POST /Account/Login as the Application_Start seeded user -> 302' "$status" 302
+check 'the seeded admin lands back on the home page' \
+  "$(location "$work/admin-login-post.head")" /
 
 status=$(get / home-admin)
 check_contains 'IsInRole("canEdit") reveals the Admin link' "$work/home-admin.html" \
@@ -283,6 +340,23 @@ check 'GET /Admin/AdminPage as canEdit -> 200 (role authorization from claims)' 
   "$status" 200
 check_contains 'the admin page binds its product DropDownList' "$work/admin.html" \
   'Convertible Car'
+
+# --- customErrors as authored ----------------------------------------------------
+
+status=$(get /NoSuchPage.aspx missing)
+check 'GET a missing page -> 302 (customErrors 404 row)' "$status" 302
+check 'the 404 row redirects to the authored ErrorPage URL' \
+  "$(location "$work/missing.head")" \
+  '/ErrorPage.aspx?msg=404&handler=customErrors%20section%20-%20Web.config'
+
+status=$(get "/ErrorPage?msg=404&handler=customErrors%20section%20-%20Web.config" errorpage)
+check 'GET the error page -> 200' "$status" 200
+check_contains 'ErrorPage renders the friendly 404 message' "$work/errorpage.html" \
+  'An HTTP error occurred. Page Not found.'
+check_contains 'Request.IsLocal opens the detailed panel' "$work/errorpage.html" \
+  'Detailed Error:'
+check_contains 'the error page names the handler from the query string' \
+  "$work/errorpage.html" 'customErrors section - Web.config'
 
 # --- static assets and the production bundles -----------------------------------
 
