@@ -26,9 +26,9 @@ exec docker run --rm $TTY \
   bash -ec '
     # linux-round.sh chowns /work to its non-root user; this script stays root
     # (it runs no tests, so the run-as-app rationale does not apply) and must
-    # tell git the app-owned clone and the host-owned /src are trusted.
-    git config --global --add safe.directory /src
-    git config --global --add safe.directory /work/repo
+    # trust the app-owned clone and /src, whose mount ownership varies by
+    # Docker file-sharing mode and resolves as /src/.git for fetch remotes.
+    git config --global --add safe.directory "*"
     if [ ! -d /work/repo/.git ]; then
       git clone -q /src /work/repo
     fi
