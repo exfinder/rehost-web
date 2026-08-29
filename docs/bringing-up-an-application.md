@@ -12,6 +12,12 @@ step designed to find it.
    dependency, whether a `Rehost.*` package exists, whether the shipped binary
    runs off Windows, and a proposed direction — port, consume as-is,
    substitute, out of contract — marked as proposal until accepted.
+   Inventory build customizations in every upstream project file —
+   `PostBuildEvent`, `BeforeBuild`/`AfterBuild`, custom targets, content
+   generators. They run invisibly on Framework machines and their output can
+   be load-bearing yet absent from source control; the AjaxControlToolkit
+   sample site's static resources exist only as an unconditional post-build
+   hard-link step.
 3. **Take the Framework baseline.** Run the app on IIS Express (integrated
    pool) from a disposable copy and record the observable rows the port must
    match: status codes, `Location`, cookies, body markers, generated control
