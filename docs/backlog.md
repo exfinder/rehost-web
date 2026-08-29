@@ -180,6 +180,17 @@ Carried from Milestone 1 as unresolved detail:
 
 ### Build system and packaging
 
+- Migration utility: automate the
+  [bring-up process](bringing-up-an-application.md) over an application's
+  source. Audit half — packages.config classification against `Rehost.*`
+  coverage and System.Web-binding detection, project-file build
+  customizations (`PostBuildEvent`, custom targets, content generators),
+  Web Site vs WAP shape, Windows-only API and backslash-literal scans.
+  Scaffold half — generate the sidecar pair from the audit: App/Host
+  projects (or Host-only for a Web Site), slnx, package mapping, and a
+  `Web.Rehost.config` seeded with the known refusals (trust, missing
+  `httpRuntime targetFramework`). Three imported apps each did both halves
+  by hand; the checklist step is the spec.
 - `Rehost.WebForms.Sdk` MSBuild SDK package for minimal consumer csproj files:
   [Rehost SDK](follow-ups/rehost-sdk.md).
 - In-place development run via a host-provided bin seam, restoring the
