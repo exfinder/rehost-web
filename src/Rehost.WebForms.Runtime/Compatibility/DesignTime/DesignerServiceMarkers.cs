@@ -4,27 +4,68 @@ namespace System.Web.UI.Design
 {
     using System;
     using System.Configuration;
+    using System.Drawing.Design;
 
-    internal interface IWebApplication
+    public interface IProjectItem
     {
+        string AppRelativeUrl { get; }
+
+        string PhysicalPath { get; }
+    }
+
+    public interface IWebApplication : IServiceProvider
+    {
+        IProjectItem RootProjectItem { get; }
+
         Configuration OpenWebConfiguration(bool isReadOnly);
     }
 
-    internal abstract class WebFormsReferenceManager
+    public abstract class WebFormsReferenceManager
     {
         internal abstract Type GetType(string tagPrefix, string typeName);
     }
 
-    internal abstract class WebFormsRootDesigner
+    public abstract class WebFormsRootDesigner
     {
+        public virtual string DocumentUrl
+        {
+            get { return String.Empty; }
+        }
+
         internal abstract WebFormsReferenceManager ReferenceManager { get; }
+
+        public virtual string ResolveUrl(string relativeUrl)
+        {
+            return relativeUrl;
+        }
     }
 
-    internal sealed class UrlEditor
+    public class UrlEditor : UITypeEditor
+    {
+        protected virtual string Caption
+        {
+            get { return String.Empty; }
+        }
+
+        protected virtual string Filter
+        {
+            get { return String.Empty; }
+        }
+
+        protected virtual UrlBuilderOptions Options
+        {
+            get { return UrlBuilderOptions.None; }
+        }
+    }
+
+    public class ImageUrlEditor : UrlEditor
     {
     }
 
-    internal sealed class ImageUrlEditor
+    [Flags]
+    public enum UrlBuilderOptions
     {
+        None = 0,
+        NoAbsolute = 1,
     }
 }

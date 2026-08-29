@@ -6,7 +6,7 @@ namespace System.Drawing
     using System.ComponentModel;
 
     [AttributeUsage(AttributeTargets.Class)]
-    internal sealed class ToolboxBitmapAttribute : Attribute
+    public sealed class ToolboxBitmapAttribute : Attribute
     {
         public ToolboxBitmapAttribute(Type t)
         {
