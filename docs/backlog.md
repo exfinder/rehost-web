@@ -48,7 +48,8 @@ Carried from earlier milestones as unresolved detail:
   [request termination](follow-ups/request-termination-and-timeouts.md).
 - Slow-upload thread-pool cliff:
   [request-body concurrency](follow-ups/request-body-concurrency.md).
-- Response diagnostics and failure preservation:
+- Error-page behavior around sent headers, and exception-text redaction — the
+  rest of the diagnostics boundary landed with ADR 0011:
   [request diagnostics](follow-ups/portable-request-diagnostics.md).
 
 ### Lifecycle and platform boundaries

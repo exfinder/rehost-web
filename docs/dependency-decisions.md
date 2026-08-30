@@ -100,9 +100,9 @@ runtime, and application assemblies without a Rehost-specific toolchain.
 ## Microsoft.Extensions.Logging.Abstractions
 
 The runtime references the logging abstractions so diagnostics carry live
-`Exception` objects into the host's `ILogger` pipeline — the runtime's first
-external package, accepted over a runtime-owned sink abstraction. See
+`Exception` objects into the host's `ILogger` pipeline, accepted over a
+runtime-owned sink abstraction. See
 [portable diagnostics boundary](adr/0011-portable-diagnostics-boundary.md).
 The full `Microsoft.Extensions.Logging` implementation and any provider
 packages stay host-side; the runtime holds an `ILoggerFactory` handed in at
-initialization, never a container.
+initialization or attached by the adapter afterwards, never a container.

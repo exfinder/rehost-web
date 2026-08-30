@@ -24,21 +24,43 @@ single caller of both channels, so they cannot drift; the `[Event]` methods
 keep string payloads because `EventSource` serializes even in-process, which
 is also why an `EventListener`→`ILogger` bridge was rejected: it can only ever
 hand `ILogger` a string, and exception-object fidelity is a requirement.
-The `ILogger` forward never throws — a failing log provider must not
-recursively fail the request it is reporting on.
+Nothing escapes a wrapper: the whole body is guarded, not only the `ILogger`
+forward, because rendering the string payload runs a caller-supplied
+`ToString()` and a provider can throw during or after shutdown. A guarded
+failure loses the report, never the request.
+
+Everything logs under one category, `Rehost.WebForms.Runtime`, which is also
+the `EventSource` name, so a single `Logging:LogLevel` entry filters the whole
+runtime. A payload reshape carries an `[Event]` `Version` bump; event 2 became
+`(site, swallowed, context)` at version 2.
+
+`WebBaseEvent.RaiseRuntimeError` writes to the choke point above the
+`healthMonitoring` gate, so request errors are delivered whether or not an
+application configures health monitoring, and the gated provider path stays
+exactly as Framework left it. A single failed request can therefore emit both
+`RuntimeError` and `SwallowedRequestException`; the duplication is accepted.
 
 ## Dependency and intake
 
-The runtime references `Microsoft.Extensions.Logging.Abstractions` — its
-first external package, accepted deliberately. The seams that avoided it (a
-runtime-owned sink interface, in typed and single-generic-method variants)
+The runtime references `Microsoft.Extensions.Logging.Abstractions`, accepted
+deliberately beside the packages it already carried. The seams that avoided
+it (a runtime-owned sink interface, in typed and single-generic-method
+variants)
 reduce to re-implementing `ILogger` minus category filtering, `LoggerMessage`
 source generation, and ecosystem familiarity, while every supported host
 already carries the abstractions via `Microsoft.AspNetCore.App`.
 
 The host hands over an `ILoggerFactory` as an explicit option on the existing
-`WebFormsApplication.Initialize` intake, default `NullLoggerFactory`. Loggers
-are created once and cached in statics: `ILogger` is singleton-shaped, and
+`WebFormsApplication.Initialize` intake, default `NullLoggerFactory`. An
+ASP.NET Core adapter has no factory at that point — `AddRehostWebForms` runs
+before `builder.Build()` — so it attaches the built host's factory in
+`UseRehostWebForms`, after the container exists and before Kestrel accepts.
+Events raised in that bootstrap window reach only the `EventSource`; they are
+not replayed, because a fatal startup error already reaches the console
+through the crash path and the one non-fatal window event (the machine-key
+warning) has a documented workaround.
+
+Loggers are created once and cached in statics: `ILogger` is singleton-shaped, and
 logging scopes and trace ids are ambient, so a static logger inherits the
 host's per-request enrichment whenever the call runs on the request's
 execution flow. The runtime does not hold an `IServiceProvider`: a container
