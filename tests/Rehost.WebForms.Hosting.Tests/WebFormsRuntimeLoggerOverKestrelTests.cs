@@ -6,7 +6,7 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // The adapter hands the built host's ILoggerFactory to the runtime before Kestrel accepts, so a
 // request error lands in the host's log pipeline with the exception still an object (ADR 0011).
-public sealed class RuntimeDiagnosticsOverKestrelTests(PageLiveScenario scenario)
+public sealed class WebFormsRuntimeLoggerOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
     [Fact]

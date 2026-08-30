@@ -42,7 +42,7 @@ public sealed class HostLogProvider : ILoggerProvider
             where TState : notnull => null;
 
         public bool IsEnabled(LogLevel logLevel) =>
-            category == System.Web.Util.RuntimeDiagnostics.Category;
+            category == System.Web.Util.WebFormsRuntimeLogger.Category;
 
         public void Log<TState>(
             LogLevel logLevel,

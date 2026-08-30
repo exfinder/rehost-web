@@ -50,7 +50,7 @@ public static class WebFormsApplication
     // container is built has no earlier moment to hand it over.
     internal static void AttachLoggerFactory(ILoggerFactory loggerFactory)
     {
-        System.Web.Util.RuntimeDiagnostics.Publish(loggerFactory);
+        System.Web.Util.WebFormsRuntimeLogger.Publish(loggerFactory);
     }
 
     internal static ApplicationBootstrapConfiguration InitializedOrNull =>

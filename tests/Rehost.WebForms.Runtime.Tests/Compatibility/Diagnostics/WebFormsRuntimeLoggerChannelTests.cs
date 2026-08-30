@@ -7,18 +7,18 @@ using Xunit;
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Diagnostics;
 
 [Collection(nameof(ApplicationBootstrapCollection))]
-public sealed class RuntimeDiagnosticsChannelTests : IDisposable
+public sealed class WebFormsRuntimeLoggerChannelTests : IDisposable
 {
     public void Dispose()
     {
-        RuntimeDiagnostics.ResetForTests();
+        WebFormsRuntimeLogger.ResetForTests();
     }
 
     [Fact]
     public void Swallowed_Request_Exception_Reaches_Both_Channels()
     {
         var factory = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(factory);
+        WebFormsRuntimeLogger.Publish(factory);
         using var listener = new RuntimeEventCollector();
         var swallowed = new InvalidOperationException("reporting failed");
 
@@ -60,7 +60,7 @@ public sealed class RuntimeDiagnosticsChannelTests : IDisposable
     public void Unhandled_Exception_Keeps_Framework_Message_Content_On_The_Event_Source()
     {
         var factory = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(factory);
+        WebFormsRuntimeLogger.Publish(factory);
         using var listener = new RuntimeEventCollector();
         var exception = Thrown(new HttpException("page blew up"));
 
@@ -78,7 +78,7 @@ public sealed class RuntimeDiagnosticsChannelTests : IDisposable
     public void A_Hostile_ToString_Does_Not_Escape_The_Wrapper()
     {
         var factory = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(factory);
+        WebFormsRuntimeLogger.Publish(factory);
         using var listener = new RuntimeEventCollector();
 
         WebFormsRuntimeEventSource.Log.MonitorDisabled("RecycleLimitMonitor", new HostileException());
@@ -91,7 +91,7 @@ public sealed class RuntimeDiagnosticsChannelTests : IDisposable
     public void A_Failing_Log_Provider_Does_Not_Escape_The_Wrapper()
     {
         var factory = new CollectingLoggerFactory(() => new InvalidOperationException("provider is broken"));
-        RuntimeDiagnostics.Publish(factory);
+        WebFormsRuntimeLogger.Publish(factory);
 
         WebFormsRuntimeEventSource.Log.MonitorDisabled("RecycleLimitMonitor", new IOException("sampling failed"));
 
@@ -102,13 +102,13 @@ public sealed class RuntimeDiagnosticsChannelTests : IDisposable
     public void A_Disposed_Factory_Neither_Throws_Nor_Wedges_The_Channel()
     {
         var disposed = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(disposed);
+        WebFormsRuntimeLogger.Publish(disposed);
         disposed.Dispose();
 
         WebFormsRuntimeEventSource.Log.MonitorSampleFailed("RecycleLimitMonitor", new IOException("late failure"));
 
         var replacement = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(replacement);
+        WebFormsRuntimeLogger.Publish(replacement);
         WebFormsRuntimeEventSource.Log.MonitorSampleFailed("RecycleLimitMonitor", new IOException("later failure"));
         replacement.Entries.ShouldHaveSingleItem().Message.ShouldContain("RecycleLimitMonitor");
         disposed.Entries.ShouldBeEmpty();

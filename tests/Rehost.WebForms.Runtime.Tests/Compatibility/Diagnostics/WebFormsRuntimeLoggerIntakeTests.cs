@@ -7,11 +7,11 @@ using Xunit;
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.Diagnostics;
 
 [Collection(nameof(ApplicationBootstrapCollection))]
-public sealed class RuntimeDiagnosticsIntakeTests : IDisposable
+public sealed class WebFormsRuntimeLoggerIntakeTests : IDisposable
 {
     public void Dispose()
     {
-        RuntimeDiagnostics.ResetForTests();
+        WebFormsRuntimeLogger.ResetForTests();
     }
 
     [Fact]
@@ -40,17 +40,17 @@ public sealed class RuntimeDiagnosticsIntakeTests : IDisposable
         bootstrap.Initialize(application.CreateOptions());
 
         bootstrap.State.ShouldBe(ApplicationBootstrapState.Initialized);
-        RuntimeDiagnostics.Logger.ShouldBeSameAs(NullLogger.Instance);
+        WebFormsRuntimeLogger.Logger.ShouldBeSameAs(NullLogger.Instance);
     }
 
     [Fact]
     public void The_Test_Reset_Detaches_An_Earlier_Factory()
     {
         var earlier = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(earlier);
-        RuntimeDiagnostics.ResetForTests();
+        WebFormsRuntimeLogger.Publish(earlier);
+        WebFormsRuntimeLogger.ResetForTests();
         var later = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(later);
+        WebFormsRuntimeLogger.Publish(later);
 
         WebFormsRuntimeEventSource.Log.MonitorDisabled("RecycleLimitMonitor", new IOException("sampling failed"));
 

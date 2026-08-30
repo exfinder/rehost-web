@@ -7,7 +7,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-internal static partial class RuntimeDiagnostics
+internal static partial class WebFormsRuntimeLogger
 {
     internal const string Category = "Rehost.WebForms.Runtime";
 

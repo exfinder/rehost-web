@@ -11,7 +11,7 @@ public sealed class RuntimeErrorDeliveryTests : IDisposable
 {
     public void Dispose()
     {
-        RuntimeDiagnostics.ResetForTests();
+        WebFormsRuntimeLogger.ResetForTests();
     }
 
     [Fact]
@@ -19,7 +19,7 @@ public sealed class RuntimeErrorDeliveryTests : IDisposable
     {
         UnconfiguredHealthMonitoring();
         var factory = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(factory);
+        WebFormsRuntimeLogger.Publish(factory);
         using var listener = new RuntimeEventCollector();
         var error = new IOException("request failed");
 
@@ -39,7 +39,7 @@ public sealed class RuntimeErrorDeliveryTests : IDisposable
     {
         UnconfiguredHealthMonitoring();
         var factory = new CollectingLoggerFactory();
-        RuntimeDiagnostics.Publish(factory);
+        WebFormsRuntimeLogger.Publish(factory);
 
         WebBaseEvent.RaiseRuntimeError(new HostileException(), this);
 
