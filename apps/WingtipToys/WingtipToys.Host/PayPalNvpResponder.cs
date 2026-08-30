@@ -9,23 +9,43 @@ using Microsoft.Extensions.Hosting;
 
 namespace WingtipToys.Host;
 
-internal static class PayPalNvpResponder
+internal sealed class PayPalNvpResponder : IHostedService
 {
     private const string SandboxEndpointPrefix = "https://api-3t.sandbox.paypal.com";
     private const string PayerId = "WINGTIPPAYER01";
 
     private static readonly ConcurrentDictionary<string, string> AmountByToken = new(StringComparer.Ordinal);
+    private WebApplication? _responder;
 
-    public static void Start()
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions());
         builder.WebHost.UseKestrel(kestrel => kestrel.Listen(IPAddress.Loopback, 0));
 
         var responder = builder.Build();
         responder.Run(RespondAsync);
-        responder.Start();
+        await responder.StartAsync(cancellationToken);
 
-        WebRequest.RegisterPrefix(SandboxEndpointPrefix, new Redirector(responder.Urls.Single()));
+        if (!WebRequest.RegisterPrefix(SandboxEndpointPrefix, new Redirector(responder.Urls.Single())))
+        {
+            await responder.StopAsync(cancellationToken);
+            await responder.DisposeAsync();
+            throw new InvalidOperationException("The PayPal Sandbox redirector is already registered.");
+        }
+
+        _responder = responder;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        var responder = Interlocked.Exchange(ref _responder, null);
+        if (responder == null)
+        {
+            return;
+        }
+
+        await responder.StopAsync(cancellationToken);
+        await responder.DisposeAsync();
     }
 
     private static async Task RespondAsync(HttpContext context)
