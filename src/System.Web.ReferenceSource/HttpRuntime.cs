@@ -2330,6 +2330,7 @@ namespace System.Web {
 
             if (!HostingEnvironment.ShutdownInitiated) {
                 // This shutdown is not triggered by hosting environment - let it do the job
+                WebFormsRuntimeEventSource.Log.RestartRequested(ShutdownReason);
                 HostingEnvironment.InitiateShutdownWithoutDemand();
                 return true;
             }

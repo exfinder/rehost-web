@@ -181,7 +181,7 @@ namespace System.Web.Util {
         }
 
         [Event(9, Level = EventLevel.Warning, Message =
-            "The runtime asked for the application to be rebuilt ({0}); the process is stopping.")]
+            "The runtime asked for the application to be rebuilt ({0}).")]
         private void RestartRequested(string reason) {
             WriteEvent(9, reason);
         }

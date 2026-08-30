@@ -5,7 +5,6 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
-using System.Web.Util;
 
 internal sealed class ClassicPipelineActivation
 {
@@ -96,7 +95,6 @@ internal sealed class ClassicPipelineActivation
                 return;
             }
 
-            WebFormsRuntimeEventSource.Log.RestartRequested(HostingEnvironment.ShutdownReason);
             _restartRequested?.Invoke();
         });
 
