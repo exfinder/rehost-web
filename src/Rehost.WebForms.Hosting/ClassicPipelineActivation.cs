@@ -40,7 +40,7 @@ internal sealed class ClassicPipelineActivation
         return HttpRuntime.CodegenDir ?? Path.GetTempPath();
     }
 
-    internal void OnRestartRequested(Action callback)
+    internal void RegisterRestartRequested(Action callback)
     {
         ArgumentNullException.ThrowIfNull(callback);
 

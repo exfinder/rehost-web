@@ -62,7 +62,7 @@ public static class RehostWebFormsExtensions
         lifetime.ApplicationStopping.Register(activation.Shutdown);
 
         // The exit code is the AppDomain recycle's analog (ADR 0012).
-        activation.OnRestartRequested(() =>
+        activation.RegisterRestartRequested(() =>
         {
             Environment.ExitCode = WebFormsExitCodes.RestartRequested;
             lifetime.StopApplication();
