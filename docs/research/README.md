@@ -15,6 +15,7 @@ support or priority. Use [compatibility](../compatibility.md) and
 
 ## Portability audits
 
+- [Integrated-vs-classic divergence](integrated-divergence-audit.md)
 - [Backslash literals](backslash-literal-audit.md)
 - [Enumeration and wildcard bin loading](enumeration-order-and-bin-wildcard.md)
 
