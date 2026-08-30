@@ -1,6 +1,7 @@
 namespace Rehost.WebForms.Hosting;
 
 using System;
+using Microsoft.Extensions.Logging;
 
 public sealed class WebFormsApplicationOptions
 {
@@ -30,6 +31,10 @@ public sealed class WebFormsApplicationOptions
     public string CompilationTempDirectory { get; set; }
 
     public string MachineKeyDirectory { get; set; }
+
+    // Events raised before Initialize returns reach this factory; hosts that only own one after
+    // their container is built attach later, and those earlier events stay on the event source.
+    public ILoggerFactory LoggerFactory { get; set; }
 }
 
 public static class WebFormsApplication

@@ -4,6 +4,8 @@ using System;
 using System.IO;
 using System.Web;
 using System.Web.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 internal sealed class ApplicationBootstrapConfiguration
 {
@@ -23,7 +25,8 @@ internal sealed class ApplicationBootstrapConfiguration
         string defaultCompilationTempDirectory,
         string machineKeyDirectory,
         string machineKeyValidationKeyOverride,
-        string machineKeyDecryptionKeyOverride)
+        string machineKeyDecryptionKeyOverride,
+        ILoggerFactory loggerFactory)
     {
         ApplicationId = applicationId;
         PhysicalRootPath = physicalRootPath;
@@ -36,6 +39,7 @@ internal sealed class ApplicationBootstrapConfiguration
         MachineKeyDirectory = machineKeyDirectory;
         MachineKeyValidationKeyOverride = machineKeyValidationKeyOverride;
         MachineKeyDecryptionKeyOverride = machineKeyDecryptionKeyOverride;
+        LoggerFactory = loggerFactory;
     }
 
     internal string ApplicationId { get; }
@@ -63,6 +67,8 @@ internal sealed class ApplicationBootstrapConfiguration
     internal string MachineKeyValidationKeyOverride { get; }
 
     internal string MachineKeyDecryptionKeyOverride { get; }
+
+    internal ILoggerFactory LoggerFactory { get; }
 
     internal string ApplicationConfigurationFilePath =>
         Path.Combine(PhysicalRootPath, HttpConfigurationSystem.WebConfigFileName);
@@ -120,7 +126,8 @@ internal sealed class ApplicationBootstrapConfiguration
                 "machine-key directory",
                 nameof(WebFormsApplicationOptions.MachineKeyDirectory)),
             ReadEnvironmentOverride(MachineKeyEnvironmentOverrides.ValidationKeyVariable),
-            ReadEnvironmentOverride(MachineKeyEnvironmentOverrides.DecryptionKeyVariable));
+            ReadEnvironmentOverride(MachineKeyEnvironmentOverrides.DecryptionKeyVariable),
+            options.LoggerFactory ?? NullLoggerFactory.Instance);
     }
 
     private static string ReadEnvironmentOverride(string variableName)
