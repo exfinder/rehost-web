@@ -46,6 +46,13 @@ public static class WebFormsApplication
         Bootstrap.Initialize(options);
     }
 
+    // Replaces whatever the options published: an adapter owning its factory only after the
+    // container is built has no earlier moment to hand it over.
+    internal static void AttachLoggerFactory(ILoggerFactory loggerFactory)
+    {
+        System.Web.Util.RuntimeDiagnostics.Publish(loggerFactory);
+    }
+
     internal static ApplicationBootstrapConfiguration InitializedOrNull =>
         Bootstrap.State == ApplicationBootstrapState.Initialized ? Bootstrap.Configuration : null;
 

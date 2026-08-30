@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
@@ -118,6 +119,7 @@ public static class Program
     {
         var builder = WebApplication.CreateSlimBuilder();
         builder.Logging.ClearProviders();
+        builder.Logging.AddProvider(new HostLogProvider());
         builder.WebHost.ConfigureKestrel(kestrel =>
         {
             kestrel.AddServerHeader = false;
@@ -155,6 +157,11 @@ public static class Program
         });
 
         var app = builder.Build();
+        ((IApplicationBuilder)app).Map(HostLogProtocol.Path, journal => journal.Run(context =>
+        {
+            context.Response.ContentType = "text/plain";
+            return context.Response.WriteAsync(HostLogJournal.Snapshot());
+        }));
         app.UseRehostWebForms();
 
         await app.StartAsync();

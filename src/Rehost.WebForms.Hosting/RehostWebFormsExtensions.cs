@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 public static class RehostWebFormsExtensions
 {
@@ -52,6 +53,12 @@ public static class RehostWebFormsExtensions
 
         var activation = app.ApplicationServices.GetRequiredService<ClassicPipelineActivation>();
         var lifetime = app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>();
+
+        // AddRehostWebForms runs before the container exists, so the host's factory can only be
+        // handed over here: after Build, before Kestrel accepts. Bootstrap-window events stay on
+        // the event source.
+        WebFormsApplication.AttachLoggerFactory(
+            app.ApplicationServices.GetService<ILoggerFactory>());
         lifetime.ApplicationStopping.Register(activation.Shutdown);
 
         // With ASPNETCORE_FORWARDEDHEADERS_ENABLED the framework's startup filter has already put
