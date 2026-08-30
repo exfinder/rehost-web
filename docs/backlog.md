@@ -61,6 +61,9 @@ Carried from earlier milestones as unresolved detail:
   asset paths.
 - Drain, disposal, explicit unload, restart, and host replacement:
   [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md).
+- Configuration-change and file-change shutdown causes reach the process-exit
+  seam ([ADR 0012](adr/0012-runtime-initiated-restart.md)) untested; only the
+  `Application_Start` latch and `HttpRuntime.UnloadAppDomain()` are exercised.
 - Remove the remaining compiled `AppDomain.Unload` and broad warning
   suppression: [unload call site](follow-ups/appdomain-unload-call-sites.md).
 - Immutable-config change detection and restart signaling:

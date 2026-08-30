@@ -157,6 +157,14 @@
    ],
    "reason": "persisted autogen-key supplier and environment-supplied machineKey values behind NETFRAMEWORK fences (ledger P15)",
    "record": "docs/adr/0010-machine-key-persistence.md"
+  },
+  {
+   "files": [
+    "HttpApplicationFactory.cs",
+    "HttpRuntime.cs"
+   ],
+   "reason": "classic Application_Start failure takes the integrated-mode contract behind !NETFRAMEWORK fences: EnsureAppStartCalled latches context.Error into HttpRuntime.InitializationException, and EnsureFirstRequestInit replays the latched exception on later requests, standing in for the native module IPipelineRuntime registers for that replay",
+   "record": "docs/adr/0012-runtime-initiated-restart.md"
   }
  ]
 }
