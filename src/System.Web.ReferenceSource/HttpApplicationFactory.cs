@@ -179,6 +179,14 @@ namespace System.Web {
                             FireApplicationOnStart(context);
                         }
 
+#if !NETFRAMEWORK
+                        // Deviation (ADR 0012): latch instead of classic's partial-init continue;
+                        // the setter starts the shutdown timer the hosting seam turns into exit.
+                        if (context.Error != null && HttpRuntime.InitializationException == null) {
+                            HttpRuntime.InitializationException = context.Error;
+                        }
+#endif // !NETFRAMEWORK
+
                         _appOnStartCalled = true;
                     }
                 }

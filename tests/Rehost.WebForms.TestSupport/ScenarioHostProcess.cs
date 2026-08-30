@@ -25,6 +25,8 @@ public sealed class ScenarioHostProcess : IDisposable
 
     public string StandardError => _standardError.Result;
 
+    public bool WaitForExit(TimeSpan timeout) => _process.WaitForExit(timeout);
+
     public void WaitForExit()
     {
         // Both streams must drain concurrently, or a child writing more than the pipe buffer

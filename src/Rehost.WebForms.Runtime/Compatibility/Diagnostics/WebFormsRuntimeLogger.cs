@@ -78,4 +78,8 @@ internal static partial class WebFormsRuntimeLogger
         this ILogger logger,
         Exception exception,
         string source);
+
+    [LoggerMessage(EventId = 9, Level = LogLevel.Warning, Message =
+        "The runtime asked for the application to be rebuilt ({reason}); the process is stopping.")]
+    internal static partial void RestartRequested(this ILogger logger, string reason);
 }

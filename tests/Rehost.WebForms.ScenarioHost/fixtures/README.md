@@ -29,6 +29,7 @@ meet the same bar.
 | `modules` | `<modules>` amendments are the claim, and the probe modules record a stage on every request in the application, which no other fixture's stage assertions could tolerate. |
 | `modules-rammfar` | `runAllManagedModulesForAllRequests="true"` nullifies the `managedHandler` condition for the whole collection, which is the opposite claim to `modules`. |
 | `migrated` | The surveyed production shape as one application: webServer-only modules including an auth gate that 403s a whole directory, `Session` swapped for a foreign type, and a handler `remove`/re-add. Every one of those is app-global. |
+| `appstart` | Process death is the claim: `Application_Start` throws while a marker file outside the application is armed, the runtime latches the failure and ends the process, and the scenarios read the exit code. No other application can host a startup that fails. |
 | `classic-unflagged` | Classic registrations without the validation flag: activation is refused, so this application can never serve a request. |
 
 ## Host tenancy

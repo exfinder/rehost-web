@@ -122,6 +122,19 @@ namespace System.Web.Util {
             }
         }
 
+        [NonEvent]
+        internal void RestartRequested(ApplicationShutdownReason reason) {
+            var text = reason.ToString();
+            try {
+                WebFormsRuntimeLogger.Logger.RestartRequested(text);
+                if (IsEnabled()) {
+                    RestartRequested(text);
+                }
+            }
+            catch {
+            }
+        }
+
         [Event(1, Level = EventLevel.Error, Message = "{0}")]
         private void UnhandledException(string eventInfo) {
             WriteEvent(1, eventInfo);
@@ -165,6 +178,12 @@ namespace System.Web.Util {
         [Event(8, Level = EventLevel.Error, Message = "{0}: {1}")]
         private void RuntimeError(string source, string exception) {
             WriteEvent(8, source, exception);
+        }
+
+        [Event(9, Level = EventLevel.Warning, Message =
+            "The runtime asked for the application to be rebuilt ({0}); the process is stopping.")]
+        private void RestartRequested(string reason) {
+            WriteEvent(9, reason);
         }
 
         [NonEvent]

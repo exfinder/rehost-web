@@ -28,6 +28,7 @@ public sealed class ProbePathConformanceTests
         ["ProtectedProbe"] = ProbePaths.Secret,
         ["ScenarioHandler"] = ProbePaths.ScenarioDefault,
         ["ModuleListHandler"] = ProbePaths.ModuleList,
+        ["UnloadProbe"] = ProbePaths.Unload,
     };
 
     // The handler-walk markers report which row of the merged list won, so the path they sit at

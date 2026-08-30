@@ -9,6 +9,16 @@ using System.Web.Hosting;
 // environment uninitialized.
 internal sealed class ClassicPipelineDispatcher : MarshalByRefObject, IRegisteredObject
 {
+    private Action? _stopped;
+
+    // A well-known object is not in the hosting environment's shutdown walk until it
+    // registers itself; ISAPIRuntime does the same.
+    internal void StartProcessing(Action stopped)
+    {
+        _stopped = stopped;
+        HostingEnvironment.RegisterObject(this);
+    }
+
     internal void ProcessRequest(HttpWorkerRequest workerRequest)
     {
         HttpRuntime.ProcessRequest(workerRequest);
@@ -19,5 +29,6 @@ internal sealed class ClassicPipelineDispatcher : MarshalByRefObject, IRegistere
         // Releases the hosting environment's shutdown wait; without this the environment polls
         // until its shutdown timeout expires before force-stopping.
         HostingEnvironment.UnregisterObject(this);
+        _stopped?.Invoke();
     }
 }

@@ -5,12 +5,14 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using System.Web.Util;
 
 internal sealed class ClassicPipelineActivation
 {
     private readonly WebFormsApplicationOptions _options;
     private readonly Lazy<ClassicPipelineDispatcher> _dispatcher;
     private ApplicationManager? _manager;
+    private Action? _restartRequested;
     private int _shutdown;
 
     internal ClassicPipelineActivation(WebFormsApplicationOptions options)
@@ -36,6 +38,13 @@ internal sealed class ClassicPipelineActivation
     internal static string TemporaryDirectory()
     {
         return HttpRuntime.CodegenDir ?? Path.GetTempPath();
+    }
+
+    internal void OnRestartRequested(Action callback)
+    {
+        ArgumentNullException.ThrowIfNull(callback);
+
+        _restartRequested = callback;
     }
 
     internal void Shutdown()
@@ -74,9 +83,26 @@ internal sealed class ClassicPipelineActivation
 
         _manager = manager;
 
-        return registered as ClassicPipelineDispatcher
+        var dispatcher = registered as ClassicPipelineDispatcher
             ?? throw new InvalidOperationException(
                 "ApplicationManager did not return a ClassicPipelineDispatcher.");
+
+        dispatcher.StartProcessing(DispatcherStopped);
+
+        return dispatcher;
+    }
+
+    // The exchange classifies the stop (host-initiated already claimed it) and keeps the
+    // ApplicationStopping handler the callback triggers from re-entering this teardown.
+    private void DispatcherStopped()
+    {
+        if (Interlocked.Exchange(ref _shutdown, 1) != 0)
+        {
+            return;
+        }
+
+        WebFormsRuntimeEventSource.Log.RestartRequested(HostingEnvironment.ShutdownReason);
+        _restartRequested?.Invoke();
     }
 
     private static string EnsureTrailingSeparator(string path)

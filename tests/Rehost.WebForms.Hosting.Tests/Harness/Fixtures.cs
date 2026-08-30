@@ -25,4 +25,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture Handlers = new("handlers");
     internal static readonly ScenarioFixture Migrated = new("migrated");
     internal static readonly ScenarioFixture ClassicUnflagged = new("classic-unflagged");
+    internal static readonly ScenarioFixture AppStart = new("appstart");
 }

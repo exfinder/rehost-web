@@ -711,6 +711,14 @@ namespace System.Web {
         }
 
         private void EnsureFirstRequestInit(HttpContext context) {
+#if !NETFRAMEWORK
+            // Deviation (ADR 0012): stands in for integrated mode's native-module replay;
+            // without it the latch window serves on partial initialization.
+            if (!_beforeFirstRequest && InitializationException != null) {
+                throw new HttpException(InitializationException.Message, InitializationException);
+            }
+#endif // !NETFRAMEWORK
+
             if (_beforeFirstRequest) {
                 lock (this) {
                     if (_beforeFirstRequest) {

@@ -92,6 +92,10 @@ public sealed class LiveScenario : IDisposable
 
     internal int HostProcessId => _process.Id;
 
+    internal bool WaitForExit(TimeSpan timeout) => _process.WaitForExit(timeout);
+
+    internal int ExitCode => _process.ExitCode;
+
     internal Uri Address { get; private set; }
 
     internal ScenarioClient Client { get; private set; }

@@ -61,6 +61,13 @@ public static class RehostWebFormsExtensions
             app.ApplicationServices.GetService<ILoggerFactory>());
         lifetime.ApplicationStopping.Register(activation.Shutdown);
 
+        // The exit code is the AppDomain recycle's analog (ADR 0012).
+        activation.OnRestartRequested(() =>
+        {
+            Environment.ExitCode = WebFormsExitCodes.RestartRequested;
+            lifetime.StopApplication();
+        });
+
         // With ASPNETCORE_FORWARDEDHEADERS_ENABLED the framework's startup filter has already put
         // the middleware at the head of the pipeline; a second pass would re-read what it left.
         var configuration = app.ApplicationServices.GetService<IConfiguration>();

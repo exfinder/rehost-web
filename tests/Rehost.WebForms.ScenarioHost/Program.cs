@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Rehost.WebForms.Hosting;
@@ -40,7 +41,8 @@ public static class Program
                 RunBatch(options);
             }
 
-            return 0;
+            // A returned literal would clobber a runtime-requested exit code.
+            return Environment.ExitCode;
         }
         catch (Exception exception)
         {
@@ -162,6 +164,12 @@ public static class Program
             context.Response.ContentType = "text/plain";
             return context.Response.WriteAsync(HostLogJournal.Snapshot());
         }));
+        ((IApplicationBuilder)app).Map(HostControlProtocol.StopPath, stop => stop.Run(context =>
+        {
+            context.RequestServices.GetRequiredService<IHostApplicationLifetime>()
+                .StopApplication();
+            return context.Response.WriteAsync("stopping");
+        }));
         app.UseRehostWebForms();
 
         await app.StartAsync();
@@ -177,7 +185,8 @@ public static class Program
                 && options.Requests.Count == 0)
             {
                 TraceChannel.Record(TraceEvents.Address + address);
-                await Task.Delay(Timeout.Infinite);
+                await app.WaitForShutdownAsync();
+                return;
             }
 
             using var handler = new SocketsHttpHandler
