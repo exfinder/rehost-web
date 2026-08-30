@@ -40,7 +40,7 @@ internal static partial class WebFormsRuntimeLogger
         string site,
         string context);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Information, Message = "assembly {assemblyName} {outcome}")]
+    [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "assembly {assemblyName} {outcome}")]
     internal static partial void AssemblyResolution(
         this ILogger logger,
         string outcome,
