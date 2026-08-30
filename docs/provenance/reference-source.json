@@ -144,6 +144,13 @@
   },
   {
    "files": [
+    "Management/WebEvents.cs"
+   ],
+   "reason": "RaiseRuntimeError writes the raised error to WebFormsRuntimeEventSource before the HealthMonitoringManager.Enabled gate, so request errors are delivered without healthMonitoring configuration; the gated body is unchanged and the addition is unfenced because Framework has no equivalent call",
+   "record": "docs/adr/0011-portable-diagnostics-boundary.md"
+  },
+  {
+   "files": [
     "HttpRuntime.cs",
     "Configuration/MachineKeySection.cs",
     "Security/Cryptography/MachineKeyMasterKeyProvider.cs"

@@ -402,6 +402,8 @@ namespace System.Web.Management {
         static internal void RaiseRuntimeError(Exception e, object source) {
             Debug.Trace("WebEventRaiseError", "Error Event is raised; type=" + e.GetType().Name);
 
+            WebFormsRuntimeEventSource.Log.RuntimeError(e, source);
+
             if (!HealthMonitoringManager.Enabled) {
                 return;
             }
