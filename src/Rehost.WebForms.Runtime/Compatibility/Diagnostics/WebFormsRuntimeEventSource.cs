@@ -133,17 +133,17 @@ namespace System.Web.Util {
 
         // .NET Framework discards these exceptions with no record of any kind; the port reports
         // them so that a failed request is diagnosable. The response is unaffected either way.
-        [Event(2, Version = 3, Level = EventLevel.Error, Message = "{0} swallowed an exception; {2}: {1}")]
+        [Event(2, Level = EventLevel.Error, Message = "{0} swallowed an exception; {2}: {1}")]
         private void SwallowedRequestException(string site, string exception, string context) {
             WriteEvent(2, site, exception, context);
         }
 
-        [Event(3, Version = 2, Level = EventLevel.Verbose, Message = "Assembly {1} {0}")]
+        [Event(3, Level = EventLevel.Verbose, Message = "Assembly {1} {0}")]
         private void AssemblyResolution(string outcome, string assemblyName) {
             WriteEvent(3, outcome, assemblyName);
         }
 
-        [Event(4, Version = 2, Level = EventLevel.Error, Message = "Compilation of {0} failed: {1}")]
+        [Event(4, Level = EventLevel.Error, Message = "Compilation of {0} failed: {1}")]
         private void CompilationFailed(string outputAssembly, string diagnostics) {
             WriteEvent(4, outputAssembly, diagnostics);
         }
@@ -166,7 +166,7 @@ namespace System.Web.Util {
             WriteEvent(7, keys, keyFilePath);
         }
 
-        [Event(8, Version = 2, Level = EventLevel.Error, Message = "Unhandled runtime error from {0}: {1}")]
+        [Event(8, Level = EventLevel.Error, Message = "Unhandled runtime error from {0}: {1}")]
         private void RuntimeError(string source, string exception) {
             WriteEvent(8, source, exception);
         }
