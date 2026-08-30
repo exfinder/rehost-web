@@ -23,6 +23,6 @@ public sealed class WebFormsRuntimeLoggerOverKestrelTests(PageLiveScenario scena
         entry.Level.ShouldBe("Error");
         entry.EventId.ShouldBe(8);
         entry.ExceptionType.ShouldBe("System.Web.HttpUnhandledException");
-        entry.Message.ShouldBe("Unhandled request error from System.Web.HttpResponse");
+        entry.Message.ShouldBe("Unhandled runtime error from System.Web.HttpResponse");
     }
 }
