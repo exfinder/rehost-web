@@ -202,6 +202,24 @@ observability was the reason `EventSource` won, and that reason stands).
   manifest schema); `EventLevel`/event id map mechanically to
   `LogLevel`/`EventId`. Adding an event kind touches one file; the two
   channels cannot drift because the wrapper is the only caller of both.
+- **Existing signatures refactor to take exceptions as objects.** Three
+  current call sites pre-stringify and reshape under the `[NonEvent]` face:
+  `MonitorFailurePolicy.cs:29,36` (`e.ToString()` moves inside the wrapper);
+  `Misc.ReportUnhandledException` (`Misc.cs:66` — wrapper takes
+  `(Exception, string[])` and keeps calling `FormatExceptionMessage`
+  internally, since that format is the Framework event-log content parity,
+  while the raw exception rides to `ILogger`); and `HttpRuntime.cs:1844`,
+  which folds two exceptions into one string. `ILogger` has one `Exception`
+  slot, so the signature becomes
+  `SwallowedRequestException(string site, Exception swallowed, Exception? context)` —
+  the swallowed reporting failure is the event's subject and takes the slot,
+  the original request error becomes a named prop; the `[Event]` string form
+  keeps both texts so EventPipe output loses nothing. Wrapping both in an
+  `AggregateException` was rejected as misrepresenting what happened. Changing
+  event 2's payload shape changes what listeners see: the parity harness
+  (`RuntimeDiagnosticListener`) and the machine-key report test attach to this
+  source, so the refactor updates them in the same change and notes it against
+  ledger P31.
 - **Runtime takes `Microsoft.Extensions.Logging.Abstractions`** — its first
   external package reference, accepted deliberately: the abstractions package
   is small, netstandard, sanctioned for libraries (library-guidance link
