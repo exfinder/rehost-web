@@ -35,6 +35,12 @@ Carried from earlier milestones as unresolved detail:
 
 - The next representative application after the production baseline;
   direction and priority live in [`../ROADMAP.md`](../ROADMAP.md).
+- IIS URL Rewrite (`system.webServer/rewrite`): production IIS web.configs
+  commonly carry rewrite rules, and the port has no counterpart module. Decide
+  the story — a portable subset, a mapping to host middleware, or a fail-fast
+  diagnostic naming the boundary — and what happens today when the section is
+  present must be measured and recorded first; a silently ignored rule set is
+  the least-astonishment failure mode.
 - Audit the managed integrated-vs-classic divergence proactively instead of
   per incident: walk the 75 `UseIntegratedPipeline` sites (19 imported files)
   plus integrated-only public APIs (`Server.TransferRequest`, writable
