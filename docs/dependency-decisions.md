@@ -96,3 +96,13 @@ In-repository hosts use precompiled Roslyn images to avoid first-process compile
 JIT. This optimization is not shipped in the package. Package consumers that
 care about cold start publish with `PublishReadyToRun`, covering Roslyn, the
 runtime, and application assemblies without a Rehost-specific toolchain.
+
+## Microsoft.Extensions.Logging.Abstractions
+
+The runtime references the logging abstractions so diagnostics carry live
+`Exception` objects into the host's `ILogger` pipeline — the runtime's first
+external package, accepted over a runtime-owned sink abstraction. See
+[portable diagnostics boundary](adr/0011-portable-diagnostics-boundary.md).
+The full `Microsoft.Extensions.Logging` implementation and any provider
+packages stay host-side; the runtime holds an `ILoggerFactory` handed in at
+initialization, never a container.

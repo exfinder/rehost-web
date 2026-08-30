@@ -13,3 +13,4 @@ history.
 - [Codegen storage](0008-codegen-storage.md)
 - [Assembly graph](0009-assembly-graph.md)
 - [Machine-key persistence](0010-machine-key-persistence.md)
+- [Portable diagnostics boundary](0011-portable-diagnostics-boundary.md)
