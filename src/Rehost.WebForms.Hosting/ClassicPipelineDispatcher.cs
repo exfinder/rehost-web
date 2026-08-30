@@ -11,11 +11,15 @@ internal sealed class ClassicPipelineDispatcher : MarshalByRefObject, IRegistere
 {
     private Action? _stopped;
 
-    // A well-known object is not in the hosting environment's shutdown walk until it
-    // registers itself; ISAPIRuntime does the same.
-    internal void StartProcessing(Action stopped)
+    internal void RegisterStopped(Action stopped)
     {
         _stopped = stopped;
+    }
+
+    // A well-known object is not in the hosting environment's shutdown walk until it
+    // registers itself; ISAPIRuntime does the same.
+    internal void StartProcessing()
+    {
         HostingEnvironment.RegisterObject(this);
     }
 

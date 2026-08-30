@@ -87,22 +87,22 @@ internal sealed class ClassicPipelineActivation
             ?? throw new InvalidOperationException(
                 "ApplicationManager did not return a ClassicPipelineDispatcher.");
 
-        dispatcher.StartProcessing(DispatcherStopped);
+        // The exchange classifies the stop (host-initiated already claimed it) and keeps the
+        // ApplicationStopping handler the callback triggers from re-entering this teardown.
+        dispatcher.RegisterStopped(() =>
+        {
+            if (Interlocked.Exchange(ref _shutdown, 1) != 0)
+            {
+                return;
+            }
+
+            WebFormsRuntimeEventSource.Log.RestartRequested(HostingEnvironment.ShutdownReason);
+            _restartRequested?.Invoke();
+        });
+
+        dispatcher.StartProcessing();
 
         return dispatcher;
-    }
-
-    // The exchange classifies the stop (host-initiated already claimed it) and keeps the
-    // ApplicationStopping handler the callback triggers from re-entering this teardown.
-    private void DispatcherStopped()
-    {
-        if (Interlocked.Exchange(ref _shutdown, 1) != 0)
-        {
-            return;
-        }
-
-        WebFormsRuntimeEventSource.Log.RestartRequested(HostingEnvironment.ShutdownReason);
-        _restartRequested?.Invoke();
     }
 
     private static string EnsureTrailingSeparator(string path)
