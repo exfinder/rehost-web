@@ -42,9 +42,6 @@ namespace System.Web.Util {
             WriteEvent(6, monitor, exception);
         }
 
-        // Framework drew auto-generated keys from a machine-wide DPAPI store; here they persist in
-        // a per-application key file (ADR 0010), which stays machine-local. Framework reports
-        // nothing, and neither does this beyond the event: the response is unaffected.
         [Event(7, Level = EventLevel.Warning, Message =
             "machineKey {0} auto-generated; keys persist in '{1}' and survive process restart " +
             "on this machine. Scale-out across machines requires an explicit <machineKey> or " +
