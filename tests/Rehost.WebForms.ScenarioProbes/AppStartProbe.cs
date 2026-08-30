@@ -18,6 +18,12 @@ public static class AppStartProbe
 
         if (!string.IsNullOrEmpty(marker) && File.Exists(marker))
         {
+            var delay = Environment.GetEnvironmentVariable(AppStartProtocol.FaultDelaySecondsVariable);
+            if (int.TryParse(delay, out var seconds) && seconds > 0)
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(seconds));
+            }
+
             throw new InvalidOperationException(AppStartProtocol.FaultText + run);
         }
     }

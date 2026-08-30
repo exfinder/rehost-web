@@ -190,6 +190,16 @@ namespace System.Web {
                         _appOnStartCalled = true;
                     }
                 }
+
+#if !NETFRAMEWORK
+                // Waiters parked on the lock passed the EnsureFirstRequestInit replay gate
+                // before the latch existed; integrated mode catches them at that gate (IV
+                // reading: all waiters get the latched failure, never partial init).
+                if (context.Error == null && HttpRuntime.InitializationException != null) {
+                    throw new HttpException(HttpRuntime.InitializationException.Message,
+                                            HttpRuntime.InitializationException);
+                }
+#endif // !NETFRAMEWORK
             }
         }
 

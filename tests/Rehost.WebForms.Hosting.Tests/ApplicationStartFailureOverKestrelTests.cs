@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Globalization;
 using Rehost.WebForms.ScenarioProtocol;
 using Rehost.WebForms.TestSupport;
 using Shouldly;
@@ -56,6 +57,27 @@ public sealed class ApplicationStartFailureOverKestrelTests
         second.Text.ShouldContain(AppStartProtocol.FaultText + "1");
     }
 
+    // Waiters parked on the app-start lock get the latched failure, never partial init
+    // (IIS integrated waiters all receive it; winbox reading, 2026-08-30).
+    [Fact]
+    public async Task A_Request_Waiting_On_A_Slow_Failing_Start_Gets_The_Failure()
+    {
+        using var fault = new TempDirectory("rehost-appstart-");
+        var marker = fault.Path("fault");
+        File.WriteAllText(marker, "");
+        using var scenario = Start(marker, faultDelaySeconds: 4);
+
+        var runner = scenario.Client.GetAsync(ProbePaths.ScenarioDefault);
+        await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
+        var waiter = await scenario.Client.GetAsync(ProbePaths.ScenarioDefault);
+        var first = await runner;
+
+        first.StatusCode.ShouldBe(500);
+        first.Text.ShouldContain(AppStartProtocol.FaultText + "1");
+        waiter.StatusCode.ShouldBe(500);
+        waiter.Text.ShouldContain(AppStartProtocol.FaultText + "1");
+    }
+
     [Fact]
     public async Task A_Host_Initiated_Stop_Leaves_The_Exit_Code_Alone()
     {
@@ -87,11 +109,21 @@ public sealed class ApplicationStartFailureOverKestrelTests
         scenario.ExitCode.ShouldBe(RestartRequested);
     }
 
-    private static LiveScenario Start(string marker) => LiveScenario.StartIsolated(
-        Fixtures.AppStart,
-        IsolationReason.ProcessDamage,
-        environment: new Dictionary<string, string>
+    private static LiveScenario Start(string marker, int faultDelaySeconds = 0)
+    {
+        var environment = new Dictionary<string, string>
         {
             [AppStartProtocol.FaultMarkerVariable] = marker,
-        });
+        };
+        if (faultDelaySeconds > 0)
+        {
+            environment[AppStartProtocol.FaultDelaySecondsVariable] =
+                faultDelaySeconds.ToString(CultureInfo.InvariantCulture);
+        }
+
+        return LiveScenario.StartIsolated(
+            Fixtures.AppStart,
+            IsolationReason.ProcessDamage,
+            environment: environment);
+    }
 }

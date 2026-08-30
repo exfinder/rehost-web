@@ -21,6 +21,12 @@ A shutdown the runtime initiates ends the process with exit code
 process is the rebuilt application. The port takes the integrated-mode
 contract for `Application_Start`: the failure latches, every request inside
 the window replays it, and Classic's partial-init continue is not reproduced.
+Requests parked on the app-start lock during a slow failing start also
+receive the latched failure, as integrated waiters do at the
+`FirstRequestInit` gate; classic's later app-start placement needs an
+explicit post-lock check to match (measured: all integrated waiters get the
+failure, and a self-referential customErrors page caps at 302 → 500 via the
+`aspxerrorpath` guard — no redirect loop on either runtime).
 
 The direction of initiation decides, not the cause. `ClassicPipelineDispatcher`
 registers itself with the hosting environment, as `ISAPIRuntime` does, so a
