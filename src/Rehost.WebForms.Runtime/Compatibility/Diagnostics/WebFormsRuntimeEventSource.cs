@@ -134,7 +134,7 @@ namespace System.Web.Util {
             WriteEvent(2, site, exception, context);
         }
 
-        [Event(3, Level = EventLevel.Informational, Message = "{0}: {1}")]
+        [Event(3, Level = EventLevel.Verbose, Message = "{0}: {1}")]
         private void AssemblyResolution(string outcome, string assemblyName) {
             WriteEvent(3, outcome, assemblyName);
         }
