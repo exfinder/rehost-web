@@ -7,7 +7,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <RehostAppContentRoot>../WingtipToys/</RehostAppContentRoot>
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
+    <NoWarn>$(NoWarn);NU1701;SYSLIB0014</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
