@@ -36,7 +36,7 @@ namespace System.Web.Util {
             }
 
             var assembly = AssemblyLoadContext.Default.LoadFromAssemblyPath(path);
-            WebFormsRuntimeEventSource.Log.AssemblyResolution("compiled", path);
+            WebFormsRuntimeEventSource.Log.AssemblyResolution(AssemblyResolutionOutcome.Compiled, path);
             return assembly;
         }
 
@@ -101,11 +101,11 @@ namespace System.Web.Util {
                 }
 
                 var assembly = context.LoadFromAssemblyPath(path);
-                WebFormsRuntimeEventSource.Log.AssemblyResolution("loaded", name.FullName);
+                WebFormsRuntimeEventSource.Log.AssemblyResolution(AssemblyResolutionOutcome.Loaded, name.FullName);
                 return assembly;
             }
 
-            WebFormsRuntimeEventSource.Log.AssemblyResolution("absent", name.FullName);
+            WebFormsRuntimeEventSource.Log.AssemblyResolution(AssemblyResolutionOutcome.Absent, name.FullName);
             return null;
         }
     }

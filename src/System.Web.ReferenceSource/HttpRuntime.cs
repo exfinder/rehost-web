@@ -1843,8 +1843,8 @@ namespace System.Web {
                             catch (Exception eReportFailure) {
                                 WebFormsRuntimeEventSource.Log.SwallowedRequestException(
                                     "HttpRuntime.FinishRequest",
-                                    "request: " + e + Environment.NewLine
-                                    + "reporting: " + eReportFailure);
+                                    eReportFailure,
+                                    "request: " + e);
                             }
                         }
                     }

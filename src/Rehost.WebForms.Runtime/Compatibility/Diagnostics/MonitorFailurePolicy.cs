@@ -26,21 +26,14 @@ internal sealed class MonitorFailurePolicy
     // True once the monitor should stop rather than keep retrying.
     internal bool RecordFailure(Exception e)
     {
-        WebFormsRuntimeEventSource.Log.MonitorSampleFailed(_monitor, e.ToString());
+        WebFormsRuntimeEventSource.Log.MonitorSampleFailed(_monitor, e);
 
         if (++_consecutiveFailures < ConsecutiveFailureLimit)
         {
             return false;
         }
 
-        WebFormsRuntimeEventSource.Log.MonitorDisabled(_monitor, e.ToString());
-
-        // Nothing subscribes to the event source by default; a container captures standard error.
-        Console.Error.WriteLine(
-            "Rehost.WebForms: {0} disabled after {1} consecutive failures; memory trimming is off. {2}",
-            _monitor,
-            ConsecutiveFailureLimit,
-            e);
+        WebFormsRuntimeEventSource.Log.MonitorDisabled(_monitor, e);
 
         return true;
     }

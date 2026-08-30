@@ -186,7 +186,7 @@ internal sealed class RoslynCSharpCompiler : ICodeCompiler
             // running a compiled application never sees.
             Util.WebFormsRuntimeEventSource.Log.CompilationFailed(
                 outputAssembly,
-                string.Join(Environment.NewLine, results.Output.Cast<string>()));
+                results.Output.Cast<string>());
 
             // A failed emit leaves an unloadable file behind, which the next request would
             // otherwise find and treat as a usable build result.
