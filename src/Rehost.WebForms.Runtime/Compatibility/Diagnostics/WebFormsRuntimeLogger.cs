@@ -40,13 +40,13 @@ internal static partial class WebFormsRuntimeLogger
         string site,
         string context);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "assembly {assemblyName} {outcome}")]
+    [LoggerMessage(EventId = 3, Level = LogLevel.Debug, Message = "Assembly {assemblyName} {outcome}")]
     internal static partial void AssemblyResolution(
         this ILogger logger,
         string outcome,
         string assemblyName);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "compilation of {outputAssembly} failed: {diagnostics}")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Error, Message = "Compilation of {outputAssembly} failed: {diagnostics}")]
     internal static partial void CompilationFailed(
         this ILogger logger,
         string outputAssembly,
@@ -73,7 +73,7 @@ internal static partial class WebFormsRuntimeLogger
         string keys,
         string keyFilePath);
 
-    [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "unhandled request error from {source}")]
+    [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(
         this ILogger logger,
         Exception exception,
