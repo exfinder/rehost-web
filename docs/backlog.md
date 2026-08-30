@@ -42,6 +42,14 @@ Carried from earlier milestones as unresolved detail:
 
 - Adapter residuals: HTTP/3, proxied client certificates, integrated-mode
   server variables: [host adapter](follow-ups/aspnet-core-host-adapter.md).
+- Audit the managed integrated-vs-classic divergence proactively instead of
+  per incident: walk the 75 `UseIntegratedPipeline` sites (19 imported files)
+  plus integrated-only public APIs (`Server.TransferRequest`, writable
+  `Request`/`Response` header collections, the `CurrentNotification` family);
+  classify each application-visible one and decide take-integrated-branch,
+  shim, or documented-unsupported. Doctrine in
+  [ADR 0001](adr/0001-runtime-compatibility-model.md); precedents there and in
+  [ADR 0012](adr/0012-runtime-initiated-restart.md).
 - Terminal-event and cancellation coverage:
   [request completion](follow-ups/request-completion-failure-and-cancellation.md).
 - Abort the client connection when a timed-out synchronous step cannot return:

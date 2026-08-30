@@ -3,6 +3,16 @@
 This describes the current classic managed path. IIS integrated mode is
 background, not a supported runtime profile.
 
+The migrating audience ran integrated mode, so where the two modes diverge in
+application-visible behavior the port executes classic and adopts the
+integrated-mode observable, decided per site against IIS readings
+([ADR 0001](adr/0001-runtime-compatibility-model.md)). Precedents: the
+always-integrated `system.webServer` configuration presentation, and the
+`Application_Start` failure contract
+([ADR 0012](adr/0012-runtime-initiated-restart.md)). Native notification
+machinery stays excluded; the managed `UseIntegratedPipeline` divergence is
+finite (75 sites in 19 imported files) and auditable — see the backlog.
+
 ## Host analogy
 
 | .NET Framework/IIS | Portable host |
