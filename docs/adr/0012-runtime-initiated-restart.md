@@ -25,8 +25,12 @@ Requests parked on the app-start lock during a slow failing start also
 receive the latched failure, as integrated waiters do at the
 `FirstRequestInit` gate; classic's later app-start placement needs an
 explicit post-lock check to match (measured: all integrated waiters get the
-failure, and a self-referential customErrors page caps at 302 → 500 via the
-`aspxerrorpath` guard — no redirect loop on either runtime).
+failure. A self-referential customErrors page caps at 302 → 500 via the
+`aspxerrorpath` guard only when `defaultRedirect` carries no query string; a
+query-carrying `defaultRedirect` never receives the marker the guard keys on
+and loops unboundedly — identically on IIS integrated and the port, app
+healthy or not, since `HttpResponse.RedirectToErrorPage` is inherited
+unmodified).
 
 The direction of initiation decides, not the cause. `ClassicPipelineDispatcher`
 registers itself with the hosting environment, as `ISAPIRuntime` does, so a
