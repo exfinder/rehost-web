@@ -28,6 +28,15 @@ internal static class RawSocketProbe
         }
     }
 
+    private static byte[] RawGet(Uri address, string path) =>
+        Encoding.ASCII.GetBytes($"""
+            GET {path} HTTP/1.1
+            Host: {address.Authority}
+            Connection: close
+
+
+            """.ReplaceLineEndings("\r\n"));
+
     internal static async Task<int> AbortMidBodyAsync(Uri address, string path)
     {
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
@@ -58,35 +67,18 @@ internal static class RawSocketProbe
 
     // Byte-true view of a response: HttpClient decodes header values as Latin-1, which would
     // disguise the wire encoding under assertion.
-    internal static Task<byte[]> GetRawResponseAsync(Uri address, string path)
-    {
-        var request = $"""
-            GET {path} HTTP/1.1
-            Host: {address.Authority}
-            Connection: close
-
-
-            """.ReplaceLineEndings("\r\n");
-        return SendRawAsync(address, Encoding.ASCII.GetBytes(request));
-    }
+    internal static Task<byte[]> GetRawResponseAsync(Uri address, string path) =>
+        SendRawAsync(address, RawGet(address, path));
 
     // A request whose bytes are on the wire before the caller does whatever unblocks the server:
     // a task handed to HttpClient may not have opened a connection at all. The returned task
     // completes with the whole response.
     internal static async Task<Task<byte[]>> DispatchRawGetAsync(Uri address, string path)
     {
-        var request = $"""
-            GET {path} HTTP/1.1
-            Host: {address.Authority}
-            Connection: close
-
-
-            """.ReplaceLineEndings("\r\n");
-
         var client = new System.Net.Sockets.TcpClient();
         await client.ConnectAsync(address.Host, address.Port);
         var stream = client.GetStream();
-        await stream.WriteAsync(Encoding.ASCII.GetBytes(request));
+        await stream.WriteAsync(RawGet(address, path));
         await stream.FlushAsync();
 
         return ReadToEndAsync(client, stream);
@@ -120,19 +112,12 @@ internal static class RawSocketProbe
     internal static async Task<List<(TimeSpan Elapsed, byte[] Bytes)>> ReadTimedAsync(
         Uri address, string path)
     {
-        var request = $"""
-            GET {path} HTTP/1.1
-            Host: {address.Authority}
-            Connection: close
-
-
-            """.ReplaceLineEndings("\r\n");
         using var client = new System.Net.Sockets.TcpClient();
         await client.ConnectAsync(address.Host, address.Port);
         await using var stream = client.GetStream();
 
         var clock = System.Diagnostics.Stopwatch.StartNew();
-        await stream.WriteAsync(Encoding.ASCII.GetBytes(request));
+        await stream.WriteAsync(RawGet(address, path));
         await stream.FlushAsync();
 
         using var deadline = new CancellationTokenSource(ReadDeadline);
