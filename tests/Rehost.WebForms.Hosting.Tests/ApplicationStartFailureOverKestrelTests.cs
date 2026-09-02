@@ -59,10 +59,8 @@ public sealed class ApplicationStartFailureOverKestrelTests
         second.Text.ShouldContain(AppStartProtocol.FaultText + "1");
     }
 
-    // Waiters parked on the app-start lock get the latched failure, never partial init
-    // (IIS integrated waiters all receive it; winbox reading, 2026-08-30). The gate holds
-    // Application_Start open until the second request is on the wire, so the failure cannot
-    // beat it to the FirstRequestInit gate and pass the test down the covered path instead.
+    // A waiter sent without the gate, or over a client that may not have dispatched it, can
+    // reach the FirstRequestInit gate instead and pass this test without ever parking.
     [Fact]
     public async Task A_Request_Waiting_On_A_Slow_Failing_Start_Gets_The_Failure()
     {
