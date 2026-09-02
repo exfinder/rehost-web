@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using System.Globalization;
+using System.Text;
 using Rehost.WebForms.ScenarioProtocol;
 using Rehost.WebForms.TestSupport;
 using Shouldly;
@@ -14,6 +14,8 @@ public sealed class ApplicationStartFailureOverKestrelTests
     private const int RestartRequested = 82;
 
     private static readonly TimeSpan ExitWait = TimeSpan.FromSeconds(30);
+
+    private static readonly TimeSpan StartWait = TimeSpan.FromSeconds(30);
 
     [Fact]
     public async Task A_Failed_Application_Start_Ends_The_Process_And_The_Next_One_Serves()
@@ -58,24 +60,36 @@ public sealed class ApplicationStartFailureOverKestrelTests
     }
 
     // Waiters parked on the app-start lock get the latched failure, never partial init
-    // (IIS integrated waiters all receive it; winbox reading, 2026-08-30).
+    // (IIS integrated waiters all receive it; winbox reading, 2026-08-30). The gate holds
+    // Application_Start open until the second request is on the wire, so the failure cannot
+    // beat it to the FirstRequestInit gate and pass the test down the covered path instead.
     [Fact]
     public async Task A_Request_Waiting_On_A_Slow_Failing_Start_Gets_The_Failure()
     {
+        var token = TestContext.Current.CancellationToken;
         using var fault = new TempDirectory("rehost-appstart-");
         var marker = fault.Path("fault");
         File.WriteAllText(marker, "");
-        using var scenario = Start(marker, faultDelaySeconds: 4);
+        using var gate = new ScenarioGate();
+        using var scenario = Start(marker, gate);
 
         var runner = scenario.Client.GetAsync(ProbePaths.ScenarioDefault);
-        await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
-        var waiter = await scenario.Client.GetAsync(ProbePaths.ScenarioDefault);
+        await gate.WaitForArrivalAsync(StartWait, token);
+        var waiter = await RawSocketProbe.DispatchRawGetAsync(
+            scenario.Address, ProbePaths.ScenarioDefault);
+
+        runner.IsCompleted.ShouldBeFalse();
+        waiter.IsCompleted.ShouldBeFalse();
+
+        gate.Release();
+
         var first = await runner;
+        var parked = Encoding.ASCII.GetString(await waiter);
 
         first.StatusCode.ShouldBe(500);
         first.Text.ShouldContain(AppStartProtocol.FaultText + "1");
-        waiter.StatusCode.ShouldBe(500);
-        waiter.Text.ShouldContain(AppStartProtocol.FaultText + "1");
+        parked.ShouldStartWith("HTTP/1.1 500");
+        parked.ShouldContain(AppStartProtocol.FaultText + "1");
     }
 
     [Fact]
@@ -109,16 +123,15 @@ public sealed class ApplicationStartFailureOverKestrelTests
         scenario.ExitCode.ShouldBe(RestartRequested);
     }
 
-    private static LiveScenario Start(string marker, int faultDelaySeconds = 0)
+    private static LiveScenario Start(string marker, ScenarioGate? gate = null)
     {
         var environment = new Dictionary<string, string>
         {
             [AppStartProtocol.FaultMarkerVariable] = marker,
         };
-        if (faultDelaySeconds > 0)
+        if (gate != null)
         {
-            environment[AppStartProtocol.FaultDelaySecondsVariable] =
-                faultDelaySeconds.ToString(CultureInfo.InvariantCulture);
+            environment[ScenarioGate.GateVariable] = gate.Name;
         }
 
         return LiveScenario.StartIsolated(

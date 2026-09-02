@@ -6,7 +6,5 @@ public static class AppStartProtocol
 {
     public const string FaultMarkerVariable = "REHOST_SCENARIO_APPSTART_FAULT";
 
-    public const string FaultDelaySecondsVariable = "REHOST_SCENARIO_APPSTART_FAULT_DELAY_SECONDS";
-
     public const string FaultText = "appstart-fault:";
 }

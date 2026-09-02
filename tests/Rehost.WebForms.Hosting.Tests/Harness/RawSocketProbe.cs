@@ -70,6 +70,50 @@ internal static class RawSocketProbe
         return SendRawAsync(address, Encoding.ASCII.GetBytes(request));
     }
 
+    // A request whose bytes are on the wire before the caller does whatever unblocks the server:
+    // a task handed to HttpClient may not have opened a connection at all. The returned task
+    // completes with the whole response.
+    internal static async Task<Task<byte[]>> DispatchRawGetAsync(Uri address, string path)
+    {
+        var request = $"""
+            GET {path} HTTP/1.1
+            Host: {address.Authority}
+            Connection: close
+
+
+            """.ReplaceLineEndings("\r\n");
+
+        var client = new System.Net.Sockets.TcpClient();
+        await client.ConnectAsync(address.Host, address.Port);
+        var stream = client.GetStream();
+        await stream.WriteAsync(Encoding.ASCII.GetBytes(request));
+        await stream.FlushAsync();
+
+        return ReadToEndAsync(client, stream);
+    }
+
+    private static async Task<byte[]> ReadToEndAsync(
+        System.Net.Sockets.TcpClient client, NetworkStream stream)
+    {
+        using (client)
+        await using (stream)
+        {
+            using var deadline = new CancellationTokenSource(ReadDeadline);
+            using var received = new MemoryStream();
+            var buffer = new byte[65536];
+            while (true)
+            {
+                var read = await ReadWithDeadlineAsync(stream, buffer, deadline.Token);
+                if (read == 0)
+                {
+                    return received.ToArray();
+                }
+
+                received.Write(buffer, 0, read);
+            }
+        }
+    }
+
     // The response as it arrives: one entry per socket read with the elapsed time since the
     // request went out, so a test can tell what reached the client before a server-side delay
     // elapsed. HttpClient would buffer that timing away.

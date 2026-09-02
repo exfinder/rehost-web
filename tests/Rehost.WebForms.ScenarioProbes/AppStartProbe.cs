@@ -18,10 +18,9 @@ public static class AppStartProbe
 
         if (!string.IsNullOrEmpty(marker) && File.Exists(marker))
         {
-            var delay = Environment.GetEnvironmentVariable(AppStartProtocol.FaultDelaySecondsVariable);
-            if (int.TryParse(delay, out var seconds) && seconds > 0)
+            using (var gate = ScenarioGate.Open())
             {
-                Thread.Sleep(TimeSpan.FromSeconds(seconds));
+                gate.ArriveAndWait();
             }
 
             throw new InvalidOperationException(AppStartProtocol.FaultText + run);
