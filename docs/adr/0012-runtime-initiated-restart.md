@@ -21,16 +21,19 @@ A shutdown the runtime initiates ends the process with exit code
 process is the rebuilt application. The port takes the integrated-mode
 contract for `Application_Start`: the failure latches, every request inside
 the window replays it, and Classic's partial-init continue is not reproduced.
-Requests parked on the app-start lock during a slow failing start also
-receive the latched failure, as integrated waiters do at the
-`FirstRequestInit` gate; classic's later app-start placement needs an
-explicit post-lock check to match (measured: all integrated waiters get the
-failure. A self-referential customErrors page caps at 302 → 500 via the
-`aspxerrorpath` guard only when `defaultRedirect` carries no query string; a
-query-carrying `defaultRedirect` never receives the marker the guard keys on
-and loops unboundedly — identically on IIS integrated and the port, app
-healthy or not, since `HttpResponse.RedirectToErrorPage` is inherited
-unmodified).
+Requests already in flight when a slow start fails also receive the latched
+failure, as integrated requests do at their `BeginRequest` gate. Classic
+places `Application_Start` after the per-request `FirstRequestInit` gate, so
+a request can pass that gate before the latch exists and reach app start
+after it, whether parked on the lock or past the `_appOnStartCalled` fast
+path; the post-lock check therefore runs on every call into
+`EnsureAppStartCalled`, not only on the calls that entered the guard
+(measured: all integrated waiters get the failure. A self-referential
+customErrors page caps at 302 → 500 via the `aspxerrorpath` guard only when
+`defaultRedirect` carries no query string; a query-carrying `defaultRedirect`
+never receives the marker the guard keys on and loops unboundedly —
+identically on IIS integrated and the port, app healthy or not, since
+`HttpResponse.RedirectToErrorPage` is inherited unmodified).
 
 The direction of initiation decides, not the cause. `ClassicPipelineDispatcher`
 registers itself with the hosting environment, as `ISAPIRuntime` does, so a

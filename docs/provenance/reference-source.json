@@ -163,7 +163,7 @@
     "HttpApplicationFactory.cs",
     "HttpRuntime.cs"
    ],
-   "reason": "classic Application_Start failure takes the integrated-mode contract behind !NETFRAMEWORK fences: EnsureAppStartCalled latches context.Error into HttpRuntime.InitializationException and rethrows it to requests parked on the app-start lock, and EnsureFirstRequestInit replays the latched exception on later requests, standing in for the FirstRequestInit gate and native-module replay that cover both cases under integrated IIS",
+   "reason": "classic Application_Start failure takes the integrated-mode contract behind !NETFRAMEWORK fences: EnsureAppStartCalled latches context.Error into HttpRuntime.InitializationException and rethrows it on every later call, covering requests parked on the app-start lock and requests that reach it past the _appOnStartCalled fast path, and EnsureFirstRequestInit replays the latched exception on later requests, standing in for the FirstRequestInit gate and native-module replay that cover both cases under integrated IIS",
    "record": "docs/adr/0012-runtime-initiated-restart.md"
   }
  ]
