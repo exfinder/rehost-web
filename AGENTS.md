@@ -109,3 +109,8 @@ synchronization object supported on every target: named `EventWaitHandle` and
 `Local\` prefix, which is honored on both. A name derived from a string hash
 must use a stable hash, since `string.GetHashCode` is randomized per process and
 each process would otherwise take a different mutex (ledger P38).
+
+That rule covers mutual exclusion. Signalling one process from another — an
+arrival, a release, a payload — goes over a named pipe (`ScenarioGate`): a mutex
+cannot tell its holder that someone is waiting, so the same handshake needs two
+of them plus polling, and ownership is thread-affine.
