@@ -29,7 +29,7 @@ public sealed class ApplicationStartFailureOverKestrelTests
         var exited = scenario.WaitForExit(ExitWait);
 
         failed.StatusCode.ShouldBe(500);
-        failed.Text.ShouldContain($"{AppStartProtocol.FaultText}:1");
+        failed.Text.ShouldContain($"{AppStartProtocol.FaultText}1");
         exited.ShouldBeTrue();
         scenario.ExitCode.ShouldBe(RestartRequested);
 
@@ -54,9 +54,9 @@ public sealed class ApplicationStartFailureOverKestrelTests
         var second = await scenario.Client.GetAsync(ProbePaths.ScenarioDefault);
 
         first.StatusCode.ShouldBe(500);
-        first.Text.ShouldContain($"{AppStartProtocol.FaultText}:1");
+        first.Text.ShouldContain($"{AppStartProtocol.FaultText}1");
         second.StatusCode.ShouldBe(500);
-        second.Text.ShouldContain($"{AppStartProtocol.FaultText}:1");
+        second.Text.ShouldContain($"{AppStartProtocol.FaultText}1");
     }
 
     // A waiter sent without the gate, or over a client that may not have dispatched it, can
@@ -85,9 +85,9 @@ public sealed class ApplicationStartFailureOverKestrelTests
         var parked = Encoding.ASCII.GetString(await waiter);
 
         first.StatusCode.ShouldBe(500);
-        first.Text.ShouldContain($"{AppStartProtocol.FaultText}:1");
+        first.Text.ShouldContain($"{AppStartProtocol.FaultText}1");
         parked.ShouldStartWith("HTTP/1.1 500");
-        parked.ShouldContain($"{AppStartProtocol.FaultText}:1");
+        parked.ShouldContain($"{AppStartProtocol.FaultText}1");
     }
 
     [Fact]

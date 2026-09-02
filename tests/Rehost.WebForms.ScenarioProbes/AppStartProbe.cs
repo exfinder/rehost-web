@@ -23,7 +23,7 @@ public static class AppStartProbe
                 gate.ArriveAndWait();
             }
 
-            throw new InvalidOperationException($"{AppStartProtocol.FaultText}:{run}");
+            throw new InvalidOperationException($"{AppStartProtocol.FaultText}{run}");
         }
     }
 }
