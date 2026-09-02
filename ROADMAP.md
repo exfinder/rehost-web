@@ -40,7 +40,7 @@ stays absent (ledger P69). The gap analysis and its closure live in
 ## Completed — Milestone 2: eShopLegacyWebForms
 
 Microsoft's eShopLegacyWebForms runs with its C#, markup, and `Web.config`
-frozen, on mock data, from [`apps/eShopLegacyWebForms`](apps/eShopLegacyWebForms/README.md).
+frozen, on mock data, from [`apps/eShopLegacyWebForms`](apps/eShopLegacyWebForms/).
 The catalog journeys (the application has no purchase flow) pass on all three
 platforms; closure work landed as two XDT module drops, an
 `Autofac.Integration.Web` recompile, the baseline `expressionBuilders`

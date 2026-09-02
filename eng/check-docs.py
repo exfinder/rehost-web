@@ -8,11 +8,15 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = (
+    "artifacts/",
     "src/System.Web.ReferenceSource/",
     "src/System.Web.ApplicationServices.ReferenceSource/",
     "src/System.Web.Services.ReferenceSource/",
     "third_party/",
 )
+# Library content an application carries verbatim, and build output copied from it: their links
+# point into the upstream repository layout and are not ours to repair.
+VENDORED = frozenset({"bin", "obj", "packages", "Scripts"})
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
 HEADING = re.compile(r"^ {0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
 PROJECT_STATE = re.compile(r"^(?:Status|Priority):", re.MULTILINE)
@@ -20,8 +24,10 @@ PROJECT_STATE = re.compile(r"^(?:Status|Priority):", re.MULTILINE)
 
 def markdown_files():
     for path in ROOT.rglob("*.md"):
-        relative = path.relative_to(ROOT).as_posix()
-        if not relative.startswith(EXCLUDED):
+        relative = path.relative_to(ROOT)
+        if relative.as_posix().startswith(EXCLUDED):
+            continue
+        if VENDORED.isdisjoint(relative.parts):
             yield path
 
 
