@@ -12,6 +12,7 @@ namespace Microsoft.Owin.Host.SystemWeb
     internal partial class OwinCallContext
     {
         private const string IIS7WorkerRequestTypeName = "System.Web.Hosting.IIS7WorkerRequest";
+        private static readonly Type IIS7WorkerType = typeof(HttpContext).Assembly.GetType(IIS7WorkerRequestTypeName);
         private static readonly Lazy<RemoveHeaderDel> IIS7RemoveHeader = new Lazy<RemoveHeaderDel>(GetRemoveHeaderDelegate);
 
         private bool _compressionDisabled;
@@ -41,7 +42,9 @@ namespace Microsoft.Owin.Host.SystemWeb
             try
             {
                 var workerRequest = (HttpWorkerRequest)_httpContext.GetService(typeof(HttpWorkerRequest));
-                if (HttpRuntime.UsingIntegratedPipeline && IIS7RemoveHeader.Value != null)
+                if (HttpRuntime.UsingIntegratedPipeline
+                    && IIS7RemoveHeader.Value != null
+                    && IIS7WorkerType.IsInstanceOfType(workerRequest))
                 {
                     // Optimized code path for IIS7, accessing Headers causes all headers to be read
                     IIS7RemoveHeader.Value.Invoke(workerRequest);
@@ -68,11 +71,10 @@ namespace Microsoft.Owin.Host.SystemWeb
         {
             try
             {
-                Type iis7WorkerType = typeof(HttpContext).Assembly.GetType(IIS7WorkerRequestTypeName);
-                MethodInfo methodInfo = iis7WorkerType.GetMethod("SetKnownRequestHeader", BindingFlags.NonPublic | BindingFlags.Instance);
+                MethodInfo methodInfo = IIS7WorkerType.GetMethod("SetKnownRequestHeader", BindingFlags.NonPublic | BindingFlags.Instance);
 
                 ParameterExpression workerParamExpr = Expression.Parameter(typeof(HttpWorkerRequest));
-                UnaryExpression iis7WorkerParamExpr = Expression.Convert(workerParamExpr, iis7WorkerType);
+                UnaryExpression iis7WorkerParamExpr = Expression.Convert(workerParamExpr, IIS7WorkerType);
                 MethodCallExpression callExpr = Expression.Call(iis7WorkerParamExpr, methodInfo,
                     Expression.Constant(HttpWorkerRequest.HeaderAcceptEncoding),
                     Expression.Constant(null, typeof(string)), Expression.Constant(false));

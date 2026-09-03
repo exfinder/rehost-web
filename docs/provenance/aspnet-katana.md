@@ -39,11 +39,28 @@ and `Owin` 1.0.0 packages, consumed under `NU1701`. `Microsoft.Web.Infrastructur
 is not needed: Katana 4.x already calls `HttpApplication.RegisterModule`
 directly, so the `PreApplicationStartMethod` attribute binds as imported.
 
-The tree compiles on .NET 10 unmodified except for two files. The IIS-only
-paths — `UnsafeIISMethods`, `DisconnectWatcher`, `ShutdownDetector`,
-`WebSockets`, `OwinHttpHandler`/`MapOwinPath` — are kept as imported and
-short-circuit on `HttpRuntime.UsingIntegratedPipeline` and a null
-`HttpRuntime.IISVersion`.
+The tree compiles on .NET 10 unmodified except for four files. The IIS-only
+paths — `UnsafeIISMethods`, `ShutdownDetector`, `WebSockets`,
+`OwinHttpHandler`/`MapOwinPath` — are kept as imported. Since
+[ADR 0013](../adr/0013-integrated-pipeline-identity.md) the runtime answers
+`HttpRuntime.UsingIntegratedPipeline` `true` and `HttpRuntime.IISVersion` 10.0,
+so those paths no longer short-circuit: `ShutdownDetector` subscribes to
+`HostingEnvironment.StopListening` instead of polling, and `OwinAppContext`
+advertises `websocket.Version` in its capabilities from the version alone —
+per-request detection still withdraws it when the server variable is absent.
+
+Two of them now needed an edit, because the identity promises what only IIS's
+native plumbing delivers. `DisconnectWatcher` keeps the imported version and
+mode check, but a first `PlatformNotSupportedException` from reading
+`HttpResponse.ClientDisconnectedToken` latches a static flag and every call
+falls back to the imported `SetDisconnected` timer; without it the refusal
+would escape into every OWIN request. `OwinCallContext.DisableResponseCompression`
+takes its `SetKnownRequestHeader` fast path only when the worker request really
+is an `IIS7WorkerRequest` — the reflected type, hoisted to a field and shared
+with the delegate builder, tests the instance — because the compiled delegate
+casts to that type and would otherwise throw `InvalidCastException` on the
+host's own worker request. The fall-through branch removes `Accept-Encoding`
+through `Request.Headers`, which refuses today.
 
 `Loader/DefaultLoader.cs` loses `AssemblyDirScanner`'s `AppDomainSetup`
 probing. Upstream derived its search paths from `PrivateBinPath` and
