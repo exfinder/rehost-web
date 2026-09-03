@@ -66,7 +66,8 @@ Carried from earlier milestones as unresolved detail:
      WebSocket capability on the first request without it) and raising
      `HostingEnvironment.StopListening` from the host's stopping notification
      (the port never fires it, so `OwinApplication.ShutdownToken` cancels only
-     at `IRegisteredObject.Stop`).
+     at `IRegisteredObject.Stop`); and the error status at `LogRequest` (IV17;
+     the port renders the error page after `EndRequest`).
   6. Remainder, fail-fast half: the audit's fail-fast leftovers; each gets a
      diagnostic naming the boundary plus a compatibility row.
 

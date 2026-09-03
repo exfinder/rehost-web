@@ -3,9 +3,9 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// The AddOnMapRequestHandlerAsync / AddOnPostLogRequestAsync overloads were refused off
-// integrated (IV2); registering them in Init is what the fixture application does, so a refusal
-// would take the whole host down rather than fail one request.
+// The AddOnMapRequestHandlerAsync / AddOnLogRequestAsync / AddOnPostLogRequestAsync overloads were
+// refused off integrated (IV2); registering them in Init is what the fixture application does, so a
+// refusal would take the whole host down rather than fail one request.
 public sealed class AsyncPipelineEventFamilyOverKestrelTests(AsyncAppLiveScenario scenario)
     : IClassFixture<AsyncAppLiveScenario>
 {
@@ -16,9 +16,17 @@ public sealed class AsyncPipelineEventFamilyOverKestrelTests(AsyncAppLiveScenari
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldStartWith("handler[");
-        Array.IndexOf(stages, "AsyncMapRequestHandler")
-            .ShouldBeInRange(0, stages.Length - 1);
-        Array.IndexOf(stages, "AsyncMapRequestHandler")
-            .ShouldBeLessThan(Array.IndexOf(stages, "AsyncPostLogRequest"));
+        Index(stages, "AsyncMapRequestHandler").ShouldBeLessThan(Index(stages, "AsyncHandler"));
+        Index(stages, "AsyncHandler").ShouldBeLessThan(Index(stages, "AsyncLogRequest"));
+        Index(stages, "AsyncLogRequest").ShouldBeLessThan(Index(stages, "AsyncPostLogRequest"));
+    }
+
+    private static int Index(string[] stages, string stage)
+    {
+        var index = Array.IndexOf(stages, stage);
+        return index >= 0
+            ? index
+            : throw new InvalidOperationException(
+                "No stage matched among " + string.Join(", ", stages) + ".");
     }
 }

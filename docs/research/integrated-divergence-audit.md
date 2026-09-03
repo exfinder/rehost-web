@@ -347,7 +347,9 @@ follows; this map is the authoritative item-to-job assignment.
   server variable and an early `HostingEnvironment.StopListening` signal;
   `HideRequestResponse`; `DefaultAuthenticationModule` hook move;
   `Response.SubStatusCode`; `CallHandlerExecutionStep` 403;
-  `Request.InsertEntityBody` — take the missing readings these still need.
+  `Request.InsertEntityBody`; the error status at `LogRequest` (IV17; the port
+  renders the error page after `EndRequest`) — take the missing readings these
+  still need.
 - **Job 6 (remainder, fail-fast half):** `MaxConcurrent*PerCPU` refusal
   reword; the inverse gates (`DefaultAuthentication.Authenticate`,
   `DefaultHttpHandler`) — decide keep-or-document, then row each.

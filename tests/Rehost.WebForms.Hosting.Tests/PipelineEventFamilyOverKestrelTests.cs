@@ -48,6 +48,20 @@ public sealed class PipelineEventFamilyOverKestrelTests(PageLiveScenario scenari
     }
 
     [Fact]
+    public async Task A_Terminating_Redirect_Logs_The_Redirect_Status_Before_EndRequest()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/Redirect.aspx");
+
+        response.StatusCode.ShouldBe(302);
+        stages.ShouldNotContain("after-redirect");
+        stages.ShouldNotContain("PostRequestHandlerExecute");
+        stages.ShouldNotContain("UpdateRequestCache");
+        stages.ShouldContain(LogRequestPrefix + "302");
+        LogIndex(stages).ShouldBeLessThan(Index(stages, "PostLogRequest"));
+        Index(stages, "PostLogRequest").ShouldBeLessThan(Index(stages, "EndRequest"));
+    }
+
+    [Fact]
     public async Task An_Early_End_At_BeginRequest_Logs_Without_Reaching_The_Map_Step()
     {
         var (response, stages) =

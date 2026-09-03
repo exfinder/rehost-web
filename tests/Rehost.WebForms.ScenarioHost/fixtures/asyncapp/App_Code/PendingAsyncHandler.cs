@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Rehost.WebForms.ScenarioProbes;
 
 // A truly-pending IHttpAsyncHandler: BeginProcessRequest returns an incomplete result and the
 // completion callback fires from a pool continuation, so EndProcessRequest and the pipeline's
@@ -34,6 +35,7 @@ public class PendingAsyncHandler : IHttpAsyncHandler
             + (Environment.CurrentManagedThreadId == pending.BeginThreadId ? "begin" : "other")
             + ";ctx=" + (current == null ? "null" : ReferenceEquals(current, context) ? "same" : "other")
             + ";module=" + context.Items["module"] + "]");
+        Witness.Stage(context.Request, "AsyncHandler");
     }
 
     private sealed class PendingResult : IAsyncResult
