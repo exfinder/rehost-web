@@ -173,6 +173,14 @@
    ],
    "reason": "the public integrated identity answers as an integrated IIS 10 pool behind !NETFRAMEWORK fences — UsingIntegratedPipeline returns true and IISVersion returns 10.0, the pair reading IV16 measured on the server whose applicationHost.config baseline the port ships — while the internal UseIntegratedPipeline stays false because it selects native notification plumbing; AppVerifier's SyncContextSendOrPostCalledBetweenNotifications assert therefore reads the internal flag, since the NotificationContext it demands is filled only by that plumbing",
    "record": "docs/adr/0013-integrated-pipeline-identity.md"
+  },
+  {
+   "files": [
+    "HttpApplication.cs",
+    "HttpContext.cs"
+   ],
+   "reason": "the integrated-only MapRequestHandler/LogRequest/PostLogRequest event family takes its integrated arm (fenced !NETFRAMEWORK): the twelve sync and async accessor gates keep their PlatformNotSupportedException only under NETFRAMEWORK, ApplicationStepManager.BuildSteps adds the three CreateEventExecutionSteps calls with the Log pair inside the early-end jump target, HookupEventHandlersForApplicationAndModules rethrows a refused add_XXX instead of swallowing it off integrated, and HttpContext.RemapHandler asks the step manager (a second range predicate beside IsInBeginRequestStep) and raises Framework's Invoke_before_pipeline_event at or after the map step",
+   "record": "docs/portability-ledger.md P90"
   }
  ]
 }

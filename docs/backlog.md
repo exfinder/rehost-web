@@ -42,7 +42,7 @@ Carried from earlier milestones as unresolved detail:
   present must be measured and recorded first; a silently ignored rule set is
   the least-astonishment failure mode.
 - Close the integrated-vs-classic divergence
-  ([audit](research/integrated-divergence-audit.md), readings IV1–IV16). Every
+  ([audit](research/integrated-divergence-audit.md), readings IV1–IV17). Every
   open item ends as integrated behavior or a fail-fast diagnostic naming the
   boundary — silence is the only banned outcome. Six jobs, one per session, in
   order (2 must precede 3; 5 and 6 may swap):
@@ -51,9 +51,10 @@ Carried from earlier milestones as unresolved detail:
   2. Landed: [ADR 0013](adr/0013-integrated-pipeline-identity.md) —
      `UsingIntegratedPipeline` `true`, `IISVersion` `10.0`; the internal flag
      stays classic.
-  3. Event family: `MapRequestHandler`/`LogRequest`/`PostLogRequest` steps
-     (placement measured in IV1; silent-drop bug pinned by IV2) landed
-     together with the ADR 0013 identity answer.
+  3. Landed: `MapRequestHandler`/`LogRequest`/`PostLogRequest` steps and
+     their sync and async accessors (placement from IV1/IV4, early-end shape
+     from IV17), the hookup rethrow that closes the silent drop IV2 pinned,
+     and the `HttpContext.RemapHandler` window (IV5).
   4. Shim batch: `CurrentNotification`/`IsPostNotification`, writable
      `Request.Headers` (contract in IV7/IV8), `PreSendRequest*` context
      restore (IV12), `AddOnSendingHeaders` (IV11), oversize-body fence (IV14),

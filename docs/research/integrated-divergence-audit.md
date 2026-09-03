@@ -8,7 +8,7 @@ diagnostic naming the boundary — never a silent classic-mode difference
 ([backlog](../backlog.md)).
 
 Research only. Current support lives in the [compatibility map](../compatibility.md);
-priority lives in the backlog. Readings IV1-IV16 below were taken after the first pass and
+priority lives in the backlog. Readings IV1-IV17 below were taken after the first pass and
 have narrowed several entries; rows carry the reading id that settles them.
 
 ## Method
@@ -27,7 +27,7 @@ line numbers drift, so members are named. Coverage:
   (second table set below).
 
 Where a classification or disposition needed the integrated observable, it was measured
-rather than inferred: [readings IV1-IV16](#framework-readings) run one application under an
+rather than inferred: [readings IV1-IV17](#framework-readings) run one application under an
 integrated and a classic application pool on the same IIS 10, so the only variable is
 pipeline mode and the classic leg is what the port reproduces today.
 
@@ -43,15 +43,15 @@ Classification:
 
 | Classification | `UseIntegratedPipeline` sites | Other integrated gates (members) |
 | --- | --- | --- |
-| PLUMBING | 32 | 17 |
-| RESOLVED | 12 | 10 |
-| APP-VISIBLE OPEN | 31 | 8 |
+| PLUMBING | 32 | 16 |
+| RESOLVED | 25 | 11 |
+| APP-VISIBLE OPEN | 18 | 8 |
 | Total | 75 | 35 |
 
-The 31 open `UseIntegratedPipeline` sites collapse to 14 distinct behaviors: the
-`MapRequestHandler`/`LogRequest`/`PostLogRequest` event family alone accounts for 12 of them,
-the `HideRequestResponse` pairs for 4, and the `HostingEnvironment` throttle accessors for
-another 4. One first-pass open item — the `Response.Redirect` content type — closed as
+The 18 open `UseIntegratedPipeline` sites collapse to 12 distinct behaviors: the
+`HideRequestResponse` pairs account for 4 and the `HostingEnvironment` throttle accessors for
+another 4. The `MapRequestHandler`/`LogRequest`/`PostLogRequest` event family (12 sites) and
+`HookupEventHandlersForApplicationAndModules` closed with job 3 (ledger P90). One first-pass open item — the `Response.Redirect` content type — closed as
 PLUMBING once measured (IV13); one new open member was found by measurement (IV12).
 
 ## `HttpApplication.cs` — 34 sites
@@ -63,18 +63,18 @@ PLUMBING once measured (IV13); one new open member was found by measurement (IV1
 | `FindISessionStateModule` | Returns the session module so `EnsureReleaseState` can release before a child request | PLUMBING | Child `Server.Execute` shares the parent's session; the release exists for `TransferRequest`, which is unsupported (P62) |
 | `AcquireNotifcationContextLock` / `ReleaseNotifcationContextLock` (2 sites) | `Debug.Assert` | PLUMBING | Debug-only; callers are integrated-only |
 | `AsyncResult` get/set (2 sites) | Stores the pending result on `NotificationContext` instead of `_ar` | PLUMBING | Per-notification storage; classic uses the field |
-| `MapRequestHandler` event add/remove (2 sites) | Fires after IIS has already mapped the handler, immediately before `PostMapRequestHandler`, with identical observable state (IV1, IV4) | **OPEN** | `PlatformNotSupportedException`; classic `BuildSteps` has no such step |
-| `LogRequest` event add/remove (2 sites) | Fires after `PostUpdateRequestCache` and **before** `EndRequest` (IV1) | **OPEN** | Same |
-| `PostLogRequest` event add/remove (2 sites) | Fires between `LogRequest` and `EndRequest` (IV1) | **OPEN** | Same |
-| `AddOnMapRequestHandlerAsync` (2 overloads) | Async form of the above | **OPEN** | Same |
-| `AddOnLogRequestAsync` (2 overloads) | Async form | **OPEN** | Same |
-| `AddOnPostLogRequestAsync` (2 overloads) | Async form | **OPEN** | Same |
+| `MapRequestHandler` event add/remove (2 sites) | Fires after IIS has already mapped the handler, immediately before `PostMapRequestHandler`, with identical observable state (IV1, IV4) | RESOLVED | Gate fenced off `NETFRAMEWORK` and the steps added after `MapHandlerExecutionStep` (ledger P90) |
+| `LogRequest` event add/remove (2 sites) | Fires after `PostUpdateRequestCache` and **before** `EndRequest` (IV1) | RESOLVED | Steps added inside the early-end jump target, which stays ahead of them (IV17, ledger P90) |
+| `PostLogRequest` event add/remove (2 sites) | Fires between `LogRequest` and `EndRequest` (IV1) | RESOLVED | Same |
+| `AddOnMapRequestHandlerAsync` (2 overloads) | Async form of the above | RESOLVED | Same; `CreateEventExecutionSteps` already emits the async steps (ledger P90) |
+| `AddOnLogRequestAsync` (2 overloads) | Async form | RESOLVED | Same |
+| `AddOnPostLogRequestAsync` (2 overloads) | Async form | RESOLVED | Same |
 | `ProcessSpecialRequest` enter/exit (2 sites) | Sets `HttpContext.HideRequestResponse`, so `Context.Request`/`Response` throw inside `Application_Start` and friends | **OPEN** | Port leaves them reachable — more permissive than what the audience observed |
 | `InitInternal` module build | `InitIntegratedModules` from the merged `system.webServer/modules` list | RESOLVED | Port's `InitModules` is fenced to build the same integrated collection (P83) |
 | `InitInternal` `HideRequestResponse` around `Init()` (2 sites) | Request/response hidden during `Init()` and module init | **OPEN** | Same family as `ProcessSpecialRequest` |
 | `InitInternal` step manager | `PipelineStepManager` | RESOLVED | Classic `ApplicationStepManager` is the decision ([ADR 0001](../adr/0001-runtime-compatibility-model.md)) |
 | `DisposeInternal` module key | Tracks `_currentModuleCollectionKey` so a module can unregister during `Dispose` | PLUMBING | Event maps exist only in integrated |
-| `HookupEventHandlersForApplicationAndModules` | A failing `add_XXX` rethrows; classic swallows it | **OPEN** | Measured on a real classic pool (IV2): `Application_MapRequestHandler`, `Application_LogRequest` and `Application_PostLogRequest` are dropped with no error, no 500 and no log entry — the application starts and serves normally without them |
+| `HookupEventHandlersForApplicationAndModules` | A failing `add_XXX` rethrows; classic swallows it | RESOLVED | Measured on a real classic pool (IV2): the handlers were dropped with no error, no 500 and no log entry. The port rethrows (ledger P90); the failure surfaces as a 500 on every request, since the refusal is raised while the application instance is built |
 | `OnExecuteRequestStep` | Registers a wrapper around every pipeline step | **OPEN** | `PlatformNotSupportedException`; `ExecuteStepImpl` already honours `_stepInvoker` in both managers, so only the gate blocks it |
 | `AssignContext` | `Debug.Assert` | PLUMBING | |
 | `AsyncAppEventHandlersTable.AddHandler` | Also adds an `AsyncEventExecutionStep` to the module's event map | PLUMBING | Event maps are the native dispatch table |
@@ -205,7 +205,7 @@ port boundary — wording, not behavior.
 | `HttpContext.AddError`/`ClearError` | Mirrors the error onto `NotificationContext` | PLUMBING | |
 | `HttpContext.SetPrincipalNoDemand` | Pushes the principal into IIS during `AuthenticateRequest` | PLUMBING | No native consumer |
 | `HttpContext.FinishPipelineRequest` cleanup | Releases `Items`/sync context earlier | PLUMBING | |
-| `HttpContext.RemapHandler` | Writes the handler name/type into IIS | PLUMBING | Classic `RemapHandlerInstance` is honoured by `MapHttpHandler` |
+| `HttpContext.RemapHandler` | Writes the handler name/type into IIS, and refuses a call at or after the `MapRequestHandler` notification (IV5) | RESOLVED | Classic `RemapHandlerInstance` is honoured by `MapHttpHandler`; the port now raises the same `InvalidOperationException` at or after the map step rather than storing a value nobody reads (ledger P90) |
 | `HttpContext.ReportRuntimeErrorIfExists` | Lets a native handler serve `aspxerrorpath` after an init exception | PLUMBING | No native handler |
 | `HttpContext.DisableNotifications` | No-op off IIS7 | PLUMBING | |
 | `HttpResponse.GenerateResponseHeadersForHandler` | Generates `Cache-Control: private` and `X-AspNet-Version` into the collection | RESOLVED | `GenerateResponseHeaders` emits the equivalent classic block (P68) |
@@ -235,16 +235,17 @@ Dispositions and effort below are post-reading; the reading that settles each on
    the exact failure mode the doctrine forbids. **Disposition: take the integrated branch**,
    and the readings make it cheap. `LogRequest`/`PostLogRequest` go **between
    `PostUpdateRequestCache` and `EndRequest`**, not after `EndRequest` as the first pass
-   assumed (IV1); `_endRequestStepIndex` moves past them. `MapRequestHandler` is
+   assumed (IV1); `_endRequestStepIndex` stays ahead of them, because integrated raises both
+   Log events after every early end too (IV17). `MapRequestHandler` is
    observationally identical to `PostMapRequestHandler` — IIS has already mapped the handler
    when it raises the event, and assigning `Context.Handler` from either one wins (IV4) — so
    its steps go immediately after `MapHandlerExecutionStep`, ahead of the existing
    `EventPostMapRequestHandler` steps. The response is still open and unflushed at all three
    events, so writes, `AppendHeader` and `Flush` behave exactly as in a page (IV3): no
    response-lifetime work is needed. **Reading: taken** (IV1-IV4). **Effort: lines-of-fence
-   plus a scenario** — three `CreateEventExecutionSteps` calls and the `_endRequestStepIndex`
-   adjustment, down from the story the first pass estimated. The hookup swallow is a separate
-   one-line fail-fast that should land first.
+   plus a scenario** — three `CreateEventExecutionSteps` calls, down from the story the first
+   pass estimated. The hookup swallow is a separate one-line fail-fast that should land first.
+   **Landed** (job 3, ledger P90), together with the `RemapHandler` window (IV5).
 
 2. **`HttpRuntime.UsingIntegratedPipeline` answers `false`** (`HttpRuntime`). Everything else
    about the port models an integrated pool — merged `<modules>` (P83), merged `<handlers>`
@@ -332,8 +333,10 @@ follows; this map is the authoritative item-to-job assignment.
   standing test).
 - **Job 2 (ADR 0013) — landed:** ranked item 2, `UsingIntegratedPipeline`
   identity ([ADR 0013](../adr/0013-integrated-pipeline-identity.md)).
-- **Job 3 (event family):** ranked item 1, including the hookup-swallow
-  fail-fast that lands first.
+- **Job 3 (event family) — landed:** ranked item 1 — the three events, their
+  sync and async accessors, and the hookup-swallow fail-fast that landed
+  first; plus the `HttpContext.RemapHandler` window (IV5), added to the job
+  because the map step is what closes it (ledger P90).
 - **Job 4 (shim batch):** ranked items 3 (`CurrentNotification`/
   `IsPostNotification`), 4 (writable `Request.Headers`), 5
   (`OnExecuteRequestStep`); `AddOnSendingHeaders`; `PreSendRequestHeaders`/
@@ -369,6 +372,7 @@ authentication, `customErrors mode="Off"`, `debug="false"`.
 | IV12 | Trace `HttpContext.Current` and `((HttpApplication)sender).Context` in `PreSendRequestHeaders`/`PreSendRequestContent`, both pools | Integrated: `Current` present, `sender.Context` present. Classic: `Current` **null**, `sender.Context` present. `AppendHeader` through `sender.Context` reaches the wire in both | The pre-send events lose `HttpContext.Current` on classic only. |
 | IV15 | Trace `Context.User` at each event, both pools, anonymous auth | Integrated: null at `BeginRequest` and `AuthenticateRequest`; `WindowsPrincipal`/`WindowsIdentity`, empty name, `IsAuthenticated=false` from `PostAuthenticateRequest` onward. Classic: already that principal at `AuthenticateRequest` | The default principal is established one stage later on integrated. |
 | IV16 | `HttpRuntime.UsingIntegratedPipeline` and `HttpRuntime.IISVersion` at `Application_Start`, both pools | Integrated: `True`, `10.0`. Classic: `False`, `8.0` | Same IIS 10 server; the classic pool reports a downlevel IIS version. |
+| IV17 | Nine early-end stimuli on the integrated pool, tracing every managed event per request (`probe.aspx` `Page_Load` for the page stimuli, `Application_BeginRequest` for the `b*` ones); taken 2026-09-03 | plain → 200, full IV1 order. `Response.End()` in page → 200, `PreRequestHandlerExecute`, `LogRequest`, `PostLogRequest`, `EndRequest`, pre-send pair (`PostRequestHandlerExecute` through `PostUpdateRequestCache` skipped). `CompleteRequest()` in page → same. `throw` in page → 500, `Error:HttpUnhandledException`, `LogRequest` with `Response.StatusCode` already 500, `PostLogRequest`, `EndRequest`, pre-send pair. `Response.Redirect(url)` → 302, End's shape, status 302 at `LogRequest`. `Response.Redirect(url, false)` → 302, full order. `Response.End()` at `BeginRequest` → 200, `BeginRequest`, `LogRequest`, `PostLogRequest`, `EndRequest`, pre-send pair (`MapRequestHandler` skipped). `CompleteRequest()` at `BeginRequest` → same. `throw` at `BeginRequest` → 500, `Error:InvalidOperationException`, `LogRequest` with status 500, `PostLogRequest`, `EndRequest`, pre-send pair | `LogRequest` and `PostLogRequest` fire after **every** early end, so the early-end jump target must land on `LogRequest`, not past it. The port matches the order but reports `Response.StatusCode` as 200 at `LogRequest` after an unhandled error, because its error page and status land after `EndRequest`; error-page timing is out of job 3's scope. |
 
 ### Handler mapping
 
