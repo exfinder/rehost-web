@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
 using Owin;
@@ -15,6 +16,23 @@ public class FixtureOwinStartup
         {
             AuthenticationType = "ApplicationCookie",
             LoginPath = new PathString("/Login"),
+        });
+
+        app.Use(delegate(IOwinContext context, Func<Task> next)
+        {
+            if (context.Request.Query.Get("compression") == "off")
+            {
+                ((Action)context.Environment["systemweb.DisableResponseCompression"])();
+            }
+
+            if (context.Request.Query.Get("cancel") == "read")
+            {
+                context.Response.Headers.Set(
+                    "X-Call-Cancelled",
+                    context.Request.CallCancelled.IsCancellationRequested ? "yes" : "no");
+            }
+
+            return next();
         });
     }
 }

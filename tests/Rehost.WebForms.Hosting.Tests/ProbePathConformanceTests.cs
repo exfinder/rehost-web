@@ -28,6 +28,7 @@ public sealed class ProbePathConformanceTests
         ["ProtectedProbe"] = ProbePaths.Secret,
         ["ScenarioHandler"] = ProbePaths.ScenarioDefault,
         ["ModuleListHandler"] = ProbePaths.ModuleList,
+        ["RuntimeIdentityProbe"] = ProbePaths.RuntimeIdentity,
         ["UnloadProbe"] = ProbePaths.Unload,
     };
 
