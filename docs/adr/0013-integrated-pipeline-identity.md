@@ -40,8 +40,12 @@ the port ships, so the two halves of the identity name the same pool.
 - Callers now take their integrated branches. Every reader of either property in
   this repo is the OWIN host or the runtime itself (verified across every
   assembly under `apps/`, `third_party/`, `src/` and the package cache):
-  `ShutdownDetector` subscribes to `HostingEnvironment.StopListening` and works;
-  `OwinAppContext` now advertises WebSocket support, which is untested;
+  `ShutdownDetector` subscribes to `HostingEnvironment.StopListening`, an event
+  only the IIS-native `PipelineRuntime` path raises, so shutdown still reaches
+  OWIN through `IRegisteredObject.Stop` as before; `OwinAppContext` advertises
+  WebSocket support at startup and withdraws it on the first request, because
+  the host adapter has no `WEBSOCKET_VERSION` server variable, so OWIN
+  WebSockets stay unavailable;
   `DisconnectWatcher` and `OwinCallContext.DisableResponseCompression` needed
   narrow edits, recorded in [the Katana provenance](../provenance/aspnet-katana.md).
 - Members that still refuse with "This operation requires IIS integrated

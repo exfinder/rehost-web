@@ -45,9 +45,13 @@ paths — `UnsafeIISMethods`, `ShutdownDetector`, `WebSockets`,
 [ADR 0013](../adr/0013-integrated-pipeline-identity.md) the runtime answers
 `HttpRuntime.UsingIntegratedPipeline` `true` and `HttpRuntime.IISVersion` 10.0,
 so those paths no longer short-circuit: `ShutdownDetector` subscribes to
-`HostingEnvironment.StopListening` instead of polling, and `OwinAppContext`
-advertises `websocket.Version` in its capabilities from the version alone —
-per-request detection still withdraws it when the server variable is absent.
+`HostingEnvironment.StopListening` instead of polling, an event the port never
+raises (only the IIS-native `PipelineRuntime` path calls
+`SetupStopListeningHandler`), so shutdown still arrives through
+`IRegisteredObject.Stop`; `OwinAppContext` advertises `websocket.Version` in
+its capabilities from the version alone, and per-request detection withdraws
+it on the first request because the host adapter answers null for
+`WEBSOCKET_VERSION`.
 
 Two of them now needed an edit, because the identity promises what only IIS's
 native plumbing delivers. `DisconnectWatcher` keeps the imported version and
