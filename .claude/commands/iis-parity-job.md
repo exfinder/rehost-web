@@ -15,7 +15,9 @@ Work pattern:
    there.
 2. Write a short plan doc to the scratchpad: the job's items from the job
    map, agreed decisions, mechanics, tests, docs. Source facts from the audit
-   doc; don't re-derive them.
+   doc; don't re-derive them. Pick the test kind from docs/writing-tests.md's
+   ladder: untouched Reference Source behavior gets a recorded run plus a
+   compatibility row, not a standing test (rung 0).
 3. If the job has an open decision, grill me first (one question at a time,
    each opening with a "port today vs .NET Framework" diff). Settle it before
    any code.
@@ -23,9 +25,11 @@ Work pattern:
    must read CLAUDE.md, docs/code-style.md, and docs/writing-tests.md first.
    It builds the solution, runs the full test suite, and commits its work to
    the branch (conventional-commit subjects, no Co-Authored-By).
-5. Review stage: spawn a Sonnet subagent and have it run the
-   /compound-engineering:ce-code-review skill, reviewing the job branch
-   against main. It hands its report back.
+5. Review stage: run the /compound-engineering:ce-code-review skill yourself
+   from this session with `base:main`, not through a subagent (a wrapper
+   agent backgrounds the reviewers and stalls). If the job changed only
+   docs and tests, add `quick` to the arguments (one built-in pass); if it
+   changed runtime code, run the full roster.
 6. Judge the report yourself — do not apply it blindly. Check each finding
    against the plan, the audit's readings, and the code. Also do your own
    pass: comment audit (hidden-constraint comments only, 1-2 lines), no stray
