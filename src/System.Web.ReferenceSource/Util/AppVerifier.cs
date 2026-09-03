@@ -497,7 +497,11 @@
                     object currentThreadContextId = (currentHttpContext != null) ? currentHttpContext.ThreadContextId : null;
                     assert(currentThreadContextId != null && ReferenceEquals(originalThreadContextId, currentThreadContextId), AppVerifierErrorCode.SyncContextSendOrPostCalledAfterRequestCompleted);
 
+#if !NETFRAMEWORK
+                    if (HttpRuntime.UseIntegratedPipeline && !currentHttpContext.HasWebSocketRequestTransitionCompleted) {
+#else
                     if (HttpRuntime.UsingIntegratedPipeline && !currentHttpContext.HasWebSocketRequestTransitionCompleted) {
+#endif // !NETFRAMEWORK
                         var notificationContext = (currentHttpContext != null) ? currentHttpContext.NotificationContext : null;
                         assert(notificationContext != null, AppVerifierErrorCode.SyncContextSendOrPostCalledBetweenNotifications);
 

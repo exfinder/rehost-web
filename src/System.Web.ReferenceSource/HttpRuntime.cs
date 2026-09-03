@@ -281,6 +281,9 @@ namespace System.Web {
         //
         private static Version _iisVersion;
         private static bool _useIntegratedPipeline;
+#if !NETFRAMEWORK
+        private static readonly Version _portableIisVersion = new Version(10, 0);
+#endif // !NETFRAMEWORK
 
         //
         // Prefetch
@@ -1450,14 +1453,24 @@ namespace System.Web {
         // Should also return the correct version for IIS Express.
         public static Version IISVersion {
             get {
+#if !NETFRAMEWORK
+                return _portableIisVersion;
+#else
                 return _iisVersion;
+#endif // !NETFRAMEWORK
             }
         }
 
         // DevDivBugs 190952: public method for querying runtime pipeline mode
         public static bool UsingIntegratedPipeline {
             get {
+#if !NETFRAMEWORK
+                // UseIntegratedPipeline stays false on purpose: it selects native IIS
+                // notification plumbing this runtime has none of (ADR 0013).
+                return true;
+#else
                 return UseIntegratedPipeline;
+#endif // !NETFRAMEWORK
             }
         }
 

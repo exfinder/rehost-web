@@ -165,6 +165,14 @@
    ],
    "reason": "classic Application_Start failure takes the integrated-mode contract behind !NETFRAMEWORK fences: EnsureAppStartCalled latches context.Error into HttpRuntime.InitializationException and rethrows it on every later call, covering requests parked on the app-start lock and requests that reach it past the _appOnStartCalled fast path, and EnsureFirstRequestInit replays the latched exception on later requests, standing in for the FirstRequestInit gate and native-module replay that cover both cases under integrated IIS",
    "record": "docs/adr/0012-runtime-initiated-restart.md"
+  },
+  {
+   "files": [
+    "HttpRuntime.cs",
+    "Util/AppVerifier.cs"
+   ],
+   "reason": "the public integrated identity answers as an integrated IIS 10 pool behind !NETFRAMEWORK fences — UsingIntegratedPipeline returns true and IISVersion returns 10.0, the pair reading IV16 measured on the server whose applicationHost.config baseline the port ships — while the internal UseIntegratedPipeline stays false because it selects native notification plumbing; AppVerifier's SyncContextSendOrPostCalledBetweenNotifications assert therefore reads the internal flag, since the NotificationContext it demands is filled only by that plumbing",
+   "record": "docs/adr/0013-integrated-pipeline-identity.md"
   }
  ]
 }
