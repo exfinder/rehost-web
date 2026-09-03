@@ -69,6 +69,11 @@ Carried from earlier milestones as unresolved detail:
 
 - Adapter residuals: HTTP/3, proxied client certificates, integrated-mode
   server variables: [host adapter](follow-ups/aspnet-core-host-adapter.md).
+- OWIN WebSockets: the host adapter answers null for the `WEBSOCKET_VERSION`
+  server variable, so Katana advertises the capability at startup and withdraws
+  it on the first request ([ADR 0013](adr/0013-integrated-pipeline-identity.md)).
+  Supply the variable from the worker-request upgrade seam (P80), then prove an
+  OWIN handshake over Kestrel.
 - Terminal-event and cancellation coverage:
   [request completion](follow-ups/request-completion-failure-and-cancellation.md).
 - Abort the client connection when a timed-out synchronous step cannot return:
@@ -88,6 +93,11 @@ Carried from earlier milestones as unresolved detail:
   asset paths.
 - Drain, disposal, explicit unload, restart, and host replacement:
   [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md).
+- Early shutdown signal for OWIN: `HostingEnvironment.StopListening` is raised
+  only by the IIS-native `PipelineRuntime` path, so Katana's `ShutdownDetector`
+  subscribes to an event the port never fires and `OwinApplication.ShutdownToken`
+  cancels only at `IRegisteredObject.Stop`. Raise it from the host's stopping
+  notification once the lifecycle work above owns that seam.
 - Configuration-change and file-change shutdown causes reach the process-exit
   seam ([ADR 0012](adr/0012-runtime-initiated-restart.md)) untested; only the
   `Application_Start` latch and `HttpRuntime.UnloadAppDomain()` are exercised.
