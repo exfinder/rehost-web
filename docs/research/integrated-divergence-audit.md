@@ -44,11 +44,11 @@ Classification:
 | Classification | `UseIntegratedPipeline` sites | Other integrated gates (members) |
 | --- | --- | --- |
 | PLUMBING | 32 | 17 |
-| RESOLVED | 10 | 10 |
-| APP-VISIBLE OPEN | 33 | 8 |
+| RESOLVED | 11 | 10 |
+| APP-VISIBLE OPEN | 32 | 8 |
 | Total | 75 | 35 |
 
-The 33 open `UseIntegratedPipeline` sites collapse to 16 distinct behaviors: the
+The 32 open `UseIntegratedPipeline` sites collapse to 15 distinct behaviors: the
 `MapRequestHandler`/`LogRequest`/`PostLogRequest` event family alone accounts for 12 of them,
 the `HideRequestResponse` pairs for 4, and the `HostingEnvironment` throttle accessors for
 another 4. One first-pass open item — the `Response.Redirect` content type — closed as
@@ -105,7 +105,7 @@ PLUMBING once measured (IV13); one new open member was found by measurement (IV1
 | Member | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
 | `Redirect` (VSO 360276) | Sets `ContentType = "text/html"` before writing the Object-moved body | PLUMBING | Measured byte-identical 302 responses from integrated and classic pools on the same IIS 10 (IV13): the classic default already emits `Content-Type: text/html; charset=utf-8` |
-| `PushPromise` | Calls `IIS7WorkerRequest.PushPromise` | **OPEN** | The imported `catch (PlatformNotSupportedException)` swallows the refusal, so the call is a silent no-op |
+| `PushPromise` | Calls `IIS7WorkerRequest.PushPromise` | RESOLVED | The imported `catch (PlatformNotSupportedException)` swallows the refusal, so the call is a silent no-op, consistent with Framework's own fire-and-forget contract; compatibility row (`Response.PushPromise`); one-off run over Kestrel on 2026-09-03: a `Trace="true"` page calling `PushPromise("~/styles.css")` returned 200 with the trace carrying "Push promise is not supported" and the `Requires_Iis_Integrated_Mode` text, and a non-virtual path raised `Invalid_path_for_push_promise` before the integrated gate |
 
 ## `HttpWriter.cs` — 6 sites
 
@@ -152,7 +152,7 @@ optimization, and the early release pairs with `FindISessionStateModule` above.
 | Site | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
 | `UrlAuthorizationModule.IsEnabled` | Reads `HttpApplication.IntegratedModuleList` | RESOLVED | Already fenced to the merged list; the classic `<httpModules>` read is dead (P83) |
-| `FileAuthorizationModule.CheckFileAccessForUser` | `s_Enabled = true` unconditionally | RESOLVED | Module is inert (P84). Note the inconsistency: unlike `UrlAuthorizationModule` this classic arm still reads the retired `<httpModules>` section, so the public API silently reports access granted |
+| `FileAuthorizationModule.CheckFileAccessForUser` | `s_Enabled = true` unconditionally | RESOLVED | Module is inert (P84). Note the inconsistency: unlike `UrlAuthorizationModule` this classic arm still reads the retired `<httpModules>` section, so the public API silently reports access granted; compatibility row (URL/file authorization) |
 | `WindowsAuthenticationModule.OnEnter` | Takes the principal IIS already set; classic reads `LOGON_USER`/`AUTH_TYPE` | RESOLVED | Registered but inert; `mode="Windows"` fails activation (P84) |
 | `RoleManagerModule.OnEnter` (2 sites) | `DisableNotifications(EndRequest)` when roles are off or uncached | PLUMBING | Perf only |
 | `DefaultAuthenticationModule.Authenticate` event add | Refuses the subscription | **OPEN** (low) | Inverse gate: the port accepts an event the audience could not use |
@@ -317,17 +317,18 @@ Remaining open items, in descending likelihood:
   `CloseConnectionAfterError` call off IIS7), lines-of-fence.
 - `Response.SubStatusCode`; `CallHandlerExecutionStep`'s `IsHandlerExecutionDenied` 403;
   `HostingEnvironment.MaxConcurrent*PerCPU` (4 sites, one behavior — keep the refusal, reword
-  it); `Request.InsertEntityBody`; `Response.PushPromise` (silent no-op, needs only a
-  compatibility row); `DefaultAuthentication.Authenticate` and `DefaultHttpHandler` (inverse
-  gates the audience never exercised).
+  it); `Request.InsertEntityBody`; `DefaultAuthentication.Authenticate` and
+  `DefaultHttpHandler` (inverse gates the audience never exercised).
 
 ## Job map
 
 The [backlog](../backlog.md) closure plan's six jobs cover the open items as
 follows; this map is the authoritative item-to-job assignment.
 
-- **Job 1 (doc rows):** `Response.PushPromise` silent no-op;
-  `FileAuthorizationModule` dead-path note (other-gates table).
+- **Job 1 (doc rows) — landed:** `Response.PushPromise` silent no-op;
+  `FileAuthorizationModule` dead-path note (other-gates table). Both are
+  compatibility rows; the no-op was verified by a one-off run (rung 0, no
+  standing test).
 - **Job 2 (ADR 0013):** ranked item 2, `UsingIntegratedPipeline` identity.
 - **Job 3 (event family):** ranked item 1, including the hookup-swallow
   fail-fast that lands first.

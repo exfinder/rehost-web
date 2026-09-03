@@ -46,8 +46,8 @@ Carried from earlier milestones as unresolved detail:
   open item ends as integrated behavior or a fail-fast diagnostic naming the
   boundary — silence is the only banned outcome. Six jobs, one per session, in
   order (2 must precede 3; 5 and 6 may swap):
-  1. Compatibility rows for the silent gaps: `Response.PushPromise` no-op;
-     `FileAuthorizationModule` dead-path note.
+  1. Landed: compatibility rows for the silent gaps — `Response.PushPromise`
+     no-op; `FileAuthorizationModule` dead-path note.
   2. Grill → ADR 0013: does `HttpRuntime.UsingIntegratedPipeline` report
      `true`? Gates job 3 (callers that detect integrated then hit refusals).
   3. Event family: `MapRequestHandler`/`LogRequest`/`PostLogRequest` steps

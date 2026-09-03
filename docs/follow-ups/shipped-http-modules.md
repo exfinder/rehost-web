@@ -14,7 +14,10 @@ Two consequences are carried deliberately:
 - `WindowsAuthentication` and `FileAuthorization` register faithfully and are
   inert (ledger P84). Reaching their Windows-bound behavior fails actionably
   rather than diverging silently; `<authentication mode="Windows">` is refused
-  at activation.
+  at activation. One exception: the public
+  `FileAuthorizationModule.CheckFileAccessForUser` grants access silently,
+  recorded in the [compatibility map](../compatibility.md)'s URL/file
+  authorization row.
 - `DefaultAuthentication` comes from its golden row rather than from
   `HttpModulesSection.CreateModules`' implicit append.
 
