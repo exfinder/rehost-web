@@ -44,11 +44,11 @@ Classification:
 | Classification | `UseIntegratedPipeline` sites | Other integrated gates (members) |
 | --- | --- | --- |
 | PLUMBING | 32 | 17 |
-| RESOLVED | 11 | 10 |
-| APP-VISIBLE OPEN | 32 | 8 |
+| RESOLVED | 12 | 10 |
+| APP-VISIBLE OPEN | 31 | 8 |
 | Total | 75 | 35 |
 
-The 32 open `UseIntegratedPipeline` sites collapse to 15 distinct behaviors: the
+The 31 open `UseIntegratedPipeline` sites collapse to 14 distinct behaviors: the
 `MapRequestHandler`/`LogRequest`/`PostLogRequest` event family alone accounts for 12 of them,
 the `HideRequestResponse` pairs for 4, and the `HostingEnvironment` throttle accessors for
 another 4. One first-pass open item — the `Response.Redirect` content type — closed as
@@ -95,7 +95,7 @@ PLUMBING once measured (IV13); one new open member was found by measurement (IV1
 
 | Member | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
-| `UsingIntegratedPipeline` (public) | `true` under an integrated pool; `false` under a classic pool on the same IIS 10, which also reports `HttpRuntime.IISVersion` as 8.0 rather than 10.0 (IV16) | **OPEN** | The port models an integrated pool for modules (P83), handlers (P85) and request filtering (P86) but answers `false` here, so third-party feature detection silently takes classic branches |
+| `UsingIntegratedPipeline` (public) | `true` under an integrated pool; `false` under a classic pool on the same IIS 10, which also reports `HttpRuntime.IISVersion` as 8.0 rather than 10.0 (IV16) | RESOLVED | The public pair now answers `true`/`10.0` as the integrated pool the port already models for modules (P83), handlers (P85) and request filtering (P86); the internal `UseIntegratedPipeline` stays `false` ([ADR 0013](../adr/0013-integrated-pipeline-identity.md)) |
 | `UseIntegratedPipeline` (internal getter) | Definition site | PLUMBING | |
 | `Dispose` drain | `PipelineRuntime.WaitForRequestsToDrain()` vs active-count spin | PLUMBING | Process replacement owns shutdown ([ADR 0012](../adr/0012-runtime-initiated-restart.md)) |
 | `ProcessRequest(HttpWorkerRequest)` | Refuses the classic entry point | RESOLVED | Inverse gate; this entry point is the port's engine ([ADR 0001](../adr/0001-runtime-compatibility-model.md)) |
@@ -259,7 +259,8 @@ Dispositions and effort below are post-reading; the reading that settles each on
    integrated and then hit the refusals. IV16 also records a companion value a caller may pair
    with it: real IIS reports `HttpRuntime.IISVersion` as 10.0 under the integrated pool and 8.0
    under the classic pool on the same server. **Reading: taken** (IV16). **Effort: ADR +
-   lines-of-fence.**
+   lines-of-fence.** **Landed as [ADR 0013](../adr/0013-integrated-pipeline-identity.md)**:
+   the public pair answers `true`/`10.0`, the internal flag stays `false`.
 
 3. **`HttpContext.CurrentNotification` / `IsPostNotification`** (`HttpContext`, 4 sites).
    Modules written for integrated read these to know where they are; the port throws
@@ -329,7 +330,8 @@ follows; this map is the authoritative item-to-job assignment.
   `FileAuthorizationModule` dead-path note (other-gates table). Both are
   compatibility rows; the no-op was verified by a one-off run (rung 0, no
   standing test).
-- **Job 2 (ADR 0013):** ranked item 2, `UsingIntegratedPipeline` identity.
+- **Job 2 (ADR 0013) — landed:** ranked item 2, `UsingIntegratedPipeline`
+  identity ([ADR 0013](../adr/0013-integrated-pipeline-identity.md)).
 - **Job 3 (event family):** ranked item 1, including the hookup-swallow
   fail-fast that lands first.
 - **Job 4 (shim batch):** ranked items 3 (`CurrentNotification`/

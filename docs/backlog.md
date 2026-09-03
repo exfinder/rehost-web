@@ -48,8 +48,9 @@ Carried from earlier milestones as unresolved detail:
   order (2 must precede 3; 5 and 6 may swap):
   1. Landed: compatibility rows for the silent gaps — `Response.PushPromise`
      no-op; `FileAuthorizationModule` dead-path note.
-  2. Grill → ADR 0013: does `HttpRuntime.UsingIntegratedPipeline` report
-     `true`? Gates job 3 (callers that detect integrated then hit refusals).
+  2. Landed: [ADR 0013](adr/0013-integrated-pipeline-identity.md) —
+     `UsingIntegratedPipeline` `true`, `IISVersion` `10.0`; the internal flag
+     stays classic.
   3. Event family: `MapRequestHandler`/`LogRequest`/`PostLogRequest` steps
      (placement measured in IV1; silent-drop bug pinned by IV2) landed
      together with the ADR 0013 identity answer.
