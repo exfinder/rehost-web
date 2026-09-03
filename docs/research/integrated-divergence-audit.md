@@ -339,7 +339,9 @@ follows; this map is the authoritative item-to-job assignment.
   (`OnExecuteRequestStep`); `AddOnSendingHeaders`; `PreSendRequestHeaders`/
   `Content` context restore; oversize-body fence;
   `ThrowIfEventBindingDisallowed` fail-fast.
-- **Job 5 (remainder, build half):** `ClientDisconnectedToken`/`Request.Abort`;
+- **Job 5 (remainder, build half):** `ClientDisconnectedToken`/`Request.Abort`,
+  with the two Katana gaps ADR 0013 exposed next to it — the `WEBSOCKET_VERSION`
+  server variable and an early `HostingEnvironment.StopListening` signal;
   `HideRequestResponse`; `DefaultAuthenticationModule` hook move;
   `Response.SubStatusCode`; `CallHandlerExecutionStep` 403;
   `Request.InsertEntityBody` — take the missing readings these still need.
