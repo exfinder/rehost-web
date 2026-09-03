@@ -41,16 +41,26 @@ Carried from earlier milestones as unresolved detail:
   diagnostic naming the boundary — and what happens today when the section is
   present must be measured and recorded first; a silently ignored rule set is
   the least-astonishment failure mode.
-- Audit the managed integrated-vs-classic divergence proactively instead of
-  per incident: walk the 75 `UseIntegratedPipeline` sites (19 imported files)
-  plus integrated-only public APIs (`Server.TransferRequest`, writable
-  `Request`/`Response` header collections, the `CurrentNotification` family);
-  every application-visible site ends as take-integrated-branch, shim, or a
-  fail-fast diagnostic naming the boundary — never a silent classic-mode
-  difference. The migrating audience ran integrated mode; enumerating this
-  before they meet it is what least-astonishment requires. Doctrine in
-  [ADR 0001](adr/0001-runtime-compatibility-model.md); precedents there and in
-  [ADR 0012](adr/0012-runtime-initiated-restart.md).
+- Close the integrated-vs-classic divergence
+  ([audit](research/integrated-divergence-audit.md), readings IV1–IV16). Every
+  open item ends as integrated behavior or a fail-fast diagnostic naming the
+  boundary — silence is the only banned outcome. Six jobs, one per session, in
+  order (2 must precede 3; 5 and 6 may swap):
+  1. Compatibility rows for the silent gaps: `Response.PushPromise` no-op;
+     `FileAuthorizationModule` dead-path note.
+  2. Grill → ADR 0013: does `HttpRuntime.UsingIntegratedPipeline` report
+     `true`? Gates job 3 (callers that detect integrated then hit refusals).
+  3. Event family: `MapRequestHandler`/`LogRequest`/`PostLogRequest` steps
+     (placement measured in IV1; silent-drop bug pinned by IV2) landed
+     together with the ADR 0013 identity answer.
+  4. Shim batch: `CurrentNotification`/`IsPostNotification`, writable
+     `Request.Headers` (contract in IV7/IV8), `PreSendRequest*` context
+     restore (IV12), `AddOnSendingHeaders` (IV11), oversize-body fence (IV14),
+     `ThrowIfEventBindingDisallowed` fail-fast (IV10).
+  5. Remainder, build half: the audit's take-branch/shim leftovers; take the
+     missing winbox readings first where the audit calls for one.
+  6. Remainder, fail-fast half: the audit's fail-fast leftovers; each gets a
+     diagnostic naming the boundary plus a compatibility row.
 
 ## Later
 
