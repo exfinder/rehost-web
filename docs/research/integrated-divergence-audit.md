@@ -321,6 +321,29 @@ Remaining open items, in descending likelihood:
   compatibility row); `DefaultAuthentication.Authenticate` and `DefaultHttpHandler` (inverse
   gates the audience never exercised).
 
+## Job map
+
+The [backlog](../backlog.md) closure plan's six jobs cover the open items as
+follows; this map is the authoritative item-to-job assignment.
+
+- **Job 1 (doc rows):** `Response.PushPromise` silent no-op;
+  `FileAuthorizationModule` dead-path note (other-gates table).
+- **Job 2 (ADR 0013):** ranked item 2, `UsingIntegratedPipeline` identity.
+- **Job 3 (event family):** ranked item 1, including the hookup-swallow
+  fail-fast that lands first.
+- **Job 4 (shim batch):** ranked items 3 (`CurrentNotification`/
+  `IsPostNotification`), 4 (writable `Request.Headers`), 5
+  (`OnExecuteRequestStep`); `AddOnSendingHeaders`; `PreSendRequestHeaders`/
+  `Content` context restore; oversize-body fence;
+  `ThrowIfEventBindingDisallowed` fail-fast.
+- **Job 5 (remainder, build half):** `ClientDisconnectedToken`/`Request.Abort`;
+  `HideRequestResponse`; `DefaultAuthenticationModule` hook move;
+  `Response.SubStatusCode`; `CallHandlerExecutionStep` 403;
+  `Request.InsertEntityBody` — take the missing readings these still need.
+- **Job 6 (remainder, fail-fast half):** `MaxConcurrent*PerCPU` refusal
+  reword; the inverse gates (`DefaultAuthentication.Authenticate`,
+  `DefaultHttpHandler`) — decide keep-or-document, then row each.
+
 ## Framework readings
 
 Captured 2026-08-30 on `winbox`, IIS 10.0 / Windows 11, .NET Framework 4.8.9344 (4.8.1). One
