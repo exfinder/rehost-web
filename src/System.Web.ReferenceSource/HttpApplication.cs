@@ -1989,9 +1989,13 @@ namespace System.Web {
                     addMethod.Invoke(target, new Object[1]{handlerDelegate});
                 }
                 catch {
+#if !NETFRAMEWORK
+                    throw;
+#else
                     if (HttpRuntime.UseIntegratedPipeline) {
                         throw;
                     }
+#endif
                 }
 
                 if (eventName != null) {

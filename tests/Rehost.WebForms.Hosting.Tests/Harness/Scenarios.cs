@@ -150,6 +150,9 @@ public sealed class ModulesLiveScenario(ScenarioHostRegistry registry)
 public sealed class ModulesRunAllLiveScenario(ScenarioHostRegistry registry)
     : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.ModulesRunAll));
 
+public sealed class HookupRefusedLiveScenario(ScenarioHostRegistry registry)
+    : Scenario(registry.GetOrAdd(Fixtures.HookupRefused));
+
 public sealed class HandlersLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.Handlers));
 
