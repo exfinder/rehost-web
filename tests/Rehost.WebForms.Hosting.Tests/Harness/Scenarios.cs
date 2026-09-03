@@ -127,7 +127,7 @@ public sealed class SessionCustomLiveScenario(ScenarioHostRegistry registry)
     : WholeWitnessScenario(registry.GetOrAdd(Fixtures.SessionCustom));
 
 public sealed class AsyncAppLiveScenario(ScenarioHostRegistry registry)
-    : Scenario(registry.GetOrAdd(Fixtures.AsyncApp));
+    : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.AsyncApp));
 
 public sealed class FriendlyUrlsLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.FriendlyUrls));

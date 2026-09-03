@@ -937,6 +937,11 @@ namespace System.Web {
 
                 wr.SetRemapHandler(handlerTypeName, handlerName);
             }
+#if !NETFRAMEWORK
+            else if (ApplicationInstance != null && ApplicationInstance.IsAtOrPastMapRequestHandlerStep) {
+                throw new InvalidOperationException(SR.GetString(SR.Invoke_before_pipeline_event, "HttpContext.RemapHandler", "HttpApplication.MapRequestHandler"));
+            }
+#endif
 
             _remapHandler = handler;
         }

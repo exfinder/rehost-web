@@ -22,6 +22,58 @@
         }
     }
 
+    void Application_PostResolveRequestCache(object sender, EventArgs e)
+    {
+        if (Request.QueryString["remap"] == "early")
+        {
+            Remap();
+        }
+    }
+
+    void Application_MapRequestHandler(object sender, EventArgs e)
+    {
+        Witness.Stage(Request, "MapRequestHandler");
+        if (Request.QueryString["remap"] == "late")
+        {
+            Remap();
+        }
+    }
+
+    private void Remap()
+    {
+        try
+        {
+            Context.RemapHandler(new RemapTarget());
+            Witness.Stage(Request, "remap:ok");
+        }
+        catch (Exception remapError)
+        {
+            Witness.Stage(Request, "remap:threw:" + remapError.GetType().Name);
+        }
+    }
+
+    void Application_LogRequest(object sender, EventArgs e)
+    {
+        Witness.Stage(Request, "LogRequest:" + Response.StatusCode);
+        if (Request.QueryString["lw"] != null)
+        {
+            try
+            {
+                Response.Write("|log");
+                Response.AppendHeader("X-At-LogRequest", "1");
+            }
+            catch (Exception logError)
+            {
+                Witness.Stage(Request, "lw:threw:" + logError.GetType().Name);
+            }
+        }
+    }
+
+    void Application_PostLogRequest(object sender, EventArgs e)
+    {
+        Witness.Stage(Request, "PostLogRequest");
+    }
+
     void Application_PreRequestHandlerExecute(object sender, EventArgs e)
     {
         Witness.Stage(Request, "PreRequestHandlerExecute");

@@ -125,6 +125,13 @@ namespace System.Web {
                 return classic != null && classic.IsInBeginRequestStep;
             }
         }
+
+        internal bool IsAtOrPastMapRequestHandlerStep {
+            get {
+                ApplicationStepManager classic = _stepManager as ApplicationStepManager;
+                return classic != null && classic.IsAtOrPastMapRequestHandlerStep;
+            }
+        }
 #endif
 
         // callback for Application ResumeSteps
@@ -864,15 +871,19 @@ namespace System.Web {
 
         public event EventHandler MapRequestHandler {
             add {
+#if NETFRAMEWORK
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
                 AddSyncEventHookup(EventMapRequestHandler, value, RequestNotification.MapRequestHandler);
             }
             remove {
+#if NETFRAMEWORK
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
                 RemoveSyncEventHookup(EventMapRequestHandler, value, RequestNotification.MapRequestHandler);
             }
         }
@@ -940,30 +951,38 @@ namespace System.Web {
 
         public event EventHandler LogRequest {
             add {
+#if NETFRAMEWORK
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
                 AddSyncEventHookup(EventLogRequest, value, RequestNotification.LogRequest);
             }
             remove {
+#if NETFRAMEWORK
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
                 RemoveSyncEventHookup(EventLogRequest, value, RequestNotification.LogRequest);
             }
         }
 
         public event EventHandler PostLogRequest {
             add {
+#if NETFRAMEWORK
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
                 AddSyncEventHookup(EventPostLogRequest, value, RequestNotification.LogRequest, true);
             }
             remove {
+#if NETFRAMEWORK
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
                 RemoveSyncEventHookup(EventPostLogRequest, value, RequestNotification.LogRequest, true);
             }
         }
@@ -1073,16 +1092,20 @@ namespace System.Web {
         }
 
         public void AddOnMapRequestHandlerAsync(BeginEventHandler bh, EndEventHandler eh) {
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
             AddOnMapRequestHandlerAsync(bh, eh, null);
         }
 
         public void AddOnMapRequestHandlerAsync(BeginEventHandler beginHandler, EndEventHandler endHandler, Object state) {
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
             AsyncEvents.AddHandler(EventMapRequestHandler, beginHandler, endHandler, state,
                                    RequestNotification.MapRequestHandler, false, this);
         }
@@ -1169,31 +1192,39 @@ namespace System.Web {
         }
 
         public void AddOnLogRequestAsync(BeginEventHandler bh, EndEventHandler eh) {
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
             AddOnLogRequestAsync(bh, eh, null);
         }
 
         public void AddOnLogRequestAsync(BeginEventHandler beginHandler, EndEventHandler endHandler, Object state) {
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
             AsyncEvents.AddHandler(EventLogRequest, beginHandler, endHandler, state,
                                    RequestNotification.LogRequest, false, this);
         }
 
         public void AddOnPostLogRequestAsync(BeginEventHandler bh, EndEventHandler eh) {
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
             AddOnPostLogRequestAsync(bh, eh, null);
         }
 
         public void AddOnPostLogRequestAsync(BeginEventHandler beginHandler, EndEventHandler endHandler, Object state) {
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
             AsyncEvents.AddHandler(EventPostLogRequest, beginHandler, endHandler, state,
                                    RequestNotification.LogRequest, true, this);
         }
@@ -3883,11 +3914,16 @@ namespace System.Web {
             private int _endRequestStepIndex;
 #if !NETFRAMEWORK
             private int _beginRequestStepEndIndex;
+            private int _mapRequestHandlerStepIndex;
 
             // The classic pipeline has no notification context; the WebSocket accept asks whether
             // it is being called from BeginRequest, which IIS's integrated pipeline refuses.
             internal bool IsInBeginRequestStep {
                 get { return _currentStepIndex >= 0 && _currentStepIndex < _beginRequestStepEndIndex; }
+            }
+
+            internal bool IsAtOrPastMapRequestHandlerStep {
+                get { return _currentStepIndex >= _mapRequestHandlerStepIndex; }
             }
 #endif
 
@@ -3932,6 +3968,10 @@ namespace System.Web {
                 steps.Add(new DirectoryRequestExecutionStep(app));
 #endif
                 steps.Add(new MapHandlerExecutionStep(app));     // map handler
+#if !NETFRAMEWORK
+                _mapRequestHandlerStepIndex = steps.Count - 1;
+                app.CreateEventExecutionSteps(HttpApplication.EventMapRequestHandler, steps);
+#endif
                 app.CreateEventExecutionSteps(HttpApplication.EventPostMapRequestHandler, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventAcquireRequestState, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPostAcquireRequestState, steps);
@@ -3945,6 +3985,12 @@ namespace System.Web {
                 app.CreateEventExecutionSteps(HttpApplication.EventUpdateRequestCache, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPostUpdateRequestCache, steps);
                 _endRequestStepIndex = steps.Count;
+#if !NETFRAMEWORK
+                // IV17: an early end jumps here, and integrated still raises both Log events
+                // before EndRequest, so the jump target stays ahead of them.
+                app.CreateEventExecutionSteps(HttpApplication.EventLogRequest, steps);
+                app.CreateEventExecutionSteps(HttpApplication.EventPostLogRequest, steps);
+#endif
                 app.CreateEventExecutionSteps(HttpApplication.EventEndRequest, steps);
                 steps.Add(new NoopExecutionStep()); // the last is always there
 
