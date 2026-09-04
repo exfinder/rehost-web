@@ -616,6 +616,15 @@ namespace System.Web {
                 }
             }
 
+#if !NETFRAMEWORK
+            // IV11: the callbacks run at the head-commit boundary, after the module SendResponse
+            // steps and before the status and headers are generated, so a status or header a
+            // callback changes still reaches the wire.
+            if (!_onSendingHeadersSubscriptionQueue.IsEmpty) {
+                _onSendingHeadersSubscriptionQueue.FireAndComplete(cb => cb(Context));
+            }
+#endif
+
             // generate headers before we touch the WorkerRequest since header generation might fail,
             // and we don't want to have touched the WR if this happens
             ArrayList headers = GenerateResponseHeaders(false);
@@ -2394,9 +2403,11 @@ namespace System.Web {
                 throw new ArgumentNullException("callback");
             }
 
+#if NETFRAMEWORK
             if (!(_wr is IIS7WorkerRequest)) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
 
             if (HeadersWritten) {
                 throw new HttpException(SR.GetString(SR.Cannot_call_method_after_headers_sent_generic));

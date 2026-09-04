@@ -12,6 +12,8 @@ public sealed class ProbePathConformanceTests
     {
         ["WitnessHandler"] = ProbePaths.Witness,
         ["ResponseHeadersProbe"] = ProbePaths.Headers,
+        ["RequestHeadersProbe"] = ProbePaths.RequestHeaders,
+        ["OnSendingHeadersProbe"] = ProbePaths.OnSendingHeaders,
         ["RequestBodyHandler"] = ProbePaths.Body,
         ["CookieHandler"] = ProbePaths.Cookies,
         ["SaveHandler"] = ProbePaths.Save,
