@@ -195,6 +195,19 @@
    ],
    "reason": "the integrated shim batch takes its integrated arm behind !NETFRAMEWORK fences: ApplicationStepManager records a notification boundary per CreateEventExecutionSteps call plus the handler-mapping and handler-execution steps and fills a per-step table from it, HttpApplication exposes TryGetCurrentNotification and raises the two pre-send events through RaiseSendResponseEvent, which reports SendResponse and restores HttpContext.Current; HttpContext.CurrentNotification and IsPostNotification read that table and otherwise raise the new Notification_outside_pipeline string added to System.Web.txt; HttpApplication.OnExecuteRequestStep and ThrowIfEventBindingDisallowed drop the UseIntegratedPipeline gate and keep Framework's two init flags; HttpHeaderCollection.Add/Set/Remove gain a request arm whose server-variable mirror reads HttpRequest.ExistingServerVariables rather than the materializing getter, HttpRequest.EnsureHeaders and GetServerVars and HttpServerVarsCollection.Populate stop calling MakeReadOnly, and BuildUrl takes the server name, and a port when named, from a Host rewritten through the collection; HttpResponse.AddOnSendingHeaders drops its IIS7WorkerRequest test and WriteHeaders drains the subscription queue before generating headers; and HttpRequest.GetEntireRawContent and HttpBufferlessInputStream.ValidateRequestEntityLength no longer close the connection after an oversize body",
    "record": "docs/portability-ledger.md P91"
+  },
+  {
+   "files": [
+    "HttpApplication.cs",
+    "HttpRuntime.cs",
+    "HttpRequest.cs",
+    "HttpResponse.cs",
+    "HttpServerVarsCollection.cs",
+    "WorkerRequest.cs",
+    "Hosting/HostingEnvironment.cs"
+   ],
+   "reason": "the integrated remainder takes its integrated arm behind !NETFRAMEWORK fences: ApplicationStepManager.ResumeSteps calls HttpContext.ReportRuntimeErrorIfExists inside the early-end jump when the context carries an error, so the error page and its status are buffered before the Log steps, and HttpRuntime.FinishRequest skips the ReportRuntimeError pair when HttpContext.IsRuntimeErrorReported already says so while still running FinalFlushAtTheEndOfRequestProcessing; the four HttpApplication HideRequestResponse gates drop their UseIntegratedPipeline test and InitInternal's classic arm wraps InitModules in the same hiding; HttpServerVarsCollection.Get falls back to HttpRequest.FetchServerVariable for a name the collection does not carry, excluding HTTP_* so a removed header is not resurrected; WorkerRequest gains TryGetClientDisconnectedToken and TryAbortConnection beside the WebSocket seam trio, which HttpResponse.ClientDisconnectedToken and HttpRequest.Abort try before their Framework refusal; HttpResponse.SubStatusCode fences out both IIS7WorkerRequest type tests and keeps the _headersWritten refusal; both HttpRequest.InsertEntityBody overloads fence out the refusal and the native call, keeping Framework's argument checks and NeedToInsertEntityBody = false; and HostingEnvironment exposes RaiseStopListening over the existing private OnGlobalStopListening, since the native wait handle SetupStopListeningHandler arms is never signalled off IIS",
+   "record": "docs/portability-ledger.md P92"
   }
  ]
 }

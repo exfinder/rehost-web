@@ -40,19 +40,19 @@ the port ships, so the two halves of the identity name the same pool.
 - Callers now take their integrated branches. Every reader of either property in
   this repo is the OWIN host or the runtime itself (verified across every
   assembly under `apps/`, `third_party/`, `src/` and the package cache):
-  `ShutdownDetector` subscribes to `HostingEnvironment.StopListening`, an event
-  only the IIS-native `PipelineRuntime` path raises, so shutdown still reaches
-  OWIN through `IRegisteredObject.Stop` as before; `OwinAppContext` advertises
-  WebSocket support at startup and withdraws it on the first request, because
-  the host adapter has no `WEBSOCKET_VERSION` server variable, so OWIN
-  WebSockets stay unavailable;
-  `DisconnectWatcher` and `OwinCallContext.DisableResponseCompression` needed
-  narrow edits, recorded in [the Katana provenance](../provenance/aspnet-katana.md).
+  `ShutdownDetector` subscribes to `HostingEnvironment.StopListening` and
+  `OwinAppContext` probes the `WEBSOCKET_VERSION` server variable, neither of
+  which the port answered when this ADR landed. Job 5 supplied both (ledger
+  P92), so OWIN's shutdown token now cancels at the host stop and the
+  advertised WebSocket capability is no longer withdrawn on the first request.
+  `OwinCallContext.DisableResponseCompression` needed a narrow edit, recorded
+  in [the Katana provenance](../provenance/aspnet-katana.md); the one
+  `DisconnectWatcher` carried is gone with the token answering.
 - Members that still refuse with "This operation requires IIS integrated
-  pipeline mode" sit next to a `true` answer until the later closure jobs land
-  them: `Response.ClientDisconnectedToken`, `Request.Abort` and
-  `Response.SubStatusCode` (job 5). Refusal wording is job 6. A recorded
-  refusal beside `true` is the accepted cost; a silent classic branch is not,
+  pipeline mode" sit next to a `true` answer until job 6 rewords them:
+  `HostingEnvironment.MaxConcurrentRequestsPerCPU` and
+  `MaxConcurrentThreadsPerCPU`. A recorded refusal beside `true` is the
+  accepted cost; a silent classic branch is not,
   which is the whole reason the identity flips first.
 - Job 3 has landed: the `MapRequestHandler`/`LogRequest`/`PostLogRequest`
   subscriptions and the `HttpContext.RemapHandler` window now answer as the
@@ -66,5 +66,10 @@ the port ships, so the two halves of the identity name the same pool.
   refuses it. `OwinCallContext.RegisterForOnSendingHeaders` reaches the same
   member reflectively; its registration is no longer refused, though no
   scenario exercises Katana's own flush notification yet.
+- Job 5 has landed the remainder's build half (ledger P92):
+  `Response.ClientDisconnectedToken`, `Request.Abort`, `Response.SubStatusCode`
+  and `Request.InsertEntityBody` answer, the intrinsics are hidden during
+  application and module init, the error page and its status land before
+  `LogRequest`, and the two Katana gaps above are closed.
 - `PopulateIISVersionInformation`, `_iisVersion` and `_useIntegratedPipeline`
   are untouched, so a Framework build of the imported tree is unaffected.

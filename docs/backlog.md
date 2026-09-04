@@ -42,7 +42,7 @@ Carried from earlier milestones as unresolved detail:
   present must be measured and recorded first; a silently ignored rule set is
   the least-astonishment failure mode.
 - Close the integrated-vs-classic divergence
-  ([audit](research/integrated-divergence-audit.md), readings IV1–IV17). Every
+  ([audit](research/integrated-divergence-audit.md), readings IV1–IV30). Every
   open item ends as integrated behavior or a fail-fast diagnostic naming the
   boundary — silence is the only banned outcome. Six jobs, one per session, in
   order (2 must precede 3; 5 and 6 may swap):
@@ -60,15 +60,15 @@ Carried from earlier milestones as unresolved detail:
      `AddOnSendingHeaders` (IV11), the `PreSendRequest*` context restore
      (IV12), the oversize-body fence (IV14), follow-up readings IV18-IV20 and the
      `ThrowIfEventBindingDisallowed` fail-fast (IV10).
-  5. Remainder, build half: the audit's take-branch/shim leftovers; take the
-     missing winbox readings first where the audit calls for one. Includes the
-     two Katana gaps ADR 0013 exposed beside `ClientDisconnectedToken`: the
-     `WEBSOCKET_VERSION` server variable (Katana withdraws its advertised
-     WebSocket capability on the first request without it) and raising
-     `HostingEnvironment.StopListening` from the host's stopping notification
-     (the port never fires it, so `OwinApplication.ShutdownToken` cancels only
-     at `IRegisteredObject.Stop`); and the error status at `LogRequest` (IV17;
-     the port renders the error page after `EndRequest`).
+  5. Landed: the remainder's build half, on readings IV21-IV30 — the error
+     page and status at the early-end jump (IV21), `HideRequestResponse`
+     (IV22), `WEBSOCKET_VERSION` (IV23), `ClientDisconnectedToken` and
+     `Request.Abort` (IV24, IV25), `Response.SubStatusCode` (IV26),
+     `Request.InsertEntityBody` (IV28) and `HostingEnvironment.StopListening`
+     from the host's stopping notification (IV30), with Katana's
+     `DisconnectWatcher` restored to upstream (ledger P92). Two items closed as
+     non-divergences with a row and no code: the `DefaultAuthenticationModule`
+     hook position (IV27) and `CallHandlerExecutionStep`'s 403 (IV29).
   6. Remainder, fail-fast half: the audit's fail-fast leftovers; each gets a
      diagnostic naming the boundary plus a compatibility row.
 

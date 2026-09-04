@@ -39,26 +39,22 @@ and `Owin` 1.0.0 packages, consumed under `NU1701`. `Microsoft.Web.Infrastructur
 is not needed: Katana 4.x already calls `HttpApplication.RegisterModule`
 directly, so the `PreApplicationStartMethod` attribute binds as imported.
 
-The tree compiles on .NET 10 unmodified except for four files. The IIS-only
+The tree compiles on .NET 10 unmodified except for three files. The IIS-only
 paths — `UnsafeIISMethods`, `ShutdownDetector`, `WebSockets`,
 `OwinHttpHandler`/`MapOwinPath` — are kept as imported. Since
 [ADR 0013](../adr/0013-integrated-pipeline-identity.md) the runtime answers
 `HttpRuntime.UsingIntegratedPipeline` `true` and `HttpRuntime.IISVersion` 10.0,
-so those paths no longer short-circuit: `ShutdownDetector` subscribes to
-`HostingEnvironment.StopListening` instead of polling, an event the port never
-raises (only the IIS-native `PipelineRuntime` path calls
-`SetupStopListeningHandler`), so shutdown still arrives through
-`IRegisteredObject.Stop`; `OwinAppContext` advertises `websocket.Version` in
-its capabilities from the version alone, and per-request detection withdraws
-it on the first request because the host adapter answers null for
-`WEBSOCKET_VERSION`.
+so those paths no longer short-circuit, and ledger P92 supplied the two things
+they then reached for: the host's stopping notification raises
+`HostingEnvironment.StopListening`, which is what `ShutdownDetector` subscribes
+to instead of polling, and the `WEBSOCKET_VERSION` server variable answers 13,
+so `OwinAppContext`'s per-request detection no longer withdraws the
+`websocket.Version` capability it advertises. `DisconnectWatcher` is the
+imported file again: it reads `HttpResponse.ClientDisconnectedToken`, which
+P92 made answer, so the refusal-latch fallback that stood here is gone.
 
-Two of them now needed an edit, because the identity promises what only IIS's
-native plumbing delivers. `DisconnectWatcher` keeps the imported version and
-mode check, but a first `PlatformNotSupportedException` from reading
-`HttpResponse.ClientDisconnectedToken` latches a static flag and every call
-falls back to the imported `SetDisconnected` timer; without it the refusal
-would escape into every OWIN request. `OwinCallContext.DisableResponseCompression`
+One edit remains among those paths, because the identity promises what only
+IIS's native plumbing delivers. `OwinCallContext.DisableResponseCompression`
 takes its `SetKnownRequestHeader` fast path only when the worker request really
 is an `IIS7WorkerRequest` — the reflected type, hoisted to a field and shared
 with the delegate builder, tests the instance — because the compiled delegate
