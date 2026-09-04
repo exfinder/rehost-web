@@ -15,6 +15,18 @@
             Response.Write("module|");
             Response.End();
         }
+        if (Request.QueryString["bind"] == "1")
+        {
+            try
+            {
+                ((HttpApplication)sender).EndRequest += delegate { };
+                Witness.Stage(Request, "bind:ok");
+            }
+            catch (Exception bindError)
+            {
+                Witness.Stage(Request, "bind:" + bindError.GetType().Name + ":" + bindError.Message);
+            }
+        }
         if (Request.QueryString["ws-begin"] != null)
         {
             try { Response.AppendHeader("X-Ws-Begin", "ok:" + Context.IsWebSocketRequest); }

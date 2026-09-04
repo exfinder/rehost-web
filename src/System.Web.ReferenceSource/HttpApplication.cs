@@ -242,7 +242,13 @@ namespace System.Web {
         }
 
         private void ThrowIfEventBindingDisallowed() {
+#if NETFRAMEWORK
             if (HttpRuntime.UseIntegratedPipeline && _initSpecialCompleted && _initInternalCompleted) {
+#else
+            // InitSpecial runs only for the native event registration, so _initSpecialCompleted
+            // is permanently false here and InitInternal alone closes the window (IV10).
+            if (_initInternalCompleted) {
+#endif
                 // throw if we're using the integrated pipeline and both InitSpecial and InitInternal have completed.
                 throw new InvalidOperationException(SR.GetString(SR.Event_Binding_Disallowed));
             }
@@ -2222,12 +2228,16 @@ namespace System.Web {
                 throw new ArgumentNullException("callback");
             }
 
+#if NETFRAMEWORK
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
 
             if (_initSpecialCompleted && _initInternalCompleted) {
                 //throw if both InitSpecial and InitInternal have completed.
+#else
+            if (_initInternalCompleted) {
+#endif
                 throw new InvalidOperationException(SR.GetString(SR.OnExecuteRequestStep_Cannot_Be_Called));
             }
 
