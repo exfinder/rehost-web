@@ -23,9 +23,6 @@ public sealed class IntegratedMembersOverKestrelTests(PageLiveScenario scenario)
         lines["unknown"].ShouldBe("null");
     }
 
-    // The shortcut path the WEBSOCKET_VERSION fallback rides on must key on absence, not on an
-    // empty value: an anonymous request stores these three as "" (reading R1), and the worker
-    // request has no answer for them, so an emptiness-keyed fallback turns them into null.
     [Fact]
     public async Task An_Empty_Server_Variable_Stays_Empty_Either_Side_Of_Population()
     {

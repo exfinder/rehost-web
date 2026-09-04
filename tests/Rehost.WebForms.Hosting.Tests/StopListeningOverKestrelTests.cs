@@ -37,8 +37,6 @@ public sealed class StopListeningOverKestrelTests
         stopped.ShouldBeGreaterThan(listener);
     }
 
-    // The raise is Framework's own unguarded multicast, so the throwing subscriber takes the rest
-    // of the chain with it; the teardown after the raise is what must survive.
     [Fact]
     public async Task A_Throwing_Stop_Listening_Subscriber_Leaves_The_Teardown_Intact()
     {
