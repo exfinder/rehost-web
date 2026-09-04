@@ -19,13 +19,13 @@ public sealed class RequestHeadersOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe(
-            """
+            $"""
             clear=NotSupportedException
             probe=p
             multi=a,b
             agent-header=null
             agent-typed=probe-agent/1
-            url-host=rewritten.example
+            url-authority=rewritten.example:{scenario.Address.Port}
 
             """.ReplaceLineEndings("\n"));
     }

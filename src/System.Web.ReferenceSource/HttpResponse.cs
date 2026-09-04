@@ -617,9 +617,7 @@ namespace System.Web {
             }
 
 #if !NETFRAMEWORK
-            // IV11: the callbacks run at the head-commit boundary, after the module SendResponse
-            // steps and before the status and headers are generated, so a status or header a
-            // callback changes still reaches the wire.
+            // IV11: before header generation, so a status or header a callback changes reaches the wire.
             if (!_onSendingHeadersSubscriptionQueue.IsEmpty) {
                 _onSendingHeadersSubscriptionQueue.FireAndComplete(cb => cb(Context));
             }

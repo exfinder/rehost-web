@@ -40,7 +40,7 @@ public sealed class RequestHeadersProbe : IHttpHandler
                 Line(dump, "multi", request.Headers["X-Multi"]);
                 Line(dump, "agent-header", request.Headers["User-Agent"]);
                 Line(dump, "agent-typed", request.UserAgent);
-                Line(dump, "url-host", request.Url.Host);
+                Line(dump, "url-authority", request.Url.Authority);
                 break;
         }
 

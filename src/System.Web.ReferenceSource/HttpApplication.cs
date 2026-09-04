@@ -148,10 +148,8 @@ namespace System.Web {
             return classic != null && classic.TryGetCurrentNotification(out notification, out isPostNotification);
         }
 
-        // The pre-send events are no step of the classic list: they run from the response's own
-        // flush, which can be past ThreadContext.DisassociateFromCurrentThread, so
-        // HttpContext.Current is restored around the handler (IV12) and the pair reports
-        // SendResponse while it runs (IV6).
+        // The pre-send events run from the response flush, which can be past
+        // ThreadContext.DisassociateFromCurrentThread, so HttpContext.Current is restored (IV12).
         private void RaiseSendResponseEvent(EventHandler handler) {
             HttpContext previousContext = HttpContext.Current;
             bool previouslyInSendResponse = _inSendResponseNotification;
@@ -278,12 +276,10 @@ namespace System.Web {
         private void ThrowIfEventBindingDisallowed() {
 #if NETFRAMEWORK
             if (HttpRuntime.UseIntegratedPipeline && _initSpecialCompleted && _initInternalCompleted) {
-#else
-            // InitSpecial runs only for the native event registration, so _initSpecialCompleted
-            // is permanently false here and InitInternal alone closes the window (IV10).
-            if (_initInternalCompleted) {
-#endif
                 // throw if we're using the integrated pipeline and both InitSpecial and InitInternal have completed.
+#else
+            if (_initSpecialCompleted && _initInternalCompleted) {
+#endif
                 throw new InvalidOperationException(SR.GetString(SR.Event_Binding_Disallowed));
             }
         }
@@ -2280,12 +2276,10 @@ namespace System.Web {
             if (!HttpRuntime.UseIntegratedPipeline) {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
 
             if (_initSpecialCompleted && _initInternalCompleted) {
                 //throw if both InitSpecial and InitInternal have completed.
-#else
-            if (_initInternalCompleted) {
-#endif
                 throw new InvalidOperationException(SR.GetString(SR.OnExecuteRequestStep_Cannot_Be_Called));
             }
 
@@ -4028,9 +4022,8 @@ namespace System.Web {
                 _notificationBoundaries.Add(boundary);
             }
 
-            // The notification each managed event reports on an integrated pool (IV6).
-            // EventDefaultAuthentication has no reading of its own: it is a classic-only step
-            // that runs inside the AuthenticateRequest neighbourhood and inherits its value.
+            // IV6, except EventDefaultAuthentication: classic-only, unmeasured, and placed with
+            // AuthenticateRequest because that is the stage it runs inside.
             private static bool MapEventToNotification(object eventIndex, out RequestNotification notification, out bool isPostNotification) {
                 notification = RequestNotification.BeginRequest;
                 isPostNotification = false;
@@ -4199,8 +4192,6 @@ namespace System.Web {
             }
 
 #if !NETFRAMEWORK
-            // Steps between two boundaries inherit the pair in force, which is how the internal
-            // steps (validation, directory, filtering, the trailing noop) answer.
             private void BuildNotificationTable() {
                 _stepNotifications = new RequestNotification[_execSteps.Length];
                 _stepIsPostNotification = new bool[_execSteps.Length];

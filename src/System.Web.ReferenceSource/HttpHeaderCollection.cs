@@ -147,8 +147,6 @@ namespace System.Web {
             }
         }
 
-        // Request headers with no native block to write through, the mirror of the response arm
-        // above (IV7).
         private void SetManagedRequestHeader(String name, String value, bool replace) {
             if (name == null) {
                 throw new ArgumentNullException("name");
@@ -168,9 +166,6 @@ namespace System.Web {
             MirrorRequestHeader(name, replace ? value : base.Get(name));
         }
 
-        // IV8: the server-variable mirror follows only where it already exists, so reading it
-        // through HttpRequest.ServerVariables here would materialize it and change what a later
-        // read reports.
         private void MirrorRequestHeader(String name, String value) {
             HttpServerVarsCollection serverVars = _request.ExistingServerVariables;
             if (serverVars != null) {

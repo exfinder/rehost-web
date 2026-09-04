@@ -38,6 +38,15 @@
             {
                 Witness.Stage(Request, "bind:" + bindError.GetType().Name + ":" + bindError.Message);
             }
+            try
+            {
+                ((HttpApplication)sender).OnExecuteRequestStep((context, next) => next());
+                Witness.Stage(Request, "wrap-late:ok");
+            }
+            catch (Exception wrapError)
+            {
+                Witness.Stage(Request, "wrap-late:" + wrapError.GetType().Name + ":" + wrapError.Message);
+            }
         }
         if (Request.QueryString["ws-begin"] != null)
         {

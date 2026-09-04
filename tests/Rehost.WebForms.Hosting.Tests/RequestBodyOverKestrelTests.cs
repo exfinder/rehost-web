@@ -201,12 +201,14 @@ public sealed class RequestBodyOverKestrelTests(
     // IV14: integrated answered the oversize body with a keep-alive 500 carrying Content-Length,
     // where classic sent Connection: close, omitted the length and dropped the socket. Pipelined
     // on one raw connection, so the second response arrives only if the first left it open.
-    [Fact]
-    public async Task An_Oversize_Body_Is_Refused_Without_Closing_The_Connection()
+    [Theory]
+    [InlineData("input")]
+    [InlineData("bufferless")]
+    public async Task An_Oversize_Body_Is_Refused_Without_Closing_The_Connection(string mode)
     {
         var oversize = new string('o', 5000);
         var request = $"""
-            POST /body?mode=input HTTP/1.1
+            POST /body?mode={mode} HTTP/1.1
             Host: {scenario.Address.Authority}
             Content-Type: text/plain
             Content-Length: {oversize.Length}

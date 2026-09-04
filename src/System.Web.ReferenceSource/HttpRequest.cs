@@ -1957,26 +1957,8 @@ namespace System.Web {
             if (!String.IsNullOrEmpty(q))
                 q = "?" + HttpEncoder.CollapsePercentUFromStringInternal(q, QueryStringEncoding);
 
-#if !NETFRAMEWORK
-            // IV8: the Url follows a Host rewritten through Request.Headers, which IIS delivered
-            // by way of the server-variable mirror behind GetServerName.
-            if (_headers != null) {
-                string rewrittenHost = _headers["Host"];
-                if (!String.IsNullOrEmpty(rewrittenHost)) {
-                    try {
-                        url = UriUtil.BuildUri(_wr.GetProtocol(), Uri.UnescapeDataString(rewrittenHost), null /* port */, pathAccessor(), q);
-                    }
-                    catch (UriFormatException) { /* Do nothing; the fallback below kicks in. */ }
-                }
-            }
-#endif
-
             // Get server name and port from Host header?  Or the old way?
-#if !NETFRAMEWORK
-            if (url == null && AppSettings.UseHostHeaderForRequestUrl) {
-#else
             if (AppSettings.UseHostHeaderForRequestUrl) {
-#endif
                 string serverAndPort = _wr.GetKnownRequestHeader(HttpWorkerRequest.HeaderHost);
                 try {
                     if (!String.IsNullOrEmpty(serverAndPort)) {
@@ -1992,10 +1974,32 @@ namespace System.Web {
             // If for some reason the Host Header failed to produce a valid Url, fall back on the old way of doing it.
             if (url == null) {
                 String serverName = _wr.GetServerName();
+#if !NETFRAMEWORK
+                String port = _wr.GetLocalPortAsString();
+                // IV8: a Host rewritten through Request.Headers reaches the Url as IIS's SERVER_NAME
+                // did, keeping the local port unless the rewrite names one.
+                if (_headers != null) {
+                    string rewrittenHost = _headers["Host"];
+                    if (!String.IsNullOrEmpty(rewrittenHost)) {
+                        int portSeparator = rewrittenHost.LastIndexOf(':');
+                        if (portSeparator > rewrittenHost.LastIndexOf(']') && portSeparator < rewrittenHost.Length - 1) {
+                            serverName = rewrittenHost.Substring(0, portSeparator);
+                            port = rewrittenHost.Substring(portSeparator + 1);
+                        }
+                        else {
+                            serverName = rewrittenHost;
+                        }
+                    }
+                }
+#endif
                 if (serverName.IndexOf(':') >= 0 && serverName[0] != '[')
                     serverName = "[" + serverName + "]"; // IPv6
 
+#if !NETFRAMEWORK
+                url = UriUtil.BuildUri(_wr.GetProtocol(), Uri.UnescapeDataString(serverName), port, pathAccessor(), q);
+#else
                 url = UriUtil.BuildUri(_wr.GetProtocol(), Uri.UnescapeDataString(serverName), _wr.GetLocalPortAsString(), pathAccessor(), q);
+#endif
             }
             return url;
         }

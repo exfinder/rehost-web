@@ -17,5 +17,8 @@ public sealed class LateEventBindingOverKestrelTests(PageLiveScenario scenario)
         stages.ShouldContain(
             "bind:InvalidOperationException:Event handlers can only be bound to HttpApplication"
             + " events during IHttpModule initialization.");
+        stages.ShouldContain(
+            "wrap-late:InvalidOperationException:Method OnExecuteRequestStep can only be called"
+            + " during HttpApplication initialization or IHttpModule initialization.");
     }
 }
