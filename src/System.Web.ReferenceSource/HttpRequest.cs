@@ -984,9 +984,11 @@ namespace System.Web {
             HttpRuntimeSection cfg = RuntimeConfig.GetConfig(_context).HttpRuntime;
             int limit = cfg.MaxRequestLengthBytes;
             if (ContentLength > limit) {
+#if NETFRAMEWORK
                 if ( !(_wr is IIS7WorkerRequest) ) {
                     Response.CloseConnectionAfterError();
                 }
+#endif
                 throw new HttpException(SR.GetString(SR.Max_request_length_exceeded),
                                         null, WebEventCodes.RuntimeErrorPostTooLarge);
             }

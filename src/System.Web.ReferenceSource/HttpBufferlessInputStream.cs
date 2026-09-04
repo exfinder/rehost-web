@@ -310,9 +310,11 @@ namespace System.Web {
 
         private void ValidateRequestEntityLength() {
             if (!_disableMaxRequestLength && Length > _maxRequestLength) {
+#if NETFRAMEWORK
                 if ( !(_context.WorkerRequest is IIS7WorkerRequest) ) {
                     _context.Response.CloseConnectionAfterError();
                 }
+#endif
                 throw new HttpException(SR.GetString(SR.Max_request_length_exceeded), null, WebEventCodes.RuntimeErrorPostTooLarge);
             }
         }

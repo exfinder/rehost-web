@@ -198,6 +198,39 @@ public sealed class RequestBodyOverKestrelTests(
         (await run.Witness.HandlerEntriesAsync()).ShouldContain("handler-entered:input");
     }
 
+    // IV14: integrated answered the oversize body with a keep-alive 500 carrying Content-Length,
+    // where classic sent Connection: close, omitted the length and dropped the socket. Pipelined
+    // on one raw connection, so the second response arrives only if the first left it open.
+    [Fact]
+    public async Task An_Oversize_Body_Is_Refused_Without_Closing_The_Connection()
+    {
+        var oversize = new string('o', 5000);
+        var request = $"""
+            POST /body?mode=input HTTP/1.1
+            Host: {scenario.Address.Authority}
+            Content-Type: text/plain
+            Content-Length: {oversize.Length}
+
+            {oversize}GET /body?mode=input HTTP/1.1
+            Host: {scenario.Address.Authority}
+            Content-Length: 0
+            Connection: close
+
+
+            """.ReplaceLineEndings("\r\n");
+
+        var wire = Encoding.ASCII.GetString(
+            await RawSocketProbe.SendRawUntilQuietAsync(
+                scenario.Address, Encoding.ASCII.GetBytes(request)));
+
+        var refusal = wire[..wire.IndexOf("\r\n\r\n", StringComparison.Ordinal)];
+        refusal.ShouldStartWith("HTTP/1.1 500 ");
+        refusal.ShouldContain("Content-Length: ");
+        refusal.ShouldNotContain("Connection: close");
+        wire.ShouldContain("Maximum request length exceeded");
+        wire.Split("HTTP/1.1 ").Length.ShouldBe(3, wire);
+    }
+
     private static string Describe(string value)
     {
         var body = Encoding.UTF8.GetBytes(value);
