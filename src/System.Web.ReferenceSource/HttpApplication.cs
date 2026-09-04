@@ -132,6 +132,40 @@ namespace System.Web {
                 return classic != null && classic.IsAtOrPastMapRequestHandlerStep;
             }
         }
+
+        private bool _inSendResponseNotification;
+
+        internal bool TryGetCurrentNotification(out RequestNotification notification, out bool isPostNotification) {
+            notification = RequestNotification.BeginRequest;
+            isPostNotification = false;
+
+            if (_inSendResponseNotification) {
+                notification = RequestNotification.SendResponse;
+                return true;
+            }
+
+            ApplicationStepManager classic = _stepManager as ApplicationStepManager;
+            return classic != null && classic.TryGetCurrentNotification(out notification, out isPostNotification);
+        }
+
+        // The pre-send events are no step of the classic list: they run from the response's own
+        // flush, which can be past ThreadContext.DisassociateFromCurrentThread, so
+        // HttpContext.Current is restored around the handler (IV12) and the pair reports
+        // SendResponse while it runs (IV6).
+        private void RaiseSendResponseEvent(EventHandler handler) {
+            HttpContext previousContext = HttpContext.Current;
+            bool previouslyInSendResponse = _inSendResponseNotification;
+
+            HttpContext.Current = _context;
+            _inSendResponseNotification = true;
+            try {
+                handler(this, AppEvent);
+            }
+            finally {
+                _inSendResponseNotification = previouslyInSendResponse;
+                HttpContext.Current = previousContext;
+            }
+        }
 #endif
 
         // callback for Application ResumeSteps
@@ -667,7 +701,11 @@ namespace System.Web {
             EventHandler handler = (EventHandler)Events[EventPreSendRequestHeaders];
             if (handler != null) {
                 try {
+#if NETFRAMEWORK
                     handler(this, AppEvent);
+#else
+                    RaiseSendResponseEvent(handler);
+#endif
                 }
                 catch (Exception e) {
                     RecordError(e);
@@ -679,7 +717,11 @@ namespace System.Web {
             EventHandler handler = (EventHandler)Events[EventPreSendRequestContent];
             if (handler != null) {
                 try {
+#if NETFRAMEWORK
                     handler(this, AppEvent);
+#else
+                    RaiseSendResponseEvent(handler);
+#endif
                 }
                 catch (Exception e) {
                     RecordError(e);
@@ -1786,6 +1828,12 @@ namespace System.Web {
 
         // helper to expand an event handler into application steps
         private void CreateEventExecutionSteps(Object eventIndex, ArrayList steps) {
+#if !NETFRAMEWORK
+            ApplicationStepManager classicSteps = _stepManager as ApplicationStepManager;
+            if (classicSteps != null) {
+                classicSteps.NoteEventBoundary(eventIndex, steps.Count);
+            }
+#endif
             // async
             AsyncAppEventHandler asyncHandler = AsyncEvents[eventIndex];
 
@@ -3935,6 +3983,133 @@ namespace System.Web {
             internal bool IsAtOrPastMapRequestHandlerStep {
                 get { return _currentStepIndex >= _mapRequestHandlerStepIndex; }
             }
+
+            private RequestNotification[] _stepNotifications;
+            private bool[] _stepIsPostNotification;
+            private List<NotificationBoundary> _notificationBoundaries;
+
+            private struct NotificationBoundary {
+                internal int StepIndex;
+                internal RequestNotification Notification;
+                internal bool IsPostNotification;
+            }
+
+            internal bool TryGetCurrentNotification(out RequestNotification notification, out bool isPostNotification) {
+                notification = RequestNotification.BeginRequest;
+                isPostNotification = false;
+
+                if (_stepNotifications == null || _currentStepIndex < 0 || _currentStepIndex >= _stepNotifications.Length) {
+                    return false;
+                }
+
+                notification = _stepNotifications[_currentStepIndex];
+                isPostNotification = _stepIsPostNotification[_currentStepIndex];
+                return true;
+            }
+
+            internal void NoteEventBoundary(object eventIndex, int stepIndex) {
+                RequestNotification notification;
+                bool isPostNotification;
+
+                if (MapEventToNotification(eventIndex, out notification, out isPostNotification)) {
+                    NoteBoundary(stepIndex, notification, isPostNotification);
+                }
+            }
+
+            private void NoteBoundary(int stepIndex, RequestNotification notification, bool isPostNotification) {
+                if (_notificationBoundaries == null) {
+                    return;
+                }
+
+                NotificationBoundary boundary;
+                boundary.StepIndex = stepIndex;
+                boundary.Notification = notification;
+                boundary.IsPostNotification = isPostNotification;
+                _notificationBoundaries.Add(boundary);
+            }
+
+            // The notification each managed event reports on an integrated pool (IV6).
+            // EventDefaultAuthentication has no reading of its own: it is a classic-only step
+            // that runs inside the AuthenticateRequest neighbourhood and inherits its value.
+            private static bool MapEventToNotification(object eventIndex, out RequestNotification notification, out bool isPostNotification) {
+                notification = RequestNotification.BeginRequest;
+                isPostNotification = false;
+
+                if (eventIndex == HttpApplication.EventBeginRequest) {
+                    notification = RequestNotification.BeginRequest;
+                }
+                else if (eventIndex == HttpApplication.EventAuthenticateRequest || eventIndex == HttpApplication.EventDefaultAuthentication) {
+                    notification = RequestNotification.AuthenticateRequest;
+                }
+                else if (eventIndex == HttpApplication.EventPostAuthenticateRequest) {
+                    notification = RequestNotification.AuthenticateRequest;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventAuthorizeRequest) {
+                    notification = RequestNotification.AuthorizeRequest;
+                }
+                else if (eventIndex == HttpApplication.EventPostAuthorizeRequest) {
+                    notification = RequestNotification.AuthorizeRequest;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventResolveRequestCache) {
+                    notification = RequestNotification.ResolveRequestCache;
+                }
+                else if (eventIndex == HttpApplication.EventPostResolveRequestCache) {
+                    notification = RequestNotification.ResolveRequestCache;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventMapRequestHandler) {
+                    notification = RequestNotification.MapRequestHandler;
+                }
+                else if (eventIndex == HttpApplication.EventPostMapRequestHandler) {
+                    notification = RequestNotification.MapRequestHandler;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventAcquireRequestState) {
+                    notification = RequestNotification.AcquireRequestState;
+                }
+                else if (eventIndex == HttpApplication.EventPostAcquireRequestState) {
+                    notification = RequestNotification.AcquireRequestState;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventPreRequestHandlerExecute) {
+                    notification = RequestNotification.PreExecuteRequestHandler;
+                }
+                else if (eventIndex == HttpApplication.EventPostRequestHandlerExecute) {
+                    notification = RequestNotification.ExecuteRequestHandler;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventReleaseRequestState) {
+                    notification = RequestNotification.ReleaseRequestState;
+                }
+                else if (eventIndex == HttpApplication.EventPostReleaseRequestState) {
+                    notification = RequestNotification.ReleaseRequestState;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventUpdateRequestCache) {
+                    notification = RequestNotification.UpdateRequestCache;
+                }
+                else if (eventIndex == HttpApplication.EventPostUpdateRequestCache) {
+                    notification = RequestNotification.UpdateRequestCache;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventLogRequest) {
+                    notification = RequestNotification.LogRequest;
+                }
+                else if (eventIndex == HttpApplication.EventPostLogRequest) {
+                    notification = RequestNotification.LogRequest;
+                    isPostNotification = true;
+                }
+                else if (eventIndex == HttpApplication.EventEndRequest) {
+                    notification = RequestNotification.EndRequest;
+                }
+                else {
+                    return false;
+                }
+
+                return true;
+            }
 #endif
 
             internal ApplicationStepManager(HttpApplication app): base(app) {
@@ -3943,6 +4118,9 @@ namespace System.Web {
             internal override void BuildSteps(WaitCallback stepCallback ) {
                 ArrayList steps = new ArrayList();
                 HttpApplication app = _application;
+#if !NETFRAMEWORK
+                _notificationBoundaries = new List<NotificationBoundary>();
+#endif
 
 #if NETFRAMEWORK
                 bool urlMappingsEnabled = false;
@@ -3980,12 +4158,18 @@ namespace System.Web {
                 steps.Add(new MapHandlerExecutionStep(app));     // map handler
 #if !NETFRAMEWORK
                 _mapRequestHandlerStepIndex = steps.Count - 1;
+                NoteBoundary(_mapRequestHandlerStepIndex, RequestNotification.MapRequestHandler, false);
                 app.CreateEventExecutionSteps(HttpApplication.EventMapRequestHandler, steps);
 #endif
                 app.CreateEventExecutionSteps(HttpApplication.EventPostMapRequestHandler, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventAcquireRequestState, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPostAcquireRequestState, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPreRequestHandlerExecute, steps);
+#if !NETFRAMEWORK
+                // No managed event maps to ExecuteRequestHandler's pre phase, so the boundary is
+                // the preload and handler steps themselves (IV6).
+                NoteBoundary(steps.Count, RequestNotification.ExecuteRequestHandler, false);
+#endif
                 steps.Add(app.CreateImplicitAsyncPreloadExecutionStep()); // implict async preload step
                 steps.Add(new CallHandlerExecutionStep(app));  // execute handler
                 app.CreateEventExecutionSteps(HttpApplication.EventPostRequestHandlerExecute, steps);
@@ -4006,10 +4190,39 @@ namespace System.Web {
 
                 _execSteps = new IExecutionStep[steps.Count];
                 steps.CopyTo(_execSteps);
+#if !NETFRAMEWORK
+                BuildNotificationTable();
+#endif
 
                 // callback for async completion when reposting to threadpool thread
                 _resumeStepsWaitCallback = stepCallback;
             }
+
+#if !NETFRAMEWORK
+            // Steps between two boundaries inherit the pair in force, which is how the internal
+            // steps (validation, directory, filtering, the trailing noop) answer.
+            private void BuildNotificationTable() {
+                _stepNotifications = new RequestNotification[_execSteps.Length];
+                _stepIsPostNotification = new bool[_execSteps.Length];
+
+                RequestNotification notification = RequestNotification.BeginRequest;
+                bool isPostNotification = false;
+                int next = 0;
+
+                for (int i = 0; i < _execSteps.Length; i++) {
+                    while (next < _notificationBoundaries.Count && _notificationBoundaries[next].StepIndex <= i) {
+                        notification = _notificationBoundaries[next].Notification;
+                        isPostNotification = _notificationBoundaries[next].IsPostNotification;
+                        next++;
+                    }
+
+                    _stepNotifications[i] = notification;
+                    _stepIsPostNotification[i] = isPostNotification;
+                }
+
+                _notificationBoundaries = null;
+            }
+#endif
 
             internal override void InitRequest() {
                 _currentStepIndex   = -1;

@@ -3659,6 +3659,7 @@ Failure_PMH_Idle=An error occurred during a process host idle check.
 Failure_Create_Listener_Shim=An error occurred while creating a dispatch shim in the target app domain.
 Event_Binding_Disallowed=Event handlers can only be bound to HttpApplication events during IHttpModule initialization.
 Requires_Iis_Integrated_Mode=This operation requires IIS integrated pipeline mode.
+Notification_outside_pipeline='{0}' is available only while a pipeline step is executing; this request is outside the managed pipeline.
 TransferRequest_not_supported=Server.TransferRequest is not supported on this host: there is no IIS pipeline to re-enter. Use Server.Transfer or Server.Execute instead.
 Method_Not_Supported_By_Iis_Integrated_Mode=The {0} method is not supported by IIS integrated pipeline mode.
 Requires_Iis_7=This operation requires IIS version 7 or higher.

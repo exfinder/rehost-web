@@ -7,9 +7,21 @@
         PageProbe.Stages.Add("application-start");
     }
 
+    // The IV6 map, staged only under the flag so the order scenarios keep their own lists.
+    private void Note(string name)
+    {
+        if (Request.QueryString["cn"] == null)
+        {
+            return;
+        }
+
+        Witness.Stage(Request, "cn|" + name + "=" + Context.CurrentNotification + "/" + Context.IsPostNotification);
+    }
+
     void Application_BeginRequest(object sender, EventArgs e)
     {
         Witness.Stage(Request, "BeginRequest");
+        Note("BeginRequest");
         if (Request.QueryString["module-end"] != null)
         {
             Response.Write("module|");
@@ -34,8 +46,34 @@
         }
     }
 
+    void Application_AuthenticateRequest(object sender, EventArgs e)
+    {
+        Note("AuthenticateRequest");
+    }
+
+    void Application_PostAuthenticateRequest(object sender, EventArgs e)
+    {
+        Note("PostAuthenticateRequest");
+    }
+
+    void Application_AuthorizeRequest(object sender, EventArgs e)
+    {
+        Note("AuthorizeRequest");
+    }
+
+    void Application_PostAuthorizeRequest(object sender, EventArgs e)
+    {
+        Note("PostAuthorizeRequest");
+    }
+
+    void Application_ResolveRequestCache(object sender, EventArgs e)
+    {
+        Note("ResolveRequestCache");
+    }
+
     void Application_PostResolveRequestCache(object sender, EventArgs e)
     {
+        Note("PostResolveRequestCache");
         if (Request.QueryString["remap"] == "early")
         {
             Remap();
@@ -45,6 +83,7 @@
     void Application_MapRequestHandler(object sender, EventArgs e)
     {
         Witness.Stage(Request, "MapRequestHandler");
+        Note("MapRequestHandler");
         if (Request.QueryString["remap"] == "late")
         {
             Remap();
@@ -64,9 +103,25 @@
         }
     }
 
+    void Application_PostMapRequestHandler(object sender, EventArgs e)
+    {
+        Note("PostMapRequestHandler");
+    }
+
+    void Application_AcquireRequestState(object sender, EventArgs e)
+    {
+        Note("AcquireRequestState");
+    }
+
+    void Application_PostAcquireRequestState(object sender, EventArgs e)
+    {
+        Note("PostAcquireRequestState");
+    }
+
     void Application_LogRequest(object sender, EventArgs e)
     {
         Witness.Stage(Request, "LogRequest:" + Response.StatusCode);
+        Note("LogRequest");
         if (Request.QueryString["lw"] != null)
         {
             try
@@ -84,31 +139,47 @@
     void Application_PostLogRequest(object sender, EventArgs e)
     {
         Witness.Stage(Request, "PostLogRequest");
+        Note("PostLogRequest");
     }
 
     void Application_PreRequestHandlerExecute(object sender, EventArgs e)
     {
         Witness.Stage(Request, "PreRequestHandlerExecute");
+        Note("PreRequestHandlerExecute");
     }
 
     void Application_PostRequestHandlerExecute(object sender, EventArgs e)
     {
         Witness.Stage(Request, "PostRequestHandlerExecute");
+        Note("PostRequestHandlerExecute");
     }
 
     void Application_ReleaseRequestState(object sender, EventArgs e)
     {
         Witness.Stage(Request, "ReleaseRequestState");
+        Note("ReleaseRequestState");
+    }
+
+    void Application_PostReleaseRequestState(object sender, EventArgs e)
+    {
+        Note("PostReleaseRequestState");
     }
 
     void Application_UpdateRequestCache(object sender, EventArgs e)
     {
         Witness.Stage(Request, "UpdateRequestCache");
+        Note("UpdateRequestCache");
+    }
+
+    void Application_PostUpdateRequestCache(object sender, EventArgs e)
+    {
+        Note("PostUpdateRequestCache");
     }
 
     void Application_EndRequest(object sender, EventArgs e)
     {
         Witness.Stage(Request, "EndRequest");
+        Note("EndRequest");
         Witness.Stage(Request, Server.GetLastError() == null ? "LastError-null" : "LastError-set");
         if (Request.QueryString["stamp"] != null)
         {
@@ -156,6 +227,28 @@
             }
             Witness.Stage(Request, "fae:" + note);
         }
+    }
+
+    void Application_PreSendRequestHeaders(object sender, EventArgs e)
+    {
+        NotePreSend(sender, "PreSendRequestHeaders");
+    }
+
+    void Application_PreSendRequestContent(object sender, EventArgs e)
+    {
+        NotePreSend(sender, "PreSendRequestContent");
+    }
+
+    private void NotePreSend(object sender, string name)
+    {
+        var live = ((HttpApplication)sender).Context;
+        if (live.Request.QueryString["cn"] == null)
+        {
+            return;
+        }
+
+        Witness.Stage(live.Request, name + ":" + (HttpContext.Current == null ? "null" : "set"));
+        Note(name);
     }
 
     void Application_Error(object sender, EventArgs e)

@@ -2021,11 +2021,22 @@ namespace System.Web {
             get {
                 EnsureHasNotTransitionedToWebSocket();
 
+#if !NETFRAMEWORK
+                RequestNotification notification;
+                bool isPostNotification;
+
+                if (ApplicationInstance == null || !ApplicationInstance.TryGetCurrentNotification(out notification, out isPostNotification)) {
+                    throw new InvalidOperationException(SR.GetString(SR.Notification_outside_pipeline, "HttpContext.CurrentNotification"));
+                }
+
+                return notification;
+#else
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
 
                 return _notificationContext.CurrentNotification;
+#endif
             }
             internal set {
                 if (!HttpRuntime.UseIntegratedPipeline) {
@@ -2154,10 +2165,21 @@ namespace System.Web {
             get {
                 EnsureHasNotTransitionedToWebSocket();
 
+#if !NETFRAMEWORK
+                RequestNotification notification;
+                bool isPostNotification;
+
+                if (ApplicationInstance == null || !ApplicationInstance.TryGetCurrentNotification(out notification, out isPostNotification)) {
+                    throw new InvalidOperationException(SR.GetString(SR.Notification_outside_pipeline, "HttpContext.IsPostNotification"));
+                }
+
+                return isPostNotification;
+#else
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
                 return _notificationContext.IsPostNotification;
+#endif
             }
             internal set {
                 if (!HttpRuntime.UseIntegratedPipeline) {
