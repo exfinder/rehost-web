@@ -1,3 +1,4 @@
+using Rehost.WebForms.ScenarioProtocol;
 using Shouldly;
 using Xunit;
 
@@ -20,5 +21,16 @@ public sealed class StepWrappingOverKestrelTests(ModulesLiveScenario scenario)
             .Where(stage => stage.StartsWith(WrappedPrefix, StringComparison.Ordinal))
             .ShouldHaveSingleItem();
         int.Parse(wrapped[WrappedPrefix.Length..]).ShouldBeGreaterThan(1);
+    }
+
+    // IV18: a module's Init on a request instance reads BeginRequest; the application instances
+    // are built by the host's first requests, so the record exists before any scenario runs.
+    [Fact]
+    public async Task Module_Init_On_A_Request_Instance_Reads_BeginRequest()
+    {
+        var witness = await scenario.Client.GetAsync(ProbePaths.Witness);
+
+        witness.Text.Split('\n').ShouldContain(
+            WitnessProtocol.InitNotificationPrefix + "BeginRequest/False");
     }
 }

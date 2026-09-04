@@ -42,6 +42,15 @@ public sealed class CurrentNotificationOverKestrelTests(PageLiveScenario scenari
         ]);
     }
 
+    // IV18: RequestCompleted reports EndRequest on an integrated pool.
+    [Fact]
+    public async Task Request_Completed_Reports_EndRequest()
+    {
+        var (_, stages) = await scenario.TracedGetAsync(this, "/Default.aspx?cn=1");
+
+        stages.ShouldContain("cn-completed=EndRequest/False");
+    }
+
     // IV12: integrated supplies HttpContext.Current inside both pre-send events; classic, which
     // raises them from the flush, leaves it null.
     [Fact]

@@ -3,8 +3,8 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// IV10: integrated refuses a += raised after module initialization, where classic accepted the
-// binding and never ran the handler.
+// IV10, IV18: integrated refuses a += or -= raised after module initialization, where classic
+// accepted the binding and never ran the handler.
 public sealed class LateEventBindingOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
@@ -16,6 +16,9 @@ public sealed class LateEventBindingOverKestrelTests(PageLiveScenario scenario)
         response.StatusCode.ShouldBe(200);
         stages.ShouldContain(
             "bind:InvalidOperationException:Event handlers can only be bound to HttpApplication"
+            + " events during IHttpModule initialization.");
+        stages.ShouldContain(
+            "unbind:InvalidOperationException:Event handlers can only be bound to HttpApplication"
             + " events during IHttpModule initialization.");
         stages.ShouldContain(
             "wrap-late:InvalidOperationException:Method OnExecuteRequestStep can only be called"

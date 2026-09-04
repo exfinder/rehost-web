@@ -22,6 +22,11 @@
     {
         Witness.Stage(Request, "BeginRequest");
         Note("BeginRequest");
+        if (Request.QueryString["cn"] != null)
+        {
+            Context.AddOnRequestCompleted(completed => Witness.Stage(completed.Request,
+                "cn-completed=" + completed.CurrentNotification + "/" + completed.IsPostNotification));
+        }
         if (Request.QueryString["module-end"] != null)
         {
             Response.Write("module|");
@@ -37,6 +42,15 @@
             catch (Exception bindError)
             {
                 Witness.Stage(Request, "bind:" + bindError.GetType().Name + ":" + bindError.Message);
+            }
+            try
+            {
+                ((HttpApplication)sender).EndRequest -= Application_EndRequest;
+                Witness.Stage(Request, "unbind:ok");
+            }
+            catch (Exception unbindError)
+            {
+                Witness.Stage(Request, "unbind:" + unbindError.GetType().Name + ":" + unbindError.Message);
             }
             try
             {

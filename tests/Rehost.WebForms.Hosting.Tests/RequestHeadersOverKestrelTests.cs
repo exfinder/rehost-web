@@ -46,6 +46,24 @@ public sealed class RequestHeadersOverKestrelTests(PageLiveScenario scenario)
             """.ReplaceLineEndings("\n"));
     }
 
+    // IV19: while the server-variable collection exists but is not yet populated, a Set is kept
+    // for population and a Remove is lost to it.
+    [Fact]
+    public async Task A_Created_But_Unpopulated_Server_Variable_Collection_Keeps_Set_And_Loses_Remove()
+    {
+        var response = await Get("?mode=lazy-existing");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe(
+            """
+            method=GET
+            clear=NotSupportedException
+            sv-probe=p
+            sv-referer=https://referer.example/from
+
+            """.ReplaceLineEndings("\n"));
+    }
+
     [Fact]
     public async Task Mirrors_Read_After_The_Mutation_Report_What_They_Cached()
     {

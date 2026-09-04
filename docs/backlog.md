@@ -58,7 +58,7 @@ Carried from earlier milestones as unresolved detail:
   4. Landed: the shim batch — `CurrentNotification`/`IsPostNotification`
      (IV6), writable `Request.Headers` (IV7-IV9), `OnExecuteRequestStep`,
      `AddOnSendingHeaders` (IV11), the `PreSendRequest*` context restore
-     (IV12), the oversize-body fence (IV14) and the
+     (IV12), the oversize-body fence (IV14), follow-up readings IV18-IV20 and the
      `ThrowIfEventBindingDisallowed` fail-fast (IV10).
   5. Remainder, build half: the audit's take-branch/shim leftovers; take the
      missing winbox readings first where the audit calls for one. Includes the

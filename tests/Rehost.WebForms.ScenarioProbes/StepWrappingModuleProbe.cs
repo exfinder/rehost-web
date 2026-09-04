@@ -1,4 +1,5 @@
 using System.Web;
+using Rehost.WebForms.ScenarioProtocol;
 
 namespace Rehost.WebForms.ScenarioProbes;
 
@@ -9,8 +10,21 @@ public sealed class StepWrappingModuleProbe : IHttpModule
 {
     private const string CountKey = "steps-wrapped";
 
+    private static string NotificationAtInit(HttpApplication application)
+    {
+        try
+        {
+            return application.Context.CurrentNotification + "/" + application.Context.IsPostNotification;
+        }
+        catch (Exception refusal)
+        {
+            return refusal.GetType().Name;
+        }
+    }
+
     public void Init(HttpApplication application)
     {
+        Witness.Record(WitnessProtocol.InitNotificationPrefix + NotificationAtInit(application));
         application.OnExecuteRequestStep((context, next) =>
         {
             context.Items[CountKey] = (context.Items[CountKey] as int? ?? 0) + 1;

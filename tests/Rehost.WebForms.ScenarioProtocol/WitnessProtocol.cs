@@ -6,6 +6,7 @@ public static class WitnessProtocol
 {
     public const string TokenKey = "wt";
     public const string StagePrefix = "stage:";
+    public const string InitNotificationPrefix = "init-notification:";
     public const string HandlerEntered = "handler-entered:";
     public const string BodyAbort = "body-abort:";
     public const string SessionEntered = "session-entered:";

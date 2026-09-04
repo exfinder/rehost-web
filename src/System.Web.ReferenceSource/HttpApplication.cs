@@ -145,7 +145,13 @@ namespace System.Web {
             }
 
             ApplicationStepManager classic = _stepManager as ApplicationStepManager;
-            return classic != null && classic.TryGetCurrentNotification(out notification, out isPostNotification);
+            if (classic != null) {
+                return classic.TryGetCurrentNotification(out notification, out isPostNotification);
+            }
+
+            // IV18: module Init on a request instance reads BeginRequest; the special instance,
+            // which has no module collection, has no value (Framework throws there).
+            return _moduleCollection != null && Context != null;
         }
 
         // The pre-send events run from the response flush, which can be past
@@ -3992,8 +3998,14 @@ namespace System.Web {
                 notification = RequestNotification.BeginRequest;
                 isPostNotification = false;
 
-                if (_stepNotifications == null || _currentStepIndex < 0 || _currentStepIndex >= _stepNotifications.Length) {
+                if (_stepNotifications == null || _currentStepIndex < 0) {
                     return false;
+                }
+
+                // IV18: RequestCompleted runs past the last step and reads EndRequest.
+                if (_currentStepIndex >= _stepNotifications.Length) {
+                    notification = RequestNotification.EndRequest;
+                    return true;
                 }
 
                 notification = _stepNotifications[_currentStepIndex];

@@ -7,7 +7,8 @@ namespace Rehost.WebForms.ScenarioProbes;
 // mirror collection already existed (server variables) or the derived value was not yet cached
 // (Request.Url). Each mode applies the same mutation and reports a different set of mirrors.
 // The mirror modes read Referer, not User-Agent: GetSimpleServerVar answers HTTP_USER_AGENT from
-// the typed accessor without ever populating the collection.
+// the typed accessor without ever populating the collection; REQUEST_METHOD is another such
+// shortcut, so reading it creates the collection without populating it (IV19).
 public sealed class RequestHeadersProbe : IHttpHandler
 {
     public bool IsReusable => false;
@@ -22,6 +23,13 @@ public sealed class RequestHeadersProbe : IHttpHandler
         {
             case "mirror":
                 Line(dump, "before-referer", request.ServerVariables["HTTP_REFERER"]);
+                Mutate(request, dump);
+                Line(dump, "sv-probe", request.ServerVariables["HTTP_X_PROBE"]);
+                Line(dump, "sv-referer", request.ServerVariables["HTTP_REFERER"]);
+                break;
+
+            case "lazy-existing":
+                Line(dump, "method", request.ServerVariables["REQUEST_METHOD"]);
                 Mutate(request, dump);
                 Line(dump, "sv-probe", request.ServerVariables["HTTP_X_PROBE"]);
                 Line(dump, "sv-referer", request.ServerVariables["HTTP_REFERER"]);
