@@ -3252,9 +3252,11 @@ namespace System.Web {
         public void InsertEntityBody(byte[] buffer, int offset, int count) {
             EnsureHasNotTransitionedToWebSocket();
 
+#if NETFRAMEWORK
             IIS7WorkerRequest wr = _wr as IIS7WorkerRequest;
             if (wr == null)
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
+#endif
             if (buffer == null)
                 throw new ArgumentNullException("buffer");
             if (offset < 0)
@@ -3264,7 +3266,9 @@ namespace System.Web {
             if (buffer.Length - offset < count)
                 throw new ArgumentException(SR.GetString(SR.InvalidOffsetOrCount, "offset", "count"));
 
+#if NETFRAMEWORK
             wr.InsertEntityBody(buffer, offset, count);
+#endif
             NeedToInsertEntityBody = false;
         }
 
@@ -3274,13 +3278,17 @@ namespace System.Web {
         // previously read.  For example, this is useful for scenarios where a native handler may need to access the
         // request entity after it has been read by ASP.NET.
         public void InsertEntityBody() {
+#if NETFRAMEWORK
             IIS7WorkerRequest wr = _wr as IIS7WorkerRequest;
             if (wr == null)
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
+#endif
             byte[] buffer = EntityBody;
             if (buffer == null)
                 return;
+#if NETFRAMEWORK
             wr.InsertEntityBody(buffer, 0, buffer.Length);
+#endif
             NeedToInsertEntityBody = false;
         }
 
@@ -3359,9 +3367,15 @@ namespace System.Web {
             if (wr != null) {
                 wr.AbortConnection();
             }
+#if !NETFRAMEWORK
+            else if (_wr == null || !_wr.TryAbortConnection()) {
+                throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
+            }
+#else
             else {
                 throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
             }
+#endif
         }
 
         // helper that throws an exception if we have transitioned the current request to a WebSocket request

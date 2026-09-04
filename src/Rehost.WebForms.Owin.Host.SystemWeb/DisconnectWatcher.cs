@@ -19,9 +19,6 @@ namespace Microsoft.Owin.Host.SystemWeb
 
         private readonly HttpResponseBase _httpResponse;
 
-        // The pair above says the token is offered; only reading it says it is implemented.
-        private static bool _clientDisconnectedTokenRefused;
-
         private CancellationTokenSource _callCancelledSource;
         private IDisposable _connectionCheckTimer;
 
@@ -32,16 +29,9 @@ namespace Microsoft.Owin.Host.SystemWeb
 
         internal CancellationToken BindDisconnectNotification()
         {
-            if (IsClientDisconnectedTokenAvailable && IsSystemWebVersion451OrGreater && !_clientDisconnectedTokenRefused)
+            if (IsClientDisconnectedTokenAvailable && IsSystemWebVersion451OrGreater)
             {
-                try
-                {
-                    return _httpResponse.ClientDisconnectedToken;
-                }
-                catch (PlatformNotSupportedException)
-                {
-                    _clientDisconnectedTokenRefused = true;
-                }
+                return _httpResponse.ClientDisconnectedToken;
             }
 
             _callCancelledSource = new CancellationTokenSource();

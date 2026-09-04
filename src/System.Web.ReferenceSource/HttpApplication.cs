@@ -1647,7 +1647,11 @@ namespace System.Web {
                                             EventArgs eventArgs,
                                             HttpSessionState session) {
             _context = context;
+#if !NETFRAMEWORK
+            if (_context != null) {
+#else
             if (HttpRuntime.UseIntegratedPipeline && _context != null) {
+#endif
                 _context.HideRequestResponse = true;
             }
             _hideRequestResponse = true;
@@ -1689,7 +1693,11 @@ namespace System.Web {
                         // restore culture
                         RestoreAppLevelCulture();
 
+#if !NETFRAMEWORK
+                        if (_context != null) {
+#else
                         if (HttpRuntime.UseIntegratedPipeline && _context != null) {
+#endif
                             _context.HideRequestResponse = false;
                         }
                         _hideRequestResponse = false;
@@ -1770,10 +1778,22 @@ namespace System.Web {
                             }
                         }
                         else {
+#if !NETFRAMEWORK
+                            try {
+                                context.HideRequestResponse = true;
+                                _hideRequestResponse = true;
+                                InitModules();
+                            }
+                            finally {
+                                context.HideRequestResponse = false;
+                                _hideRequestResponse = false;
+                            }
+#else
                             InitModules();
 
                             // this is used exclusively for integrated mode
                             Debug.Assert(null == _moduleContainers, "null == _moduleContainers");
+#endif
                         }
 
                         // Hookup event handlers via reflection
@@ -1782,7 +1802,11 @@ namespace System.Web {
 
                         // Initialization of the derived class
                         _context = context;
+#if !NETFRAMEWORK
+                        if (_context != null) {
+#else
                         if (HttpRuntime.UseIntegratedPipeline && _context != null) {
+#endif
                             _context.HideRequestResponse = true;
                         }
                         _hideRequestResponse = true;
@@ -1795,7 +1819,11 @@ namespace System.Web {
                         }
                     }
 
+#if !NETFRAMEWORK
+                    if (_context != null) {
+#else
                     if (HttpRuntime.UseIntegratedPipeline && _context != null) {
+#endif
                         _context.HideRequestResponse = false;
                     }
                     _hideRequestResponse = false;
@@ -4291,6 +4319,12 @@ namespace System.Web {
                                     if (_currentStepIndex < _endRequestStepIndex && (context.Error != null || _requestCompleted)) {
                                         // end request
                                         context.Response.FilterOutput();
+#if !NETFRAMEWORK
+                                        if (context.Error != null) {
+                                            RequestNotificationStatus reportStatus = RequestNotificationStatus.Continue;
+                                            context.ReportRuntimeErrorIfExists(ref reportStatus);
+                                        }
+#endif
                                         _currentStepIndex = _endRequestStepIndex;
                                     }
                                     else {

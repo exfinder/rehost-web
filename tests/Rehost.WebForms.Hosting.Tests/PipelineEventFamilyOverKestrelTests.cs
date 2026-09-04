@@ -72,8 +72,8 @@ public sealed class PipelineEventFamilyOverKestrelTests(PageLiveScenario scenari
         LogIndex(stages).ShouldBeLessThan(Index(stages, "EndRequest"));
     }
 
-    // IV17 read 500 at LogRequest on integrated. The port is still 200 there: the error page and
-    // its status land after EndRequest here. Error-page timing is not this family's to move.
+    // IV17/IV21: the Error event still sees 200, and LogRequest onward sees the 500 the rendered
+    // error page carries.
     [Fact]
     public async Task An_Unhandled_Page_Error_Logs_Between_The_Error_Event_And_EndRequest()
     {
@@ -83,7 +83,7 @@ public sealed class PipelineEventFamilyOverKestrelTests(PageLiveScenario scenari
         Index(stages, s => s.StartsWith("ApplicationError:", StringComparison.Ordinal))
             .ShouldBeLessThan(LogIndex(stages));
         LogIndex(stages).ShouldBeLessThan(Index(stages, "EndRequest"));
-        stages.ShouldContain(LogRequestPrefix + "200");
+        stages.ShouldContain(LogRequestPrefix + "500");
     }
 
     [Fact]

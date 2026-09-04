@@ -205,7 +205,19 @@ namespace System.Web {
                 return var;
             }
             else {
+#if !NETFRAMEWORK
+                string var = GetServerVar(BaseGet(name));
+
+                // HTTP_* stays out of the fallback: the header collection is the store for those,
+                // so a removed header must not come back from the worker request (IV19).
+                if (String.IsNullOrEmpty(var) && !StringUtil.StringStartsWithIgnoreCase(name, "HTTP_")) {
+                    var = _request.FetchServerVariable(name);
+                }
+
+                return var;
+#else
                 return GetServerVar(BaseGet(name));
+#endif
             }
         }
 

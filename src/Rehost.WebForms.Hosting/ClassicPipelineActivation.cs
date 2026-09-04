@@ -59,6 +59,7 @@ internal sealed class ClassicPipelineActivation
             return;
         }
 
+        HostingEnvironment.RaiseStopListening();
         manager.StopObject(_options.ApplicationId, typeof(ClassicPipelineDispatcher));
         manager.ShutdownApplication(_options.ApplicationId);
         manager.Close();

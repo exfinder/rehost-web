@@ -1648,16 +1648,20 @@ namespace System.Web {
         // directly
         public int SubStatusCode {
             get {
+#if NETFRAMEWORK
                 if ( !(_wr is IIS7WorkerRequest) ) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
 
                 return _subStatusCode;
             }
             set {
+#if NETFRAMEWORK
                 if ( !(_wr is IIS7WorkerRequest) ) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
+#endif
 
                 if (_headersWritten) {
                     throw new HttpException(SR.GetString(SR.Cannot_set_status_after_headers_sent));
@@ -2012,6 +2016,11 @@ namespace System.Web {
                 if (wr != null && wr.TryGetClientDisconnectedCancellationToken(out cancellationToken)) {
                     return cancellationToken;
                 }
+#if !NETFRAMEWORK
+                else if (_wr != null && _wr.TryGetClientDisconnectedToken(out cancellationToken)) {
+                    return cancellationToken;
+                }
+#endif
                 else {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_75_Integrated));
                 }

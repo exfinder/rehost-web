@@ -1850,6 +1850,16 @@ namespace System.Web {
                         // be run while impersonating the token given by IIS
                         using (new ApplicationImpersonationContext()) {
                             try {
+#if !NETFRAMEWORK
+                                if (!context.IsRuntimeErrorReported) {
+                                    try {
+                                        response.ReportRuntimeError(e, true /*canThrow*/, false);
+                                    }
+                                    catch (Exception eReport) {
+                                        response.ReportRuntimeError(eReport, false /*canThrow*/, false);
+                                    }
+                                }
+#else
                                 try {
                                     // try to report error in a way that could possibly throw (a config exception)
                                     response.ReportRuntimeError(e, true /*canThrow*/, false);
@@ -1858,6 +1868,7 @@ namespace System.Web {
                                     // report the config error in a way that would not throw
                                     response.ReportRuntimeError(eReport, false /*canThrow*/, false);
                                 }
+#endif
 
                                 response.FinalFlushAtTheEndOfRequestProcessing();
                             }

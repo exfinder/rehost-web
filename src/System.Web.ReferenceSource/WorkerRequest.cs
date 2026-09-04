@@ -764,6 +764,15 @@ namespace System.Web {
         internal virtual void AcceptWebSocketUpgrade(HttpContext context, Func<System.Web.WebSockets.AspNetWebSocketContext, System.Threading.Tasks.Task> userFunc, String subProtocol) {
             throw new NotSupportedException();
         }
+
+        // Client-disconnect notification and connection reset, the two other capabilities
+        // HttpResponse and HttpRequest otherwise reach only by casting to IIS7WorkerRequest.
+        internal virtual bool TryGetClientDisconnectedToken(out System.Threading.CancellationToken token) {
+            token = default(System.Threading.CancellationToken);
+            return false;
+        }
+
+        internal virtual bool TryAbortConnection() { return false; }
 #endif
 
         // Sends the currently buffered response to the client asynchronously.  To support this, 

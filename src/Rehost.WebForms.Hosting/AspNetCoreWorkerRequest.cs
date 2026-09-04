@@ -73,6 +73,22 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         _webSocketAccept = (context, userFunc, subProtocol);
     }
 
+    // Kestrel signals the token on FIN or RST; IIS waited for the server's next write (IV24).
+    internal override bool TryGetClientDisconnectedToken(out CancellationToken token)
+    {
+        token = _context.RequestAborted;
+        return true;
+    }
+
+    // IV25: the reset does not end the request — managed code keeps running and only a flush
+    // surfaces the loss.
+    internal override bool TryAbortConnection()
+    {
+        _clientGone = true;
+        _context.Abort();
+        return true;
+    }
+
     internal Task Completion => _completion.Task;
 
     public override string GetUriPath()
@@ -237,6 +253,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     // variables, unset ones ""), so none is null. Site topology takes IIS's shape for a single
     // site; the certificate and TLS-strength set is "" as on an IIS site without client
     // certificates (the negotiated strengths have no non-obsolete source on Kestrel).
+    // WEBSOCKET_VERSION is the exception and must stay out of that collection: integrated answers
+    // it here while AllKeys omits it and Count stays 45 (IV23).
     public override string? GetServerVariable(string name)
     {
         return name switch
@@ -248,6 +266,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
             "SERVER_SOFTWARE" => "Kestrel",
             "HTTPS" => IsSecure() ? "on" : "off",
             "REMOTE_PORT" => GetRemotePort().ToString(CultureInfo.InvariantCulture),
+            "WEBSOCKET_VERSION" => "13",
             "AUTH_PASSWORD" or "LOGON_USER"
                 or "CERT_COOKIE" or "CERT_FLAGS" or "CERT_ISSUER" or "CERT_KEYSIZE"
                 or "CERT_SECRETKEYSIZE" or "CERT_SERIALNUMBER" or "CERT_SERVER_ISSUER"

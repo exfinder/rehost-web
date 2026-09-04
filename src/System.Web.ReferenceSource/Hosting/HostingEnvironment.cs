@@ -1577,6 +1577,15 @@ namespace System.Web.Hosting {
             }, null, Timeout.Infinite, executeOnlyOnce: true);
         }
 
+#if !NETFRAMEWORK
+        // IIS raised this from CGlobalModule::OnGlobalStopListening about a second ahead of
+        // IRegisteredObject.Stop, and only on an integrated pool (IV30). The host's stopping
+        // notification is the port's equivalent signal.
+        internal static void RaiseStopListening() {
+            OnGlobalStopListening();
+        }
+#endif
+
         private static void OnGlobalStopListening() {
             _stopListeningWasCalled = true;
 
