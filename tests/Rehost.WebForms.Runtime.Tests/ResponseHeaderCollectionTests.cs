@@ -174,14 +174,24 @@ public sealed class ResponseHeaderCollectionTests
         Generated(response).ShouldBe("Cache-Control: private|Content-Type: text/html");
     }
 
+    // IV7: the request collection is writable too, Add appending comma-joined, and only Clear
+    // stays refused.
     [Fact]
-    public void Request_Headers_Still_Refuse_Mutation()
+    public void Request_Headers_Take_Adds_Sets_And_Removes()
     {
-        var context = new HttpContext(new RecordingWorkerRequest());
+        var headers = new HttpContext(new RecordingWorkerRequest()).Request.Headers;
 
-        Should.Throw<PlatformNotSupportedException>(() => context.Request.Headers.Add("X-Custom", "v"));
-        Should.Throw<PlatformNotSupportedException>(() => context.Request.Headers.Set("X-Custom", "v"));
-        Should.Throw<PlatformNotSupportedException>(() => context.Request.Headers.Remove("X-Custom"));
+        headers.Set("X-Custom", "v1");
+        headers.Set("X-Custom", "v2");
+        headers.Add("X-Multi", "a");
+        headers.Add("X-Multi", "b");
+        headers.Add("X-Gone", "g");
+        headers.Remove("X-Gone");
+
+        headers["X-Custom"].ShouldBe("v2");
+        headers["X-Multi"].ShouldBe("a,b");
+        headers["X-Gone"].ShouldBeNull();
+        Should.Throw<NotSupportedException>(() => headers.Clear());
     }
 
     private static HttpResponse NewResponse(out RecordingWorkerRequest worker)

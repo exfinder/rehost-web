@@ -93,9 +93,11 @@ namespace System.Web {
                         _unsyncedEntries.Clear();
                     }
 
+#if NETFRAMEWORK
                     if (_iis7workerRequest == null) {
                         MakeReadOnly();
                     }
+#endif
                 }
                 _populated = true;
             }

@@ -73,10 +73,15 @@ namespace System.Web {
 #if !NETFRAMEWORK
                 if (_request == null) {
                     SetManagedResponseHeader(name, value, false /*replace*/);
-                    return;
                 }
-#endif
+                else {
+                    SetManagedRequestHeader(name, value, false /*replace*/);
+                }
+
+                return;
+#else
                 throw new PlatformNotSupportedException();
+#endif
             }
             // append to existing value
             SetHeader(name, value, false /*replace*/);
@@ -99,10 +104,15 @@ namespace System.Web {
 #if !NETFRAMEWORK
                 if (_request == null) {
                     SetManagedResponseHeader(name, value, true /*replace*/);
-                    return;
                 }
-#endif
+                else {
+                    SetManagedRequestHeader(name, value, true /*replace*/);
+                }
+
+                return;
+#else
                 throw new PlatformNotSupportedException();
+#endif
             }
             // set new value
             SetHeader(name, value, true /*replace*/);
@@ -135,6 +145,39 @@ namespace System.Web {
             else {
                 base.Add(name, value);
             }
+        }
+
+        // Request headers with no native block to write through, the mirror of the response arm
+        // above (IV7).
+        private void SetManagedRequestHeader(String name, String value, bool replace) {
+            if (name == null) {
+                throw new ArgumentNullException("name");
+            }
+
+            if (value == null) {
+                throw new ArgumentNullException("value");
+            }
+
+            if (replace) {
+                base.Set(name, value);
+            }
+            else {
+                base.Add(name, value);
+            }
+
+            MirrorRequestHeader(name, replace ? value : base.Get(name));
+        }
+
+        // IV8: the server-variable mirror follows only where it already exists, so reading it
+        // through HttpRequest.ServerVariables here would materialize it and change what a later
+        // read reports.
+        private void MirrorRequestHeader(String name, String value) {
+            HttpServerVarsCollection serverVars = _request.ExistingServerVariables;
+            if (serverVars != null) {
+                serverVars.SynchronizeServerVariable("HTTP_" + name.ToUpper(CultureInfo.InvariantCulture).Replace('-', '_'), value, ensurePopulated: false);
+            }
+
+            _request.InvalidateParams();
         }
 
         // The collection reports the block that left once headers are written (reading H15).
@@ -226,20 +269,23 @@ namespace System.Web {
         public override void Remove(String name) {
             if (_iis7WorkerRequest == null) {
 #if !NETFRAMEWORK
-                if (_request == null) {
-                    if (name == null) {
-                        throw new ArgumentNullException("name");
-                    }
-
-                    // Inert once the block has left, where Add throws (reading H15).
-                    if (!_response.HeadersWritten) {
-                        base.Remove(name);
-                    }
-
-                    return;
+                if (name == null) {
+                    throw new ArgumentNullException("name");
                 }
-#endif
+
+                if (_request != null) {
+                    base.Remove(name);
+                    MirrorRequestHeader(name, null);
+                }
+                // Inert once the block has left, where Add throws (reading H15).
+                else if (!_response.HeadersWritten) {
+                    base.Remove(name);
+                }
+
+                return;
+#else
                 throw new PlatformNotSupportedException();
+#endif
             }
 
             if (name == null) {

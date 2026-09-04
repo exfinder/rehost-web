@@ -1957,8 +1957,26 @@ namespace System.Web {
             if (!String.IsNullOrEmpty(q))
                 q = "?" + HttpEncoder.CollapsePercentUFromStringInternal(q, QueryStringEncoding);
 
+#if !NETFRAMEWORK
+            // IV8: the Url follows a Host rewritten through Request.Headers, which IIS delivered
+            // by way of the server-variable mirror behind GetServerName.
+            if (_headers != null) {
+                string rewrittenHost = _headers["Host"];
+                if (!String.IsNullOrEmpty(rewrittenHost)) {
+                    try {
+                        url = UriUtil.BuildUri(_wr.GetProtocol(), Uri.UnescapeDataString(rewrittenHost), null /* port */, pathAccessor(), q);
+                    }
+                    catch (UriFormatException) { /* Do nothing; the fallback below kicks in. */ }
+                }
+            }
+#endif
+
             // Get server name and port from Host header?  Or the old way?
+#if !NETFRAMEWORK
+            if (url == null && AppSettings.UseHostHeaderForRequestUrl) {
+#else
             if (AppSettings.UseHostHeaderForRequestUrl) {
+#endif
                 string serverAndPort = _wr.GetKnownRequestHeader(HttpWorkerRequest.HeaderHost);
                 try {
                     if (!String.IsNullOrEmpty(serverAndPort)) {
@@ -2271,13 +2289,23 @@ namespace System.Web {
                 if (_wr != null)
                     FillInHeadersCollection();
 
+#if NETFRAMEWORK
                 if (!(_wr is IIS7WorkerRequest)) {
                     _headers.MakeReadOnly();
                 }
+#endif
             }
 
             return _headers;
         }
+
+#if !NETFRAMEWORK
+        // The server-variable mirror only where it already exists: the ServerVariables getter
+        // would materialize it, and IV8 turns on whether it existed when the header changed.
+        internal HttpServerVarsCollection ExistingServerVariables {
+            get { return _serverVariables; }
+        }
+#endif
 
         // Allows access to request collections that have not gone through request validation
         public UnvalidatedRequestValues Unvalidated {
@@ -2315,9 +2343,11 @@ namespace System.Web {
             if (_serverVariables == null) {
                 _serverVariables = new HttpServerVarsCollection(_wr, this);
 
+#if NETFRAMEWORK
                 if ( !(_wr is IIS7WorkerRequest) ) {
                     _serverVariables.MakeReadOnly();
                 }
+#endif
             }
             return _serverVariables;
         }

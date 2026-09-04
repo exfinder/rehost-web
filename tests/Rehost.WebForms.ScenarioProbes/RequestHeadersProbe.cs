@@ -6,6 +6,8 @@ namespace Rehost.WebForms.ScenarioProbes;
 // IV7-IV9: the request header collection is writable, and its mirrors follow only where the
 // mirror collection already existed (server variables) or the derived value was not yet cached
 // (Request.Url). Each mode applies the same mutation and reports a different set of mirrors.
+// The mirror modes read Referer, not User-Agent: GetSimpleServerVar answers HTTP_USER_AGENT from
+// the typed accessor without ever populating the collection.
 public sealed class RequestHeadersProbe : IHttpHandler
 {
     public bool IsReusable => false;
@@ -19,16 +21,16 @@ public sealed class RequestHeadersProbe : IHttpHandler
         switch (request.QueryString["mode"])
         {
             case "mirror":
-                Line(dump, "before-agent", request.ServerVariables["HTTP_USER_AGENT"]);
+                Line(dump, "before-referer", request.ServerVariables["HTTP_REFERER"]);
                 Mutate(request, dump);
                 Line(dump, "sv-probe", request.ServerVariables["HTTP_X_PROBE"]);
-                Line(dump, "sv-agent", request.ServerVariables["HTTP_USER_AGENT"]);
+                Line(dump, "sv-referer", request.ServerVariables["HTTP_REFERER"]);
                 break;
 
             case "lazy":
                 Line(dump, "before-host", request.Url.Host);
                 Mutate(request, dump);
-                Line(dump, "sv-agent", request.ServerVariables["HTTP_USER_AGENT"]);
+                Line(dump, "sv-referer", request.ServerVariables["HTTP_REFERER"]);
                 Line(dump, "url-host", request.Url.Host);
                 break;
 
@@ -53,6 +55,7 @@ public sealed class RequestHeadersProbe : IHttpHandler
         headers.Add("X-Multi", "a");
         headers.Add("X-Multi", "b");
         headers.Remove("User-Agent");
+        headers.Remove("Referer");
 
         try
         {
