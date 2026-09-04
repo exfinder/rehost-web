@@ -1839,7 +1839,13 @@ namespace System.Web {
 
                     if (_appOfflineMessage != null) {
                         try {
+#if !NETFRAMEWORK
+                            if (!context.IsRuntimeErrorReported) {
+                                ReportAppOfflineErrorMessage(response, _appOfflineMessage);
+                            }
+#else
                             ReportAppOfflineErrorMessage(response, _appOfflineMessage);
+#endif
                             response.FinalFlushAtTheEndOfRequestProcessing();
                         }
                         catch {

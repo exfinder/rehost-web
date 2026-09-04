@@ -27,6 +27,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     private (string FilePath, string PathInfo)? _split;
     private bool _statusSent;
     private bool _clientGone;
+    private CancellationToken? _clientDisconnectedToken;
     private (System.Web.HttpContext Context, Func<AspNetWebSocketContext, Task> UserFunc, string? SubProtocol)? _webSocketAccept;
 
     internal AspNetCoreWorkerRequest(
@@ -74,9 +75,12 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     }
 
     // Kestrel signals the token on FIN or RST; IIS waited for the server's next write (IV24).
+    // Captured once: IV24 has the token read after the request has ended, and ASP.NET Core pools
+    // HttpContext, so a fresh read then would answer with a later request's token.
     internal override bool TryGetClientDisconnectedToken(out CancellationToken token)
     {
-        token = _context.RequestAborted;
+        _clientDisconnectedToken ??= _context.RequestAborted;
+        token = _clientDisconnectedToken.Value;
         return true;
     }
 

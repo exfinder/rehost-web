@@ -42,18 +42,24 @@ public sealed class IntegratedMembersProbe : IHttpHandler
         }
     }
 
-    // The value first, then the enumerated shape: reading the name must not add it.
+    // The value first, then the enumerated shape: reading the name must not add it. The Count read
+    // in the middle populates the collection, so the auth reads either side of it are the two
+    // states an empty-valued variable is answered from.
     private static void Variables(HttpContext context, HttpResponse response)
     {
         var variables = context.Request.ServerVariables;
         var dump = new StringBuilder();
 
         Line(dump, "websocket-version", variables["WEBSOCKET_VERSION"]);
+        Line(dump, "auth-type-before", variables["AUTH_TYPE"]);
         Line(dump, "count", variables.Count.ToString(CultureInfo.InvariantCulture));
         Line(dump, "in-allkeys", Array.IndexOf(variables.AllKeys, "WEBSOCKET_VERSION") >= 0
             ? "true"
             : "false");
         Line(dump, "unknown", variables["REHOST_NOT_A_VARIABLE"]);
+        Line(dump, "auth-type-after", variables["AUTH_TYPE"]);
+        Line(dump, "remote-user-after", variables["REMOTE_USER"]);
+        Line(dump, "logon-user-after", variables["LOGON_USER"]);
 
         response.Write(dump.ToString());
     }

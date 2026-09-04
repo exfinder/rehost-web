@@ -22,7 +22,7 @@ public sealed class TimeoutSweepOverKestrelTests(SweepLiveScenario scenario)
         stages.ShouldContain("token-canceled:True");
         stages.Count(s => s.StartsWith("ApplicationError:", StringComparison.Ordinal))
             .ShouldBe(1);
-        stages.ShouldContain("ApplicationError:HttpException:Request timed out.");
+        stages.ShouldContain("ApplicationError:HttpException:Request timed out.;status=200");
         stages.ShouldContain("EndRequest");
         stages.ShouldContain("LastError-set");
         stages.ShouldNotContain("PostRequestHandlerExecute");

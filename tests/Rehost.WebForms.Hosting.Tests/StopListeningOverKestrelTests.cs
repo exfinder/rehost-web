@@ -27,8 +27,34 @@ public sealed class StopListeningOverKestrelTests
         stopping.StatusCode.ShouldBe(200);
         scenario.WaitForExit(ExitWait).ShouldBeTrue();
         var recorded = TraceChannel.ReadLines(path);
-        recorded.ShouldContain(ShutdownProtocol.StopListeningEvent);
-        recorded.ShouldContain(ShutdownProtocol.StopListeningObject);
+        var raised = recorded.IndexOf(ShutdownProtocol.StopListeningEvent);
+        var listener = recorded.IndexOf(ShutdownProtocol.StopListeningObject);
+        var stopped = recorded.IndexOf(ShutdownProtocol.RegisteredStop + "False");
+
+        raised.ShouldBeGreaterThanOrEqualTo(0);
+        listener.ShouldBeGreaterThanOrEqualTo(0);
+        stopped.ShouldBeGreaterThan(raised);
+        stopped.ShouldBeGreaterThan(listener);
+    }
+
+    // The raise is Framework's own unguarded multicast, so the throwing subscriber takes the rest
+    // of the chain with it; the teardown after the raise is what must survive.
+    [Fact]
+    public async Task A_Throwing_Stop_Listening_Subscriber_Leaves_The_Teardown_Intact()
+    {
+        using var log = new TempDirectory("rehost-stoplistening-");
+        var path = log.Path("shutdown.log");
+        using var scenario = Start(path, throwingSubscriber: true);
+
+        var warm = await scenario.Client.GetAsync(ProbePaths.ScenarioDefault);
+        var stopping = await scenario.Client.GetAsync(HostControlProtocol.StopPath);
+
+        warm.StatusCode.ShouldBe(200);
+        stopping.StatusCode.ShouldBe(200);
+        scenario.WaitForExit(ExitWait).ShouldBeTrue();
+        var recorded = TraceChannel.ReadLines(path);
+        recorded.ShouldNotContain(ShutdownProtocol.StopListeningEvent);
+        recorded.ShouldContain(ShutdownProtocol.RegisteredStop + "False");
     }
 
     // The recycle line proves the same log channel was live in this process, so the two negatives
@@ -50,12 +76,19 @@ public sealed class StopListeningOverKestrelTests
         recorded.ShouldNotContain(ShutdownProtocol.StopListeningObject);
     }
 
-    private static LiveScenario Start(string logPath) =>
-        LiveScenario.StartIsolated(
-            Fixtures.AppStart,
-            IsolationReason.ProcessDamage,
-            environment: new Dictionary<string, string>
-            {
-                [ShutdownProtocol.LogVariable] = logPath,
-            });
+    private static LiveScenario Start(string logPath, bool throwingSubscriber = false)
+    {
+        var environment = new Dictionary<string, string>
+        {
+            [ShutdownProtocol.LogVariable] = logPath,
+        };
+
+        if (throwingSubscriber)
+        {
+            environment[ShutdownProtocol.ThrowingSubscriberVariable] = "1";
+        }
+
+        return LiveScenario.StartIsolated(
+            Fixtures.AppStart, IsolationReason.ProcessDamage, environment: environment);
+    }
 }

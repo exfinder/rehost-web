@@ -11,6 +11,14 @@ public sealed class ShutdownProbe : IRegisteredObject, IStopListeningRegisteredO
 {
     public static void Arm()
     {
+        // First in the multicast chain, so the recording subscriber below and the registered-object
+        // loop after it are both lost to the throw — which is what the host has to survive.
+        if (Environment.GetEnvironmentVariable(ShutdownProtocol.ThrowingSubscriberVariable) != null)
+        {
+            HostingEnvironment.StopListening += (_, _) =>
+                throw new InvalidOperationException("stop-listening-subscriber");
+        }
+
         HostingEnvironment.StopListening +=
             (_, _) => TraceChannel.RecordTo(
                 ShutdownProtocol.LogVariable, ShutdownProtocol.StopListeningEvent);

@@ -142,7 +142,8 @@
     }
 
     // IV21: integrated has already rendered the error page and set the status by LogRequest, so
-    // these three writes append to it and a Clear at LogRequest wipes it.
+    // these three writes append to it and a Clear at LogRequest wipes it. Mixed case on purpose:
+    // an upper-casing response filter that survived the jump would show up in these markers.
     private void ErrorWrite(string at)
     {
         if (Request.QueryString["err"] == null)
@@ -150,7 +151,7 @@
             return;
         }
 
-        if (Request.QueryString["err"] == "clear" && at == "LOG")
+        if (Request.QueryString["err"] == "clear" && at == "Log")
         {
             Response.Clear();
         }
@@ -163,7 +164,7 @@
     {
         Witness.Stage(Request, "LogRequest:" + Response.StatusCode);
         Note("LogRequest");
-        ErrorWrite("LOG");
+        ErrorWrite("Log");
         if (Request.QueryString["lw"] != null)
         {
             try
@@ -182,7 +183,7 @@
     {
         Witness.Stage(Request, "PostLogRequest");
         Note("PostLogRequest");
-        ErrorWrite("PLOG");
+        ErrorWrite("PLog");
     }
 
     void Application_PreRequestHandlerExecute(object sender, EventArgs e)
@@ -223,7 +224,7 @@
     {
         Witness.Stage(Request, "EndRequest");
         Note("EndRequest");
-        ErrorWrite("END");
+        ErrorWrite("End");
         Witness.Stage(Request, Server.GetLastError() == null ? "LastError-null" : "LastError-set");
         if (Request.QueryString["stamp"] != null)
         {
@@ -298,7 +299,7 @@
     void Application_Error(object sender, EventArgs e)
     {
         var error = Server.GetLastError();
-        Witness.Stage(Request, "ApplicationError:" + (error == null ? "null" : error.GetType().Name + ":" + error.Message));
+        Witness.Stage(Request, "ApplicationError:" + (error == null ? "null" : error.GetType().Name + ":" + error.Message) + ";status=" + Response.StatusCode);
         if (Request.QueryString["xferr"] != null)
         {
             Server.Transfer("~/xfer/ErrorPage.aspx");

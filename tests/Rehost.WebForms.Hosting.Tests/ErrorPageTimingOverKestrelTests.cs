@@ -16,11 +16,11 @@ public sealed class ErrorPageTimingOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("boom-from-page");
-        response.Text.ShouldEndWith("[LOG][PLOG][END]");
+        response.Text.ShouldEndWith("[Log][PLog][End]");
         response.Text.IndexOf("boom-from-page", StringComparison.Ordinal)
-            .ShouldBeLessThan(response.Text.IndexOf("[LOG]", StringComparison.Ordinal));
-        stages.ShouldContain("err|LOG=500");
-        stages.ShouldContain("err|END=500");
+            .ShouldBeLessThan(response.Text.IndexOf("[Log]", StringComparison.Ordinal));
+        stages.ShouldContain("err|Log=500");
+        stages.ShouldContain("err|End=500");
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public sealed class ErrorPageTimingOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?err=clear");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldBe("[LOG][PLOG][END]");
+        response.Text.ShouldBe("[Log][PLog][End]");
         response.Header("Content-Length").ShouldBe("16");
     }
 
@@ -43,19 +43,21 @@ public sealed class ErrorPageTimingOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(500);
         raised.ShouldBeGreaterThanOrEqualTo(0);
-        raised.ShouldBeLessThan(Array.IndexOf(stages, "err|LOG=500"));
+        stages[raised].ShouldEndWith(";status=200");
+        raised.ShouldBeLessThan(Array.IndexOf(stages, "err|Log=500"));
     }
 
     // The response filter the page installed is closed by the early-end jump, before the render,
-    // so the error page reaches the client unfiltered rather than upper-cased or truncated.
+    // so neither the error page nor the mixed-case markers written after it come back upper-cased.
+    // Case.Sensitive is the assertion here: Shouldly's string comparisons default to insensitive,
+    // which is blind to exactly the filter this measures.
     [Fact]
     public async Task An_Installed_Response_Filter_Does_Not_Reach_The_Error_Page()
     {
         var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?filter=1&err=append");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("boom-from-page");
-        response.Text.ShouldNotContain("PAGE-OUTPUT");
-        response.Text.ShouldEndWith("[LOG][PLOG][END]");
+        response.Text.ShouldContain("boom-from-page", Case.Sensitive);
+        response.Text.ShouldEndWith("[Log][PLog][End]", Case.Sensitive);
     }
 }

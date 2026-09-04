@@ -3174,7 +3174,13 @@ namespace System.Web {
         }
 
         internal string FetchServerVariable(string variable) {
+#if !NETFRAMEWORK
+            // The public (filename, url, queryString) constructor leaves _wr null, and the
+            // server-variable collection reaches here off IIS7 as well.
+            return (_wr != null) ? _wr.GetServerVariable(variable) : null;
+#else
             return _wr.GetServerVariable(variable);
+#endif
         }
 
         // Used by IIS7WorkerRequest.SynchronizeServerVariables to update server variables in the collection

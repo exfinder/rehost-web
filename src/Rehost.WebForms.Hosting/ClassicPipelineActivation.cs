@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using System.Web.Util;
 
 internal sealed class ClassicPipelineActivation
 {
@@ -59,7 +60,21 @@ internal sealed class ClassicPipelineActivation
             return;
         }
 
-        HostingEnvironment.RaiseStopListening();
+        // OnGlobalStopListening raises its subscribers unguarded, as Framework does, and the
+        // shutdown latch above is already set: without this catch one throwing subscriber would
+        // strand the teardown below with no second chance at it.
+        try
+        {
+            HostingEnvironment.RaiseStopListening();
+        }
+        catch (Exception stopListeningFailure)
+        {
+            WebFormsRuntimeEventSource.Log.SwallowedRequestException(
+                "ClassicPipelineActivation.Shutdown",
+                stopListeningFailure,
+                "HostingEnvironment.RaiseStopListening");
+        }
+
         manager.StopObject(_options.ApplicationId, typeof(ClassicPipelineDispatcher));
         manager.ShutdownApplication(_options.ApplicationId);
         manager.Close();

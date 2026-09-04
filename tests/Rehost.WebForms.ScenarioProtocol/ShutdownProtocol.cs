@@ -7,6 +7,8 @@ public static class ShutdownProtocol
 {
     public const string LogVariable = "REHOST_SCENARIO_SHUTDOWN_LOG";
 
+    public const string ThrowingSubscriberVariable = "REHOST_SCENARIO_STOPLISTENING_THROWS";
+
     public const string StopListeningEvent = "stop-listening:event";
 
     public const string StopListeningObject = "stop-listening:object";
