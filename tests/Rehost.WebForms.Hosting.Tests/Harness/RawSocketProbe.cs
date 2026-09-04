@@ -70,6 +70,86 @@ internal static class RawSocketProbe
     internal static Task<byte[]> GetRawResponseAsync(Uri address, string path) =>
         SendRawAsync(address, RawGet(address, path));
 
+    // A connection the caller keeps: it reads part of the response, then either walks away
+    // (leaving the server to notice) or waits for the server to reset it.
+    internal static async Task<SocketReader> OpenAsync(Uri address, string path)
+    {
+        var client = new TcpClient();
+        await client.ConnectAsync(address.Host, address.Port);
+        var stream = client.GetStream();
+        await stream.WriteAsync(RawGet(address, path));
+        await stream.FlushAsync();
+
+        return new SocketReader(client, stream);
+    }
+
+    internal sealed class SocketReader(TcpClient client, NetworkStream stream) : IAsyncDisposable
+    {
+        private readonly StringBuilder _received = new();
+        private bool _reset;
+
+        internal async Task<string> ReadUntilAsync(string marker)
+        {
+            using var deadline = new CancellationTokenSource(ReadDeadline);
+            var buffer = new byte[65536];
+
+            while (!_received.ToString().Contains(marker, StringComparison.Ordinal))
+            {
+                int read;
+                try
+                {
+                    read = await ReadWithDeadlineAsync(stream, buffer, deadline.Token);
+                }
+                catch (IOException)
+                {
+                    _reset = true;
+                    break;
+                }
+
+                if (read == 0)
+                {
+                    break;
+                }
+
+                _received.Append(Encoding.ASCII.GetString(buffer, 0, read));
+            }
+
+            return _received.ToString();
+        }
+
+        // True when the server reset the connection rather than closing it cleanly; the abort
+        // reading (IV25) is a forcible reset the client sees as an IOException.
+        internal async Task<bool> ReadToResetAsync()
+        {
+            using var deadline = new CancellationTokenSource(ReadDeadline);
+            var buffer = new byte[65536];
+
+            while (!_reset)
+            {
+                try
+                {
+                    if (await ReadWithDeadlineAsync(stream, buffer, deadline.Token) == 0)
+                    {
+                        return false;
+                    }
+                }
+                catch (IOException)
+                {
+                    return true;
+                }
+            }
+
+            return true;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            client.Client.LingerState = new LingerOption(true, 0);
+            await stream.DisposeAsync();
+            client.Dispose();
+        }
+    }
+
     // A request whose bytes are on the wire before the caller does whatever unblocks the server:
     // a task handed to HttpClient may not have opened a connection at all. The returned task
     // completes with the whole response.
@@ -138,7 +218,9 @@ internal static class RawSocketProbe
     }
 
     // A request whose response may leave the connection open (an upgrade, a kept-alive error):
-    // whatever arrives until the server closes or goes quiet for two seconds.
+    // whatever arrives until the server closes or goes quiet for two seconds. The quiet window
+    // opens only once the first byte has arrived — the full deadline covers the wait for it,
+    // since a cold host spends seconds activating before it answers at all.
     internal static async Task<byte[]> SendRawUntilQuietAsync(Uri address, byte[] request)
     {
         using var client = new System.Net.Sockets.TcpClient();
@@ -153,7 +235,10 @@ internal static class RawSocketProbe
         while (true)
         {
             using var quiet = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
-            quiet.CancelAfter(TimeSpan.FromSeconds(2));
+            if (received.Length > 0)
+            {
+                quiet.CancelAfter(TimeSpan.FromSeconds(2));
+            }
             int read;
             try
             {

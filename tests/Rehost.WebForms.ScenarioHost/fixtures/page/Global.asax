@@ -141,10 +141,29 @@
         Note("PostAcquireRequestState");
     }
 
+    // IV21: integrated has already rendered the error page and set the status by LogRequest, so
+    // these three writes append to it and a Clear at LogRequest wipes it.
+    private void ErrorWrite(string at)
+    {
+        if (Request.QueryString["err"] == null)
+        {
+            return;
+        }
+
+        if (Request.QueryString["err"] == "clear" && at == "LOG")
+        {
+            Response.Clear();
+        }
+
+        Witness.Stage(Request, "err|" + at + "=" + Response.StatusCode);
+        Response.Write("[" + at + "]");
+    }
+
     void Application_LogRequest(object sender, EventArgs e)
     {
         Witness.Stage(Request, "LogRequest:" + Response.StatusCode);
         Note("LogRequest");
+        ErrorWrite("LOG");
         if (Request.QueryString["lw"] != null)
         {
             try
@@ -163,6 +182,7 @@
     {
         Witness.Stage(Request, "PostLogRequest");
         Note("PostLogRequest");
+        ErrorWrite("PLOG");
     }
 
     void Application_PreRequestHandlerExecute(object sender, EventArgs e)
@@ -203,6 +223,7 @@
     {
         Witness.Stage(Request, "EndRequest");
         Note("EndRequest");
+        ErrorWrite("END");
         Witness.Stage(Request, Server.GetLastError() == null ? "LastError-null" : "LastError-set");
         if (Request.QueryString["stamp"] != null)
         {

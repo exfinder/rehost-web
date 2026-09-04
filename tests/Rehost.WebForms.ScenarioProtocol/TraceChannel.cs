@@ -12,9 +12,11 @@ public static class TraceChannel
 
     private static readonly object Gate = new();
 
-    public static void Record(string entry)
+    public static void Record(string entry) => RecordTo(TraceVariable, entry);
+
+    public static void RecordTo(string variable, string entry)
     {
-        var path = Environment.GetEnvironmentVariable(TraceVariable);
+        var path = Environment.GetEnvironmentVariable(variable);
         if (string.IsNullOrEmpty(path))
         {
             return;

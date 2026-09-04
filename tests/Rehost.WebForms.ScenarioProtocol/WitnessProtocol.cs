@@ -13,4 +13,10 @@ public static class WitnessProtocol
     public const string SessionExited = "session-exited:";
     public const string SessionEnded = "session-ended:";
     public const string SessionStoreCall = "session-store:";
+    public const string DisconnectToken = "disconnect-token:";
+    public const string DisconnectCompleted = "disconnect-completed:";
+    public const string DisconnectHeld = "disconnect-held:";
+    public const string AbortReturned = "disconnect-aborted:";
+    public const string AbortConnected = "disconnect-connected:";
+    public const string AbortFlushed = "disconnect-flushed:";
 }

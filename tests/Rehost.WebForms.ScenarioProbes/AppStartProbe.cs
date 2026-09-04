@@ -41,6 +41,7 @@ public sealed class UnloadProbe : IHttpHandler
         context.Response.StatusCode = 200;
         context.Response.Write("unloading");
         context.Response.Flush();
+        TraceChannel.RecordTo(ShutdownProtocol.LogVariable, ShutdownProtocol.RecycleRequested);
         HttpRuntime.UnloadAppDomain();
     }
 }

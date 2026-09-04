@@ -32,6 +32,9 @@ public sealed class ProbePathConformanceTests
         ["ModuleListHandler"] = ProbePaths.ModuleList,
         ["RuntimeIdentityProbe"] = ProbePaths.RuntimeIdentity,
         ["UnloadProbe"] = ProbePaths.Unload,
+        ["LifecycleReportProbe"] = ProbePaths.Lifecycle,
+        ["IntegratedMembersProbe"] = ProbePaths.Integrated,
+        ["DisconnectProbe"] = ProbePaths.Disconnect,
     };
 
     // The handler-walk markers report which row of the merged list won, so the path they sit at

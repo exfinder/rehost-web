@@ -80,8 +80,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return true;
     }
 
-    // IV25: the reset does not end the request — managed code keeps running and only a flush
-    // surfaces the loss.
+    // IV25: the reset does not end the request — managed code keeps running past it.
     internal override bool TryAbortConnection()
     {
         _clientGone = true;

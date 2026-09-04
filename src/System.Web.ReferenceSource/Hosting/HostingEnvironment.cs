@@ -1578,9 +1578,8 @@ namespace System.Web.Hosting {
         }
 
 #if !NETFRAMEWORK
-        // IIS raised this from CGlobalModule::OnGlobalStopListening about a second ahead of
-        // IRegisteredObject.Stop, and only on an integrated pool (IV30). The host's stopping
-        // notification is the port's equivalent signal.
+        // The native wait handle SetupStopListeningHandler arms is never signalled off IIS, so the
+        // host's stopping notification is what reaches this (IV30).
         internal static void RaiseStopListening() {
             OnGlobalStopListening();
         }
