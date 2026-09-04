@@ -51,7 +51,11 @@ Classification:
 The 18 open `UseIntegratedPipeline` sites collapse to 12 distinct behaviors: the
 `HideRequestResponse` pairs account for 4 and the `HostingEnvironment` throttle accessors for
 another 4. The `MapRequestHandler`/`LogRequest`/`PostLogRequest` event family (12 sites) and
-`HookupEventHandlersForApplicationAndModules` closed with job 3 (ledger P90). One first-pass open item — the `Response.Redirect` content type — closed as
+`HookupEventHandlersForApplicationAndModules` closed with job 3 (ledger P90). Job 4
+closed six more `UseIntegratedPipeline` sites — `CurrentNotification`/`IsPostNotification`,
+`OnExecuteRequestStep` and `ThrowIfEventBindingDisallowed` — and four members from the
+other-gates table: `EnsureHeaders`, `AddOnSendingHeaders`, the oversize-body pair and the
+pre-send raise (ledger P91). One first-pass open item — the `Response.Redirect` content type — closed as
 PLUMBING once measured (IV13); one new open member was found by measurement (IV12).
 
 ## `HttpApplication.cs` — 34 sites
@@ -59,7 +63,7 @@ PLUMBING once measured (IV13); one new open member was found by measurement (IV1
 | Member | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
 | `IsContainerInitalizationAllowed` | True while re-running `InitInternal` after IIS event registration | PLUMBING | Module step containers exist only for native notification dispatch |
-| `ThrowIfEventBindingDisallowed` | `InvalidOperationException` "Event handlers can only be bound to HttpApplication events during IHttpModule initialization" (IV10) | **OPEN** | Measured: classic accepts the binding silently and the handler never runs, because `CreateEventExecutionSteps` snapshotted handlers at init (IV10) |
+| `ThrowIfEventBindingDisallowed` | `InvalidOperationException` "Event handlers can only be bound to HttpApplication events during IHttpModule initialization" (IV10) | RESOLVED | The port raises the same refusal once `InitInternal` has completed, since `_initSpecialCompleted` is never set here (ledger P91) |
 | `FindISessionStateModule` | Returns the session module so `EnsureReleaseState` can release before a child request | PLUMBING | Child `Server.Execute` shares the parent's session; the release exists for `TransferRequest`, which is unsupported (P62) |
 | `AcquireNotifcationContextLock` / `ReleaseNotifcationContextLock` (2 sites) | `Debug.Assert` | PLUMBING | Debug-only; callers are integrated-only |
 | `AsyncResult` get/set (2 sites) | Stores the pending result on `NotificationContext` instead of `_ar` | PLUMBING | Per-notification storage; classic uses the field |
@@ -75,7 +79,7 @@ PLUMBING once measured (IV13); one new open member was found by measurement (IV1
 | `InitInternal` step manager | `PipelineStepManager` | RESOLVED | Classic `ApplicationStepManager` is the decision ([ADR 0001](../adr/0001-runtime-compatibility-model.md)) |
 | `DisposeInternal` module key | Tracks `_currentModuleCollectionKey` so a module can unregister during `Dispose` | PLUMBING | Event maps exist only in integrated |
 | `HookupEventHandlersForApplicationAndModules` | A failing `add_XXX` rethrows; classic swallows it | RESOLVED | Measured on a real classic pool (IV2): the handlers were dropped with no error, no 500 and no log entry. The port rethrows (ledger P90); the failure surfaces as a 500 on every request, since the refusal is raised while the application instance is built |
-| `OnExecuteRequestStep` | Registers a wrapper around every pipeline step | **OPEN** | `PlatformNotSupportedException`; `ExecuteStepImpl` already honours `_stepInvoker` in both managers, so only the gate blocks it |
+| `OnExecuteRequestStep` | Registers a wrapper around every pipeline step | RESOLVED | The gate is fenced off and `ExecuteStepImpl`'s `_stepInvoker` carries the wrapper through the classic list (ledger P91) |
 | `AssignContext` | `Debug.Assert` | PLUMBING | |
 | `AsyncAppEventHandlersTable.AddHandler` | Also adds an `AsyncEventExecutionStep` to the module's event map | PLUMBING | Event maps are the native dispatch table |
 | `AsyncEventExecutionStep` ctor chaining | Passes the mode to an overload that ignores the parameter | PLUMBING | Parameter unused in both arms |
@@ -88,8 +92,8 @@ PLUMBING once measured (IV13); one new open member was found by measurement (IV1
 | Member | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
 | `SetSkipAuthorizationNoDemand` | Persists into the `IS_LOGIN_PAGE` server variable so IIS skips its own authorization | RESOLVED | Native `system.webServer` authorization is unimplemented and the section ignored; managed `SkipAuthorization` is unaffected (compatibility: URL/file authorization) |
-| `CurrentNotification` get/set (2 sites) | Returns the executing `RequestNotification`; the full managed-event-to-notification map is measured in IV6 | **OPEN** | `PlatformNotSupportedException` on classic (IV6) |
-| `IsPostNotification` get/set (2 sites) | Post-phase flag; every `Post*` managed event reports `true` on its base notification (IV6) | **OPEN** | `PlatformNotSupportedException` on classic (IV6) |
+| `CurrentNotification` get/set (2 sites) | Returns the executing `RequestNotification`; the full managed-event-to-notification map is measured in IV6 | RESOLVED | Answered from a notification table built beside the classic step list; a read outside a step raises `InvalidOperationException` naming the boundary (ledger P91) |
+| `IsPostNotification` get/set (2 sites) | Post-phase flag; every `Post*` managed event reports `true` on its base notification (IV6) | RESOLVED | Same table (ledger P91) |
 
 ## `HttpRuntime.cs` — 4 sites
 
@@ -184,17 +188,17 @@ port boundary — wording, not behavior.
 
 | Site | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
-| `HttpRequest.EnsureHeaders` | Collection is writable: `Set`/`Add`/`Remove` succeed, `Add` appends comma-joined, `Clear` throws `NotSupportedException` (IV7); mutations feed `ServerVariables` and `Request.Url` with the caveats in IV8 | **OPEN** | Port calls `MakeReadOnly()` (measured `IsReadOnly=True` on a classic pool, `False` on integrated — IV9), so `Request.Headers.Set/Add/Remove` throws where the audience mutated request headers freely |
+| `HttpRequest.EnsureHeaders` | Collection is writable: `Set`/`Add`/`Remove` succeed, `Add` appends comma-joined, `Clear` throws `NotSupportedException` (IV7); mutations feed `ServerVariables` and `Request.Url` with the caveats in IV8 | RESOLVED | `MakeReadOnly()` is fenced off and the managed collection is the store, with both IV8 laziness caveats reproduced; the `GetSimpleServerVar` shortcuts still answer from the worker request (ledger P91) |
 | `HttpRequest.GetServerVars` | Collection is writable | RESOLVED | `ServerVariables.Set` unavailable, stated in P76 and the compatibility row |
 | `HttpResponse.Headers` | Native header block backs the collection | RESOLVED | P68, readings H1–H16; fenced so the managed collection is the store |
 | `HttpResponse.SubStatusCode` get/set | IIS substatus for the error code | **OPEN** | `PlatformNotSupportedException`; the port has no substatus channel (hidden-segment 404.8 is already noted as app-shaped) |
-| `HttpResponse.AddOnSendingHeaders` | Per-request pre-send callback; measured firing inside the `SendResponse` notification with the response still 200 and headers not yet emitted (IV11) | **OPEN** | `PlatformNotSupportedException` on classic (IV11). `OwinCallContext.RegisterForOnSendingHeaders` probes it reflectively and swallows the failure, so Katana loses its non-OWIN flush notification |
+| `HttpResponse.AddOnSendingHeaders` | Per-request pre-send callback; measured firing inside the `SendResponse` notification with the response still 200 and headers not yet emitted (IV11) | RESOLVED | The queue fires in `WriteHeaders` after the pre-send headers event and before header generation, so `OwinCallContext.RegisterForOnSendingHeaders`'s reflective probe no longer fails (ledger P91) |
 | `HttpResponse.ClientDisconnectedToken` | Cancellation token signalled on client disconnect (IIS 7.5+) | **OPEN** | `PlatformNotSupportedException`; long-poll/SignalR-shaped code uses it. `Owin.DisconnectWatcher` gates on `IISVersion` + `UsingIntegratedPipeline` and falls back |
 | `HttpRequest.Abort` | Forcibly resets the TCP connection | **OPEN** | `PlatformNotSupportedException`; Kestrel exposes an abort feature |
 | `HttpRequest.InsertEntityBody` (2 overloads) | Hands the read entity back to IIS | **OPEN** (very low) | No native handler follows; the honest answer is a boundary-naming refusal or a no-op |
 | `HttpRequest.HttpChannelBinding` | Extended-protection binding token | RESOLVED | Windows authentication is unsupported |
 | `HttpRequest.TlsTokenBindingInfo` | Token-binding info on Win10+ | RESOLVED | The imported contract is "null when unavailable"; the port returns null |
-| `HttpRequest.ContentLength` limit, `HttpBufferlessInputStream.ValidateRequestEntityLength` | Integrated answers an oversize body with a keep-alive 500 carrying `Content-Length` (IV14) | **OPEN** (low) | Measured (IV14): classic sends the same 500 body with `Connection: close` and no `Content-Length`, then closes the socket. The port takes the classic arm |
+| `HttpRequest.ContentLength` limit, `HttpBufferlessInputStream.ValidateRequestEntityLength` | Integrated answers an oversize body with a keep-alive 500 carrying `Content-Length` (IV14) | RESOLVED | Both `CloseConnectionAfterError()` calls are fenced off, so the refusal carries `Content-Length` and the connection serves the next request (ledger P91) |
 | `HttpRequest.CanValidateRequest` | Skips validation when IIS already rejected with 404/400 during Log/EndRequest | PLUMBING | No native rejection precedes managed code |
 | `HttpRequest.LogonUserIdentity` | Refuses reads before `AuthenticateRequest` completes | PLUMBING | Windows auth unsupported |
 | `HttpRequest.InternalRewritePath` (2 sites) | `RewriteNotifyPipeline` tells IIS the URL changed | PLUMBING | The classic `MapHandlerExecutionStep` maps from the rewritten path anyway |
@@ -210,7 +214,7 @@ port boundary — wording, not behavior.
 | `HttpContext.DisableNotifications` | No-op off IIS7 | PLUMBING | |
 | `HttpResponse.GenerateResponseHeadersForHandler` | Generates `Cache-Control: private` and `X-AspNet-Version` into the collection | RESOLVED | `GenerateResponseHeaders` emits the equivalent classic block (P68) |
 | `HttpResponse.AppendHeader` | Writes through to `Headers` instead of `_customHeaders`/`_cacheHeaders` | RESOLVED | P68 merge (`AppendManagedHeaderCollection`) |
-| `HttpApplication.SendResponseExecutionStep` (raises `PreSendRequestHeaders`/`PreSendRequestContent`) | Both events run as a `SendResponse` notification step with `HttpContext.Current` set (IV12) | **OPEN** (low) | Measured (IV12): on classic both events run with `HttpContext.Current` **null**, though `((HttpApplication)sender).Context` is live and `AppendHeader` from there still reaches the wire. A module that reads `HttpContext.Current` in `PreSendRequestHeaders` gets a `NullReferenceException` on the port |
+| `HttpApplication.SendResponseExecutionStep` (raises `PreSendRequestHeaders`/`PreSendRequestContent`) | Both events run as a `SendResponse` notification step with `HttpContext.Current` set (IV12) | RESOLVED | The port measured `null` in both events before the fix; the raise now restores `HttpContext.Current` and reports notification `SendResponse` (ledger P91) |
 | `HttpResponse.Filter` setter, `FilterOutput`, `GetSnapshot`, `UpdateNativeResponse`, `ClearNativeResponse`, `Clear`, `EndFlush`, `Flush`, `WriteSubstBlock`, `GetHttpHeaderContentEncoding` | Native response manipulation | PLUMBING | `GetHttpHeaderContentEncoding` is already fenced for the managed collection |
 | `HttpResponse.AppendToLog` | Routes to `Request.AppendToLogQueryString` | PLUMBING | No IIS log |
 | `Handlers/TransferRequestHandler.ProcessRequestAsync` | Schedules a child `ExecuteUrl` for extensionless URLs | RESOLVED | The baseline row is transparent to dispatch (P85, `IisHandlerRoutes.IsTransferRequest`) |
@@ -270,7 +274,7 @@ Dispositions and effort below are post-reading; the reading that settles each on
    value every classic managed event reports, including the two the classic pipeline has no
    step for. `ApplicationStepManager` already tracks step ranges (`_beginRequestStepEndIndex`
    for the WebSocket fence), so the same mechanism carries the notification. **Reading: taken**
-   (IV6). **Effort: new seam (small).**
+   (IV6). **Effort: new seam (small).** **Landed** (job 4, ledger P91).
 
 4. **Writable `Request.Headers`** (`HttpRequest.EnsureHeaders`). Integrated let an application
    or module mutate request headers and have downstream code see the change; the port calls
@@ -284,18 +288,19 @@ Dispositions and effort below are post-reading; the reading that settles each on
    Framework's own laziness, not IIS behavior, so the port reproduces them for free by keeping
    `SynchronizeHeader`'s existing shape. Typed known-header accessors do not follow the
    collection (IV8). **Reading: taken** (IV7-IV9). **Effort: lines-of-fence plus a scenario.**
+   **Landed** (job 4, ledger P91).
 
 5. **`HttpApplication.OnExecuteRequestStep`** (`HttpApplication`). Step-wrapping is how
    request-scoped instrumentation (APM agents, diagnostic middleware) attaches. The port
    throws, yet `ExecuteStepImpl` already invokes `_stepInvoker` in both step managers — only the
    gate blocks it. **Disposition: take the integrated branch.** **Reading: not needed.**
-   **Effort: lines-of-fence.**
+   **Effort: lines-of-fence.** **Landed** (job 4, ledger P91).
 
 Remaining open items, in descending likelihood:
 
 - **`Response.AddOnSendingHeaders`** — Katana probes it reflectively and silently degrades.
   Measured firing point is the `SendResponse` notification, before the head is emitted (IV11),
-  which is the port's own flush commit point. **Shim**, lines-of-fence.
+  which is the port's own flush commit point. **Shim**, lines-of-fence. **Landed** (job 4, ledger P91).
 - **`Response.ClientDisconnectedToken`, `Request.Abort`** — long-poll and streaming apps;
   Kestrel exposes both capabilities. **Shim.**
 - **`HideRequestResponse` during `Application_Start`/`Init`** — the port is more permissive
@@ -303,7 +308,8 @@ Remaining open items, in descending likelihood:
 - **`PreSendRequestHeaders`/`PreSendRequestContent` context** — new, found by measurement:
   `HttpContext.Current` is null in both events on classic while integrated supplies it (IV12).
   `((HttpApplication)sender).Context` is live in both, so the fix is to restore
-  `HttpContext.Current` around the raise. **Shim**, lines-of-fence.
+  `HttpContext.Current` around the raise. **Shim**, lines-of-fence. **Landed**
+  (job 4, ledger P91).
 - **`DefaultAuthenticationModule` hooking `DefaultAuthentication`** — measured: on integrated
   `Context.User` is null through `AuthenticateRequest` and established by
   `PostAuthenticateRequest`; on classic it is already set when `AuthenticateRequest` runs
@@ -313,10 +319,11 @@ Remaining open items, in descending likelihood:
   list.
 - **`ThrowIfEventBindingDisallowed`** — late binding is accepted and silently inert on classic,
   and throws `InvalidOperationException` naming module initialization on integrated (IV10).
-  **Fail-fast**, reusing Framework's own message.
+  **Fail-fast**, reusing Framework's own message. **Landed** (job 4, ledger P91).
 - **Oversize request body** — integrated answers keep-alive with `Content-Length`; classic
   closes the connection and omits it (IV14). **Take the integrated branch** (drop the
-  `CloseConnectionAfterError` call off IIS7), lines-of-fence.
+  `CloseConnectionAfterError` call off IIS7), lines-of-fence. **Landed** (job 4,
+  ledger P91).
 - `Response.SubStatusCode`; `CallHandlerExecutionStep`'s `IsHandlerExecutionDenied` 403;
   `HostingEnvironment.MaxConcurrent*PerCPU` (4 sites, one behavior — keep the refusal, reword
   it); `Request.InsertEntityBody`; `DefaultAuthentication.Authenticate` and
@@ -337,11 +344,16 @@ follows; this map is the authoritative item-to-job assignment.
   sync and async accessors, and the hookup-swallow fail-fast that landed
   first; plus the `HttpContext.RemapHandler` window (IV5), added to the job
   because the map step is what closes it (ledger P90).
-- **Job 4 (shim batch):** ranked items 3 (`CurrentNotification`/
+- **Job 4 (shim batch) — landed:** ranked items 3 (`CurrentNotification`/
   `IsPostNotification`), 4 (writable `Request.Headers`), 5
   (`OnExecuteRequestStep`); `AddOnSendingHeaders`; `PreSendRequestHeaders`/
   `Content` context restore; oversize-body fence;
-  `ThrowIfEventBindingDisallowed` fail-fast.
+  `ThrowIfEventBindingDisallowed` fail-fast (ledger P91). Two boundaries the
+  port keeps: a notification read outside a step raises
+  `InvalidOperationException` naming it, and the six server variables
+  `GetSimpleServerVar` answers without populating the collection —
+  `HTTP_USER_AGENT` among them — do not follow a header mutation, where IV8
+  measured integrated's `HTTP_USER_AGENT` doing so.
 - **Job 5 (remainder, build half):** `ClientDisconnectedToken`/`Request.Abort`,
   with the two Katana gaps ADR 0013 exposed next to it — the `WEBSOCKET_VERSION`
   server variable and an early `HostingEnvironment.StopListening` signal;

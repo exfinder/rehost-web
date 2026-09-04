@@ -50,9 +50,7 @@ the port ships, so the two halves of the identity name the same pool.
   narrow edits, recorded in [the Katana provenance](../provenance/aspnet-katana.md).
 - Members that still refuse with "This operation requires IIS integrated
   pipeline mode" sit next to a `true` answer until the later closure jobs land
-  them: `HttpContext.CurrentNotification`/`IsPostNotification`, writable
-  `Request.Headers` and `Response.AddOnSendingHeaders` (job 4);
-  `Response.ClientDisconnectedToken`, `Request.Abort` and
+  them: `Response.ClientDisconnectedToken`, `Request.Abort` and
   `Response.SubStatusCode` (job 5). Refusal wording is job 6. A recorded
   refusal beside `true` is the accepted cost; a silent classic branch is not,
   which is the whole reason the identity flips first.
@@ -60,5 +58,13 @@ the port ships, so the two halves of the identity name the same pool.
   subscriptions and the `HttpContext.RemapHandler` window now answer as the
   integrated pool a caller detects here (ledger P90), so the first family a
   detector reaches after the identity flip no longer refuses.
+- Job 4 has landed the shim batch beside it (ledger P91):
+  `HttpContext.CurrentNotification`/`IsPostNotification`, writable
+  `Request.Headers`, `HttpApplication.OnExecuteRequestStep` and
+  `Response.AddOnSendingHeaders` answer instead of refusing, the pre-send
+  events carry `HttpContext.Current`, and a late `+=` is refused as integrated
+  refuses it. `OwinCallContext.RegisterForOnSendingHeaders` reaches the same
+  member reflectively; its registration is no longer refused, though no
+  scenario exercises Katana's own flush notification yet.
 - `PopulateIISVersionInformation`, `_iisVersion` and `_useIntegratedPipeline`
   are untouched, so a Framework build of the imported tree is unaffected.

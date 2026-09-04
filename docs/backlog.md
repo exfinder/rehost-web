@@ -55,9 +55,10 @@ Carried from earlier milestones as unresolved detail:
      their sync and async accessors (placement from IV1/IV4, early-end shape
      from IV17), the hookup rethrow that closes the silent drop IV2 pinned,
      and the `HttpContext.RemapHandler` window (IV5).
-  4. Shim batch: `CurrentNotification`/`IsPostNotification`, writable
-     `Request.Headers` (contract in IV7/IV8), `PreSendRequest*` context
-     restore (IV12), `AddOnSendingHeaders` (IV11), oversize-body fence (IV14),
+  4. Landed: the shim batch — `CurrentNotification`/`IsPostNotification`
+     (IV6), writable `Request.Headers` (IV7-IV9), `OnExecuteRequestStep`,
+     `AddOnSendingHeaders` (IV11), the `PreSendRequest*` context restore
+     (IV12), the oversize-body fence (IV14) and the
      `ThrowIfEventBindingDisallowed` fail-fast (IV10).
   5. Remainder, build half: the audit's take-branch/shim leftovers; take the
      missing winbox readings first where the audit calls for one. Includes the

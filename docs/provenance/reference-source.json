@@ -181,6 +181,20 @@
    ],
    "reason": "the integrated-only MapRequestHandler/LogRequest/PostLogRequest event family takes its integrated arm (fenced !NETFRAMEWORK): the twelve sync and async accessor gates keep their PlatformNotSupportedException only under NETFRAMEWORK, ApplicationStepManager.BuildSteps adds the three CreateEventExecutionSteps calls with the Log pair inside the early-end jump target, HookupEventHandlersForApplicationAndModules rethrows a refused add_XXX instead of swallowing it off integrated, and HttpContext.RemapHandler asks the step manager (a second range predicate beside IsInBeginRequestStep) and raises Framework's Invoke_before_pipeline_event at or after the map step",
    "record": "docs/portability-ledger.md P90"
+  },
+  {
+   "files": [
+    "HttpApplication.cs",
+    "HttpContext.cs",
+    "HttpRequest.cs",
+    "HttpHeaderCollection.cs",
+    "HttpServerVarsCollection.cs",
+    "HttpResponse.cs",
+    "HttpBufferlessInputStream.cs",
+    "System.Web.txt"
+   ],
+   "reason": "the integrated shim batch takes its integrated arm behind !NETFRAMEWORK fences: ApplicationStepManager records a notification boundary per CreateEventExecutionSteps call plus the handler-mapping and handler-execution steps and fills a per-step table from it, HttpApplication exposes TryGetCurrentNotification and raises the two pre-send events through RaiseSendResponseEvent, which reports SendResponse and restores HttpContext.Current; HttpContext.CurrentNotification and IsPostNotification read that table and otherwise raise the new Notification_outside_pipeline string added to System.Web.txt; HttpApplication.OnExecuteRequestStep and ThrowIfEventBindingDisallowed drop the UseIntegratedPipeline gate and close their window on _initInternalCompleted alone, because InitSpecial never runs here; HttpHeaderCollection.Add/Set/Remove gain a request arm whose server-variable mirror reads HttpRequest.ExistingServerVariables rather than the materializing getter, HttpRequest.EnsureHeaders and GetServerVars and HttpServerVarsCollection.Populate stop calling MakeReadOnly, and BuildUrl prefers a Host rewritten through the collection; HttpResponse.AddOnSendingHeaders drops its IIS7WorkerRequest test and WriteHeaders drains the subscription queue before generating headers; and HttpRequest.GetEntireRawContent and HttpBufferlessInputStream.ValidateRequestEntityLength no longer close the connection after an oversize body",
+   "record": "docs/portability-ledger.md P91"
   }
  ]
 }
