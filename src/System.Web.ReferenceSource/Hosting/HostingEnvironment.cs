@@ -1959,13 +1959,20 @@ namespace System.Web.Hosting {
                          Justification="matches casing of config attribute")]
         public static int MaxConcurrentRequestsPerCPU {
             get {
+#if !NETFRAMEWORK
+                throw new PlatformNotSupportedException(SR.GetString(SR.MaxConcurrentPerCPU_not_supported, "MaxConcurrentRequestsPerCPU"));
+#else
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
                 return UnsafeIISMethods.MgdGetMaxConcurrentRequestsPerCPU();
+#endif
             }
             [SecurityPermission(SecurityAction.Demand, Unrestricted = true)]
             set {
+#if !NETFRAMEWORK
+                throw new PlatformNotSupportedException(SR.GetString(SR.MaxConcurrentPerCPU_not_supported, "MaxConcurrentRequestsPerCPU"));
+#else
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
@@ -1979,6 +1986,7 @@ namespace System.Web.Hosting {
                         // The value must be greater than zero.  A value of zero would disable the feature, but this can only be done via configuration.
                         throw new ArgumentException(SR.GetString(SR.Invalid_queue_limit));
                 }
+#endif
             }
         }
 
@@ -1986,13 +1994,20 @@ namespace System.Web.Hosting {
                          Justification="matches casing of config attribute")]
         public static int MaxConcurrentThreadsPerCPU {
             get {
+#if !NETFRAMEWORK
+                throw new PlatformNotSupportedException(SR.GetString(SR.MaxConcurrentPerCPU_not_supported, "MaxConcurrentThreadsPerCPU"));
+#else
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
                 return UnsafeIISMethods.MgdGetMaxConcurrentThreadsPerCPU();
+#endif
             }
             [SecurityPermission(SecurityAction.Demand, Unrestricted = true)]
             set {
+#if !NETFRAMEWORK
+                throw new PlatformNotSupportedException(SR.GetString(SR.MaxConcurrentPerCPU_not_supported, "MaxConcurrentThreadsPerCPU"));
+#else
                 if (!HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Requires_Iis_Integrated_Mode));
                 }
@@ -2006,6 +2021,7 @@ namespace System.Web.Hosting {
                         // The value must be greater than zero.  A value of zero would disable the feature, but this can only be done via configuration.
                         throw new ArgumentException(SR.GetString(SR.Invalid_queue_limit));
                 }
+#endif
             }
         }
 

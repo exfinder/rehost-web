@@ -3661,6 +3661,7 @@ Event_Binding_Disallowed=Event handlers can only be bound to HttpApplication eve
 Requires_Iis_Integrated_Mode=This operation requires IIS integrated pipeline mode.
 Notification_outside_pipeline='{0}' is available only while a pipeline step is executing; this request is outside the managed pipeline.
 TransferRequest_not_supported=Server.TransferRequest is not supported on this host: there is no IIS pipeline to re-enter. Use Server.Transfer or Server.Execute instead.
+MaxConcurrentPerCPU_not_supported=HostingEnvironment.{0} is not supported on this host: these are IIS application-pool throttles and this runtime has no IIS pool. Configure request and thread concurrency on the host server.
 Method_Not_Supported_By_Iis_Integrated_Mode=The {0} method is not supported by IIS integrated pipeline mode.
 Requires_Iis_7=This operation requires IIS version 7 or higher.
 Requires_Iis_75_Integrated=This operation requires IIS version 7.5 or higher running in integrated pipeline mode.

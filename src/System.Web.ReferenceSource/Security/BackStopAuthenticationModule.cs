@@ -41,10 +41,14 @@ namespace System.Web.Security {
         public event DefaultAuthenticationEventHandler Authenticate {
             add {
                 // WOS 1709222: DefaultAuthentication_Authenticate is not supported in integrated mode.
+#if !NETFRAMEWORK
+                throw new PlatformNotSupportedException(SR.GetString(SR.Method_Not_Supported_By_Iis_Integrated_Mode, "DefaultAuthentication.Authenticate"));
+#else
                 if (HttpRuntime.UseIntegratedPipeline) {
                     throw new PlatformNotSupportedException(SR.GetString(SR.Method_Not_Supported_By_Iis_Integrated_Mode, "DefaultAuthentication.Authenticate"));
                 }
                 _eventHandler += value;
+#endif
             }
             remove {
                 _eventHandler -= value;
