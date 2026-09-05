@@ -29,8 +29,10 @@ engine is `HttpRuntime.ProcessRequest(HttpWorkerRequest)` ([ADR
 property is the feature-detection contract the migrating audience observed;
 answering `false` there sends third-party code down classic branches that the
 audience's own server never took. `Util/AppVerifier.cs` was the one imported
-reader of the public property; it moves to the internal flag, because the
-`NotificationContext` its assert demands exists only where that plumbing does.
+reader of the public property on a path the port executes (`IIS7WorkerRequest`
+also reads `IISVersion`, on a type no port worker request is); it moves to the
+internal flag, because the `NotificationContext` its assert demands exists only
+where that plumbing does.
 
 `10.0` is the version IV16 measured on the server whose `applicationHost.config`
 the port ships, so the two halves of the identity name the same pool.

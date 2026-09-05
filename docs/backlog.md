@@ -41,40 +41,12 @@ Carried from earlier milestones as unresolved detail:
   diagnostic naming the boundary — and what happens today when the section is
   present must be measured and recorded first; a silently ignored rule set is
   the least-astonishment failure mode.
-- Closed: the integrated-vs-classic divergence
-  ([audit](research/integrated-divergence-audit.md), readings IV1–IV30). Every
-  item ended as integrated behavior or a fail-fast diagnostic naming the
-  boundary; the audit has no application-visible open entries left. Six jobs,
-  one per session:
-  1. Landed: compatibility rows for the silent gaps — `Response.PushPromise`
-     no-op; `FileAuthorizationModule` dead-path note.
-  2. Landed: [ADR 0013](adr/0013-integrated-pipeline-identity.md) —
-     `UsingIntegratedPipeline` `true`, `IISVersion` `10.0`; the internal flag
-     stays classic.
-  3. Landed: `MapRequestHandler`/`LogRequest`/`PostLogRequest` steps and
-     their sync and async accessors (placement from IV1/IV4, early-end shape
-     from IV17), the hookup rethrow that closes the silent drop IV2 pinned,
-     and the `HttpContext.RemapHandler` window (IV5).
-  4. Landed: the shim batch — `CurrentNotification`/`IsPostNotification`
-     (IV6), writable `Request.Headers` (IV7-IV9), `OnExecuteRequestStep`,
-     `AddOnSendingHeaders` (IV11), the `PreSendRequest*` context restore
-     (IV12), the oversize-body fence (IV14), follow-up readings IV18-IV20 and the
-     `ThrowIfEventBindingDisallowed` fail-fast (IV10).
-  5. Landed: the remainder's build half, on readings IV21-IV30 — the error
-     page and status at the early-end jump (IV21), `HideRequestResponse`
-     (IV22), `WEBSOCKET_VERSION` (IV23), `ClientDisconnectedToken` and
-     `Request.Abort` (IV24, IV25), `Response.SubStatusCode` (IV26),
-     `Request.InsertEntityBody` (IV28) and `HostingEnvironment.StopListening`
-     from the host's stopping notification (IV30), with Katana's
-     `DisconnectWatcher` restored to upstream (ledger P92). Two items closed as
-     non-divergences with a row and no code: the `DefaultAuthenticationModule`
-     hook position (IV27) and `CallHandlerExecutionStep`'s 403 (IV29).
-  6. Landed: the remainder's fail-fast half — the `MaxConcurrent*PerCPU`
-     refusal reworded off Framework's "switch IIS modes" message, and both
-     inverse gates banned to match integrated: `DefaultAuthentication.Authenticate`
-     and `DefaultHttpHandler`, each with Framework's own message. The
-     `DefaultHttpHandler` ban needed the port's own static-file role split out
-     into `StaticFileBridgeHandler` first (ledger P93).
+- Prove an OWIN WebSocket handshake over Kestrel. The integrated-divergence
+  closure supplied everything Katana's capability probe reads —
+  `websocket.Version` stays advertised and `WEBSOCKET_VERSION` answers (IV23,
+  ledger P92) — but the accept path through `OwinCallContext` has never run;
+  until a scenario carries a handshake end to end, OWIN WebSockets stay a
+  claim about the probe, not the feature.
 
 ## Later
 
@@ -126,6 +98,9 @@ Carried from earlier milestones as unresolved detail:
   - `system.webServer/security/authorization` is not read at all. An application
     that protected a folder with the native section — the only one of the two that
     reaches a static file (MH36) — gets no protection here and no error.
+    `<handlers accessPolicy>` is unread too: IIS Web Core answered 403.1 for a
+    verb outside the policy, identically in both pipeline modes (IV29), and the
+    port serves the request.
   - `OPTIONS` answers 405 where IIS answers 200 with an `Allow` header and an
     obsolete `Public` carrying the same list, and `TRACE` answers 405 where IIS
     answers 501 unless `EnableTraceMethod` is set (MH37, MH38).

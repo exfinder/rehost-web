@@ -8,7 +8,7 @@ diagnostic naming the boundary — never a silent classic-mode difference
 ([backlog](../backlog.md)).
 
 Research only. Current support lives in the [compatibility map](../compatibility.md);
-priority lives in the backlog. Readings IV1-IV30 below were taken after the first pass and
+priority lives in the backlog. Readings IV1-IV31 below were taken after the first pass and
 have settled every entry they touch; rows carry the reading id that decides them.
 
 ## Method
@@ -27,7 +27,7 @@ line numbers drift, so members are named. Coverage:
   (second table set below).
 
 Where a classification or disposition needed the integrated observable, it was measured
-rather than inferred: [readings IV1-IV30](#framework-readings) run one application under an
+rather than inferred: [readings IV1-IV31](#framework-readings) run one application under an
 integrated and a classic application pool on the same IIS 10, so the only variable is
 pipeline mode and the classic leg is what the port reproduces today.
 
@@ -71,7 +71,7 @@ refusal outright (ledger P93). No APP-VISIBLE OPEN entry remains in this audit.
 | Member | Integrated behavior | Class | Note |
 | --- | --- | --- | --- |
 | `IsContainerInitalizationAllowed` | True while re-running `InitInternal` after IIS event registration | PLUMBING | Module step containers exist only for native notification dispatch |
-| `ThrowIfEventBindingDisallowed` | `InvalidOperationException` "Event handlers can only be bound to HttpApplication events during IHttpModule initialization" (IV10) | RESOLVED | The port raises the same refusal once `InitInternal` has completed, since `_initSpecialCompleted` is never set here (ledger P91) |
+| `ThrowIfEventBindingDisallowed` | `InvalidOperationException` "Event handlers can only be bound to HttpApplication events during IHttpModule initialization" (IV10) | RESOLVED | The port raises the same refusal once the instance's `InitInternal` has completed: the fence drops the `UseIntegratedPipeline` gate and keeps Framework's two init flags, of which `_initSpecialCompleted` is static and already set by the special instance (ledger P91) |
 | `FindISessionStateModule` | Returns the session module so `EnsureReleaseState` can release before a child request | PLUMBING | Child `Server.Execute` shares the parent's session; the release exists for `TransferRequest`, which is unsupported (P62) |
 | `AcquireNotifcationContextLock` / `ReleaseNotifcationContextLock` (2 sites) | `Debug.Assert` | PLUMBING | Debug-only; callers are integrated-only |
 | `AsyncResult` get/set (2 sites) | Stores the pending result on `NotificationContext` instead of `_ar` | PLUMBING | Per-notification storage; classic uses the field |
@@ -480,6 +480,7 @@ the box. Anonymous authentication, `customErrors mode="Off"`, `debug="false"`,
 | IV28 | `?e=ieb` on a `POST`: read `Request.Form`, then call `Request.InsertEntityBody()` and `InsertEntityBody(buffer, 0, 3)` | Integrated: both overloads return, no exception, and the response is unchanged (`200`, page body). Classic: `PlatformNotSupportedException` "This operation requires IIS integrated pipeline mode." from both | With no native handler following, the integrated call is observably a no-op. |
 | IV29 | A folder carrying `system.webServer/security/authorization` `<add accessType="Deny" users="*" />`, and a second folder carrying `<handlers accessPolicy="Read" />`, each holding an `.aspx`; also a non-existent `.txt` in the first | Deny: **401.2** from module `UrlAuthorizationModule`, error code `0x80070005`, on **both** pools, for the `.aspx` and the `.txt` alike. `accessPolicy="Read"`: **403.1** from `IIS Web Core`, `0x80070005`, on **both** pools. The page never ran in any case | Both native denial paths are enforced by IIS ahead of managed code and are identical in the two pipeline modes, so neither is an integrated-versus-classic divergence. `CallHandlerExecutionStep`'s `IsHandlerExecutionDenied` 403 is not what a denied request meets. |
 | IV30 | Register a `HostingEnvironment.StopListening` handler and an `IRegisteredObject` that is also `IStopListeningRegisteredObject` at `Application_Start`; warm the application, then `appcmd stop apppool` | Integrated: `HostingEnvironment.StopListening` and `IStopListeningRegisteredObject.StopListening` fire together, then `IRegisteredObject.Stop(immediate: false)` ~1.0s later, then `Stop(immediate: true)` ~30s after that, then `Application_End` with `ShutdownReason.HostingEnvironment`. Classic: neither StopListening signal ever fires; only `Stop(false)` → 30s → `Stop(true)` → `Application_End`. An app-domain recycle (`Global.asax` edit) raises neither signal on either pool | The early stop signal precedes `IRegisteredObject.Stop` by about a second and exists only on integrated. It is what Katana's `ShutdownDetector` binds to so a long-running request is cancelled before the drain deadline. |
+| IV31 | `Request.Headers.Set("Host", "rewritten.example:9999")` before the first `Request.Url` read, integrated, site on local port 8123; controls: a rewrite naming no port, server variables read before `Url`, `Url` read before the rewrite | `Request.Url` = `http://rewritten.example:8123/...` in both rewrite shapes: the host name follows the rewrite, the local port always wins over the rewrite's `:9999`. `SERVER_NAME` follows the rewrite, `SERVER_PORT` stays 8123, `HTTP_HOST` shows the raw rewritten string. A `Url` read before the rewrite never changes; server-variable read order is irrelevant | Extends IV8, whose recorded `:8123` was the local port and did not disambiguate. The rewrite contributes the host name only, as `SERVER_NAME` implies. |
 
 The rig (two sites, one shared application directory, raw-socket reader) was removed after the
 readings; nothing durable was left on the host.
