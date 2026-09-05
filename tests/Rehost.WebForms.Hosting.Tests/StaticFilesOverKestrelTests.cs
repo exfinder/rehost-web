@@ -110,6 +110,29 @@ public sealed class StaticFilesOverKestrelTests(PageLiveScenario scenario)
     }
 
     [Fact]
+    public async Task A_Post_To_A_Static_File_Answers_405()
+    {
+        var response = await scenario.Client.PostFormAsync("/styles.css", "probe=1");
+
+        response.StatusCode.ShouldBe(405);
+        response.Text.ShouldContain("The HTTP verb POST", Case.Sensitive);
+    }
+
+    // The classic-ASP refusal runs ahead of the extension gate, and .asp is off the static
+    // content-type list, so 404 here would mean the gate answered and the refusal is gone.
+    [Fact]
+    public async Task A_Classic_Asp_Request_Answers_403_Not_The_Gate_404()
+    {
+        File.WriteAllText(
+            Path.Combine(scenario.ApplicationPath, "gate-probe.asp"), "<% secret %>");
+
+        var response = await scenario.Client.GetAsync("/gate-probe.asp");
+
+        response.StatusCode.ShouldBe(403);
+        response.Text.ShouldNotContain("secret");
+    }
+
+    [Fact]
     public async Task Head_Answers_The_Get_Headers_With_No_Body()
     {
         var response = await scenario.Client.HeadAsync("/styles.css");

@@ -208,6 +208,16 @@
    ],
    "reason": "the integrated remainder takes its integrated arm behind !NETFRAMEWORK fences: ApplicationStepManager.ResumeSteps calls HttpContext.ReportRuntimeErrorIfExists inside the early-end jump when the context carries an error, so the error page and its status are buffered before the Log steps, and HttpRuntime.FinishRequest skips both the app-offline render and the ReportRuntimeError pair when HttpContext.IsRuntimeErrorReported already says so while still running FinalFlushAtTheEndOfRequestProcessing; the four HttpApplication HideRequestResponse gates drop their UseIntegratedPipeline test and InitInternal's classic arm wraps InitModules in the same hiding; HttpServerVarsCollection.Get falls back to HttpRequest.FetchServerVariable for a name the collection does not carry, excluding HTTP_* so a removed header is not resurrected, and FetchServerVariable answers null where there is no worker request; WorkerRequest gains TryGetClientDisconnectedToken and TryAbortConnection beside the WebSocket seam trio, which HttpResponse.ClientDisconnectedToken and HttpRequest.Abort try before their Framework refusal; HttpResponse.SubStatusCode fences out both IIS7WorkerRequest type tests and keeps the _headersWritten refusal; both HttpRequest.InsertEntityBody overloads fence out the refusal and the native call, keeping Framework's argument checks and NeedToInsertEntityBody = false; and HostingEnvironment exposes RaiseStopListening over the existing private OnGlobalStopListening, since the native wait handle SetupStopListeningHandler arms is never signalled off IIS",
    "record": "docs/portability-ledger.md P92"
+  },
+  {
+   "files": [
+    "Hosting/HostingEnvironment.cs",
+    "Security/BackStopAuthenticationModule.cs",
+    "DefaultHttpHandler.cs",
+    "System.Web.txt"
+   ],
+   "reason": "the integrated fail-fast remainder takes its integrated arm behind !NETFRAMEWORK fences: HostingEnvironment.MaxConcurrentRequestsPerCPU and MaxConcurrentThreadsPerCPU throw unconditionally from both accessors with the new MaxConcurrentPerCPU_not_supported string added to System.Web.txt, which names the property instead of Framework's Requires_Iis_Integrated_Mode message, and the UnsafeIISMethods calls with their S_FALSE/E_INVALIDARG handling stay under NETFRAMEWORK; DefaultAuthenticationModule's Authenticate add accessor throws Framework's own Method_Not_Supported_By_Iis_Integrated_Mode unconditionally while remove stays ungated; and DefaultHttpHandler.BeginProcessRequest throws the same message unconditionally, its port-owned P58 static-content gate having moved to the port-owned StaticFileBridgeHandler subclass that IntegratedHandlers now builds for the native StaticFile handler row",
+   "record": "docs/portability-ledger.md P93"
   }
  ]
 }

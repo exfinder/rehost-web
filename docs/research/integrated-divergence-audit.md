@@ -44,12 +44,12 @@ Classification:
 | Classification | `UseIntegratedPipeline` sites | Other integrated gates (members) |
 | --- | --- | --- |
 | PLUMBING | 32 | 16 |
-| RESOLVED | 25 | 11 |
-| APP-VISIBLE OPEN | 18 | 8 |
+| RESOLVED | 43 | 19 |
+| APP-VISIBLE OPEN | 0 | 0 |
 | Total | 75 | 35 |
 
-The 18 open `UseIntegratedPipeline` sites collapse to 12 distinct behaviors: the
-`HideRequestResponse` pairs account for 4 and the `HostingEnvironment` throttle accessors for
+The 18 `UseIntegratedPipeline` sites this audit opened collapsed to 12 distinct behaviors: the
+`HideRequestResponse` pairs accounted for 4 and the `HostingEnvironment` throttle accessors for
 another 4. The `MapRequestHandler`/`LogRequest`/`PostLogRequest` event family (12 sites) and
 `HookupEventHandlersForApplicationAndModules` closed with job 3 (ledger P90). Job 4
 closed six more `UseIntegratedPipeline` sites — `CurrentNotification`/`IsPostNotification`,
@@ -62,8 +62,9 @@ and `DefaultAuthenticationModule.Init` — and four members from the other-gates
 error-page timing P90 left open (ledger P92). Two of those closed as non-divergences rather
 than as code: IV27 and IV29. One first-pass open item — the `Response.Redirect` content type —
 closed as PLUMBING once measured (IV13); one new open member was found by measurement (IV12).
-What remains open is job 6's fail-fast half: `MaxConcurrent*PerCPU`,
-`DefaultAuthentication.Authenticate` and `DefaultHttpHandler`.
+Job 6 closed the fail-fast half — `MaxConcurrent*PerCPU`,
+`DefaultAuthentication.Authenticate` and `DefaultHttpHandler`, the last two taking integrated's
+refusal outright (ledger P93). No APP-VISIBLE OPEN entry remains in this audit.
 
 ## `HttpApplication.cs` — 34 sites
 
@@ -134,10 +135,16 @@ of Framework's "switch IIS modes" message. The refusal is already fenced with a 
 
 ## `DefaultHttpHandler.cs` — 1 site
 
-`BeginProcessRequest` — **OPEN** (very low). Integrated refuses the handler outright; the port
-takes the classic arm, where `CanExecuteUrlForEntireResponse` is false (`SupportsExecuteUrl`
-defaults to false) and the request degrades into the port-owned static-file path (P58). An
-application that ran on integrated cannot have depended on this handler.
+`BeginProcessRequest` — **RESOLVED** (job 6, ledger P93). Integrated refuses the handler
+outright and the port now does too, with Framework's own message. The first pass's note — "an
+application that ran on integrated cannot have depended on this handler" — was right about
+applications and wrong about the port: the port itself had reused the type as the managed body of
+the shipped baseline's native `StaticFile` handler row, so every static file it served entered
+`BeginProcessRequest` and took the classic arm, where `CanExecuteUrlForEntireResponse` is false
+(`SupportsExecuteUrl` defaults to false) and the request degraded into the port-owned static-file
+path (P58). That role moved to the internal `StaticFileBridgeHandler`, which still derives from
+`DefaultHttpHandler` because `ImplicitAsyncPreloadModule` and `HttpServerUtility.Execute`
+type-test for it.
 
 ## `UI/TraceContext.cs` — 1 site
 
@@ -166,14 +173,16 @@ optimization, and the early release pairs with `FindISessionStateModule` above.
 | `FileAuthorizationModule.CheckFileAccessForUser` | `s_Enabled = true` unconditionally | RESOLVED | Module is inert (P84). Note the inconsistency: unlike `UrlAuthorizationModule` this classic arm still reads the retired `<httpModules>` section, so the public API silently reports access granted; compatibility row (URL/file authorization) |
 | `WindowsAuthenticationModule.OnEnter` | Takes the principal IIS already set; classic reads `LOGON_USER`/`AUTH_TYPE` | RESOLVED | Registered but inert; `mode="Windows"` fails activation (P84) |
 | `RoleManagerModule.OnEnter` (2 sites) | `DisableNotifications(EndRequest)` when roles are off or uncached | PLUMBING | Perf only |
-| `DefaultAuthenticationModule.Authenticate` event add | Refuses the subscription | **OPEN** (low) | Inverse gate: the port accepts an event the audience could not use |
+| `DefaultAuthenticationModule.Authenticate` event add | Refuses the subscription | RESOLVED | The port refuses too, with Framework's own message, since it now presents an integrated identity and nobody migrating from an integrated pool can hold this subscription. The classic `DefaultAuthentication` step it fires from still exists here, and the module's hook position and anonymous principal are unchanged (IV27, ledger P93) |
 | `DefaultAuthenticationModule.Init` | Hooks `PostAuthenticateRequest`; classic hooks `DefaultAuthentication` | RESOLVED | Not observable here: IV27 re-measured with `authentication mode` `None` and `Forms` and the two pools are identical — `Context.User` null at `AuthenticateRequest`, a `GenericIdentity` at `PostAuthenticateRequest` — because the classic `DefaultAuthentication` step sits between the two events. Only `mode="Windows"` diverges (IV15), and that mode fails activation (P84). `HttpApplication.DefaultAuthentication` is `internal`, so no application can subscribe |
 
 ## `Hosting/HostingEnvironment.cs` — 4 sites
 
-`MaxConcurrentRequestsPerCPU` and `MaxConcurrentThreadsPerCPU`, get and set — **OPEN** (low).
-`PlatformNotSupportedException` today; the values are IIS pool throttles with no portable
-equivalent (Kestrel's limits belong to the host).
+`MaxConcurrentRequestsPerCPU` and `MaxConcurrentThreadsPerCPU`, get and set — **RESOLVED**
+(job 6, ledger P93). The refusal stays, since the values are IIS pool throttles with no portable
+equivalent (Kestrel's limits belong to the host), but the message no longer tells the caller to
+switch to integrated pipeline mode, which the port now reports it is already in (ADR 0013); it
+names the property and says to configure concurrency on the host server.
 
 ## `Hosting/SimpleWorkerRequest.cs` — 2 sites
 
@@ -343,9 +352,12 @@ Remaining open items, in descending likelihood:
   and `handlers accessPolicy="Read"` answers 403.1 from IIS Web Core, both ahead of managed
   code and both identical across the pools. The port's gap is that it reads neither section,
   which stays the Later entry under MH36.
-- `HostingEnvironment.MaxConcurrent*PerCPU` (4 sites, one behavior — keep the refusal, reword
-  it); `DefaultAuthentication.Authenticate` and `DefaultHttpHandler` (inverse gates the
-  audience never exercised) — job 6.
+- `HostingEnvironment.MaxConcurrent*PerCPU` (4 sites, one behavior — the refusal kept, the
+  message reworded); `DefaultAuthentication.Authenticate` and `DefaultHttpHandler` (inverse
+  gates the audience never exercised, now refused as integrated refused them). **Landed**
+  (job 6, ledger P93). `DefaultHttpHandler` was not the free ban it looked like: the port had
+  reused the type as the managed body of the native `StaticFile` handler row, so the static-file
+  role moved to an internal subclass before the public entry point could refuse.
 
 ## Job map
 
@@ -384,9 +396,15 @@ follows; this map is the authoritative item-to-job assignment.
   `CallHandlerExecutionStep`'s 403 (IV29). Boundaries the port keeps: the
   disconnect token is eager, the flush after `Request.Abort` does not raise,
   and the substatus has no consumer.
-- **Job 6 (remainder, fail-fast half):** `MaxConcurrent*PerCPU` refusal
-  reword; the inverse gates (`DefaultAuthentication.Authenticate`,
-  `DefaultHttpHandler`) — decide keep-or-document, then row each.
+- **Job 6 (remainder, fail-fast half) — landed:** the `MaxConcurrent*PerCPU`
+  refusal reworded off Framework's "switch IIS modes" message, and both inverse
+  gates banned to match integrated — `DefaultAuthentication.Authenticate` and
+  `DefaultHttpHandler`, each with Framework's own message (ledger P93). The
+  `DefaultHttpHandler` ban needed a split first: the port had repurposed the
+  type as the managed body of the shipped baseline's native `StaticFile` row, a
+  role the audit's "an application that ran on integrated cannot have depended
+  on this handler" note did not cover, so `StaticFileBridgeHandler` took it
+  over. With this the audit has no APP-VISIBLE OPEN entries left.
 
 ## Framework readings
 

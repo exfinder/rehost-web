@@ -107,9 +107,9 @@ internal static class IntegratedHandlers
         }
     }
 
-    private static IHttpHandler NativeHandler(IisHandlerRoute route, string requestType) =>
+    internal static IHttpHandler NativeHandler(IisHandlerRoute route, string requestType) =>
         route.Bridge == IisNativeBridge.StaticFile && IsStaticFileVerb(requestType)
-            ? new DefaultHttpHandler()
+            ? new StaticFileBridgeHandler()
             : new HttpMethodNotAllowedHandler();
 
     private static bool IsStaticFileVerb(string requestType) =>

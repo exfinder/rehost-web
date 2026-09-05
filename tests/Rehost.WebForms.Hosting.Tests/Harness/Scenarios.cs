@@ -153,6 +153,9 @@ public sealed class ModulesRunAllLiveScenario(ScenarioHostRegistry registry)
 public sealed class HookupRefusedLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.HookupRefused));
 
+public sealed class DefaultAuthRefusedLiveScenario(ScenarioHostRegistry registry)
+    : Scenario(registry.GetOrAdd(Fixtures.DefaultAuthRefused));
+
 public sealed class HandlersLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.Handlers));
 
