@@ -311,7 +311,9 @@ internal static class Util {
             // Attempt to create the file
             fs = new FileStream(dummyFile, FileMode.Create);
         }
-        catch {
+        catch (Exception swallowedException) {
+            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                $"{nameof(Util)}.{nameof(HasWriteAccessToDirectory)}", swallowedException, "new FileStream");
         }
         finally {
             if (fs != null) {

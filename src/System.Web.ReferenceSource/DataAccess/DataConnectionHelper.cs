@@ -86,7 +86,10 @@ namespace System.Web.DataAccess
                     return id.Name;
                 }
             }
-            catch {}
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(DataConnectionHelper)}.{nameof(GetCurrentName)}", swallowedException, "UnsafeNativeMethods.ConvertStringSidToSid");
+            }
             finally
             {
                 if( pSid != IntPtr.Zero )

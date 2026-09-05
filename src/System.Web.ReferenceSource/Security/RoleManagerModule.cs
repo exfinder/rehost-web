@@ -122,7 +122,10 @@ namespace System.Web.Security {
                             }
                         }
                     }
-                    catch {  } // ---- exceptions
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(RoleManagerModule)}.{nameof(OnEnter)}", swallowedException, "Roles.DeleteCookie");
+                    } // ---- exceptions
                 }
                 else
                 {

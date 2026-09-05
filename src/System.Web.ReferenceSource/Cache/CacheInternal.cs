@@ -1290,7 +1290,9 @@ namespace System.Web.Caching {
                     PerfCounters.IncrementCounterEx(AppPerfCounter.CACHE_OUTPUT_TRIMS, ocEntriesTrimmed);
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(CacheSingle)}.{nameof(TrimIfNecessary)}", swallowedException, "_expires.FlushExpiredItems");
             }
             
 #if DBG

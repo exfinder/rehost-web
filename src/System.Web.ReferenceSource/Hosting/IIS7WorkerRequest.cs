@@ -1437,7 +1437,9 @@ namespace System.Web.Hosting {
                     try {
                         ((MemoryBytes)_cachedResponseBodyBytes[i]).UnlockMemory();
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(IIS7WorkerRequest)}.{nameof(UnlockCachedResponseBytes)}", swallowedException, "UnlockMemory");
                     }
                 }
             }

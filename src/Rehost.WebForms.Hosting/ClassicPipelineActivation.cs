@@ -69,7 +69,7 @@ internal sealed class ClassicPipelineActivation
         }
         catch (Exception stopListeningFailure)
         {
-            WebFormsRuntimeEventSource.Log.SwallowedRequestException(
+            WebFormsRuntimeEventSource.Log.SwallowedException(
                 "ClassicPipelineActivation.Shutdown",
                 stopListeningFailure,
                 "HostingEnvironment.RaiseStopListening");

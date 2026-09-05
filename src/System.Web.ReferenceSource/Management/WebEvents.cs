@@ -431,7 +431,9 @@ namespace System.Web.Management {
                 FindEventCode(e, ref eventCode, ref eventDetailsCode, ref eStack);
                 WebBaseEvent.RaiseSystemEvent(source, eventCode, eventDetailsCode, eStack);
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(WebBaseEvent)}.{nameof(RaiseRuntimeError)}", swallowedException, "e.GetType");
             }
         }
 
@@ -2430,7 +2432,9 @@ namespace System.Web.Management {
                     s_heartbeatTimer = null;
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HealthMonitoringManager)}.{nameof(Dispose)}", swallowedException, "s_heartbeatTimer.Dispose");
             }
         }
 

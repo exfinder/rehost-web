@@ -141,7 +141,10 @@ namespace System.Web.Security {
             if ((encryptedTicket.Length % 2) == 0) { // Could be a hex string
                 try {
                     bBlob = CryptoUtil.HexToBinary(encryptedTicket);
-                } catch { }
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(FormsAuthentication)}.{nameof(Decrypt)}", swallowedException, "CryptoUtil.HexToBinary");
+                  }
             }
             if (bBlob == null)
                 bBlob = HttpServerUtility.UrlTokenDecode(encryptedTicket);

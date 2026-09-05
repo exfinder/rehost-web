@@ -77,7 +77,9 @@ internal class FileUtil {
         try {
             exists = File.Exists(filename);
         }
-        catch {
+        catch (Exception swallowedException) {
+            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                $"{nameof(FileUtil)}.{nameof(FileExists)}", swallowedException, "File.Exists");
         }
 
         return exists;
@@ -330,7 +332,9 @@ internal class FileUtil {
         try {
             exists = Directory.Exists(dirname);
         }
-        catch {
+        catch (Exception swallowedException) {
+            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                $"{nameof(FileUtil)}.{nameof(DirectoryExists)}", swallowedException, "Directory.Exists");
         }
 
         return exists;
@@ -345,7 +349,9 @@ internal class FileUtil {
         try {
             accessible = (new DirectoryInfo(dirname)).Exists;
         }
-        catch {
+        catch (Exception swallowedException) {
+            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                $"{nameof(FileUtil)}.{nameof(DirectoryAccessible)}", swallowedException, "new DirectoryInfo");
         }
 
         return accessible;

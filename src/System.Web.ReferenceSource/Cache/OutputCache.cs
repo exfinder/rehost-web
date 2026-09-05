@@ -318,7 +318,9 @@ namespace System.Web.Caching {
             try {
                 WebBaseEvent.RaiseRuntimeError(e, typeof(OutputCache));
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(OutputCache)}.{nameof(HandleErrorWithoutContext)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
             }
         }
 

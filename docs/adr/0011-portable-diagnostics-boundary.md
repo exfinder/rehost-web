@@ -38,7 +38,7 @@ runtime. A payload reshape carries an `[Event]` `Version` bump; event 2 became
 `healthMonitoring` gate, so request errors are delivered whether or not an
 application configures health monitoring, and the gated provider path stays
 exactly as Framework left it. A single failed request can therefore emit both
-`RuntimeError` and `SwallowedRequestException`; the duplication is accepted.
+`RuntimeError` and `SwallowedException`; the duplication is accepted.
 
 ## Dependency and intake
 

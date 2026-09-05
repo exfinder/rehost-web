@@ -67,7 +67,9 @@ namespace System.Web.Configuration {
                             ConfigurationErrorsException.GetFilename(child),
                             ConfigurationErrorsException.GetLineNumber(child));
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(ProtocolsConfiguration)}.ctor", swallowedException, "new ProtocolsConfigurationEntry");
                     }
                 }
                 else {

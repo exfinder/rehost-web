@@ -12,6 +12,7 @@ Two files differ from that tree:
 | --- | --- | --- |
 | `ui/ScriptControlManager.cs` | qualify six `OrderedDictionary<,>` uses as `System.Web.Util.` | .NET 9 added `System.Collections.Generic.OrderedDictionary<TKey,TValue>`; both namespaces are imported, so the bare name is ambiguous. A `using` alias cannot name an open generic. |
 | `ClientServices/Providers/ClientData.cs` | isolated-storage cache filename built with `Path.Combine` instead of a `"\\"` concat | A literal backslash is not a separator off Windows. The file is not compiled; fixed during the 2026-08-21 backslash sweep so a ClientServices port does not inherit it. |
+| `ClientServices/Providers/ClientData.cs` | two bare `catch {}` report the discarded exception on the diagnostics choke point | Repo-wide swallowed-exception sweep; ledger P94. |
 
 `Script/Services/WebServiceData.cs` carried a second deviation from 2026-08 —
 the three built-in `*_JSON_AppService.axd` mappings behind `#if NETFRAMEWORK`,

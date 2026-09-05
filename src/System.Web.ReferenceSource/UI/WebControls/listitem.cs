@@ -276,7 +276,9 @@ namespace System.Web.UI.WebControls {
                         try  {
                             Enabled = (bool) t.Third;
                         }
-                        catch {
+                        catch (Exception swallowedException) {
+                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                $"{nameof(ListItem)}.{nameof(LoadViewState)}", swallowedException, "");
                         }
                     }
                 }

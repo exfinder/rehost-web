@@ -4446,7 +4446,10 @@ window.onload = WebForm_RestoreScrollPosition;
                 try {
                     if (needToCallEndTrace)
                         ProcessRequestEndTrace();
-                } catch {}
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(Page)}.{nameof(ProcessRequest)}", swallowedException, "ProcessRequestEndTrace");
+                  }
             }
             finally {
                 if (includeStagesAfterAsyncPoint) {
@@ -4490,7 +4493,10 @@ window.onload = WebForm_RestoreScrollPosition;
                 try {
                     if (needToCallEndTrace)
                         ProcessRequestEndTrace();
-                } catch {}
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(Page)}.{nameof(ProcessRequestAsync)}", swallowedException, "ProcessRequestEndTrace");
+                  }
             }
             finally {
                 if (includeStagesAfterAsyncPoint) {

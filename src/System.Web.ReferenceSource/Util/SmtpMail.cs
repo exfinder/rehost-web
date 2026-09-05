@@ -56,7 +56,9 @@ public class SmtpMail {
                     try {
                         _type = Type.GetTypeFromProgID(_progId);
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(LateBoundAccessHelper)}.{nameof(LateBoundType)}_get", swallowedException, "Type.GetTypeFromProgID");
                     }
 
                     if (_type == null)

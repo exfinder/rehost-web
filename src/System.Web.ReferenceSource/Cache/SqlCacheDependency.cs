@@ -925,7 +925,9 @@ namespace System.Web.Caching {
 
                         dbState.ReleaseConnection(ref sqlConn, ref sqlCmd, pollExpt != null);
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(SqlCacheDependencyManager)}.{nameof(PollDatabaseForChanges)}", swallowedException, "sqlReader.Close");
                     }
 
                     // Need locking because EnsureTableIsRegisteredAndPolled() assumes 
@@ -944,7 +946,10 @@ namespace System.Web.Caching {
                                 try {
                                     cacheInternal.Remove(GetMoniterKey(dbState._database, (string)key));
                                 }
-                                catch {}
+                                catch (Exception swallowedException) {
+                                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                        $"{nameof(SqlCacheDependencyManager)}.{nameof(PollDatabaseForChanges)}#2", swallowedException, "cacheInternal.Remove");
+                                }
                                 
                                 Debug.Trace("SqlCacheDependencyManagerPolling", 
                                     "Changed to disabled.  Remove Database=" + dbState._database+ "; key=" + key);
@@ -1713,7 +1718,9 @@ namespace System.Web.Caching {
                         sqlConn.Close();
                     }
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(SqlCacheDependencyAdmin)}.{nameof(GetEnabledTables)}", swallowedException, "sqlReader.Close");
                 }
             }
 

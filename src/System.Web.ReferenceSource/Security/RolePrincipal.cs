@@ -113,8 +113,10 @@ namespace System.Web.Security {
             try{
                 ms = new System.IO.MemoryStream(bTicket);
                 rp = (new BinaryFormatter()).Deserialize(ms) as RolePrincipal;
-            } catch {
-            } finally {
+            } catch (Exception swallowedException) {
+                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      $"{nameof(RolePrincipal)}.{nameof(InitFromEncryptedTicket)}", swallowedException, "new System.IO.MemoryStream");
+              } finally {
                 ms.Close();
             }
             if (rp == null)
@@ -373,7 +375,10 @@ namespace System.Web.Security {
             _IssueDate = info.GetDateTime("_IssueDate");
             try {
                 _Identity = info.GetValue("_Identity", typeof(IIdentity)) as IIdentity;
-            } catch { } // Ignore Exceptions
+            } catch (Exception swallowedException) {
+                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      $"{nameof(RolePrincipal)}.ctor", swallowedException, "info.GetValue");
+              } // Ignore Exceptions
             _ProviderName = info.GetString("_ProviderName");
             _Username = info.GetString("_Username");
             _IsRoleListCached = info.GetBoolean("_IsRoleListCached");
@@ -442,7 +447,10 @@ namespace System.Web.Security {
             info.AddValue("_IssueDate", _IssueDate);
             try {
                 info.AddValue("_Identity", _Identity);
-            } catch { } // Ignore Exceptions
+            } catch (Exception swallowedException) {
+                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      $"{nameof(RolePrincipal)}.{nameof(GetObjectData)}", swallowedException, "info.AddValue");
+              } // Ignore Exceptions
             info.AddValue("_ProviderName", _ProviderName);
             info.AddValue("_Username", _Identity == null ? _Username : _Identity.Name);
             info.AddValue("_IsRoleListCached", _IsRoleListCached);

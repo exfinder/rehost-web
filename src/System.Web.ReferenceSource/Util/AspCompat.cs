@@ -311,7 +311,9 @@ internal class AspCompatApplicationStep : HttpApplication.IExecutionStep, IManag
                 if (regKey != null)
                     threadingModel = (String)regKey.GetValue("ThreadingModel");
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(AspCompatApplicationStep)}.{nameof(CheckThreadingModel)}", swallowedException, "Registry.ClassesRoot.OpenSubKey");
             }
             finally {
                 if (regKey != null)

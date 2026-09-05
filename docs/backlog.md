@@ -82,7 +82,9 @@ Carried from earlier milestones as unresolved detail:
   `HttpRuntime`/`HttpConfigurationSystem`/`HostingEnvironment`; feed or
   fail-fast the ones with reachable consumers:
   [ambient statics audit](follow-ups/ambient-statics-audit.md).
-- Classify reached silent catches without creating diagnostic noise:
+- Two swallows the P94 sweep surfaced and did not close:
+  `<processModel>` min-thread settings never reach the thread pool, and a null
+  callback list aborts config-record teardown:
   [silent exceptions](follow-ups/silent-exception-swallowing.md).
 
 ### IIS-derived behavior and modules

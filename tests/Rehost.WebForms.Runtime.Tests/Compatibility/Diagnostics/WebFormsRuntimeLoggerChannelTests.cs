@@ -15,21 +15,21 @@ public sealed class WebFormsRuntimeLoggerChannelTests : IDisposable
     }
 
     [Fact]
-    public void Swallowed_Request_Exception_Reaches_Both_Channels()
+    public void Swallowed_Exception_Reaches_Both_Channels()
     {
         var factory = new CollectingLoggerFactory();
         WebFormsRuntimeLogger.Publish(factory);
         using var listener = new RuntimeEventCollector();
         var swallowed = new InvalidOperationException("reporting failed");
 
-        WebFormsRuntimeEventSource.Log.SwallowedRequestException(
+        WebFormsRuntimeEventSource.Log.SwallowedException(
             "HttpRuntime.FinishRequest",
             swallowed,
             "request: original boom");
 
         var entry = factory.Entries.ShouldHaveSingleItem();
         entry.Category.ShouldBe("Rehost.WebForms.Runtime");
-        entry.Level.ShouldBe(LogLevel.Error);
+        entry.Level.ShouldBe(LogLevel.Warning);
         entry.Exception.ShouldBeSameAs(swallowed);
         entry.Message.ShouldContain("HttpRuntime.FinishRequest", Case.Sensitive);
         entry.Message.ShouldContain("request: original boom");

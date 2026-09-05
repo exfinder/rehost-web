@@ -593,7 +593,9 @@ namespace System.Web.Hosting {
                         try {
                             siteId = Int32.Parse(appHost.GetSiteID(), CultureInfo.InvariantCulture);
                         }
-                        catch {
+                        catch (Exception swallowedException) {
+                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                $"{nameof(ApplicationManager)}.{nameof(GetAppDomainInfos)}", swallowedException, "Int32.Parse");
                         }
                     }
 

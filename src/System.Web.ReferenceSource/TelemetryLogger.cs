@@ -56,7 +56,10 @@ namespace System.Web {
                     }
                 );
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(TelemetryLogger)}.{nameof(LogHttpHandler)}", swallowedException, "s_TelemetryLogger.Write");
+            }
         }
 
         public static void LogTargetFramework(Version targetFrameworkVersion) {
@@ -74,7 +77,10 @@ namespace System.Web {
                     }
                 );
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(TelemetryLogger)}.{nameof(LogTargetFramework)}", swallowedException, "s_TelemetryLogger.Write");
+            }
         }
 
         public static void LogProvider(Type providerType) {
@@ -92,7 +98,10 @@ namespace System.Web {
                     }
                 );
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(TelemetryLogger)}.{nameof(LogProvider)}", swallowedException, "s_TelemetryLogger.Write");
+            }
         }
 
         private static string GetAppID() {

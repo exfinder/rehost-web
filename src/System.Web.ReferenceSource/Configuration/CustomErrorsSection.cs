@@ -232,7 +232,10 @@ namespace System.Web.Configuration {
                 if (DeploymentSection.RetailInternal)
                     return true;
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(CustomErrorsSection)}.{nameof(CustomErrorsEnabled)}", swallowedException, "");
+            }
 
             switch (Mode) {
                 case CustomErrorsMode.Off:

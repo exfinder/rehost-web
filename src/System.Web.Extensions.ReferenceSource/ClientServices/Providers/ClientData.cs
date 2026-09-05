@@ -219,7 +219,10 @@ namespace System.Web.ClientServices.Providers
                             }
                         }
                     }
-                } catch {} // ignore exceptions
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(ClientData)}.{nameof(Load)}", swallowedException, "IsolatedStorageFile.GetUserStoreForAssembly");
+                  } // ignore exceptions
 
             } else {
                 fileName = SqlHelper.GetFullDBFileName(username, ".clientdata");
@@ -231,7 +234,10 @@ namespace System.Web.ClientServices.Providers
                             }
                         }
                     }
-                } catch {} // ignore exceptions
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(ClientData)}.{nameof(Load)}#2", swallowedException, "File.Exists");
+                  } // ignore exceptions
             }
 
 
