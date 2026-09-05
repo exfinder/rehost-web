@@ -48,12 +48,16 @@ the port ships, so the two halves of the identity name the same pool.
   `OwinCallContext.DisableResponseCompression` needed a narrow edit, recorded
   in [the Katana provenance](../provenance/aspnet-katana.md); the one
   `DisconnectWatcher` carried is gone with the token answering.
-- No member refuses with "This operation requires IIS integrated pipeline
-  mode" any more: job 6 reworded the last pair,
+- Job 6 reworded the pair that refused with "This operation requires IIS
+  integrated pipeline mode" beside a `true` answer,
   `HostingEnvironment.MaxConcurrentRequestsPerCPU` and
   `MaxConcurrentThreadsPerCPU`, to name the property and the host-side change
-  (ledger P93). A recorded refusal beside `true` is the accepted cost; a silent
-  classic branch is not, which is the whole reason the identity flips first.
+  (ledger P93). The message is not gone: `HttpContext.IsWebSocketRequest`,
+  `AcceptWebSocketRequest` (P80) and `Request.Abort` (P92) still raise it where
+  a host leaves those worker-request seams unimplemented, which is a seam
+  contract rather than a pipeline-mode claim. A recorded refusal beside `true`
+  is the accepted cost; a silent classic branch is not, which is the whole
+  reason the identity flips first.
 - Job 3 has landed: the `MapRequestHandler`/`LogRequest`/`PostLogRequest`
   subscriptions and the `HttpContext.RemapHandler` window now answer as the
   integrated pool a caller detects here (ledger P90), so the first family a
