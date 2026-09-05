@@ -6,6 +6,7 @@
 
     void Application_Start(object sender, EventArgs e)
     {
+        RouteTable.Routes.MapOwinPath("/owin-ws");
         RouteTable.Routes.EnableFriendlyUrls(
             new FriendlyUrlSettings
             {

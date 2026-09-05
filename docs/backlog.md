@@ -41,12 +41,6 @@ Carried from earlier milestones as unresolved detail:
   diagnostic naming the boundary — and what happens today when the section is
   present must be measured and recorded first; a silently ignored rule set is
   the least-astonishment failure mode.
-- Prove an OWIN WebSocket handshake over Kestrel. The integrated-divergence
-  closure supplied everything Katana's capability probe reads —
-  `websocket.Version` stays advertised and `WEBSOCKET_VERSION` answers (IV23,
-  ledger P92) — but the accept path through `OwinCallContext` has never run;
-  until a scenario carries a handshake end to end, OWIN WebSockets stay a
-  claim about the probe, not the feature.
 
 ## Later
 

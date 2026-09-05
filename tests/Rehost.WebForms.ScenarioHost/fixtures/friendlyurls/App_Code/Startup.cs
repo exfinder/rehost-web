@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
@@ -20,6 +23,39 @@ public class FixtureOwinStartup
 
         app.Use(delegate(IOwinContext context, Func<Task> next)
         {
+            if (context.Request.PathBase.Value == "/owin-ws"
+                || context.Request.Path.Value == "/owin-ws")
+            {
+                var accept = context.Get<Action<IDictionary<string, object>,
+                    Func<IDictionary<string, object>, Task>>>("websocket.Accept");
+                if (accept == null)
+                {
+                    context.Response.StatusCode = 422;
+                    return Task.CompletedTask;
+                }
+
+                accept(null, async delegate(IDictionary<string, object> ws)
+                {
+                    var send = (Func<ArraySegment<byte>, int, bool, CancellationToken, Task>)
+                        ws["websocket.SendAsync"];
+                    var receive = (Func<ArraySegment<byte>, CancellationToken,
+                        Task<Tuple<int, bool, int>>>)ws["websocket.ReceiveAsync"];
+                    var close = (Func<int, string, CancellationToken, Task>)
+                        ws["websocket.CloseAsync"];
+                    var cancelled = (CancellationToken)ws["websocket.CallCancelled"];
+
+                    var buffer = new ArraySegment<byte>(new byte[4096]);
+                    var frame = await receive(buffer, cancelled);
+                    var text = "owin-echo:" + frame.Item1 + ":"
+                        + Encoding.UTF8.GetString(buffer.Array, 0, frame.Item3);
+                    var payload = Encoding.UTF8.GetBytes(text);
+                    await send(new ArraySegment<byte>(payload), 0x1, true, cancelled);
+                    await close(1000, "owin-bye", cancelled);
+                    await receive(buffer, cancelled);
+                });
+                return Task.CompletedTask;
+            }
+
             if (context.Request.Query.Get("compression") == "off")
             {
                 ((Action)context.Environment["systemweb.DisableResponseCompression"])();
