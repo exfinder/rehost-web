@@ -11,6 +11,8 @@ public static class ShutdownProtocol
 
     public const string StopListeningEvent = "stop-listening:event";
 
+    public const string StopListeningThrew = "stop-listening:threw";
+
     public const string StopListeningObject = "stop-listening:object";
 
     public const string RegisteredStop = "registered-stop:";

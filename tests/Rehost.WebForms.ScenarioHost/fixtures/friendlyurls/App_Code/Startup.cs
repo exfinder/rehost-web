@@ -27,9 +27,11 @@ public class FixtureOwinStartup
 
             if (context.Request.Query.Get("cancel") == "read")
             {
+                var token = context.Request.CallCancelled;
                 context.Response.Headers.Set(
                     "X-Call-Cancelled",
-                    context.Request.CallCancelled.IsCancellationRequested ? "yes" : "no");
+                    (token.CanBeCanceled ? "armed-" : "none-")
+                        + (token.IsCancellationRequested ? "yes" : "no"));
             }
 
             return next();

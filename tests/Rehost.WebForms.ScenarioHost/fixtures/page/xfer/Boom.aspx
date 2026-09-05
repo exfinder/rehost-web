@@ -6,6 +6,9 @@
             Response.Write("page-output");
             Response.Filter = new UpperCaseFilter(Response.Filter);
         }
+        if (Request.QueryString["nothrow"] != null) {
+            return;
+        }
         throw new InvalidOperationException("boom-from-page");
     }
 </script>

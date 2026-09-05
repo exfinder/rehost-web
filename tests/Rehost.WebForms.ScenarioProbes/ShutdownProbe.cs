@@ -16,7 +16,11 @@ public sealed class ShutdownProbe : IRegisteredObject, IStopListeningRegisteredO
         if (Environment.GetEnvironmentVariable(ShutdownProtocol.ThrowingSubscriberVariable) != null)
         {
             HostingEnvironment.StopListening += (_, _) =>
+            {
+                TraceChannel.RecordTo(
+                    ShutdownProtocol.LogVariable, ShutdownProtocol.StopListeningThrew);
                 throw new InvalidOperationException("stop-listening-subscriber");
+            };
         }
 
         HostingEnvironment.StopListening +=

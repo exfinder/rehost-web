@@ -51,6 +51,7 @@ public sealed class StopListeningOverKestrelTests
         stopping.StatusCode.ShouldBe(200);
         scenario.WaitForExit(ExitWait).ShouldBeTrue();
         var recorded = TraceChannel.ReadLines(path);
+        recorded.ShouldContain(ShutdownProtocol.StopListeningThrew);
         recorded.ShouldNotContain(ShutdownProtocol.StopListeningEvent);
         recorded.ShouldContain(ShutdownProtocol.RegisteredStop + "False");
     }

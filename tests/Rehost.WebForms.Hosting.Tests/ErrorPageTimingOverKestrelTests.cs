@@ -47,10 +47,8 @@ public sealed class ErrorPageTimingOverKestrelTests(PageLiveScenario scenario)
         raised.ShouldBeLessThan(Array.IndexOf(stages, "err|Log=500"));
     }
 
-    // The response filter the page installed is closed by the early-end jump, before the render,
-    // so neither the error page nor the mixed-case markers written after it come back upper-cased.
-    // Case.Sensitive is the assertion here: Shouldly's string comparisons default to insensitive,
-    // which is blind to exactly the filter this measures.
+    // Case.Sensitive is load-bearing: Shouldly's string comparisons default to insensitive,
+    // which is blind to exactly the upper-casing filter this measures.
     [Fact]
     public async Task An_Installed_Response_Filter_Does_Not_Reach_The_Error_Page()
     {
@@ -59,5 +57,14 @@ public sealed class ErrorPageTimingOverKestrelTests(PageLiveScenario scenario)
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("boom-from-page", Case.Sensitive);
         response.Text.ShouldEndWith("[Log][PLog][End]", Case.Sensitive);
+    }
+
+    [Fact]
+    public async Task The_Same_Filter_Upper_Cases_A_Response_That_Does_Not_Fail()
+    {
+        var response = await scenario.Client.GetAsync("/xfer/Boom.aspx?filter=1&nothrow=1");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldContain("PAGE-OUTPUT", Case.Sensitive);
     }
 }

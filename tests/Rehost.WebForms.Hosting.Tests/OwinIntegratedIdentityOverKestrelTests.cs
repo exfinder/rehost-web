@@ -29,6 +29,6 @@ public sealed class OwinIntegratedIdentityOverKestrelTests(FriendlyUrlsLiveScena
         var response = await scenario.Client.GetAsync("/Echo?cancel=read");
 
         response.StatusCode.ShouldBe(200, response.Text);
-        response.Headers["X-Call-Cancelled"].ShouldBe("no");
+        response.Headers["X-Call-Cancelled"].ShouldBe("armed-no");
     }
 }
