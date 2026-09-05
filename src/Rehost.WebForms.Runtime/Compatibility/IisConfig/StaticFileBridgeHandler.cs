@@ -25,6 +25,9 @@ internal sealed class StaticFileBridgeHandler : DefaultHttpHandler
             throw new HttpException(403, SR.GetString(SR.Path_forbidden, request.Path));
         }
 
+        // The extension gate is load-bearing: IIS refused extensions outside its static
+        // content-type list, and this host replaces IIS, so without it any file the forbidden
+        // mappings miss would download (a *.bak beside web.config).
         if (!IisServerConfiguration.Current.ServesStaticContent(Path.GetExtension(request.FilePath))
             && !FileUtil.DirectoryExists(request.PhysicalPath))
         {
