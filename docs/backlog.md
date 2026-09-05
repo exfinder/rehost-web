@@ -41,11 +41,11 @@ Carried from earlier milestones as unresolved detail:
   diagnostic naming the boundary — and what happens today when the section is
   present must be measured and recorded first; a silently ignored rule set is
   the least-astonishment failure mode.
-- Close the integrated-vs-classic divergence
+- Closed: the integrated-vs-classic divergence
   ([audit](research/integrated-divergence-audit.md), readings IV1–IV30). Every
-  open item ends as integrated behavior or a fail-fast diagnostic naming the
-  boundary — silence is the only banned outcome. Six jobs, one per session, in
-  order (2 must precede 3; 5 and 6 may swap):
+  item ended as integrated behavior or a fail-fast diagnostic naming the
+  boundary; the audit has no application-visible open entries left. Six jobs,
+  one per session:
   1. Landed: compatibility rows for the silent gaps — `Response.PushPromise`
      no-op; `FileAuthorizationModule` dead-path note.
   2. Landed: [ADR 0013](adr/0013-integrated-pipeline-identity.md) —
@@ -69,8 +69,12 @@ Carried from earlier milestones as unresolved detail:
      `DisconnectWatcher` restored to upstream (ledger P92). Two items closed as
      non-divergences with a row and no code: the `DefaultAuthenticationModule`
      hook position (IV27) and `CallHandlerExecutionStep`'s 403 (IV29).
-  6. Remainder, fail-fast half: the audit's fail-fast leftovers; each gets a
-     diagnostic naming the boundary plus a compatibility row.
+  6. Landed: the remainder's fail-fast half — the `MaxConcurrent*PerCPU`
+     refusal reworded off Framework's "switch IIS modes" message, and both
+     inverse gates banned to match integrated: `DefaultAuthentication.Authenticate`
+     and `DefaultHttpHandler`, each with Framework's own message. The
+     `DefaultHttpHandler` ban needed the port's own static-file role split out
+     into `StaticFileBridgeHandler` first (ledger P93).
 
 ## Later
 

@@ -62,16 +62,15 @@ for PayPal — with `customErrors` as authored, zero frozen-source edits, zero
 application clears every provider section and runs roles from Identity
 claims, so the SQL-provider journey stays in the backlog.
 
-## Current — integrated-divergence closure
+## Completed — integrated-divergence closure
 
-Close every open item of the
+Every open item of the
 [integrated-vs-classic divergence audit](docs/research/integrated-divergence-audit.md)
-before the next milestone: the migrating audience ran integrated mode, and
-least astonishment demands each divergence ends as integrated behavior or a
-fail-fast diagnostic — never silence. The six-job plan lives in the
-[backlog](docs/backlog.md) under Next; one job per session.
+is closed: the migrating audience ran integrated mode, and each divergence now
+ends as integrated behavior or a fail-fast diagnostic naming the boundary —
+never silence. Six jobs, one per session, landed as ledger P90-P93.
 
-## Next — Milestone 4: production baseline
+## Current — Milestone 4: production baseline
 
 Turn a running milestone application into a production deployment baseline:
 real SQL operations, deterministic Windows/Linux publish, containers, graceful
