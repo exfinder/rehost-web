@@ -86,6 +86,13 @@ public static class Program
         try
         {
             TraceChannel.Record("private-bytes-limit:" + HttpRuntime.Cache.EffectivePrivateBytesLimit);
+            ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxIoThreads);
+            ThreadPool.GetMinThreads(out var minWorkerThreads, out var minIoThreads);
+#pragma warning disable SYSLIB0014
+            TraceChannel.Record(
+                $"thread-pool:{maxWorkerThreads}:{maxIoThreads}:{minWorkerThreads}:{minIoThreads}:"
+                + ServicePointManager.DefaultConnectionLimit);
+#pragma warning restore SYSLIB0014
 
             for (var i = 0; i < options.Requests.Count; i++)
             {

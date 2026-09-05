@@ -281,6 +281,13 @@
    ],
    "reason": "bare `catch {}` reports the discarded exception on the diagnostics choke point (ledger P94)",
    "record": "docs/portability-ledger.md P94"
+  },
+  {
+   "files": [
+    "HttpRuntime.cs"
+   ],
+   "reason": "CLR thread-pool maximum set through ThreadPool.SetMaxThreads instead of the webengine4 export (ledger P95)",
+   "record": "docs/portability-ledger.md P95"
   }
  ]
 }

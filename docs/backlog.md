@@ -82,9 +82,10 @@ Carried from earlier milestones as unresolved detail:
   `HttpRuntime`/`HttpConfigurationSystem`/`HostingEnvironment`; feed or
   fail-fast the ones with reachable consumers:
   [ambient statics audit](follow-ups/ambient-statics-audit.md).
-- Two swallows the P94 sweep surfaced and did not close:
-  `<processModel>` min-thread settings never reach the thread pool, and a null
-  callback list aborts config-record teardown:
+- The one swallow the P94 sweep surfaced and P95 did not close: a null callback
+  list aborts config-record teardown in
+  `WebConfigurationHost.StopMonitoringStreamForChanges`, needing a Framework
+  reading before it can be called a port defect:
   [silent exceptions](follow-ups/silent-exception-swallowing.md).
 
 ### IIS-derived behavior and modules

@@ -33,12 +33,10 @@ its own stack, which is what actually identifies the throwing line.
 
 Measured over the full suite and the `apps/WebFormsApplication` smoke, all green:
 
-- `HttpRuntime.SetThreadPoolLimits` fires once per application start.
-  `UnsafeNativeMethods.SetClrThreadPoolLimits` raises the port's deliberate
-  `PlatformNotSupportedException` from inside the same `try` as the portable
-  `ThreadPool.SetMinThreads` block below it, so a configured
-  `<processModel minWorkerThreads=... minIoThreads=...>` never reaches the thread
-  pool. Open.
+- `HttpRuntime.SetThreadPoolLimits` fired once per application start, and the
+  `PlatformNotSupportedException` from the native max-threads call discarded the
+  portable `ThreadPool.SetMinThreads` and connection-limit work below it.
+  Closed by P95; that site no longer reports.
 - `CacheEntry.CallCacheItemRemovedCallback#2` fires during config-record teardown
   in the suite, never in the app smoke. `WebConfigurationHost.StopMonitoringStreamForChanges`
   dereferences a null callback list and aborts `BaseConfigurationRecord.CloseRecursive()`

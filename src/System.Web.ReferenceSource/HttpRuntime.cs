@@ -1239,7 +1239,11 @@ namespace System.Web {
             // only set if different
             if (pmConfig.DefaultMaxWorkerThreadsForAutoConfig != workerMax || pmConfig.DefaultMaxIoThreadsForAutoConfig != ioMax) {
                 Debug.Trace("ThreadPool", "SetThreadLimit: from " + workerMax + "," + ioMax + " to " + pmConfig.DefaultMaxWorkerThreadsForAutoConfig + "," + pmConfig.DefaultMaxIoThreadsForAutoConfig);
+#if NETFRAMEWORK
                 UnsafeNativeMethods.SetClrThreadPoolLimits(pmConfig.DefaultMaxWorkerThreadsForAutoConfig, pmConfig.DefaultMaxIoThreadsForAutoConfig, true);
+#else
+                ThreadPool.SetMaxThreads(pmConfig.DefaultMaxWorkerThreadsForAutoConfig, pmConfig.DefaultMaxIoThreadsForAutoConfig);
+#endif
             }
 
             // this is the code equivalent of setting maxconnection
@@ -1266,7 +1270,11 @@ namespace System.Web {
                     // only set if different
                     if (pmConfig.MaxWorkerThreadsTimesCpuCount != workerMax || pmConfig.MaxIoThreadsTimesCpuCount != ioMax) {
                         Debug.Trace("ThreadPool", "SetThreadLimit: from " + workerMax + "," + ioMax + " to " + pmConfig.MaxWorkerThreadsTimesCpuCount + "," + pmConfig.MaxIoThreadsTimesCpuCount);
+#if NETFRAMEWORK
                         UnsafeNativeMethods.SetClrThreadPoolLimits(pmConfig.MaxWorkerThreadsTimesCpuCount, pmConfig.MaxIoThreadsTimesCpuCount, false);
+#else
+                        ThreadPool.SetMaxThreads(pmConfig.MaxWorkerThreadsTimesCpuCount, pmConfig.MaxIoThreadsTimesCpuCount);
+#endif
                     }
                 }
 
