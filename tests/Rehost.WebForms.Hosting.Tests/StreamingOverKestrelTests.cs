@@ -60,8 +60,8 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
         var beforeDelay = Encoding.ASCII.GetString(
             arrivals.TakeWhile(arrival => arrival.Elapsed < windowEnd)
                 .SelectMany(arrival => arrival.Bytes).ToArray());
-        beforeDelay.ShouldStartWith("HTTP/1.1 200 OK\r\n");
-        beforeDelay.ShouldContain("Transfer-Encoding: chunked\r\n");
+        beforeDelay.ShouldStartWith("HTTP/1.1 200 OK\r\n", Case.Sensitive);
+        beforeDelay.ShouldContain("Transfer-Encoding: chunked\r\n", Case.Sensitive);
         beforeDelay.ShouldNotContain("Content-Length:");
         beforeDelay.ShouldContain("6\r\npart1\n\r\n");
         beforeDelay.ShouldNotContain("part2");
@@ -79,7 +79,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
         var arrivals = await RawSocketProbe.ReadTimedAsync(scenario.Address, ProbePaths.StreamFlush + "?case=end&delay=300");
 
         var (headers, body) = SplitAndDechunk(arrivals.SelectMany(arrival => arrival.Bytes).ToArray());
-        headers.ShouldStartWith("HTTP/1.1 200 OK\r\n");
+        headers.ShouldStartWith("HTTP/1.1 200 OK\r\n", Case.Sensitive);
         body.ShouldBe("part1\npart2\n");
     }
 
@@ -130,7 +130,7 @@ public sealed class StreamingOverKestrelTests(PageLiveScenario scenario)
             scenario.Address, ProbePaths.StreamAsyncFlush + "?delay=200");
 
         var raw = arrivals.SelectMany(arrival => arrival.Bytes).ToArray();
-        Encoding.ASCII.GetString(raw).ShouldContain("Transfer-Encoding: chunked\r\n");
+        Encoding.ASCII.GetString(raw).ShouldContain("Transfer-Encoding: chunked\r\n", Case.Sensitive);
         var (headers, body) = SplitAndDechunk(raw);
         headers.ShouldNotContain("Content-Length:");
         body.ShouldBe("part1\npart2\n");

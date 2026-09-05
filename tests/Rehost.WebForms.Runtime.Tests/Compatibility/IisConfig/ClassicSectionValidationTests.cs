@@ -49,10 +49,10 @@ public sealed class ClassicSectionValidationTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("httpModules");
-        exception.Message.ShouldContain("LogA");
+        exception.Message.ShouldContain("httpModules", Case.Sensitive);
+        exception.Message.ShouldContain("LogA", Case.Sensitive);
         exception.Message.ShouldContain("web.config");
-        exception.Message.ShouldContain("validateIntegratedModeConfiguration");
+        exception.Message.ShouldContain("validateIntegratedModeConfiguration", Case.Sensitive);
     }
 
     // Reading MH5b: 500.23, the httpHandlers variant, whose entries are named by path.
@@ -72,9 +72,9 @@ public sealed class ClassicSectionValidationTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("httpHandlers");
+        exception.Message.ShouldContain("httpHandlers", Case.Sensitive);
         exception.Message.ShouldContain("probe3.axd");
-        exception.Message.ShouldContain("validateIntegratedModeConfiguration");
+        exception.Message.ShouldContain("validateIntegratedModeConfiguration", Case.Sensitive);
     }
 
     // Reading MH5c: 500.24.
@@ -118,7 +118,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("LogA");
+            .Message.ShouldContain("LogA", Case.Sensitive);
     }
 
     // Reading MH23a: a bare remove with no adds trips the same 500.22.
@@ -133,7 +133,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
             () => IisServerConfiguration.Load(Baseline(), app));
 
         exception.Message.ShouldContain("remove");
-        exception.Message.ShouldContain("Session");
+        exception.Message.ShouldContain("Session", Case.Sensitive);
     }
 
     // Reading MH23b.
@@ -156,7 +156,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("httpHandlers");
+            .Message.ShouldContain("httpHandlers", Case.Sensitive);
     }
 
     // Readings MH3, MH4, MH7, MH16: with the flag false the sections are dead text, and the
@@ -230,7 +230,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("validateIntegratedModeConfiguration");
+        exception.Message.ShouldContain("validateIntegratedModeConfiguration", Case.Sensitive);
         exception.Message.ShouldContain("web.config");
     }
 
@@ -249,7 +249,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("httpModules configSource=\"modules.config\"");
+        exception.Message.ShouldContain("httpModules configSource=\"modules.config\"", Case.Sensitive);
         exception.Message.ShouldContain(app);
     }
 
@@ -262,7 +262,7 @@ public sealed class ClassicSectionValidationTests : IDisposable
 
         Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("httpHandlers configSource=\"handlers.config\"");
+            .Message.ShouldContain("httpHandlers configSource=\"handlers.config\"", Case.Sensitive);
     }
 
     // MH33: the same registrations inside <location> trip nothing on IIS, so the port stays

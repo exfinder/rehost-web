@@ -64,7 +64,7 @@ public sealed class IisFolderHandlersCaseSensitivityTests(CaseSensitiveVolume vo
             () => IisServerConfiguration.Load(
                 baseline, Path.Combine(appRoot, "web.config"), "/app"));
 
-        failure.Message.ShouldContain("/app/Sub");
+        failure.Message.ShouldContain("/app/Sub", Case.Sensitive);
         failure.Message.ShouldContain("/app/sub");
     }
 }

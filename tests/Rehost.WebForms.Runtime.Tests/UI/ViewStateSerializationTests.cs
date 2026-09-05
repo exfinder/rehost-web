@@ -37,7 +37,7 @@ public sealed class ViewStateSerializationTests
         var bytes = stream.ToArray();
 
         bytes.ShouldContain((byte)50);
-        System.Text.Encoding.ASCII.GetString(bytes).ShouldContain("Coordinates");
+        System.Text.Encoding.ASCII.GetString(bytes).ShouldContain("Coordinates", Case.Sensitive);
     }
 
     // Framework 4.8.1 builds System.Web with OBJECTSTATEFORMATTER defined, so view state keys

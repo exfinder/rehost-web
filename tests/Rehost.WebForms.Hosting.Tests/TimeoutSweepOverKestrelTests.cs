@@ -17,7 +17,7 @@ public sealed class TimeoutSweepOverKestrelTests(SweepLiveScenario scenario)
         var (response, stages) = await scenario.TracedGetAsync(this, "/TimeoutSweep.aspx");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("Request timed out.");
+        response.Text.ShouldContain("Request timed out.", Case.Sensitive);
         stages.ShouldContain("sweep-returned");
         stages.ShouldContain("token-canceled:True");
         stages.Count(s => s.StartsWith("ApplicationError:", StringComparison.Ordinal))

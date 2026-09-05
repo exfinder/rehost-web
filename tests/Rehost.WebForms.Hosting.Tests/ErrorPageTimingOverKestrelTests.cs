@@ -16,7 +16,7 @@ public sealed class ErrorPageTimingOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(500);
         response.Text.ShouldContain("boom-from-page");
-        response.Text.ShouldEndWith("[Log][PLog][End]");
+        response.Text.ShouldEndWith("[Log][PLog][End]", Case.Sensitive);
         response.Text.IndexOf("boom-from-page", StringComparison.Ordinal)
             .ShouldBeLessThan(response.Text.IndexOf("[Log]", StringComparison.Ordinal));
         stages.ShouldContain("err|Log=500");

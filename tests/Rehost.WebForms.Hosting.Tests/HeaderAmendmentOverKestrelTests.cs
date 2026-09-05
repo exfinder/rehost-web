@@ -60,11 +60,11 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
         var (raw, _) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=end&stamp=1");
         var (headers, body) = SplitRaw(raw);
 
-        headers.ShouldStartWith("HTTP/1.1 200");
+        headers.ShouldStartWith("HTTP/1.1 200", Case.Sensitive);
         body.ShouldBe("amend-start|");
-        headers.ShouldContain("Content-Length: 12");
+        headers.ShouldContain("Content-Length: 12", Case.Sensitive);
         headers.ShouldNotContain("Transfer-Encoding");
-        headers.ShouldContain("X-After-End: stamped");
+        headers.ShouldContain("X-After-End: stamped", Case.Sensitive);
     }
 
     [Fact]
@@ -73,10 +73,10 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
         var (raw, _) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=redirect&stamp=1");
         var (headers, body) = SplitRaw(raw);
 
-        headers.ShouldStartWith("HTTP/1.1 302");
+        headers.ShouldStartWith("HTTP/1.1 302", Case.Sensitive);
         headers.ShouldContain("Content-Length: " + body.Length);
         headers.ShouldNotContain("Transfer-Encoding");
-        headers.ShouldContain("X-After-End: stamped");
+        headers.ShouldContain("X-After-End: stamped", Case.Sensitive);
     }
 
     // Reading W5: an explicit Flush in EndRequest after End writes the headers immediately with
@@ -87,10 +87,10 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
         var (raw, stages) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=end&stamp=1&fae=1");
         var (headers, body) = SplitRaw(raw);
 
-        headers.ShouldStartWith("HTTP/1.1 200");
+        headers.ShouldStartWith("HTTP/1.1 200", Case.Sensitive);
         body.ShouldContain("amend-start|");
         headers.ShouldNotContain("Content-Length");
-        headers.ShouldContain("X-After-End: stamped");
+        headers.ShouldContain("X-After-End: stamped", Case.Sensitive);
         headers.ShouldNotContain("X-Late-2");
         stages.ShouldContain("fae:flush-ok|late2-threw:HttpException");
     }

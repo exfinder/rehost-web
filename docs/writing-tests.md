@@ -93,6 +93,16 @@ response.Text.ShouldContain("...");
   build cache's case-insensitive key served any casing once one compiled.
   Arrange a cache miss (request the wrongly-cased path first), and verify a
   new test by mutation — stash the implementation out and watch it fail.
+- Shouldly's string `ShouldContain`, `ShouldStartWith` and `ShouldEndWith`
+  compare case-insensitively unless the call passes `Case.Sensitive`;
+  `ShouldBe` and the collection overloads do not. Pass `Case.Sensitive`
+  wherever casing carries the claim: markup and control ids, wire header
+  text, `Boolean.ToString()`, encoded values, paths on a case-sensitive
+  volume. A response filter test once asserted its own output was not
+  upper-cased and could not fail. Where the whole value is known, prefer
+  `ShouldBe`, which is exact and also catches extra content. The negative
+  form is the other way round: `ShouldNotContain` is stricter while it stays
+  insensitive, so leave it alone.
 - Protocol strings (labels, CLI options, environment variables, trace
   grammar) have exactly one typed definition site. Pinned expected values —
   golden hashes, rendered markup, error text — stay literal in the test: the

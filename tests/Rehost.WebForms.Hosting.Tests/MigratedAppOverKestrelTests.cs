@@ -80,7 +80,7 @@ public sealed class MigratedAppOverKestrelTests(MigratedLiveScenario scenario)
         var (response, stages) = await scenario.TracedGetAsync(this, "/asset.txt");
 
         response.StatusCode.ShouldBe(200, response.Text);
-        response.Text.ShouldContain("STATIC-OK");
+        response.Text.ShouldContain("STATIC-OK", Case.Sensitive);
         response.Headers["X-Migrated"].ShouldBe("header-module");
         stages.ShouldBe(
         [
@@ -109,7 +109,7 @@ public sealed class MigratedAppOverKestrelTests(MigratedLiveScenario scenario)
         denied.StatusCode.ShouldBe(403);
         denied.Text.ShouldBe("DENIED-BY:gatekeeper");
         allowed.StatusCode.ShouldBe(200, allowed.Text);
-        allowed.Text.ShouldContain("PRIVATE-OK");
+        allowed.Text.ShouldContain("PRIVATE-OK", Case.Sensitive);
     }
 
     // MH9v: the re-added inherited name is active for the URLs nothing else claims, and still

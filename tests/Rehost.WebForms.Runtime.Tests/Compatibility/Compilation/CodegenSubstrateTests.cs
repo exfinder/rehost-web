@@ -32,8 +32,8 @@ public sealed class CodegenSubstrateTests(CodegenSubstrateFixture fixture)
         // Global.asax used a type from App_Code, which used one from the sub-directory assembly
         // and the generated resource class. Separate load contexts would fail this, not the
         // assembly names.
-        Value(first, TraceEvents.AppCode).ShouldStartWith("App_Code.");
-        Value(first, TraceEvents.SubCode).ShouldStartWith("App_SubCode_Shared.");
+        Value(first, TraceEvents.AppCode).ShouldStartWith("App_Code.", Case.Sensitive);
+        Value(first, TraceEvents.SubCode).ShouldStartWith("App_SubCode_Shared.", Case.Sensitive);
         Value(first, TraceEvents.Resource).ShouldBe("neutral-greeting");
 
         fixture.AppCodeCount.ShouldBe(1);

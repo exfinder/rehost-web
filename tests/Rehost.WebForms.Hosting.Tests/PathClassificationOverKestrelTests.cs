@@ -67,9 +67,9 @@ public sealed class PathClassificationOverKestrelTests(PageLiveScenario scenario
         var write = await Probe("w", "//srv/share/x.txt");
         var transmit = await Probe("t", "//srv/share/x.txt");
 
-        write.ShouldStartWith("write=EX ");
+        write.ShouldStartWith("write=EX ", Case.Sensitive);
         write.ShouldNotContain("site-file");
-        transmit.ShouldStartWith("transmit=EX ");
+        transmit.ShouldStartWith("transmit=EX ", Case.Sensitive);
         transmit.ShouldNotContain("site-file");
         (await Probe("map", "//srv/share/x.txt")).ShouldBe(
             "map=" + Path.Combine(scenario.ApplicationPath, "srv", "share", "x.txt"));

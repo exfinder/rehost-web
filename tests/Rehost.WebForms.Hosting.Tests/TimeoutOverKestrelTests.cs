@@ -17,7 +17,7 @@ public sealed class TimeoutOverKestrelTests(TimeoutLiveScenario scenario)
         var (response, stages) = await scenario.TracedGetAsync(this, "/Slow.aspx?ms=5000");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("Request timed out.");
+        response.Text.ShouldContain("Request timed out.", Case.Sensitive);
         stages.ShouldContain("after-sleep-ran");
         stages.ShouldContain("ApplicationError:HttpException:Request timed out.");
         stages.ShouldContain("EndRequest");
@@ -36,6 +36,6 @@ public sealed class TimeoutOverKestrelTests(TimeoutLiveScenario scenario)
             .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("completed[past-budget=True]");
+        response.Text.ShouldContain("completed[past-budget=True]", Case.Sensitive);
     }
 }

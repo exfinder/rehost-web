@@ -21,7 +21,7 @@ public sealed class CodegenCompileErrorTests
         trace.FindAll(entry => entry == "request:/default:500").Count.ShouldBe(2);
         var diagnostics = trace.FindAll(entry => entry.StartsWith(TraceEvents.ErrorBody));
         diagnostics.Count.ShouldBe(2);
-        diagnostics[0].ShouldContain("Compilation Error");
+        diagnostics[0].ShouldContain("Compilation Error", Case.Sensitive);
         diagnostics[1].ShouldBe(diagnostics[0]);
     }
 

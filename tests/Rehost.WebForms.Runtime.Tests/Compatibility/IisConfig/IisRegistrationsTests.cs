@@ -177,7 +177,7 @@ public sealed class IisRegistrationsTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("Dup");
+        exception.Message.ShouldContain("Dup", Case.Sensitive);
         exception.Message.ShouldContain("modules");
         exception.Message.ShouldContain("web.config");
     }
@@ -198,7 +198,7 @@ public sealed class IisRegistrationsTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("Dup");
+        exception.Message.ShouldContain("Dup", Case.Sensitive);
         exception.Message.ShouldContain("handlers");
         exception.Message.ShouldContain("web.config");
     }
@@ -213,7 +213,7 @@ public sealed class IisRegistrationsTests : IDisposable
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("Session");
+            .Message.ShouldContain("Session", Case.Sensitive);
     }
 
     // Reading MH14.

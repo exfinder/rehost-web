@@ -47,7 +47,7 @@ public sealed class HandlersOverKestrelTests(HandlersLiveScenario scenario)
         var broken = await scenario.Client.GetAsync("/broken.axd");
 
         broken.StatusCode.ShouldBe(500);
-        broken.Text.ShouldContain("Broken");
+        broken.Text.ShouldContain("Broken", Case.Sensitive);
 
         (await scenario.Client.GetAsync("/api")).StatusCode.ShouldBe(200);
     }

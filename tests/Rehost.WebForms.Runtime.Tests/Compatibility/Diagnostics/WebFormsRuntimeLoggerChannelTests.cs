@@ -31,7 +31,7 @@ public sealed class WebFormsRuntimeLoggerChannelTests : IDisposable
         entry.Category.ShouldBe("Rehost.WebForms.Runtime");
         entry.Level.ShouldBe(LogLevel.Error);
         entry.Exception.ShouldBeSameAs(swallowed);
-        entry.Message.ShouldContain("HttpRuntime.FinishRequest");
+        entry.Message.ShouldContain("HttpRuntime.FinishRequest", Case.Sensitive);
         entry.Message.ShouldContain("request: original boom");
         entry.State.ShouldContain(new KeyValuePair<string, object?>("site", "HttpRuntime.FinishRequest"));
 
@@ -67,8 +67,8 @@ public sealed class WebFormsRuntimeLoggerChannelTests : IDisposable
         Misc.ReportUnhandledException(exception, ["Unhandled execution error", " | app: ", "test-app"]);
 
         var written = listener.EventsWithId(1).ShouldHaveSingleItem();
-        written.Payload[0].ShouldStartWith("Unhandled execution error | app: test-app");
-        written.Payload[0].ShouldContain("System.Web.HttpException");
+        written.Payload[0].ShouldStartWith("Unhandled execution error | app: test-app", Case.Sensitive);
+        written.Payload[0].ShouldContain("System.Web.HttpException", Case.Sensitive);
         written.Payload[0].ShouldContain("page blew up");
         written.Payload[0].ShouldContain(nameof(Thrown));
         factory.Entries.ShouldHaveSingleItem().Exception.ShouldBeSameAs(exception);
@@ -110,7 +110,7 @@ public sealed class WebFormsRuntimeLoggerChannelTests : IDisposable
         var replacement = new CollectingLoggerFactory();
         WebFormsRuntimeLogger.Publish(replacement);
         WebFormsRuntimeEventSource.Log.MonitorSampleFailed("RecycleLimitMonitor", new IOException("later failure"));
-        replacement.Entries.ShouldHaveSingleItem().Message.ShouldContain("RecycleLimitMonitor");
+        replacement.Entries.ShouldHaveSingleItem().Message.ShouldContain("RecycleLimitMonitor", Case.Sensitive);
         disposed.Entries.ShouldBeEmpty();
     }
 

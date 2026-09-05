@@ -68,7 +68,7 @@ public sealed class AsyncPagesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/async/ParallelTasks.aspx");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("'executeInParallel'");
+        response.Text.ShouldContain("'executeInParallel'", Case.Sensitive);
         response.Text.ShouldContain("unsupported in the current application configuration");
     }
 
@@ -96,7 +96,7 @@ public sealed class AsyncPagesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/async/TokenTask.aspx?slow=1");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("An asynchronous operation exceeded the page timeout.");
+        response.Text.ShouldContain("An asynchronous operation exceeded the page timeout.", Case.Sensitive);
     }
 
     [Fact]

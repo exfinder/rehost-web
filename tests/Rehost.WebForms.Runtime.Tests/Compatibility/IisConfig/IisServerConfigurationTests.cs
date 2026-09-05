@@ -195,7 +195,7 @@ public sealed class IisServerConfigurationTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("allowUnlisted=\"yes\"");
+        exception.Message.ShouldContain("allowUnlisted=\"yes\"", Case.Sensitive);
         exception.Message.ShouldContain(app);
     }
 
@@ -252,7 +252,7 @@ public sealed class IisServerConfigurationTests : IDisposable
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("mimeType");
+            .Message.ShouldContain("mimeType", Case.Sensitive);
     }
 
     [Fact]

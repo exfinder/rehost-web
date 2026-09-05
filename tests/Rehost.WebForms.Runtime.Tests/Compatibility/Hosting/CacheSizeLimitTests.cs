@@ -15,8 +15,8 @@ public sealed class CacheSizeLimitTests
         var refusal = Should.Throw<ConfigurationErrorsException>(
             () => UnsupportedCacheOptions.RejectPrivateBytesLimit(209715200));
 
-        refusal.Message.ShouldContain("privateBytesLimit");
-        refusal.Message.ShouldContain("processModel memoryLimit");
+        refusal.Message.ShouldContain("privateBytesLimit", Case.Sensitive);
+        refusal.Message.ShouldContain("processModel memoryLimit", Case.Sensitive);
     }
 
     [Fact]

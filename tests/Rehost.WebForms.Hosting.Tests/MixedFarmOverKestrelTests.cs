@@ -18,7 +18,7 @@ public sealed class MixedFarmOverKestrelTests(FarmBatch scenario) : IClassFixtur
         // clicked: the button's Click handler ran, so the payload survived MAC validation, view
         // state deserialization, and event validation rather than merely decrypting.
         Run.ResponseText("captured:postback")
-            .ShouldContain("postback=True|carried=carried-from-initial|echo=clicked");
+            .ShouldContain("postback=True|carried=carried-from-initial|echo=clicked", Case.Sensitive);
     }
 
     // Carried is assigned only when IsPostBack is false, so its value here crossed runtimes inside
@@ -30,7 +30,7 @@ public sealed class MixedFarmOverKestrelTests(FarmBatch scenario) : IClassFixtur
         var render = Run.ResponseText("captured:render");
         var postback = Run.ResponseText("captured:postback");
 
-        render.ShouldContain("postback=False");
+        render.ShouldContain("postback=False", Case.Sensitive);
         postback.ShouldContain("carried=carried-from-initial");
     }
 
@@ -41,6 +41,6 @@ public sealed class MixedFarmOverKestrelTests(FarmBatch scenario) : IClassFixtur
     {
         Run.Status("captured-without-event-validation:postback").ShouldBe(500);
         Run.ResponseText("captured-without-event-validation:postback")
-            .ShouldContain("Invalid postback or callback argument");
+            .ShouldContain("Invalid postback or callback argument", Case.Sensitive);
     }
 }

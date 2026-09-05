@@ -21,7 +21,7 @@ public sealed class WebResourceOverKestrelTests(PageLiveScenario scenario)
     public async Task An_Embedded_Resource_Round_Trips_Through_The_Handler()
     {
         var url = await RenderedUrlAsync();
-        url.ShouldStartWith("/WebResource.axd?d=");
+        url.ShouldStartWith("/WebResource.axd?d=", Case.Sensitive);
 
         var response = await scenario.Client.GetAsync(url);
 

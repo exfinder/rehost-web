@@ -157,7 +157,7 @@ public sealed class IisPreConditionsTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("runAllManagedModulesForAllRequests");
+        exception.Message.ShouldContain("runAllManagedModulesForAllRequests", Case.Sensitive);
         exception.Message.ShouldContain("web.config");
     }
 
@@ -172,8 +172,8 @@ public sealed class IisPreConditionsTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("Module");
-        exception.Message.ShouldContain("LogA");
+        exception.Message.ShouldContain("Module", Case.Sensitive);
+        exception.Message.ShouldContain("LogA", Case.Sensitive);
         exception.Message.ShouldContain("bogus");
         exception.Message.ShouldContain("web.config");
     }
@@ -194,8 +194,8 @@ public sealed class IisPreConditionsTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("Handler");
-        exception.Message.ShouldContain("PC");
+        exception.Message.ShouldContain("Handler", Case.Sensitive);
+        exception.Message.ShouldContain("PC", Case.Sensitive);
         exception.Message.ShouldContain("bogus");
         exception.Message.ShouldContain("web.config");
     }
@@ -286,6 +286,6 @@ public sealed class IisPreConditionsTests : IDisposable
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("LogA");
+            .Message.ShouldContain("LogA", Case.Sensitive);
     }
 }

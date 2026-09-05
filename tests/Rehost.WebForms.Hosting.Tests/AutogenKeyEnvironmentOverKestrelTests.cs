@@ -33,7 +33,7 @@ public sealed class AutogenKeyEnvironmentOverKestrelTests(AuthLiveScenario confi
             });
 
         var signIn = await environmentKeyed.Client.GetAsync(ProbePaths.AuthSignIn + "?u=alice&p=pw");
-        signIn.Text.ShouldContain("validate:True");
+        signIn.Text.ShouldContain("validate:True", Case.Sensitive);
         var ticket = signIn.SetCookies
             .First(line => line.StartsWith(AuthCookie + "=", StringComparison.Ordinal))
             .Split(';')[0];

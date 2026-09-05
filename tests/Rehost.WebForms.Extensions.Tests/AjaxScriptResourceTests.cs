@@ -72,7 +72,7 @@ public sealed class AjaxScriptResourceTests
     {
         var core = ReadResource("MicrosoftAjaxCore.js");
 
-        core.ShouldContain("Sys.Debug.isDebug=false");
+        core.ShouldContain("Sys.Debug.isDebug=false", Case.Sensitive);
         core.ShouldNotContain("Sys.Res.notATypeName");
     }
 
@@ -126,7 +126,7 @@ public sealed class AjaxScriptResourceTests
         var script = ReadResource("MicrosoftAjax.js");
 
         script.ShouldStartWith("//----");
-        script.ShouldContain("// MicrosoftAjax.js\r\n");
+        script.ShouldContain("// MicrosoftAjax.js\r\n", Case.Sensitive);
         Regex.Matches(script, "Copyright").Count.ShouldBe(1);
     }
 }

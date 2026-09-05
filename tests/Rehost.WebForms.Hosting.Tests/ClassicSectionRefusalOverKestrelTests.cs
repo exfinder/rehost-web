@@ -18,8 +18,8 @@ public sealed class ClassicSectionRefusalOverKestrelTests
         host.WaitForExit();
 
         host.ExitCode.ShouldNotBe(0, host.StandardOutput);
-        host.StandardError.ShouldContain("httpModules <add name=\"ClassicOnly\">");
-        host.StandardError.ShouldContain("httpHandlers <add path=\"probe3.axd\">");
-        host.StandardError.ShouldContain("validateIntegratedModeConfiguration=\"false\"");
+        host.StandardError.ShouldContain("httpModules <add name=\"ClassicOnly\">", Case.Sensitive);
+        host.StandardError.ShouldContain("httpHandlers <add path=\"probe3.axd\">", Case.Sensitive);
+        host.StandardError.ShouldContain("validateIntegratedModeConfiguration=\"false\"", Case.Sensitive);
     }
 }

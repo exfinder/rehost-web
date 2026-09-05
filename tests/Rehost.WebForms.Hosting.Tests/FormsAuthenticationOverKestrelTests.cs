@@ -38,11 +38,11 @@ public sealed class FormsAuthenticationOverKestrelTests(AuthLiveScenario scenari
     public async Task Signing_In_Authenticates_The_Next_Request()
     {
         var signIn = await scenario.Client.GetAsync(ProbePaths.AuthSignIn + "?u=alice&p=pw");
-        signIn.Text.ShouldContain("validate:True");
+        signIn.Text.ShouldContain("validate:True", Case.Sensitive);
 
         var ticket = Cookie(signIn, AuthCookie).ShouldNotBeNull();
         ticket.ShouldContain("path=/");
-        ticket.ShouldContain("HttpOnly");
+        ticket.ShouldContain("HttpOnly", Case.Sensitive);
         ticket.ShouldNotContain("expires=");
 
         var report = Report(await scenario.Client.GetWithCookiesAsync(ProbePaths.AuthStatus, Value(ticket)));
@@ -67,7 +67,7 @@ public sealed class FormsAuthenticationOverKestrelTests(AuthLiveScenario scenari
 
         var roles = Cookie(first, RoleCookie).ShouldNotBeNull();
         roles.ShouldContain("path=/");
-        roles.ShouldContain("HttpOnly");
+        roles.ShouldContain("HttpOnly", Case.Sensitive);
 
         var second = await scenario.Client.GetWithCookiesAsync(ProbePaths.AuthStatus, ticket, Value(roles));
         Report(second)["editors"].ShouldBe("True");

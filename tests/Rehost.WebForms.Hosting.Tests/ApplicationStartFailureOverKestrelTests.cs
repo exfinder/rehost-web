@@ -86,7 +86,7 @@ public sealed class ApplicationStartFailureOverKestrelTests
 
         first.StatusCode.ShouldBe(500);
         first.Text.ShouldContain("appstart-fault:1");
-        parked.ShouldStartWith("HTTP/1.1 500");
+        parked.ShouldStartWith("HTTP/1.1 500", Case.Sensitive);
         parked.ShouldContain("appstart-fault:1");
     }
 

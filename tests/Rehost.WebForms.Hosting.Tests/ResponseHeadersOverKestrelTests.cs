@@ -53,8 +53,8 @@ public sealed class ResponseHeadersOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe("/x");
-        response.Text.ShouldEndWith("Count=0\nContentType=text/html\nRedirectLocation=/x\nStatusCode=302\n");
-        response.Text.ShouldContain("Object moved");
+        response.Text.ShouldEndWith("Count=0\nContentType=text/html\nRedirectLocation=/x\nStatusCode=302\n", Case.Sensitive);
+        response.Text.ShouldContain("Object moved", Case.Sensitive);
     }
 
     [Fact]
@@ -137,7 +137,7 @@ public sealed class ResponseHeadersOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(302);
         response.Header("Location").ShouldBe("/x");
-        response.Text.ShouldEndWith("Count=0\nContentType=text/html\nRedirectLocation=/x\nStatusCode=302\n");
+        response.Text.ShouldEndWith("Count=0\nContentType=text/html\nRedirectLocation=/x\nStatusCode=302\n", Case.Sensitive);
     }
 
     [Fact]

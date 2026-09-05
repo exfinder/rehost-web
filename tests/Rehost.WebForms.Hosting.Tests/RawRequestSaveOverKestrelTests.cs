@@ -70,10 +70,10 @@ public sealed class RawRequestSaveOverKestrelTests(BodyLiveScenario scenario)
         split.ShouldBeGreaterThan(0);
 
         var head = Encoding.UTF8.GetString(saved, 0, split);
-        head.ShouldStartWith("POST /save?mode=raw-headers&to=");
-        head.ShouldContain(" HTTP/1.1\r\n");
+        head.ShouldStartWith("POST /save?mode=raw-headers&to=", Case.Sensitive);
+        head.ShouldContain(" HTTP/1.1\r\n", Case.Sensitive);
         head.ShouldContain("Content-Length: " + body.Length + "\r\n");
-        head.ShouldContain("Content-Type: application/octet-stream\r\n");
+        head.ShouldContain("Content-Type: application/octet-stream\r\n", Case.Sensitive);
         saved[(split + separator.Length)..].ShouldBe(body);
     }
 

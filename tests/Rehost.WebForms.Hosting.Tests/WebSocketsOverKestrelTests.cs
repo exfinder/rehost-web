@@ -103,7 +103,7 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
         using var socket = new ClientWebSocket();
         await socket.ConnectAsync(WsUri("mode=junk"), _deadline.Token);
 
-        (await ReceiveTextAsync(socket)).ShouldStartWith("type=System.Web.WebSockets.AspNetWebSocket");
+        (await ReceiveTextAsync(socket)).ShouldStartWith("type=System.Web.WebSockets.AspNetWebSocket", Case.Sensitive);
         await socket.CloseAsync(WebSocketCloseStatus.NormalClosure, "", _deadline.Token);
     }
 
@@ -112,14 +112,14 @@ public sealed class WebSocketsOverKestrelTests(PageLiveScenario scenario)
     {
         // sub-protocol the client did not offer: 500 ArgumentException (R-WS4)
         var mismatch = await RawHandshakeAsync("mode=sub", "Sec-WebSocket-Protocol: other");
-        mismatch.ShouldStartWith("HTTP/1.1 500 ");
-        mismatch.ShouldContain("The sub-protocol &#39;chat&#39; cannot be negotiated for this request.");
+        mismatch.ShouldStartWith("HTTP/1.1 500 ", Case.Sensitive);
+        mismatch.ShouldContain("The sub-protocol &#39;chat&#39; cannot be negotiated for this request.", Case.Sensitive);
 
         // RequireSameOrigin without / with a foreign Origin: 403 (R-WS5)
-        (await RawHandshakeAsync("mode=origin", null)).ShouldStartWith("HTTP/1.1 403 ");
-        (await RawHandshakeAsync("mode=origin", "Origin: http://evil.example")).ShouldStartWith("HTTP/1.1 403 ");
+        (await RawHandshakeAsync("mode=origin", null)).ShouldStartWith("HTTP/1.1 403 ", Case.Sensitive);
+        (await RawHandshakeAsync("mode=origin", "Origin: http://evil.example")).ShouldStartWith("HTTP/1.1 403 ", Case.Sensitive);
         (await RawHandshakeAsync("mode=origin", "Origin: http://" + scenario.Address.Authority))
-            .ShouldStartWith("HTTP/1.1 101 ");
+            .ShouldStartWith("HTTP/1.1 101 ", Case.Sensitive);
 
         // a plain GET is not a WebSocket request (R-WS6)
         var info = await scenario.Client.GetAsync(ProbePaths.WebSocketEcho + "?mode=info");

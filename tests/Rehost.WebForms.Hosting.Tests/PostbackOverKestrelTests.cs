@@ -16,8 +16,8 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
         var render = await scenario.Client.GetAsync("/Default.aspx");
 
         render.StatusCode.ShouldBe(200);
-        render.Text.ShouldContain("name=\"__VIEWSTATE\"");
-        render.Text.ShouldContain("name=\"__EVENTVALIDATION\"");
+        render.Text.ShouldContain("name=\"__VIEWSTATE\"", Case.Sensitive);
+        render.Text.ShouldContain("name=\"__EVENTVALIDATION\"", Case.Sensitive);
 
         // Pinned, not merely present: GetClientStateIdentifier hashes the template source
         // directory and the generated type name, and ledger P38 makes that hash the stable
@@ -114,7 +114,7 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
             });
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("Validation of viewstate MAC failed");
+        response.Text.ShouldContain("Validation of viewstate MAC failed", Case.Sensitive);
     }
 
     // The same corrupt-payload class as the tampered case, distinguished only by the generator
@@ -160,8 +160,8 @@ public sealed class PostbackOverKestrelTests(PostbackLiveScenario scenario)
             });
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("HttpRequestValidationException");
-        response.Text.ShouldContain("A potentially dangerous Request.Form value was detected");
+        response.Text.ShouldContain("HttpRequestValidationException", Case.Sensitive);
+        response.Text.ShouldContain("A potentially dangerous Request.Form value was detected", Case.Sensitive);
     }
 
     private async Task<string> RenderAsync() =>

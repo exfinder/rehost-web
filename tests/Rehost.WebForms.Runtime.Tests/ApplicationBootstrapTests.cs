@@ -105,7 +105,7 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<PlatformNotSupportedException>(
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
-        exception.Message.ShouldContain("aspnet:UseTaskFriendlySynchronizationContext");
+        exception.Message.ShouldContain("aspnet:UseTaskFriendlySynchronizationContext", Case.Sensitive);
         exception.Message.ShouldContain("task-friendly");
     }
 
@@ -139,7 +139,7 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
-        exception.Message.ShouldContain("Web Forms configuration preflight failed");
+        exception.Message.ShouldContain("Web Forms configuration preflight failed", Case.Sensitive);
         exception.Message.ShouldContain("web.config");
         exception.InnerException.ShouldNotBeNull();
     }
@@ -337,7 +337,7 @@ public sealed class ApplicationBootstrapTests
             });
 
         exception.Message.ShouldContain(WebFormsApplicationOptions.CompilationTempDirectoryVariable);
-        exception.Message.ShouldContain("Remove one of them");
+        exception.Message.ShouldContain("Remove one of them", Case.Sensitive);
     }
 
     [Fact]
@@ -417,8 +417,8 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<PlatformNotSupportedException>(
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
-        exception.Message.ShouldContain("mode=\"Windows\"");
-        exception.Message.ShouldContain("Windows login");
+        exception.Message.ShouldContain("mode=\"Windows\"", Case.Sensitive);
+        exception.Message.ShouldContain("Windows login", Case.Sensitive);
     }
 
     [Fact]
@@ -461,7 +461,7 @@ public sealed class ApplicationBootstrapTests
 
             exception.Message.ShouldContain($"targetFramework=\"{declared}\"");
             exception.Message.ShouldContain("is not supported");
-            exception.Message.ShouldContain("targetFramework=\"4.0\" and later");
+            exception.Message.ShouldContain("targetFramework=\"4.0\" and later", Case.Sensitive);
         }
     }
 
@@ -522,9 +522,9 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<PlatformNotSupportedException>(
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
-        exception.Message.ShouldContain("mode=\"StateServer\"");
+        exception.Message.ShouldContain("mode=\"StateServer\"", Case.Sensitive);
         exception.Message.ShouldContain("is not supported");
-        exception.Message.ShouldContain("mode=\"InProc\"");
+        exception.Message.ShouldContain("mode=\"InProc\"", Case.Sensitive);
     }
 
     [Fact]
@@ -545,9 +545,9 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<PlatformNotSupportedException>(
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
-        exception.Message.ShouldContain("mode=\"SQLServer\"");
+        exception.Message.ShouldContain("mode=\"SQLServer\"", Case.Sensitive);
         exception.Message.ShouldContain("is not yet implemented");
-        exception.Message.ShouldContain("mode=\"InProc\"");
+        exception.Message.ShouldContain("mode=\"InProc\"", Case.Sensitive);
     }
 
     [Fact]
@@ -589,8 +589,8 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => ApplicationConfigurationPreflight.Validate(configuration));
 
-        exception.Message.ShouldContain("Configuration reload is unavailable");
-        exception.Message.ShouldContain("fcnMode=\"Disabled\"");
+        exception.Message.ShouldContain("Configuration reload is unavailable", Case.Sensitive);
+        exception.Message.ShouldContain("fcnMode=\"Disabled\"", Case.Sensitive);
     }
 
     [Fact]
@@ -715,7 +715,7 @@ public sealed class ApplicationBootstrapTests
         var exception = Should.Throw<InvalidOperationException>(
             () => ApplicationBinding.Bind(configuration, data));
 
-        exception.Message.ShouldContain(".appId");
+        exception.Message.ShouldContain(".appId", Case.Sensitive);
         data.Values[".appId"].ShouldBe("other-app");
         data.Get(".appPath").ShouldBeNull();
     }

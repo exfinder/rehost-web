@@ -89,7 +89,7 @@ public sealed class IisFolderHandlersTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(Load);
 
         exception.Message.ShouldContain(broken);
-        exception.Message.ShouldContain("not well-formed XML");
+        exception.Message.ShouldContain("not well-formed XML", Case.Sensitive);
     }
 
     // A hidden segment refuses every request that touches it, so a folder file underneath one can
@@ -268,7 +268,7 @@ public sealed class IisFolderHandlersTests : IDisposable
         var failure = Should.Throw<ConfigurationErrorsException>(Load);
 
         failure.Message.ShouldContain(folder);
-        failure.Message.ShouldContain("Dup");
+        failure.Message.ShouldContain("Dup", Case.Sensitive);
     }
 
     // A folder's rows are validated at activation, not when a request first reaches the folder.
@@ -296,7 +296,7 @@ public sealed class IisFolderHandlersTests : IDisposable
         var failure = Should.Throw<ConfigurationErrorsException>(Load);
 
         failure.Message.ShouldContain(folder);
-        failure.Message.ShouldContain("CustomNativeModule");
+        failure.Message.ShouldContain("CustomNativeModule", Case.Sensitive);
     }
 
     // MH24: IIS ignores a folder <modules> section outright. The handlers walk reads the same

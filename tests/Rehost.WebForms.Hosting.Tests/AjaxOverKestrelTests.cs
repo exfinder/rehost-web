@@ -74,8 +74,8 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("""<div id="Panel">""");
         response.Text.ShouldContain("inside:initial");
-        response.Text.ShouldContain("Sys.WebForms.PageRequestManager._initialize");
-        response.Text.ShouldContain("ScriptResource.axd");
+        response.Text.ShouldContain("Sys.WebForms.PageRequestManager._initialize", Case.Sensitive);
+        response.Text.ShouldContain("ScriptResource.axd", Case.Sensitive);
     }
 
     [Fact]
@@ -187,8 +187,8 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         var response = await GetAsBrowserAsync("/ajax/Panel.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("PageMethods");
-        response.Text.ShouldContain("Echo");
+        response.Text.ShouldContain("PageMethods", Case.Sensitive);
+        response.Text.ShouldContain("Echo", Case.Sensitive);
     }
 
     [Fact]
@@ -224,7 +224,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(500);
         response.Headers["Content-Type"].ShouldStartWith("application/json");
-        response.Text.ShouldContain("AuthenticationService is disabled.");
+        response.Text.ShouldContain("AuthenticationService is disabled.", Case.Sensitive);
     }
 
     [Fact]
@@ -236,7 +236,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
             "application/json; charset=utf-8");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("RoleService is disabled.");
+        response.Text.ShouldContain("RoleService is disabled.", Case.Sensitive);
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/ajax/Query.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("[Grace:85][Linus:55][Ada:36]");
+        response.Text.ShouldContain("[Grace:85][Linus:55][Ada:36]", Case.Sensitive);
         response.Text.ShouldNotContain("Brendan");
     }
 }

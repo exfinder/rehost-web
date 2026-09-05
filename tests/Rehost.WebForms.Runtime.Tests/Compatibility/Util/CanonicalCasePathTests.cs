@@ -53,8 +53,8 @@ public sealed class CanonicalCasePathTests(CaseSensitiveVolume volume)
             () => CanonicalCasePath.Resolve(Path.Combine(root, "file.txt"), root));
 
         exception.GetHttpCode().ShouldBe(500);
-        exception.Message.ShouldContain("File.txt");
-        exception.Message.ShouldContain("fILE.txt");
+        exception.Message.ShouldContain("File.txt", Case.Sensitive);
+        exception.Message.ShouldContain("fILE.txt", Case.Sensitive);
     }
 
     [Fact]

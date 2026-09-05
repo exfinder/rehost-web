@@ -79,7 +79,7 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
         var (response, stages) = await scenario.TracedGetAsync(this, "/asset.txt");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("STATIC-OK");
+        response.Text.ShouldContain("STATIC-OK", Case.Sensitive);
         stages.ShouldBe(ModuleStages.Interleaved("unconditioned", "webserver-copy"));
     }
 

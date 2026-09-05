@@ -97,7 +97,7 @@ public sealed class DefaultDocumentsTests : IDisposable
         var exception = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(Baseline(), app));
 
-        exception.Message.ShouldContain("DEFAULT.HTM");
+        exception.Message.ShouldContain("DEFAULT.HTM", Case.Sensitive);
         exception.Message.ShouldContain("web.config");
     }
 

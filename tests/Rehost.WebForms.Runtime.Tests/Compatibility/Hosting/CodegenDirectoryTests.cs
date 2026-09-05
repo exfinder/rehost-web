@@ -64,7 +64,7 @@ public sealed class CodegenDirectoryTests
 
         exception.Filename.ShouldBe("/app/web.config");
         exception.Line.ShouldBe(11);
-        exception.Message.ShouldContain("tempDirectory");
+        exception.Message.ShouldContain("tempDirectory", Case.Sensitive);
     }
 
     [Fact]

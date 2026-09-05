@@ -47,7 +47,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
         var exact = await live.Client.GetAsync("/extra.aspx");
 
         ambiguous.StatusCode.ShouldBe(500);
-        ambiguous.Text.ShouldContain("Extra.aspx");
+        ambiguous.Text.ShouldContain("Extra.aspx", Case.Sensitive);
         ambiguous.Text.ShouldContain("extra.aspx");
         exact.StatusCode.ShouldBe(200);
         exact.Text.ShouldContain("lower");
@@ -95,7 +95,7 @@ public sealed class CaseInsensitiveUrlOverKestrelTests(CaseSensitiveLiveScenario
         var exact = await live.Client.GetAsync("/dup.js");
 
         ambiguous.StatusCode.ShouldBe(500);
-        ambiguous.Text.ShouldContain("Dup.js");
+        ambiguous.Text.ShouldContain("Dup.js", Case.Sensitive);
         ambiguous.Text.ShouldContain("dup.js");
         exact.StatusCode.ShouldBe(200);
         exact.Text.ShouldContain("//lower");

@@ -204,7 +204,7 @@ public sealed class IntegratedHandlersTests : IDisposable
             () => IntegratedHandlers.Resolve(routes, "GET", Path_("/app/phantom.aspx"), absent));
 
         failure.GetHttpCode().ShouldBe(404);
-        failure.Message.ShouldContain("Phantom");
+        failure.Message.ShouldContain("Phantom", Case.Sensitive);
     }
 
     // No reading covers Either and Directory; they carry the meaning IIS documents, and the
@@ -254,8 +254,8 @@ public sealed class IntegratedHandlersTests : IDisposable
                      scriptProcessor="C:\legacy.dll" />
                 """));
 
-        failure.Message.ShouldContain("IsapiModule");
-        failure.Message.ShouldContain("Isapi");
+        failure.Message.ShouldContain("IsapiModule", Case.Sensitive);
+        failure.Message.ShouldContain("Isapi", Case.Sensitive);
     }
 
     [Fact]
@@ -264,6 +264,6 @@ public sealed class IntegratedHandlersTests : IDisposable
         Should.Throw<ConfigurationErrorsException>(
                 () => Routes(
                     """<add name="Odd" path="*.aspx" verb="*" type="Probe.HandlerA" resourceType="Wherever" />"""))
-            .Message.ShouldContain("Wherever");
+            .Message.ShouldContain("Wherever", Case.Sensitive);
     }
 }

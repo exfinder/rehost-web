@@ -27,7 +27,7 @@ public sealed class WebFormsRuntimeLoggerIntakeTests : IDisposable
 
         var entry = factory.Entries.ShouldHaveSingleItem();
         entry.EventId.Id.ShouldBe(7);
-        entry.Message.ShouldContain("validationKey and decryptionKey");
+        entry.Message.ShouldContain("validationKey and decryptionKey", Case.Sensitive);
         entry.Message.ShouldContain(application.MachineKeyDirectory);
     }
 
@@ -54,7 +54,7 @@ public sealed class WebFormsRuntimeLoggerIntakeTests : IDisposable
 
         WebFormsRuntimeEventSource.Log.MonitorDisabled("RecycleLimitMonitor", new IOException("sampling failed"));
 
-        later.Entries.ShouldHaveSingleItem().Message.ShouldContain("RecycleLimitMonitor");
+        later.Entries.ShouldHaveSingleItem().Message.ShouldContain("RecycleLimitMonitor", Case.Sensitive);
         earlier.Entries.ShouldBeEmpty();
     }
 

@@ -41,7 +41,7 @@ public sealed class PathCasingOverKestrelTests(CaseSensitiveLiveScenario scenari
         var response = await live.Client.GetAsync("/sitemap/Show.aspx");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldStartWith("rooted=/sitemap/A.aspx|key=/sitemap/a.aspx\n");
+        response.Text.ShouldStartWith("rooted=/sitemap/A.aspx|key=/sitemap/a.aspx\n", Case.Sensitive);
     }
 
     [Fact]

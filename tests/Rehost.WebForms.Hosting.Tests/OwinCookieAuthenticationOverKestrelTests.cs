@@ -51,7 +51,7 @@ public sealed class OwinCookieAuthenticationOverKestrelTests(FriendlyUrlsLiveSce
         signout.Text.ShouldBe("signed-out");
         var cleared = signout.SetCookies.Single(header => header.StartsWith(CookieName + "="));
         cleared.ShouldContain(CookieName + "=;");
-        cleared.ShouldContain("expires=Thu, 01-Jan-1970 00:00:00 GMT");
+        cleared.ShouldContain("expires=Thu, 01-Jan-1970 00:00:00 GMT", Case.Sensitive);
 
         var withCleared = await scenario.Client.GetWithCookiesAsync(
             "/Protected",

@@ -17,7 +17,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/compose/Composed.aspx?q=42");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<title>\r\n\tFrom content page\r\n</title>");
+        response.Text.ShouldContain("<title>\r\n\tFrom content page\r\n</title>", Case.Sensitive);
         response.Text.ShouldContain("""<meta name="probe" content="head-content" />""");
         response.Text.ShouldContain("""<span id="ChromeLabel">master-load-ran</span>""");
         response.Text.ShouldContain("""<span id="MainContent_PageLabel">content-load-ran</span>""");
@@ -76,7 +76,7 @@ public sealed class MasterPagesOverKestrelTests(PageLiveScenario scenario)
     public async Task A_Button_In_A_Master_Hosted_Form_Raises_Its_Event()
     {
         var render = (await scenario.Client.GetAsync("/compose/MasterForm.aspx")).Text;
-        render.ShouldContain("name=\"ctl00$MainContent$Entry\"");
+        render.ShouldContain("name=\"ctl00$MainContent$Entry\"", Case.Sensitive);
         render.ShouldContain("""<span id="MainContent_Echo">not-clicked</span>""");
 
         // The form action is relative to the page's directory, as a browser resolves it.

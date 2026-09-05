@@ -67,7 +67,7 @@ public sealed class RequestBodyOverKestrelTests(
             Enumerable.Repeat((byte)'l', 5000).ToArray());
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("Maximum request length exceeded");
+        response.Text.ShouldContain("Maximum request length exceeded", Case.Sensitive);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public sealed class RequestBodyOverKestrelTests(
             BodyFraming.DelayedChunked);
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("Maximum request length exceeded");
+        response.Text.ShouldContain("Maximum request length exceeded", Case.Sensitive);
     }
 
     // Its own fixture: asyncPreloadMode="All" is a different application.
@@ -226,10 +226,10 @@ public sealed class RequestBodyOverKestrelTests(
                 scenario.Address, Encoding.ASCII.GetBytes(request)));
 
         var refusal = wire[..wire.IndexOf("\r\n\r\n", StringComparison.Ordinal)];
-        refusal.ShouldStartWith("HTTP/1.1 500 ");
-        refusal.ShouldContain("Content-Length: ");
+        refusal.ShouldStartWith("HTTP/1.1 500 ", Case.Sensitive);
+        refusal.ShouldContain("Content-Length: ", Case.Sensitive);
         refusal.ShouldNotContain("Connection: close");
-        wire.ShouldContain("Maximum request length exceeded");
+        wire.ShouldContain("Maximum request length exceeded", Case.Sensitive);
         wire.Split("HTTP/1.1 ").Length.ShouldBe(3, wire);
     }
 

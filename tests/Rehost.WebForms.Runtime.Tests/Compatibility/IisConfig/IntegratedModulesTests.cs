@@ -77,8 +77,8 @@ public sealed class IntegratedModulesTests : IDisposable
         var refusal = Should.Throw<ConfigurationErrorsException>(
             () => ConfigInfo("""<add name="BadM" type="No.Such.Type, NoAsm" />"""));
 
-        refusal.Message.ShouldContain("name=\"BadM\"");
-        refusal.Message.ShouldContain("No.Such.Type, NoAsm");
+        refusal.Message.ShouldContain("name=\"BadM\"", Case.Sensitive);
+        refusal.Message.ShouldContain("No.Such.Type, NoAsm", Case.Sensitive);
         refusal.Message.ShouldContain("static files");
     }
 
@@ -88,8 +88,8 @@ public sealed class IntegratedModulesTests : IDisposable
         var refusal = Should.Throw<ConfigurationErrorsException>(
             () => ConfigInfo("""<add name="NotAModule" type="System.Web.HttpContext" />"""));
 
-        refusal.Message.ShouldContain("name=\"NotAModule\"");
-        refusal.Message.ShouldContain("IHttpModule");
+        refusal.Message.ShouldContain("name=\"NotAModule\"", Case.Sensitive);
+        refusal.Message.ShouldContain("IHttpModule", Case.Sensitive);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public sealed class IntegratedModulesTests : IDisposable
         var refusal = Should.Throw<ConfigurationErrorsException>(
             () => ConfigInfo("""<add name="Typeless" />"""));
 
-        refusal.Message.ShouldContain("name=\"Typeless\"");
+        refusal.Message.ShouldContain("name=\"Typeless\"", Case.Sensitive);
         refusal.Message.ShouldContain("no type=");
     }
 }

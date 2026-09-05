@@ -42,7 +42,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         response.StatusCode.ShouldBe(200);
         response.Headers["Content-Type"].ShouldBe("text/xml; charset=utf-8");
         response.Text.ShouldContain($"""<AddResponse xmlns="{Ns}">""");
-        response.Text.ShouldContain("<AddResult>7</AddResult>");
+        response.Text.ShouldContain("<AddResult>7</AddResult>", Case.Sensitive);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         response.StatusCode.ShouldBe(200);
         response.Headers["Content-Type"].ShouldBe("application/soap+xml; charset=utf-8");
         response.Text.ShouldContain("http://www.w3.org/2003/05/soap-envelope");
-        response.Text.ShouldContain("<AddResult>42</AddResult>");
+        response.Text.ShouldContain("<AddResult>42</AddResult>", Case.Sensitive);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
             "Sum");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<SumResult>42</SumResult>");
+        response.Text.ShouldContain("<SumResult>42</SumResult>", Case.Sensitive);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
             ("SOAPAction", $"\"{Ns}/EchoToken\""));
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("<EchoTokenResult>tok-421</EchoTokenResult>");
+        response.Text.ShouldContain("<EchoTokenResult>tok-421</EchoTokenResult>", Case.Sensitive);
     }
 
     [Fact]
@@ -93,8 +93,8 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         var response = await InvokeSoap11Async($"""<Fail xmlns="{Ns}" />""", "Fail");
 
         response.StatusCode.ShouldBe(500);
-        response.Text.ShouldContain("<soap:Fault>");
-        response.Text.ShouldContain("soap:Server");
+        response.Text.ShouldContain("<soap:Fault>", Case.Sensitive);
+        response.Text.ShouldContain("soap:Server", Case.Sensitive);
         response.Text.ShouldContain("calc-deliberate-failure");
     }
 
@@ -105,7 +105,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         var first = await InvokeSoap11Async(bump, "Bump");
 
         first.StatusCode.ShouldBe(200);
-        first.Text.ShouldContain("<BumpResult>1</BumpResult>");
+        first.Text.ShouldContain("<BumpResult>1</BumpResult>", Case.Sensitive);
         var sessionCookie = first.SetCookies
             .Single(cookie => cookie.StartsWith("ASP.NET_SessionId=", StringComparison.Ordinal));
 
@@ -114,7 +114,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
             ("SOAPAction", $"\"{Ns}/Bump\""),
             ("Cookie", sessionCookie.Split(';')[0]));
 
-        second.Text.ShouldContain("<BumpResult>2</BumpResult>");
+        second.Text.ShouldContain("<BumpResult>2</BumpResult>", Case.Sensitive);
     }
 
     [Fact]
@@ -174,8 +174,8 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldContain("<discovery");
-        response.Text.ShouldContain("contractRef");
-        response.Text.ShouldContain("Calc.asmx?wsdl");
+        response.Text.ShouldContain("contractRef", Case.Sensitive);
+        response.Text.ShouldContain("Calc.asmx?wsdl", Case.Sensitive);
     }
 
     [Fact]
@@ -185,9 +185,9 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Headers["Content-Type"].ShouldStartWith("text/html");
-        response.Text.ShouldContain("The following operations are supported");
-        response.Text.ShouldContain("Add");
-        response.Text.ShouldContain("EchoToken");
+        response.Text.ShouldContain("The following operations are supported", Case.Sensitive);
+        response.Text.ShouldContain("Add", Case.Sensitive);
+        response.Text.ShouldContain("EchoToken", Case.Sensitive);
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public sealed class AsmxOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.GetAsync("/ScriptCalc.asmx/js");
 
         response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("ScriptCalcService");
-        response.Text.ShouldContain("JsonAdd");
+        response.Text.ShouldContain("ScriptCalcService", Case.Sensitive);
+        response.Text.ShouldContain("JsonAdd", Case.Sensitive);
     }
 }

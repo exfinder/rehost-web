@@ -809,7 +809,7 @@ public sealed class AspNetCoreWorkerRequestTests
 
         request.SupportsWebSocketUpgrade.ShouldBeTrue();
         Should.Throw<PlatformNotSupportedException>(() => request.IsWebSocketUpgradeRequest())
-            .Message.ShouldStartWith("The IIS WebSocket module is not enabled.");
+            .Message.ShouldStartWith("The IIS WebSocket module is not enabled.", Case.Sensitive);
     }
 
     // Once the accept is recorded the response body is the upgrade's, not the pipeline's: bytes

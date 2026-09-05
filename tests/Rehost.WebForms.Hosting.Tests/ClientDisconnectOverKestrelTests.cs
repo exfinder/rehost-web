@@ -34,7 +34,7 @@ public sealed class ClientDisconnectOverKestrelTests(AbortLiveScenario scenario)
         await using (var reader = await RawSocketProbe.OpenAsync(
             scenario.Address, ProbePaths.Disconnect + "?mode=hold"))
         {
-            (await reader.ReadUntilAsync("HOLDING")).ShouldContain("HOLDING");
+            (await reader.ReadUntilAsync("HOLDING")).ShouldContain("HOLDING", Case.Sensitive);
         }
 
         (await scenario.Witness.WaitForAsync(WitnessProtocol.DisconnectHeld, WitnessBudget))
@@ -48,7 +48,7 @@ public sealed class ClientDisconnectOverKestrelTests(AbortLiveScenario scenario)
         await using (var reader = await RawSocketProbe.OpenAsync(
             scenario.Address, ProbePaths.Disconnect + "?mode=abort"))
         {
-            (await reader.ReadUntilAsync("BEFORE-ABORT")).ShouldContain("BEFORE-ABORT");
+            (await reader.ReadUntilAsync("BEFORE-ABORT")).ShouldContain("BEFORE-ABORT", Case.Sensitive);
             (await reader.ReadToResetAsync()).ShouldBeTrue();
         }
 

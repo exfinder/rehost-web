@@ -42,13 +42,13 @@ public sealed class AutogenKeyRestartOverKestrelTests
         var afterRestart = await scenario.Client.GetWithCookiesAsync(ProbePaths.Secret, ticket);
 
         afterRestart.StatusCode.ShouldBe(302);
-        afterRestart.Header("Location").ShouldStartWith("/Login.aspx");
+        afterRestart.Header("Location").ShouldStartWith("/Login.aspx", Case.Sensitive);
     }
 
     private static async Task<string> SignIn(LiveScenario scenario)
     {
         var signIn = await scenario.Client.GetAsync(ProbePaths.AuthSignIn + "?u=alice&p=pw");
-        signIn.Text.ShouldContain("validate:True");
+        signIn.Text.ShouldContain("validate:True", Case.Sensitive);
 
         var ticket = signIn.SetCookies.FirstOrDefault(
             line => line.StartsWith(AuthCookie + "=", StringComparison.Ordinal));

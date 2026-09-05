@@ -32,7 +32,7 @@ public sealed class ScriptResourceOverKestrelTests(PageLiveScenario scenario)
         var script = await FirstScriptAsync();
 
         script.ShouldStartWith("//----");
-        script.ShouldContain("Sys.Debug.isDebug=false");
+        script.ShouldContain("Sys.Debug.isDebug=false", Case.Sensitive);
     }
 
     [Fact]
@@ -50,8 +50,8 @@ public sealed class ScriptResourceOverKestrelTests(PageLiveScenario scenario)
         // Sys.Res exists on no other delivery path: the script resource never carries it.
         var script = await FirstScriptAsync();
 
-        script.ShouldContain("Type.registerNamespace('Sys');");
-        script.ShouldContain("Sys.Res={");
-        script.ShouldContain("\"argumentNull\":");
+        script.ShouldContain("Type.registerNamespace('Sys');", Case.Sensitive);
+        script.ShouldContain("Sys.Res={", Case.Sensitive);
+        script.ShouldContain("\"argumentNull\":", Case.Sensitive);
     }
 }

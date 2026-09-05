@@ -67,7 +67,7 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
         var page = await scenario.Client.GetWithCookiesAsync("/ReadOnly.aspx?write=from-readonly", cookie);
 
         page.StatusCode.ShouldBe(200);
-        page.Text.ShouldContain("readonly=True");
+        page.Text.ShouldContain("readonly=True", Case.Sensitive);
         page.Text.ShouldContain("v=seed");
         page.Text.ShouldContain("write=ok");
 
