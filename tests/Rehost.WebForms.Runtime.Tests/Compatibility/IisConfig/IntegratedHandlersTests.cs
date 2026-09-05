@@ -258,6 +258,24 @@ public sealed class IntegratedHandlersTests : IDisposable
         failure.Message.ShouldContain("Isapi", Case.Sensitive);
     }
 
+    // The bridge stays a DefaultHttpHandler because ImplicitAsyncPreloadModule and
+    // HttpServerUtility.Execute type-test for one (ledger P93).
+    [Fact]
+    public void The_StaticFile_Bridge_Serves_Through_The_Port_Owned_Static_Handler()
+    {
+        var routes = Routes();
+        var file = System.IO.Path.Combine(_root.FullName, "asset.txt");
+        File.WriteAllText(file, "asset");
+
+        var route = IntegratedHandlers.Resolve(routes, "GET", Path_("/app/asset.txt"), file);
+        route.Registration.Name.ShouldBe("StaticFile");
+
+        var handler = IntegratedHandlers.NativeHandler(route, "GET");
+
+        handler.ShouldBeOfType<StaticFileBridgeHandler>();
+        handler.ShouldBeAssignableTo<DefaultHttpHandler>();
+    }
+
     [Fact]
     public void An_Unknown_ResourceType_Refuses_Activation()
     {
