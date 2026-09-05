@@ -30,6 +30,20 @@ public sealed class RequestHeadersOverKestrelTests(PageLiveScenario scenario)
             """.ReplaceLineEndings("\n"));
     }
 
+    // IV31: the rewrite contributes the host name only; the local port wins over a rewritten one.
+    [Fact]
+    public async Task A_Host_Rewrite_Naming_A_Port_Keeps_The_Local_Port_On_The_Url()
+    {
+        var response = await Get("?mode=host-port");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe(
+            $"""
+            url-authority=rewritten.example:{scenario.Address.Port}
+
+            """.ReplaceLineEndings("\n"));
+    }
+
     [Fact]
     public async Task An_Already_Materialized_Server_Variable_Follows_The_Mutation()
     {

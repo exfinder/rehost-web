@@ -1976,19 +1976,16 @@ namespace System.Web {
                 String serverName = _wr.GetServerName();
 #if !NETFRAMEWORK
                 String port = _wr.GetLocalPortAsString();
-                // IV8: a Host rewritten through Request.Headers reaches the Url as IIS's SERVER_NAME
-                // did, keeping the local port unless the rewrite names one.
+                // IV8/IV31: a Host rewritten through Request.Headers contributes the host name
+                // only, as SERVER_NAME did; the local port wins even when the rewrite names one.
                 if (_headers != null) {
                     string rewrittenHost = _headers["Host"];
                     if (!String.IsNullOrEmpty(rewrittenHost)) {
                         int portSeparator = rewrittenHost.LastIndexOf(':');
-                        if (portSeparator > rewrittenHost.LastIndexOf(']') && portSeparator < rewrittenHost.Length - 1) {
-                            serverName = rewrittenHost.Substring(0, portSeparator);
-                            port = rewrittenHost.Substring(portSeparator + 1);
+                        if (portSeparator > rewrittenHost.LastIndexOf(']')) {
+                            rewrittenHost = rewrittenHost.Substring(0, portSeparator);
                         }
-                        else {
-                            serverName = rewrittenHost;
-                        }
+                        serverName = rewrittenHost;
                     }
                 }
 #endif

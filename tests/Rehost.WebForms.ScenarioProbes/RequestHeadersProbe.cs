@@ -42,6 +42,11 @@ public sealed class RequestHeadersProbe : IHttpHandler
                 Line(dump, "url-host", request.Url.Host);
                 break;
 
+            case "host-port":
+                request.Headers.Set("Host", "rewritten.example:9999");
+                Line(dump, "url-authority", request.Url.Authority);
+                break;
+
             default:
                 Mutate(request, dump);
                 Line(dump, "probe", request.Headers["X-Probe"]);
