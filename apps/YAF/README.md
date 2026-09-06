@@ -27,8 +27,9 @@ normalisation. Import exclusions and every source deviation are in the provenanc
 | --- | --- |
 | `yafsrc/` | The frozen 4.8.1 sources, minus the three non-SQL-Server database variants. Never modified except as the provenance record lists. |
 | `YAF.App/` | The website assembly, `YAF.dll`, from `yafsrc/YetAnotherForum.NET/**/*.cs`. |
-| `YAF.Types/`, `YAF.Configuration/`, `YAF.Core/`, `YAF.UrlRewriter/`, `YAF.Web/`, `YAF.Data.SqlServer/` | One sidecar per YAF library, each keeping its upstream assembly name. |
-| `ServiceStack.OrmLite/`, `ServiceStack.OrmLite.SqlServer/` | Sidecars over the vendored OrmLite fork. |
+| `YAF.Types/`, `YAF.Configuration/`, `YAF.Core/`, `YAF.UrlRewriter/`, `YAF.Web/` | One sidecar per YAF library, each keeping its upstream assembly name. |
+| `YAF.Data.PostgreSQL/`, `YAF.Data.SqlServer/` | The two database backends. `YAF.App` references the PostgreSQL one; both build. |
+| `ServiceStack.OrmLite/`, `.PostgreSQL/`, `.SqlServer/` | Sidecars over the vendored OrmLite fork and its two dialects. |
 | `System.Web.Http.WebHost/` | Recompile of Web API's host, byte-identical upstream source plus one field. |
 | `YAF.Compat/` | Five shims for APIs modern .NET dropped, so the frozen sources need no edit. |
 | `YAF.Host/` | The process: a ~20-line Kestrel host and the app's `Web.Rehost.config`. |
@@ -49,15 +50,24 @@ apps/YAF/smoke.sh                     # against the default URL
 eng/app-linux-smoke.sh YAF 5087       # the same, in a Linux container
 ```
 
-SQL Server, isolated from the other applications' instances:
+PostgreSQL, isolated from the other applications' instances. It is native on arm64 and
+ready in about two seconds, where the SQL Server image runs emulated and took ten to
+twenty-five, crashing twice during this bring-up:
 
 ```text
-docker run -d --name rehost-yaf-sql -e ACCEPT_EULA=Y \
-  -e 'MSSQL_SA_PASSWORD=Rehost!Dev2026' -p 14334:1433 \
-  mcr.microsoft.com/mssql/server:2022-latest
-docker exec rehost-yaf-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
-  -P 'Rehost!Dev2026' -C -Q "CREATE DATABASE yafnet;"
+docker run -d --name rehost-yaf-pg -e POSTGRES_USER=yaf \
+  -e POSTGRES_PASSWORD='Rehost!Dev2026' -e POSTGRES_DB=yafnet \
+  -p 15432:5432 postgres:17-alpine
 ```
+
+## Switching to SQL Server
+
+Both data assemblies register `DbProviderFactory` unnamed in their Autofac module, so only
+one may be loaded, which is why upstream ships a separate website project per database.
+Point `YAF.App` at `../YAF.Data.SqlServer/YAF.Data.SqlServer.csproj` and change the
+`yafnet` entry in `Web.Rehost.config` to the SQL Server connection string with
+`providerName="Microsoft SQL Server"`. Nothing else differs; the journey was green on
+SQL Server on all three platforms before PostgreSQL became the default.
 
 Then browse to `/`, which redirects to `/install/default.aspx` against an empty database,
 and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a board named
@@ -69,7 +79,7 @@ and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a b
 | Upstream | Here | Note |
 | --- | --- | --- |
 | Six YAF libraries and the website | sidecars, same assembly names | All bind Framework `System.Web`; binary interchangeability is unsupported |
-| vendored OrmLite, OrmLite.SqlServer | sidecars | `NETFX;NET481` from the frozen `ServiceStack/Directory.Build.props` must be repeated, or `PclExport.Instance` is null and every query dies in `Env`'s static constructor |
+| vendored OrmLite and its dialects | sidecars | `NETFX;NET481` from the frozen `ServiceStack/Directory.Build.props` must be repeated, or `PclExport.Instance` is null and every query dies in `Env`'s static constructor |
 | vendored Lucene, five projects | `Lucene.Net` 4.8.0-beta00018 packages | The tree vendors Lucene.NET renamed to `YAF.Lucene.Net`, which exists to avoid an identity clash under DNN hosting. Only `Services/Search.cs` names those types, so the packages replace 26 MB of source for ten `using` lines |
 | `Microsoft.AspNet.WebApi.Core` 5.3.0 | same package, unchanged | References no `System.Web` at all |
 | `Microsoft.AspNet.WebApi.WebHost` 5.3.0 | `System.Web.Http.WebHost/` | The one Framework-bound Web API assembly, and `Application_Start` reaches it |
@@ -77,6 +87,7 @@ and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a b
 | `Microsoft.Owin.*`, `Microsoft.AspNet.Identity.*` | same packages, unchanged | Cookie sign-in and the Identity stores are exercised |
 | `OEmbed.Core` 2.0.7 | same package, `net10.0` asset | The package ships a different contract per target: `net481` has the sync `Embed`, `net10.0` only `EmbedAsync`. Taking the modern asset moves one call site to the async method |
 | `Autofac` 9.3.2, `Newtonsoft.Json`, `Farsi.Library` | same packages, unchanged | Autofac is activation-critical |
+| `Npgsql` 8.0.9 | same package, unchanged | The data provider the default backend uses; `providerName` in the connection string is what selects the backend |
 | `System.Data.Linq` | `YAF.Compat` | One obsolete model uses one attribute |
 | `System.Web.DynamicData`, `System.Web.Entity`, `System.ServiceModel`, `EnterpriseServices` | dropped | Referenced by the frozen projects, reached by nothing in the closure |
 | `System.Drawing` | `System.Drawing.Common` | Compiles; image paths are unexercised and not portable off Windows |
