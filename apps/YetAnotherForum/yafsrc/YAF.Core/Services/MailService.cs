@@ -50,7 +50,7 @@ public class MailService : IMailService, IHaveServiceLocator
     {
         var mailMessages = messages.ToList();
 
-        using var smtpClient = new SmtpClient();
+        using var smtpClient = new SmtpClient { DeliveryMethod = SmtpDeliveryMethod.SpecifiedPickupDirectory, PickupDirectoryLocation = System.IO.Directory.CreateDirectory(System.IO.Path.Combine(System.Web.HttpRuntime.AppDomainAppPath, "App_Data", "mail")).FullName };
 
         // send the message...
         mailMessages.ToList().ForEach(
