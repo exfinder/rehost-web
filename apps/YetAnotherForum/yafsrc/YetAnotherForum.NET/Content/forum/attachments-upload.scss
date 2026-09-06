@@ -1,0 +1,19 @@
+﻿/* Attachments List Drop Down */
+
+.AlbumsList,
+.AttachmentList {
+    span {
+        width: 100px;
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        -ms-text-overflow: ellipsis;
+        -o-text-overflow: ellipsis;
+        text-overflow: ellipsis;
+    }
+
+    img {
+        max-width: 100px;
+        max-height: 100px;
+    }
+}

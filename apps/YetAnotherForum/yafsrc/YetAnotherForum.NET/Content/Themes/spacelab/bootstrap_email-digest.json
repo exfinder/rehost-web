@@ -1,0 +1,5 @@
+﻿{
+	"sass_email_location": "Content/Themes/spacelab/",
+	"sass_location": "Content/bootstrap-email/",
+    "CompileOnlyBody": true
+}

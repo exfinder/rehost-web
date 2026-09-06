@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>YAF.Configuration</AssemblyName>
+    <RootNamespace>YAF.Configuration</RootNamespace>
+    <Source>$(YafSrc)YAF.Configuration/</Source>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />
+  </ItemGroup>
+</Project>

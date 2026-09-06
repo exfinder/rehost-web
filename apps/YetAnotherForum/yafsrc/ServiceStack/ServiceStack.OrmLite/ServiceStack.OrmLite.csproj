@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>ServiceStack.OrmLite</PackageId>
+    <AssemblyName>ServiceStack.OrmLite</AssemblyName>
+    <TargetFrameworks>net481</TargetFrameworks>
+    <Title>OrmLite - Fast, code-first, config-free POCO ORM</Title>
+    <PackageDescription>
+      Common library for the Light, simple and fast convention-based code-first POCO, OrmLite.
+      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
+      OrmLite is a suite extension methods on ADO.NET's underlying IDbConnection providing DRY, typed access for common data usage patterns that map to clean, simple POCOs. Great support for testing where OrmLite methods can be mocked.
+    </PackageDescription>
+    <PackageTags>OrmLite;RDBMS;SQL;POCO;Code-First;ORM;Schema-less;Blobs</PackageTags>
+    <DefineConstants>$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.11" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+	  <Reference Include="System.Configuration" />
+	  <Reference Include="System.Net" />
+	  <Reference Include="System.ComponentModel.DataAnnotations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Base\Common\Templates\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Base\Common\MiniProfiler\Data\ProfiledCommand.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Base\Common\MiniProfiler\Data\ProfiledConnection.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+
+</Project>

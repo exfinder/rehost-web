@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>ServiceStack.OrmLite</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite</RootNamespace>
+    <Source>$(YafSrc)ServiceStack/ServiceStack.OrmLite/</Source>
+    <!-- net481 defined neither NETCORE nor NET6_0_OR_GREATER. On the second,
+         PclExport.Instance binds a Net6PclExport this fork does not ship. -->
+    <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="10.0.10" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="10.0.11" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <ProjectReference Include="../YAF.Compat/YAF.Compat.csproj" />
+  </ItemGroup>
+</Project>

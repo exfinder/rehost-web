@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>YAF.Lucene.Net.QueryParser</AssemblyName>
+    <RootNamespace>YAF.Lucene.Net.QueryParser</RootNamespace>
+    <Source>$(YafSrc)Lucene.Net/Lucene.Net.QueryParser/</Source>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <ProjectReference Include="../YAF.Lucene.Net.Analysis.Common/YAF.Lucene.Net.Analysis.Common.csproj" />
+    <ProjectReference Include="../YAF.Lucene.Net.Queries/YAF.Lucene.Net.Queries.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,28 @@
+<Project>
+
+  <PropertyGroup>
+	<Version>3.2.16</Version>
+	<AssemblyVersion>3.2.16</AssemblyVersion>
+	<FileVersion>3.2.16</FileVersion>
+    <Authors>ServiceStack</Authors>
+    <Company>ServiceStack, Inc.</Company>
+    <Copyright>&#169; 2008-2026 ServiceStack, Inc</Copyright>
+    <DebugType>embedded</DebugType>
+    <LangVersion>latest</LangVersion>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <GenerateAssemblyVersionAttribute>true</GenerateAssemblyVersionAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net481' ">
+    <DefineConstants>$(DefineConstants);NETFX;NET481</DefineConstants>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+</Project>

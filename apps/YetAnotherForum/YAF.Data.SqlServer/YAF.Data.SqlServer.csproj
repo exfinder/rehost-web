@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>YAF.Data.SqlServer</AssemblyName>
+    <RootNamespace>YAF.Data.SqlServer</RootNamespace>
+    <Source>$(YafSrc)YAF.Data/YAF.Data.SqlServer/</Source>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="9.3.2" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.11" />
+    <ProjectReference Include="../ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="../ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.csproj" />
+    <ProjectReference Include="../YAF.Configuration/YAF.Configuration.csproj" />
+    <ProjectReference Include="../YAF.Core/YAF.Core.csproj" />
+    <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />
+  </ItemGroup>
+</Project>

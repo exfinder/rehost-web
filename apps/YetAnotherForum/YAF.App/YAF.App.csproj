@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>YAF</AssemblyName>
+    <RootNamespace>YAF</RootNamespace>
+    <Source>$(YafSrc)YetAnotherForum.NET/</Source>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Not RehostAppContentRoot: that contract globs the whole tree, and four
+         orphaned code-behind files on disk are absent from the frozen project's
+         explicit list. Their markup is gone and they name a namespace that no
+         longer exists, so compiling them fails. -->
+    <Compile Include="$(Source)**/*.cs"
+             Exclude="$(Source)Pages/ModForumUser.ascx.cs;$(Source)Pages/ModForumUser.ascx.designer.cs;$(Source)Pages/Moderating.ascx.cs;$(Source)Pages/Moderating.ascx.designer.cs"
+             Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Farsi.Library" Version="2.7.0" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.11" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+    <PackageReference Include="OEmbed.Core" Version="2.0.7" GeneratePathProperty="true" ExcludeAssets="compile;runtime" />
+    <Reference Include="$(PkgOEmbed_Core)/lib/net481/OEmbed.Core.dll" Private="true" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="../YAF.Configuration/YAF.Configuration.csproj" />
+    <ProjectReference Include="../YAF.Core/YAF.Core.csproj" />
+    <ProjectReference Include="../YAF.Data.SqlServer/YAF.Data.SqlServer.csproj" />
+    <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />
+    <ProjectReference Include="../YAF.UrlRewriter/YAF.UrlRewriter.csproj" />
+    <ProjectReference Include="../YAF.Web/YAF.Web.csproj" />
+  </ItemGroup>
+</Project>

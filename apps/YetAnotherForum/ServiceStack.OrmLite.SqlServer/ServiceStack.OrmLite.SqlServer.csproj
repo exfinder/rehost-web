@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>ServiceStack.OrmLite.SqlServer</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
+    <Source>$(YafSrc)ServiceStack/ServiceStack.OrmLite.SqlServer/</Source>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
+    <ProjectReference Include="../ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />
+  </ItemGroup>
+</Project>
