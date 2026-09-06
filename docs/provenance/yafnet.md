@@ -22,8 +22,9 @@ reproduces upstream bytes and the diff below stays the whole difference.
 
 ## Deviations
 
-Nine files differ from upstream. Every one is a compile blocker on .NET 10, not
-a behavior preference.
+Eleven files differ from upstream. Nine are compile blockers on .NET 10; two
+are runtime blockers measured against a running application, and each is noted
+as such.
 
 | File | Change |
 | --- | --- |
@@ -31,6 +32,8 @@ a behavior preference.
 | `YAF.Types/Extensions/EnumerableExtensions.cs` | drops `DistinctBy`, whose body is `Enumerable.DistinctBy`'s own first-key-wins filter and which is now ambiguous with it at seven call sites |
 | `YAF.Web/Controls/HelpMenu.cs` | drops an unused `using System.Runtime.Remoting.Contexts`, a namespace with no modern implementation |
 | `{YAF.Configuration,YAF.Core,YAF.Data.SqlServer,YAF.Types,YAF.UrlRewriter,YAF.Web}/Properties/AssemblyInfo.cs` | drops `[assembly: AssemblyKeyFile("..\\YetAnotherForum.NET.snk")]`. The literal backslash is a filename off Windows, so the compiler fails to find the key; the port does not strong-name and claims no binary identity |
+| `ServiceStack/ServiceStack.OrmLite/Base/Text/ReflectionOptimizer.Emit.cs` | `AssemblyBuilderAccess.RunAndSave` becomes `Run`. Modern .NET cannot persist a dynamic assembly and dropped the member; nothing here saves the one it builds. Reached only once `NETFX` is defined, which is what compiles this file |
+| `YAF.Core/Tasks/IntermittentBackgroundTask.cs` | drops the `WindowsIdentity.GetCurrent()` capture. It throws `PlatformNotSupportedException` off Windows, and the timer callback it feeds cannot impersonate on any platform, since modern .NET replaced scoped impersonation with the callback-shaped `RunImpersonated`. One process under one identity is the hosting model, so the callback already runs as the identity the capture existed to restore. Measured: without this the first request dies in `Session_Start` |
 
 ## Added
 
@@ -52,15 +55,24 @@ Import authority is the archived
 at tag `v3.3.0`, revision `1231b77d79956152831b75ad7f094f844251b97f`, whose
 `src/System.Web.Http.WebHost` tree object is
 `835324b71109144dade2b88c919433409dbd6699`. That tree is copied byte-for-byte
-except its `.csproj` and `packages.config`; the seven `src/Common` files and
+except its `.csproj`, `packages.config`, and one field in
+`HttpControllerRouteHandler.cs`; the seven `src/Common` files and
 `src/CommonAssemblyInfo.cs` its project linked in come with it, under `Common/`
-and at the root, matching upstream's `Link` paths. Not one source line is
-edited, and `ASPNETMVC` is defined as upstream's own build defines it, which is
-what selects `AssemblyVersion` 5.3.0.0.
+and at the root, matching upstream's `Link` paths. `ASPNETMVC` is defined as upstream's own build defines it, which is what selects
+`AssemblyVersion` 5.3.0.0.
+
+The one edit drops `readonly` from the private static `_instance` field.
+`WebApiConfig.Register` reaches into that field by reflection to install YAF's
+session-enabled route handler, which is the whole reason YAF's Web API
+controllers see session state. Framework's reflection permitted writing a
+static initonly field; .NET Core forbids it once the type is initialized, so
+the call raises `FieldAccessException` and takes `Application_Start` with it.
+Dropping the modifier reproduces the Framework outcome and changes nothing for
+any caller that does not reflect.
 
 The shipped 5.3.0 assembly reports informational version
 `5.3.0-61837 (ec2f0a5af7b4dbefba38e605c9025367a15a2f0f)`, and that revision is
-not public — `v3.3.0` is the nearest published source. The gap is measured
+not public, so `v3.3.0` is the nearest published source. The gap is measured
 rather than assumed: decompiling both assemblies and comparing every `public`
 and `protected` declaration leaves one difference, the implicit
 `WebHostBufferPolicySelector()` constructor ILSpy renders for the shipped
