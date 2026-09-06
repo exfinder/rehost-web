@@ -76,7 +76,7 @@ and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a b
 | `Microsoft.AspNet.WebApi.WebHost` 5.3.0 | `System.Web.Http.WebHost/` | The one Framework-bound Web API assembly, and `Application_Start` reaches it |
 | `Microsoft.Owin.Host.SystemWeb` 4.2.3 | `Rehost.WebForms.Owin.Host.SystemWeb` | The documented substitution |
 | `Microsoft.Owin.*`, `Microsoft.AspNet.Identity.*` | same packages, unchanged | Cookie sign-in and the Identity stores are exercised |
-| `OEmbed.Core` 2.0.7 | same package, `net481` asset pinned | Its `net10.0` asset drops the sync `Embed` the BBCode module calls, offering only `EmbedAsync`; the `net481` assembly binds no Framework-only identity |
+| `OEmbed.Core` 2.0.7 | same package, `net10.0` asset | The package ships a different contract per target: `net481` has the sync `Embed`, `net10.0` only `EmbedAsync`. Taking the modern asset moves one call site to the async method |
 | `Autofac` 9.3.2, `Newtonsoft.Json`, `Farsi.Library` | same packages, unchanged | Autofac is activation-critical |
 | `System.Data.Linq` | `YAF.Compat` | One obsolete model uses one attribute |
 | `System.Web.DynamicData`, `System.Web.Entity`, `System.ServiceModel`, `EnterpriseServices` | dropped | Referenced by the frozen projects, reached by nothing in the closure |

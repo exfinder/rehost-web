@@ -11,8 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="OEmbed.Core" Version="2.0.7" GeneratePathProperty="true" ExcludeAssets="compile;runtime" />
-    <Reference Include="$(PkgOEmbed_Core)/lib/net481/OEmbed.Core.dll" Private="true" />
+    <PackageReference Include="OEmbed.Core" Version="2.0.7" />
     <ProjectReference Include="../YAF.Configuration/YAF.Configuration.csproj" />
     <ProjectReference Include="../YAF.Core/YAF.Core.csproj" />
     <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />

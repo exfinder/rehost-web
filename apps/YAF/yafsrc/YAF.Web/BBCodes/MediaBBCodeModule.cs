@@ -46,7 +46,9 @@ public class MediaBBCodeModule : BBCodeControl
             return;
         }
 
-        var response = this.Get<IOEmbed>().Embed(url, this.Get<HttpRequestBase>().Url.Host);
+        var oembed = this.Get<IOEmbed>();
+        var hostUrl = this.Get<HttpRequestBase>().Url.Host;
+        var response = System.Threading.Tasks.Task.Run(() => oembed.EmbedAsync(url, hostUrl)).GetAwaiter().GetResult();
 
         if (response == null)
         {
