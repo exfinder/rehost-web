@@ -7,7 +7,7 @@ sibling checkout is `../YAFNET`, pinned at tag `v3.2.16`, revision
 `31e836d7aa1d6886821160162f83aa95e57c7451`. The sibling checkout is never a
 build input.
 
-`apps/YetAnotherForum/yafsrc` is that tree with the three non-SQL-Server
+`apps/YAF/yafsrc` is that tree with the three non-SQL-Server
 database variants removed, since only the SQL Server closure is built:
 
 | Removed | Reason |
@@ -66,7 +66,7 @@ The host's `Web.Rehost.config` transforms it; the copy itself is unedited.
 The `Microsoft.AspNet.WebApi.WebHost` 5.3.0 assembly binds Framework's
 strong-named `System.Web`, and `YAF.Core` reaches it from `Application_Start`,
 so it is rebuilt from source at
-`apps/YetAnotherForum/System.Web.Http.WebHost`. `Microsoft.AspNet.WebApi.Core`
+`apps/YAF/System.Web.Http.WebHost`. `Microsoft.AspNet.WebApi.Core`
 5.3.0 is consumed as shipped: it references no `System.Web` at all.
 
 Import authority is the archived

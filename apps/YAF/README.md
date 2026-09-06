@@ -32,7 +32,7 @@ normalisation. Import exclusions and every source deviation are in the provenanc
 | `YAF.Lucene.Net*/` | Sidecars over the five vendored Lucene projects. |
 | `System.Web.Http.WebHost/` | Recompile of Web API's host, byte-identical upstream source plus one field. |
 | `YAF.Compat/` | Five shims for APIs modern .NET dropped, so the frozen sources need no edit. |
-| `YetAnotherForum.Host/` | The process: a ~20-line Kestrel host and the app's `Web.Rehost.config`. |
+| `YAF.Host/` | The process: a ~20-line Kestrel host and the app's `Web.Rehost.config`. |
 | `Sidecar.props` | Settings every frozen sidecar shares, including the pinned language version. |
 
 The sidecars glob the frozen tree rather than using `RehostAppContentRoot`: four orphaned
@@ -42,12 +42,12 @@ and whose namespace no longer exists.
 ## Commands
 
 ```text
-dotnet build apps/YetAnotherForum/YetAnotherForum.slnx
-dotnet run --project apps/YetAnotherForum/YetAnotherForum.Host
+dotnet build apps/YAF/YAF.slnx
+dotnet run --project apps/YAF/YAF.Host
 # http://127.0.0.1:5087/ (pass a URL as the first argument to change)
 
-apps/YetAnotherForum/smoke.sh                     # against the default URL
-eng/app-linux-smoke.sh YetAnotherForum 5087       # the same, in a Linux container
+apps/YAF/smoke.sh                     # against the default URL
+eng/app-linux-smoke.sh YAF 5087       # the same, in a Linux container
 ```
 
 SQL Server, isolated from the other applications' instances:
@@ -98,7 +98,7 @@ here has that exposure.
 
 ## web.config
 
-`YetAnotherForum.Host/Web.Rehost.config` replaces the package default wholesale, so it
+`YAF.Host/Web.Rehost.config` replaces the package default wholesale, so it
 repeats the default's `<runtime>` removal, then: points the `yafnet` connection string at
 the container, inserts an explicit `<machineKey>` so the auth cookie survives a process
 replacement, and removes `<system.net>`, which fails activation here and configures

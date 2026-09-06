@@ -54,4 +54,4 @@ its body is unread; the evidence is its consumer above plus the public section g
 
 YAF.NET calls `new SmtpClient()` in `YAF.Core/Services/MailService.cs`, and every
 user-creation path sends a verification mail, so no second user can be created
-without an answer here ([app notes](../../apps/YetAnotherForum/README.md)).
+without an answer here ([app notes](../../apps/YAF/README.md)).

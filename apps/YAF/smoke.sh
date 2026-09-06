@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The forum journey against a running YetAnotherForum.Host: read the board as an
+# The forum journey against a running YAF.Host: read the board as an
 # anonymous guest, prove the guest is refused a post, sign the host administrator
 # in through the rendered login form, then register a member, verify the address
 # from the mail YAF wrote to its pickup directory, and prove the member sees the
@@ -7,13 +7,13 @@
 # bash + curl only, and no bash-4 builtins, so the same script runs on macOS,
 # Linux, and Git bash on Windows.
 #
-#   apps/YetAnotherForum/smoke.sh [base-url]
+#   apps/YAF/smoke.sh [base-url]
 
 set -uo pipefail
 
 BASE="${1:-http://127.0.0.1:5087}"
 BASE="${BASE%/}"
-SITE="$(cd "$(dirname "$0")" && pwd)/YetAnotherForum.Host/bin/site"
+SITE="$(cd "$(dirname "$0")" && pwd)/YAF.Host/bin/site"
 MAIL_DIR="$SITE/App_Data/mail"
 ADMIN_USER='hostadmin'
 ADMIN_PASSWORD='Rehost!Dev2026'

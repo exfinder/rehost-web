@@ -8,9 +8,9 @@
 # endings would break docs/provenance/*.json.
 third_party/** -text
 src/System.Web.ReferenceSource/** -text
-apps/YetAnotherForum/yafsrc/** -text
-apps/YetAnotherForum/System.Web.Http.WebHost/** -text
-apps/YetAnotherForum/System.Web.Http.WebHost/*.csproj text
+apps/YAF/yafsrc/** -text
+apps/YAF/System.Web.Http.WebHost/** -text
+apps/YAF/System.Web.Http.WebHost/*.csproj text
 
 # Recorded response bytes, not source. HttpWriter.WriteLine emits a hardcoded CRLF
 # pair while markup literals carry the source's LF, so these files are a deliberate

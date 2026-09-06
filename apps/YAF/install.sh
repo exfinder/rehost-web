@@ -3,7 +3,7 @@
 # reaches the board state smoke.sh expects. A deployment step, not part of the
 # journey: it is idempotent only in the sense that it refuses a board that exists.
 #
-#   apps/YetAnotherForum/install.sh [base-url]
+#   apps/YAF/install.sh [base-url]
 
 set -uo pipefail
 
