@@ -478,7 +478,10 @@ namespace System.Web.Compilation {
                 Version ver = new Version(version);
                 return ver;
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(MultiTargetingUtil)}.{nameof(GetVersion)}", swallowedException, "new Version");
+            }
             return null;
         }
     }

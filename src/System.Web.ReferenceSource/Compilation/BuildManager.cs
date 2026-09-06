@@ -2515,7 +2515,10 @@ namespace System.Web.Compilation {
                 Debug.Trace("BuildManager", "DeletePrecompTargetDirectory failed: " + e.Message);
             }
 #else
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(BuildManager)}.{nameof(DeletePrecompTargetDirectory)}", swallowedException, "FileEnumerator.Create");
+            }
 #endif
             return !Util.IsNonEmptyDirectory(_precompTargetPhysicalDir);
         }

@@ -790,7 +790,10 @@ namespace System.Web {
                 if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
                     return uri.LocalPath;
             }
-            catch {}
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(ErrorFormatter)}.{nameof(GetVirtualPathFromHttpLinePragma)}", swallowedException, "new Uri");
+            }
 
             return null;
         }
@@ -1062,7 +1065,10 @@ namespace System.Web {
                                 // This could throw if the assembly is dynamic
                                 assemblyDir = System.Web.UI.Util.GetAssemblyCodeBase(declaringType.Assembly);
                             }
-                            catch {}
+                            catch (Exception swallowedException) {
+                                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                    $"{nameof(UnhandledErrorFormatter)}.{nameof(ColoredSquare2Content)}_get", swallowedException, "System.Web.UI.Util.GetAssemblyCodeBase");
+                            }
 
                             if (assemblyDir != null) {
                                 assemblyDir = Path.GetDirectoryName(assemblyDir);
@@ -1470,7 +1476,10 @@ namespace System.Web {
                 if (reader == null && fileName != null)
                     reader = new StreamReader(fileName, encoding, true, 4096);
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(FormatterWithFileInfo)}.{nameof(GetSourceFileLines)}", swallowedException, "new StreamReader");
+            }
 
             if (reader == null) {
                 if (sourceCode == null)

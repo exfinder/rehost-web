@@ -1,21 +1,49 @@
 # Silent exception swallowing in imported Reference Source
 
-## Problem
+## What the sweep covered
 
-Imported Reference Source contains 204 `catch` blocks with empty bodies across
-89 files, concentrated in `HttpRuntime` (16), `Security/Roles` (10),
-`HttpRequest`, `UI/Page`, `Util/FileUtil`, and `Compilation/BuildResultCache`
-(6 each). A discarded exception during a port is not a minor inconvenience: the
-pipeline slice presented as an empty `200` with no status, no headers, and no
-flush, and the cause — two native dependencies and an unresolvable `bin`
-assembly — was invisible until one of those blocks was instrumented (P31).
+Imported Reference Source carries 145 empty `catch` blocks that name no
+exception type (144 bare `catch {}` plus one `catch (Exception) {}`), across 65
+files, concentrated in `HttpRuntime` (13), `Security/Roles` (10), and then
+`UI/Page`, `Configuration/RemoteWebConfigurationHostServer`, `Hosting/HostingEnvironment`
+and `Compilation/BuildResultCache` (5 each). A discarded exception during a port
+is not a minor inconvenience: the pipeline slice presented as an empty `200` with
+no status, no headers, and no flush, and the cause — two native dependencies and
+an unresolvable `bin` assembly — was invisible until one of those blocks was
+instrumented (P31).
 
-## Current rule
+116 of them now report on the diagnostics choke point (ledger P94). The site is
+built from `nameof`, so it survives a rename and folds to a literal at compile
+time; the context names the first call the `try` guarded; the exception carries
+its own stack, which is what actually identifies the throwing line.
 
-No silent catch survives contact with a slice. A slice instruments the swallows
-it actually traps against, and records them in the portability ledger. Blocks
-that a slice never reaches stay untouched, because changing unreached imported
-code obliges a test that fails without the change.
+## What stays untouched, and why
+
+- **Typed empty catches** (21). `catch (FileNotFoundException) {}` states its
+  intent in the type. Instrumenting them would report expected outcomes.
+- **Trivial-intent bare catches** (22). The guarded call states the intent by
+  itself: `Int32.Parse` (malformed input), culture creation from a user-supplied
+  name, and best-effort `File.Delete`/`Directory.Delete` during cleanup.
+- **Unreachable catches** (2, both in `UI/SkinBuilder.cs`). They follow a
+  `catch (Exception e)`, so no exception can reach them and the compiler rejects
+  a typed rewrite.
+- **Dead `#if` branches** (3) and code inside `/* */` blocks (2).
+
+## What the sweep found
+
+Measured over the full suite and the `apps/WebFormsApplication` smoke, all green:
+
+- `HttpRuntime.SetThreadPoolLimits` fired once per application start, and the
+  `PlatformNotSupportedException` from the native max-threads call discarded the
+  portable `ThreadPool.SetMinThreads` and connection-limit work below it.
+  Closed by P95; that site no longer reports.
+- `CacheEntry.CallCacheItemRemovedCallback#2` fires during config-record teardown
+  in the suite, never in the app smoke. `WebConfigurationHost.StopMonitoringStreamForChanges`
+  dereferences a null callback list and aborts `BaseConfigurationRecord.CloseRecursive()`
+  partway. Framework runs the same code, so whether this is a port defect needs a
+  Framework reading before anyone calls it. Open.
+- A later exception reaching `HttpRuntime.FinishRequest` after the error page has
+  been rendered is dropped (P92).
 
 ## A stashed-and-masked variant, found in the page slice
 
@@ -35,25 +63,3 @@ constructs the singleton before hosting is initialized. Framework behaves the
 same way, so this is a diagnosability defect rather than a port divergence, and
 no imported source is edited for it. It cost real time to diagnose once; the note
 exists so it costs less the next time.
-
-## Required decisions before any sweep
-
-- Which swallows are deliberate and must stay quiet. `FileUtil` probe-and-ignore,
-  `ErrorFormatter` fallbacks, and shutdown paths are load-bearing; a channel that
-  fires on every request teaches readers to ignore it.
-- Severity per site, so expected-and-ignorable is distinguishable from
-  lost-and-fatal without reading the call site.
-- Whether reporting belongs at the catch site or behind a helper, given that
-  every instrumented site is a permanent diff against upstream that a future
-  reader must diff past.
-- How the channel behaves with no listener attached, on hot paths.
-
-## Verification
-
-A slice that traps a swallowed exception can name it from diagnostic output
-alone, without a debugger and without a bisect.
-
-## Done when
-
-Every reached swallow reports, the expected-and-quiet set is enumerated with
-reasons, and the ledger records the deviation class once rather than per site.

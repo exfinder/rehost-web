@@ -372,7 +372,10 @@ namespace System.Web.Security {
                     return null;
                 return new AnonymousIdData(id, expireDate);
             }
-            catch {}
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(AnonymousIdentificationModule)}.{nameof(GetDecodedValue)}", swallowedException, "CookieProtectionHelper.Decode");
+            }
             return null;
         }
 

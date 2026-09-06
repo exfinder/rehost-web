@@ -198,7 +198,10 @@ namespace System.Web.Security {
                 if (user != null && user.ProviderName == Provider.Name && user.IsRoleListCached && user.IsInRole(roleName))
                     user.SetDirty();
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(DeleteRole)}", swallowedException, "GetCurrentUser");
+            }
 
             return roleDeleted;
         }
@@ -228,7 +231,10 @@ namespace System.Web.Security {
                 if (user != null && user.ProviderName == Provider.Name && user.IsRoleListCached && StringUtil.EqualsIgnoreCase(user.Identity.Name, username))
                     user.SetDirty();
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(AddUserToRole)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -251,7 +257,10 @@ namespace System.Web.Security {
                 if (user != null && user.ProviderName == Provider.Name && user.IsRoleListCached && StringUtil.EqualsIgnoreCase(user.Identity.Name, username))
                     user.SetDirty();
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(AddUserToRoles)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -279,7 +288,10 @@ namespace System.Web.Security {
                             break;
                         }
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(AddUsersToRole)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -312,7 +324,10 @@ namespace System.Web.Security {
                             break;
                         }
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(AddUsersToRoles)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -327,7 +342,10 @@ namespace System.Web.Security {
                 if (user != null && user.ProviderName == Provider.Name && user.IsRoleListCached && StringUtil.EqualsIgnoreCase(user.Identity.Name, username))
                     user.SetDirty();
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(RemoveUserFromRole)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -350,7 +368,10 @@ namespace System.Web.Security {
                 if (user != null && user.ProviderName == Provider.Name && user.IsRoleListCached && StringUtil.EqualsIgnoreCase(user.Identity.Name, username))
                     user.SetDirty();
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(RemoveUserFromRoles)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -378,7 +399,10 @@ namespace System.Web.Security {
                             break;
                         }
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(RemoveUsersFromRole)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -411,7 +435,10 @@ namespace System.Web.Security {
                             break;
                         }
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Roles)}.{nameof(RemoveUsersFromRoles)}", swallowedException, "GetCurrentUser");
+            }
         }
 
 
@@ -561,7 +588,10 @@ namespace System.Web.Security {
                     try {
                         s_Provider = s_Providers[settings.DefaultProvider];
                     }
-                    catch { }
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(Roles)}.{nameof(InitializeDefaultProvider)}", swallowedException, "");
+                    }
                 }
 
                 if (s_Provider == null) {

@@ -40,11 +40,11 @@ namespace System.Web.Util {
         }
 
         [NonEvent]
-        internal void SwallowedRequestException(string site, Exception swallowed, string context) {
+        internal void SwallowedException(string site, Exception swallowed, string context) {
             Swallow(() => {
-                WebFormsRuntimeLogger.Logger.SwallowedRequestException(swallowed, site, context);
+                WebFormsRuntimeLogger.Logger.SwallowedException(swallowed, site, context);
                 if (IsEnabled()) {
-                    SwallowedRequestException(site, swallowed.ToString(), context);
+                    SwallowedException(site, swallowed.ToString(), context);
                 }
             });
         }
@@ -133,8 +133,8 @@ namespace System.Web.Util {
 
         // .NET Framework discards these exceptions with no record of any kind; the port reports
         // them so that a failed request is diagnosable. The response is unaffected either way.
-        [Event(2, Level = EventLevel.Error, Message = "{0} swallowed an exception; {2}: {1}")]
-        private void SwallowedRequestException(string site, string exception, string context) {
+        [Event(2, Level = EventLevel.Warning, Message = "{0} swallowed an exception; {2}: {1}")]
+        private void SwallowedException(string site, string exception, string context) {
             WriteEvent(2, site, exception, context);
         }
 

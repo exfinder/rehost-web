@@ -793,7 +793,9 @@ namespace System.Web.Configuration {
                             header = version.Substring(0, i);
                         }
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(HttpRuntimeSection)}.{nameof(VersionHeader)}_get", swallowedException, "version.LastIndexOf");
                     }
 
                     if (header == null) {

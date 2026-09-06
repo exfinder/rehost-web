@@ -438,7 +438,10 @@ namespace System.Web.Security {
                     }
                 }
             }
-            catch { }
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(Membership)}.{nameof(CheckedPasswordFormat)}", swallowedException, "StringUtil.EqualsIgnoreCase");
+            }
         }
 
         private static bool InitializeSettings(bool initializeGeneralSettings, RuntimeConfig appConfig, MembershipSection settings) {

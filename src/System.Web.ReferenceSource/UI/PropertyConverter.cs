@@ -97,7 +97,9 @@ namespace System.Web.UI {
                     }
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(PropertyConverter)}.{nameof(ObjectFromString)}", swallowedException, "EnumFromString");
             }
 
             if (useParseMethod) {
@@ -114,7 +116,9 @@ namespace System.Web.UI {
                     try {
                         ret = Util.InvokeMethod(methodInfo, null, parameters);
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(PropertyConverter)}.{nameof(ObjectFromString)}#2", swallowedException, "Util.InvokeMethod");
                     }
                 }
                 else {
@@ -128,7 +132,9 @@ namespace System.Web.UI {
                         try {
                             ret = Util.InvokeMethod(methodInfo, null, parameters);
                         }
-                        catch {
+                        catch (Exception swallowedException) {
+                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                $"{nameof(PropertyConverter)}.{nameof(ObjectFromString)}#3", swallowedException, "Util.InvokeMethod");
                         }
                     }
                 }

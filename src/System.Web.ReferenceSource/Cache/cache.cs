@@ -383,7 +383,9 @@ namespace System.Web.Caching {
                     try {
                         WebBaseEvent.RaiseRuntimeError(e, value);
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(SentinelEntry)}.{nameof(OnCacheItemRemovedCallback)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
                     }
                 }
             }

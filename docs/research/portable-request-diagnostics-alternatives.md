@@ -28,7 +28,7 @@ configuration.
 | `EventLogWebEventProvider.ProcessEvent` | `UnsafeNativeMethods.RaiseEventlogEvent`, a webengine4 `DllImport` (`Management/EventlogProvider.cs:250`, `UnsafeNativeMethods.cs:1267-1269`) | would throw `DllNotFoundException` if a config ever activated it; never activated. Same for `WmiWebEventProvider` (`RaiseWmiEvent`) and `IisTraceWebEventProvider` |
 | `EtwTrace` (14 calling files) | IIS ETW / FREB | inert twice over: `TraceEnableCheck` early-returns unless `HttpRuntime.IsEngineLoaded` (`EtwTrace.cs:193-196`), which is permanently false (ledger P04, `HttpRuntime.cs:2976`), so `IsTraceEnabled` never passes; and `Trace` dispatches only on IIS worker-request casts (`EtwTrace.cs:233-261`), which `AspNetCoreWorkerRequest` fails |
 | `PerfCounters` | webengine4 shared memory | inert (P04); owned by [portable runtime metrics](../follow-ups/portable-runtime-metrics.md), shape already chosen: `System.Diagnostics.Metrics` behind the `IPerfCounters` seam |
-| 204 empty `catch` blocks | nothing, by design | untouched except where a slice trapped one; the instrumented site `HttpRuntime.cs:1844` reports `SwallowedRequestException` on the EventSource (P31) |
+| 145 untyped empty `catch` blocks | nothing, by design | 116 report `SwallowedException` on the choke point (P94); the rest are trivial-intent, unreachable, or in dead `#if` branches |
 
 The port therefore already has a portable channel:
 `src/Rehost.WebForms.Runtime/Compatibility/Diagnostics/WebFormsRuntimeEventSource.cs`,
@@ -211,7 +211,7 @@ observability was the reason `EventSource` won, and that reason stands).
   while the raw exception rides to `ILogger`); and `HttpRuntime.cs:1844`,
   which folds two exceptions into one string. `ILogger` has one `Exception`
   slot, so the signature becomes
-  `SwallowedRequestException(string site, Exception swallowed, Exception? context)` —
+  `SwallowedException(string site, Exception swallowed, Exception? context)` —
   the swallowed reporting failure is the event's subject and takes the slot,
   the original request error becomes a named prop; the `[Event]` string form
   keeps both texts so EventPipe output loses nothing. Wrapping both in an

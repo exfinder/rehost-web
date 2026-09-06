@@ -1838,7 +1838,9 @@ namespace System.Web {
                                 try {
                                     fileMon = dirMon.StartMonitoringFileWithAssert(file, callback, alias);
                                 }
-                                catch {
+                                catch (Exception swallowedException) {
+                                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                        $"{nameof(FileChangesMonitor)}.{nameof(StartMonitoringPath)}", swallowedException, "dirMon.StartMonitoringFileWithAssert");
                                 }
 
                                 if (fileMon != null) {

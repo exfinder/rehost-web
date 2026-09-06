@@ -33,8 +33,8 @@ internal static partial class WebFormsRuntimeLogger
         Exception exception,
         string eventInfo);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Error, Message = "{site} swallowed an exception; {context}")]
-    internal static partial void SwallowedRequestException(
+    [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "{site} swallowed an exception; {context}")]
+    internal static partial void SwallowedException(
         this ILogger logger,
         Exception exception,
         string site,

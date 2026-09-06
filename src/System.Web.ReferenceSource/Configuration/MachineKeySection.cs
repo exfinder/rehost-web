@@ -1137,7 +1137,10 @@ namespace System.Web.Configuration
                         _AutoGenValidationKeySize = RoundupNumBitsToNumBytes(alg.InputBlockSize);
                     if (_AutoGenValidationKeySize < 1)
                         _AutoGenValidationKeySize = RoundupNumBitsToNumBytes(alg.OutputBlockSize);
-                } catch {}
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(MachineKeySection)}.{nameof(InitValidationAndEncyptionSizes)}", swallowedException, "RoundupNumBitsToNumBytes");
+                  }
 
                 if (_HashSize < 1 || _AutoGenValidationKeySize < 1) {
                     // If we didn't get the hash-size or key-size, perform a hash and get the sizes

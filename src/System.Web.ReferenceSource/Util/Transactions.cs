@@ -144,7 +144,9 @@ public class Transactions {
                 try {
                     inTransaction = ContextUtil.IsInTransaction;
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(Utils)}.{nameof(IsInTransaction)}_get", swallowedException, "");
                 }
 
                 return inTransaction;
@@ -159,7 +161,9 @@ public class Transactions {
                     if (ContextUtil.MyTransactionVote == TransactionVote.Abort)
                         aborted = true;
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(Utils)}.{nameof(AbortPending)}_get", swallowedException, "");
                 }
 
                 return aborted;

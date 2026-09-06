@@ -122,7 +122,9 @@ namespace System.Web.Hosting {
                     String error;
                     token = IdentitySection.CreateUserToken(username, password, out error);
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(ISAPIApplicationHost)}.{nameof(IApplicationHost.GetConfigToken)}", swallowedException, "IdentitySection.CreateUserToken");
                 }
             }
 

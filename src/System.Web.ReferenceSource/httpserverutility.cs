@@ -76,7 +76,9 @@ namespace System.Web {
                 throw new NotImplementedException("ROTORTODO");
 #endif // !FEATURE_PAL
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpServerUtility)}.{nameof(CreateObject)}", swallowedException, "Type.GetTypeFromProgID");
             }
 
             if (type == null) {
@@ -147,7 +149,9 @@ namespace System.Web {
                 // Instantiate the object
                 obj = Activator.CreateInstance(type);
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpServerUtility)}.{nameof(CreateObjectFromClsid)}", swallowedException, "Type.GetTypeFromCLSID");
             }
 
             if (obj == null) {

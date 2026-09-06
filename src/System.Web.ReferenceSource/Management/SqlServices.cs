@@ -632,7 +632,9 @@ namespace System.Web.Management {
                     try {
                         sqlConnection.Close();
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(SqlServices)}.{nameof(SetupApplicationServices)}", swallowedException, "sqlConnection.Close");
                     }
                     finally {
                         sqlConnection = null;
@@ -683,7 +685,9 @@ namespace System.Web.Management {
                     try {
                         sqlConnection.Close();
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(SqlServices)}.{nameof(SetupSessionState)}", swallowedException, "sqlConnection.Close");
                     }
                     finally {
                         sqlConnection = null;

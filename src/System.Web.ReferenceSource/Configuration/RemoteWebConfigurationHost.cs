@@ -370,7 +370,9 @@ namespace System.Web.Configuration {
                         wiContext.Undo(); // revert impersonation
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(RemoteWebConfigurationHost)}.{nameof(CallEncryptOrDecrypt)}", swallowedException, "CreateRemoteObject");
             }
 
             return returnString;

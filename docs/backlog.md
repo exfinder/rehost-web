@@ -82,7 +82,10 @@ Carried from earlier milestones as unresolved detail:
   `HttpRuntime`/`HttpConfigurationSystem`/`HostingEnvironment`; feed or
   fail-fast the ones with reachable consumers:
   [ambient statics audit](follow-ups/ambient-statics-audit.md).
-- Classify reached silent catches without creating diagnostic noise:
+- The one swallow the P94 sweep surfaced and P95 did not close: a null callback
+  list aborts config-record teardown in
+  `WebConfigurationHost.StopMonitoringStreamForChanges`, needing a Framework
+  reading before it can be called a port defect:
   [silent exceptions](follow-ups/silent-exception-swallowing.md).
 - Declare `system.net` in the shipped `machine.config` so an application that
   merely contains the section can activate. It fixes activation only: modern .NET

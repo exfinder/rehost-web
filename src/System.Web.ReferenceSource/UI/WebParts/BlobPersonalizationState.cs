@@ -1169,7 +1169,9 @@ namespace System.Web.UI.WebControls.WebParts {
                         FastPropertyAccessor.SetProperty(control, name, value, control.DesignMode);
                         propertySet = true;
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(BlobPersonalizationState)}.{nameof(SetPersonalizedProperties)}", swallowedException, "FastPropertyAccessor.SetProperty");
                     }
                 }
 

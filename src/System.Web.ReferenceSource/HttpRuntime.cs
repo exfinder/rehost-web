@@ -365,7 +365,10 @@ namespace System.Web {
                 DisposeAppDomainShutdownTimer();
                 ShutdownAppDomain(ApplicationShutdownReason.InitializationError, "Initialization Error");
             }
-            catch { } // ignore exceptions
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(AppDomainShutdownTimerCallback)}", swallowedException, "DisposeAppDomainShutdownTimer");
+            } // ignore exceptions
         }
 
         /*
@@ -1210,9 +1213,15 @@ namespace System.Web {
                 catch (FileNotFoundException) {
                     // If Load failed, try LoadFrom (VSWhidbey 493725)
                     try { Assembly.LoadFrom(fi.FullName); }
-                    catch { }
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(HttpRuntime)}.{nameof(PreloadAssembliesFromBinRecursive)}", swallowedException, "Assembly.LoadFrom");
+                    }
                 }
-                catch { }
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(HttpRuntime)}.{nameof(PreloadAssembliesFromBinRecursive)}#2", swallowedException, "Assembly.Load");
+                }
             }
 
             // Recurse on the subdirectories
@@ -1230,7 +1239,11 @@ namespace System.Web {
             // only set if different
             if (pmConfig.DefaultMaxWorkerThreadsForAutoConfig != workerMax || pmConfig.DefaultMaxIoThreadsForAutoConfig != ioMax) {
                 Debug.Trace("ThreadPool", "SetThreadLimit: from " + workerMax + "," + ioMax + " to " + pmConfig.DefaultMaxWorkerThreadsForAutoConfig + "," + pmConfig.DefaultMaxIoThreadsForAutoConfig);
+#if NETFRAMEWORK
                 UnsafeNativeMethods.SetClrThreadPoolLimits(pmConfig.DefaultMaxWorkerThreadsForAutoConfig, pmConfig.DefaultMaxIoThreadsForAutoConfig, true);
+#else
+                ThreadPool.SetMaxThreads(pmConfig.DefaultMaxWorkerThreadsForAutoConfig, pmConfig.DefaultMaxIoThreadsForAutoConfig);
+#endif
             }
 
             // this is the code equivalent of setting maxconnection
@@ -1257,7 +1270,11 @@ namespace System.Web {
                     // only set if different
                     if (pmConfig.MaxWorkerThreadsTimesCpuCount != workerMax || pmConfig.MaxIoThreadsTimesCpuCount != ioMax) {
                         Debug.Trace("ThreadPool", "SetThreadLimit: from " + workerMax + "," + ioMax + " to " + pmConfig.MaxWorkerThreadsTimesCpuCount + "," + pmConfig.MaxIoThreadsTimesCpuCount);
+#if NETFRAMEWORK
                         UnsafeNativeMethods.SetClrThreadPoolLimits(pmConfig.MaxWorkerThreadsTimesCpuCount, pmConfig.MaxIoThreadsTimesCpuCount, false);
+#else
+                        ThreadPool.SetMaxThreads(pmConfig.MaxWorkerThreadsTimesCpuCount, pmConfig.MaxIoThreadsTimesCpuCount);
+#endif
                     }
                 }
 
@@ -1273,7 +1290,9 @@ namespace System.Web {
                         ThreadPool.SetMinThreads(newMinWorkerThreads, newMinIoThreads);
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(SetThreadPoolLimits)}", swallowedException, "RuntimeConfig.GetMachineConfig");
             }
         }
 
@@ -1624,7 +1643,9 @@ namespace System.Web {
                 try {
                     context.Response.UpdateNativeResponse(sendHeaders);
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(HttpRuntime)}.{nameof(FinishRequestNotification)}", swallowedException, "context.Response.UpdateNativeResponse");
                 }
             }
 
@@ -1848,7 +1869,9 @@ namespace System.Web {
 #endif
                             response.FinalFlushAtTheEndOfRequestProcessing();
                         }
-                        catch {
+                        catch (Exception swallowedException) {
+                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                $"{nameof(HttpRuntime)}.{nameof(FinishRequest)}", swallowedException, "ReportAppOfflineErrorMessage");
                         }
                     }
                     else {
@@ -1879,7 +1902,7 @@ namespace System.Web {
                                 response.FinalFlushAtTheEndOfRequestProcessing();
                             }
                             catch (Exception eReportFailure) {
-                                WebFormsRuntimeEventSource.Log.SwallowedRequestException(
+                                WebFormsRuntimeEventSource.Log.SwallowedException(
                                     "HttpRuntime.FinishRequest",
                                     eReportFailure,
                                     "request: " + e);
@@ -1958,14 +1981,18 @@ namespace System.Web {
             try {
                 PerfCounters.IncrementGlobalCounter(GlobalPerfCounter.APPLICATION_RESTARTS);
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(ReleaseResourcesAndUnloadAppDomain)}", swallowedException, "PerfCounters.IncrementGlobalCounter");
             }
 
             // Release all resources
             try {
                 Dispose();
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(ReleaseResourcesAndUnloadAppDomain)}#2", swallowedException, "Dispose");
             }
 
             Thread.Sleep(250);
@@ -2269,7 +2296,9 @@ namespace System.Web {
                     maxWaitChangeNotification = config.MaxWaitChangeNotification;
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(CoalesceNotifications)}", swallowedException, "RuntimeConfig.GetAppLKGConfig");
             }
 
             if (waitChangeNotification == 0 || maxWaitChangeNotification == 0)
@@ -2285,7 +2314,9 @@ namespace System.Web {
                     Thread.Sleep(250);
                 }
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(CoalesceNotifications)}#2", swallowedException, "_theRuntime.LastShutdownAttemptTime.AddSeconds");
             }
         }
 
@@ -2344,7 +2375,9 @@ namespace System.Web {
                         }
                     }
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(HttpRuntime)}.{nameof(ShutdownAppDomain)}", swallowedException, "RuntimeConfig.GetAppLKGConfig");
                 }
             }
 
@@ -2766,7 +2799,9 @@ namespace System.Web {
                 if (HasPathDiscoveryPermission(path)) // could throw on bad filenames
                     return path;
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HttpRuntime)}.{nameof(GetSafePath)}", swallowedException, "HasPathDiscoveryPermission");
             }
 
             return Path.GetFileName(path);
@@ -3624,7 +3659,10 @@ namespace System.Web {
                 if (config != null && config.HttpRuntime != null && config.HttpRuntime.RelaxedUrlToFileSystemMapping) {
                     _DefaultPhysicalPathOnMapPathFailure = Path.Combine(_appDomainAppPath, "NOT_A_VALID_FILESYSTEM_PATH");
                 }
-            } catch {}
+            } catch (Exception swallowedException) {
+                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      $"{nameof(HttpRuntime)}.{nameof(RelaxMapPathIfRequired)}", swallowedException, "RuntimeConfig.GetAppConfig");
+              }
         }
         internal static bool IsMapPathRelaxed {
             get {

@@ -210,7 +210,10 @@ namespace System.Web.DataAccess {
                         if (context != null)
                             HttpRuntime.RestrictIISFolders(context);
                     }
-                    catch { }
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(SqlConnectionHelper)}.{nameof(CreateMdfFile)}", swallowedException, "HttpRuntime.RestrictIISFolders");
+                    }
                 }
 
                 fullFileName = fullFileName.ToUpper(CultureInfo.InvariantCulture);
@@ -270,7 +273,9 @@ namespace System.Web.DataAccess {
                 command.Parameters.AddWithValue("@skipchecks", "true");
                 command.ExecuteNonQuery();
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(SqlConnectionHelper)}.{nameof(DetachDB)}", swallowedException, "connection.Open");
             }
             finally {
                 connection.Close();

@@ -465,7 +465,9 @@ namespace System.Web.Hosting {
                 ProcessModelSection pmConfig = RuntimeConfig.GetMachineConfig().ProcessModel;
                 limit = pmConfig.MaxAppDomains;
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HostingEnvironment)}.{nameof(EnforceAppDomainLimit)}", swallowedException, "RuntimeConfig.GetMachineConfig");
             }
 
             if (limit > 0 && _appManager.AppDomainsCount >= limit) {
@@ -488,7 +490,9 @@ namespace System.Web.Hosting {
                 }
                 _appIdentityTokenSet = true;
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(HostingEnvironment)}.{nameof(GetApplicationIdentity)}", swallowedException, "RuntimeConfig.GetAppConfig");
             }
         }
 
@@ -557,7 +561,9 @@ namespace System.Web.Hosting {
                     try {
                         obj.Stop(immediate);
                     }
-                    catch {
+                    catch (Exception swallowedException) {
+                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            $"{nameof(HostingEnvironment)}.{nameof(StopRegisteredObjects)}", swallowedException, "obj.Stop");
                     }
                 }
             }

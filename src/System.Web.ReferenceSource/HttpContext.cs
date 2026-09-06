@@ -571,7 +571,10 @@ namespace System.Web {
                         eurl = StringUtil.StringFromWCharPtr(pBuffer, UnsafeNativeMethods.lstrlenW(pBuffer));
                     }
                 }
-                catch {} // ignore all exceptions
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(HttpContext)}.{nameof(GetEurl)}", swallowedException, "UnsafeNativeMethods.GetExtensionlessUrlAppendage");
+                } // ignore all exceptions
                 s_eurl = eurl;
                 s_eurlSet = true;
             }
@@ -1146,7 +1149,9 @@ namespace System.Web {
                         return;
                     }
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(HttpContext)}.{nameof(ReportRuntimeErrorIfExists)}", swallowedException, "String.IsNullOrEmpty");
                 }
             }
 
@@ -1159,7 +1164,9 @@ namespace System.Web {
                     HttpRuntime.ReportAppOfflineErrorMessage(Response, HttpRuntime.AppOfflineMessage);
 
                 }
-                catch {
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(HttpContext)}.{nameof(ReportRuntimeErrorIfExists)}#2", swallowedException, "HttpRuntime.ReportAppOfflineErrorMessage");
                 }
             }
             else {
@@ -1184,7 +1191,9 @@ namespace System.Web {
                                 Response.ReportRuntimeError(eReport, false /*canThrow*/, false);
                             }
                         }
-                        catch (Exception) {
+                        catch (Exception swallowedException) {
+                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                $"{nameof(HttpContext)}.{nameof(ReportRuntimeErrorIfExists)}#3", swallowedException, "Response.ReportRuntimeError");
                         }
                     }
                 }

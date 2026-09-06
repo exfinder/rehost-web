@@ -512,7 +512,10 @@ namespace System.Web {
                 try {
                     text = ResourceExpressionBuilder.GetGlobalResourceObject(Provider.ResourceKey, ResourceKey + "." + attributeName) as String;
                 }
-                catch { }
+                catch (Exception swallowedException) {
+                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        $"{nameof(SiteMapNode)}.{nameof(GetImplicitResourceString)}", swallowedException, "ResourceExpressionBuilder.GetGlobalResourceObject");
+                }
             }
 
             return text;

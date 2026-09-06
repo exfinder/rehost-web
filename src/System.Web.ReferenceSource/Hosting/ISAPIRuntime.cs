@@ -180,7 +180,10 @@ namespace System.Web.Hosting {
             catch(Exception e) {
                 try {
                     WebBaseEvent.RaiseRuntimeError(e, this);
-                } catch {}
+                } catch (Exception swallowedException) {
+                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          $"{nameof(ISAPIRuntime)}.{nameof(ProcessRequest)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
+                  }
                 
                 // Have we called HSE_REQ_DONE_WITH_SESSION?  If so, don't re-throw.
                 if (wr != null && wr.Ecb == IntPtr.Zero) {
@@ -247,7 +250,9 @@ namespace System.Web.Hosting {
 
                 HttpRuntime.AddAppDomainTraceMessage(SR.GetString(SR.App_Domain_Restart));
             }
-            catch {
+            catch (Exception swallowedException) {
+                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    $"{nameof(ISAPIRuntime)}.{nameof(RemoveThisAppDomainFromUnmanagedTable)}", swallowedException, "Debug.Trace");
             }
         }
     }
