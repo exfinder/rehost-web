@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Sidecar.props" />
+  <PropertyGroup>
+    <AssemblyName>ServiceStack.OrmLite.PostgreSQL</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.PostgreSQL</RootNamespace>
+    <Source>$(YafSrc)ServiceStack/ServiceStack.OrmLite.PostgreSQL/</Source>
+    <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
+    <!-- yafsrc/ServiceStack/Directory.Build.props defines these for the net481
+         build. NETFX is what supplies PclExport.Instance; without it every
+         OrmLite query fails in Env's static constructor. -->
+    <DefineConstants>$(DefineConstants);NETFX;NET481</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="8.0.9" />
+    <ProjectReference Include="../ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />
+  </ItemGroup>
+</Project>

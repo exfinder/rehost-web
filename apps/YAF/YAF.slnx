@@ -1,11 +1,13 @@
 <Solution>
   <Project Path="ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />
+  <Project Path="ServiceStack.OrmLite.PostgreSQL/ServiceStack.OrmLite.PostgreSQL.csproj" />
   <Project Path="ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.csproj" />
   <Project Path="System.Web.Http.WebHost/System.Web.Http.WebHost.csproj" />
   <Project Path="YAF.App/YAF.App.csproj" />
   <Project Path="YAF.Compat/YAF.Compat.csproj" />
   <Project Path="YAF.Configuration/YAF.Configuration.csproj" />
   <Project Path="YAF.Core/YAF.Core.csproj" />
+  <Project Path="YAF.Data.PostgreSQL/YAF.Data.PostgreSQL.csproj" />
   <Project Path="YAF.Data.SqlServer/YAF.Data.SqlServer.csproj" />
   <Project Path="YAF.Types/YAF.Types.csproj" />
   <Project Path="YAF.UrlRewriter/YAF.UrlRewriter.csproj" />

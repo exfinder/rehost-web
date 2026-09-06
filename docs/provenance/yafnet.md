@@ -12,8 +12,8 @@ database variants removed, since only the SQL Server closure is built:
 
 | Removed | Reason |
 | --- | --- |
-| `ServiceStack/ServiceStack.OrmLite.{MySql,PostgreSQL,Sqlite}` | outside the `YAF-SqlServer` project closure |
-| `YAF.Data/YAF.Data.{MySql,PostgreSQL,Sqlite}` | same |
+| `ServiceStack/ServiceStack.OrmLite.{MySql,Sqlite}` | outside the closure of either database the port builds |
+| `YAF.Data/YAF.Data.{MySql,Sqlite}` | same |
 | `YetAnotherForum.NET/YAF-{MySql,PostgreSQL,Sqlite}.csproj` | same |
 | `YAF.NET-{MySql,PostgreSQL,Sqlite}.slnx` | same |
 | `Lucene.Net/` (five projects, 26 MB) | the published `Lucene.Net` 4.8.0-beta00018 packages carry the same 4.8.0 code the fork is based on, and the rename to `YAF.Lucene.Net` exists to avoid an identity clash when YAF is hosted inside DNN, which does not apply here. `yafsrc/YAF.NET-SqlServer.slnx` still lists them and no longer opens as upstream ships it |
@@ -23,7 +23,7 @@ reproduces upstream bytes and the diff below stays the whole difference.
 
 ## Deviations
 
-Fifteen files differ from upstream. Nine are compile blockers on .NET 10, three
+Sixteen files differ from upstream. Nine are compile blockers on .NET 10, three
 are runtime blockers measured against a running application, two follow from
 choosing a dependency's published package over the copy vendored into the tree,
 and one is an upstream defect that has nothing to do with the port. Each is
@@ -34,7 +34,7 @@ marked.
 | `ServiceStack/ServiceStack.OrmLite/Base/Common/MiniProfiler/Data/ProfiledProviderFactory.cs` | drops the `CreatePermission` override; `DbProviderFactory` lost it with Code Access Security |
 | `YAF.Types/Extensions/EnumerableExtensions.cs` | drops `DistinctBy`, whose body is `Enumerable.DistinctBy`'s own first-key-wins filter and which is now ambiguous with it at seven call sites |
 | `YAF.Web/Controls/HelpMenu.cs` | drops an unused `using System.Runtime.Remoting.Contexts`, a namespace with no modern implementation |
-| `{YAF.Configuration,YAF.Core,YAF.Data.SqlServer,YAF.Types,YAF.UrlRewriter,YAF.Web}/Properties/AssemblyInfo.cs` | drops `[assembly: AssemblyKeyFile("..\\YetAnotherForum.NET.snk")]`. The literal backslash is a filename off Windows, so the compiler fails to find the key; the port does not strong-name and claims no binary identity |
+| `{YAF.Configuration,YAF.Core,YAF.Data.PostgreSQL,YAF.Data.SqlServer,YAF.Types,YAF.UrlRewriter,YAF.Web}/Properties/AssemblyInfo.cs` | drops `[assembly: AssemblyKeyFile("..\\YetAnotherForum.NET.snk")]`. The literal backslash is a filename off Windows, so the compiler fails to find the key; the port does not strong-name and claims no binary identity |
 | `ServiceStack/ServiceStack.OrmLite/Base/Text/ReflectionOptimizer.Emit.cs` | `AssemblyBuilderAccess.RunAndSave` becomes `Run`. Modern .NET cannot persist a dynamic assembly and dropped the member; nothing here saves the one it builds. Reached only once `NETFX` is defined, which is what compiles this file |
 | `YAF.Core/Services/MailService.cs` | gives `new SmtpClient()` a delivery method and a pickup directory under `App_Data/mail`. Framework's parameterless constructor configured itself from `<system.net><mailSettings>`; modern .NET deleted that reading, so the client has no host and every send throws "The SMTP host was not specified" ([reading](../follow-ups/system-net-mail-settings.md)). Every YAF user-creation path sends a verification mail, so without this no second account can be created. The directory mode is one of the two upstream `recommended.web.config` offers and needs no network |
 | `YAF.Core/Services/Search.cs` | ten `using YAF.Lucene.Net.*` become `using Lucene.Net.*`. The tree vendors Lucene.NET under a renamed namespace; the port consumes the published `Lucene.Net` 4.8.0-beta00018 packages instead, and this is the only file that names those types. Measured: `/api/Search/GetSearchResults` returns hits with `<mark>` highlighting, so index, query and Highlighter all work through the packages |
