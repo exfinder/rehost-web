@@ -4,6 +4,9 @@
     <AssemblyName>YAF</AssemblyName>
     <RootNamespace>YAF</RootNamespace>
     <Source>$(YafSrc)YetAnotherForum.NET/</Source>
+    <!-- Controls/ForumList.ascx.cs uses the C# 14 field keyword, so this one
+         assembly cannot take Sidecar.props's pinned 13. -->
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Not RehostAppContentRoot: that contract globs the whole tree, and four
