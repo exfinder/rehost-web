@@ -46,5 +46,10 @@ exec docker run --rm $TTY ${SMOKE_DOCKER_ARGS:-} \
       curl -fsS -o /dev/null "http://127.0.0.1:$PORT/" && break
       sleep 2
     done
+    # an app whose schema exists only inside its own installer seeds the
+    # database it was just given before the journey runs against it
+    if [ -x "apps/$APP/install.sh" ]; then
+      "apps/$APP/install.sh" "http://127.0.0.1:$PORT/"
+    fi
     "apps/$APP/smoke.sh"
   '
