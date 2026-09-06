@@ -50,6 +50,20 @@ field() { # field <html> <name>
   tr '<' '\n' < "$1" | grep "name=\"$2\"" | sed 's/.*value="//; s/".*//' | head -1
 }
 
+post_form() { # post_form <jar> <url> <out> <target> <extra curl args...>
+  local jar="$1" url="$2" out="$3" target="$4"; shift 4
+  curl -sS --max-time 180 -A "$UA" -b "$jar" -c "$jar" -o "$out" -w '%{http_code}' -L \
+    --data-urlencode "__VIEWSTATE=$VS" \
+    --data-urlencode "__VIEWSTATEGENERATOR=$VSG" \
+    --data-urlencode "__EVENTVALIDATION=$EV" \
+    --data-urlencode "__EVENTTARGET=$target" \
+    --data-urlencode "__EVENTARGUMENT=" "$@" "$BASE$url"
+}
+
+read_state() { # read_state <html>
+  VS=$(field "$1" __VIEWSTATE); VSG=$(field "$1" __VIEWSTATEGENERATOR); EV=$(field "$1" __EVENTVALIDATION)
+}
+
 approval_link() { # approval_link <eml> -- the link out of the first base64 part
   awk '
     /^Content-Transfer-Encoding: base64/ { want = 1; next }
@@ -187,6 +201,65 @@ check 'member board index status' "$code" 200
 check_contains 'the member is named on the board' "$work/newbie-index.html" "$NEW_USER"
 check_contains 'the member can sign out' "$work/newbie-index.html" '/Account/Logout'
 check_missing 'the member gets no administration' "$work/newbie-index.html" '/Admin/Admin'
+
+# --- the administrator opens a topic ---------------------------------------
+
+TOPIC="Rehost smoke topic $(date +%s)"
+
+code=$(get "$member" '/PostTopic?f=1' "$work/new-topic.html")
+check 'new topic form status' "$code" 200
+check_contains 'the form asks for a subject' "$work/new-topic.html" 'name="forum$ctl02$TopicSubjectTextBox"'
+
+read_state "$work/new-topic.html"
+code=$(post_form "$member" '/PostTopic?f=1' "$work/topic-posted.html" 'forum$ctl02$PostReply' \
+  --data-urlencode "forum\$ctl02\$TopicSubjectTextBox=$TOPIC" \
+  --data-urlencode "forum\$ctl02\$YafTextEditor=Opened by the smoke run.")
+check 'posting the topic' "$code" 200
+check_contains 'the topic shows its subject' "$work/topic-posted.html" "$TOPIC"
+
+topic_id=$(grep -o 'PostMessage?t=[0-9]*' "$work/topic-posted.html" | head -1 | sed 's/.*t=//')
+opening_id=$(grep -o 'DeleteMessage?m=[0-9]*' "$work/topic-posted.html" | sed 's/.*m=//' | sort -n | head -1)
+if [ -n "$topic_id" ]; then pass 'the topic has an id'
+else fail 'the topic has an id' 'no PostMessage?t= link on the posted topic'; fi
+
+# --- the member replies ----------------------------------------------------
+
+REPLY="Replied by the member at $(date +%s)"
+
+code=$(get "$newbie" "/PostMessage?t=$topic_id&f=1" "$work/reply-form.html")
+check 'member reply form status' "$code" 200
+
+read_state "$work/reply-form.html"
+code=$(post_form "$newbie" "/PostMessage?t=$topic_id&f=1" "$work/replied.html" 'forum$ctl02$PostReply' \
+  --data-urlencode "forum\$ctl02\$YafTextEditor=$REPLY")
+check 'posting the reply' "$code" 200
+check_contains 'the reply is on the topic' "$work/replied.html" "$REPLY"
+check_contains 'the reply is attributed to the member' "$work/replied.html" "$NEW_USER"
+
+reply_id=$(grep -o 'DeleteMessage?m=[0-9]*' "$work/replied.html" | sed 's/.*m=//' | sort -n | tail -1)
+
+code=$(get "$guest" "/Posts/t$topic_id-x" "$work/guest-topic.html")
+check_contains 'a guest can read the reply' "$work/guest-topic.html" "$REPLY"
+
+# --- only the moderator may moderate ---------------------------------------
+
+check_contains 'the member may delete their own reply' "$work/replied.html" "DeleteMessage?m=$reply_id"
+check_missing "the member cannot delete the administrator's post" "$work/replied.html" "DeleteMessage?m=$opening_id"
+
+code=$(get "$member" "/Posts/t$topic_id-x" "$work/admin-topic.html")
+check 'administrator topic status' "$code" 200
+check_contains 'the administrator is offered a delete' "$work/admin-topic.html" "DeleteMessage?m=$reply_id"
+
+code=$(get "$member" "/DeleteMessage?m=$reply_id&action=delete" "$work/delete-form.html")
+check 'delete confirmation status' "$code" 200
+
+read_state "$work/delete-form.html"
+code=$(post_form "$member" "/DeleteMessage?m=$reply_id&action=delete" "$work/deleted.html" 'forum$ctl02$Delete')
+check 'deleting the reply' "$code" 200
+
+code=$(get "$guest" "/Posts/t$topic_id-x" "$work/guest-after.html")
+check 'topic still reads after moderation' "$code" 200
+check_missing 'the moderated reply is gone for a guest' "$work/guest-after.html" "$REPLY"
 
 printf '\n'
 if [ "$failures" -eq 0 ]; then
