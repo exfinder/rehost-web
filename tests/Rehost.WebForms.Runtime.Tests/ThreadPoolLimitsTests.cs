@@ -12,16 +12,20 @@ namespace Rehost.WebForms.Runtime.Tests;
 // costs this claim its own activation.
 public sealed class ThreadPoolLimitsTests
 {
-    private const string ShippedProcessModel = "<processModel autoConfig=\"true\" memoryLimit=\"80\" />";
+    private const string ShippedProcessModel = """<processModel autoConfig="true" memoryLimit="80" />""";
+
+    private const string ConfiguredProcessModel =
+        """
+        <processModel autoConfig="false" maxWorkerThreads="37" maxIoThreads="41"
+                      minWorkerThreads="3" minIoThreads="5" memoryLimit="80" />
+        """;
 
     [Fact]
     public void Configured_Thread_Counts_Reach_The_Pool()
     {
         var cpus = Environment.ProcessorCount;
 
-        var reading = Run(
-            "<processModel autoConfig=\"false\" maxWorkerThreads=\"37\" maxIoThreads=\"41\" "
-            + "minWorkerThreads=\"3\" minIoThreads=\"5\" memoryLimit=\"80\" />");
+        var reading = Run(ConfiguredProcessModel);
 
         reading.MaxWorker.ShouldBe(37 * cpus);
         reading.MaxIo.ShouldBe(41 * cpus);
