@@ -12,6 +12,7 @@
 set -uo pipefail
 
 BASE="${1:-http://127.0.0.1:5087}"
+BASE="${BASE%/}"
 SITE="$(cd "$(dirname "$0")" && pwd)/YetAnotherForum.Host/bin/site"
 MAIL_DIR="$SITE/App_Data/mail"
 ADMIN_USER='hostadmin'

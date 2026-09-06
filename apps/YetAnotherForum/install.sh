@@ -8,6 +8,7 @@
 set -uo pipefail
 
 BASE="${1:-http://127.0.0.1:5087}"
+BASE="${BASE%/}"
 BOARD='Rehost Test Forum'
 CONNECTION='yafnet'
 ADMIN_USER='hostadmin'
