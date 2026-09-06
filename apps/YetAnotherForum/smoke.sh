@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # The forum journey against a running YetAnotherForum.Host: read the board as an
 # anonymous guest, prove the guest is refused a post, sign the host administrator
-# in through the rendered login form, and read the seeded topic as a member.
+# in through the rendered login form, then register a member, verify the address
+# from the mail YAF wrote to its pickup directory, and prove the member sees the
+# board the administrator's own view withholds.
 # bash + curl only, and no bash-4 builtins, so the same script runs on macOS,
 # Linux, and Git bash on Windows.
 #
@@ -10,16 +12,21 @@
 set -uo pipefail
 
 BASE="${1:-http://127.0.0.1:5087}"
+SITE="$(cd "$(dirname "$0")" && pwd)/YetAnotherForum.Host/bin/site"
+MAIL_DIR="$SITE/App_Data/mail"
 ADMIN_USER='hostadmin'
 ADMIN_PASSWORD='Rehost!Dev2026'
 UA='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
+NEW_USER="member$(date +%s)"
 guest="$work/guest.txt"
 member="$work/member.txt"
+newbie="$work/newbie.txt"
 : > "$guest"
 : > "$member"
+: > "$newbie"
 
 failures=0
 
@@ -41,6 +48,16 @@ check_missing() { # check_missing <label> <file> <needle>
 
 field() { # field <html> <name>
   tr '<' '\n' < "$1" | grep "name=\"$2\"" | sed 's/.*value="//; s/".*//' | head -1
+}
+
+approval_link() { # approval_link <eml> -- the link out of the first base64 part
+  awk '
+    /^Content-Transfer-Encoding: base64/ { want = 1; next }
+    want && /^[[:space:]]*$/ { want = 0; body = 1; next }
+    body && /^----boundary/ { exit }
+    body { printf "%s", $0 }
+  ' "$1" | tr -d '\r' | openssl base64 -d -A 2>/dev/null \
+    | tr -c 'A-Za-z0-9:/?=&._%~-' '\n' | grep -F 'Account/Approve?code=' | head -1
 }
 
 get() { # get <jar> <path> <out>
@@ -104,6 +121,72 @@ check_missing 'member is no longer a guest' "$work/member-index.html" 'Welcome G
 check_contains 'member is named on the board' "$work/member-index.html" "$ADMIN_USER"
 check_contains 'member can sign out' "$work/member-index.html" '/Account/Logout'
 check_contains 'administrator sees administration' "$work/member-index.html" '/Admin/Admin'
+
+# --- register a member and verify the address ------------------------------
+
+code=$(get "$newbie" '/RulesAndPrivacy' "$work/rules.html")
+check 'registration rules status' "$code" 200
+
+code=$(curl -sS --max-time 120 -A "$UA" -b "$newbie" -c "$newbie" -o "$work/register.html" \
+  -w '%{http_code}' -L \
+  --data-urlencode "__VIEWSTATE=$(field "$work/rules.html" __VIEWSTATE)" \
+  --data-urlencode "__VIEWSTATEGENERATOR=$(field "$work/rules.html" __VIEWSTATEGENERATOR)" \
+  --data-urlencode "__EVENTVALIDATION=$(field "$work/rules.html" __EVENTVALIDATION)" \
+  --data-urlencode "__EVENTTARGET=forum\$ctl03\$Accept" --data-urlencode "__EVENTARGUMENT=" \
+  "$BASE/RulesAndPrivacy")
+check 'accepting the rules reaches registration' "$code" 200
+check_contains 'registration asks for an address' "$work/register.html" 'name="forum$ctl02$Email"'
+
+before=$(ls "$MAIL_DIR" 2>/dev/null | wc -l | tr -d ' ')
+
+code=$(curl -sS --max-time 180 -A "$UA" -b "$newbie" -c "$newbie" -o "$work/registered.html" \
+  -w '%{http_code}' -L \
+  --data-urlencode "__VIEWSTATE=$(field "$work/register.html" __VIEWSTATE)" \
+  --data-urlencode "__VIEWSTATEGENERATOR=$(field "$work/register.html" __VIEWSTATEGENERATOR)" \
+  --data-urlencode "__EVENTVALIDATION=$(field "$work/register.html" __EVENTVALIDATION)" \
+  --data-urlencode "__EVENTTARGET=forum\$ctl02\$CreateUser" --data-urlencode "__EVENTARGUMENT=" \
+  --data-urlencode "forum\$ctl02\$UserName=$NEW_USER" \
+  --data-urlencode "forum\$ctl02\$Email=$NEW_USER@rehost.test" \
+  --data-urlencode "forum\$ctl02\$Password=$ADMIN_PASSWORD" \
+  --data-urlencode "forum\$ctl02\$ConfirmPassword=$ADMIN_PASSWORD" \
+  "$BASE/Account/Register")
+check 'registration status' "$code" 200
+
+after=$(ls "$MAIL_DIR" 2>/dev/null | wc -l | tr -d ' ')
+if [ "$after" -gt "$before" ]; then pass 'the verification mail was written'
+else fail 'the verification mail was written' "no new file under $MAIL_DIR"; fi
+
+newest=$(ls -t "$MAIL_DIR"/*.eml 2>/dev/null | head -1)
+link=''
+if [ -n "$newest" ]; then link=$(approval_link "$newest"); fi
+if [ -n "$link" ]; then pass 'the mail carries an approval link'
+else fail 'the mail carries an approval link' "none found in $newest"; fi
+
+code=$(curl -sS --max-time 120 -A "$UA" -b "$newbie" -c "$newbie" -o "$work/approved.html" \
+  -w '%{http_code}' -L "${link:-$BASE/}")
+check 'following the approval link' "$code" 200
+
+# --- the member is not an administrator ------------------------------------
+
+code=$(get "$newbie" '/Account/Login' "$work/member-login.html")
+check 'member login page status' "$code" 200
+
+code=$(curl -sS --max-time 120 -A "$UA" -b "$newbie" -c "$newbie" -o "$work/member-in.html" \
+  -w '%{http_code}' -L \
+  --data-urlencode "__VIEWSTATE=$(field "$work/member-login.html" __VIEWSTATE)" \
+  --data-urlencode "__VIEWSTATEGENERATOR=$(field "$work/member-login.html" __VIEWSTATEGENERATOR)" \
+  --data-urlencode "__EVENTVALIDATION=$(field "$work/member-login.html" __EVENTVALIDATION)" \
+  --data-urlencode "__EVENTTARGET=forum\$ctl02\$LoginButton" --data-urlencode "__EVENTARGUMENT=" \
+  --data-urlencode "forum\$ctl02\$UserName=$NEW_USER" \
+  --data-urlencode "forum\$ctl02\$Password=$ADMIN_PASSWORD" \
+  "$BASE/Account/Login")
+check 'member sign-in status' "$code" 200
+
+code=$(get "$newbie" / "$work/newbie-index.html")
+check 'member board index status' "$code" 200
+check_contains 'the member is named on the board' "$work/newbie-index.html" "$NEW_USER"
+check_contains 'the member can sign out' "$work/newbie-index.html" '/Account/Logout'
+check_missing 'the member gets no administration' "$work/newbie-index.html" '/Admin/Admin'
 
 printf '\n'
 if [ "$failures" -eq 0 ]; then
