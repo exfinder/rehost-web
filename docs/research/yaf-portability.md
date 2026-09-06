@@ -1,8 +1,74 @@
 # YAF.NET 3.2 portability assessment
 
-Static research only. No YAF build, application execution, package probe, or
-Framework/IIS baseline was performed. This document proposes work; it does not
+Everything below the horizontal rule is the original static assessment, kept as
+written so its predictions can be scored. The bring-up has since run: see
+[the app notes](../../apps/YetAnotherForum/README.md) and
+[the provenance record](../provenance/yafnet.md). Neither this document nor those
 widen [`compatibility.md`](../compatibility.md).
+
+## What the bring-up measured
+
+The 14-project SQL Server closure compiles and the forum runs: anonymous read,
+registration with the verification mail, sign-in, a topic, a member's reply, a
+moderation delete, and the permission differences between guest, member and
+administrator. Fifty-four scripted checks pass on macOS arm64 and Linux.
+
+### Predictions that held
+
+- Web API's `System.Web.Http.WebHost` is the one Framework-bound assembly on the
+  path, and `Application_Start` reaches it unconditionally.
+- All reached YAF assemblies bind Framework's `System.Web` and need rebuilding.
+- `Microsoft.Owin.Host.SystemWeb` substitutes cleanly.
+- `Session_Start` is where initialization happens, and the database check
+  redirects a fresh board to the installer.
+- The installer's config mutation conflicts with immutable configuration; the
+  install is a deployment step here, scripted as `install.sh`.
+- Case-sensitivity defects exist. One was measured, and only Linux showed it:
+  `web.config` names `URLRewriter.config`, the file is `UrlRewriter.config`.
+
+### Predictions that were wrong
+
+- **Web API was called the likely first blocker and a possible new workstream.**
+  It is a 3,073-line recompile from `aspnet/AspNetWebStack` v3.3.0 with one
+  field's `readonly` dropped, and Web API Core needs nothing at all: it
+  references no `System.Web`. No new Rehost seam was required.
+- **`System.Data.Linq` was called unsupported if reached.** It is reached, by one
+  attribute on one obsolete model, and a five-line shim covers it.
+- **`System.Web.DynamicData` and `System.Web.Entity` were called compile
+  blockers.** The frozen projects reference them and nothing in the closure
+  reaches them; dropping the references costs nothing.
+- **Lucene was called a recompile-or-defer decision.** All five projects compile
+  unchanged. Their build file only knows target frameworks up to net9, so net10
+  gets none of its `FEATURE_*` defines, which is the same set net481 got.
+
+### Blockers the static pass did not predict
+
+- **C# 14's first-class spans.** `array.Contains(x)` rebinds from `Enumerable` to
+  `MemoryExtensions`, and OrmLite cannot box the resulting `ReadOnlySpan` into an
+  expression tree. Pinning `LangVersion` 13 restores the net481 reading. Any
+  frozen tree rebuilt on .NET 10 has this exposure.
+- **`<system.net>` fails activation outright**, and mail cannot be configured from
+  `web.config` on modern .NET at all
+  ([reading](../follow-ups/system-net-mail-settings.md)). Every YAF
+  user-creation path sends a verification mail, so this gates registration.
+- **An upstream YAF defect.** Since v3.2.14, `Migration01` returns before creating
+  the five ASP.NET Identity tables on every provider except MySQL, so a fresh
+  SQL Server install cannot create a board.
+- **Framework reflection permissiveness.** YAF sets a static `initonly` field by
+  reflection during `Application_Start`; .NET refuses where Framework allowed it.
+- **`App_Browsers` fails activation**, which the map already records as
+  Unsupported. Excluding it leaves the rendered markup uplevel.
+
+### Still unmeasured
+
+Search and indexing, image and avatar paths, attachments, private messages,
+multi-board creation, the ten Web API controllers, virtual-directory hosting, the
+upgrade path, and mail over a network. The Framework/IIS baseline the original
+plan called for was never taken: the port was measured against YAF's own expected
+behavior and its source, not against a running Framework instance.
+
+---
+
 
 ## Executive verdict
 
