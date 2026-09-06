@@ -78,10 +78,12 @@ debugging round on YAF.NET ([app notes](../apps/YAF/README.md)).
 - **Reflection is stricter.** Framework let `FieldInfo.SetValue` write a static
   `initonly` field; .NET refuses once the type is initialized. An application
   that reaches into a library's private statics fails where it used to work.
-- **A case difference only one platform can see.** Windows and macOS hide a
-  `configSource` whose casing does not match the file. Linux does not, and the
-  section fails to load. The Linux round is what catches this; nothing earlier
-  in the loop can.
+- **A case difference only one platform can see.** YAF names a `configSource`
+  in a casing the file does not have. NTFS and stock APFS fold it; ext4 does
+  not, and the section failed to load. The port folds that seam now (ledger
+  P70), but the class stays open: any path an application spells itself can
+  differ this way. The Linux round is what catches it; nothing earlier in the
+  loop can.
 
 Rigs: [Windows validation](windows-validation-host.md) (IIS Express readings,
 Docker Desktop for SQL Server), `eng/linux-round.sh` and

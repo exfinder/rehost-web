@@ -71,7 +71,9 @@ the imported `FileUtil` path. Case canonicalization occurs once per path-produci
 seam — `HostingEnvironment.MapPathActual`, `HttpRequest.PhysicalPathInternal`
 for the path a worker request concatenates itself,
 `UserMapPath.GetPhysicalPathForPath` for the configuration system, which maps
-lowercased configuration paths and composes `web.config` itself, and the
+lowercased configuration paths and composes `web.config` itself,
+`WebConfigurationHost.GetStreamNameForConfigSource` for the `configSource` file
+`System.Configuration` composes below that, and the
 server-include fallback that composes a physical path above the application
 root — keeping downstream ignore-case compilation and configuration caches
 coherent. Resolution is idempotent, so a path crossing two seams folds once.

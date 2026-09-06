@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <copyright file="WebConfigurationHost.cs" company="Microsoft">
 //     Copyright (c) Microsoft Corporation.  All rights reserved.
 // </copyright>
@@ -511,6 +511,15 @@ namespace System.Web.Configuration {
                 return null;
             }
         }
+
+#if !NETFRAMEWORK
+        // base owns the "stays under the config directory" check.
+        public override string GetStreamNameForConfigSource(string streamName, string configSource) {
+            return CanonicalCasePath.Resolve(
+                base.GetStreamNameForConfigSource(streamName, configSource),
+                HostingEnvironment.ApplicationPhysicalPath);
+        }
+#endif
 
         // change notification support - runtime only
         public override bool SupportsChangeNotifications {

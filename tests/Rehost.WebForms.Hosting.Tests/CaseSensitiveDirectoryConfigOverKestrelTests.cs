@@ -19,4 +19,15 @@ public sealed class CaseSensitiveDirectoryConfigOverKestrelTests(CaseSensitiveLi
         response.StatusCode.ShouldBe(401);
         response.Text.ShouldNotContain("secret-body");
     }
+
+    [Fact]
+    public async Task A_ConfigSource_Spelled_In_Another_Casing_Denies_The_Request()
+    {
+        var live = scenario.RequireLive();
+
+        var response = await live.Client.GetAsync("/Sourced/Secret.aspx");
+
+        response.StatusCode.ShouldBe(401);
+        response.Text.ShouldNotContain("sourced-secret-body");
+    }
 }

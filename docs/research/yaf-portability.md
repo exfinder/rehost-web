@@ -24,7 +24,11 @@ administrator. Fifty-four scripted checks pass on macOS arm64 and Linux.
 - The installer's config mutation conflicts with immutable configuration; the
   install is a deployment step here, scripted as `install.sh`.
 - Case-sensitivity defects exist. One was measured, and only Linux showed it:
-  `web.config` names `URLRewriter.config`, the file is `UrlRewriter.config`.
+  `web.config` names `URLRewriter.config`, the file is `UrlRewriter.config`. It
+  turned out to be a gap in the port, not the application: the `configSource`
+  path is composed by `System.Configuration` below the seams P70 already folded.
+  `WebConfigurationHost` folds it too now, and the application needs no
+  transform.
 
 ### Predictions that were wrong
 
