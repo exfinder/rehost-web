@@ -26,16 +26,16 @@
     <PackageReference Include="System.Runtime.Caching" Version="10.0.11" />
     <PackageReference Include="System.ServiceModel.Syndication" Version="10.0.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+    <PackageReference Include="Lucene.Net" Version="4.8.0-beta00018" />
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00018" />
+    <PackageReference Include="Lucene.Net.Highlighter" Version="4.8.0-beta00018" />
+    <PackageReference Include="Lucene.Net.Queries" Version="4.8.0-beta00018" />
+    <PackageReference Include="Lucene.Net.QueryParser" Version="4.8.0-beta00018" />
     <PackageReference Include="OEmbed.Core" Version="2.0.7" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../System.Web.Http.WebHost/System.Web.Http.WebHost.csproj" />
     <ProjectReference Include="../YAF.Configuration/YAF.Configuration.csproj" />
-    <ProjectReference Include="../YAF.Lucene.Net/YAF.Lucene.Net.csproj" />
-    <ProjectReference Include="../YAF.Lucene.Net.Analysis.Common/YAF.Lucene.Net.Analysis.Common.csproj" />
-    <ProjectReference Include="../YAF.Lucene.Net.Highlighter/YAF.Lucene.Net.Highlighter.csproj" />
-    <ProjectReference Include="../YAF.Lucene.Net.Queries/YAF.Lucene.Net.Queries.csproj" />
-    <ProjectReference Include="../YAF.Lucene.Net.QueryParser/YAF.Lucene.Net.QueryParser.csproj" />
     <ProjectReference Include="../ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />
   </ItemGroup>

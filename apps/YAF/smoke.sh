@@ -89,7 +89,7 @@ code=$(get "$guest" / "$work/index.html")
 check 'guest board index status' "$code" 200
 check_contains 'guest sees the board name' "$work/index.html" 'Rehost Test Forum'
 check_contains 'guest sees the seeded category' "$work/index.html" 'Test Category'
-check_contains 'guest sees the seeded topic' "$work/index.html" 'Hello from YAF.NET'
+check_contains 'guest sees the seeded forum' "$work/index.html" 'Test Forum'
 check_contains 'guest is greeted as a guest' "$work/index.html" 'Welcome Guest!'
 check_contains 'guest is offered a login' "$work/index.html" 'LoginLink'
 check_missing 'guest has no sign-out' "$work/index.html" '/Account/Logout'
@@ -102,6 +102,7 @@ check_contains 'category lists the forum' "$work/category.html" 'Test Forum'
 code=$(get "$guest" '/Posts/t1--Hello-from-YAF-NET' "$work/topic.html")
 check 'guest topic status' "$code" 200
 check_contains 'topic shows its author' "$work/topic.html" 'hostadmin'
+check_contains 'topic shows its subject' "$work/topic.html" 'Hello from YAF.NET'
 
 check 'theme stylesheet is served' \
   "$(status_of "$guest" '/Content/Themes/yaf/bootstrap-forum.min.css?v=1')" 200
@@ -261,6 +262,32 @@ check 'deleting the reply' "$code" 200
 code=$(get "$guest" "/Posts/t$topic_id-x" "$work/guest-after.html")
 check 'topic still reads after moderation' "$code" 200
 check_missing 'the moderated reply is gone for a guest' "$work/guest-after.html" "$REPLY"
+
+# --- the Web API host answers ----------------------------------------------
+
+code=$(curl -sS --max-time 120 -A "$UA" -b "$member" -c "$member" -o "$work/forums.json" \
+  -w '%{http_code}' -H 'Content-Type: application/json' -X POST \
+  --data '{"ForumId":0,"Page":0,"PageSize":20,"SearchTerm":""}' "$BASE/api/Forum/GetForums")
+check 'web api status' "$code" 200
+check_contains 'the api names the category' "$work/forums.json" 'Test Category'
+check_contains 'the api names the forum' "$work/forums.json" 'Test Forum'
+
+# --- the search index finds the topic --------------------------------------
+# Indexing follows the post, so give it a bounded wait rather than one shot.
+
+found=''
+n=1
+while [ "$n" -le 12 ]; do
+  curl -sS --max-time 120 -A "$UA" -b "$member" -c "$member" -o "$work/search.json" \
+    -H 'Content-Type: application/json' -X POST \
+    --data "{\"ForumId\":0,\"TopicId\":0,\"PageSize\":20,\"Page\":0,\"SearchTerm\":\"${TOPIC##* }\",\"AllForumsOption\":true}" \
+    "$BASE/api/Search/GetSearchResults" >/dev/null
+  if grep -qF -- "${TOPIC##* }" "$work/search.json" 2>/dev/null; then found=yes; break; fi
+  sleep 5
+  n=$((n + 1))
+done
+if [ -n "$found" ]; then pass 'search finds the topic this run posted'
+else fail 'search finds the topic this run posted' "no hit for '${TOPIC##* }' after 12 tries"; fi
 
 printf '\n'
 if [ "$failures" -eq 0 ]; then

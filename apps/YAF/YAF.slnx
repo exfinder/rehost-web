@@ -7,11 +7,6 @@
   <Project Path="YAF.Configuration/YAF.Configuration.csproj" />
   <Project Path="YAF.Core/YAF.Core.csproj" />
   <Project Path="YAF.Data.SqlServer/YAF.Data.SqlServer.csproj" />
-  <Project Path="YAF.Lucene.Net/YAF.Lucene.Net.csproj" />
-  <Project Path="YAF.Lucene.Net.Analysis.Common/YAF.Lucene.Net.Analysis.Common.csproj" />
-  <Project Path="YAF.Lucene.Net.Highlighter/YAF.Lucene.Net.Highlighter.csproj" />
-  <Project Path="YAF.Lucene.Net.Queries/YAF.Lucene.Net.Queries.csproj" />
-  <Project Path="YAF.Lucene.Net.QueryParser/YAF.Lucene.Net.QueryParser.csproj" />
   <Project Path="YAF.Types/YAF.Types.csproj" />
   <Project Path="YAF.UrlRewriter/YAF.UrlRewriter.csproj" />
   <Project Path="YAF.Web/YAF.Web.csproj" />

@@ -29,7 +29,6 @@ normalisation. Import exclusions and every source deviation are in the provenanc
 | `YAF.App/` | The website assembly, `YAF.dll`, from `yafsrc/YetAnotherForum.NET/**/*.cs`. |
 | `YAF.Types/`, `YAF.Configuration/`, `YAF.Core/`, `YAF.UrlRewriter/`, `YAF.Web/`, `YAF.Data.SqlServer/` | One sidecar per YAF library, each keeping its upstream assembly name. |
 | `ServiceStack.OrmLite/`, `ServiceStack.OrmLite.SqlServer/` | Sidecars over the vendored OrmLite fork. |
-| `YAF.Lucene.Net*/` | Sidecars over the five vendored Lucene projects. |
 | `System.Web.Http.WebHost/` | Recompile of Web API's host, byte-identical upstream source plus one field. |
 | `YAF.Compat/` | Five shims for APIs modern .NET dropped, so the frozen sources need no edit. |
 | `YAF.Host/` | The process: a ~20-line Kestrel host and the app's `Web.Rehost.config`. |
@@ -71,7 +70,7 @@ and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a b
 | --- | --- | --- |
 | Six YAF libraries and the website | sidecars, same assembly names | All bind Framework `System.Web`; binary interchangeability is unsupported |
 | vendored OrmLite, OrmLite.SqlServer | sidecars | `NETFX;NET481` from the frozen `ServiceStack/Directory.Build.props` must be repeated, or `PclExport.Instance` is null and every query dies in `Env`'s static constructor |
-| vendored Lucene, five projects | sidecars, no source change | Their own build file knows up to net9, so net10 gets none of its `FEATURE_*` defines, which is the set net481 got. Search is unexercised |
+| vendored Lucene, five projects | `Lucene.Net` 4.8.0-beta00018 packages | The tree vendors Lucene.NET renamed to `YAF.Lucene.Net`, which exists to avoid an identity clash under DNN hosting. Only `Services/Search.cs` names those types, so the packages replace 26 MB of source for ten `using` lines |
 | `Microsoft.AspNet.WebApi.Core` 5.3.0 | same package, unchanged | References no `System.Web` at all |
 | `Microsoft.AspNet.WebApi.WebHost` 5.3.0 | `System.Web.Http.WebHost/` | The one Framework-bound Web API assembly, and `Application_Start` reaches it |
 | `Microsoft.Owin.Host.SystemWeb` 4.2.3 | `Rehost.WebForms.Owin.Host.SystemWeb` | The documented substitution |
@@ -122,9 +121,14 @@ registered, the verification mail written to the pickup directory, its approval 
 followed, and that member signed in and refused administration. The administrator opening a
 topic, the member replying to it, a guest reading the reply, the member allowed to delete
 their own reply but not the administrator's post, and the administrator deleting the
-member's reply so a guest no longer sees it.
+member's reply so a guest no longer sees it. Then the two services behind those pages:
+`/api/Forum/GetForums` through the recompiled Web API host, and
+`/api/Search/GetSearchResults` finding the topic this run posted, which is what proves the
+Lucene packages index and query.
 
-Fifty-four checks, all GET and POST through rendered forms and view state.
+Fifty-nine checks. The journey is repeatable against a board it has already run on: it
+asserts on what it creates, not on install-seeded content that later posts push out of
+view.
 
 ## Verified by hand, not by `smoke.sh`
 
@@ -135,7 +139,8 @@ Linux runner owns.
 
 ## Not exercised
 
-Search and indexing, image resizing and avatars, attachments, private messages, multi-board
-creation, the Web API controllers, virtual-directory hosting, the upgrade path, and mail
-delivery over a network. Registration is the only mail the journey sends, and it lands in a
+Image resizing and avatars, attachments, private messages, multi-board creation,
+virtual-directory hosting, the upgrade path, and mail delivery over a network. Of the ten
+Web API controllers only Forum and Search are reached; search is exercised through its API
+rather than the search page's own JavaScript. Registration is the only mail the journey sends, and it lands in a
 directory rather than on a wire.

@@ -16,16 +16,18 @@ database variants removed, since only the SQL Server closure is built:
 | `YAF.Data/YAF.Data.{MySql,PostgreSQL,Sqlite}` | same |
 | `YetAnotherForum.NET/YAF-{MySql,PostgreSQL,Sqlite}.csproj` | same |
 | `YAF.NET-{MySql,PostgreSQL,Sqlite}.slnx` | same |
+| `Lucene.Net/` (five projects, 26 MB) | the published `Lucene.Net` 4.8.0-beta00018 packages carry the same 4.8.0 code the fork is based on, and the rename to `YAF.Lucene.Net` exists to avoid an identity clash when YAF is hosted inside DNN, which does not apply here. `yafsrc/YAF.NET-SqlServer.slnx` still lists them and no longer opens as upstream ships it |
 
 `.gitattributes` exempts the tree from line-ending normalization, so a checkout
 reproduces upstream bytes and the diff below stays the whole difference.
 
 ## Deviations
 
-Fourteen files differ from upstream. Nine are compile blockers on .NET 10, three
-are runtime blockers measured against a running application, one follows from
-choosing a dependency's .NET 10 asset over its Framework one, and one is an
-upstream defect that has nothing to do with the port. Each is marked.
+Fifteen files differ from upstream. Nine are compile blockers on .NET 10, three
+are runtime blockers measured against a running application, two follow from
+choosing a dependency's published package over the copy vendored into the tree,
+and one is an upstream defect that has nothing to do with the port. Each is
+marked.
 
 | File | Change |
 | --- | --- |
@@ -35,6 +37,7 @@ upstream defect that has nothing to do with the port. Each is marked.
 | `{YAF.Configuration,YAF.Core,YAF.Data.SqlServer,YAF.Types,YAF.UrlRewriter,YAF.Web}/Properties/AssemblyInfo.cs` | drops `[assembly: AssemblyKeyFile("..\\YetAnotherForum.NET.snk")]`. The literal backslash is a filename off Windows, so the compiler fails to find the key; the port does not strong-name and claims no binary identity |
 | `ServiceStack/ServiceStack.OrmLite/Base/Text/ReflectionOptimizer.Emit.cs` | `AssemblyBuilderAccess.RunAndSave` becomes `Run`. Modern .NET cannot persist a dynamic assembly and dropped the member; nothing here saves the one it builds. Reached only once `NETFX` is defined, which is what compiles this file |
 | `YAF.Core/Services/MailService.cs` | gives `new SmtpClient()` a delivery method and a pickup directory under `App_Data/mail`. Framework's parameterless constructor configured itself from `<system.net><mailSettings>`; modern .NET deleted that reading, so the client has no host and every send throws "The SMTP host was not specified" ([reading](../follow-ups/system-net-mail-settings.md)). Every YAF user-creation path sends a verification mail, so without this no second account can be created. The directory mode is one of the two upstream `recommended.web.config` offers and needs no network |
+| `YAF.Core/Services/Search.cs` | ten `using YAF.Lucene.Net.*` become `using Lucene.Net.*`. The tree vendors Lucene.NET under a renamed namespace; the port consumes the published `Lucene.Net` 4.8.0-beta00018 packages instead, and this is the only file that names those types. Measured: `/api/Search/GetSearchResults` returns hits with `<mark>` highlighting, so index, query and Highlighter all work through the packages |
 | `YAF.Web/BBCodes/MediaBBCodeModule.cs` | calls `EmbedAsync` instead of `Embed`. `OEmbed.Core` 2.0.7 ships a different contract per target and its `net10.0` asset offers only the async one. The port takes .NET 10 assets wherever a package has them, so the call site follows. It runs through `Task.Run`, not a bare `GetAwaiter().GetResult()`: the assembly contains no `ConfigureAwait(false)`, so its continuations capture the Web Forms synchronization context a direct block would be holding. Unexercised: no journey renders a media BBCode |
 | `YAF.Core/Migrations/Migration01.cs` | moves the five `CreateTable<AspNet*>` calls above the MySQL collation block. **Upstream defect, not a portability change.** Commit `7f3234f6a8` ("[FIXED] install for mysql", 2026-05-14) inserted `if (SQLServerName() != "MySQL") return;` above them, so from v3.2.14 onward a fresh install on SQL Server, PostgreSQL or SQLite creates 54 tables and none of the five ASP.NET Identity ones, and board creation then fails on `Invalid object name 'yaf_AspNetUsers'`. The reorder restores the pre-`7f3234f6a8` outcome for every provider and leaves the MySQL statements exactly where that commit put them |
 | `YAF.Core/Tasks/IntermittentBackgroundTask.cs` | drops the `WindowsIdentity.GetCurrent()` capture. It throws `PlatformNotSupportedException` off Windows, and the timer callback it feeds cannot impersonate on any platform, since modern .NET replaced scoped impersonation with the callback-shaped `RunImpersonated`. One process under one identity is the hosting model, so the callback already runs as the identity the capture existed to restore. Measured: without this the first request dies in `Session_Start` |
