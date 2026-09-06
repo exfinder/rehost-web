@@ -11,7 +11,7 @@ namespace System.Web.Http.WebHost
     /// </summary>
     public class HttpControllerRouteHandler : IRouteHandler
     {
-        private static readonly Lazy<HttpControllerRouteHandler> _instance =
+        private static Lazy<HttpControllerRouteHandler> _instance =
             new Lazy<HttpControllerRouteHandler>(() => new HttpControllerRouteHandler(), isThreadSafe: true);
 
         /// <summary>

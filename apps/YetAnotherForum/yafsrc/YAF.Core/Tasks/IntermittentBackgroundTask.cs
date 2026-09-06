@@ -68,9 +68,6 @@ public class IntermittentBackgroundTask : BaseBackgroundTask
             return;
         }
 
-        // keep the context...
-        this.primaryThreadIdentity = WindowsIdentity.GetCurrent();
-
         // we're running this thread now...
         this.IsRunning = true;
 

@@ -7,6 +7,10 @@
     <!-- net481 defined neither NETCORE nor NET6_0_OR_GREATER. On the second,
          PclExport.Instance binds a Net6PclExport this fork does not ship. -->
     <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
+    <!-- yafsrc/ServiceStack/Directory.Build.props defines these for the net481
+         build. NETFX is what supplies PclExport.Instance; without it every
+         OrmLite query fails in Env's static constructor. -->
+    <DefineConstants>$(DefineConstants);NETFX;NET481</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />

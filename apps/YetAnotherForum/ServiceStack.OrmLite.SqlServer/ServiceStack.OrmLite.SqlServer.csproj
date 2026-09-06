@@ -4,6 +4,11 @@
     <AssemblyName>ServiceStack.OrmLite.SqlServer</AssemblyName>
     <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
     <Source>$(YafSrc)ServiceStack/ServiceStack.OrmLite.SqlServer/</Source>
+    <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
+    <!-- yafsrc/ServiceStack/Directory.Build.props defines these for the net481
+         build. NETFX is what supplies PclExport.Instance; without it every
+         OrmLite query fails in Env's static constructor. -->
+    <DefineConstants>$(DefineConstants);NETFX;NET481</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />

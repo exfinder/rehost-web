@@ -433,7 +433,7 @@ namespace ServiceStack.OrmLite.Base.Text
         static DynamicProxy()
         {
             var assemblyName = new AssemblyName("DynImpl");
-            DynamicAssembly = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
+            DynamicAssembly = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
             ModuleBuilder = DynamicAssembly.DefineDynamicModule("DynImplModule");
         }
 
