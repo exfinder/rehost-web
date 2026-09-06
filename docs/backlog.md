@@ -84,14 +84,10 @@ Carried from earlier milestones as unresolved detail:
   [ambient statics audit](follow-ups/ambient-statics-audit.md).
 - Classify reached silent catches without creating diagnostic noise:
   [silent exceptions](follow-ups/silent-exception-swallowing.md).
-- Declare `system.net` in the shipped `machine.config`. Framework's declares the
-  group, so any application carrying `<system.net>`, whether for proxy,
-  connection management or `mailSettings`, fails activation here with "Unrecognized
-  configuration section system.net". YAF.NET carries `mailSettings` and its
-  host XDT deletes the whole group to activate at all. `IgnoreSection` matches
-  what modern .NET does with these settings, since `SmtpClient` and
-  `WebRequest` read none of them, but honoring versus ignoring is a
-  compatibility decision that wants a Framework reading first.
+- Declare `system.net` in the shipped `machine.config` so an application that
+  merely contains the section can activate. It fixes activation only: modern .NET
+  deleted the reading, so `mailSettings` configures nothing either way
+  ([reading](follow-ups/system-net-mail-settings.md)).
 - A configuration error raised from `HttpRuntime.HostingInit` reaches the
   client as `200` with an empty body: the error page render calls
   `AppSettings.EnsureSettingsLoaded`, which re-reads the same broken
