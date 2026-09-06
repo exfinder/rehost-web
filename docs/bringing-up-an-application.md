@@ -51,6 +51,38 @@ step designed to find it.
 8. **Record.** Strike the gap document's steps, list every gap the pair
    exposed with its commit, update compatibility rows and the roadmap.
 
+## What bites on the rebuild
+
+Not app bugs. These are ways a tree that built on net481 means something else
+once the same sources go through a modern compiler and BCL, and each cost a
+debugging round on YAF.NET ([app notes](../apps/YAF/README.md)).
+
+- **The frozen tree has its own build files.** Sidecars that glob sources sit
+  outside them, so `Directory.Build.props` beside the vendored code never
+  applies and its `DefineConstants` are silently gone. YAF's vendored OrmLite
+  needs `NETFX` to pick a `PclExport`; without it every query died in a static
+  constructor, at runtime, long after a clean compile. Read every
+  `Directory.Build.*` under the import before writing a sidecar.
+- **C# 14 rebinds `array.Contains`.** First-class spans join overload
+  resolution, so it takes `MemoryExtensions` instead of `Enumerable` and yields
+  a `ReadOnlySpan`. Any consumer that puts the call in an expression tree then
+  tries to box a ref struct, and `Expression.Compile()` throws
+  `InvalidProgramException`. net481 had no such overload; pin `LangVersion` 13
+  on frozen sidecars and raise it only where a file needs more.
+- **Framework's parameterless constructors read configuration.**
+  `new SmtpClient()` took host, port, credentials and delivery method from
+  `<system.net><mailSettings>`; modern .NET deleted that reading entirely, so
+  the same call yields an unconfigured client
+  ([reading](follow-ups/system-net-mail-settings.md)). Treat any
+  configuration-driven BCL type as unconfigured until measured.
+- **Reflection is stricter.** Framework let `FieldInfo.SetValue` write a static
+  `initonly` field; .NET refuses once the type is initialized. An application
+  that reaches into a library's private statics fails where it used to work.
+- **A case difference only one platform can see.** Windows and macOS hide a
+  `configSource` whose casing does not match the file. Linux does not, and the
+  section fails to load. The Linux round is what catches this; nothing earlier
+  in the loop can.
+
 Rigs: [Windows validation](windows-validation-host.md) (IIS Express readings,
 Docker Desktop for SQL Server), `eng/linux-round.sh` and
 `eng/app-linux-smoke.sh` for Linux, SQL Server as
