@@ -2,8 +2,8 @@
 
 YAF.NET 3.2.16 — a .NET Framework 4.8.1 forum with fourteen source projects, ASP.NET
 Identity over OWIN cookies, a custom URL rewriter, three managed handlers, a code-first
-migration engine over a vendored ServiceStack OrmLite, vendored Lucene, and Web API —
-running on the ported runtime from packages, against SQL Server.
+migration engine over a vendored ServiceStack OrmLite, Lucene search, and Web API —
+running on the ported runtime from packages, against PostgreSQL.
 
 Nothing here is a support claim; [`docs/compatibility.md`](../../docs/compatibility.md)
 remains the only one. The pre-import analysis is
@@ -58,7 +58,27 @@ twenty-five, crashing twice during this bring-up:
 docker run -d --name rehost-yaf-pg -e POSTGRES_USER=yaf \
   -e POSTGRES_PASSWORD='Rehost!Dev2026' -e POSTGRES_DB=yafnet \
   -p 15432:5432 postgres:17-alpine
+docker rm -f rehost-yaf-pg                # when done
 ```
+
+The Linux round joins the smoke container to a PostgreSQL container listening on
+15432 in-container, so the staged connection string works unchanged. The wizard
+needs an empty database, so the container is fresh each round:
+
+```text
+docker rm -f rehost-yaf-pg-linux
+docker run -d --name rehost-yaf-pg-linux -e POSTGRES_USER=yaf \
+  -e POSTGRES_PASSWORD='Rehost!Dev2026' -e POSTGRES_DB=yafnet \
+  postgres:17-alpine -c port=15432
+SMOKE_DOCKER_ARGS='--network container:rehost-yaf-pg-linux' \
+  eng/app-linux-smoke.sh YAF 5087
+docker rm -f rehost-yaf-pg-linux
+```
+
+Then browse to `/`, which redirects to `/install/default.aspx` against an empty database,
+and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a board named
+`Rehost Test Forum` with super user `hostadmin` / `Rehost!Dev2026` and base URL mask
+`http://127.0.0.1:5087/`. The wizard is a deployment step, not part of the journey.
 
 ## Switching to SQL Server
 
@@ -68,11 +88,6 @@ Point `YAF.App` at `../YAF.Data.SqlServer/YAF.Data.SqlServer.csproj` and change 
 `yafnet` entry in `Web.Rehost.config` to the SQL Server connection string with
 `providerName="Microsoft SQL Server"`. Nothing else differs; the journey was green on
 SQL Server on all three platforms before PostgreSQL became the default.
-
-Then browse to `/`, which redirects to `/install/default.aspx` against an empty database,
-and walk YAF's own wizard: Next, Next, Next, Next, Initialize Database, then a board named
-`Rehost Test Forum` with super user `hostadmin` / `Rehost!Dev2026` and base URL mask
-`http://127.0.0.1:5087/`. The wizard is a deployment step, not part of the journey.
 
 ## Dependencies
 
