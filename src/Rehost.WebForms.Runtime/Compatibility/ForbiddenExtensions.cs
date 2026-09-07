@@ -11,13 +11,7 @@ namespace System.Web;
 // webServer handler walk retires that table, and the deny list is the rule IIS itself applied.
 internal static class ForbiddenExtensions
 {
-    internal static void CheckVirtualPath(string? virtualPath)
-    {
-        if (!string.IsNullOrEmpty(virtualPath)
-            && IisServerConfiguration.Current.IsForbiddenExtension(
-                UrlPath.GetExtension(virtualPath!)))
-        {
-            throw new HttpException(404, string.Empty);
-        }
-    }
+    internal static bool Refuses(string? virtualPath) =>
+        !string.IsNullOrEmpty(virtualPath)
+        && IisServerConfiguration.Current.IsForbiddenExtension(UrlPath.GetExtension(virtualPath!));
 }

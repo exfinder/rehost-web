@@ -33,11 +33,12 @@ internal static class IntegratedHandlers
         return null;
     }
 
-    internal static IisHandlerRoute Resolve(
+    internal static IisHandlerRoute? Resolve(
         IReadOnlyList<IisHandlerRoute> routes,
         string requestType,
         VirtualPath path,
-        string? pathTranslated)
+        string? pathTranslated,
+        out string refusal)
     {
         foreach (var route in routes)
         {
@@ -46,14 +47,21 @@ internal static class IntegratedHandlers
                 continue;
             }
 
-            RequireResource(route, path, pathTranslated);
-            return route;
+            if (ResourcePresent(route, pathTranslated))
+            {
+                refusal = "";
+                return route;
+            }
+
+            refusal = "<add name=\"" + route.Registration.Name + "\"> in <system.webServer><handlers>"
+                + " requires resourceType=\"" + route.ResourceType + "\" for "
+                + path.VirtualPathString + ", and nothing is at " + pathTranslated + ".";
+            return null;
         }
 
-        throw new HttpException(
-            404,
-            "No <system.webServer><handlers> entry matches " + requestType + " "
-            + path.VirtualPathString + ".");
+        refusal = "No <system.webServer><handlers> entry matches " + requestType + " "
+            + path.VirtualPathString + ".";
+        return null;
     }
 
     internal static IHttpHandler Map(
@@ -68,7 +76,14 @@ internal static class IntegratedHandlers
             IisServerConfiguration.Current.HandlerRoutesFor(path),
             requestType,
             path,
-            pathTranslated);
+            pathTranslated,
+            out var refusal);
+
+        if (route == null)
+        {
+            factory = null;
+            return new NativeRefusalHandler(404, refusal);
+        }
 
         if (route.Bridge != IisNativeBridge.None)
         {
@@ -83,35 +98,26 @@ internal static class IntegratedHandlers
     // Default resourceType consults nothing on disk; File requires the mapped file and answers
     // 404 naming the entry, without falling through to the next row (MH26). Either and Directory
     // are unmeasured and carry their IIS-documented meaning.
-    private static void RequireResource(IisHandlerRoute route, VirtualPath path, string? pathTranslated)
+    private static bool ResourcePresent(IisHandlerRoute route, string? pathTranslated)
     {
         if (route.ResourceType == IisResourceType.Unspecified
             || string.IsNullOrEmpty(pathTranslated))
         {
-            return;
+            return true;
         }
 
-        var present = route.ResourceType switch
+        return route.ResourceType switch
         {
             IisResourceType.File => FileUtil.FileExists(pathTranslated),
             IisResourceType.Directory => FileUtil.DirectoryExists(pathTranslated),
             _ => FileUtil.FileExists(pathTranslated) || FileUtil.DirectoryExists(pathTranslated),
         };
-
-        if (!present)
-        {
-            throw new HttpException(
-                404,
-                "<add name=\"" + route.Registration.Name + "\"> in <system.webServer><handlers>"
-                + " requires resourceType=\"" + route.ResourceType + "\" for "
-                + path.VirtualPathString + ", and nothing is at " + pathTranslated + ".");
-        }
     }
 
     internal static IHttpHandler NativeHandler(IisHandlerRoute route, string requestType) =>
         route.Bridge == IisNativeBridge.StaticFile && IsStaticFileVerb(requestType)
             ? new StaticFileBridgeHandler()
-            : new HttpMethodNotAllowedHandler();
+            : new NativeRefusalHandler(405);
 
     private static bool IsStaticFileVerb(string requestType) =>
         string.Equals(requestType, "GET", StringComparison.OrdinalIgnoreCase)

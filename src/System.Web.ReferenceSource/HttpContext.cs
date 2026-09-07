@@ -705,8 +705,9 @@ namespace System.Web {
             pathData.ValidatePath(_request.PhysicalPathInternal);
 #if !NETFRAMEWORK
             // Replaces IIS request filtering; judges the script path only, path info passes (ledger P59, P86, P72).
-            HiddenSegments.CheckVirtualPath(_request.FilePath);
-            ForbiddenExtensions.CheckVirtualPath(_request.FilePath);
+            if (HiddenSegments.Refuses(_request.FilePath) || ForbiddenExtensions.Refuses(_request.FilePath)) {
+                IisConfig.NativeRefusal.Respond(this, 404);
+            }
 #endif
         }
 

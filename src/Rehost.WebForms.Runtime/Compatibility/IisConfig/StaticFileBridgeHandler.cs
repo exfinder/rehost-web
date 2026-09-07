@@ -16,13 +16,14 @@ internal sealed class StaticFileBridgeHandler : DefaultHttpHandler
 
         if (request.HttpVerb == HttpVerb.POST)
         {
-            throw new HttpException(
-                405, SR.GetString(SR.Method_not_allowed, request.HttpMethod, request.Path));
+            NativeRefusal.Respond(context, 405);
+            return new HttpAsyncResult(callback, state, true, null, null);
         }
 
         if (DefaultHttpHandler.IsClassicAspRequest(request.FilePath))
         {
-            throw new HttpException(403, SR.GetString(SR.Path_forbidden, request.Path));
+            NativeRefusal.Respond(context, 403);
+            return new HttpAsyncResult(callback, state, true, null, null);
         }
 
         // The extension gate is load-bearing: IIS refused extensions outside its static
@@ -31,7 +32,8 @@ internal sealed class StaticFileBridgeHandler : DefaultHttpHandler
         if (!IisServerConfiguration.Current.ServesStaticContent(Path.GetExtension(request.FilePath))
             && !FileUtil.DirectoryExists(request.PhysicalPath))
         {
-            throw new HttpException(404, string.Empty);
+            NativeRefusal.Respond(context, 404);
+            return new HttpAsyncResult(callback, state, true, null, null);
         }
 
         StaticFileHandler.ProcessRequestInternal(context, null);

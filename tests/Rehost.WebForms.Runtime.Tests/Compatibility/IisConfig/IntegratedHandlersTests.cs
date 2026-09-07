@@ -55,7 +55,14 @@ public sealed class IntegratedHandlersTests : IDisposable
 
     private string Resolved(
         IReadOnlyList<IisHandlerRoute> routes, string verb, string path, string? translated = null) =>
-        IntegratedHandlers.Resolve(routes, verb, Path_(path), translated).Registration.Name;
+        IntegratedHandlers.Resolve(routes, verb, Path_(path), translated, out _)!.Registration.Name;
+
+    private string Refused(
+        IReadOnlyList<IisHandlerRoute> routes, string verb, string path, string? translated = null)
+    {
+        IntegratedHandlers.Resolve(routes, verb, Path_(path), translated, out var refusal).ShouldBeNull();
+        return refusal;
+    }
 
     // MH8: among the application's own adds, the first in document order wins even when a later
     // one is more specific, and both beat the inherited page factory for a real .aspx.
@@ -178,10 +185,7 @@ public sealed class IntegratedHandlersTests : IDisposable
     {
         var routes = Routes("""<remove name="StaticFile" />""");
 
-        var failure = Should.Throw<HttpException>(
-            () => IntegratedHandlers.Resolve(routes, "GET", Path_("/app/x.txt"), null));
-
-        failure.GetHttpCode().ShouldBe(404);
+        Refused(routes, "GET", "/app/x.txt").ShouldContain("No <system.webServer><handlers> entry", Case.Sensitive);
     }
 
     // MH26: default resourceType never asks the disk; File requires the mapped file and names
@@ -200,11 +204,7 @@ public sealed class IntegratedHandlersTests : IDisposable
 
         Resolved(routes, "GET", "/app/ghost.aspx", absent).ShouldBe("Ghost");
 
-        var failure = Should.Throw<HttpException>(
-            () => IntegratedHandlers.Resolve(routes, "GET", Path_("/app/phantom.aspx"), absent));
-
-        failure.GetHttpCode().ShouldBe(404);
-        failure.Message.ShouldContain("Phantom", Case.Sensitive);
+        Refused(routes, "GET", "/app/phantom.aspx", absent).ShouldContain("Phantom", Case.Sensitive);
     }
 
     // No reading covers Either and Directory; they carry the meaning IIS documents, and the
@@ -217,14 +217,8 @@ public sealed class IntegratedHandlersTests : IDisposable
 
         Resolved(routes, "GET", "/app/", _root.FullName).ShouldBe("StaticFile");
 
-        Should.Throw<HttpException>(
-                () => IntegratedHandlers.Resolve(
-                    routes,
-                    "GET",
-                    Path_("/app/gone.txt"),
-                    System.IO.Path.Combine(_root.FullName, "gone.txt")))
-            .GetHttpCode()
-            .ShouldBe(404);
+        Refused(routes, "GET", "/app/gone.txt", System.IO.Path.Combine(_root.FullName, "gone.txt"))
+            .ShouldContain("StaticFile", Case.Sensitive);
     }
 
     [Fact]
@@ -238,8 +232,7 @@ public sealed class IntegratedHandlersTests : IDisposable
         var file = System.IO.Path.Combine(_root.FullName, "x.aspx");
         File.WriteAllText(file, "page");
 
-        Should.Throw<HttpException>(
-            () => IntegratedHandlers.Resolve(routes, "GET", Path_("/app/x.aspx"), file));
+        Refused(routes, "GET", "/app/x.aspx", file).ShouldContain("OnlyDir", Case.Sensitive);
     }
 
     // A native row the port has no reimplementation for is an activation refusal naming the
@@ -267,7 +260,7 @@ public sealed class IntegratedHandlersTests : IDisposable
         var file = System.IO.Path.Combine(_root.FullName, "asset.txt");
         File.WriteAllText(file, "asset");
 
-        var route = IntegratedHandlers.Resolve(routes, "GET", Path_("/app/asset.txt"), file);
+        var route = IntegratedHandlers.Resolve(routes, "GET", Path_("/app/asset.txt"), file, out _)!;
         route.Registration.Name.ShouldBe("StaticFile");
 
         var handler = IntegratedHandlers.NativeHandler(route, "GET");

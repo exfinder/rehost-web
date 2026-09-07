@@ -7,11 +7,11 @@ namespace System.Web;
 // Replaces IIS request filtering's hidden-segment 404 (ledger P59/P60).
 internal static class HiddenSegments
 {
-    internal static void CheckVirtualPath(string? virtualPath)
+    internal static bool Refuses(string? virtualPath)
     {
         if (string.IsNullOrEmpty(virtualPath))
         {
-            return;
+            return false;
         }
 
         var configuration = IisServerConfiguration.Current;
@@ -19,8 +19,10 @@ internal static class HiddenSegments
         {
             if (segment.Length != 0 && configuration.IsHiddenSegment(segment))
             {
-                throw new HttpException(404, string.Empty);
+                return true;
             }
         }
+
+        return false;
     }
 }

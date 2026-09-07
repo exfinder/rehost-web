@@ -115,7 +115,7 @@ public sealed class StaticFilesOverKestrelTests(PageLiveScenario scenario)
         var response = await scenario.Client.PostFormAsync("/styles.css", "probe=1");
 
         response.StatusCode.ShouldBe(405);
-        response.Text.ShouldContain("The HTTP verb POST", Case.Sensitive);
+        response.Text.ShouldContain("405 - HTTP verb used to access this page is not allowed.", Case.Sensitive);
     }
 
     // The classic-ASP refusal runs ahead of the extension gate, and .asp is off the static

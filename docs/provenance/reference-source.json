@@ -10,7 +10,7 @@
  },
  "import": {
   "path": "src/System.Web.ReferenceSource",
-  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' \u2014 shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
+  "policy": "verbatim import; narrow, story-documented deviations listed under 'deviations' — shipped 4.8.1 binaries outrank the published snapshot when they measurably disagree (PROJECT.md authority order)",
   "verification": "Files not named under 'deviations' must match upstream.sourceTree; deviating files are accounted for individually."
  },
  "license": {
@@ -131,8 +131,8 @@
    "files": [
     "HttpContext.cs"
    ],
-   "reason": "IIS request filtering's <fileExtensions> deny list is checked beside the hidden-segment rule in ValidatePath (fenced !NETFRAMEWORK), because the retired classic <httpHandlers> table was what had been refusing those extensions",
-   "record": "docs/portability-ledger.md P86"
+   "reason": "IIS request filtering's <fileExtensions> deny list is checked beside the hidden-segment rule in ValidatePath (fenced !NETFRAMEWORK), because the retired classic <httpHandlers> table was what had been refusing those extensions; both refusals are native responses that end the request without a managed exception (ledger P97)",
+   "record": "docs/portability-ledger.md P86, docs/portability-ledger.md P97"
   },
   {
    "files": [
@@ -171,7 +171,7 @@
     "HttpRuntime.cs",
     "Util/AppVerifier.cs"
    ],
-   "reason": "the public integrated identity answers as an integrated IIS 10 pool behind !NETFRAMEWORK fences \u2014 UsingIntegratedPipeline returns true and IISVersion returns 10.0, the pair reading IV16 measured on the server whose applicationHost.config baseline the port ships \u2014 while the internal UseIntegratedPipeline stays false because it selects native notification plumbing; AppVerifier's SyncContextSendOrPostCalledBetweenNotifications assert therefore reads the internal flag, since the NotificationContext it demands is filled only by that plumbing",
+   "reason": "the public integrated identity answers as an integrated IIS 10 pool behind !NETFRAMEWORK fences — UsingIntegratedPipeline returns true and IISVersion returns 10.0, the pair reading IV16 measured on the server whose applicationHost.config baseline the port ships — while the internal UseIntegratedPipeline stays false because it selects native notification plumbing; AppVerifier's SyncContextSendOrPostCalledBetweenNotifications assert therefore reads the internal flag, since the NotificationContext it demands is filled only by that plumbing",
    "record": "docs/adr/0013-integrated-pipeline-identity.md"
   },
   {
@@ -193,7 +193,7 @@
     "HttpBufferlessInputStream.cs",
     "System.Web.txt"
    ],
-   "reason": "the integrated shim batch takes its integrated arm behind !NETFRAMEWORK fences: ApplicationStepManager records a notification boundary per CreateEventExecutionSteps call plus the handler-mapping and handler-execution steps and fills a per-step table from it, HttpApplication exposes TryGetCurrentNotification and raises the two pre-send events through RaiseSendResponseEvent, which reports SendResponse and restores HttpContext.Current; HttpContext.CurrentNotification and IsPostNotification read that table and otherwise raise the new Notification_outside_pipeline string added to System.Web.txt; HttpApplication.OnExecuteRequestStep and ThrowIfEventBindingDisallowed drop the UseIntegratedPipeline gate and keep Framework's two init flags; HttpHeaderCollection.Add/Set/Remove gain a request arm whose server-variable mirror reads HttpRequest.ExistingServerVariables rather than the materializing getter, HttpRequest.EnsureHeaders and GetServerVars and HttpServerVarsCollection.Populate stop calling MakeReadOnly, and BuildUrl takes the server name \u2014 the host name only, the local port always winning (IV31) \u2014 from a Host rewritten through the collection; HttpResponse.AddOnSendingHeaders drops its IIS7WorkerRequest test and WriteHeaders drains the subscription queue before generating headers; and HttpRequest.GetEntireRawContent and HttpBufferlessInputStream.ValidateRequestEntityLength no longer close the connection after an oversize body",
+   "reason": "the integrated shim batch takes its integrated arm behind !NETFRAMEWORK fences: ApplicationStepManager records a notification boundary per CreateEventExecutionSteps call plus the handler-mapping and handler-execution steps and fills a per-step table from it, HttpApplication exposes TryGetCurrentNotification and raises the two pre-send events through RaiseSendResponseEvent, which reports SendResponse and restores HttpContext.Current; HttpContext.CurrentNotification and IsPostNotification read that table and otherwise raise the new Notification_outside_pipeline string added to System.Web.txt; HttpApplication.OnExecuteRequestStep and ThrowIfEventBindingDisallowed drop the UseIntegratedPipeline gate and keep Framework's two init flags; HttpHeaderCollection.Add/Set/Remove gain a request arm whose server-variable mirror reads HttpRequest.ExistingServerVariables rather than the materializing getter, HttpRequest.EnsureHeaders and GetServerVars and HttpServerVarsCollection.Populate stop calling MakeReadOnly, and BuildUrl takes the server name — the host name only, the local port always winning (IV31) — from a Host rewritten through the collection; HttpResponse.AddOnSendingHeaders drops its IIS7WorkerRequest test and WriteHeaders drains the subscription queue before generating headers; and HttpRequest.GetEntireRawContent and HttpBufferlessInputStream.ValidateRequestEntityLength no longer close the connection after an oversize body",
    "record": "docs/portability-ledger.md P91"
   },
   {
