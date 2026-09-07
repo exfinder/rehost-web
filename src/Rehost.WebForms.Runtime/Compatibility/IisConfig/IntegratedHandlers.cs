@@ -46,7 +46,7 @@ internal static class IntegratedHandlers
                 continue;
             }
 
-            RequireResource(route, pathTranslated);
+            RequireResource(route, path, pathTranslated);
             return route;
         }
 
@@ -83,7 +83,7 @@ internal static class IntegratedHandlers
     // Default resourceType consults nothing on disk; File requires the mapped file and answers
     // 404 naming the entry, without falling through to the next row (MH26). Either and Directory
     // are unmeasured and carry their IIS-documented meaning.
-    private static void RequireResource(IisHandlerRoute route, string? pathTranslated)
+    private static void RequireResource(IisHandlerRoute route, VirtualPath path, string? pathTranslated)
     {
         if (route.ResourceType == IisResourceType.Unspecified
             || string.IsNullOrEmpty(pathTranslated))
@@ -103,7 +103,8 @@ internal static class IntegratedHandlers
             throw new HttpException(
                 404,
                 "<add name=\"" + route.Registration.Name + "\"> in <system.webServer><handlers>"
-                + " requires resourceType=\"" + route.ResourceType + "\" and nothing is there.");
+                + " requires resourceType=\"" + route.ResourceType + "\" for "
+                + path.VirtualPathString + ", and nothing is at " + pathTranslated + ".");
         }
     }
 
