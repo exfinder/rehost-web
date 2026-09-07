@@ -91,15 +91,6 @@ Carried from earlier milestones as unresolved detail:
   merely contains the section can activate. It fixes activation only: modern .NET
   deleted the reading, so `mailSettings` configures nothing either way
   ([reading](follow-ups/system-net-mail-settings.md)).
-- A configuration error raised from `HttpRuntime.HostingInit` reaches the
-  client as `200` with an empty body: the error page render calls
-  `AppSettings.EnsureSettingsLoaded`, which re-reads the same broken
-  configuration and throws inside `FinishRequest`, so the `500` is never
-  written. Measured with the unrecognized `system.net` above. Framework answers
-  `500` and ASP.NET's Configuration Error page, naming the file and the parse
-  failure, on that request and every one after it
-  ([readings](research/config-error-readings.md)). An activation failure must
-  not present as success.
 
 ### IIS-derived behavior and modules
 

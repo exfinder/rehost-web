@@ -28,6 +28,12 @@ internal static class ResponseHeaderEncoding
             return Encoding.UTF8;
         }
 
-        return _configured = RuntimeConfig.GetAppConfig().Globalization.ResponseHeaderEncoding;
+        var globalization = RuntimeConfig.GetAppLKGConfig().Globalization;
+        if (globalization == null)
+        {
+            return Encoding.UTF8;
+        }
+
+        return _configured = globalization.ResponseHeaderEncoding;
     }
 }

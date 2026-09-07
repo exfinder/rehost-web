@@ -46,4 +46,4 @@ The port has no native IIS parser, so the managed answer is the one it owes: a
 Both readings repeat identically on the next request, so the failure is not
 one-shot.
 
-The port's current `200` with an empty body matches nothing here.
+The port answers the managed page (ledger P96).

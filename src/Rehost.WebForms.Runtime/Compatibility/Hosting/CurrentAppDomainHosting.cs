@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using Rehost.WebForms.Hosting;
 using System.Web.Configuration;
+using System.Web.Util;
 
 internal static class CurrentAppDomainHosting
 {
@@ -82,7 +83,25 @@ internal static class CurrentAppDomainHosting
                 startupConfigurationException);
         }
 
+        SpendAppSettingsThrowOnce();
         return environment;
+    }
+
+    // AppSettings rethrows a broken configuration once, then latches; spent here, that throw lands
+    // on the startup failure HostingInit latched, not on the flush of the request reporting it.
+    private static void SpendAppSettingsThrowOnce()
+    {
+        try
+        {
+            _ = AppSettings.EnsureSessionStateLockedOnFlush;
+        }
+        catch (Exception exception)
+        {
+            WebFormsRuntimeEventSource.Log.SwallowedException(
+                $"{nameof(CurrentAppDomainHosting)}.{nameof(SpendAppSettingsThrowOnce)}",
+                exception,
+                "AppSettings.EnsureSettingsLoaded");
+        }
     }
 
     private static string NormalizeHostPhysicalPath(string physicalPath)
