@@ -22,7 +22,9 @@ internal static class NativeRefusal
         response.Clear();
         response.StatusCode = status;
         response.ContentType = "text/html";
-        var detailLine = detail == null ? "" : $"<p>{HttpUtility.HtmlEncode(detail)}</p>";
+        // IIS's httpErrors default is DetailedLocalOnly: the path-bearing detail stays off the wire
+        // for a remote client.
+        var detailLine = detail == null || !context.Request.IsLocal ? "" : $"<p>{HttpUtility.HtmlEncode(detail)}</p>";
         response.Write($"""
             <!DOCTYPE html>
             <html>
