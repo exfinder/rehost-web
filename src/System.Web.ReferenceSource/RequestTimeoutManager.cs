@@ -188,9 +188,7 @@ namespace System.Web {
             }
 
             internal void TimeoutIfNeeded(DateTime now) {
-                // Cooperative (ledger P53): MustTimeout cancels TimedOutToken and flags
-                // the request; the step-boundary checkpoint delivers the timeout. No
-                // Thread.Abort - it throws on this runtime (ledger P51).
+                // Cooperative delivery at the step boundary; Thread.Abort throws on this runtime (ledger P53, P51).
                 if (_context.MustTimeout(now)) {
                     RemoveFromList();
                 }

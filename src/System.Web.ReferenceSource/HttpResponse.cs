@@ -489,11 +489,7 @@ namespace System.Web {
         }
 
 #if !NETFRAMEWORK
-        // ASP.NET's own generation runs on top of the collection (ledger P68): a field- or
-        // policy-generated header of the same name wins (readings H8, H9, H11), a collection
-        // Location with no RedirectLocation goes out as written (H7), and Set-Cookie is
-        // additive alongside the cookies (H10, H14). After the block has left the collection
-        // holds what was sent, so it contributes nothing further.
+        // Generated headers win over same-named collection entries; Set-Cookie is additive (ledger P68).
         private void AppendManagedHeaderCollection(ArrayList headers, bool forCache) {
             if (_headers == null || _headersWritten) {
                 return;
@@ -645,9 +641,7 @@ namespace System.Web {
             }
 
 #if !NETFRAMEWORK
-            // From here Response.Headers reports the block that left, as the native collection
-            // did after the first flush (reading H15, ledger P68). Folded in on the next read so
-            // a response nobody asks about allocates no collection.
+            // Folded in on the next read so a response nobody asks about allocates no collection (ledger P68).
             _sentHeaders = headers;
 #endif
         }
@@ -1043,8 +1037,7 @@ namespace System.Web {
         public NameValueCollection Headers {
             get {
 #if !NETFRAMEWORK
-                // Without a native header block the managed collection is the store itself
-                // (ledger P68); the throw was IIS7's absence, not an unportable operation.
+                // The managed collection is the store itself; the throw was IIS7's absence (ledger P68).
                 if (_headers == null) {
                     _headers = new HttpHeaderCollection(_wr, this, 16);
                 }
@@ -2208,8 +2201,7 @@ namespace System.Web {
                 }
                 else {
 #if !NETFRAMEWORK
-                    // Integrated mode routed AppendHeader into the collection, so the entry is
-                    // visible there and answers to Remove (readings H6, H13; ledger P68).
+                    // Route into the collection so the entry answers to Remove (ledger P68).
                     Headers.Add(name, value);
 #else
                     HttpResponseHeader h;
@@ -2926,9 +2918,7 @@ namespace System.Web {
             WriteFileTranslated(filename, readIntoMemory);
         }
 
-        // Split at the normalization like TransmitFileTranslated: off Windows a rooted physical
-        // path is indistinguishable from a rooted virtual one, so a caller holding a path it
-        // already mapped enters here (ledger P61, pattern P54).
+        // Entry for a caller holding an already-mapped path; normalization would re-map it off Windows (ledger P61).
         internal void WriteFileTranslated(String filename, bool readIntoMemory) {
             FileStream f = null;
 
@@ -2978,10 +2968,7 @@ namespace System.Web {
             TransmitFileTranslated(filename, offset, length);
         }
 
-        // GetNormalizedFilename classifies physical-vs-virtual by string shape, which off Windows
-        // cannot tell a rooted physical path from a virtual one: a Unix-rooted physical path is
-        // re-mapped as virtual under the application root (ledger P54). A caller holding a path
-        // the worker request already translated enters here, past that classification.
+        // Entry past GetNormalizedFilename, which re-maps a Unix-rooted physical path as virtual (ledger P54).
         internal void TransmitFileTranslated(string filename, long offset, long length) {
             if (offset < 0)
                 throw new ArgumentException(SR.GetString(SR.Invalid_range), "offset");
@@ -3265,10 +3252,7 @@ namespace System.Web {
                 // neither emit further output (_ended) nor resume the pipeline
                 // (CompleteRequest); then unwind.
                 if (!_flushing) {
-                    // Nothing reaches the wire before the single commit on this host, so
-                    // End's internal flush sends body bytes only and leaves the headers
-                    // open for EndRequest to amend, as they were under Framework's abort
-                    // arm (readings R19-R24, W2, ledger P55).
+                    // End's internal flush sends body bytes only; headers stay open for EndRequest (ledger P55).
                     _endHeadersDeferred = true;
                     _endInternalFlush = true;
                     try {

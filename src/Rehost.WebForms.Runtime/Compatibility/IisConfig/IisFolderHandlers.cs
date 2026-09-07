@@ -171,10 +171,7 @@ internal sealed class IisFolderHandlers
         return folderWaiver;
     }
 
-    // The file name matches ignoring case on every filesystem, because Visual Studio writes
-    // Web.config and the configuration system composes web.config (ledger P70). Enumeration order
-    // is the filesystem's, so the chain is ordered here instead: a folder is merged after every
-    // ancestor it inherits from.
+    // Web.config matches ignoring case on every filesystem (ledger P70); the chain is ordered here, not by enumeration.
     private static List<FolderConfig> Discover(
         string physicalRoot, string prefix, Dictionary<string, string> hiddenSegments)
     {

@@ -270,9 +270,7 @@ internal class WebDirectoryBatchCompiler {
     private IDictionary _buildProviders = new Hashtable(
         StringComparer.OrdinalIgnoreCase);
 #else
-    // A Hashtable's Values order follows string hash codes, which .NET randomizes per process
-    // (ledger P38): the compile order, and so which page's error a batch reports, would change on
-    // every start. Insertion order is the directory's, which FileEnumerator keeps stable.
+    // OrderedDictionary: a Hashtable's order follows per-process-randomized string hashes (ledger P38).
     private IDictionary _buildProviders = new System.Collections.Specialized.OrderedDictionary(
         StringComparer.OrdinalIgnoreCase);
 #endif

@@ -2455,8 +2455,7 @@ public abstract class TemplateParser : BaseParser, IAssemblyDependencyParser {
 #if NETFRAMEWORK
                     newPhysicalPath = Path.GetFullPath(Path.Combine(currentPhysicalDir, filename.Replace('/', '\\')));
 #else
-                    // The author may write either separator; off Windows only '/' is one, and the
-                    // composed path never passed the case-sensitive fold (ledger P71).
+                    // Either separator may be written; the composed path never passed the case fold (ledger P71).
                     newPhysicalPath = Path.GetFullPath(Path.Combine(currentPhysicalDir,
                         filename.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar)));
                     newPhysicalPath = System.Web.Util.CanonicalCasePath.Resolve(

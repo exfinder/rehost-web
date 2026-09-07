@@ -532,9 +532,7 @@ namespace System.Web {
             fileLength = fileInfo.Length;
 
 #if !NETFRAMEWORK
-            // Port-owned revalidation (ledger P58): on every real deployment the 304 came from
-            // IIS's native static module, which this host replaces; the managed handler never
-            // carried it. If-None-Match wins over If-Modified-Since, as on IIS.
+            // IIS's native static module owned the 304; If-None-Match wins over If-Modified-Since (ledger P58).
             bool notModified = false;
             string ifNoneMatch = request.Headers["If-None-Match"];
             if (ifNoneMatch != null) {

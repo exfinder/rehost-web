@@ -119,9 +119,7 @@ namespace System.Web {
         }
 
 #if !NETFRAMEWORK
-        // Response headers without a native block to write through (ledger P68). The entry is
-        // the whole effect: nothing syncs back into RedirectLocation, ContentType, or the cache
-        // flags, which integrated mode did not do either (readings H7, H8).
+        // The entry is the whole effect; nothing syncs back into RedirectLocation, ContentType or cache flags (ledger P68).
         private void SetManagedResponseHeader(String name, String value, bool replace) {
             if (name == null) {
                 throw new ArgumentNullException("name");

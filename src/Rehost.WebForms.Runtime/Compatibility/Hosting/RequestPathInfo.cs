@@ -4,10 +4,7 @@ using System.Web.IisConfig;
 
 namespace System.Web.Hosting;
 
-// IIS split a URL into SCRIPT_NAME and PATH_INFO by handler mapping, not by what exists on
-// disk: the first segment whose extension a mapping claims ends the file path, everything after
-// it is path info, and a URL no mapping claims is one file path (IIS reading, ledger P72). The
-// worker request replaced IIS in that role, so it asks here before ASP.NET sees the request.
+// IIS split file path from path info by handler mapping, not by what exists on disk (ledger P72).
 internal static class RequestPathInfo
 {
     internal static (string FilePath, string PathInfo) Split(string verb, string virtualPath) =>

@@ -1145,9 +1145,7 @@ namespace System.Web.Hosting {
             }
 
 #if !NETFRAMEWORK
-            // A case-sensitive filesystem cannot fold /default.aspx onto Default.aspx the way
-            // NTFS did for Framework; resolve a missing path to its real casing before any
-            // consumer probes it (filesystem-semantics decisions, ledger P57).
+            // Resolve a missing path to its real casing before any consumer probes it (ledger P57).
             if (result != null) {
                 result = System.Web.Util.CanonicalCasePath.Resolve(result, _appPhysicalPath);
             }

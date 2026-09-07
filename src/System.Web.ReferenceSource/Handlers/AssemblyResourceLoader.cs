@@ -103,9 +103,7 @@ namespace System.Web.Handlers {
                 }
 #if !NETFRAMEWORK
                 else {
-                    // The merged <handlers> list is this port's mapping authority (ledger P85), so
-                    // the row is matched there and its type compared by name: the row resolves
-                    // lazily and asking whether WebResource.axd is mapped must not force it.
+                    // Match the row by name; resolving its type here would force the lazy handler load (ledger P85).
                     IisConfig.IisHandlerRoute route = IisConfig.IntegratedHandlers.Selected(
                         "GET", VirtualPath.Create(_webResourceUrl));
                     _handlerExists = route != null

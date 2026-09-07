@@ -146,10 +146,7 @@ namespace System.Web.Configuration {
             }
 
 #if !NETFRAMEWORK
-            // Configuration paths are lowercased, and NTFS folded that back onto the real
-            // directory name. This is the configuration system's own path-producing seam, so a
-            // case-sensitive filesystem misses here and IsConfigRecordRequired then reports no
-            // record for a directory that has one (ledger P70).
+            // Configuration paths are lowercased; a case-sensitive filesystem misses without the fold (ledger P70).
             physicalPath = CanonicalCasePath.Resolve(physicalPath, mapping.PhysicalDirectory);
 #endif
 

@@ -4,10 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-// http.sys canonicalized the URL before IIS or ASP.NET saw it: '\' became '/', %2F a real
-// separator, repeated separators one, and '.'/'..' segments were resolved, refusing the URL
-// (403) when '..' climbed above the root. Kestrel leaves %2F encoded and passes an escaping
-// '..' through, so the adapter finishes the job here (IIS reading, ledger P72).
+// Replaces http.sys URL canonicalization, which Kestrel does not perform (ledger P72).
 internal static class RequestPathCanonicalizer
 {
     // The raw request target, still percent-encoded and with its query.

@@ -704,8 +704,7 @@ namespace System.Web {
             CachedPathData pathData = GetConfigurationPathData();
             pathData.ValidatePath(_request.PhysicalPathInternal);
 #if !NETFRAMEWORK
-            // IIS request filtering owned these refusals; this host replaces IIS (ledger P59,
-            // P86). They judged the script path only; path info passes (ledger P72).
+            // Replaces IIS request filtering; judges the script path only, path info passes (ledger P59, P86, P72).
             HiddenSegments.CheckVirtualPath(_request.FilePath);
             ForbiddenExtensions.CheckVirtualPath(_request.FilePath);
 #endif
@@ -1819,9 +1818,7 @@ namespace System.Web {
         }
 
         internal void WaitForExceptionIfCancelled() {
-            // Cooperative timeout (ledger P53): consume the sweep's flag exactly once
-            // and unwind; ExecuteStep's recovery renders the request-timed-out error.
-            // Consuming prevents the repeated re-throw at every later boundary.
+            // Consume the sweep's flag exactly once, or every later boundary re-throws (ledger P53).
             if (_pendingTimeout) {
                 _pendingTimeout = false;
                 throw new HttpApplication.CancelModuleException(true);
@@ -1855,10 +1852,7 @@ namespace System.Web {
                         return false;
                     }
 
-                    // Cooperative: flag the request for WaitForExceptionIfCancelled to
-                    // consume at the next step boundary. The -1 _timeoutState flip
-                    // belonged to the abort handshake and would strand the request
-                    // (ledger P53).
+                    // Flag only; the -1 _timeoutState flip belonged to the abort handshake and strands the request (ledger P53).
                     _pendingTimeout = true;
                     return true;
                 }

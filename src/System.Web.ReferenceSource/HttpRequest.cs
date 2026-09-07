@@ -1692,8 +1692,7 @@ namespace System.Web {
                             _pathTranslated = HttpRuntime.GetRelaxedMapPathResult(_pathTranslated);
 
 #if !NETFRAMEWORK
-                        // A worker request builds this by concatenation, so unlike MapPathActual
-                        // it never passed the case-sensitive filesystem fold (ledger P57).
+                        // Built by concatenation, so it never passed the case fold MapPathActual applies (ledger P57).
                         if (_pathTranslated != null) {
                             _pathTranslated = System.Web.Util.CanonicalCasePath.Resolve(
                                 _pathTranslated, HttpRuntime.AppDomainAppPathInternal);

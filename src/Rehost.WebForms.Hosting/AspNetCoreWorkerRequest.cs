@@ -113,8 +113,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return string.IsNullOrEmpty(query) ? "" : query.TrimStart('?');
     }
 
-    // http.sys handed ASP.NET the canonical, decoded path as the "raw" URL and only the query
-    // verbatim (IIS reading, ledger P72).
+    // http.sys handed ASP.NET the decoded path as the raw URL and only the query verbatim (ledger P72).
     public override string GetRawUrl()
     {
         var queryString = GetQueryString();

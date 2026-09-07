@@ -26,8 +26,7 @@ namespace System.Web {
             }
 
 #if !NETFRAMEWORK
-            // Integrated mode took types from IIS's map, not the classic table; so does this
-            // host, from the merged baseline (ledger P60).
+            // Types come from the merged IIS baseline, not the classic table (ledger P60).
             string mapped = System.Web.IisConfig.IisServerConfiguration.Current
                 .StaticContentTypeOf(System.IO.Path.GetExtension(fileName));
             if (mapped != null) {

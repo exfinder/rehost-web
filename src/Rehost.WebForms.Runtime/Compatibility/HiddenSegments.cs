@@ -4,8 +4,7 @@ using System.Web.IisConfig;
 
 namespace System.Web;
 
-// IIS request filtering's hidden-segment 404, any casing, any depth (ledger P59/P60). The
-// list is the merged <hiddenSegments> section; apps extend or un-hide entries.
+// Replaces IIS request filtering's hidden-segment 404 (ledger P59/P60).
 internal static class HiddenSegments
 {
     internal static void CheckVirtualPath(string? virtualPath)

@@ -753,10 +753,7 @@ namespace System.Web {
         public virtual bool SupportsAsyncFlush { get { return false; } }
 
 #if !NETFRAMEWORK
-        // WebSocket capability of a host other than IIS's integrated pipeline, which HttpContext
-        // otherwise reaches only by casting to IIS7WorkerRequest. The defaults reproduce that
-        // refusal; a host that answers true takes the accept and runs the callback once the
-        // pipeline has finished (ledger P80).
+        // Upgrade seam for a host other than IIS's integrated pipeline; false reproduces the refusal (ledger P80).
         internal virtual bool SupportsWebSocketUpgrade { get { return false; } }
 
         internal virtual bool IsWebSocketUpgradeRequest() { return false; }
