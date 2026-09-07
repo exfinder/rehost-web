@@ -9,6 +9,10 @@ and Framework sequencing stay intact unless stated.
 - **portable leaf:** replace only the platform operation.
 - **unsupported:** fail explicitly when selected.
 
+A row holds the verdict, the contract in two sentences, the boundary, and one evidence link.
+How the edge was found belongs in the commit; measurements belong in the readings the link
+names. A row needing more is a batch of edges and is split.
+
 Focused tests and the full solution run on Windows x64, Linux x64 and macOS arm64. Frozen
 Framework/adapter gates cover the managed-pipeline boundary; see
 [parity rigs](../tests/parity/README.md).
