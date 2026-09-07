@@ -22,7 +22,7 @@ internal static class NativeRefusal
         response.Clear();
         response.StatusCode = status;
         response.ContentType = "text/html";
-        var detailLine = detail == null ? "" : "<p>" + HttpUtility.HtmlEncode(detail) + "</p>";
+        var detailLine = detail == null ? "" : $"<p>{HttpUtility.HtmlEncode(detail)}</p>";
         response.Write($"""
             <!DOCTYPE html>
             <html>
