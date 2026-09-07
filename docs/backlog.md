@@ -94,6 +94,12 @@ Carried from earlier milestones as unresolved detail:
 
 ### IIS-derived behavior and modules
 
+- `Global.asax` application events run for a native request without
+  `runAllManagedModulesForAllRequests`. IIS raises no managed event for a
+  static miss or a request-filtering refusal unless RAMMFAR is on; the port
+  raises `LogRequest`, `EndRequest` and `PreSendRequestHeaders` regardless
+  (MH41, MH42). The `managedHandler` precondition already gates modules (P83);
+  the application's own event hookup is not gated the same way.
 - A native 404 reaches `Application_Error`. IIS answers a missing static file,
   a missing directory, or Chrome's `/.well-known/appspecific/com.chrome.devtools.json`
   probe with a native 404 that no managed handler sees; the port's `StaticFile`

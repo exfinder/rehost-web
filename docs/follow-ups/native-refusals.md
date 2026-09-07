@@ -14,7 +14,7 @@ real error on every refresh.
 
 ## Readings
 
-[MH40 and MH41](../research/iis-modules-handlers-readings.md), IIS Express 10 /
+[MH40, MH41 and MH42](../research/iis-modules-handlers-readings.md), IIS Express 10 /
 4.8, 2026-09-07:
 
 | | IIS | port today |
@@ -25,6 +25,7 @@ real error on every refresh.
 | `LogRequest`, `EndRequest`, `PreSendRequestHeaders` status | 404 | 404 after the error page |
 | body | IIS's 404 page, no `X-AspNet-Version` | ASP.NET's 404 page |
 | missing `.aspx` | managed 404, `Application_Error` fires, `customErrors` applies | same |
+| hidden segment / forbidden extension (404.8 / 404.7) | no `BeginRequest`, no error event, Log/End/PreSend 404, `customErrors` ignored | no `BeginRequest`, **`Application_Error` fires**, then the same events |
 
 ## Contract
 
@@ -32,17 +33,25 @@ real error on every refresh.
    null, `Server.GetLastError()` returns null, `Application_Error` does not run.
 2. `customErrors` is not consulted. `httpErrors` has no port counterpart; the
    body is a fixed IIS-shaped page, not IIS's bytes.
-3. The refusal is decided where IIS decided it, the handler stage, so every
-   event before it runs unchanged and `LogRequest` onward see the status.
+3. The refusal is decided where IIS decided it: the handler stage for a
+   missing file, `ValidatePathExecutionStep` (ahead of `BeginRequest`) for
+   request filtering. Every event before it runs unchanged, none is added, and
+   `LogRequest` onward see the status.
 4. A managed miss (`/nosuch.aspx`) keeps Framework's exception, page, and
    `customErrors`.
 
 ## Shape
 
-One internal handler, `NativeRefusalHandler(status, reason)`, in
-`Compatibility/IisConfig`. Its `ProcessRequest` clears the response, sets the
-status, writes the fixed body, and calls `CompleteRequest()`, so the step
-manager jumps to `LogRequest` with no error on the context.
+One internal entry point, `NativeRefusal.Respond(context, status, reason)`, in
+`Compatibility/IisConfig`: clears the response, sets the status, writes the
+fixed body, and calls `CompleteRequest()`, so the step manager jumps to
+`LogRequest` with no error on the context. Two callers:
+
+- `ValidatePathExecutionStep`: `HiddenSegments` and `ForbiddenExtensions`
+  call it and return instead of throwing; the step manager's post-step check
+  takes the jump, and `BeginRequest` never runs, as measured.
+- `NativeRefusalHandler(status, reason)`, a handler whose `ProcessRequest` is
+  that call, for refusals decided at mapping or inside the static handler.
 
 `IntegratedHandlers.Map` returns it instead of throwing where a native row
 refuses: `RequireResource` (`resourceType` miss, MH26 and MH40) and the no-match
@@ -57,10 +66,10 @@ otherwise leaves no trace.
 
 ## Out of this cut
 
-- Request filtering (`HiddenSegments`, `ForbiddenExtensions`) refuses in
-  `ValidatePathExecutionStep`, ahead of `BeginRequest`, as IIS does natively.
-  Whether managed events fire after a native 404.7/404.8 is unmeasured; a reading
-  (MH42) decides whether the same handler shape or an earlier end applies.
+- `Global.asax` events on a native request without
+  `runAllManagedModulesForAllRequests`: IIS raises none (MH41, MH42), the port
+  raises Log/End/PreSend. A `managedHandler` precondition matter (P83), listed
+  in the backlog, not a refusal matter.
 - A missing directory: IIS answers through `ExtensionlessUrlHandler` and a
   `TransferRequest` child (MH41); the port's own step owns it (P67).
 
@@ -76,9 +85,10 @@ otherwise leaves no trace.
 ## Evidence to add
 
 - Scenario on a fixture whose `Global.asax` records `Application_Error`:
-  `GET /nosuch.json` is 404, the body is the fixed page, no error was recorded,
-  and a traced request shows 404 at `LogRequest`; `GET /nosuch.aspx` still
-  records one. Red today on the first three assertions.
+  `GET /nosuch.json`, `/bin/x.dll` and `/web.config` are 404, the body is the
+  fixed page, no error was recorded, and a traced request shows 404 at
+  `LogRequest` with no `BeginRequest` for the filtered two; `GET /nosuch.aspx`
+  still records one. Red today on the error-recorded assertions.
 - Ledger row: native refusals are responses. Compatibility: the static-files
   boundary added on 2026-09-07 comes off; the `customErrors` row gains the
   native-404 boundary.
