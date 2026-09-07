@@ -94,6 +94,17 @@ Carried from earlier milestones as unresolved detail:
 
 ### IIS-derived behavior and modules
 
+- A native 404 reaches `Application_Error`. IIS answers a missing static file,
+  a missing directory, or Chrome's `/.well-known/appspecific/com.chrome.devtools.json`
+  probe with a native 404 that no managed handler sees; the port's `StaticFile`
+  bridge, hidden segments and forbidden extensions all refuse with a managed
+  `HttpException(404)`, so every application's `Application_Error` runs for
+  them ([MH40](research/iis-modules-handlers-readings.md)). Measured for the
+  static-file cases; the request-filtering refusals share the mechanism and are
+  presumed the same. YAF stores each error application-wide and renders it on
+  `error.aspx`, so a DevTools probe replaced the real error. The fix is a
+  native-refusal path that writes the 404 and ends the request without raising
+  the managed error event, across those sites; a design change, not a hotfix.
 - Integrated-mode divergences the [round-4 readings](research/iis-modules-handlers-readings.md)
   measured and this runtime has not closed:
   - `system.webServer/security/authorization` is not read at all. An application
