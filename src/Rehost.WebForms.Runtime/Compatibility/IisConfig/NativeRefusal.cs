@@ -22,10 +22,19 @@ internal static class NativeRefusal
         response.Clear();
         response.StatusCode = status;
         response.ContentType = "text/html";
-        response.Write("<!DOCTYPE html><html><head><title>" + title + "</title></head><body><h1>Server Error</h1><h2>"
-            + title + "</h2><p>" + text + "</p>"
-            + (detail == null ? "" : "<p>" + HttpUtility.HtmlEncode(detail) + "</p>")
-            + "</body></html>");
+        var detailLine = detail == null ? "" : "<p>" + HttpUtility.HtmlEncode(detail) + "</p>";
+        response.Write($"""
+            <!DOCTYPE html>
+            <html>
+            <head><title>{title}</title></head>
+            <body>
+            <h1>Server Error</h1>
+            <h2>{title}</h2>
+            <p>{text}</p>
+            {detailLine}
+            </body>
+            </html>
+            """.ReplaceLineEndings("\n"));
         context.ApplicationInstance.CompleteRequest();
     }
 }
