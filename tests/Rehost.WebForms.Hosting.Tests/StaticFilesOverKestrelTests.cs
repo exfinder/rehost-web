@@ -116,6 +116,7 @@ public sealed class StaticFilesOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(405);
         response.Text.ShouldContain("405 - HTTP verb used to access this page is not allowed.", Case.Sensitive);
+        response.Header("Allow").ShouldBe("GET, HEAD, OPTIONS, TRACE");
     }
 
     // The classic-ASP refusal runs ahead of the extension gate, and .asp is off the static

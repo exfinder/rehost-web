@@ -44,6 +44,12 @@ something asks for the section.
 The port has no native IIS parser, so the managed answer is the one it owes: a
 `500` carrying a page that names the configuration file and the parse failure.
 Both readings repeat identically on the next request, so the failure is not
-one-shot.
+one-shot. Five requests against the `authentication mode="Nonsense"` site, one
+of them to a different URL, returned byte-identical 5,270-byte pages: 249 ms
+for the first, 26-27 ms for each later one (2026-09-08). A replay of cached
+bytes would take a millisecond; 27 ms is a fresh parse and render, which is what
+the imported `HostingInitFailed` path prescribes, an AppDomain shutdown after
+each request and a rebuild on the next. The rebuild itself is not directly
+observable from outside; the timing and the imported code agree.
 
 The port answers the managed page (ledger P96).

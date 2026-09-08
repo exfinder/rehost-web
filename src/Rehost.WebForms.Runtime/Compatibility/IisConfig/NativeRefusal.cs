@@ -11,17 +11,21 @@ internal static class NativeRefusal
         var (title, text) = status switch
         {
             403 => ("403 - Forbidden: Access is denied.",
-                "You do not have permission to view this directory or page using the credentials that you supplied."),
+                "You do not have permission to view this directory or page."),
             405 => ("405 - HTTP verb used to access this page is not allowed.",
-                "The page you are looking for cannot be displayed because an invalid method (HTTP verb) was used to attempt access."),
+                "The page you are looking for cannot be displayed because an invalid method (HTTP verb) is being used."),
             _ => ("404 - File or directory not found.",
-                "The resource you are looking for might have been removed, had its name changed, or is temporarily unavailable."),
+                "The resource you are looking for has been removed, had its name changed, or is temporarily unavailable."),
         };
 
         var response = context.Response;
         response.Clear();
         response.StatusCode = status;
         response.ContentType = "text/html";
+        if (status == 405)
+        {
+            response.AppendHeader("Allow", "GET, HEAD, OPTIONS, TRACE");
+        }
         // IIS's httpErrors default is DetailedLocalOnly: the path-bearing detail stays off the wire
         // for a remote client.
         var detailLine = detail == null || !context.Request.IsLocal ? "" : $"<p>{HttpUtility.HtmlEncode(detail)}</p>";
