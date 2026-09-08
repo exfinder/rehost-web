@@ -42,6 +42,16 @@ public abstract class WitnessScenario : Scenario
         return (response, await StagesOrThrowAsync(token, pathAndQuery));
     }
 
+    // For a request IIS answered natively, where no managed event running is the claim; a
+    // positive control in the same class keeps the empty list from passing vacuously.
+    internal async Task<(ScenarioResponse Response, string[] Stages)> TracedGetAllowingSilenceAsync(
+        object testClass, string pathAndQuery, [CallerMemberName] string method = "")
+    {
+        var token = TracedToken.For(testClass, method);
+        var response = await Client.GetAsync(TracedToken.Append(pathAndQuery, token));
+        return (response, await Host.Witness.StagesAsync(token));
+    }
+
     internal async Task<(byte[] Raw, string[] Stages)> TracedRawGetAsync(
         object testClass, string pathAndQuery, [CallerMemberName] string method = "")
     {

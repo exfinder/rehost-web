@@ -2516,6 +2516,10 @@ namespace System.Web {
                 moduleList.Add(dynamicModule);
             }
 
+            if (!serverConfig.RunAllManagedModulesForAllRequests) {
+                conditioned.Add(HttpApplicationFactory.applicationFileName);
+            }
+
             _managedHandlerModules = conditioned;
             // IntegratedModuleList is how the rest of the runtime asks what registered; on IIS
             // only the native wireup path filled it.

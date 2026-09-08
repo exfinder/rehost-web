@@ -89,12 +89,6 @@ Carried from earlier milestones as unresolved detail:
 
 ### IIS-derived behavior and modules
 
-- `Global.asax` application events run for a native request without
-  `runAllManagedModulesForAllRequests`. IIS raises no managed event for a
-  static miss or a request-filtering refusal unless RAMMFAR is on; the port
-  raises `LogRequest`, `EndRequest` and `PreSendRequestHeaders` regardless
-  (MH41, MH42). The `managedHandler` precondition already gates modules (P83);
-  the application's own event hookup is not gated the same way.
 - Integrated-mode divergences the [round-4 readings](research/iis-modules-handlers-readings.md)
   measured and this runtime has not closed:
   - `system.webServer/security/authorization` is not read at all. An application
