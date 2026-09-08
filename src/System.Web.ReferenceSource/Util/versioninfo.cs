@@ -98,7 +98,7 @@ namespace System.Web.Util {
                 if (_engineVersion == null) {
                     lock(_lock) {
                         if (_engineVersion == null)
-                            _engineVersion = GetLoadedModuleVersion(ModName.ENGINE_FULL_NAME);
+                            _engineVersion = "4.8";
                     }
                 }
 
