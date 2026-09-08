@@ -70,7 +70,21 @@ is closed: the migrating audience ran integrated mode, and each divergence now
 ends as integrated behavior or a fail-fast diagnostic naming the boundary —
 never silence. Six jobs, one per session, landed as ledger P90-P93.
 
-## Current — Milestone 4: production baseline
+## Current — public developer alpha
+
+Prepare the existing runtime and application evidence for external developers:
+licensing and publication review, explicit unsupported security boundaries,
+package-only consumption, onboarding, and a validated release candidate.
+YAF's landed forum journey adds a representative application beyond Wingtip;
+its scope and substitutions remain in [the app notes](apps/YAF/README.md) and
+[compatibility map](docs/compatibility.md).
+
+The [Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
+tracks execution; [the release plan](docs/plans/2026-09-05-2135-public-alpha-release-plan.md)
+orders the gates. The migration helper is optional. No further application port
+or production-readiness claim is required for alpha.
+
+## Following alpha — Milestone 4: production baseline
 
 Turn a running milestone application into a production deployment baseline:
 real SQL operations, deterministic Windows/Linux publish, containers, graceful

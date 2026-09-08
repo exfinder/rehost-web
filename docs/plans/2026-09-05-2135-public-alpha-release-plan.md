@@ -11,6 +11,31 @@ Milestone 4 in `ROADMAP.md`.
 This is a release preparation plan, not authorization to change repository
 visibility, publish packages, or contact testers.
 
+## Execution tracking
+
+The [Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
+owns task status. [Scope and distribution](https://github.com/exfinder/rehost-webforms/issues/8)
+settles the remaining release decisions. The repo backlog links each issue;
+this plan keeps sequencing without duplicate completion checkboxes.
+
+1. Settle scope (#8); licensing (#9), publication audit (#10), configuration
+   boundaries (#11), and consumer preparation (#12–15) can then proceed in
+   isolated worktrees.
+2. Produce candidate artifacts (#16), complete exact-candidate validation (#17),
+   and run the external onboarding trial (#18). Before publication, a trial
+   uses approved private access or candidate artifacts from an isolated feed.
+3. Prepare feedback handling (#20), then launch (#19) after all mandatory
+   gates and explicit authorization. Continuing feedback does not keep the
+   release milestone open.
+4. The [minimal migration helper](https://github.com/exfinder/rehost-webforms/issues/21)
+   follows the verified walkthrough but remains outside the release milestone.
+
+Readiness inspection at `3aaf93c6` confirmed YAF is landed: its README records
+59 smoke checks, PostgreSQL as default, a prior three-platform SQL Server
+journey, and separate manual restart evidence. Reuse this evidence for scope;
+rerun the advertised journeys against the final candidate. No tests were run
+as part of creating the tracking issues.
+
 ## Proposed release scope
 
 - Public GitHub repository and tagged GitHub prerelease.
@@ -57,7 +82,8 @@ is assumed; estimate after the publication and licensing inventories.
 ## Explicitly deferred
 
 - Production orchestration, graceful lifecycle completion, and multi-instance support.
-- Migration automation and broad API completeness.
+- General migration automation and broad API completeness; the bounded WAP
+  helper is optional and cannot delay release.
 - Visual Basic support and other capabilities outside the current contract.
 - Production-readiness claims; Milestone 4 retains ownership of that work.
 
