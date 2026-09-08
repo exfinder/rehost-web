@@ -563,6 +563,13 @@ namespace System.Web.Configuration {
         }
 
         public override void StopMonitoringStreamForChanges(string streamName, StreamChangeCallback callback) {
+#if !NETFRAMEWORK
+            // The record marks streams monitored before consulting SupportsChangeNotifications and
+            // stops them on that mark, so Stop arrives for streams Start never saw.
+            if (!SupportsChangeNotifications) {
+                return;
+            }
+#endif
             WebConfigurationHostFileChange wrapper = null;
             lock (this) {
                 ArrayList list = (ArrayList) FileChangeCallbacks[streamName];

@@ -40,8 +40,11 @@ Measured over the full suite and the `apps/WebFormsApplication` smoke, all green
 - `CacheEntry.CallCacheItemRemovedCallback#2` fires during config-record teardown
   in the suite, never in the app smoke. `WebConfigurationHost.StopMonitoringStreamForChanges`
   dereferences a null callback list and aborts `BaseConfigurationRecord.CloseRecursive()`
-  partway. Framework runs the same code, so whether this is a port defect needs a
-  Framework reading before anyone calls it. Open.
+  partway. Not Framework's path: `BaseConfigurationRecord` marks every stream monitored
+  before it consults `SupportsChangeNotifications`, and tears down on that mark alone, so a
+  host answering false (this one; `ClientConfigurationHost` on Framework, whose Stop is a
+  no-op) receives Stop for streams Start never saw. The host now returns early. Closed;
+  `WebConfigurationHostTests` pins it.
 - A later exception reaching `HttpRuntime.FinishRequest` after the error page has
   been rendered is dropped (P92).
 

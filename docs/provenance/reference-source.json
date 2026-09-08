@@ -288,6 +288,13 @@
    ],
    "reason": "CLR thread-pool maximum set through ThreadPool.SetMaxThreads instead of the webengine4 export (ledger P95)",
    "record": "docs/portability-ledger.md P95"
+  },
+  {
+   "files": [
+    "Configuration/WebConfigurationHost.cs"
+   ],
+   "reason": "StopMonitoringStreamForChanges returns when SupportsChangeNotifications is false (fenced !NETFRAMEWORK): the configuration system stops every stream it marked monitored, marking before it asks the host, so Stop arrives for streams Start never saw",
+   "record": "tests/Rehost.WebForms.Runtime.Tests/Configuration/WebConfigurationHostTests.cs"
   }
  ]
 }
