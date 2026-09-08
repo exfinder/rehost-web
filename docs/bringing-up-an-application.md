@@ -63,12 +63,27 @@ debugging round on YAF.NET ([app notes](../apps/YAF/README.md)).
   needs `NETFX` to pick a `PclExport`; without it every query died in a static
   constructor, at runtime, long after a clean compile. Read every
   `Directory.Build.*` under the import before writing a sidecar.
-- **C# 14 rebinds `array.Contains`.** First-class spans join overload
-  resolution, so it takes `MemoryExtensions` instead of `Enumerable` and yields
-  a `ReadOnlySpan`. Any consumer that puts the call in an expression tree then
-  tries to box a ref struct, and `Expression.Compile()` throws
-  `InvalidProgramException`. net481 had no such overload; pin `LangVersion` 13
-  on frozen sidecars and raise it only where a file needs more.
+- **The language version floats with the SDK.** A missing `LangVersion` means
+  7.3 on any `net4x` project, old-style or SDK-style, and 14 the moment a
+  sidecar retargets the same sources to `net10.0`; `latest` and `preview`
+  float the same way. Pin each sidecar to what its upstream project built
+  with: the number it names, 7.3 when it names nothing, and for `latest` or
+  `preview` the compiler its tool markers imply (`global.json`, a
+  `Microsoft.Net.Compilers` package, the highest `VisualStudioVersion` group in
+  the csproj; VS 2019 and 2022 default to 7.3, `latest` on VS 2022 is 12 or
+  13, on VS 2026 it is 14). One pin per project, never `latest`; raise a
+  project only when a file fails to compile, and name that file. The trap is
+  not the compiler alone but the compiler plus the modern BCL: C# 14 lets
+  arrays convert to spans during overload resolution, and the .NET 10 BCL has
+  a generic `MemoryExtensions.Contains` that Framework's `System.Memory` lacks,
+  so `array.Contains(x)` silently rebinds from `Enumerable` on the retargeted
+  build only. In plain code that is harmless. Inside an expression tree the
+  `ReadOnlySpan` node is a ref struct, `Expression.Compile()` throws
+  `InvalidProgramException`, and the build was clean. YAF's OrmLite predicate
+  over a `string[]` in `UserStore` hit it on the installer's first query; its
+  sidecars pin 13 because upstream said `latest` on VS 2026, and one project
+  takes 14 for a file using the `field` keyword. A clean build does not prove
+  the pin; run the smoke journey.
 - **Framework's parameterless constructors read configuration.**
   `new SmtpClient()` took host, port, credentials and delivery method from
   `<system.net><mailSettings>`; modern .NET deleted that reading entirely, so
