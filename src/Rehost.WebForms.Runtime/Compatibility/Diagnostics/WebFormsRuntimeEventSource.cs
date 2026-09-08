@@ -178,6 +178,22 @@ namespace System.Web.Util {
         }
 
         [NonEvent]
+        internal void SystemNetUnsupported(string file) {
+            Swallow(() => {
+                WebFormsRuntimeLogger.Logger.SystemNetUnsupported(file);
+                if (IsEnabled()) {
+                    SystemNetUnsupported10(file);
+                }
+            });
+        }
+
+        [Event(10, Level = EventLevel.Error, Message =
+            "<system.net> in {0} is not supported and declared for activation only; nothing on .NET reads it. Configure proxies, connection limits and mail settings in code.")]
+        private void SystemNetUnsupported10(string file) {
+            WriteEvent(10, file);
+        }
+
+        [NonEvent]
         private static string OutcomeText(AssemblyResolutionOutcome outcome) {
             switch (outcome) {
                 case AssemblyResolutionOutcome.Compiled:

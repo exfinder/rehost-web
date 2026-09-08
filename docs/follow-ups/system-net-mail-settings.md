@@ -50,6 +50,13 @@ including the network-free `SpecifiedPickupDirectory` mode.
 `MailConfiguration` is internal and `ilspycmd -t` will not emit internal types, so
 its body is unread; the evidence is its consumer above plus the public section group.
 
+## Port
+
+The shipped `machine.config` declares `system.net` as an ignored section, so an
+application carrying it activates. Preflight reports its presence once, as
+diagnostics error 10 naming the file, since nothing on .NET reads any of it
+(ledger P98).
+
 ## Reached by
 
 YAF.NET calls `new SmtpClient()` in `YAF.Core/Services/MailService.cs`, and every

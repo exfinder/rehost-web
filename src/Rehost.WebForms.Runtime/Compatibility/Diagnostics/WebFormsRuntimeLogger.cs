@@ -73,6 +73,13 @@ internal static partial class WebFormsRuntimeLogger
         string keys,
         string keyFilePath);
 
+    [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message =
+        "<system.net> in {file} is not supported and declared for activation only; nothing on .NET " +
+        "reads it. Configure proxies, connection limits and mail settings in code.")]
+    internal static partial void SystemNetUnsupported(
+        this ILogger logger,
+        string file);
+
     [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(
         this ILogger logger,

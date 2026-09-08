@@ -82,13 +82,6 @@ Carried from earlier milestones as unresolved detail:
   `HttpRuntime`/`HttpConfigurationSystem`/`HostingEnvironment`; feed or
   fail-fast the ones with reachable consumers:
   [ambient statics audit](follow-ups/ambient-statics-audit.md).
-- Declare `system.net` in the shipped `machine.config` so an application that
-  merely contains the section can activate. It fixes activation only: modern .NET
-  deleted the reading, so `mailSettings` configures nothing either way
-  ([reading](follow-ups/system-net-mail-settings.md)).
-
-### IIS-derived behavior and modules
-
 - Integrated-mode divergences the [round-4 readings](research/iis-modules-handlers-readings.md)
   measured and this runtime has not closed:
   - `system.webServer/security/authorization` is not read at all. An application

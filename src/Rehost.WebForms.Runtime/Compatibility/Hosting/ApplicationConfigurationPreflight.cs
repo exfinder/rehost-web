@@ -76,6 +76,7 @@ internal static class ApplicationConfigurationPreflight
 
             ValidateCompilationTempDirectory(configuration, compilation);
             ValidateMachineKey(configuration, mappedConfiguration);
+            ReportUnsupportedSystemNet(mappedConfiguration);
         }
         catch (ConfigurationErrorsException exception)
         {
@@ -88,6 +89,15 @@ internal static class ApplicationConfigurationPreflight
                 exception,
                 exception.Filename,
                 exception.Line);
+        }
+    }
+
+    private static void ReportUnsupportedSystemNet(Configuration mappedConfiguration)
+    {
+        if (mappedConfiguration.GetSection("system.net") is IgnoreSection net
+            && net.SectionInformation.GetRawXml() != null)
+        {
+            WebFormsRuntimeEventSource.Log.SystemNetUnsupported(mappedConfiguration.FilePath);
         }
     }
 
