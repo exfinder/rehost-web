@@ -36,11 +36,12 @@ Microsoft ASP.NET component EULA whose URL no longer resolves.
 
 Sample applications: [`apps/NOTICE.md`](../../apps/NOTICE.md).
 
-## Open
+## Status
 
-- Package payload check against the seven packages #12 produces: license
-  element, `THIRD-PARTY-NOTICES.txt` present, `build/tasks/` DLL covered.
-  Verified so far only on packs from this branch.
+- Payload check passed 2026-09-12 on the seven `0.1.0-alpha.1` packages the
+  package tests pack: license element per the table above,
+  `THIRD-PARTY-NOTICES.txt` in every package, `build/tasks/` DLL covered.
+  Repeat on the #16 candidate.
 - Microsoft ASP.NET script files inside the sample apps (`apps/NOTICE.md`):
   redistribution terms unverified; not offered under MIT.
 - Sample-app provenance gaps listed in `apps/NOTICE.md` (template versions,
