@@ -31,8 +31,8 @@ on Windows x64, Linux, and macOS arm64:
 Each app is a frozen tree plus a sidecar `.App`/`.Host` pair; the packages it
 consumes are packed from `src/` into a shared local feed. Boundaries recorded
 along the way: LocalDb is a Windows-only engine (the connection string is the
-one app-visible change); auto-generated machine keys are process-scoped, so
-logins do not survive a restart without an explicit `<machineKey>`; the
+one app-visible change). Auto-generated keys later gained host-resolvable
+file persistence ([ADR 0010](docs/adr/0010-machine-key-persistence.md)); the
 `ListView`/`DataPager` family joined the Extensions closure and Dynamic Data
 stays absent (ledger P69). The gap analysis and its closure live in
 [`docs/research/webforms-identity-application-gaps.md`](docs/research/webforms-identity-application-gaps.md).
@@ -72,25 +72,24 @@ never silence. Six jobs, one per session, landed as ledger P90-P93.
 
 ## Current — public developer alpha
 
-Prepare the existing runtime and application evidence for external developers:
-licensing and publication review, explicit unsupported security boundaries,
-package-only consumption, onboarding, and a validated release candidate.
-YAF's landed forum journey adds a representative application beyond Wingtip;
-its scope and substitutions remain in [the app notes](apps/YAF/README.md) and
-[compatibility map](docs/compatibility.md).
+Make the existing runtime usable by external developers: resolve publication
+and licensing, finish consumer packaging, document a quickstart, and validate
+the release. The stock template is the first run; YAF is the richer example.
 
-The [Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
-tracks execution; [the release plan](docs/plans/2026-09-05-2135-public-alpha-release-plan.md)
-orders the gates. The migration helper is optional. No further application port
-or production-readiness claim is required for alpha.
+The [release plan](docs/plans/2026-09-05-2135-public-alpha-release-plan.md)
+owns the agreed release details. The
+[Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
+owns execution. Further app ports, production readiness and the optional
+migration helper do not block alpha.
 
 ## Following alpha — Milestone 4: production baseline
 
 Turn a running milestone application into a production deployment baseline:
 real SQL operations, deterministic Windows/Linux publish, containers, graceful
 lifecycle, readiness/health, metrics and diagnostics, external configuration
-and secrets, and multi-instance operation. Production-mode Optimization
-validation lands here if no earlier smoke claims it.
+and secrets, and multi-instance operation. Wingtip already exercises production
+bundle combination/minification; broader Optimization caching and `VaryBy`
+behavior remain in the backlog.
 
 ## Rejected directions
 

@@ -9,30 +9,16 @@ updates [`../ROADMAP.md`](../ROADMAP.md) when milestone scope changes.
 ### Public alpha release
 
 The [Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
-owns execution status. This backlog owns durable scope; the
-[release plan](plans/2026-09-05-2135-public-alpha-release-plan.md) owns sequencing.
-Do not duplicate issue checkboxes here.
+owns tasks and completion status. The
+[release plan](plans/2026-09-05-2135-public-alpha-release-plan.md) records the
+agreed scope and sequence; [#8](https://github.com/exfinder/rehost-webforms/issues/8)
+preserves the decision.
 
-- [Scope and distribution decision](https://github.com/exfinder/rehost-webforms/issues/8).
-- [Licensing and notices](https://github.com/exfinder/rehost-webforms/issues/9),
-  [publication audit](https://github.com/exfinder/rehost-webforms/issues/10), and
-  [unsupported security configuration](https://github.com/exfinder/rehost-webforms/issues/11).
-- [External package consumption](https://github.com/exfinder/rehost-webforms/issues/12),
-  [quickstart](https://github.com/exfinder/rehost-webforms/issues/13),
-  [migration walkthrough](https://github.com/exfinder/rehost-webforms/issues/14), and
-  [public documentation/reporting](https://github.com/exfinder/rehost-webforms/issues/15).
-- [Release artifacts](https://github.com/exfinder/rehost-webforms/issues/16),
-  [candidate validation](https://github.com/exfinder/rehost-webforms/issues/17),
-  [external onboarding trial](https://github.com/exfinder/rehost-webforms/issues/18),
-  [authorized launch](https://github.com/exfinder/rehost-webforms/issues/19), and
-  [feedback process](https://github.com/exfinder/rehost-webforms/issues/20).
-
-YAF is an existing compatibility example, not new port work. Alpha does not
-require another application port or completion of the production baseline.
-Distribution, version, and license remain explicit decisions in the linked issues.
+Remaining work: licensing, publication audit, unsupported security settings,
+consumer packages, documentation, release validation, a user trial, and launch.
+Production readiness and further app ports are not alpha requirements.
 The [minimal WAP helper](https://github.com/exfinder/rehost-webforms/issues/21)
-is optional and outside the release milestone; broader migration automation
-remains under Build system and packaging below.
+is optional; broader migration automation stays under Build system and packaging.
 
 ### Production baseline
 
