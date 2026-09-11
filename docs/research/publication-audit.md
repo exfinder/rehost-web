@@ -11,7 +11,7 @@ never quoted here; locations, categories and dispositions are.
 | Repository | `exfinder/rehost-webforms`, private at audit time |
 | Commit | `065d1f55` (`main` = `origin/main`), 708 commits of history |
 | Refs that become public | `main` only: it is the sole remote branch; the remote has no tags |
-| Local branches | Six exist. All are contained in `main` except `feat/alpha-packaging`, whose net diff is one message line in `eng/external-consumer.sh`; #12 itself landed before the audited commit |
+| Local branches | Six exist. All are contained in `main` except `feat/alpha-packaging`, an active local branch (test changes only at audit time, not reviewed); #12 itself landed before the audited commit |
 | Hosted content | 21 issues and 14 comments read in full; milestone 1; no releases, tags, workflows, Actions runs or artifacts; wiki, pages and discussions disabled; no repository secrets, variables or environments; two read-write deploy keys (admin-only, not exposed by visibility) |
 
 Not covered: GitHub Projects (token lacks `read:project`), binary blob
