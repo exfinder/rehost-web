@@ -42,10 +42,9 @@ Sample applications: [`apps/NOTICE.md`](../../apps/NOTICE.md).
   package tests pack: license element per the table above,
   `THIRD-PARTY-NOTICES.txt` in every package, `build/tasks/` DLL covered.
   Repeat on the #16 candidate.
-- Microsoft ASP.NET script files inside the sample apps (`apps/NOTICE.md`):
-  redistribution terms unverified; not offered under MIT.
-- Sample-app provenance gaps listed in `apps/NOTICE.md` (template versions,
-  eShop upstream commit, Autofac.Web revision, missing client-library license
-  texts in YAF and WingtipToys).
+- Microsoft ASP.NET script files inside the sample apps: accepted as-is by
+  the maintainer on 2026-09-12; marked in `apps/NOTICE.md`, never packaged.
+- Sample-app provenance gaps stay listed in `apps/NOTICE.md`; they are
+  disclosure, not release blockers.
 - Two unused `35MSSharedLib1024.snk` files and seven YAF `.snk` files ride
   along as upstream bytes; nothing signs with them.
