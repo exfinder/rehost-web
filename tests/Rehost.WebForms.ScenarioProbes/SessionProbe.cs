@@ -26,11 +26,23 @@ public sealed class SessionProbe : IHttpHandler, IRequiresSessionState
 
             case "hold":
                 var tag = request.QueryString["tag"];
-                Witness.Record(WitnessProtocol.SessionEntered + tag);
-                Thread.Sleep(int.Parse(
-                    request.QueryString["ms"]!,
-                    CultureInfo.InvariantCulture));
-                Witness.Record(WitnessProtocol.SessionExited + tag);
+                using (var gate = ScenarioGate.Open(request.QueryString["gate"]))
+                {
+                    Witness.Record($"{WitnessProtocol.SessionEntered}{tag}");
+                    if (gate.Armed)
+                    {
+                        gate.ArriveAndWait();
+                    }
+                    else
+                    {
+                        Thread.Sleep(int.Parse(
+                            request.QueryString["ms"]!,
+                            CultureInfo.InvariantCulture));
+                    }
+
+                    Witness.Record($"{WitnessProtocol.SessionExited}{tag}");
+                }
+
                 break;
         }
 

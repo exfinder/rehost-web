@@ -97,7 +97,8 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
 
     // The handshake is what keeps this from passing vacuously: the second request is dispatched
     // only after the first reports itself inside the lock, so "B ran after A" cannot be an
-    // accident of scheduling. The paired overlap case rules out a merely serial host.
+    // accident of scheduling. The paired overlap case rules out a merely serial host; the test
+    // holds P at a gate until it has seen Q inside, so a slow Q cannot fail it, only a blocked one.
     [Fact]
     public async Task Two_Requests_Sharing_A_Session_Serialize_While_Separate_Sessions_Overlap()
     {
@@ -119,14 +120,14 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
         var separate = SessionCookie(other);
         SessionIdOf(separate).ShouldNotBe(SessionIdOf(shared));
 
-        var one = Dispatch(shared, "P");
-        await scenario.Witness.WaitForAsync(
-            WitnessProtocol.SessionEntered + "P",
-            TimeSpan.FromSeconds(10));
+        using var gate = new ScenarioGate();
+        var one = Dispatch(shared, "P", gate);
+        await gate.WaitForArrivalAsync(TestContext.Current.CancellationToken);
         var two = Dispatch(separate, "Q");
         await scenario.Witness.WaitForAsync(
             WitnessProtocol.SessionEntered + "Q",
-            TimeSpan.FromSeconds(10));
+            ScenarioGate.DefaultWait);
+        gate.Release();
         await Task.WhenAll(one, two);
 
         var overlapped = await SessionMarkersAsync();
@@ -134,9 +135,11 @@ public sealed class SessionStateOverKestrelTests(SessionLiveScenario scenario)
             .ShouldBeLessThan(overlapped.IndexOf(WitnessProtocol.SessionExited + "P"));
     }
 
-    private Task<ScenarioResponse> Dispatch(string cookie, string tag) =>
+    private Task<ScenarioResponse> Dispatch(string cookie, string tag, ScenarioGate? gate = null) =>
         scenario.Client.GetWithCookiesAsync(
-            ProbePaths.Session + "?mode=hold&ms=" + HoldMilliseconds + "&tag=" + tag,
+            gate == null
+                ? $"{ProbePaths.Session}?mode=hold&ms={HoldMilliseconds}&tag={tag}"
+                : $"{ProbePaths.Session}?mode=hold&tag={tag}&gate={gate.Name}",
             cookie);
 
     private async Task<List<string>> SessionMarkersAsync() =>
