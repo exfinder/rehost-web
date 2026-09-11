@@ -23,21 +23,13 @@
 
   <ItemGroup>
     <RehostLocalBuildSupportProject Include="$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
-
-    <!-- Broad on purpose: a hand-maintained per-project list once missed Extensions'
-         embedded Scripts/*.js and shipped a stale package. False repacks are cheap;
-         stale packages are not. -->
-    <RehostLocalPackageSource
-      Include="$(RehostRepoRoot)src/**/*"
-      Exclude="$(RehostRepoRoot)src/**/bin/**;$(RehostRepoRoot)src/**/obj/**" />
-    <RehostLocalPackageSource Include="$(RehostRepoRoot)Directory.Packages.props;$(RehostRepoRoot)global.json" />
   </ItemGroup>
 
   <Target
     Name="RehostPackLocalFeed"
     BeforeTargets="Restore"
     Condition="'$(_RehostLocalFeedEnabled)' == 'true'"
-    Inputs="@(RehostLocalPackageSource)"
+    Inputs="@(RehostPackageSource)"
     Outputs="$(RehostLocalPackageStamp)">
     <ItemGroup>
       <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(RehostPackageProject.Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
@@ -105,7 +97,7 @@
     Name="RehostAssertLocalFeedCurrent"
     BeforeTargets="CoreCompile"
     Condition="'$(_RehostLocalFeedEnabled)' == 'true' and '$(MSBuildProjectExtension)' == '.csproj'"
-    Inputs="@(RehostLocalPackageSource)"
+    Inputs="@(RehostPackageSource)"
     Outputs="$(RehostLocalPackageStamp)">
     <Error Text="Local Rehost package feed is stale and this build skipped restore. Build without --no-restore so the feed can repack." />
   </Target>

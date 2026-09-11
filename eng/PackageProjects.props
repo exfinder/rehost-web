@@ -13,4 +13,14 @@
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
   </ItemGroup>
+
+  <!-- Everything a package's content can depend on. Broad on purpose: a hand-maintained
+       per-project list once missed Extensions' embedded Scripts/*.js and shipped a stale
+       package. False repacks are cheap; stale packages are not. -->
+  <ItemGroup>
+    <RehostPackageSource
+      Include="$(RehostRepoRoot)src/**/*;$(RehostRepoRoot)eng/Rehost.WebForms.Build.Tasks/**/*;$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/*"
+      Exclude="$(RehostRepoRoot)src/**/bin/**;$(RehostRepoRoot)src/**/obj/**;$(RehostRepoRoot)eng/**/bin/**;$(RehostRepoRoot)eng/**/obj/**" />
+    <RehostPackageSource Include="$(RehostRepoRoot)Directory.Packages.props;$(RehostRepoRoot)global.json;$(MSBuildThisFileFullPath)" />
+  </ItemGroup>
 </Project>

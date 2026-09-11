@@ -5,6 +5,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RehostTestPackageFeed>$(MSBuildProjectDirectory)/bin/$(Configuration)/packages/</RehostTestPackageFeed>
+    <RehostTestPackageStamp>$(MSBuildProjectDirectory)/bin/$(Configuration)/packages.stamp</RehostTestPackageStamp>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,13 +19,23 @@
   </ItemGroup>
 
   <!-- The packages under test are real pack output of the current tree, never a feed
-       another build left behind. -->
-  <Target Name="RehostPackForTests" AfterTargets="Build">
+       another build left behind. Same inputs and stamp rule as the local feed: the stamp
+       takes the time packing began, so a source edited during the pack still counts as
+       newer. -->
+  <Target
+    Name="RehostPackForTests"
+    AfterTargets="Build"
+    Inputs="@(RehostPackageSource)"
+    Outputs="$(RehostTestPackageStamp)">
+    <PropertyGroup>
+      <_RehostPackStarted>$([System.DateTime]::UtcNow.ToString('o'))</_RehostPackStarted>
+    </PropertyGroup>
     <RemoveDir Directories="$(RehostTestPackageFeed)" />
     <MSBuild
       Projects="@(RehostPackageProject)"
       Targets="Pack"
       BuildInParallel="false"
       Properties="Configuration=$(Configuration);PackageOutputPath=$(RehostTestPackageFeed)" />
+    <Touch Files="$(RehostTestPackageStamp)" AlwaysCreate="true" Time="$(_RehostPackStarted)" />
   </Target>
 </Project>
