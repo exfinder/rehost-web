@@ -11,12 +11,12 @@ never quoted here; locations, categories and dispositions are.
 | Repository | `exfinder/rehost-webforms`, private at audit time |
 | Commit | `065d1f55` (`main` = `origin/main`), 708 commits of history |
 | Refs that become public | `main` only: it is the sole remote branch; the remote has no tags |
-| Local branches | Six exist. All but `feat/alpha-packaging` (three unpushed commits, #12) are contained in `main` and add no history |
+| Local branches | Six exist. All are contained in `main` except `feat/alpha-packaging`, whose net diff is one message line in `eng/external-consumer.sh`; #12 itself landed before the audited commit |
 | Hosted content | 21 issues and 14 comments read in full; milestone 1; no releases, tags, workflows, Actions runs or artifacts; wiki, pages and discussions disabled; no repository secrets, variables or environments; two read-write deploy keys (admin-only, not exposed by visibility) |
 
 Not covered: GitHub Projects (token lacks `read:project`), binary blob
-contents (fonts, PNGs, `CatalogItems.zip`, `Thumbs.db`, `.snk`), anything on
-`feat/alpha-packaging`, and every commit after `065d1f55`.
+contents (fonts, PNGs, `CatalogItems.zip`, `Thumbs.db`, `.snk`), and every
+commit after `065d1f55`.
 
 ## Tools and method
 
@@ -77,10 +77,10 @@ record.
 ## Material after this audit
 
 The reviewed commit already contains the #9 outcome (`LICENSE`,
-`THIRD-PARTY-NOTICES.txt`, package license metadata). Everything below is
-outside the audited scope and needs the recheck before visibility:
+`THIRD-PARTY-NOTICES.txt`, package license metadata) and the #12 packaging
+work. Everything below is outside the audited scope and needs the recheck
+before visibility:
 
-- `feat/alpha-packaging` and any further #12 commits.
 - Candidate packages and their build output; `artifacts/candidate/` is
   ignored and must stay so.
 - NuGet or GitHub publication credentials introduced for #16 or #19: never in
