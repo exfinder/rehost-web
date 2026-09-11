@@ -35,6 +35,7 @@
     <Project Path="tests/Rehost.WebForms.FriendlyUrls.Tests/Rehost.WebForms.FriendlyUrls.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Owin.Host.SystemWeb.Tests/Rehost.WebForms.Owin.Host.SystemWeb.Tests.csproj" />
+    <Project Path="tests/Rehost.WebForms.Packages.Tests/Rehost.WebForms.Packages.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
     <Project Path="tests/Rehost.WebForms.ScriptManager.Bundles.Tests/Rehost.WebForms.ScriptManager.Bundles.Tests.csproj" />

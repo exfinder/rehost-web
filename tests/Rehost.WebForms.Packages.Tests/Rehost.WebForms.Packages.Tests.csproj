@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../eng/Repo.props" />
+  <Import Project="../../eng/PackageProjects.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RehostTestPackageFeed>$(MSBuildProjectDirectory)/bin/$(Configuration)/packages/</RehostTestPackageFeed>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="@(RehostPackageProject)" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="RehostPackageFeed" Value="$(RehostTestPackageFeed)" />
+    <AssemblyMetadata Include="RehostPackagesProps" Value="$(RehostRepoRoot)Directory.Packages.props" />
+    <AssemblyMetadata Include="RehostDependenciesProps" Value="$(RehostRepoRoot)src/Rehost.WebForms/Rehost.WebForms.Dependencies.props" />
+  </ItemGroup>
+
+  <!-- The packages under test are real pack output of the current tree, never a feed
+       another build left behind. -->
+  <Target Name="RehostPackForTests" AfterTargets="Build">
+    <RemoveDir Directories="$(RehostTestPackageFeed)" />
+    <MSBuild
+      Projects="@(RehostPackageProject)"
+      Targets="Pack"
+      BuildInParallel="false"
+      Properties="Configuration=$(Configuration);PackageOutputPath=$(RehostTestPackageFeed)" />
+  </Target>
+</Project>
