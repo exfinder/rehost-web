@@ -223,8 +223,8 @@ Carried from earlier milestones as unresolved detail:
   [Rehost SDK](follow-ups/rehost-sdk.md).
 - In-place development run via a host-provided bin seam, restoring the
   edit-markup-refresh loop: [in-place dev run](follow-ups/in-place-dev-run.md).
-- Choose the project license and set `PackageLicenseExpression`; nuget.org
-  publishing is blocked until then:
+- Verify license metadata and notices against the seven packages #12
+  produces; sample-app redistribution gaps:
   [package license](follow-ups/package-license.md).
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).

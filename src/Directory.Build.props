@@ -18,9 +18,13 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <!-- PackageLicenseExpression is deliberately unset: the project license is an open
-         decision (docs/follow-ups/package-license.md). nuget.org publishing is blocked
-         until it lands. -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <!-- Imported Apache-2.0 trees make up nearly all of these three packages; the
+       expression follows the payload, not the repository license. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Owin.Host.SystemWeb'">
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +32,11 @@
       Include="$(MSBuildThisFileDirectory)PACKAGE_README.md"
       Pack="true"
       PackagePath="README.md"
+      Visible="false" />
+    <None
+      Include="$(MSBuildThisFileDirectory)../THIRD-PARTY-NOTICES.txt"
+      Pack="true"
+      PackagePath="THIRD-PARTY-NOTICES.txt"
       Visible="false" />
   </ItemGroup>
 </Project>

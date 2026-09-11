@@ -1,16 +1,50 @@
-# Package license decision
+# Package license and redistribution inventory
 
-The packages carry nuget.org-ready metadata (readme, repository URL,
-SourceLink, snupkg symbols, shared version) but `PackageLicenseExpression` is
-deliberately unset, and nuget.org publishing is blocked until it is chosen.
+Decided 2026-09-12 (#9): project-authored code is MIT, copyright Ex Finder.
+Root [`LICENSE`](../../LICENSE) carries the text. Imported trees keep their
+own licenses; nothing here replaces them.
 
-The decision is not only picking a license for this repository's own code: the
-packages embed imported source, and the expression must be compatible with
-every imported tree recorded under [`docs/provenance`](../provenance/):
-Microsoft Reference Source (MIT per the pinned revision's LICENSE.txt),
-AspNetWebOptimization (license text preserved at
-`third_party/aspnet/AspNetWebOptimization/LICENSE.txt`), and any tree imported
-later. The repository itself also has no top-level LICENSE file yet; that
-lands with the same decision.
+## Package license expressions
 
-Until then, local feeds (`1.0.0-local`) are the only distribution channel.
+`src/Directory.Build.props` sets `PackageLicenseExpression` and packs
+[`THIRD-PARTY-NOTICES.txt`](../../THIRD-PARTY-NOTICES.txt) into every package.
+
+| Package | Expression | Why |
+| --- | --- | --- |
+| `Rehost.WebForms` (Runtime, ApplicationServices, Extensions, WebServices) | MIT | Reference Source, dotnet/winforms and dotnet/msbuild imports are MIT; project code is MIT |
+| `Rehost.WebForms.Hosting` | MIT | Project code; bundled `Microsoft.Web.XmlTransform.dll` 3.2.11 is MIT per its nuspec |
+| `Rehost.WebForms.FriendlyUrls` | MIT | Project code |
+| `Rehost.WebForms.ScriptManager.Bundles` | MIT | Project code |
+| `Rehost.WebForms.Optimization` | Apache-2.0 | Imported AspNetWebOptimization tree; project edits offered under Apache-2.0 |
+| `Rehost.WebForms.Optimization.WebForms` | Apache-2.0 | Same tree |
+| `Rehost.WebForms.Owin.Host.SystemWeb` | Apache-2.0 | Imported Katana tree; project edits offered under Apache-2.0 |
+
+## Evidence
+
+| Component | Primary source read | Local copy |
+| --- | --- | --- |
+| Reference Source `ec9fa9ae` | upstream `LICENSE.txt` at that revision: MIT | `third_party/microsoft/referencesource/LICENSE.txt` |
+| dotnet/winforms `195f89af` | `LICENSE.TXT` snapshot: MIT, .NET Foundation | `src/Rehost.WebForms.Runtime/Compatibility/Resources/WinForms195f89a/` |
+| dotnet/msbuild `39950c62` | file header: MIT | `StronglyTypedResourceBuilder.cs` header only |
+| AspNetWebOptimization `65e3911f` | upstream has no license file; 51 of 52 `.cs` headers say Apache-2.0 | `third_party/aspnet/AspNetWebOptimization/LICENSE.txt` (standard text) |
+| AspNetKatana `v4.2.3` | upstream `LICENSE.txt` at that revision: Apache-2.0; no `NOTICE` file, so §4(d) adds nothing | `third_party/aspnet/AspNetKatana/LICENSE.txt` |
+| Microsoft.Web.Xdt 3.2.11 | nuspec: `<license type="expression">MIT</license>` | none; text reproduced in the notices file |
+
+Consumer-restored dependencies are not bundled and carry their own metadata.
+WebGrease 1.6.0 and the `Microsoft.AspNet.ScriptManager.*` packages point at a
+Microsoft ASP.NET component EULA whose URL no longer resolves.
+
+Sample applications: [`apps/NOTICE.md`](../../apps/NOTICE.md).
+
+## Open
+
+- Package payload check against the seven packages #12 produces: license
+  element, `THIRD-PARTY-NOTICES.txt` present, `build/tasks/` DLL covered.
+  Verified so far only on packs from this branch.
+- Microsoft ASP.NET script files inside the sample apps (`apps/NOTICE.md`):
+  redistribution terms unverified; not offered under MIT.
+- Sample-app provenance gaps listed in `apps/NOTICE.md` (template versions,
+  eShop upstream commit, Autofac.Web revision, missing client-library license
+  texts in YAF and WingtipToys).
+- Two unused `35MSSharedLib1024.snk` files and seven YAF `.snk` files ride
+  along as upstream bytes; nothing signs with them.
