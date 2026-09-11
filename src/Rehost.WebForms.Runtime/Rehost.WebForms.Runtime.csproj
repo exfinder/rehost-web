@@ -8,7 +8,9 @@
     <NoWarn>$(NoWarn);CS0108;CS0436;CS0612;CS0618;CS0672;CS3021;CS9191;CA2200;SYSLIB0003;SYSLIB0004;SYSLIB0005;SYSLIB0011;SYSLIB0012;SYSLIB0013;SYSLIB0014;SYSLIB0021;SYSLIB0023;SYSLIB0024;SYSLIB0044;SYSLIB0045;SYSLIB0050;SYSLIB0051</NoWarn>
     <DefineConstants>$(DefineConstants);SYSTEM_WEB;CONFIGPATHUTILITY_SYSTEMWEB;OBJECTSTATEFORMATTER</DefineConstants>
     <RehostRoslynR2RProducer>true</RehostRoslynR2RProducer>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <Import Project="../Rehost.WebForms/Rehost.WebForms.Dependencies.props" />
 
   <ItemGroup>
     <Compile Include="../System.Web.ReferenceSource/**/*.cs" />
@@ -48,34 +50,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Tasks.Core" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
-    <PackageReference Include="System.CodeDom" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Data.SqlClient" />
-    <PackageReference Include="System.DirectoryServices" />
-    <PackageReference Include="System.DirectoryServices.Protocols" />
-    <PackageReference Include="System.Runtime.Caching" />
-    <PackageReference Include="System.Runtime.Serialization.Formatters" />
-    <PackageReference Include="System.Security.Cryptography.Xml" />
-    <PackageReference Include="System.Security.Permissions" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Root configs ship in the Rehost.WebForms metapackage, which owns the promise
-         that everything they name is present; the copy here serves project-reference
+    <!-- The Rehost.WebForms package ships these; the copy here serves project-reference
          consumers only. -->
     <None
       Update="configs/*"
       CopyToOutputDirectory="PreserveNewest"
       CopyToPublishDirectory="PreserveNewest" />
-    <!-- buildTransitive as well: consumers usually reference the Rehost.WebForms
-         metapackage, and plain build/ assets do not flow through a dependency. -->
-    <None
-      Update="build/Rehost.WebForms.Runtime.targets"
-      Pack="true"
-      PackagePath="build/Rehost.WebForms.Runtime.targets;buildTransitive/Rehost.WebForms.Runtime.targets" />
   </ItemGroup>
 
   <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.targets" />

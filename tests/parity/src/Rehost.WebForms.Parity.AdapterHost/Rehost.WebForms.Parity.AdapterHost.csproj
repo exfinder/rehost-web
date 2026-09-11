@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <Import Project="../../StageParityFixtures.targets" />
-  <Import Project="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+  <Import Project="$(RehostRepoRoot)src/Rehost.WebForms/build/Rehost.WebForms.targets" />
   <Import Project="$(RehostRepoRoot)eng/RoslynReadyToRun.targets" />
 
   <Import Project="../../../BaselineNamedAssemblies.props" />

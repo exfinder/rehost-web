@@ -6,7 +6,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <NoWarn>$(NoWarn);CS0108;CS0612;CS0618;CS0649;CS0672;CS3021;CS9191;SYSLIB0003;SYSLIB0004;SYSLIB0005;SYSLIB0044;SYSLIB0050;SYSLIB0051</NoWarn>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <Import Project="../Rehost.WebForms/Rehost.WebForms.Dependencies.props" />
 
   <ItemGroup>
     <Compile Include="../System.Web.Extensions.ReferenceSource/**/*.cs" />
@@ -52,5 +54,4 @@
       Private="false"
       PrivateAssets="all" />
   </ItemGroup>
-
 </Project>

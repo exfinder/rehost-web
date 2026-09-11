@@ -20,7 +20,7 @@ The baseline root configuration maps `*.asmx` through Framework's chain:
 script-service calls (`[ScriptService]`, `/js` proxy scripts) and hands
 everything else to `WebServiceHandlerFactory`. Both satellite assemblies are
 named in `<compilation><assemblies>` as Framework named their originals; the
-`Rehost.WebForms` metapackage guarantees they are deployed.
+`Rehost.WebForms` package ships both.
 
 Scenario evidence: `tests/Rehost.WebForms.Hosting.Tests/AsmxOverKestrelTests.cs`
 over the shared page fixture (`Calc.asmx`, `ScriptCalc.asmx`).

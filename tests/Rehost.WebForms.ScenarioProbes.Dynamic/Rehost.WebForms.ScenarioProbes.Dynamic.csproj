@@ -9,5 +9,5 @@
     <ProjectReference Include="../Rehost.WebForms.ScenarioProbes/Rehost.WebForms.ScenarioProbes.csproj" />
   </ItemGroup>
 
-  <Import Project="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets" />
+  <Import Project="$(RehostRepoRoot)src/Rehost.WebForms/build/Rehost.WebForms.targets" />
 </Project>

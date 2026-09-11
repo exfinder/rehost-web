@@ -5,6 +5,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
+    <ProjectReference Include="../../src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
+    <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
 
 </Project>

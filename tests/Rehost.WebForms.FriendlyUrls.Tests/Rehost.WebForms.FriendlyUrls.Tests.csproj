@@ -5,6 +5,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
+    <ProjectReference Include="../../src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
   </ItemGroup>
 
 </Project>

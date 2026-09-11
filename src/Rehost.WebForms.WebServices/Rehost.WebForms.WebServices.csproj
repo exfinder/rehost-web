@@ -5,7 +5,9 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <NoWarn>$(NoWarn);CS0108;CS0618;CS0649;CS0612;CS0672;CS3021;CA2200;SYSLIB0003;SYSLIB0004;SYSLIB0011;SYSLIB0012;SYSLIB0014;SYSLIB0050;SYSLIB0051</NoWarn>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <Import Project="../Rehost.WebForms/Rehost.WebForms.Dependencies.props" />
 
   <ItemGroup>
     <Compile Include="../System.Web.Services.ReferenceSource/**/*.cs" />
@@ -28,12 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.CodeDom" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Security.Permissions" />
   </ItemGroup>
 
   <Import Project="../../eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.ServicesGeneratedInputs.targets" />

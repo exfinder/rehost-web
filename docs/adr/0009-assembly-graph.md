@@ -45,8 +45,14 @@ missing satellite costs that path rather than every activation.
 Framework could keep such promises because the GAC guaranteed the assemblies.
 This port names `Rehost.WebForms.Extensions` under `<controls>` so that an
 unchanged application parses `<asp:ScriptManager>`, and keeps the promise by
-having every consumer here reference that package explicitly. The
-`Rehost.WebForms` metapackage guarantees the runtime and named companions and
-owns the root configuration. Runtime consumer targets also ship as
+shipping the four assemblies together. The `Rehost.WebForms` package carries
+`Rehost.WebForms.Runtime`, `Rehost.WebForms.ApplicationServices`,
+`Rehost.WebForms.Extensions` and `Rehost.WebForms.WebServices` in its `lib/`,
+owns the root configuration, and lists their external dependencies; the four
+remain separate assemblies and projects but are not packages of their own, and
+no public package names their project IDs as a dependency (public alpha
+contract, GitHub #8). Satellite packages reference the component projects with
+`PrivateAssets="all"` and the bundle project for the dependency edge, so their
+nuspecs name `Rehost.WebForms` alone. The consumer targets ship as
 `buildTransitive/`, because ordinary `build/` assets do not flow through package
 dependencies.

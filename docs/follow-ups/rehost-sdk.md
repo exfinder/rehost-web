@@ -18,7 +18,7 @@ The next step in friction removal is an MSBuild SDK package:
 ```
 
 An SDK can own both project shapes (`Rehost.WebForms.Sdk` /
-`Rehost.WebForms.Sdk.Host`), inject the metapackage reference, and replace the
+`Rehost.WebForms.Sdk.Host`), inject the `Rehost.WebForms` reference, and replace the
 remaining boilerplate (TFM, AssemblyName, GenerateAssemblyInfo) with defaults.
 It is also the natural home for a `Microsoft.WebApplication.targets`
 replacement if the Web Site project model lands

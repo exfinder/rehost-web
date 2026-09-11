@@ -7,6 +7,7 @@ artifacts/build/**/*.binlog
 artifacts/build/**/*.log
 artifacts/roslyn-r2r/
 artifacts/apps/
+artifacts/candidate/
 
 .DS_Store
 

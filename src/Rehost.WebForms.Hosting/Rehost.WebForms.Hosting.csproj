@@ -10,7 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
     <ProjectReference
       Include="../../eng/Rehost.WebForms.Build.Tasks/Rehost.WebForms.Build.Tasks.csproj"
       ReferenceOutputAssembly="false"
@@ -37,5 +38,4 @@
       PackagePath="build/tasks/"
       Visible="false" />
   </ItemGroup>
-
 </Project>

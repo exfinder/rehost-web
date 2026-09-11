@@ -2,28 +2,63 @@
   <PropertyGroup>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <!-- Metapackage: no assembly of its own. It restores the GAC promise — everything
-         the root configuration names is guaranteed present, so an application that
-         references this package alone can parse asp: tags (docs/follow-ups/runtime-metapackage.md). -->
-    <IncludeBuildOutput>false</IncludeBuildOutput>
-    <NoWarn>$(NoWarn);CS2008;NU5128</NoWarn>
+    <NoWarn>$(NoWarn);CS2008</NoWarn>
     <Description>ASP.NET Web Forms runtime for modern .NET: the System.Web-compatible runtime and the companion assemblies the root configuration names.</Description>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RehostBundleAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);RehostBundleSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
   </PropertyGroup>
 
+  <Import Project="Rehost.WebForms.Dependencies.props" />
+
+  <!-- PrivateAssets keeps the four unpublished package IDs out of the nuspec; the
+       assemblies themselves are packed below. -->
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- The package that guarantees the companions also owns the root configuration
-       that names them. -->
   <ItemGroup>
     <None
       Include="../Rehost.WebForms.Runtime/configs/*"
       Pack="true"
       PackagePath="contentFiles/any/any/configs/"
       PackageCopyToOutput="true" />
+    <!-- buildTransitive as well: a host reaches this package through its App project,
+         and plain build/ assets do not flow through a dependency. -->
+    <None
+      Update="build/Rehost.WebForms.targets"
+      Pack="true"
+      PackagePath="build/Rehost.WebForms.targets;buildTransitive/Rehost.WebForms.targets" />
   </ItemGroup>
+
+  <Target Name="RehostResolveBundledAssemblies" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_RehostBundledAssembly
+        Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' and '%(Extension)' == '.dll'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- This project's own assembly is empty; the package's lib/ is the four components. -->
+  <Target Name="RehostBundleAssemblies" DependsOnTargets="RehostResolveBundledAssemblies">
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />
+      <BuildOutputInPackage
+        Include="@(_RehostBundledAssembly)"
+        FinalOutputPath="%(FullPath)"
+        TargetPath="%(Filename)%(Extension)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RehostBundleSymbols" DependsOnTargets="RehostResolveBundledAssemblies">
+    <ItemGroup>
+      <DebugSymbolsProjectOutputGroupOutput Remove="@(DebugSymbolsProjectOutputGroupOutput)" />
+      <TfmSpecificDebugSymbolsFile
+        Include="@(_RehostBundledAssembly->'%(RootDir)%(Directory)%(Filename).pdb')"
+        TargetPath="%(Filename).pdb"
+        TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
 </Project>

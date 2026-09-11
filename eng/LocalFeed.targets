@@ -19,19 +19,9 @@
     <_RehostLocalFeedEnabled Condition="'$(RehostSkipLocalFeed)' == 'true' or '$(DesignTimeBuild)' == 'true' or '$(RehostLocalPackageRoot)' == ''">false</_RehostLocalFeedEnabled>
   </PropertyGroup>
 
-  <ItemGroup>
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms/Rehost.WebForms.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
-    <RehostLocalPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
+  <Import Project="PackageProjects.props" />
 
+  <ItemGroup>
     <RehostLocalBuildSupportProject Include="$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
 
     <!-- Broad on purpose: a hand-maintained per-project list once missed Extensions'
@@ -50,7 +40,7 @@
     Inputs="@(RehostLocalPackageSource)"
     Outputs="$(RehostLocalPackageStamp)">
     <ItemGroup>
-      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(RehostLocalPackageProject.Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
+      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(RehostPackageProject.Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -72,13 +62,13 @@
       Properties="Configuration=Release"
       RemoveProperties="$(_RehostRestorePassGlobals)" />
     <MSBuild
-      Projects="@(RehostLocalPackageProject)"
+      Projects="@(RehostPackageProject)"
       Targets="Restore"
       BuildInParallel="false"
       Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostWebFormsVersion)"
       RemoveProperties="$(_RehostRestorePassGlobals)" />
     <MSBuild
-      Projects="@(RehostLocalPackageProject)"
+      Projects="@(RehostPackageProject)"
       Targets="Pack"
       BuildInParallel="false"
       Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostWebFormsVersion)"
@@ -96,7 +86,7 @@
     AfterTargets="Restore"
     Condition="'$(_RehostLocalFeedEnabled)' == 'true'">
     <ItemGroup>
-      <_RehostFeedCheck Include="@(RehostLocalPackageProject->'%(Filename)')">
+      <_RehostFeedCheck Include="@(RehostPackageProject->'%(Filename)')">
         <FeedNupkg>$(RehostLocalPackageFeed)%(Filename).$(RehostWebFormsVersion).nupkg</FeedNupkg>
         <CacheMetadata>$(RehostLocalPackageCache)$([System.String]::Copy('%(Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)/.nupkg.metadata</CacheMetadata>
       </_RehostFeedCheck>

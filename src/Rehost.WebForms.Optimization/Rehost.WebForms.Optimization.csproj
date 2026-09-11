@@ -21,7 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,5 +30,4 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="WebGrease" NoWarn="NU1701" />
   </ItemGroup>
-
 </Project>

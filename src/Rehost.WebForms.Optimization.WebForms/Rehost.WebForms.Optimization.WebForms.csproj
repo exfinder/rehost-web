@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
   </ItemGroup>
 </Project>

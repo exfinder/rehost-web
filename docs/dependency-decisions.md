@@ -58,7 +58,7 @@ compiles against the same version it runs on; see
 [Roslyn page compilation](adr/0007-roslyn-page-compilation.md).
 
 Two mechanisms turn the runtime switch on, and neither subsumes the other. The
-shipped `build/Rehost.WebForms.Runtime.targets` writes it into the consuming
+shipped `build/Rehost.WebForms.targets` writes it into the consuming
 application's runtimeconfig, which is correct from process start and independent
 of load order, but reaches only consumers that take the package or import the
 targets. Every executable in this repository that consumes the port imports them,

@@ -33,8 +33,8 @@ Every source header declares Apache-2.0; the repository's `LICENSE.txt` is
 preserved at `third_party/aspnet/AspNetKatana/LICENSE.txt`.
 
 The port ships as the standalone `Rehost.WebForms.Owin.Host.SystemWeb` package,
-not as part of the `Rehost.WebForms` metapackage. It depends on
-`Rehost.WebForms.Runtime` plus the unmodified nuget.org `Microsoft.Owin` 4.2.3
+not inside `Rehost.WebForms`. It depends on
+`Rehost.WebForms` plus the unmodified nuget.org `Microsoft.Owin` 4.2.3
 and `Owin` 1.0.0 packages, consumed under `NU1701`. `Microsoft.Web.Infrastructure`
 is not needed: Katana 4.x already calls `HttpApplication.RegisterModule`
 directly, so the `PreApplicationStartMethod` attribute binds as imported.

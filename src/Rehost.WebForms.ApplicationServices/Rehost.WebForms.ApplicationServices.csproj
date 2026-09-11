@@ -4,7 +4,9 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <NoWarn>$(NoWarn);CS0672;CS9191;SYSLIB0003;SYSLIB0051;CA1416</NoWarn>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <Import Project="../Rehost.WebForms/Rehost.WebForms.Dependencies.props" />
 
   <ItemGroup>
     <Compile
@@ -22,8 +24,4 @@
       PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Security.Permissions" />
-  </ItemGroup>
 </Project>

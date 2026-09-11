@@ -5,8 +5,8 @@ in-repo hosts (tests, samples) start page compilation without JITting the
 compiler. The images live in `artifacts/roslyn-r2r/` and are substituted into
 `RuntimeCopyLocalItems` for projects that import the targets file.
 
-Package consumers never see them: the runtime package ships only
-`build/Rehost.WebForms.Runtime.targets`, so `apps/WebFormsApplication` (and any
+Package consumers never see them: the `Rehost.WebForms` package ships only
+`build/Rehost.WebForms.targets`, so `apps/WebFormsApplication` (and any
 real consumer) runs IL Roslyn and pays the JIT cost on first page compile.
 Meanwhile the local-feed pack flow builds the src projects in Release, firing
 the producer and crossgenning images that flow never consumes.

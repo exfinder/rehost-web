@@ -1,0 +1,16 @@
+<Project>
+  <!-- The public package set. The local feed packs it; the package tests inspect it. -->
+  <PropertyGroup>
+    <RehostRepoRoot Condition="'$(RehostRepoRoot)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</RehostRepoRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms/Rehost.WebForms.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
+  </ItemGroup>
+</Project>

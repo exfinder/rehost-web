@@ -3,7 +3,7 @@
 Run predominantly managed ASP.NET Web Forms applications on modern .NET across
 Windows, Linux, and macOS with minimal application-source changes.
 
-The `Rehost.WebForms` metapackage is the starting point: it brings the
+The `Rehost.WebForms` package is the starting point: it carries the
 `System.Web`-compatible runtime and the companion assemblies the root
 configuration names, so `asp:` tags parse out of the box. Packages that were
 NuGet packages on .NET Framework (`FriendlyUrls`, `Optimization`,
