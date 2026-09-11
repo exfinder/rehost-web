@@ -19,8 +19,13 @@ BASE="http://127.0.0.1:$PORT"
 
 host=""
 cleanup() {
-  [ -n "$host" ] && kill "$host" 2>/dev/null && wait "$host" 2>/dev/null
-  [ "${KEEP:-0}" = 1 ] && echo "work folder kept: $WORK" || rm -rf "$WORK"
+  local status=$?
+  if [ -n "$host" ]; then
+    kill "$host" 2>/dev/null || true
+    wait "$host" 2>/dev/null || true
+  fi
+  if [ "${KEEP:-0}" = 1 ]; then echo "work folder kept: $WORK"; else rm -rf "$WORK"; fi
+  exit "$status"
 }
 trap cleanup EXIT
 
