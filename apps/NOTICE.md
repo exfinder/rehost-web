@@ -23,4 +23,6 @@ eShop come from the `Microsoft.AspNet.ScriptManager.WebForms` and
 points at a Microsoft EULA whose URL no longer resolves. They are kept as part
 of the sample applications they shipped with and are not offered under this
 repository's MIT license. The maintainer accepted this on 2026-09-12 (#9):
-they travel only inside the sample apps, never in a package.
+they travel only inside the sample apps, never in a package. The same
+scripts exist under MIT in Microsoft Reference Source; the Rehost packages
+ship that MIT build.
