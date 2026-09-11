@@ -228,9 +228,13 @@ Carried from earlier milestones as unresolved detail:
   [package license](follow-ups/package-license.md).
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
-- Decide whether a runtime-plus-Extensions bundle is useful beside the
-  template-shaped metapackage, and fail activation clearly when configuration
-  names an absent companion assembly.
+- Fail activation clearly when configuration names an absent companion
+  assembly; the seven-package alpha ships the four companions inside
+  `Rehost.WebForms`, so the case is a consumer that deploys a partial `bin`.
+- Rewrite each app's `smoke.sh` journey as a C# test project beside its App
+  and Host (one method per check, a shared start-and-wait helper), so the
+  external-consumer rig and a future CI matrix run journeys through
+  `dotnet test` without bash or curl.
 
 ## Parked
 

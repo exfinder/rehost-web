@@ -11,6 +11,9 @@ APP=${1:?app folder under apps/}
 PORT=${2:?host port}
 SDK_VERSION=$(python3 -c 'import json; print(json.load(open("global.json"))["sdk"]["version"])')
 ARCH=$(docker version --format '{{.Server.Arch}}')
+# REHOST_ROUND_TAG: suffix for the persistent volumes, so two checkouts can run rounds
+# at the same time without sharing a workspace.
+VOL="rehost-linux-$ARCH${REHOST_ROUND_TAG:+-$REHOST_ROUND_TAG}"
 
 TTY=""
 [ -t 1 ] && TTY="-t"
@@ -20,8 +23,8 @@ TTY=""
 # shellcheck disable=SC2086 # $TTY and $SMOKE_DOCKER_ARGS are word-split flags
 exec docker run --rm $TTY ${SMOKE_DOCKER_ARGS:-} \
   -v "$PWD:/src:ro" \
-  -v "rehost-linux-$ARCH-work:/work" \
-  -v "rehost-linux-$ARCH-nuget:/root/.nuget" \
+  -v "$VOL-work:/work" \
+  -v "$VOL-nuget:/root/.nuget" \
   -e DOTNET_CLI_TELEMETRY_OPTOUT=1 \
   -e APP="$APP" -e PORT="$PORT" \
   "mcr.microsoft.com/dotnet/sdk:$SDK_VERSION" \

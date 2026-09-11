@@ -12,7 +12,7 @@ runtime from packages — the way an external consumer would.
 | `WebFormsApplication.Host/` | The process: a ~30-line Kestrel host. |
 
 The mental model for a migration: **the GAC becomes the `Rehost.WebForms`
-metapackage; each `packages.config` line maps to a `Rehost.*` package; the
+package; each `packages.config` line maps to a `Rehost.*` package; the
 host exe adds `Rehost.WebForms.Hosting`; the legacy folder is never touched.**
 
 ## Commands
@@ -27,6 +27,8 @@ dotnet publish apps/WebFormsApplication/WebFormsApplication.Host -c Release
 
 apps/WebFormsApplication/smoke.sh                    # journey against the running host
 eng/app-linux-smoke.sh WebFormsApplication 5081      # the same, built and run in a Linux container
+eng/external-consumer.sh artifacts/candidate/feed    # the same app copied outside the checkout,
+                                                     # restored from a packed candidate feed only
 ```
 
 `smoke.sh` is bash + curl only and walks the template's browser journey: the

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # The stock template's browser journey against a running WebFormsApplication.Host:
-# default document, pages, Friendly URL redirect, bundles, static assets, the server
-# form's postback target, and mobile view switching. bash + curl only, so the same
+# default document, pages, Friendly URL redirect, bundles, static assets, a postback to
+# the server form, and mobile view switching. bash + curl only, so the same
 # script runs on macOS, Linux, and Git bash on Windows.
 #
 #   apps/WebFormsApplication/smoke.sh [base-url]
@@ -46,6 +46,15 @@ check 'GET / -> 200 (default document)' "$status" 200
 check_contains 'GET / renders the template home page' "$work/home.html" 'Getting started'
 action=$(sed -n 's/.*<form[^>]*action="\([^"]*\)".*/\1/p' "$work/home.html" | head -1)
 check 'form on / posts back to ./' "$action" ./
+
+hidden() { sed -n "s/.*id=\"$1\" value=\"\([^\"]*\)\".*/\1/p" "$work/home.html" | head -1; }
+status=$(curl -sS -o "$work/postback.html" -w '%{http_code}' --max-time 300 \
+  --data-urlencode "__VIEWSTATE=$(hidden __VIEWSTATE)" \
+  --data-urlencode "__VIEWSTATEGENERATOR=$(hidden __VIEWSTATEGENERATOR)" \
+  --data-urlencode "__EVENTVALIDATION=$(hidden __EVENTVALIDATION)" \
+  "$BASE/")
+check 'POST / with the rendered hidden fields -> 200 (postback)' "$status" 200
+check_contains 'postback re-renders the template home page' "$work/postback.html" 'Getting started'
 
 status=$(get /About about)
 check 'GET /About -> 200 (Friendly URL)' "$status" 200
