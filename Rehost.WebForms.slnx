@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/eng/">
+    <Project Path="eng/Rehost.WebForms.Build.Tasks/Rehost.WebForms.Build.Tasks.csproj" />
     <Project Path="eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
     <Project Path="eng/Rehost.WebForms.ReferenceSource.BuildInputs/Rehost.WebForms.ReferenceSource.BuildInputs.csproj" />
   </Folder>
