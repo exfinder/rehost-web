@@ -41,7 +41,7 @@ contents (fonts, PNGs, `CatalogItems.zip`, `Thumbs.db`, `.snk`), anything on
 
 ## Findings
 
-No publication blocker was found. Nothing in the tree, history or hosted
+No publication blocker was found. D1 and D4 are resolved; D2, D3 and D5 are accepted as recorded. Nothing in the tree, history or hosted
 content matches a real credential, private key, cloud identifier or customer
 record.
 
@@ -52,7 +52,7 @@ record.
 | D1 | `docs/windows-validation-host.md` line 6 | Private LAN address of the Windows validation host | Low: RFC 1918 address, unreachable off the LAN | Resolved 2026-09-12: the current files name only the `winbox` alias and profile-relative paths (`~\...`, `$HOME`). The SSH user name stays by maintainer decision. History keeps the old text; a rewrite is not proportionate |
 | D2 | Every commit; `LICENSE` | Author identity `Ex Finder` with a personal mail address on 1430 commit records | Already the public GitHub account identity | Accept. Changing it means rewriting all history |
 | D3 | `docs/provenance/generated-build-inputs.json` lines 103–127; `docs/research/{blogengine-net,dnn-platform,wingtiptoys}-portability.md`; history of early docs and build logs | Absolute paths under the maintainer's home directory | Cosmetic: reveals a short local user name and sibling checkout names | Accept, or replace with relative wording in the four current files |
-| D4 | `tests/Rehost.WebForms.ScenarioHost/fixtures/{auth,farm,postback}/web.config`; `apps/YAF/yafsrc/YetAnotherForum.NET/{Web,recommended.web}.config`; `apps/YAF/YAF.Host/Web.Rehost.config` | Explicit `machineKey` values generated for this repository (they differ from upstream YAF, which ships the element commented out) | None if the keys were never used on a real deployment; forgeable auth cookies and view state otherwise | Confirm they were generated for fixtures only. Then they are intentional fixtures; #8 already records them as fixture inputs |
+| D4 | `tests/Rehost.WebForms.ScenarioHost/fixtures/{auth,farm,postback}/web.config`; `apps/YAF/yafsrc/YetAnotherForum.NET/{Web,recommended.web}.config`; `apps/YAF/YAF.Host/Web.Rehost.config` | Explicit `machineKey` values generated for this repository (they differ from upstream YAF, which ships the element commented out) | None: maintainer confirmed on 2026-09-12 that they were generated for fixtures and never used on a real deployment | Resolved: intentional fixture, as #8 records. Do not reuse them outside fixtures |
 | D5 | `eng/win-oracle.sh`, `eng/win-oracle.md`, `docs/windows-validation-host.md` | AWS rig automation and cost notes | Discloses that an EC2 oracle exists, its instance shape and idle policy; no account, AMI, key-pair, security-group or IP values are committed | Accept |
 
 ### Intentional fixtures
