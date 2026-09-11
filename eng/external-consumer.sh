@@ -32,7 +32,9 @@ for item in WebFormsApplication WebFormsApplication.App WebFormsApplication.Host
   cp -R "$REPO/apps/WebFormsApplication/$item" "$APP/"
 done
 rm -rf "$APP"/*/bin "$APP"/*/obj
-sed "s|@FEED@|$(native "$FEED")|" "$REPO/eng/external-consumer/NuGet.config" > "$APP/NuGet.config"
+template=$(<"$REPO/eng/external-consumer/NuGet.config")
+feed_native=$(native "$FEED")
+printf '%s\n' "${template//@FEED@/$feed_native}" > "$APP/NuGet.config"
 cp "$REPO/eng/external-consumer/global.json" "$APP/"
 
 export NUGET_PACKAGES="$WORK/nuget/packages"
@@ -45,6 +47,7 @@ cd "$APP"
 echo "== toolchain"
 dotnet --version
 dotnet --info | grep -E 'RID:|OS Name:|OS Version:|OS Platform:' | sed 's/^ *//'
+dotnet --list-runtimes | grep -E '^Microsoft\.(NETCore|AspNetCore)\.App 10\.' | sed 's/ \[.*//'
 echo "== candidate feed: $FEED"
 ls "$FEED" | grep -E '\.nupkg$' | grep -v snupkg
 
