@@ -31,7 +31,7 @@ frequency clamp machine-wide. It needs an elevated merge and a reboot.
 snapshot was recorded. A
 different Windows host without it is roughly 2.5x slower with nothing in the
 repository to explain why. `power-throttling-off.reg` and
-`power-throttling-default.reg` sit in `C:\Users\sshuser\`.
+`power-throttling-default.reg` sit in the user profile root (`~\`).
 
 ## The E-core confinement: pinning each process at High QoS
 
@@ -55,7 +55,7 @@ policy being disabled is execution speed throttling, hence the API constant
 pwsh -NoProfile -File eng\Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.WebForms.slnx --no-build'
 ```
 
-A copy lives at `C:\Users\sshuser\bin\Invoke-Unthrottled.ps1` so the wrapper
+A copy lives at `~\bin\Invoke-Unthrottled.ps1` so the wrapper
 survives a checkout reset. It exits with the wrapped command's exit code.
 
 Invoke it as a child process — `pwsh -NoProfile -File ...`, as above — whenever
@@ -71,7 +71,7 @@ the reason given in
 [windows-validation-host.md](windows-validation-host.md#exit-codes-over-ssh):
 
 ```bash
-ssh winbox 'pwsh -NoProfile -File C:\Users\sshuser\bin\Invoke-Unthrottled.ps1 -WorkingDirectory C:\Users\sshuser\source\repos\rehost-webforms -Command "dotnet test Rehost.WebForms.slnx --no-build"; exit $LASTEXITCODE'
+ssh winbox 'pwsh -NoProfile -File $HOME\bin\Invoke-Unthrottled.ps1 -WorkingDirectory $HOME\source\repos\rehost-webforms -Command "dotnet test Rehost.WebForms.slnx --no-build"; exit $LASTEXITCODE'
 ```
 
 ## What does not work

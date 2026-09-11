@@ -5,7 +5,7 @@ tools, and credentials before relying on them; none is a support claim.
 
 Windows x64 validation runs on `winbox` (an ssh alias for `sshuser@<host>`, defined
 in `~/.ssh/config` with ControlMaster/ControlPersist so connections are reused),
-in a dedicated persistent clone at `C:\Users\sshuser\source\repos\rehost-webforms`.
+in a dedicated persistent clone at `~\source\repos\rehost-webforms`.
 The clone may be reset freely. `winbox` is LAN-only; see the EC2 alternative
 below when it is unreachable.
 
@@ -41,7 +41,7 @@ each round instead, and delete it on the remote at the end of the same ssh call:
 ```bash
 git add -A                       # separate call — do not combine with the push
 REF=$(git commit-tree $(git write-tree) -p HEAD -m wip)
-git push "winbox:C:/Users/sshuser/source/repos/rehost-webforms" \
+git push "winbox:source/repos/rehost-webforms" \
   "${REF}:refs/heads/wip/win-<topic>"     # quote it: zsh eats $REF:refs as a :r modifier
 # remote, one call: git checkout -f -B wintest wip/win-<topic>; git clean -fd;
 #                   build; test; git branch -D wip/win-<topic>
@@ -91,8 +91,8 @@ plain quoting is mangled by the ssh shell before `pwsh` sees it. `pwsh` is Core
 7.6.3 (not `powershell.exe` 5.1); global.json pins SDK 10.0.302 as a floor and
 rolls forward within 10.0.
 
-The scp-style URL matters for the push: `ssh://host/C:/...` fails to parse,
-`host:C:/...` works.
+The scp-style URL matters for the push: `ssh://host/C:/...` fails to parse;
+`host:C:/...` and the profile-relative `host:source/...` both work.
 
 `sshd` is configured with `pwsh` as its `DefaultShell`, so `ssh winbox` lands in
 PowerShell Core directly and needs no wrapper shell.
