@@ -152,7 +152,7 @@ public sealed class CustomErrorsLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.BodyCustomErrors));
 
 public sealed class WebServerLiveScenario(ScenarioHostRegistry registry)
-    : Scenario(registry.GetOrAdd(Fixtures.WebServer));
+    : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.WebServer));
 
 public sealed class ModulesLiveScenario(ScenarioHostRegistry registry)
     : ScopedWitnessScenario(registry.GetOrAdd(Fixtures.Modules));
