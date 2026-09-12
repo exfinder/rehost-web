@@ -6,8 +6,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 
 // One test per Response.Headers reading (H1-H16, IIS Express 10.0.26013), taken with the probe
 // this handler reproduces: each asserts the wire and the collection the handler saw before the
-// send. IIS-only artefacts of the readings (Server, X-SourceFiles, X-Powered-By, Date) are not
-// this host's to produce. Ledger P68.
+// send. IIS-only artefacts of the readings (Server, X-SourceFiles, Date) are not this host's
+// to produce. Ledger P68.
 public sealed class ResponseHeadersOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {

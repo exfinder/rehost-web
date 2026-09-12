@@ -118,8 +118,8 @@ Carried from earlier milestones as unresolved detail:
 - `staticContent`, `defaultDocument` and `hiddenSegments` are still
   merged from the application root alone and are unassessed per folder;
   `fileExtensions` is measured there and is the entry above.
-- Request-filtering limits, custom headers, and error shaping — the tenants the
-  modules/handlers work did not touch:
+- Request-filtering limits and error shaping — the tenants the modules/handlers
+  work did not touch, custom headers aside (ledger P101):
   [IIS configuration layers](follow-ups/iis-integration-plan.md) and
   [`system.webServer` mapping](follow-ups/system-webserver-configuration-compatibility.md).
 - `Server.TransferRequest` and the extensionless-URL handler's child-request
