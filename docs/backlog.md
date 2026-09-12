@@ -51,8 +51,9 @@ Carried from earlier milestones as unresolved detail:
 
 - The next representative application after the production baseline;
   direction and priority live in [`../ROADMAP.md`](../ROADMAP.md).
-- IIS URL Rewrite (`system.webServer/rewrite`): production IIS web.configs
-  commonly carry rewrite rules, and the port has no counterpart module. Measured
+- IIS URL Rewrite (`system.webServer/rewrite`): plan in
+  [2026-09-12-iis-url-rewrite](plans/2026-09-12-iis-url-rewrite.md). Production
+  IIS web.configs commonly carry rewrite rules, and the port has no counterpart module. Measured
   2026-09-12 ([readings UR1-UR25](research/iis-url-rewrite-readings.md)): the
   port activates the section and silently ignores every rule, where IIS without
   the module refuses the whole application with 500.19. Decide the story — a
