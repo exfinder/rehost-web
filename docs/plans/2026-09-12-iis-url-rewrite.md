@@ -168,7 +168,7 @@ cites them.
    worker-request changes. Unit tests green.
 3. Fixture amendment and scenarios. macOS suite green.
 4. Docs: compatibility row `system.webServer/rewrite` to Partial with the
-   boundaries above; ledger P99; backlog item closed; the `webserver` row in
+   boundaries above; ledger P100; backlog item closed; the `webserver` row in
    the fixtures README names the rule set.
 5. Windows and Linux rounds on the committed head.
 
