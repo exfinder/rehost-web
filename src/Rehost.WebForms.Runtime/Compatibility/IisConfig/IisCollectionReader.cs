@@ -58,7 +58,7 @@ internal static class IisCollectionReader
     internal static void Apply(
         XmlNode sectionNode,
         IisCollectionSchema schema,
-        Dictionary<string, string> entries,
+        IDictionary<string, string> entries,
         string configPath) =>
         Apply(
             sectionNode,
@@ -72,7 +72,7 @@ internal static class IisCollectionReader
     internal static void Apply<TValue>(
         XmlNode sectionNode,
         IisCollectionSchema schema,
-        Dictionary<string, TValue> entries,
+        IDictionary<string, TValue> entries,
         string configPath,
         Func<XmlNode, string, TValue> readValue)
     {

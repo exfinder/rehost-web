@@ -38,7 +38,8 @@ internal sealed class IisServerConfiguration
         Array.Empty<IisRegistration>(),
         Array.Empty<IisHandlerRoute>(),
         IisFolderHandlers.Empty,
-        rewrite: null);
+        rewrite: null,
+        CustomHeaders.Empty);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -60,7 +61,8 @@ internal sealed class IisServerConfiguration
         IReadOnlyList<IisRegistration> handlers,
         IReadOnlyList<IisHandlerRoute> handlerRoutes,
         IisFolderHandlers folderHandlers,
-        RewriteSection? rewrite)
+        RewriteSection? rewrite,
+        CustomHeaders customHeaders)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -75,6 +77,7 @@ internal sealed class IisServerConfiguration
         HandlerRoutes = handlerRoutes;
         _folderHandlers = folderHandlers;
         Rewrite = rewrite;
+        CustomHeaders = customHeaders;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -92,6 +95,8 @@ internal sealed class IisServerConfiguration
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutes { get; }
 
     internal RewriteSection? Rewrite { get; }
+
+    internal CustomHeaders CustomHeaders { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
         _folderHandlers.RoutesFor(path);
@@ -186,7 +191,8 @@ internal sealed class IisServerConfiguration
                 applicationVirtualPath,
                 sections.ClassicSectionsWaived,
                 sections.HiddenSegments),
-            sections.Rewrite);
+            sections.Rewrite,
+            sections.CustomHeaders.Build());
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -221,6 +227,8 @@ internal sealed class IisServerConfiguration
                 ClassicSectionValidation.Validate(document, configPath);
             sections.Rewrite = RewriteSection.Read(document, configPath);
         }
+
+        sections.CustomHeaders.Apply(document, configPath);
 
         var staticContentNode = document.SelectSingleNode(
             "/configuration/system.webServer/staticContent");
@@ -352,6 +360,8 @@ internal sealed class IisServerConfiguration
         internal bool ClassicSectionsWaived { get; set; }
 
         internal RewriteSection? Rewrite { get; set; }
+
+        internal CustomHeaderSection CustomHeaders { get; } = new();
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();
 
