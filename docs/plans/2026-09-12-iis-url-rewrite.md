@@ -141,17 +141,20 @@ Unit, in the folder mirroring the source:
 - `Hosting.Tests/AspNetCoreWorkerRequestTests`: frozen `RawUrl`; the four
   variables answer and stay out of `AllKeys`.
 
-Scenario, one new fixture `rewrite` (rules are application-global: every
-request in the host passes them, so no existing fixture can carry them),
-`RewriteOverKestrelTests` on its shared host:
+Scenario, joining the `webserver` fixture's shared host: its `web.config`
+already amends `<system.webServer>`, and every rule pattern sits under a `rw/`
+prefix so no other class's request on that host is touched.
+`RewriteOverKestrelTests`:
 
 - A rewritten page reports `RawUrl` original, `Url`/`Path`/`QueryString`
   rewritten, `X-Original-URL`, `IIS_WasUrlRewritten`, and a form action
   relative to the original (UR9, UR12).
-- A rule into `App_Data` gets the 404 from the runtime step (UR27).
+- A rule into `Private`, the segment that fixture hides, gets the 404 from
+  the runtime step (UR27).
 - A redirect rule answers with the absolute `Location` and no managed event
   (traced token, silence allowed).
-- A rule onto a folder serves its default document (UR30).
+- A rule onto a folder holding the fixture's default document serves it
+  (UR30).
 - A denied original (`/bin/x`) is refused before the rule (UR26).
 
 No differential test: the readings are the oracle and the compatibility row
@@ -163,9 +166,10 @@ cites them.
    refusal, `IisErrorBodies`. Unit tests green.
 2. Hosting: `DirectoryAwareFileProvider`, `RewriteRules`, the middleware and
    worker-request changes. Unit tests green.
-3. Fixture and scenarios. macOS suite green.
+3. Fixture amendment and scenarios. macOS suite green.
 4. Docs: compatibility row `system.webServer/rewrite` to Partial with the
-   boundaries above; ledger P99; backlog item closed; fixtures README row.
+   boundaries above; ledger P99; backlog item closed; the `webserver` row in
+   the fixtures README names the rule set.
 5. Windows and Linux rounds on the committed head.
 
 ## Done when
