@@ -20,7 +20,8 @@ IIS without the module refuses the whole application (UR1).
   request time gets the ordinary 404.
 - Importer-internal gaps are accepted and named: patterns see the re-encoded
   path (`%20`, `%C3%A9`), `REQUEST_URI` carries no query, `HTTPS` is upper
-  case, `trackAllCaptures` numbering differs.
+  case, `trackAllCaptures` numbering differs, and once a directory-aware file
+  provider makes `IsDirectory` true its `IsFile` is true for a folder too.
 - The original request's second `LogRequest`/`EndRequest` tail (UR3) is not
   reproduced. The managed pipeline runs once, on the rewritten URL.
 

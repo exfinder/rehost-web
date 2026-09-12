@@ -12,17 +12,38 @@ public sealed class RewriteOverKestrelTests(WebServerLiveScenario scenario)
     [Fact]
     public async Task A_Rewritten_Page_Keeps_The_Original_Url_And_Moves_Every_Other_Member()
     {
-        var (response, stages) = await scenario.TracedGetAsync(this, "/rw/clean/5");
+        var (traced, stages) = await scenario.TracedGetAsync(this, "/rw/clean/5");
+        var response = await scenario.Client.GetAsync("/rw/clean/5?extra=9");
 
-        response.StatusCode.ShouldBe(200);
-        response.Text.ShouldContain("path=/rw-probe.aspx", Case.Sensitive);
-        response.Text.ShouldContain("rawurl=/rw/clean/5?", Case.Sensitive);
-        response.Text.ShouldContain("query=5", Case.Sensitive);
-        response.Text.ShouldContain("xoriginal=/rw/clean/5?", Case.Sensitive);
-        response.Text.ShouldContain("rewritten=1", Case.Sensitive);
-        response.Text.ShouldContain("inallkeys=False", Case.Sensitive);
-        response.Text.ShouldContain("""action="./5?id=5""", Case.Sensitive);
+        traced.StatusCode.ShouldBe(200);
         stages.ShouldContain("BeginRequest");
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldContain("path=/rw-probe.aspx\n", Case.Sensitive);
+        response.Text.ShouldContain("rawurl=/rw/clean/5?extra=9\n", Case.Sensitive);
+        response.Text.ShouldContain("query=id=5&extra=9\n", Case.Sensitive);
+        response.Text.ShouldContain("xoriginal=/rw/clean/5?extra=9\n", Case.Sensitive);
+        response.Text.ShouldContain("rewritten=1\n", Case.Sensitive);
+        response.Text.ShouldContain("requesturi=/rw/clean/5?extra=9\n", Case.Sensitive);
+        response.Text.ShouldContain("inallkeys=False,False,False,False\n", Case.Sensitive);
+        response.Text.ShouldContain("action=\"./5?id=5&amp;extra=9\"", Case.Sensitive);
+    }
+
+    // The first pass judges the script file the handler map claims, not the whole URL: path info
+    // after an existing page passes while a denied name in a URL no handler claims is refused
+    // before any rule (UR42, UR43).
+    [Fact]
+    public async Task The_First_Pass_Judges_The_Script_File_Not_The_Path_Info()
+    {
+        var direct = await scenario.Client.GetAsync("/rw-probe.aspx/x.cs");
+        var rewrittenInfo = await scenario.Client.GetAsync("/rw/pi/one");
+        var deniedOriginal = await scenario.Client.GetAsync("/rw/pi/x.cs");
+
+        direct.StatusCode.ShouldBe(200);
+        direct.Text.ShouldContain("pathinfo=/x.cs\n", Case.Sensitive);
+        rewrittenInfo.StatusCode.ShouldBe(200);
+        rewrittenInfo.Text.ShouldContain("pathinfo=/one\n", Case.Sensitive);
+        rewrittenInfo.Text.ShouldContain("rawurl=/rw/pi/one\n", Case.Sensitive);
+        deniedOriginal.StatusCode.ShouldBe(404);
     }
 
     // The rewritten URL faces request filtering again, so a rule cannot reach hidden content; the

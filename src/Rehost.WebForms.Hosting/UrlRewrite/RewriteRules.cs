@@ -17,7 +17,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 internal enum RewriteOutcomeKind
 {
-    Skipped,
     Unchanged,
     Rewritten,
     Answered,
@@ -27,14 +26,11 @@ internal readonly struct RewriteOutcome(RewriteOutcomeKind kind, string? origina
 {
     internal RewriteOutcomeKind Kind { get; } = kind;
 
-    // The path and query the client asked for, decoded, for a request a rule rewrote.
     internal string? OriginalUrl { get; } = originalUrl;
 }
 
-// Inbound rules parsed by Microsoft.AspNetCore.Rewrite and applied where the IIS module applied
-// them: before the managed pipeline, on the canonical URL, after the original has faced request
-// filtering (UR3, UR26-UR28). The parser's own answers for the abort, the query order, the
-// Location shape and the response body differ from IIS, so this owns all four.
+// The parser's own answers for the abort, the query order, the Location shape and the response
+// body differ from IIS (UR5, UR6, UR11, UR38), so this owns all four rather than the middleware.
 internal sealed class RewriteRules
 {
     private readonly IReadOnlyList<IRule> _rules;
@@ -80,7 +76,7 @@ internal sealed class RewriteRules
         var (filePath, _) = RequestPathInfo.Split(request.Method, originalPath.Value!);
         if (HiddenSegments.Refuses(filePath) || ForbiddenExtensions.Refuses(filePath))
         {
-            return new RewriteOutcome(RewriteOutcomeKind.Skipped, null);
+            return new RewriteOutcome(RewriteOutcomeKind.Unchanged, null);
         }
 
         if (Run(context) == RuleResult.EndResponse)
@@ -162,9 +158,7 @@ internal sealed class RewriteRules
     }
 
     private static string Absolute(HttpRequest request, string location) =>
-        location.StartsWith('/')
-            ? $"{request.Scheme}://{request.Host.Value}{location}"
-            : location;
+        location.StartsWith('/') ? RequestUrls.Absolute(request, location) : location;
 
     private static void SetReasonPhrase(HttpContext context, int status)
     {

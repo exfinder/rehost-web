@@ -232,16 +232,23 @@ public sealed class RewriteSectionTests : IDisposable
 
     private string WriteApplication(string systemWebServerContent) => WriteConfig(
         "web.config",
-        systemWebServerContent.Length == 0
-            ? "<system.webServer />"
-            : "<system.webServer>" + systemWebServerContent + "</system.webServer>");
+        $"""
+        <system.webServer>
+        {systemWebServerContent}
+        </system.webServer>
+        """);
 
     private string WriteConfig(string name, string configurationContent)
     {
         var path = Path.Combine(_root.FullName, name);
         File.WriteAllText(
             path,
-            """<?xml version="1.0"?><configuration>""" + configurationContent + "</configuration>");
+            $"""
+            <?xml version="1.0"?>
+            <configuration>
+            {configurationContent}
+            </configuration>
+            """);
         return path;
     }
 }

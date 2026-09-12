@@ -95,6 +95,9 @@ internal sealed class RewriteSection
         }
     }
 
+    private const string EscapingTargetReason =
+        "leaves the application, which one process cannot serve; write the target application-relative";
+
     private static void RefuseEscapingTargets(XmlNode section, string configPath)
     {
         foreach (XmlNode action in section.SelectNodes(".//action[@type='Rewrite']")!)
@@ -110,8 +113,7 @@ internal sealed class RewriteSection
                 || Uri.IsWellFormedUriString(url, UriKind.Absolute))
             {
                 throw new InvalidOperationException(
-                    $"""<action type="Rewrite" url="{url}"> in '{configPath}' leaves the application, """
-                    + "which one process cannot serve; write the target application-relative.");
+                    $"""<action type="Rewrite" url="{url}"> in '{configPath}' {EscapingTargetReason}.""");
             }
         }
     }

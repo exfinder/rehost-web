@@ -36,7 +36,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         string virtualRootPath,
         string physicalRootPath,
         Func<string> temporaryDirectoryAccessor,
-        string? rewrittenFrom = null)
+        string? rewrittenFrom)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentException.ThrowIfNullOrWhiteSpace(virtualRootPath);
@@ -284,7 +284,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
             "UNENCODED_URL" => _context.Features.Get<IHttpRequestFeature>()?.RawTarget is { Length: > 0 } target
                 ? target
                 : GetRawUrl(),
-            "CACHE_URL" => $"{_context.Request.Scheme}://{_context.Request.Host.Value}{GetRawUrl()}",
+            "CACHE_URL" => RequestUrls.Absolute(_context.Request, GetRawUrl()),
             "AUTH_PASSWORD" or "LOGON_USER"
                 or "CERT_COOKIE" or "CERT_FLAGS" or "CERT_ISSUER" or "CERT_KEYSIZE"
                 or "CERT_SECRETKEYSIZE" or "CERT_SERIALNUMBER" or "CERT_SERVER_ISSUER"
