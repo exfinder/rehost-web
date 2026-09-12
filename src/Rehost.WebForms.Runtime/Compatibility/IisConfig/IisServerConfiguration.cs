@@ -37,7 +37,8 @@ internal sealed class IisServerConfiguration
         runAllManagedModulesForAllRequests: false,
         Array.Empty<IisRegistration>(),
         Array.Empty<IisHandlerRoute>(),
-        IisFolderHandlers.Empty);
+        IisFolderHandlers.Empty,
+        rewrite: null);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -58,7 +59,8 @@ internal sealed class IisServerConfiguration
         bool runAllManagedModulesForAllRequests,
         IReadOnlyList<IisRegistration> handlers,
         IReadOnlyList<IisHandlerRoute> handlerRoutes,
-        IisFolderHandlers folderHandlers)
+        IisFolderHandlers folderHandlers,
+        RewriteSection? rewrite)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -72,6 +74,7 @@ internal sealed class IisServerConfiguration
         Handlers = handlers;
         HandlerRoutes = handlerRoutes;
         _folderHandlers = folderHandlers;
+        Rewrite = rewrite;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -87,6 +90,8 @@ internal sealed class IisServerConfiguration
     internal IReadOnlyList<IisRegistration> Handlers { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutes { get; }
+
+    internal RewriteSection? Rewrite { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
         _folderHandlers.RoutesFor(path);
@@ -180,7 +185,8 @@ internal sealed class IisServerConfiguration
                 Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
                 applicationVirtualPath,
                 sections.ClassicSectionsWaived,
-                sections.HiddenSegments));
+                sections.HiddenSegments),
+            sections.Rewrite);
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -213,6 +219,7 @@ internal sealed class IisServerConfiguration
         {
             sections.ClassicSectionsWaived =
                 ClassicSectionValidation.Validate(document, configPath);
+            sections.Rewrite = RewriteSection.Read(document, configPath);
         }
 
         var staticContentNode = document.SelectSingleNode(
@@ -343,6 +350,8 @@ internal sealed class IisServerConfiguration
         }
 
         internal bool ClassicSectionsWaived { get; set; }
+
+        internal RewriteSection? Rewrite { get; set; }
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();
 
