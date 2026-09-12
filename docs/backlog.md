@@ -60,7 +60,11 @@ Carried from earlier milestones as unresolved detail:
   other path member rewritten, one managed pass on the rewritten URL), a
   mapping to host middleware, or a fail-fast diagnostic naming the boundary.
   Named boundaries either way: cross-application targets, `serverVariables`
-  allow-listing, outbound rules.
+  allow-listing, outbound rules. The ASP.NET Core importer was measured against
+  the readings (same document): usable without its middleware, but it refuses
+  every server variable outside a list of 17, drops outbound rules and
+  `serverVariables` silently, and differs from IIS on query order, redirect
+  `Location` shape, the directory test, decoded input and the abort.
 
 ## Later
 
