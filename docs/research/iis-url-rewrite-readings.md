@@ -1,6 +1,6 @@
 # IIS URL Rewrite Module readings
 
-Evidence for the `system.webServer/rewrite` backlog item. UR1-UR41 were observed
+Evidence for the `system.webServer/rewrite` backlog item. UR1-UR55 were observed
 on full IIS 10 on `winbox`, 2026-09-12. Tables keep the stimulus, the observable
 result and the conclusion; setup, transcripts and teardown are omitted.
 
@@ -22,7 +22,9 @@ installed and remains on `winbox`. `HTTP_X_BAR` was added to the server-level
 `allowedServerVariables` for UR25 and removed at teardown. Round 3 (UR26-UR40)
 added applications for request filtering, `customErrors`, `errorMode="Custom"`,
 `runAllManagedModulesForAllRequests`, Friendly URLs 1.0.2 from the NuGet
-package, and `@ OutputCache`.
+package, and `@ OutputCache`. Round 4 (UR42-UR55) covered path-info filtering,
+condition inputs, captures, maps, encoding, `<clear/>`, duplicate names and
+POST/HEAD.
 
 The port's own behavior was measured the same day on macOS: the `webserver`
 scenario fixture carrying a `<rewrite>` section with a `Redirect` rule on
@@ -100,6 +102,52 @@ serves its content with status 200. Every rule is silently ignored.
 | UR40 | Friendly URLs 1.0.2 with `AutoRedirectMode.Permanent`; rewrite `/fu/(.*)` → `{R:1}` and `/legacy` → `about.aspx`. | `/fu/about` and `/fu/about/seg1/seg2?x=1` route to `about.aspx` with segments `seg1|seg2`. `/legacy` and `/fu/about.aspx` serve `about.aspx` with no 301, while the direct `/about.aspx` is 301 to `/about`. `FriendlyUrl.Href("~/about","x")` returns `/r12/fu/about/x` on the rewritten request and `/r12/about/x` otherwise. | Routing consumes the rewritten path; the friendly redirect and `Href` read the original, so a rewritten `.aspx` is not redirected. |
 | UR41 | `@ OutputCache Duration="60"` page behind rules `c1`, `c2`, `c3` (`?v=3`) with `VaryByParam="none"`, and `d1`/`d2` sharing one rewritten query with `VaryByParam="*"`. | Every variant served the entry the first original filled: `RawUrl=/r13/c1`, form action `./c1`, identical ticks, for `/c2`, `/cached.aspx` and `/c3`; `/d2` served `/d1`'s page. | The managed output cache keys on the rewritten path and query only; the first original's form action is served to every other original. |
 
+## Round 4: filtering detail, condition inputs, configuration edge cases
+
+| ID | Stimulus | Observed result | Contract evidence |
+|---|---|---|---|
+| UR42 | Denied extension or hidden segment inside path info of an existing page: `/probe.aspx/x.cs`, `/probe.aspx/bin/x`. | Both 200; `PathInfo` is `/x.cs` and `/bin/x`. | Request filtering judges the script file, not the path info, which is what `ValidatePath` judges in the port. |
+| UR43 | The same denied names inside a URL a rule would rewrite onto `probe.aspx/…`: `/pi/one/x.cs`, `/pi/bin/x`, `/pi/one/web.config`. | 404.7, 404.8, 404.8 from `RequestFilteringModule` at `BeginRequest` on the original URL; the rule never runs. | Before the rules there is no script file to split on, so the whole original URL is judged. The port's first pass must split with the handler map, as `RequestPathInfo.Split` does, to pass UR42 and refuse UR43. |
+| UR44 | `{REQUEST_METHOD}`, `{HTTP_X_FOO}` (an arbitrary client header), `{HTTP_X_FORWARDED_PROTO}` as condition inputs. | All work: GET vs POST selects the rule; `X-Foo: bar` gives `{C:0}=bar`; a missing header is an empty string and fails the pattern. | Any header is a variable. The importer refuses the last two at load. |
+| UR45 | Two conditions with captures, `{C:0}`/`{C:1}` in the action. | `{C:0}=GET`, `{C:1}=G`: the last matched condition. | Matches the importer's default. |
+| UR46 | Same with `trackAllCaptures="true"` and `{C:0}`-`{C:3}`. | 500.50 "The expression … cannot be expanded", `0x80070585`. | Cumulative numbering differs from the importer's `c0..c3`; the exact IIS numbering is unmeasured. |
+| UR47 | `<rule enabled="false">`. | Never matches. | Matches the importer, which drops it. |
+| UR48 | Rewrite map keyed `/r14/mq?x=1` looked up through `{REQUEST_URI}`; a map key `/r14/CaseKey` requested as `/casekey`. | The keyed query matches (`REQUEST_URI` carries it); without the query nothing matches. The case-different key matches. | `REQUEST_URI` includes the query on IIS and not in the importer; map keys are case-insensitive on both. |
+| UR49 | `+` in the path: `/sp/a%20b+c`. | 404.11 from `RequestFilteringModule`, "double escape sequence", before any rule. | IIS refuses a literal `+` in a path segment; the port has no such refusal today (incidental, not a rewrite item). |
+| UR50 | `{UrlEncode:{R:1}}` over `a b/c` (from `a%20b%2Fc`); `{UrlDecode:{QUERY_STRING}}` in a condition. | `ue=a b%2Fc`: the slash is encoded, the space is not. `UrlDecode` turns `v=a%20b` into `v=a b` for matching. | Same as UR36; decode works as documented. |
+| UR51 | `{HTTPS}` with `ignoreCase="false"` against `^off$`; `<match ignoreCase="false">`. | `off` matches, so the value is lower case. Case-sensitive match refuses `/CS/Abc` and accepts `/cs/Abc`. | The importer answers `OFF`; a case-sensitive `HTTPS` condition would differ. |
+| UR52 | `negate="true"` on a `{QUERY_STRING}` condition; `logicalGrouping="MatchAny"` over two headers. | `?skip=1` skips the rule, `?go=1` runs it; one of two headers present is enough. | As documented, same as the importer. |
+| UR53 | `<rules><clear/>` at application level. | Accepted; the following rule works. | Not locked, unlike `<modules>` (MH15). |
+| UR54 | Two rules named `dup`. | Every request in the application is 500.52, `0x8007000d`, "Cannot add duplicate collection entry", raised at `SendResponse`, config source lines named. | Names are unique keys; the importer accepts the duplicate silently, so the port must refuse it at activation. |
+| UR55 | POST through a `Rewrite`; POST and HEAD to a `Redirect`; HEAD to a rewritten page. | The POST reaches the page with its body; the redirect answers 301 with the same `Location` for POST and HEAD; HEAD of the rewritten page is 200 with `Content-Length` and no body. | Verbs pass through unchanged. |
+
+## What Kestrel hands the adapter
+
+Measured on macOS with a bare Kestrel 10 app printing `IHttpRequestFeature.RawTarget`,
+`Request.Path.Value` and `Request.Path.ToString()`:
+
+| Wire target | `Path.Value` | `Path.ToString()` |
+|---|---|---|
+| `/enc/a%2Fb%20c%C3%A9` | `/enc/a%2Fb cé` | `/enc/a%2Fb%20c%C3%A9` |
+| `/dots/a/../b`, `/dots/a/%2e%2e/b`, `/x/./y/` | `/dots/b`, `/dots/b`, `/x/y/` | same |
+| `/sp%20ace/a+b` | `/sp ace/a+b` | `/sp%20ace/a+b` |
+| `/q%3Fx/y?z=1` | `/q?x/y` | `/q%3Fx/y` |
+| `/pct%2525/y` | `/pct%25/y` | same |
+| `/back\slash/y`, `//double//slash` | unchanged | `/back%5Cslash/y`, unchanged |
+
+Kestrel decodes everything but `%2F`, removes dot segments, and leaves `+`,
+`\` and empty segments alone. The port's `RequestPathCanonicalizer` already turns
+`%2F` and `\` into `/` and collapses empty segments, so the canonical path is the
+decoded form IIS matched (UR10, UR28).
+
+The importer, probed the same way, matches `Path.ToString()`, the re-encoded
+form: a canonical `/enc/a b/cé` reaches the regex as `enc/a%20b/c%C3%A9` and
+`{R:1}` carries the escapes. IIS matched the decoded text. Its `IsDirectory`
+condition asks `IFileProvider.GetFileInfo`, which `PhysicalFileProvider` answers
+`Exists=false` for a directory, so `/sub` was never a directory; a provider
+whose `GetFileInfo` returns an `IsDirectory` entry for a real folder makes the
+same rule match. `IsFile` works with the physical provider.
+
 ## The ASP.NET Core importer, measured against the readings
 
 `Microsoft.AspNetCore.Rewrite` 10.0.10 (shared framework) was probed on macOS
@@ -124,20 +172,20 @@ timeout; `ignoreCase="false"` drops the flag.
 | `REQUEST_URI`, `HTTP_URL` | Path only: no `PathBase`, no query. | Site-absolute path with query (UR9, UR20); a rewrite map keyed on `{REQUEST_URI}` therefore misses every keyed query. |
 | `HTTPS` | `ON` / `OFF`. | `on` / `off` (UR9). Equal under the default `ignoreCase`. |
 | Query append order | Original first, then the rule's: `/clean/5?extra=9` → `?extra=9&id=5`. | Rule's first: `id=5&extra=9` (UR11). |
-| Encoded path input | The regex sees `Request.Path` as given; on `DefaultHttpContext` that is the encoded text (`enc/a%2Fb%20c`). What Kestrel hands the adapter is the port's canonical-request question. | Matching runs on the decoded path (UR10). |
+| Encoded path input | The regex sees `Request.Path.ToString()`, the re-encoded form: spaces and non-ASCII arrive as `%20`, `%C3%A9`; `%2F` only if the host left it (see the Kestrel table). | Matching runs on the decoded path (UR10, UR50). |
 | `Redirect` | `Location` is a root-relative path with `PathBase` prepended (`/r1/new/thing?k=1`); an absolute URL passes through; 301/302/303/307 and numeric codes including 308; `PermanentRedirect` is refused. | Absolute `Location` (UR6); 308 unsupported. |
 | `CustomResponse` | `subStatusCode` throws `NotSupportedException` at load; without it the status, reason and description load. | 403.7 with reason phrase and description inside the error page (UR7, UR38). |
 | `AbortRequest` | `Result = EndResponse`, status left at 200, nothing closes the connection. | Connection reset (UR5). |
-| `IsDirectory` | `/sub` and `/` were not recognized as directories over a `PhysicalFileProvider` holding `sub/`; the catch-all rewrote both. | Both skipped as directories (UR18, UR22). |
-| `{C:n}` | Last matched condition unless `trackAllCaptures="true"`, then cumulative. | `{C:0}` = last condition's match (UR18); the rest unmeasured. |
+| `IsDirectory` | `/sub` and `/` were not recognized as directories over a `PhysicalFileProvider` holding `sub/`; the catch-all rewrote both. A provider answering `GetFileInfo` with an `IsDirectory` entry fixes it. | Both skipped as directories (UR18, UR22). |
+| `{C:n}` | Last matched condition unless `trackAllCaptures="true"`, then cumulative `c0..c3`. | Last condition (UR45); the cumulative numbering differs, `{C:3}` failed to expand (UR46). |
 | Wildcard syntax | `NotSupportedException` at load. | Partially working (UR21). |
 | `<outboundRules>` | Loads and is silently dropped (zero rules). | Applied (UR24). |
 | `<serverVariables><set>` | Loads and is silently dropped; nothing is set. | Applied under an allow list, else 500.50 (UR25). |
 | `<globalRules>`, `<location path>`, whole `web.config` as input | All load; `<location>`'s path is ignored and the rules apply application-wide. | `<location>` scoping is application-wide too (UR23). |
-| `enabled="false"`, duplicate names, `<clear/>` | Dropped; accepted; accepted. | Duplicate names unmeasured. |
+| `enabled="false"`, duplicate names, `<clear/>` | Dropped; accepted; accepted. | Dropped (UR47); every request 500.52 (UR54); accepted (UR53). |
 | Functions | `ToLower`, `UrlEncode`, `UrlDecode`; `UrlEncode` double-encodes an already encoded input. | `UrlEncode` left a space unencoded (UR36). |
 | Back-references | `{R:0}`-`{R:9}`, `{C:0}`-`{C:9}`; `{R:10}` throws at load. | Documented range. |
-| Rewrite maps | Case-insensitive keys, `defaultValue` honored, miss leaves the path. | Case unmeasured. |
+| Rewrite maps | Case-insensitive keys, `defaultValue` honored, miss leaves the path. | Case-insensitive too (UR48). |
 
 Silent drops are the importer's own least-astonishment failures: a port that
 adopts it must refuse `<outboundRules>` and `<serverVariables>` itself before
@@ -159,7 +207,8 @@ the directory test and the decoded input if IIS parity is the claim.
   matches everything an application can observe except that tail.
 - Rule evaluation sits after canonicalization and after request filtering of
   the original URL, and filtering runs again on the result (UR26-UR28). The
-  port's existing canonical-request boundary is the right input.
+  port's existing canonical-request boundary is the right input. The first pass
+  judges the handler-split script file, as `ValidatePath` does (UR42, UR43).
 - `RawUrl` must come from the request line the host received, never from an
   `X-Original-URL` header, and a rewrite must overwrite that header (UR34).
 - Boundaries an implementation must name: cross-application and parent-relative
