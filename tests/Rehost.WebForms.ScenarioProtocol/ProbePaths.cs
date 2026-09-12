@@ -7,6 +7,7 @@ public static class ProbePaths
 {
     public const string Witness = "/witness";
     public const string Headers = "/headers";
+    public const string CustomHeaders = "/custom-headers";
     public const string RequestHeaders = "/request-headers";
     public const string OnSendingHeaders = "/on-sending-headers";
     public const string Body = "/body";
