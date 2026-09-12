@@ -31,6 +31,8 @@ internal sealed class ClassicPipelineActivation
 
     internal string PhysicalRootPath => _options.PhysicalRootPath;
 
+    internal RewriteRules? RewriteRules { get; init; }
+
     // Activation is deferred to the first request so that request observes a cold application:
     // activating at startup would make every served request a warm one.
     internal ClassicPipelineDispatcher Dispatcher => _dispatcher.Value;

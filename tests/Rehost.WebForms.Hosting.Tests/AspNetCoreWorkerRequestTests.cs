@@ -50,6 +50,43 @@ public sealed class AspNetCoreWorkerRequestTests
         Create(context).GetRawUrl().ShouldBe("/a b/c?x=%2F");
     }
 
+    // A rule rewrote the request before the pipeline, and IIS kept RawUrl on what the client asked
+    // for while every path member followed the rewritten URL (UR9).
+    [Fact]
+    public void Raw_Url_Is_The_Original_When_A_Rule_Rewrote_The_Request()
+    {
+        var request = Create(
+            Context(path: "/probe.aspx", query: "?id=5&extra=9"),
+            rewrittenFrom: "/clean/5?extra=9");
+
+        request.GetRawUrl().ShouldBe("/clean/5?extra=9");
+        request.GetUriPath().ShouldBe("/probe.aspx");
+        request.GetQueryString().ShouldBe("id=5&extra=9");
+    }
+
+    [Fact]
+    public void The_Rewrite_Server_Variables_Answer_From_The_Original()
+    {
+        var context = Context(path: "/probe.aspx", query: "?id=5");
+        context.Features.Get<IHttpRequestFeature>()!.RawTarget = "/clean/a%20b?x=1";
+
+        var request = Create(context, rewrittenFrom: "/clean/a b?x=1");
+
+        request.GetServerVariable("IIS_WasUrlRewritten").ShouldBe("1");
+        request.GetServerVariable("REQUEST_URI").ShouldBe("/clean/a b?x=1");
+        request.GetServerVariable("UNENCODED_URL").ShouldBe("/clean/a%20b?x=1");
+        request.GetServerVariable("CACHE_URL").ShouldBe("http://localhost/clean/a b?x=1");
+    }
+
+    [Fact]
+    public void An_Unrewritten_Request_Carries_No_Rewrite_Marker()
+    {
+        var request = Create(path: "/probe.aspx", query: "?id=5");
+
+        request.GetServerVariable("IIS_WasUrlRewritten").ShouldBeNull();
+        request.GetServerVariable("REQUEST_URI").ShouldBe("/probe.aspx?id=5");
+    }
+
     [Fact]
     public void Raw_Url_Collapses_Dot_Segments_And_Repeated_Separators()
     {
@@ -902,13 +939,15 @@ public sealed class AspNetCoreWorkerRequestTests
 
     private static AspNetCoreWorkerRequest Create(
         HttpContext context,
-        string virtualRoot = "/")
+        string virtualRoot = "/",
+        string? rewrittenFrom = null)
     {
         return new AspNetCoreWorkerRequest(
             context,
             virtualRoot,
             PhysicalRoot,
-            Path.GetTempPath);
+            Path.GetTempPath,
+            rewrittenFrom);
     }
 
     private sealed class WebSocketFeature(bool isWebSocketRequest) : IHttpWebSocketFeature

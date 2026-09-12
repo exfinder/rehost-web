@@ -24,7 +24,12 @@ public static class RehostWebFormsExtensions
         configure(options);
 
         WebFormsApplication.Initialize(options);
-        builder.Services.AddSingleton(new ClassicPipelineActivation(options));
+        builder.Services.AddSingleton(new ClassicPipelineActivation(options)
+        {
+            RewriteRules = RewriteRules.Load(
+                System.Web.IisConfig.IisServerConfiguration.Current.Rewrite,
+                options.PhysicalRootPath),
+        });
 
         builder.Services.Configure<KestrelServerOptions>(kestrel =>
         {

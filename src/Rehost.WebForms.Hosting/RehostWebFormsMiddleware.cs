@@ -35,13 +35,26 @@ internal sealed class RehostWebFormsMiddleware
             return;
         }
 
+        string? rewrittenFrom = null;
+        if (_activation.RewriteRules is { } rewriteRules)
+        {
+            var outcome = await rewriteRules.ApplyAsync(context);
+            if (outcome.Kind == RewriteOutcomeKind.Answered)
+            {
+                return;
+            }
+
+            rewrittenFrom = outcome.OriginalUrl;
+        }
+
         var dispatcher = _activation.Dispatcher;
 
         using var workerRequest = new AspNetCoreWorkerRequest(
             context,
             _activation.VirtualRootPath,
             _activation.PhysicalRootPath,
-            ClassicPipelineActivation.TemporaryDirectory);
+            ClassicPipelineActivation.TemporaryDirectory,
+            rewrittenFrom);
 
         try
         {

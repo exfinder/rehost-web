@@ -20,6 +20,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     private readonly string _virtualRootPath;
     private readonly string _physicalRootPath;
     private readonly RequestBodyCoordinator _body;
+    private readonly string? _rewrittenFrom;
     private readonly bool _canHaveBody;
     private readonly TaskCompletionSource _completion =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -34,7 +35,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         HttpContext context,
         string virtualRootPath,
         string physicalRootPath,
-        Func<string> temporaryDirectoryAccessor)
+        Func<string> temporaryDirectoryAccessor,
+        string? rewrittenFrom = null)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentException.ThrowIfNullOrWhiteSpace(virtualRootPath);
@@ -43,6 +45,7 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         _context = context;
         _virtualRootPath = NormalizeVirtualRoot(virtualRootPath);
         _physicalRootPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(physicalRootPath));
+        _rewrittenFrom = rewrittenFrom;
         _body = new RequestBodyCoordinator(context.Request.BodyReader, context.RequestAborted);
         _canHaveBody = context.Features.Get<IHttpRequestBodyDetectionFeature>()?.CanHaveBody == true;
         Response = new ResponseSpool(temporaryDirectoryAccessor);
@@ -113,9 +116,15 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
         return string.IsNullOrEmpty(query) ? "" : query.TrimStart('?');
     }
 
-    // http.sys handed ASP.NET the decoded path as the raw URL and only the query verbatim.
+    // http.sys handed ASP.NET the decoded path as the raw URL and only the query verbatim; a rewrite
+    // freezes it at what the client asked for, which every client-facing path member derives from.
     public override string GetRawUrl()
     {
+        if (_rewrittenFrom != null)
+        {
+            return _rewrittenFrom;
+        }
+
         var queryString = GetQueryString();
         return queryString.Length == 0 ? GetUriPath() : GetUriPath() + "?" + queryString;
     }
@@ -255,8 +264,9 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     // variables, unset ones ""), so none is null. Site topology takes IIS's shape for a single
     // site; the certificate and TLS-strength set is "" as on an IIS site without client
     // certificates (the negotiated strengths have no non-obsolete source on Kestrel).
-    // WEBSOCKET_VERSION is the exception and must stay out of that collection: integrated answers
-    // it here while AllKeys omits it and Count stays 45 (IV23).
+    // WEBSOCKET_VERSION and the four rewrite variables are the exception and must stay out of that
+    // collection: integrated answers them here while AllKeys omits them and Count stays 45 (IV23,
+    // UR9).
     public override string? GetServerVariable(string name)
     {
         return name switch
@@ -269,6 +279,12 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
             "HTTPS" => IsSecure() ? "on" : "off",
             "REMOTE_PORT" => GetRemotePort().ToString(CultureInfo.InvariantCulture),
             "WEBSOCKET_VERSION" => "13",
+            "IIS_WasUrlRewritten" => _rewrittenFrom == null ? null : "1",
+            "REQUEST_URI" => GetRawUrl(),
+            "UNENCODED_URL" => _context.Features.Get<IHttpRequestFeature>()?.RawTarget is { Length: > 0 } target
+                ? target
+                : GetRawUrl(),
+            "CACHE_URL" => $"{_context.Request.Scheme}://{_context.Request.Host.Value}{GetRawUrl()}",
             "AUTH_PASSWORD" or "LOGON_USER"
                 or "CERT_COOKIE" or "CERT_FLAGS" or "CERT_ISSUER" or "CERT_KEYSIZE"
                 or "CERT_SECRETKEYSIZE" or "CERT_SERIALNUMBER" or "CERT_SERVER_ISSUER"
