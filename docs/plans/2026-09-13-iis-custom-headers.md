@@ -15,11 +15,13 @@ Today the section is tolerated and every row is silently ignored.
   with characters outside the HTTP token set, or a value with CR or LF, fails
   activation too: IIS sent them raw (CH23) and Kestrel would fault the
   response instead, so the refusal moves to start-up and names the row.
-- `X-Powered-By: ASP.NET` stays unsent. Ledger P68 already decided the host
-  does not produce it, and the shipped baseline carries no `customHeaders`
-  section, so there is no inherited row. `<remove name="X-Powered-By" />` is
-  accepted and inert. Boundary: an application-level `add` of that name is
-  sent here where IIS refused it as a duplicate (CH13).
+- `X-Powered-By: ASP.NET` is sent, as on IIS (CH1): the shipped baseline
+  `applicationHost.config` now carries IIS's own row, and the application's
+  section amends the inherited list. `<remove name="X-Powered-By" />` drops it
+  for real (CH10) and an application-level `add` of the name without a
+  `remove` is the duplicate IIS refused (CH13). The "not this host's to
+  produce" remark in `ResponseHeadersOverKestrelTests` was scope, not a
+  decision; it loses the name.
 - `<remove name="Server" />` is accepted and inert, as on IIS (CH19).
   `security/requestFiltering/@removeServerHeader="true"` turns Kestrel's own
   `Server` header off (CH20); `false` or absent leaves the host's setting
@@ -40,10 +42,11 @@ Today the section is tolerated and every row is silently ignored.
 ordered `(Name, Value)` rows after `add`/`remove`/`clear`, and
 `RemoveServerHeader`.
 
-- Read in `IisServerConfiguration.ApplyFile` for the application file only.
-  The rows come through `IisCollectionReader.Apply` over an empty dictionary,
+- Read in `IisServerConfiguration.ApplyFile` for both files, baseline first,
+  as `staticContent` is. The rows come through `IisCollectionReader.Apply`,
   which already gives `add`/`remove`/`clear` semantics and the duplicate-key
-  refusal every other collection uses; the record keeps document order.
+  refusal every other collection uses; the record keeps document order, the
+  inherited row first.
 - `RemoveServerHeader` comes from `IisCollectionReader.OptionalBoolean` on
   `security/requestFiltering`.
 - Refusals by XPath, each naming `configPath` and the element:
@@ -52,7 +55,7 @@ ordered `(Name, Value)` rows after `add`/`remove`/`clear`, and
   document has `system.webServer/httpProtocol/customHeaders`, beside its
   rewrite refusal.
 - `IisServerConfiguration.CustomHeaders` exposes the record. An application
-  with no section gets the empty record, not null.
+  with no section gets the baseline's record, never null.
 
 ### Layer 1: applying them (Hosting)
 
@@ -87,10 +90,11 @@ dictionary, which writes one line per value.
 
 Unit:
 
-- `Runtime.Tests/Compatibility/IisConfig/CustomHeadersTests`: add, remove,
-  clear, document order, the duplicate and case-insensitive duplicate
-  refusals, the `<location>` and folder refusals, the token and CR/LF
-  refusals, `removeServerHeader` parsed, absent section gives the empty
+- `Runtime.Tests/Compatibility/IisConfig/CustomHeadersTests`: the inherited
+  `X-Powered-By` row, add, remove of the inherited row, clear, document
+  order, the duplicate and case-insensitive duplicate refusals including a
+  re-add of `X-Powered-By`, the `<location>` and folder refusals, the token and CR/LF
+  refusals, `removeServerHeader` parsed, absent section gives the baseline's
   record. Each refusal asserts the file and element in the message.
 - `Hosting.Tests/CustomResponseHeadersTests` over a `HeaderDictionary`: a
   second value for `X-Custom` is a second entry; `Cache-Control` and
@@ -102,7 +106,8 @@ row becomes the honored row (renamed `X-Fixture: honored`) beside an added
 moves to a `<urlCompression>` element. `CustomHeadersOverKestrelTests`:
 
 - A page, a static file, the native 404 for a missing file, and the rewrite
-  step's redirect (`/rw/old`) all carry `X-Fixture` (CH2, CH3).
+  step's redirect (`/rw/old`) all carry `X-Powered-By: ASP.NET` then
+  `X-Fixture` (CH1-CH3).
 - The page's `Cache-Control` reads `private,no-store` and the static file's
   `no-store` (CH6).
 - A probe that appends `X-Fixture: app` gets two lines, the probe's first
