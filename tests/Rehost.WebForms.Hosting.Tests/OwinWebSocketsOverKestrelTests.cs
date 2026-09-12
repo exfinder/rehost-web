@@ -20,8 +20,11 @@ public sealed class OwinWebSocketsOverKestrelTests(FriendlyUrlsLiveScenario scen
     public async Task Owin_Middleware_Accepts_The_Handshake_And_Frames_Echo()
     {
         using var socket = new ClientWebSocket();
+        socket.Options.CollectHttpResponseDetails = true;
         var uri = new UriBuilder(scenario.Address) { Scheme = "ws", Path = "/owin-ws" }.Uri;
         await socket.ConnectAsync(uri, _deadline.Token);
+
+        socket.HttpResponseHeaders!["X-Powered-By"].ShouldBe(["ASP.NET"]);
 
         await socket.SendAsync(
             "hello"u8.ToArray(), WebSocketMessageType.Text, true, _deadline.Token);

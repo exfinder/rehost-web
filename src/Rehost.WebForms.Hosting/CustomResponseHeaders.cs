@@ -8,19 +8,13 @@ using Microsoft.Extensions.Primitives;
 
 // IIS's protocol module wrote the configured rows as the head left, after managed code was done
 // with the response, which is why an application's Headers.Remove and ClearHeaders never reached
-// one (CH8, CH21). Cache-Control and Content-Type joined the existing header with a comma; every
-// other name became a second line (CH5-CH7), and an empty value sent nothing (CH15).
+// one (CH8, CH21).
 internal static class CustomResponseHeaders
 {
     internal static void Register(HttpContext context, CustomHeaders headers)
     {
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(headers);
-
-        if (headers.Rows.Count == 0)
-        {
-            return;
-        }
 
         context.Response.OnStarting(() =>
         {

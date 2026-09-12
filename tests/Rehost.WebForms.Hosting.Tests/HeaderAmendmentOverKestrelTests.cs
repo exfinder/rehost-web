@@ -47,18 +47,11 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
         stages.ShouldContain("stamp:append-ok|cookie-ok");
     }
 
-    private static (string Headers, string Body) SplitRaw(byte[] raw)
-    {
-        var text = System.Text.Encoding.Latin1.GetString(raw);
-        var boundary = text.IndexOf("\r\n\r\n", StringComparison.Ordinal);
-        return (text[..boundary], text[(boundary + 4)..]);
-    }
-
     [Fact]
     public async Task An_Ended_Response_States_Its_Exact_Content_Length()
     {
         var (raw, _) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=end&stamp=1");
-        var (headers, body) = SplitRaw(raw);
+        var (headers, body) = RawResponse.Split(raw);
 
         headers.ShouldStartWith("HTTP/1.1 200", Case.Sensitive);
         body.ShouldBe("amend-start|");
@@ -71,7 +64,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     public async Task A_Terminating_Redirect_States_Its_Exact_Content_Length()
     {
         var (raw, _) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=redirect&stamp=1");
-        var (headers, body) = SplitRaw(raw);
+        var (headers, body) = RawResponse.Split(raw);
 
         headers.ShouldStartWith("HTTP/1.1 302", Case.Sensitive);
         headers.ShouldContain("Content-Length: " + body.Length);
@@ -85,7 +78,7 @@ public sealed class HeaderAmendmentOverKestrelTests(PageLiveScenario scenario)
     public async Task A_Flush_After_End_In_EndRequest_Seals_And_Forfeits_The_Length()
     {
         var (raw, stages) = await scenario.TracedRawGetAsync(this, "/Amend.aspx?mode=end&stamp=1&fae=1");
-        var (headers, body) = SplitRaw(raw);
+        var (headers, body) = RawResponse.Split(raw);
 
         headers.ShouldStartWith("HTTP/1.1 200", Case.Sensitive);
         body.ShouldContain("amend-start|");

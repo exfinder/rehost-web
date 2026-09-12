@@ -8,9 +8,8 @@ namespace System.Web.IisConfig;
 
 internal readonly record struct CustomHeader(string Name, string Value);
 
-// The merged <httpProtocol><customHeaders> collection in document order, the inherited rows first
-// (CH1-CH4), beside requestFiltering's removeServerHeader, which is the only switch for the
-// server's own Server header: a <remove name="Server" /> row is accepted and inert (CH19, CH20).
+// requestFiltering's removeServerHeader is the only switch for the server's own Server header: a
+// <remove name="Server" /> row is accepted and inert (CH19, CH20).
 internal sealed record CustomHeaders(IReadOnlyList<CustomHeader> Rows, bool RemoveServerHeader)
 {
     internal static CustomHeaders Empty { get; } =

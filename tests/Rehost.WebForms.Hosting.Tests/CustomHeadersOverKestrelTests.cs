@@ -1,4 +1,3 @@
-using System.Text;
 using Rehost.WebForms.ScenarioProtocol;
 using Shouldly;
 using Xunit;
@@ -30,7 +29,7 @@ public sealed class CustomHeadersOverKestrelTests(WebServerLiveScenario scenario
     }
 
     [Fact]
-    public async Task The_Inherited_Row_Is_Written_Before_The_Application_Adds_It_Amends()
+    public async Task The_Inherited_Row_Is_Written_Before_The_Rows_The_Application_Adds()
     {
         var (raw, _) = await scenario.TracedRawGetAsync(this, "/Default.aspx");
         var head = Head(raw);
@@ -73,9 +72,5 @@ public sealed class CustomHeadersOverKestrelTests(WebServerLiveScenario scenario
     private async Task<string> RawHead(string path) =>
         Head(await RawSocketProbe.GetRawResponseAsync(scenario.Address, path));
 
-    private static string Head(byte[] raw)
-    {
-        var text = Encoding.Latin1.GetString(raw);
-        return text[..text.IndexOf("\r\n\r\n", StringComparison.Ordinal)];
-    }
+    private static string Head(byte[] raw) => RawResponse.Split(raw).Headers;
 }
