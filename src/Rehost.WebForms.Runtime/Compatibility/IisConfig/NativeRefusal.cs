@@ -20,6 +20,7 @@ internal static class NativeRefusal
 
         var response = context.Response;
         response.Clear();
+        response.SuppressDefaultCacheControlHeader = true;
         response.StatusCode = status;
         response.ContentType = "text/html";
         if (status == 405)

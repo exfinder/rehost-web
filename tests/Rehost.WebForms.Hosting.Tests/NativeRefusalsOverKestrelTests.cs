@@ -14,6 +14,7 @@ public sealed class NativeRefusalsOverKestrelTests(PageLiveScenario scenario)
         var (response, stages) = await scenario.TracedGetAllowingSilenceAsync(this, "/nosuch.json");
 
         response.StatusCode.ShouldBe(404);
+        response.Header("Cache-Control").ShouldBeNull();
         response.Text.ShouldContain("404 - File or directory not found.", Case.Sensitive);
         stages.ShouldBeEmpty();
     }
