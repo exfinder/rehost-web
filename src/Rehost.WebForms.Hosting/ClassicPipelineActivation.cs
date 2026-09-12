@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Web;
 using System.Web.Hosting;
+using System.Web.IisConfig;
 using System.Web.Util;
 
 internal sealed class ClassicPipelineActivation
@@ -32,6 +33,8 @@ internal sealed class ClassicPipelineActivation
     internal string PhysicalRootPath => _options.PhysicalRootPath;
 
     internal RewriteRules? RewriteRules { get; init; }
+
+    internal CustomHeaders CustomHeaders { get; init; } = CustomHeaders.Empty;
 
     // Activation is deferred to the first request so that request observes a cold application:
     // activating at startup would make every served request a warm one.

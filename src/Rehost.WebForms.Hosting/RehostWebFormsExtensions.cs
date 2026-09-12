@@ -24,17 +24,23 @@ public static class RehostWebFormsExtensions
         configure(options);
 
         WebFormsApplication.Initialize(options);
+        var serverConfiguration = System.Web.IisConfig.IisServerConfiguration.Current;
         builder.Services.AddSingleton(new ClassicPipelineActivation(options)
         {
             RewriteRules = RewriteRules.Load(
-                System.Web.IisConfig.IisServerConfiguration.Current.Rewrite,
+                serverConfiguration.Rewrite,
                 options.PhysicalRootPath),
+            CustomHeaders = serverConfiguration.CustomHeaders,
         });
 
         builder.Services.Configure<KestrelServerOptions>(kestrel =>
         {
             kestrel.ResponseHeaderEncodingSelector = ResponseHeaderEncoding.Select;
             kestrel.RequestHeaderEncodingSelector = _ => RequestHeaderEncoding.Instance;
+            if (serverConfiguration.CustomHeaders.RemoveServerHeader)
+            {
+                kestrel.AddServerHeader = false;
+            }
         });
 
         // Behind a TLS-terminating proxy the scheme, host, and client address a Framework
