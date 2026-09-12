@@ -107,7 +107,7 @@ internal sealed class RewriteSection
 
             if (url.StartsWith("/", StringComparison.Ordinal)
                 || url.StartsWith("..", StringComparison.Ordinal)
-                || url.Contains("://", StringComparison.Ordinal))
+                || Uri.IsWellFormedUriString(url, UriKind.Absolute))
             {
                 throw new InvalidOperationException(
                     $"""<action type="Rewrite" url="{url}"> in '{configPath}' leaves the application, """
