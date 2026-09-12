@@ -41,9 +41,17 @@ public sealed class DirectoryAwareFileProviderTests : IDisposable
     }
 
     [Fact]
-    public void A_Path_Climbing_Out_Of_The_Application_Does_Not_Exist()
+    public void A_Real_Folder_Outside_The_Application_Does_Not_Exist()
     {
-        Provider().GetFileInfo("/../" + _root.Name).Exists.ShouldBeFalse();
+        var outside = Directory.CreateTempSubdirectory("rehost-fileprovider-outside-");
+        try
+        {
+            Provider().GetFileInfo("/../" + outside.Name).Exists.ShouldBeFalse();
+        }
+        finally
+        {
+            outside.Delete();
+        }
     }
 
     private DirectoryAwareFileProvider Provider() => new(_root.FullName);
