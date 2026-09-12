@@ -1,7 +1,7 @@
 # IIS custom response headers readings
 
 Evidence for the `httpProtocol/customHeaders` tenant in the
-[IIS configuration plan](../follow-ups/iis-integration-plan.md). CH1-CH18 were
+[IIS configuration plan](../follow-ups/iis-integration-plan.md). CH1-CH24 were
 observed on full IIS 10 on `winbox`, 2026-09-13.
 
 ## Method
@@ -48,6 +48,32 @@ The server-level baseline is IIS's own, whose `customHeaders` carries
 | CH17 | `<location path="sub">` adding `X-Loc`. | `X-Loc` on `/sub/probe.aspx`, `/sub/static.txt`, and on IIS's own `301` for `/sub`; absent at the root. The root's `X-Root` is present under `sub` too. | `<location>` scopes by request path and inherits the root's rows, unlike the rewrite section (UR23). |
 | CH18 | `folder/web.config` adding `X-Folder` and removing `X-Root`. | Under `folder/`: `X-Folder` on the page, the static file and the native 404; `X-Root` gone; `X-Powered-By` kept. At the root: `X-Root` present, `X-Folder` absent. | Folder files add to and remove from the inherited collection for their subtree. |
 
+## Round 2: removal switches, timing, encoding, upgrades
+
+| ID | Stimulus | Observed result | Contract evidence |
+|---|---|---|---|
+| CH19 | `<remove name="Server" />` in `customHeaders`. | Accepted; `Server: Microsoft-IIS/10.0` still sent on every response. | The collection cannot touch a header the server itself writes; the hardening line is inert. |
+| CH20 | `<security><requestFiltering removeServerHeader="true" /></security>`. | `Server` gone from the page, the static file and the native 404; `X-Powered-By` and the custom adds stay. | That attribute is the real switch for `Server`; it is independent of `customHeaders`. |
+| CH21 | A page that writes, flushes, sleeps, then writes more. | `Transfer-Encoding: chunked`; the custom headers are on the head that left with the first flush. | The headers are applied when the head is sent, not when the request ends. |
+| CH22 | `value="café"` in a UTF-8 `web.config`. | One byte on the wire, `0xE9`: `X-NonAscii: caf\xE9`. | Header values leave as ISO-8859-1, whatever the file encoding. |
+| CH23 | `add name="X Bad"` with a space in the name. | Accepted and sent raw: `X Bad: x`. | Names are not validated; a client that rejects the line is the only guard. |
+| CH24 | A WebSocket upgrade to an `.ashx` that accepts it, `X-Custom: ws` configured. | The `101 Switching Protocols` head carries `X-Custom: ws` and `X-Powered-By: ASP.NET` beside `Upgrade`, `Connection` and `Sec-WebSocket-Accept`. | The upgrade response is a response like any other. |
+
+## What Kestrel does with the same shapes
+
+Measured on macOS with a bare Kestrel 10 app, headers appended in the handler
+and in a `Response.OnStarting` callback, one early flush:
+
+- Two values under one name are written as two lines, for `X-Dup` and for
+  `Cache-Control` alike. IIS coalesced `Cache-Control` and `Content-Type`
+  (CH6, CH7), so the port must join those two by hand and leave the rest.
+- Headers appended in `OnStarting` are on the head that leaves with the
+  first flush, matching CH21.
+- A non-ASCII value fails the response with a 500 unless
+  `ResponseHeaderEncodingSelector` allows it; with Latin-1 selected the byte
+  is `0xE9`, matching CH22. The port already installs a selector for response
+  headers, so the value takes that path.
+
 ## Conclusions for the port
 
 - One mechanism, one place: a callback that runs when the response head is
@@ -67,3 +93,7 @@ The server-level baseline is IIS's own, whose `customHeaders` carries
 - Per-path scoping exists on IIS (CH17, CH18). Root-only is the smaller
   first cut; a folder or `<location>` section must then fail activation
   rather than fall silent, as the rewrite section does.
+- `remove name="Server"` is inert and `removeServerHeader` is the switch
+  (CH19, CH20); the port's own `Server` header should follow the attribute
+  and ignore the row. Values go out as ISO-8859-1 bytes (CH22), names are
+  not validated (CH23), and the 101 upgrade carries the headers too (CH24).
