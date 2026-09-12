@@ -107,7 +107,7 @@ Evidence: Hosting scenario tests named `RequestBody*`, `Postback*`,
 | `executionTimeout` | Partial | Cooperative delivery occurs between steps; an executing step is not interrupted and a never-returning step is not stopped |
 | `Server.Transfer` and `Server.Execute` | Supported | Child execution, query/form semantics, writer capture, previous-page state, and static-file child are exercised |
 | `Server.TransferRequest` | Unsupported | No integrated pipeline to re-enter; failure names `Transfer`/`Execute` alternatives |
-| Static files through System.Web | Partial | IIS-derived extension/type map, hidden segments, normal ranges, HEAD, validators, 304, and sendfile-backed commit are exercised; `If-Range` is unassessed. A missing file is a native 404: no `Application_Error`, no `customErrors`, `LogRequest` onward see the status (MH40, MH41, ledger P97) |
+| Static files through System.Web | Partial | IIS-derived extension/type map, hidden segments, normal ranges, HEAD, validators, 304, and sendfile-backed commit are exercised; `If-Range` is unassessed. Without a `caching` profile a static response carries no `Cache-Control` and no `Expires` on 200, 206, 304 and HEAD, as IIS's native module sent none (CP1, CP50). A missing file is a native 404: no `Application_Error`, no `customErrors`, `LogRequest` onward see the status (MH40, MH41, ledger P97) |
 | Path-taking APIs: includes, masters, site map, data/mail/control files, response files, `MapPath` | Supported | Framework path classification and case folding, including above-root includes (P71). No portable spelling for absolute Windows physical paths; use virtual paths. Jet/OLEDB `AccessDataSource` excluded |
 | Friendly URLs and application routing | Partial | Extensionless pages/handlers, segments, physical redirects, route ordering, mobile selection/switching, and direct/routed authorization are exercised; route escaping breadth and real upstream rewrite variables remain open |
 | Response compression, HTTP/3 | Unassessed | Compression is IIS's own module ([IIS-role follow-up](follow-ups/iis-role-behaviors.md)); HTTP/3 has no transport gate. Client-visible streaming and WebSockets are now Supported (rows above, ledger P79/P80) |
@@ -119,7 +119,8 @@ Evidence: `IisServerConfigurationTests`, `IisRegistrationsTests`,
 `ShippedRegistrationBaselineTests`, `ClassicSectionValidationTests`,
 `WebServerAmendmentsOverKestrelTests`, `ModulesOverKestrelTests`,
 `HandlersOverKestrelTests`, `MigratedAppOverKestrelTests`,
-`ClassicSectionRefusalOverKestrelTests`, `HiddenSegmentsOverKestrelTests`, and
+`ClassicSectionRefusalOverKestrelTests`, `HiddenSegmentsOverKestrelTests`,
+`CachingProfilesTests`, `CachingProfilesReportTests`, and
 `StaticFilesOverKestrelTests`.
 
 | Capability | State | Boundary |
@@ -132,6 +133,7 @@ Evidence: `IisServerConfigurationTests`, `IisRegistrationsTests`,
 | Per-folder `system.webServer/handlers` | Supported | Each folder `Web.config` merges into an immutable effective list at activation; mapping, path-info, and `managedHandler` use the deepest configured list. Multi-level compositions follow the tested merge algorithm but are not individually measured against IIS (ledger P87, MH27) |
 | Per-folder `system.webServer`, other sections | Partial | `<modules>` in a folder file is inert, which is IIS's own behavior — it ignores a subfolder section outright, silently (MH24). `staticContent`, `defaultDocument`, `requestFiltering` and the rest are still merged from the application root alone and are unassessed per folder |
 | App-root `system.webServer/defaultDocument` | Supported | Directory requests rewrite to the first existing candidate in list order (app observes the list's casing), 301 slash redirect, 403-class refusal, and `enabled="false"` narrows to directory requests alone (readings D1–D15); error bodies app-shaped pending `httpErrors` |
+| App-root `system.webServer/caching` | Partial | Profiles set the static `Cache-Control` word by `location` (`Client`/`ServerAndClient` private, `Any`/`Downstream` public, `Server`/`None` no-cache) and nothing else: `duration`, `varyByHeaders`, `varyByQueryString` and `kernelCachePolicy` are read and dropped, and `enabled="false"` does not silence the word. IIS also stored the response and served later requests from it; this host runs every request, so a profile on a managed extension is not honored and preflight warns once (event 11). Per-folder files are unassessed, like the other static sections ([CP1–CP51](research/iis-caching-profiles-readings.md), ledger P99) |
 | `<system.net>` in `web.config` | Unsupported | Declared as an ignored section so the application activates; nothing on .NET reads any of it, which preflight reports once as an error naming the file (ledger P98) |
 | Static `System.Configuration.ConfigurationManager` inside the application | Supported | Activation installs site `web.config` as process configuration, so app settings, connections and custom sections work for libraries such as Katana/EF; integration-tested |
 | Broken `system.webServer` sections | Supported | Any honored section that fails to parse or validate refuses activation, naming the file and the entry; IIS instead scoped its 500.19 to the requests reading the section, so an application it served despite a latent duplicate must be corrected before it starts here |

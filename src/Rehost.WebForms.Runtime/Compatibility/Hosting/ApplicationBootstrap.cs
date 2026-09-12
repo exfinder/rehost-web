@@ -46,6 +46,7 @@ internal sealed class ApplicationBootstrap
                 configuration.ServerConfigurationFilePath,
                 configuration.ApplicationConfigurationFilePath,
                 configuration.VirtualRootPath);
+            serverConfiguration.ReportUnsupported(configuration.ApplicationConfigurationFilePath);
             _environment.Preflight(configuration);
             _environment.Bind(configuration);
             System.Web.Configuration.HttpConfigurationSystem.SetConfigurationFilePaths(

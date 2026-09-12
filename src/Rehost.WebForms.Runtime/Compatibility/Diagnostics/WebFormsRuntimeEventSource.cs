@@ -194,6 +194,22 @@ namespace System.Web.Util {
         }
 
         [NonEvent]
+        internal void CachingProfilesIgnored(string file, string extensions) {
+            Swallow(() => {
+                WebFormsRuntimeLogger.Logger.CachingProfilesIgnored(file, extensions);
+                if (IsEnabled()) {
+                    CachingProfilesIgnored11(file, extensions);
+                }
+            });
+        }
+
+        [Event(11, Level = EventLevel.Warning, Message =
+            "<system.webServer><caching> in {0}: profiles for {1} are ignored; IIS served stored responses for them, this host runs every request.")]
+        private void CachingProfilesIgnored11(string file, string extensions) {
+            WriteEvent(11, file, extensions);
+        }
+
+        [NonEvent]
         private static string OutcomeText(AssemblyResolutionOutcome outcome) {
             switch (outcome) {
                 case AssemblyResolutionOutcome.Compiled:

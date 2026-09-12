@@ -1,0 +1,1 @@
+var fixture = 1;

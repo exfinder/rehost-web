@@ -466,9 +466,16 @@ namespace System.Web {
                      * Ensure that cacheability is set to cache-control: private
                      * if it is not explicitly set.
                      */
+#if !NETFRAMEWORK
+                    if (!_cacheControlHeaderAdded && sendCacheControlHeader
+                        && !SuppressDefaultCacheControlHeader) {
+                        headers.Add(new HttpResponseHeader(HttpWorkerRequest.HeaderCacheControl, "private"));
+                    }
+#else
                     if (!_cacheControlHeaderAdded && sendCacheControlHeader) {
                         headers.Add(new HttpResponseHeader(HttpWorkerRequest.HeaderCacheControl, "private"));
                     }
+#endif
                 }
             }
 

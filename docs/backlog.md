@@ -235,6 +235,12 @@ Carried from earlier milestones as unresolved detail:
   and Host (one method per check, a shared start-and-wait helper), so the
   external-consumer rig and a future CI matrix run journeys through
   `dotnet test` without bash or curl.
+- Dynamic `system.webServer/caching` profiles, lowest priority: they reopen
+  only for a public site with no session state, since IIS stopped storing
+  anything once the application issued a session cookie (CP37, CP49). Any
+  implementation must copy the URL-keyed shared copy, identity included
+  (CP28), and that disable
+  ([readings](research/iis-caching-profiles-readings.md)).
 
 ## Parked
 

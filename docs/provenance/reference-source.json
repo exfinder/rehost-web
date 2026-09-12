@@ -101,8 +101,15 @@
    "files": [
     "StaticFileHandler.cs"
    ],
-   "reason": "static responses opt out of server caching (fenced !NETFRAMEWORK): IIS served them from its native module before any managed module could store one, so replaying them through the registered OutputCacheModule would defeat the revalidation the handler sets",
+   "reason": "the validators are written as plain headers and the cache policy is left untouched (fenced !NETFRAMEWORK), because IIS's native static module owned these responses and sent no Cache-Control and no Expires without a caching profile; an unmodified policy is also never stored by OutputCacheModule, which is what the retired SetNoServerCaching call had arranged",
    "record": "docs/portability-ledger.md P58"
+  },
+  {
+   "files": [
+    "HttpResponse.cs"
+   ],
+   "reason": "the classic header generation honors SuppressDefaultCacheControlHeader (fenced !NETFRAMEWORK) as the integrated one already did, since the host replaces IIS's native static module and its responses carry no Cache-Control at all",
+   "record": "docs/portability-ledger.md P99"
   },
   {
    "files": [

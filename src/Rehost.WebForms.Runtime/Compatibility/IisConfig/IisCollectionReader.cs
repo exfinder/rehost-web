@@ -59,7 +59,22 @@ internal static class IisCollectionReader
         XmlNode sectionNode,
         IisCollectionSchema schema,
         Dictionary<string, string> entries,
-        string configPath)
+        string configPath) =>
+        Apply(
+            sectionNode,
+            schema,
+            entries,
+            configPath,
+            (node, path) => schema.ValueAttribute == null
+                ? ""
+                : RequireAttribute(node, schema.ValueAttribute, path));
+
+    internal static void Apply<TValue>(
+        XmlNode sectionNode,
+        IisCollectionSchema schema,
+        Dictionary<string, TValue> entries,
+        string configPath,
+        Func<XmlNode, string, TValue> readValue)
     {
         foreach (XmlNode node in sectionNode.ChildNodes)
         {
@@ -88,11 +103,7 @@ internal static class IisCollectionReader
                         + " first to change it.");
                 }
 
-                entries.Add(
-                    key,
-                    schema.ValueAttribute == null
-                        ? ""
-                        : RequireAttribute(node, schema.ValueAttribute, configPath));
+                entries.Add(key, readValue(node, configPath));
             }
             else
             {

@@ -469,7 +469,9 @@ namespace System.Web {
             response.AppendHeader("Last-Modified", HttpUtility.FormatHttpDateTime(lastModified));
             response.AppendHeader("Accept-Ranges", "bytes");
             response.AppendHeader("ETag", etag);
+#if NETFRAMEWORK
             response.AppendHeader("Cache-Control", "public");
+#endif
 
             handled = true;
             return handled;
@@ -575,6 +577,11 @@ namespace System.Web {
 
             // Specify content type. Use extension to do the mapping
             response.ContentType = MimeMapping.GetMimeMapping(physicalPath);
+#if !NETFRAMEWORK
+            response.AppendHeader("Last-Modified", HttpUtility.FormatHttpDateTime(lastModifiedInUtc));
+            response.AppendHeader("ETag", etag);
+            response.AppendHeader("Accept-Ranges", "bytes");
+#else
             // Static file handler supports byte ranges
             response.AppendHeader("Accept-Ranges", "bytes");
             // We want to flush cache entry when static file has changed
@@ -590,12 +597,6 @@ namespace System.Web {
             response.Cache.SetETag(etag); 
             // always set Cache-Control to public
             response.Cache.SetCacheability(HttpCacheability.Public);
-#if !NETFRAMEWORK
-            // Ledger P58: IIS served static files from its native module, before any managed
-            // module could store the response. Registering OutputCacheModule here would replay it
-            // and defeat the revalidation above, since a cached entry requires every present
-            // condition to match. The wire headers are unaffected.
-            response.Cache.SetNoServerCaching();
 #endif
         }
 

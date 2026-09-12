@@ -22,11 +22,16 @@ internal sealed class IisServerConfiguration
     private static readonly IisCollectionSchema FileExtensionSchema =
         new("add", "fileExtension", "allowed");
 
+    private static readonly IisCollectionSchema CachingProfileSchema =
+        new("add", "extension", null);
+
     private static volatile IisServerConfiguration _current = new(
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
         new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase),
         allowUnlistedExtensions: true,
+        new Dictionary<string, IisCachingProfile>(StringComparer.OrdinalIgnoreCase),
+        Array.Empty<string>(),
         new DefaultDocuments(enabled: true, Array.Empty<string>()),
         Array.Empty<IisRegistration>(),
         runAllManagedModulesForAllRequests: false,
@@ -38,6 +43,7 @@ internal sealed class IisServerConfiguration
     private readonly Dictionary<string, string> _hiddenSegments;
     private readonly Dictionary<string, bool> _fileExtensions;
     private readonly bool _allowUnlistedExtensions;
+    private readonly Dictionary<string, IisCachingProfile> _cachingProfiles;
     private readonly IisFolderHandlers _folderHandlers;
 
     private IisServerConfiguration(
@@ -45,6 +51,8 @@ internal sealed class IisServerConfiguration
         Dictionary<string, string> hiddenSegments,
         Dictionary<string, bool> fileExtensions,
         bool allowUnlistedExtensions,
+        Dictionary<string, IisCachingProfile> cachingProfiles,
+        IReadOnlyList<string> userModeCachedExtensions,
         DefaultDocuments defaultDocuments,
         IReadOnlyList<IisRegistration> modules,
         bool runAllManagedModulesForAllRequests,
@@ -56,6 +64,8 @@ internal sealed class IisServerConfiguration
         _hiddenSegments = hiddenSegments;
         _fileExtensions = fileExtensions;
         _allowUnlistedExtensions = allowUnlistedExtensions;
+        _cachingProfiles = cachingProfiles;
+        UserModeCachedExtensions = userModeCachedExtensions;
         DefaultDocuments = defaultDocuments;
         Modules = modules;
         RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
@@ -83,6 +93,45 @@ internal sealed class IisServerConfiguration
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
+
+    internal string? StaticCacheControl(string? extension) =>
+        !string.IsNullOrEmpty(extension)
+        && _cachingProfiles.TryGetValue(extension, out var profile)
+            ? profile.CacheControl
+            : null;
+
+    internal IReadOnlyList<string> UserModeCachedExtensions { get; }
+
+    internal void ReportUnsupported(string applicationConfigurationFilePath)
+    {
+        ReportIgnoredCachingProfiles(applicationConfigurationFilePath);
+    }
+
+    // Static or dynamic is the handler list's answer for a request, not a fixed extension list.
+    private void ReportIgnoredCachingProfiles(string applicationConfigurationFilePath)
+    {
+        var dynamicExtensions = new List<string>();
+        foreach (var extension in UserModeCachedExtensions)
+        {
+            var route = IntegratedHandlers.Resolve(
+                HandlerRoutes,
+                "GET",
+                VirtualPath.Create($"/probe{extension}"),
+                pathTranslated: null,
+                out _);
+            if (route is { IsManaged: true })
+            {
+                dynamicExtensions.Add(extension);
+            }
+        }
+
+        if (dynamicExtensions.Count != 0)
+        {
+            Util.WebFormsRuntimeEventSource.Log.CachingProfilesIgnored(
+                applicationConfigurationFilePath,
+                string.Join(", ", dynamicExtensions));
+        }
+    }
 
     internal string? StaticContentTypeOf(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.TryGetValue(extension, out var mimeType)
@@ -118,6 +167,8 @@ internal sealed class IisServerConfiguration
             sections.HiddenSegments,
             sections.FileExtensionsParsed,
             sections.AllowUnlistedExtensions,
+            sections.CachingProfiles,
+            sections.UserModeCachedExtensions(),
             sections.DefaultDocuments.Build(),
             sections.Modules.Build(),
             sections.Modules.RunAllManagedModules,
@@ -199,6 +250,18 @@ internal sealed class IisServerConfiguration
                 hiddenSegmentsNode, HiddenSegmentSchema, sections.HiddenSegments, configPath);
         }
 
+        var cachingProfilesNode = document.SelectSingleNode(
+            "/configuration/system.webServer/caching/profiles");
+        if (cachingProfilesNode != null)
+        {
+            IisCollectionReader.Apply(
+                cachingProfilesNode,
+                CachingProfileSchema,
+                sections.CachingProfiles,
+                configPath,
+                IisCachingProfile.Read);
+        }
+
         var defaultDocumentNode = document.SelectSingleNode(
             "/configuration/system.webServer/defaultDocument");
         if (defaultDocumentNode != null)
@@ -234,6 +297,24 @@ internal sealed class IisServerConfiguration
             new(StringComparer.OrdinalIgnoreCase);
 
         internal bool AllowUnlistedExtensions { get; set; } = true;
+
+        internal Dictionary<string, IisCachingProfile> CachingProfiles { get; } =
+            new(StringComparer.OrdinalIgnoreCase);
+
+        internal IReadOnlyList<string> UserModeCachedExtensions()
+        {
+            var extensions = new List<string>();
+            foreach (var entry in CachingProfiles)
+            {
+                if (entry.Value.StoresUserModeCopy)
+                {
+                    extensions.Add(entry.Key);
+                }
+            }
+
+            extensions.Sort(StringComparer.OrdinalIgnoreCase);
+            return extensions.ToArray();
+        }
 
         internal void ParseFileExtensions(string configPath)
         {

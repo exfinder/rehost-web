@@ -80,6 +80,14 @@ internal static partial class WebFormsRuntimeLogger
         this ILogger logger,
         string file);
 
+    [LoggerMessage(EventId = 11, Level = LogLevel.Warning, Message =
+        "<system.webServer><caching> in {file}: profiles for {extensions} are ignored; IIS served " +
+        "stored responses for them, this host runs every request.")]
+    internal static partial void CachingProfilesIgnored(
+        this ILogger logger,
+        string file,
+        string extensions);
+
     [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(
         this ILogger logger,

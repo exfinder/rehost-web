@@ -143,4 +143,52 @@ public sealed class StaticFilesOverKestrelTests(PageLiveScenario scenario)
         response.Header("Content-Type").ShouldBe("text/css");
         response.Bytes.ShouldBeEmpty();
     }
+
+    // CP1 and CP50: IIS's native static module sent no Cache-Control and no Expires on any
+    // status without a profile, only the validators. script.js carries no profile.
+    [Fact]
+    public async Task Without_A_Profile_No_Cache_Headers_Ride_Any_Static_Status()
+    {
+        var full = await scenario.Client.GetAsync("/script.js");
+        var partial = await scenario.Client.GetWithHeadersAsync(
+            "/script.js", ("Range", "bytes=2-6"));
+        var revalidation = await scenario.Client.GetWithHeadersAsync(
+            "/script.js", ("If-Modified-Since", full.Header("Last-Modified")!));
+        var head = await scenario.Client.HeadAsync("/script.js");
+
+        full.StatusCode.ShouldBe(200);
+        full.Header("Last-Modified").ShouldNotBeNull();
+        full.Header("ETag").ShouldNotBeNull();
+        full.Header("Accept-Ranges").ShouldBe("bytes");
+        partial.StatusCode.ShouldBe(206);
+        revalidation.StatusCode.ShouldBe(304);
+        head.StatusCode.ShouldBe(200);
+        foreach (var response in new[] { full, partial, revalidation, head })
+        {
+            response.Header("Cache-Control").ShouldBeNull();
+            response.Header("Expires").ShouldBeNull();
+        }
+    }
+
+    // CP51: the profile's word rides every static status, and location="Client" is private.
+    [Fact]
+    public async Task A_Profiled_Extension_Carries_Its_Word_On_Every_Static_Status()
+    {
+        var full = await scenario.Client.GetAsync("/styles.css");
+        var partial = await scenario.Client.GetWithHeadersAsync(
+            "/styles.css", ("Range", "bytes=2-6"));
+        var revalidation = await scenario.Client.GetWithHeadersAsync(
+            "/styles.css", ("If-Modified-Since", full.Header("Last-Modified")!));
+        var head = await scenario.Client.HeadAsync("/styles.css");
+
+        full.StatusCode.ShouldBe(200);
+        partial.StatusCode.ShouldBe(206);
+        revalidation.StatusCode.ShouldBe(304);
+        head.StatusCode.ShouldBe(200);
+        foreach (var response in new[] { full, partial, revalidation, head })
+        {
+            response.Header("Cache-Control").ShouldBe("private");
+            response.Header("Expires").ShouldBeNull();
+        }
+    }
 }
