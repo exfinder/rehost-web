@@ -270,7 +270,7 @@ internal class WebDirectoryBatchCompiler {
     private IDictionary _buildProviders = new Hashtable(
         StringComparer.OrdinalIgnoreCase);
 #else
-    // OrderedDictionary: a Hashtable's order follows per-process-randomized string hashes (ledger P38).
+    // OrderedDictionary: a Hashtable's order follows per-process-randomized string hashes.
     private IDictionary _buildProviders = new System.Collections.Specialized.OrderedDictionary(
         StringComparer.OrdinalIgnoreCase);
 #endif

@@ -4,7 +4,7 @@ using System.Web.IisConfig;
 
 namespace System.Web;
 
-// Replaces IIS request filtering's hidden-segment 404 (ledger P59/P60).
+// Replaces IIS request filtering's hidden-segment 404.
 internal static class HiddenSegments
 {
     internal static bool Refuses(string? virtualPath)

@@ -534,7 +534,7 @@ namespace System.Web {
             fileLength = fileInfo.Length;
 
 #if !NETFRAMEWORK
-            // IIS's native static module owned the 304; If-None-Match wins over If-Modified-Since (ledger P58).
+            // IIS's native static module owned the 304; If-None-Match wins over If-Modified-Since.
             bool notModified = false;
             string ifNoneMatch = request.Headers["If-None-Match"];
             if (ifNoneMatch != null) {
@@ -615,7 +615,7 @@ namespace System.Web {
             try {
                 // When not hosted on IIS, TransmitFile sends bytes in memory similar to WriteFile
                 HttpRuntime.CheckFilePermission(physicalPath);
-                // physicalPath is already translated; TransmitFile would re-classify it (ledger P54).
+                // physicalPath is already translated; TransmitFile would re-classify it.
                 context.Response.TransmitFileTranslated(physicalPath, offset, length);
             }
             catch (ExternalException e) {

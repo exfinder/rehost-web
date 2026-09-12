@@ -103,7 +103,7 @@ namespace System.Web.Handlers {
                 }
 #if !NETFRAMEWORK
                 else {
-                    // Match the row by name; resolving its type here would force the lazy handler load (ledger P85).
+                    // Match the row by name; resolving its type here would force the lazy handler load.
                     IisConfig.IisHandlerRoute route = IisConfig.IntegratedHandlers.Selected(
                         "GET", VirtualPath.Create(_webResourceUrl));
                     _handlerExists = route != null

@@ -146,7 +146,7 @@ namespace System.Web.Configuration {
             }
 
 #if !NETFRAMEWORK
-            // Configuration paths are lowercased; a case-sensitive filesystem misses without the fold (ledger P70).
+            // Configuration paths are lowercased; a case-sensitive filesystem misses without the fold.
             physicalPath = CanonicalCasePath.Resolve(physicalPath, mapping.PhysicalDirectory);
 #endif
 

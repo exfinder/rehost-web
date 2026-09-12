@@ -47,11 +47,11 @@ namespace System.Web {
 
         private HttpHeaderCollection _headers;      // response header collection (IIS7+)
 #if !NETFRAMEWORK
-        private ArrayList _sentHeaders;             // block that left the wire, folded into _headers on the next read (ledger P68)
+        private ArrayList _sentHeaders;             // block that left the wire, folded into _headers on the next read
 #endif
 
         private bool _headersWritten;
-        private bool _endHeadersDeferred;   // Response.End defers header generation to the final flush (ledger P55)
+        private bool _endHeadersDeferred;   // Response.End defers header generation to the final flush
         private bool _endInternalFlush;     // only End's own flush defers; an application Flush after End seals (reading W5)
         private long _endDeferredBodyLength; // bytes End's flush sent while headers were deferred; the final flush reports them as Content-Length (reading W2)
         private bool _completed;    // after final flush
@@ -496,7 +496,7 @@ namespace System.Web {
         }
 
 #if !NETFRAMEWORK
-        // Generated headers win over same-named collection entries; Set-Cookie is additive (ledger P68).
+        // Generated headers win over same-named collection entries; Set-Cookie is additive.
         private void AppendManagedHeaderCollection(ArrayList headers, bool forCache) {
             if (_headers == null || _headersWritten) {
                 return;
@@ -648,7 +648,7 @@ namespace System.Web {
             }
 
 #if !NETFRAMEWORK
-            // Folded in on the next read so a response nobody asks about allocates no collection (ledger P68).
+            // Folded in on the next read so a response nobody asks about allocates no collection.
             _sentHeaders = headers;
 #endif
         }
@@ -1044,7 +1044,7 @@ namespace System.Web {
         public NameValueCollection Headers {
             get {
 #if !NETFRAMEWORK
-                // The managed collection is the store itself; the throw was IIS7's absence (ledger P68).
+                // The managed collection is the store itself; the throw was IIS7's absence.
                 if (_headers == null) {
                     _headers = new HttpHeaderCollection(_wr, this, 16);
                 }
@@ -2208,7 +2208,7 @@ namespace System.Web {
                 }
                 else {
 #if !NETFRAMEWORK
-                    // Route into the collection so the entry answers to Remove (ledger P68).
+                    // Route into the collection so the entry answers to Remove.
                     Headers.Add(name, value);
 #else
                     HttpResponseHeader h;
@@ -2925,7 +2925,7 @@ namespace System.Web {
             WriteFileTranslated(filename, readIntoMemory);
         }
 
-        // Entry for a caller holding an already-mapped path; normalization would re-map it off Windows (ledger P61).
+        // Entry for a caller holding an already-mapped path; normalization would re-map it off Windows.
         internal void WriteFileTranslated(String filename, bool readIntoMemory) {
             FileStream f = null;
 
@@ -2975,7 +2975,7 @@ namespace System.Web {
             TransmitFileTranslated(filename, offset, length);
         }
 
-        // Entry past GetNormalizedFilename, which re-maps a Unix-rooted physical path as virtual (ledger P54).
+        // Entry past GetNormalizedFilename, which re-maps a Unix-rooted physical path as virtual.
         internal void TransmitFileTranslated(string filename, long offset, long length) {
             if (offset < 0)
                 throw new ArgumentException(SR.GetString(SR.Invalid_range), "offset");
@@ -3259,7 +3259,7 @@ namespace System.Web {
                 // neither emit further output (_ended) nor resume the pipeline
                 // (CompleteRequest); then unwind.
                 if (!_flushing) {
-                    // End's internal flush sends body bytes only; headers stay open for EndRequest (ledger P55).
+                    // End's internal flush sends body bytes only; headers stay open for EndRequest.
                     _endHeadersDeferred = true;
                     _endInternalFlush = true;
                     try {

@@ -26,7 +26,7 @@ namespace System.Web {
             }
 
 #if !NETFRAMEWORK
-            // Types come from the merged IIS baseline, not the classic table (ledger P60).
+            // Types come from the merged IIS baseline, not the classic table.
             string mapped = System.Web.IisConfig.IisServerConfiguration.Current
                 .StaticContentTypeOf(System.IO.Path.GetExtension(fileName));
             if (mapped != null) {

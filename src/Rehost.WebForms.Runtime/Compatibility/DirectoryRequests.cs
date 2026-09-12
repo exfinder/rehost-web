@@ -6,7 +6,7 @@ using System.Web.Util;
 
 namespace System.Web;
 
-// Replaces IIS's DefaultDocument and DirectoryListing modules in one step (ledger P67).
+// Replaces IIS's DefaultDocument and DirectoryListing modules in one step.
 internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecutionStep
 {
     private readonly HttpApplication _application;

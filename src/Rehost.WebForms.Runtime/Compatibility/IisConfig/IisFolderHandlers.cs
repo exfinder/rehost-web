@@ -171,7 +171,7 @@ internal sealed class IisFolderHandlers
         return folderWaiver;
     }
 
-    // Web.config matches ignoring case on every filesystem (ledger P70); the chain is ordered here, not by enumeration.
+    // Web.config matches ignoring case on every filesystem; the chain is ordered here, not by enumeration.
     private static List<FolderConfig> Discover(
         string physicalRoot, string prefix, Dictionary<string, string> hiddenSegments)
     {

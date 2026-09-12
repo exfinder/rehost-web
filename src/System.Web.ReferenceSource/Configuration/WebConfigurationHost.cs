@@ -491,7 +491,7 @@ namespace System.Web.Configuration {
             try {
                 string path = Path.Combine(directory, baseName);
 #if !NETFRAMEWORK
-                // NTFS folded Web.config onto web.config; a case-sensitive filesystem misses without this (ledger P70).
+                // NTFS folded Web.config onto web.config; a case-sensitive filesystem misses without this.
                 path = CanonicalCasePath.Resolve(path, HostingEnvironment.ApplicationPhysicalPath);
 #endif
                 // validate path by calling GetFullPath, but return the result of Path.Combine so as

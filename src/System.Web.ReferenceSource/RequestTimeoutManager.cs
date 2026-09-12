@@ -188,7 +188,7 @@ namespace System.Web {
             }
 
             internal void TimeoutIfNeeded(DateTime now) {
-                // Cooperative delivery at the step boundary; Thread.Abort throws on this runtime (ledger P53, P51).
+                // Cooperative delivery at the step boundary; Thread.Abort throws on this runtime.
                 if (_context.MustTimeout(now)) {
                     RemoveFromList();
                 }

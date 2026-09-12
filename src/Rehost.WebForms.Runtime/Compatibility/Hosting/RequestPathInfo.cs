@@ -4,7 +4,7 @@ using System.Web.IisConfig;
 
 namespace System.Web.Hosting;
 
-// IIS split file path from path info by handler mapping, not by what exists on disk (ledger P72).
+// IIS split file path from path info by handler mapping, not by what exists on disk.
 internal static class RequestPathInfo
 {
     internal static (string FilePath, string PathInfo) Split(string verb, string virtualPath) =>

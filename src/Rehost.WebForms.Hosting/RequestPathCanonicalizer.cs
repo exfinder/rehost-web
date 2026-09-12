@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-// Replaces http.sys URL canonicalization, which Kestrel does not perform (ledger P72).
+// Replaces http.sys URL canonicalization, which Kestrel does not perform.
 internal static class RequestPathCanonicalizer
 {
     // The raw request target, still percent-encoded and with its query.

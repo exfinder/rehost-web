@@ -1460,7 +1460,7 @@ namespace System.Web {
                 }
 
 #if !NETFRAMEWORK
-                // The merged system.webServer/handlers list selects the handler; the classic table is dead text (ledger P85).
+                // The merged system.webServer/handlers list selects the handler; the classic table is dead text.
                 IHttpHandlerFactory selectedFactory;
                 handler = IisConfig.IntegratedHandlers.Map(
                     context, requestType, path, pathTranslated, GetFactory, out selectedFactory);
@@ -4191,7 +4191,7 @@ namespace System.Web {
                 app.CreateEventExecutionSteps(HttpApplication.EventResolveRequestCache, steps);
                 app.CreateEventExecutionSteps(HttpApplication.EventPostResolveRequestCache, steps);
 #if !NETFRAMEWORK
-                // IIS's DefaultDocumentModule ran here (ledger P67).
+                // IIS's DefaultDocumentModule ran here.
                 steps.Add(new DirectoryRequestExecutionStep(app));
 #endif
                 steps.Add(new MapHandlerExecutionStep(app));     // map handler

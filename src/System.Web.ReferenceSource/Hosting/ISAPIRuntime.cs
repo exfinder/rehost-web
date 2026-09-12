@@ -191,7 +191,7 @@ namespace System.Web.Hosting {
                         UnsafeNativeMethods.SetDoneWithSessionCalled(pHttpCompletion);
                     }
                     // if this is a thread abort exception, cancel the abort
-                    // (unreachable ISAPI hosting; retained verbatim, ledger P52)
+                    // (unreachable ISAPI hosting; retained verbatim)
 #pragma warning disable SYSLIB0006
                     if (e is ThreadAbortException) {
                         Thread.ResetAbort();

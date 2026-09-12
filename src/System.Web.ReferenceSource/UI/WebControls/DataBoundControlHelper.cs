@@ -130,7 +130,7 @@ namespace System.Web.UI.WebControls {
 #if NETFRAMEWORK
                 Type dataControlExtensionsType = Assembly.Load(AssemblyRef.SystemWebDynamicData).GetType("System.Web.UI.DataControlExtensions");
 #else
-                // System.Web.DynamicData is not carried; the Assembly.Load cannot succeed (ledger P69).
+                // System.Web.DynamicData is not carried; the Assembly.Load cannot succeed.
                 Type dataControlExtensionsType = Type.GetType(
                     "System.Web.UI.DataControlExtensions, " + AssemblyRef.SystemWebDynamicData,
                     throwOnError: false);

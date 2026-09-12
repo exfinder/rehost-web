@@ -753,7 +753,7 @@ namespace System.Web {
         public virtual bool SupportsAsyncFlush { get { return false; } }
 
 #if !NETFRAMEWORK
-        // Upgrade seam for a host other than IIS's integrated pipeline; false reproduces the refusal (ledger P80).
+        // Upgrade seam for a host other than IIS's integrated pipeline; false reproduces the refusal.
         internal virtual bool SupportsWebSocketUpgrade { get { return false; } }
 
         internal virtual bool IsWebSocketUpgradeRequest() { return false; }

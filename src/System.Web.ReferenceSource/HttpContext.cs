@@ -704,7 +704,7 @@ namespace System.Web {
             CachedPathData pathData = GetConfigurationPathData();
             pathData.ValidatePath(_request.PhysicalPathInternal);
 #if !NETFRAMEWORK
-            // Replaces IIS request filtering; judges the script path only, path info passes (ledger P59, P86, P72).
+            // Replaces IIS request filtering; judges the script path only, path info passes.
             if (HiddenSegments.Refuses(_request.FilePath) || ForbiddenExtensions.Refuses(_request.FilePath)) {
                 IisConfig.NativeRefusal.Respond(this, 404);
             }
@@ -1819,7 +1819,7 @@ namespace System.Web {
         }
 
         internal void WaitForExceptionIfCancelled() {
-            // Consume the sweep's flag exactly once, or every later boundary re-throws (ledger P53).
+            // Consume the sweep's flag exactly once, or every later boundary re-throws.
             if (_pendingTimeout) {
                 _pendingTimeout = false;
                 throw new HttpApplication.CancelModuleException(true);
@@ -1853,7 +1853,7 @@ namespace System.Web {
                         return false;
                     }
 
-                    // Flag only; the -1 _timeoutState flip belonged to the abort handshake and strands the request (ledger P53).
+                    // Flag only; the -1 _timeoutState flip belonged to the abort handshake and strands the request.
                     _pendingTimeout = true;
                     return true;
                 }

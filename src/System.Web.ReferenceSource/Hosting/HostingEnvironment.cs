@@ -1145,7 +1145,7 @@ namespace System.Web.Hosting {
             }
 
 #if !NETFRAMEWORK
-            // Resolve a missing path to its real casing before any consumer probes it (ledger P57).
+            // Resolve a missing path to its real casing before any consumer probes it.
             if (result != null) {
                 result = System.Web.Util.CanonicalCasePath.Resolve(result, _appPhysicalPath);
             }

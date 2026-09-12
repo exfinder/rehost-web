@@ -119,7 +119,7 @@ namespace System.Web {
         }
 
 #if !NETFRAMEWORK
-        // The entry is the whole effect; nothing syncs back into RedirectLocation, ContentType or cache flags (ledger P68).
+        // The entry is the whole effect; nothing syncs back into RedirectLocation, ContentType or cache flags.
         private void SetManagedResponseHeader(String name, String value, bool replace) {
             if (name == null) {
                 throw new ArgumentNullException("name");

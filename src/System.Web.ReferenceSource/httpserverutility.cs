@@ -508,7 +508,7 @@ namespace System.Web {
                         // -- it would dump the source of the current page
                         // instead just dump the file content into response
                         try {
-                            // physPath is already mapped; re-normalizing double-maps it off Windows (ledger P61).
+                            // physPath is already mapped; re-normalizing double-maps it off Windows.
                             response.WriteFileTranslated(physPath, false);
                         }
                         catch {
@@ -753,7 +753,7 @@ namespace System.Web {
             EnsureHasNotTransitionedToWebSocket();
 
             if (!HttpRuntime.UseIntegratedPipeline) {
-                // Framework's message said to switch IIS modes, which this host cannot (ledger P62).
+                // Framework's message said to switch IIS modes, which this host cannot.
                 throw new PlatformNotSupportedException(SR.GetString(SR.TransferRequest_not_supported));
             }
 
