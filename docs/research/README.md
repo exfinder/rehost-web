@@ -12,6 +12,7 @@ support or priority. Use [compatibility](../compatibility.md) and
 - [IIS configuration and response headers](iis-integration-readings.md)
 - [IIS modules and handlers](iis-modules-handlers-readings.md)
 - [IIS URL canonicalization](iis-url-canonicalization-readings.md)
+- [IIS URL Rewrite Module](iis-url-rewrite-readings.md)
 
 ## Portability audits
 
