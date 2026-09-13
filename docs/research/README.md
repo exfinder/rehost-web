@@ -14,6 +14,7 @@ support or priority. Use [compatibility](../compatibility.md) and
 - [IIS URL canonicalization](iis-url-canonicalization-readings.md)
 - [IIS URL Rewrite Module](iis-url-rewrite-readings.md)
 - [IIS custom response headers](iis-custom-headers-readings.md)
+- [IIS request filtering limits](iis-request-limits-readings.md)
 
 ## Portability audits
 
