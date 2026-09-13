@@ -20,9 +20,10 @@ public sealed class NativeAuthorizationTests : IDisposable
     {
         var app = WriteApplication($"<security>{authorization}</security>");
 
-        var failure = Refusal(app);
+        var failure = RefusalMessage(app);
 
         failure.ShouldContain(Section, Case.Sensitive);
+        failure.ShouldNotContain("inside <location");
         failure.ShouldContain("does not enforce", Case.Sensitive);
         failure.ShouldContain("<authorization> under <system.web> in that folder's", Case.Sensitive);
     }
@@ -32,7 +33,7 @@ public sealed class NativeAuthorizationTests : IDisposable
     {
         var app = WriteApplication("""<handlers accessPolicy="Read" />""");
 
-        Refusal(app).ShouldContain("""<handlers accessPolicy="Read">""", Case.Sensitive);
+        RefusalMessage(app).ShouldContain("""<handlers accessPolicy="Read">""", Case.Sensitive);
     }
 
     [Theory]
@@ -44,11 +45,7 @@ public sealed class NativeAuthorizationTests : IDisposable
         var app = WriteApplication("");
         var folder = WriteFolder("uploads", content);
 
-        var failure = Should.Throw<ConfigurationErrorsException>(
-            () => IisServerConfiguration.Load(ShippedBaseline, app));
-
-        failure.Message.ShouldContain(folder);
-        failure.Message.ShouldContain(element, Case.Sensitive);
+        RefusalMessage(app, namedFile: folder).ShouldContain(element, Case.Sensitive);
     }
 
     [Theory]
@@ -67,7 +64,7 @@ public sealed class NativeAuthorizationTests : IDisposable
             </location>
             """);
 
-        var failure = Refusal(app);
+        var failure = RefusalMessage(app);
 
         failure.ShouldContain(element, Case.Sensitive);
         failure.ShouldContain("""inside <location path="uploads">""", Case.Sensitive);
@@ -93,12 +90,12 @@ public sealed class NativeAuthorizationTests : IDisposable
     private static string ShippedBaseline => Path.Combine(
         AppContext.BaseDirectory, "configs", "rehost-webforms.applicationHost.config");
 
-    private string Refusal(string applicationConfigPath)
+    private static string RefusalMessage(string applicationConfigPath, string? namedFile = null)
     {
         var failure = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(ShippedBaseline, applicationConfigPath));
 
-        failure.Message.ShouldContain(applicationConfigPath);
+        failure.Message.ShouldContain(namedFile ?? applicationConfigPath);
         return failure.Message;
     }
 
