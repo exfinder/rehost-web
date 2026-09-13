@@ -31,6 +31,7 @@ public static class RehostWebFormsExtensions
                 serverConfiguration.Rewrite,
                 options.PhysicalRootPath),
             CustomHeaders = serverConfiguration.CustomHeaders,
+            RequestLimits = serverConfiguration.RequestLimits,
         });
 
         builder.Services.Configure<KestrelServerOptions>(kestrel =>

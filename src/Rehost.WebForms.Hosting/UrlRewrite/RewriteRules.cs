@@ -9,6 +9,7 @@ using System.Web.Hosting;
 using System.Web.IisConfig;
 using ForbiddenExtensions = System.Web.ForbiddenExtensions;
 using HiddenSegments = System.Web.HiddenSegments;
+using RequestFiltering = System.Web.RequestFiltering;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Rewrite;
@@ -74,7 +75,9 @@ internal sealed class RewriteRules
         var originalQuery = request.QueryString;
 
         var (filePath, _) = RequestPathInfo.Split(request.Method, originalPath.Value!);
-        if (HiddenSegments.Refuses(filePath) || ForbiddenExtensions.Refuses(filePath))
+        if (HiddenSegments.Refuses(filePath)
+            || ForbiddenExtensions.Refuses(filePath)
+            || RequestFiltering.Judge(request.Method, filePath, RawQuery(originalQuery)) != null)
         {
             return new RewriteOutcome(RewriteOutcomeKind.Unchanged, null);
         }
@@ -156,6 +159,9 @@ internal sealed class RewriteRules
 
         await WriteAsync(response, "text/html", IisErrorBodies.Refusal(response.StatusCode));
     }
+
+    private static string RawQuery(QueryString query) =>
+        query.HasValue ? query.Value![1..] : string.Empty;
 
     private static string Absolute(HttpRequest request, string location) =>
         location.StartsWith('/') ? RequestUrls.Absolute(request, location) : location;

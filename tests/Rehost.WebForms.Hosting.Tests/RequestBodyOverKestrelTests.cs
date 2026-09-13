@@ -148,11 +148,11 @@ public sealed class RequestBodyOverKestrelTests(
         outcome.ShouldBe("body-apm-abort:System.Web.HttpException");
     }
 
-    // Its own host for two reasons. The Kestrel limit is process-wide, so sharing it with an
-    // ordinary probe would reject that probe's body too; and the claim below is a negative over
-    // every handler entry, which the chunked case would satisfy, so the two cannot share either.
+    // The application's maxAllowedContentLength is the declared-length limit the host refuses
+    // before the pipeline; a consumer's own Kestrel limit is left where Kestrel enforces it, on
+    // the read. Its own host, since that limit is process-wide.
     [Fact]
-    public async Task Kestrel_Refuses_A_Declared_Length_Over_Its_Own_Limit_Before_The_Pipeline()
+    public async Task A_Declared_Length_Over_An_Explicit_Kestrel_Limit_Fails_The_Handler_Mid_Read()
     {
         using var run = LiveScenario.StartIsolated(
             Fixtures.Body, IsolationReason.HostConfiguration, kestrelMaxBody: 1024);
@@ -162,9 +162,7 @@ public sealed class RequestBodyOverKestrelTests(
             Enumerable.Repeat((byte)'k', 2048).ToArray());
 
         response.StatusCode.ShouldBe(413);
-        // Empty content type: System.Web never ran. An app-rendered rejection carries one.
-        response.ContentType.ShouldBeNull();
-        (await run.Witness.HandlerEntriesAsync()).ShouldBeEmpty();
+        (await run.Witness.HandlerEntriesAsync()).ShouldContain("handler-entered:input");
     }
 
     [Fact]

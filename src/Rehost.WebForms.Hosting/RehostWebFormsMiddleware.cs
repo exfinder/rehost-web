@@ -1,7 +1,9 @@
 namespace Rehost.WebForms.Hosting;
 
 using System;
+using System.Text;
 using System.Threading.Tasks;
+using System.Web.IisConfig;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 
@@ -22,11 +24,16 @@ internal sealed class RehostWebFormsMiddleware
         // refusals and the rewrite step's early answers included.
         CustomResponseHeaders.Register(context, _activation.CustomHeaders);
 
-        // Kestrel's limit fires on a read, so whether the handler already ran would otherwise
-        // depend on when the application first touches the entity.
-        if (ExceedsHostBodyLimit(context))
+        // A chunked entity carries no declared length and IIS never measured one against this
+        // limit, so only Content-Length is judged here.
+        if (context.Request.ContentLength > _activation.RequestLimits.MaxAllowedContentLength)
         {
+            var body = IisErrorBodies.Refusal(StatusCodes.Status413PayloadTooLarge);
             context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge;
+            context.Response.Headers.Connection = "close";
+            context.Response.ContentType = "text/html";
+            context.Response.ContentLength = Encoding.UTF8.GetByteCount(body);
+            await context.Response.WriteAsync(body);
             return;
         }
 
@@ -96,12 +103,5 @@ internal sealed class RehostWebFormsMiddleware
             // as an HttpException, and the spool no-ops here.)
             context.Abort();
         }
-    }
-
-    private static bool ExceedsHostBodyLimit(HttpContext context)
-    {
-        return context.Request.ContentLength is long declared
-            && context.Features.Get<IHttpMaxRequestBodySizeFeature>()?.MaxRequestBodySize is long limit
-            && declared > limit;
     }
 }

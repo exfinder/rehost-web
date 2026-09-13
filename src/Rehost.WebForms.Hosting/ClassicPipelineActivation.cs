@@ -36,6 +36,8 @@ internal sealed class ClassicPipelineActivation
 
     internal CustomHeaders CustomHeaders { get; init; } = CustomHeaders.Empty;
 
+    internal RequestLimits RequestLimits { get; init; } = RequestLimits.Unlimited;
+
     // Activation is deferred to the first request so that request observes a cold application:
     // activating at startup would make every served request a warm one.
     internal ClassicPipelineDispatcher Dispatcher => _dispatcher.Value;
