@@ -61,7 +61,6 @@ internal sealed class DirectoryRequestExecutionStep : HttpApplication.IExecution
 
         // IIS's browsing-off 403 was native, so managed customErrors never converted it
         // (reading D16): a completed response, not a thrown HttpException, keeps that surface.
-        // The body stays empty until the httpErrors tenant decides pre-pipeline error bodies.
         context.Response.StatusCode = 403;
         _application.CompleteRequest();
     }
