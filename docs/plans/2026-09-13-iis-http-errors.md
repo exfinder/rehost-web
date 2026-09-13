@@ -81,8 +81,11 @@ key-reader overload so the composite `statusCode,subStatusCode` key fits
 (existing callers unchanged), and the row reader parses both numbers,
 `subStatusCode` defaulting to `-1`. `Build(configDirectory, contentTypeOf)`
 runs in `Load` after both files: a relative `File` path becomes the absolute
-path under the application root, its type from the static map already
-loaded, and a `Redirect` path is kept as written. Refusals by XPath, each
+path under the application root, resolved through `CanonicalCasePath` so a
+row spelled `Err404.htm` finds `err404.htm` on a case-sensitive filesystem
+as NTFS did; its type from the static map already loaded, and a `Redirect`
+path is kept as written. The request-time `File.Exists` sees the resolved
+spelling only. Refusals by XPath, each
 naming `configPath` and the element: `//location//httpErrors`,
 `httpErrors/@defaultPath`, `httpErrors/@allowAbsolutePathsWhenDelegated`,
 and `error[@responseMode='ExecuteURL']`. `RefuseBelowTheRoot` beside the
@@ -161,7 +164,9 @@ row mode on a shared host, nothing a scenario already proves.
   ten rows load as `BuiltIn`; an application removes one and adds a `File`
   row whose path and type resolve; the four XPath refusals and the
   `ExecuteURL`-by-default refusal, each asserting the file and element in
-  the message; a duplicate key refused. Six tests.
+  the message; a duplicate key refused; a `File` row whose casing differs
+  from the disk resolves on a `CaseSensitiveDirectory` (skips on NTFS).
+  Seven tests.
 - `Hosting.Tests/ResponseSpoolTests`: a body past the threshold swapped
   before commit deletes its temp file and delivers the new bytes; a swap
   keeps `Connection` and `Allow` and replaces `Content-Type`; a swap after
