@@ -32,7 +32,7 @@ normalisation. Import exclusions and every source deviation are in the provenanc
 | `ServiceStack.OrmLite/`, `.PostgreSQL/`, `.SqlServer/` | Sidecars over the vendored OrmLite fork and its two dialects. |
 | `System.Web.Http.WebHost/` | Recompile of Web API's host, byte-identical upstream source plus one field. |
 | `YAF.Compat/` | Five shims for APIs modern .NET dropped, so the frozen sources need no edit. |
-| `YAF.Host/` | The process: a ~20-line Kestrel host and the app's `Web.Rehost.config`. |
+| `YAF.Host/` | The process: a ~25-line Kestrel host with Serilog request logging to the console, levels set in `appsettings.json`, and the app's `Web.Rehost.config`. |
 | `Sidecar.props` | Settings every frozen sidecar shares, including the pinned language version. |
 
 The sidecars glob the frozen tree rather than using `RehostAppContentRoot`: four orphaned
