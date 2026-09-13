@@ -22,7 +22,9 @@ body.
   that is absolute (what IIS answers for one is unmeasured); a `Redirect`
   path that is neither site-absolute nor an absolute URL (unmeasured); the
   section in a `<location>` block or a folder `web.config`, root-only like
-  `customHeaders` where IIS scoped per path (HE4, HE17).
+  `customHeaders` where IIS scoped per path (HE4, HE17); a `File` path whose
+  resolved location leaves the application root (unmeasured; validated
+  before anything is published).
 - Rows key on `(statusCode, subStatusCode)`, `-1` the wildcard, exact
   substatus first (HE20). A duplicate key fails activation (HE21). The
   shipped baseline carries IIS's ten default rows written out, so an
@@ -130,6 +132,9 @@ static void Apply(ResponseSpool spool, HttpContext context, HttpErrors config, b
     BuiltIn: ReplaceEntity("text/html", IisErrorBodies.Refusal(status))
 ```
 
+`Apply` never throws: the only I/O is a `File.Exists` and a length read,
+and a file that vanishes between them is the same `IOException` the
+`TransmitFile` path already turns into an aborted connection at commit.
 `IsLocal` is loopback or remote equals local, the worker request's own
 rule. The port carries no substatus on the spool, so `Find` is asked with
 `0`, which the `-1` rows answer; an exact-substatus row therefore never
