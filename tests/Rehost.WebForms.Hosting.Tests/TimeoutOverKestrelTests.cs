@@ -32,6 +32,8 @@ public sealed class TimeoutOverKestrelTests(TimeoutLiveScenario scenario)
     [Fact]
     public async Task A_Pending_Async_Task_Is_Never_Timed_Out()
     {
+        await scenario.Client.GetAsync("/async/AsyncSlow.aspx?ms=0");
+
         var response = await scenario.Client.GetAsync("/async/AsyncSlow.aspx")
             .WaitAsync(TimeSpan.FromSeconds(30), TestContext.Current.CancellationToken);
 
