@@ -64,6 +64,9 @@ internal sealed class ScenarioClient : IDisposable
     internal Task<ScenarioResponse> HeadAsync(string path) =>
         SendAsync(new HttpRequestMessage(HttpMethod.Head, path));
 
+    internal Task<ScenarioResponse> DeleteAsync(string path) =>
+        SendAsync(new HttpRequestMessage(HttpMethod.Delete, path));
+
     internal Task<ScenarioResponse> GetWithHeadersAsync(
         string path, params (string Name, string Value)[] headers)
     {
