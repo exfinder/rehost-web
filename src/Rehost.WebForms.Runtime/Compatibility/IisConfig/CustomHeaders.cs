@@ -20,9 +20,6 @@ internal sealed class CustomHeaderSection
 {
     private const string TokenPunctuation = "!#$%&'*+-.^_`|~";
 
-    private const string RootOnlyRule =
-        "is honored only in the application root web.config.";
-
     private const string NameRule =
         $"is not an HTTP header name; only letters, digits and {TokenPunctuation} form one.";
 
@@ -50,11 +47,7 @@ internal sealed class CustomHeaderSection
 
     internal void Apply(XmlDocument document, string configPath)
     {
-        if (document.SelectSingleNode("//location//customHeaders") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<customHeaders> inside <location> in '{configPath}' {RootOnlyRule}");
-        }
+        IisCollectionReader.RefuseInsideLocation(document, "customHeaders", configPath);
 
         var section = document.SelectSingleNode(
             "/configuration/system.webServer/httpProtocol/customHeaders");
@@ -68,15 +61,6 @@ internal sealed class CustomHeaderSection
         _removeServerHeader = IisCollectionReader.OptionalBoolean(
                 requestFiltering, "requestFiltering", "removeServerHeader", configPath)
             ?? _removeServerHeader;
-    }
-
-    internal static void RefuseBelowTheRoot(XmlDocument document, string configPath)
-    {
-        if (document.SelectSingleNode("//customHeaders") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<customHeaders> in '{configPath}' {RootOnlyRule}");
-        }
     }
 
     // IIS wrote a configured name and value onto the wire unvalidated; Kestrel faults the

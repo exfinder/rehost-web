@@ -39,8 +39,7 @@ internal sealed class StaticFileBridgeHandler : DefaultHttpHandler
         StaticFileHandler.ProcessRequestInternal(context, null);
 
         var configuration = IisServerConfiguration.Current;
-        var cacheControl = configuration.ClientCache.CacheControl(
-            configuration.StaticCacheControl(Path.GetExtension(request.FilePath)));
+        var cacheControl = configuration.StaticCacheControl(Path.GetExtension(request.FilePath));
         if (cacheControl == null)
         {
             context.Response.SuppressDefaultCacheControlHeader = true;

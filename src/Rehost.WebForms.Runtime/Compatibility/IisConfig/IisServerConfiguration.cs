@@ -120,10 +120,11 @@ internal sealed class IisServerConfiguration
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
 
     internal string? StaticCacheControl(string? extension) =>
-        !string.IsNullOrEmpty(extension)
-        && _cachingProfiles.TryGetValue(extension, out var profile)
-            ? profile.CacheControl
-            : null;
+        ClientCache.CacheControl(
+            !string.IsNullOrEmpty(extension)
+            && _cachingProfiles.TryGetValue(extension, out var profile)
+                ? profile.CacheControl
+                : null);
 
     internal IReadOnlyList<string> UserModeCachedExtensions { get; }
 

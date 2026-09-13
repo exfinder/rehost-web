@@ -14,8 +14,8 @@ internal sealed class IisCollectionSchema
         string addElement,
         string keyAttribute,
         string? valueAttribute,
-        IReadOnlyList<string>? siblingElements = null)
-        : this(addElement, [keyAttribute], valueAttribute, siblingElements)
+        IReadOnlyList<string>? ownedElsewhere = null)
+        : this(addElement, [keyAttribute], valueAttribute, ownedElsewhere)
     {
     }
 
@@ -23,12 +23,12 @@ internal sealed class IisCollectionSchema
         string addElement,
         IReadOnlyList<string> keyAttributes,
         string? valueAttribute,
-        IReadOnlyList<string>? siblingElements = null)
+        IReadOnlyList<string>? ownedElsewhere = null)
     {
         AddElement = addElement;
         KeyAttributes = keyAttributes;
         ValueAttribute = valueAttribute;
-        SiblingElements = siblingElements ?? Array.Empty<string>();
+        OwnedElsewhere = new HashSet<string>(ownedElsewhere ?? [], StringComparer.Ordinal);
     }
 
     internal string AddElement { get; }
@@ -40,11 +40,32 @@ internal sealed class IisCollectionSchema
     // Null for membership-only collections (hiddenSegments); required when present (mimeMap).
     internal string? ValueAttribute { get; }
 
-    internal IReadOnlyList<string> SiblingElements { get; }
+    internal IReadOnlySet<string> OwnedElsewhere { get; }
 }
 
 internal static class IisCollectionReader
 {
+    internal const string RootOnlyRule =
+        "is honored only in the application root web.config.";
+
+    internal static void RefuseInsideLocation(XmlDocument document, string element, string configPath)
+    {
+        if (document.SelectSingleNode($"//location//{element}") != null)
+        {
+            throw new ConfigurationErrorsException(
+                $"<{element}> inside <location> in '{configPath}' {RootOnlyRule}");
+        }
+    }
+
+    internal static void RefuseBelowTheRoot(XmlDocument document, string element, string configPath)
+    {
+        if (document.SelectSingleNode($"//{element}") != null)
+        {
+            throw new ConfigurationErrorsException(
+                $"<{element}> in '{configPath}' {RootOnlyRule}");
+        }
+    }
+
     internal const string BooleanRule =
         """is not a boolean; IIS accepts only "true" or "false".""";
 
@@ -151,26 +172,13 @@ internal static class IisCollectionReader
 
                 entries.Add(key, readValue(node, configPath));
             }
-            else if (!OwnedElsewhere(schema, node.Name))
+            else if (!schema.OwnedElsewhere.Contains(node.Name))
             {
                 throw new ConfigurationErrorsException(
                     "'" + configPath + "' contains unsupported element <" + node.Name
                     + "> inside <" + sectionNode.Name + ">.");
             }
         }
-    }
-
-    private static bool OwnedElsewhere(IisCollectionSchema schema, string elementName)
-    {
-        foreach (var sibling in schema.SiblingElements)
-        {
-            if (elementName == sibling)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static string Describe(XmlNode node, IisCollectionSchema schema)

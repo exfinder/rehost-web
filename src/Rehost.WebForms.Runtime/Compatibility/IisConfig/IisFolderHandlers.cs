@@ -161,9 +161,9 @@ internal sealed class IisFolderHandlers
 
         var folderWaiver = ClassicSectionValidation.Validate(document, configPath, waiver);
         RewriteSection.RefuseBelowTheRoot(document, configPath);
-        CustomHeaderSection.RefuseBelowTheRoot(document, configPath);
-        HttpErrorsSection.RefuseBelowTheRoot(document, configPath);
-        ClientCacheSection.RefuseBelowTheRoot(document, configPath);
+        IisCollectionReader.RefuseBelowTheRoot(document, "customHeaders", configPath);
+        IisCollectionReader.RefuseBelowTheRoot(document, "httpErrors", configPath);
+        IisCollectionReader.RefuseBelowTheRoot(document, "clientCache", configPath);
         NativeAuthorization.Refuse(document, configPath);
 
         var handlersNode = document.SelectSingleNode(

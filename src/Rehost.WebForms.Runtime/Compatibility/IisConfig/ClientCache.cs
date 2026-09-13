@@ -58,11 +58,8 @@ internal sealed record ClientCache(
 
 internal sealed class ClientCacheSection
 {
-    private const string RootOnlyRule =
-        "is honored only in the application root web.config.";
-
     private const string SpanRule =
-        "is not a time span; IIS accepts only a [d.]hh:mm:ss value.";
+        "is not a time span such as 1.00:00:00 or 00:00:30.";
 
     private const string EtagRule =
         "is not supported: the managed static handler writes the ETag with the response's cache"
@@ -80,11 +77,7 @@ internal sealed class ClientCacheSection
 
     internal void Apply(XmlDocument document, string configPath)
     {
-        if (document.SelectSingleNode("//location//clientCache") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<clientCache> inside <location> in '{configPath}' {RootOnlyRule}");
-        }
+        IisCollectionReader.RefuseInsideLocation(document, "clientCache", configPath);
 
         var section = document.SelectSingleNode(
             "/configuration/system.webServer/staticContent/clientCache");
@@ -113,15 +106,6 @@ internal sealed class ClientCacheSection
 
         _httpExpires = Text(section, "httpExpires", configPath) ?? _httpExpires;
         _custom = Text(section, "cacheControlCustom", configPath) ?? _custom;
-    }
-
-    internal static void RefuseBelowTheRoot(XmlDocument document, string configPath)
-    {
-        if (document.SelectSingleNode("//clientCache") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<clientCache> in '{configPath}' {RootOnlyRule}");
-        }
     }
 
     private static TimeSpan Span(string value, string configPath)

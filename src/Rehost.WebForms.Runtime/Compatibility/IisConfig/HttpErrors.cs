@@ -84,9 +84,6 @@ internal sealed record HttpErrors(
 
 internal sealed class HttpErrorsSection
 {
-    private const string RootOnlyRule =
-        "is honored only in the application root web.config.";
-
     private const string LockedRule =
         "is locked below the server, where IIS refused it with a 500.19.";
 
@@ -111,11 +108,7 @@ internal sealed class HttpErrorsSection
 
     internal void Apply(XmlDocument document, string configPath)
     {
-        if (document.SelectSingleNode("//location//httpErrors") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<httpErrors> inside <location> in '{configPath}' {RootOnlyRule}");
-        }
+        IisCollectionReader.RefuseInsideLocation(document, "httpErrors", configPath);
 
         var section = document.SelectSingleNode("/configuration/system.webServer/httpErrors");
         if (section == null)
@@ -133,15 +126,6 @@ internal sealed class HttpErrorsSection
             Parse<ResponseMode>(section, "defaultResponseMode", configPath) ?? _defaultResponseMode;
 
         IisCollectionReader.Apply(section, Schema, _rows, configPath, ReadRow, Key);
-    }
-
-    internal static void RefuseBelowTheRoot(XmlDocument document, string configPath)
-    {
-        if (document.SelectSingleNode("//httpErrors") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<httpErrors> in '{configPath}' {RootOnlyRule}");
-        }
     }
 
     internal HttpErrors Build(string applicationRoot, Func<string, string?> contentTypeOf)
