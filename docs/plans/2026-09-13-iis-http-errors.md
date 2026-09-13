@@ -157,40 +157,40 @@ a 4xx.
 
 ## Tests
 
-Pragmatic: unit tests for the spool and the decision, one scenario per
-row mode on a shared host, nothing a scenario already proves.
+Unit tests for everything the port decides; one scenario for the wiring,
+since nothing but a live host proves the hook is attached and the runtime
+leaves the entity empty for it.
 
 - `Runtime.Tests/Compatibility/IisConfig/HttpErrorsTests`: the baseline's
-  ten rows load as `BuiltIn`; an application removes one and adds a `File`
-  row whose path and type resolve; the four XPath refusals and the
-  `ExecuteURL`-by-default refusal, each asserting the file and element in
-  the message; a duplicate key refused; a `File` row whose casing differs
-  from the disk resolves on a `CaseSensitiveDirectory` (skips on NTFS).
-  Seven tests.
+  ten rows load as `BuiltIn` with the schema defaults; an application
+  removes one and adds a `File` row whose path and type resolve; the four
+  XPath refusals and the `ExecuteURL`-by-default refusal, each asserting the
+  file and element in the message; a duplicate key refused; a `File` row
+  whose casing differs from the disk resolves on a `CaseSensitiveDirectory`
+  (skips on NTFS). Seven tests.
 - `Hosting.Tests/ResponseSpoolTests`: a body past the threshold swapped
   before commit deletes its temp file and delivers the new bytes; a swap
   keeps `Connection` and `Allow` and replaces `Content-Type`; a swap after
   the head committed throws; `BeforeHeadCommit` runs once across a flush and
-  the terminal commit. Four tests.
-- `Hosting.Tests/HttpErrorPagesTests` over a spool and `DefaultHttpContext`:
-  the HE5/HE6/HE9/HE10 matrix as one theory (mode, existingResponse, body
-  present, skip flag → replaced or kept). One theory.
-- Scenario on the `body-customerrors` shared host, which gains
-  `<httpErrors errorMode="Custom">` with `404` onto `he/err404.json` (`File`)
-  and `403` onto `/he/forbidden.htm` (`Redirect`), plus a `he/probe.aspx`
-  that sets a status, writes, and optionally sets the skip flag or flushes.
-  Its existing claims survive: the managed-500 conversion is a `302`, and
-  the 413 is written past the spool. `HttpErrorsOverKestrelTests`:
-  - a missing static file answers `404`, `application/json`, the file's
-    bytes, with `X-Powered-By` on it;
-  - the probe's `404` with a body is replaced, and kept when it sets the
-    skip flag;
-  - the directory refusal answers `302` to the absolute `Location` with the
-    "Object Moved" body and no `customErrors` redirect (the existing
-    `DirectoryRefusalOverKestrelTests` body assertion moves here);
-  - a page that sets `404`, flushes, then writes more answers the file
-    followed by the second write.
-  Four tests.
+  the terminal commit, and what is written after the flush follows the
+  swapped entity (HE27). Four tests.
+- `Hosting.Tests/HttpErrorPagesTests` over a spool and `DefaultHttpContext`
+  with a loopback or remote address: the HE5/HE6/HE9/HE10 matrix as one
+  theory (mode, client, existingResponse, body present, skip flag →
+  replaced or kept); a `File` row delivers the file's bytes and type and a
+  missing file the built-in body; a `Redirect` row answers `302`,
+  `Redirect`, the absolute `Location` and the "Object Moved" body; a status
+  under 400 is untouched. One theory, three tests.
+- `Hosting.Tests/AspNetCoreWorkerRequestTests`: `TrySkipIisCustomErrors`
+  round-trips through the override. One test.
+- Scenario, on the `body-customerrors` shared host, which gains
+  `<httpErrors errorMode="Custom">` with `404` onto `he/err404.json`
+  (`File`). `HttpErrorsOverKestrelTests`: a missing static file answers
+  `404`, `application/json`, the file's bytes, with `X-Powered-By` on it.
+  One test. The host's existing claims survive: the managed-500 conversion
+  is a `302`, and the 413 is written past the spool. The existing
+  `DirectoryRefusalOverKestrelTests` on that host asserts the row-less 403
+  now carries the built-in body instead of none.
 
 ## Sequence
 
