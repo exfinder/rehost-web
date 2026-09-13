@@ -14,8 +14,8 @@ already carries IIS's defaults for them.
   limit the middleware already refuses before the pipeline (RL2, RL3, RL5).
   The answer gains IIS's 413 body and `Connection: close`. A chunked entity is
   not measured, as on IIS (RL4); `httpRuntime maxRequestLength` keeps its own
-  managed path (RL6, RL7). A consumer's explicit Kestrel body limit is not
-  consulted: the application's value is the limit, as on IIS.
+  managed path (RL6, RL7). The smaller of the application's value and the
+  host's Kestrel body limit is judged, keeping the existing contract.
 - `maxUrl` judges the script path the handler map claims, in bytes; path info
   past a claimed script is not counted (RL8, RL9). `maxQueryString` judges the
   raw query bytes after `?` (RL11). Both answer 404 through `NativeRefusal`.

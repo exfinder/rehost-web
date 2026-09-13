@@ -26,7 +26,7 @@ internal sealed class RehostWebFormsMiddleware
 
         // A chunked entity carries no declared length and IIS never measured one against this
         // limit, so only Content-Length is judged here.
-        if (context.Request.ContentLength > _activation.RequestLimits.MaxAllowedContentLength)
+        if (context.Request.ContentLength > DeclaredLengthLimit(context))
         {
             var body = IisErrorBodies.Refusal(StatusCodes.Status413PayloadTooLarge);
             context.Response.StatusCode = StatusCodes.Status413PayloadTooLarge;
@@ -104,4 +104,9 @@ internal sealed class RehostWebFormsMiddleware
             context.Abort();
         }
     }
+
+    private long DeclaredLengthLimit(HttpContext context) =>
+        Math.Min(
+            _activation.RequestLimits.MaxAllowedContentLength,
+            context.Features.Get<IHttpMaxRequestBodySizeFeature>()?.MaxRequestBodySize ?? long.MaxValue);
 }
