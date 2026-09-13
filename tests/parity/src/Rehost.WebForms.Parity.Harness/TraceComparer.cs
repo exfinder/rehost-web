@@ -10,9 +10,10 @@ public static class TraceComparer
     private static readonly string[] HostRecordedEventPrefixes = { "worker.", "runner." };
 
     // Kestrel adds Date unconditionally; Server is disabled at the listener but excluded here so
-    // a configuration slip reports as an extra header rather than a silent pass.
+    // a configuration slip reports as an extra header rather than a silent pass. X-Powered-By is
+    // IIS's, and the oracle column is Framework with no IIS in front of it.
     private static readonly HashSet<string> TransportHeaders =
-        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Date", "Server" };
+        new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Date", "Server", "X-Powered-By" };
 
     public static void VerifySessions(
         IReadOnlyList<SessionObservation> expected,
