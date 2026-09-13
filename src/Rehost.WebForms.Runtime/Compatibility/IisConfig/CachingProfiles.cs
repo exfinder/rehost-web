@@ -70,21 +70,9 @@ internal sealed class IisCachingProfile
         where TEnum : struct, Enum
     {
         var value = node.Attributes?[attribute]?.Value;
-        if (value == null)
-        {
-            return null;
-        }
-
-        if (Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed)
-            && Enum.IsDefined(parsed))
-        {
-            return parsed;
-        }
-
-        var allowed = string.Join(", ", Enum.GetNames<TEnum>());
-        throw new ConfigurationErrorsException(
-            $"""
-            <add extension="{extension}" {attribute}="{value}"> in '{configPath}' is not one of {allowed}.
-            """);
+        return value == null
+            ? null
+            : IisCollectionReader.EnumValue<TEnum>(
+                $"""<add extension="{extension}" {attribute}="{value}">""", value, configPath);
     }
 }

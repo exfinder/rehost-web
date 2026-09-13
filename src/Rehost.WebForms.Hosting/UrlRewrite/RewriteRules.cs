@@ -142,7 +142,7 @@ internal sealed class RewriteRules
         var location = response.Headers.Location.ToString();
         if (location.Length != 0)
         {
-            var absolute = Absolute(context.Request, location);
+            var absolute = RequestUrls.Resolve(context.Request, location);
             response.Headers.Location = absolute;
             SetReasonPhrase(context, response.StatusCode);
             await WriteAsync(response, "text/html; charset=UTF-8", IisErrorBodies.ObjectMoved(absolute));
@@ -162,9 +162,6 @@ internal sealed class RewriteRules
 
     private static string RawQuery(QueryString query) =>
         query.HasValue ? query.Value![1..] : string.Empty;
-
-    private static string Absolute(HttpRequest request, string location) =>
-        location.StartsWith('/') ? RequestUrls.Absolute(request, location) : location;
 
     private static void SetReasonPhrase(HttpContext context, int status)
     {

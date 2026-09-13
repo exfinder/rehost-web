@@ -6,12 +6,10 @@ using System.Text;
 using System.Web.IisConfig;
 using Microsoft.AspNetCore.Http;
 
-// IIS's custom-error module judged the response as the head left, and replaced the entity alone:
-// the status and its headers are the answer's, and later writes flow through untouched.
 internal static class HttpErrorPages
 {
     internal static void Apply(
-        ResponseSpool spool, HttpContext context, HttpErrors config, bool skip)
+        ResponseSpool spool, HttpContext context, HttpErrors config, bool skip, bool isLocal)
     {
         var status = spool.StatusCode;
         if (status < StatusCodes.Status400BadRequest)
@@ -19,7 +17,7 @@ internal static class HttpErrorPages
             return;
         }
 
-        if (config.DetailedFor(IsLocal(context)))
+        if (config.DetailedFor(isLocal))
         {
             if (!spool.HasEntity)
             {
@@ -40,7 +38,7 @@ internal static class HttpErrorPages
         var row = config.Find(status, 0);
         if (row is { Mode: HttpErrorRowMode.Redirect })
         {
-            spool.Redirect(Absolute(context.Request, row.Location!));
+            spool.Redirect(RequestUrls.Resolve(context.Request, row.Location!));
             return;
         }
 
@@ -61,21 +59,4 @@ internal static class HttpErrorPages
         spool.ReplaceEntity(
             "text/html", Encoding.UTF8.GetBytes(IisErrorBodies.Refusal(status)));
 
-    private static string Absolute(HttpRequest request, string location) =>
-        location.StartsWith('/') ? RequestUrls.Absolute(request, location) : location;
-
-    private static bool IsLocal(HttpContext context)
-    {
-        var remote = context.Connection.RemoteIpAddress?.ToString();
-        if (string.IsNullOrEmpty(remote))
-        {
-            return false;
-        }
-
-        return remote is "127.0.0.1" or "::1"
-            || string.Equals(
-                remote,
-                context.Connection.LocalIpAddress?.ToString(),
-                StringComparison.Ordinal);
-    }
 }

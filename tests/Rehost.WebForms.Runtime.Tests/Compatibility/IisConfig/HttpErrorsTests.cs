@@ -75,48 +75,42 @@ public sealed class HttpErrorsTests : IDisposable
             </httpErrors>
             """);
 
-        failure.ShouldContain($"""<error statusCode="{status},-1">""", Case.Sensitive);
+        failure.ShouldContain($"""<error statusCode="{status}">""", Case.Sensitive);
         failure.ShouldContain("duplicates an entry");
     }
 
-    [Fact]
-    public void An_Execute_Url_Row_Fails_Activation()
-    {
-        var failure = Refusal(
-            """
-            <httpErrors>
-              <error statusCode="410" path="/err.aspx" responseMode="ExecuteURL" />
-            </httpErrors>
-            """);
-
-        failure.ShouldContain("""<error statusCode="410" responseMode="ExecuteURL">""", Case.Sensitive);
-        failure.ShouldContain("second managed request");
-    }
-
-    [Fact]
-    public void A_Row_Taking_An_Execute_Url_Default_Fails_Activation()
-    {
-        var failure = Refusal(
-            """
-            <httpErrors defaultResponseMode="ExecuteURL">
-              <error statusCode="410" path="/err.aspx" />
-            </httpErrors>
-            """);
-
-        failure.ShouldContain("""<error statusCode="410">""", Case.Sensitive);
-        failure.ShouldContain("defaultResponseMode", Case.Sensitive);
-        failure.ShouldContain("second managed request");
-    }
-
     [Theory]
-    [InlineData("defaultPath", "def.htm")]
-    [InlineData("allowAbsolutePathsWhenDelegated", "true")]
-    public void An_Attribute_IIS_Locks_Fails_Activation(string attribute, string value)
+    [InlineData(
+        """<httpErrors><error statusCode="410" path="/err.aspx" responseMode="executeUrl" /></httpErrors>""",
+        """<error statusCode="410" responseMode="ExecuteURL">""",
+        "second managed request")]
+    [InlineData(
+        """<httpErrors defaultResponseMode="ExecuteURL"><error statusCode="410" path="/err.aspx" /></httpErrors>""",
+        """<error statusCode="410"> in '""",
+        """defaultResponseMode="ExecuteURL", which""")]
+    [InlineData(
+        """<httpErrors defaultPath="def.htm" />""",
+        """<httpErrors defaultPath="def.htm">""",
+        "locked below the server")]
+    [InlineData(
+        """<httpErrors allowAbsolutePathsWhenDelegated="true" />""",
+        """<httpErrors allowAbsolutePathsWhenDelegated="true">""",
+        "locked below the server")]
+    [InlineData(
+        """<httpErrors errorMode="Verbose" />""",
+        """<httpErrors errorMode="Verbose">""",
+        "is not one of DetailedLocalOnly, Custom, Detailed")]
+    [InlineData(
+        """<httpErrors><error statusCode="410" path="/srv/err.htm" /></httpErrors>""",
+        """<error statusCode="410" path="/srv/err.htm">""",
+        "is an absolute path")]
+    public void A_Shape_IIS_Locked_Or_This_Port_Cannot_Run_Fails_Activation(
+        string section, string element, string rule)
     {
-        var failure = Refusal($"""<httpErrors {attribute}="{value}" />""");
+        var failure = Refusal(section);
 
-        failure.ShouldContain($"""<httpErrors {attribute}="{value}">""", Case.Sensitive);
-        failure.ShouldContain("locked below the server");
+        failure.ShouldContain(element, Case.Sensitive);
+        failure.ShouldContain(rule, Case.Sensitive);
     }
 
     [Fact]

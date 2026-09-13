@@ -85,8 +85,8 @@ public sealed class DefaultDocumentsOverKestrelTests(WebServerLiveScenario scena
 }
 
 // IIS answered the browsing-off 403 natively, before managed error handling, so an app's
-// customErrors never converts it into the defaultRedirect (reading D16); httpErrors is what
-// writes its body, and this host carries no row for 403.
+// customErrors never converts it into the defaultRedirect; httpErrors is what writes its body,
+// and this host carries no row for 403.
 public sealed class DirectoryRefusalOverKestrelTests(CustomErrorsLiveScenario scenario)
     : IClassFixture<CustomErrorsLiveScenario>
 {

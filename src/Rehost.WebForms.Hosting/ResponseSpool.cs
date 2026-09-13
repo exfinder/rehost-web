@@ -113,7 +113,7 @@ internal sealed class ResponseSpool : IDisposable
     internal bool HasEntity => _segments.Count != 0;
 
     // Raised once, before the head is published, whether a mid-request flush or the end of the
-    // request brings it: that is the moment IIS's custom-error module judged the response.
+    // request brings it.
     internal Action<ResponseSpool, HttpContext>? BeforeHeadCommit { get; set; }
 
     internal void ReplaceEntity(string contentType, byte[] body)

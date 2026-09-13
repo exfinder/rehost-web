@@ -750,20 +750,6 @@ public sealed class AspNetCoreWorkerRequestTests
         request.Response.Headers.ShouldHaveSingleItem().Name.ShouldBe("X-Framework-Oracle");
     }
 
-    // ASP.NET's own error rendering sets this, and IIS's custom-error module read it from the
-    // worker request as the head left; without the override it would answer false forever.
-    [Fact]
-    public void Try_Skip_Iis_Custom_Errors_Round_Trips_Through_The_Response()
-    {
-        var request = Create();
-
-        request.TrySkipIisCustomErrors.ShouldBeFalse();
-
-        request.TrySkipIisCustomErrors = true;
-
-        request.TrySkipIisCustomErrors.ShouldBeTrue();
-    }
-
     [Fact]
     public void Client_Disconnect_Is_Observable()
     {

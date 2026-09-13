@@ -70,7 +70,11 @@ internal sealed class RehostWebFormsMiddleware
             rewrittenFrom);
 
         workerRequest.Response.BeforeHeadCommit = (spool, spooled) => HttpErrorPages.Apply(
-            spool, spooled, _activation.HttpErrors, workerRequest.TrySkipIisCustomErrors);
+            spool,
+            spooled,
+            _activation.HttpErrors,
+            workerRequest.TrySkipIisCustomErrors,
+            workerRequest.IsLocal());
 
         try
         {

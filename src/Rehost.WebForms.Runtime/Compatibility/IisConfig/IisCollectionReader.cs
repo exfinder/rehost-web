@@ -11,15 +11,23 @@ namespace System.Web.IisConfig;
 internal sealed class IisCollectionSchema
 {
     internal IisCollectionSchema(string addElement, string keyAttribute, string? valueAttribute)
+        : this(addElement, [keyAttribute], valueAttribute)
+    {
+    }
+
+    internal IisCollectionSchema(
+        string addElement, IReadOnlyList<string> keyAttributes, string? valueAttribute)
     {
         AddElement = addElement;
-        KeyAttribute = keyAttribute;
+        KeyAttributes = keyAttributes;
         ValueAttribute = valueAttribute;
     }
 
     internal string AddElement { get; }
 
-    internal string KeyAttribute { get; }
+    internal string KeyAttribute => KeyAttributes[0];
+
+    internal IReadOnlyList<string> KeyAttributes { get; }
 
     // Null for membership-only collections (hiddenSegments); required when present (mimeMap).
     internal string? ValueAttribute { get; }
@@ -39,6 +47,19 @@ internal static class IisCollectionReader
         return value == null
             ? null
             : Boolean($"""<{elementName} {attribute}="{value}">""", value, configPath);
+    }
+
+    internal static TEnum EnumValue<TEnum>(string element, string value, string configPath)
+        where TEnum : struct, Enum
+    {
+        if (System.Enum.TryParse<TEnum>(value, ignoreCase: true, out var parsed)
+            && System.Enum.IsDefined(parsed))
+        {
+            return parsed;
+        }
+
+        throw new ConfigurationErrorsException(
+            $"{element} in '{configPath}' is not one of {string.Join(", ", System.Enum.GetNames<TEnum>())}.");
     }
 
     internal static bool Boolean(string element, string value, string configPath)
@@ -113,10 +134,9 @@ internal static class IisCollectionReader
                 if (entries.ContainsKey(key))
                 {
                     throw new ConfigurationErrorsException(
-                        "<" + schema.AddElement + " " + schema.KeyAttribute + "=\"" + key
-                        + "\"> in '" + configPath + "' duplicates an entry the collection"
-                        + " already contains; IIS refuses this with a 500.19. <remove> it"
-                        + " first to change it.");
+                        Describe(node, schema) + " in '" + configPath
+                        + "' duplicates an entry the collection already contains; IIS refuses"
+                        + " this with a 500.19. <remove> it first to change it.");
                 }
 
                 entries.Add(key, readValue(node, configPath));
@@ -128,6 +148,20 @@ internal static class IisCollectionReader
                     + "> inside <" + sectionNode.Name + ">.");
             }
         }
+    }
+
+    private static string Describe(XmlNode node, IisCollectionSchema schema)
+    {
+        var text = "<" + node.Name;
+        foreach (var attribute in schema.KeyAttributes)
+        {
+            if (node.Attributes?[attribute]?.Value is { } value)
+            {
+                text += " " + attribute + "=\"" + value + "\"";
+            }
+        }
+
+        return text + ">";
     }
 
     internal static string RequireAttribute(XmlNode node, string name, string configPath)

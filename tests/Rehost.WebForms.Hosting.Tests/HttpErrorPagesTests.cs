@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using System.Web.IisConfig;
 using Microsoft.AspNetCore.Http;
@@ -30,17 +29,14 @@ public sealed class HttpErrorPagesTests
     private const string ApplicationBody = "the page's own body";
 
     [Theory]
-    // Detailed for this client: the empty entity is filled, anything the application wrote stays.
     [InlineData("DetailedLocalOnly", true, "Auto", true, false, false)]
     [InlineData("DetailedLocalOnly", true, "Auto", false, false, true)]
     [InlineData("DetailedLocalOnly", true, "Auto", true, true, false)]
     [InlineData("Detailed", false, "Auto", false, false, true)]
-    // Custom for this client: the row replaces what the application wrote unless it asked to skip.
     [InlineData("DetailedLocalOnly", false, "Auto", true, false, true)]
     [InlineData("Custom", true, "Auto", true, false, true)]
     [InlineData("Custom", true, "Auto", true, true, false)]
     [InlineData("Custom", true, "Auto", false, false, true)]
-    // PassThrough sends the existing response even when it is empty; Replace outranks the flag.
     [InlineData("Custom", true, "PassThrough", true, false, false)]
     [InlineData("Custom", true, "PassThrough", false, false, false)]
     [InlineData("Custom", true, "Replace", true, true, true)]
@@ -93,23 +89,27 @@ public sealed class HttpErrorPagesTests
     }
 
     [Fact]
-    public async Task A_File_Row_Whose_File_Is_Gone_Falls_Back_To_The_Built_In_Body()
+    public async Task A_File_Row_Whose_File_Is_Gone_Falls_Back_To_The_Built_In_Body_For_Its_Status()
     {
         var answer = await AnswerAsync(
             Config(
                 HttpErrorMode.Custom,
                 ExistingResponse.Auto,
                 new HttpErrorRow(
-                    404,
+                    500,
                     -1,
                     HttpErrorRowMode.File,
                     Path.Combine(Path.GetTempPath(), "rehost-no-such-error-page.htm"),
                     "text/html",
                     null)),
+            status: 500,
             body: ApplicationBody);
 
-        answer.Status.ShouldBe(404);
-        answer.Body.ShouldBe(BuiltIn404.ReplaceLineEndings("\n"));
+        answer.Status.ShouldBe(500);
+        answer.Body.ShouldContain("<h2>500 - Internal server error.</h2>", Case.Sensitive);
+        answer.Body.ShouldContain(
+            "The page cannot be displayed because an internal server error has occurred.",
+            Case.Sensitive);
         answer.Header("Content-Type").ShouldBe("text/html");
     }
 
@@ -163,9 +163,6 @@ public sealed class HttpErrorPagesTests
         var context = new DefaultHttpContext();
         context.Request.Scheme = "http";
         context.Request.Host = new HostString("example.invalid");
-        context.Connection.LocalIpAddress = IPAddress.Parse("10.1.1.1");
-        context.Connection.RemoteIpAddress =
-            local ? IPAddress.Loopback : IPAddress.Parse("203.0.113.7");
         using var delivered = new MemoryStream();
         context.Response.Body = delivered;
 
@@ -181,7 +178,7 @@ public sealed class HttpErrorPagesTests
         }
 
         spool.BeforeHeadCommit = (spooled, spooledContext) =>
-            HttpErrorPages.Apply(spooled, spooledContext, config, skip);
+            HttpErrorPages.Apply(spooled, spooledContext, config, skip, local);
         spool.Seal();
         await spool.CommitAsync(context, TestContext.Current.CancellationToken);
 

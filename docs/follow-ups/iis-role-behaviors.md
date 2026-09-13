@@ -13,7 +13,9 @@ request-tier gaps.
   non-ASCII or `#`, and static trailing separators. Both hosts refuse these,
   but status/substatus differs; readings are in
   [URL canonicalization](../research/iis-url-canonicalization-readings.md).
-- `httpErrors` versus `customErrors` ownership for failures before System.Web.
+- `httpErrors` versus `customErrors` ownership for failures before System.Web:
+  closed by the `httpErrors` tenant (ledger P104); `customErrors` converts
+  exceptions alone, every other status is the section's.
 - Compression ownership and the `TransmitFile`/static-file bypass when the
   host adds ASP.NET Core response compression.
 - Explicitly classify Windows/anonymous authentication beyond current support,

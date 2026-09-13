@@ -93,7 +93,8 @@ internal sealed class HttpErrorsSection
     private const string ExecuteUrlRule =
         "is not supported: the error page would run as a second managed request.";
 
-    private static readonly IisCollectionSchema Schema = new("error", "statusCode", null);
+    private static readonly IisCollectionSchema Schema =
+        new("error", ["statusCode", "subStatusCode"], null);
 
     private readonly OrderedDictionary<string, Draft> _rows = new(StringComparer.Ordinal);
 
@@ -114,15 +115,6 @@ internal sealed class HttpErrorsSection
         {
             throw new ConfigurationErrorsException(
                 $"<httpErrors> inside <location> in '{configPath}' {RootOnlyRule}");
-        }
-
-        var executeUrl = document.SelectSingleNode("//httpErrors/error[@responseMode='ExecuteURL']");
-        if (executeUrl != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"""
-                <error statusCode="{executeUrl.Attributes?["statusCode"]?.Value}" responseMode="ExecuteURL"> in '{configPath}' {ExecuteUrlRule}
-                """);
         }
 
         var section = document.SelectSingleNode("/configuration/system.webServer/httpErrors");
@@ -225,14 +217,17 @@ internal sealed class HttpErrorsSection
             return new Draft(status, subStatus, HttpErrorRowMode.BuiltIn, null, configPath);
         }
 
-        var responseMode =
-            Parse<ResponseMode>(node, "responseMode", configPath) ?? _defaultResponseMode;
+        var explicitMode = Parse<ResponseMode>(node, "responseMode", configPath);
+        var responseMode = explicitMode ?? _defaultResponseMode;
         if (responseMode == ResponseMode.ExecuteURL)
         {
-            throw new ConfigurationErrorsException(
-                $"""
-                <error statusCode="{status}"> in '{configPath}' takes the section's defaultResponseMode="ExecuteURL", which {ExecuteUrlRule}
-                """);
+            throw new ConfigurationErrorsException(explicitMode == null
+                ? $"""
+                  <error statusCode="{status}"> in '{configPath}' takes the section's defaultResponseMode="ExecuteURL", which {ExecuteUrlRule}
+                  """
+                : $"""
+                  <error statusCode="{status}" responseMode="ExecuteURL"> in '{configPath}' {ExecuteUrlRule}
+                  """);
         }
 
         var path = IisCollectionReader.RequireAttribute(node, "path", configPath);
@@ -296,21 +291,10 @@ internal sealed class HttpErrorsSection
         where TValue : struct, Enum
     {
         var value = node.Attributes?[attribute]?.Value;
-        if (value == null)
-        {
-            return null;
-        }
-
-        if (!Enum.TryParse<TValue>(value, ignoreCase: true, out var parsed)
-            || !Enum.IsDefined(parsed))
-        {
-            throw new ConfigurationErrorsException(
-                $"""
-                <{node.Name} {attribute}="{value}"> in '{configPath}' is not one of {string.Join(", ", Enum.GetNames<TValue>())}.
-                """);
-        }
-
-        return parsed;
+        return value == null
+            ? null
+            : IisCollectionReader.EnumValue<TValue>(
+                $"""<{node.Name} {attribute}="{value}">""", value, configPath);
     }
 
     private sealed record Draft(
