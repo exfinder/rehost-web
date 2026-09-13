@@ -36,11 +36,13 @@ internal static class IisCollectionReader
         XmlNode? node, string elementName, string attribute, string configPath)
     {
         var value = node?.Attributes?[attribute]?.Value;
-        if (value == null)
-        {
-            return null;
-        }
+        return value == null
+            ? null
+            : Boolean($"""<{elementName} {attribute}="{value}">""", value, configPath);
+    }
 
+    internal static bool Boolean(string element, string value, string configPath)
+    {
         if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
         {
             return true;
@@ -51,8 +53,7 @@ internal static class IisCollectionReader
             return false;
         }
 
-        throw new ConfigurationErrorsException(
-            $"""<{elementName} {attribute}="{value}"> in '{configPath}' {BooleanRule}""");
+        throw new ConfigurationErrorsException($"{element} in '{configPath}' {BooleanRule}");
     }
 
     internal static void Apply(

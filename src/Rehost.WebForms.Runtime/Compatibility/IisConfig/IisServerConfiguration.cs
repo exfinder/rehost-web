@@ -347,22 +347,9 @@ internal sealed class IisServerConfiguration
             }
         }
 
-        private static bool ParseAllowed(string extension, string value, string configPath)
-        {
-            if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            throw new ConfigurationErrorsException(
-                $"""<add fileExtension="{extension}" allowed="{value}"> in '{configPath}' """
-                + IisCollectionReader.BooleanRule);
-        }
+        private static bool ParseAllowed(string extension, string value, string configPath) =>
+            IisCollectionReader.Boolean(
+                $"""<add fileExtension="{extension}" allowed="{value}">""", value, configPath);
 
         internal bool ClassicSectionsWaived { get; set; }
 

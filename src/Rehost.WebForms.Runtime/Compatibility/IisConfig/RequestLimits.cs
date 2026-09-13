@@ -90,18 +90,7 @@ internal sealed class RequestLimitsSection
     {
         var verb = IisCollectionReader.RequireAttribute(node, "verb", configPath);
         var value = IisCollectionReader.RequireAttribute(node, "allowed", configPath);
-        if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        if (string.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        throw new ConfigurationErrorsException(
-            $"""<add verb="{verb}" allowed="{value}"> in '{configPath}' """
-            + IisCollectionReader.BooleanRule);
+        return IisCollectionReader.Boolean(
+            $"""<add verb="{verb}" allowed="{value}">""", value, configPath);
     }
 }

@@ -13,6 +13,7 @@ internal static class NativeRefusal
         response.SuppressDefaultCacheControlHeader = true;
         response.StatusCode = status;
         response.ContentType = "text/html";
+        response.AppendHeader("Connection", "close");
         if (status == 405)
         {
             response.AppendHeader("Allow", "GET, HEAD, OPTIONS, TRACE");

@@ -52,10 +52,14 @@ public sealed class RequestLimitsOverKestrelTests(WebServerLiveScenario scenario
     public async Task A_Denied_Verb_Is_Refused_Where_An_Unlisted_One_Serves()
     {
         var refused = await scenario.Client.DeleteAsync("/Default.aspx");
+        var refusedBeforeRewrite = await scenario.Client.DeleteAsync("/rw/clean/5");
         var allowed = await scenario.Client.PostFormAsync("/Default.aspx", "a=1");
 
         refused.StatusCode.ShouldBe(404);
         refused.Text.ShouldContain("404.6 Verb Denied", Case.Sensitive);
+        refused.Header("Connection").ShouldBe("close");
+        refusedBeforeRewrite.StatusCode.ShouldBe(404);
+        refusedBeforeRewrite.Text.ShouldContain("404.6 Verb Denied", Case.Sensitive);
         allowed.StatusCode.ShouldBe(200);
     }
 

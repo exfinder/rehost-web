@@ -24,8 +24,10 @@ internal sealed class RehostWebFormsMiddleware
         // refusals and the rewrite step's early answers included.
         CustomResponseHeaders.Register(context, _activation.CustomHeaders);
 
-        // A chunked entity carries no declared length and IIS never measured one against this
-        // limit, so only Content-Length is judged here.
+        // Kestrel's limit fires on a read, so whether the handler already ran would otherwise
+        // depend on when the application first touches the entity. A chunked entity carries no
+        // declared length and IIS never measured one against this limit, so only Content-Length
+        // is judged here.
         if (context.Request.ContentLength > DeclaredLengthLimit(context))
         {
             var body = IisErrorBodies.Refusal(StatusCodes.Status413PayloadTooLarge);
