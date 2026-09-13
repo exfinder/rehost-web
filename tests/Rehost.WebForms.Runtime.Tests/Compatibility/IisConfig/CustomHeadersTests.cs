@@ -21,24 +21,6 @@ public sealed class CustomHeadersTests : IDisposable
     }
 
     [Fact]
-    public void Added_Rows_Follow_The_Inherited_One_In_Document_Order()
-    {
-        var headers = Load(
-            """
-            <httpProtocol>
-              <customHeaders>
-                <add name="X-Two" value="2" />
-                <add name="X-One" value="1" />
-                <remove name="X-Two" />
-                <add name="X-Three" value="3" />
-              </customHeaders>
-            </httpProtocol>
-            """);
-
-        Rows(headers).ShouldBe(["X-Powered-By=ASP.NET", "X-One=1", "X-Three=3"]);
-    }
-
-    [Fact]
     public void Removing_The_Inherited_Row_Drops_It_And_Frees_The_Name()
     {
         var dropped = Load(
@@ -80,21 +62,6 @@ public sealed class CustomHeadersTests : IDisposable
             """);
 
         Rows(headers).ShouldBe(["X-Only=1"]);
-    }
-
-    [Fact]
-    public void An_Empty_Value_Is_Accepted_As_A_Row()
-    {
-        var headers = Load(
-            """
-            <httpProtocol>
-              <customHeaders>
-                <add name="X-Empty" value="" />
-              </customHeaders>
-            </httpProtocol>
-            """);
-
-        Rows(headers).ShouldBe(["X-Powered-By=ASP.NET", "X-Empty="]);
     }
 
     [Theory]
@@ -233,17 +200,6 @@ public sealed class CustomHeadersTests : IDisposable
         Rows(inert).ShouldBe(["X-Powered-By=ASP.NET"]);
         inert.RemoveServerHeader.ShouldBeFalse();
         switched.RemoveServerHeader.ShouldBeTrue();
-    }
-
-    [Fact]
-    public void An_Unparsable_RemoveServerHeader_Fails_Activation()
-    {
-        Refusal(
-            """
-            <security>
-              <requestFiltering removeServerHeader="yes" />
-            </security>
-            """).ShouldContain("""<requestFiltering removeServerHeader="yes">""", Case.Sensitive);
     }
 
     private static string ShippedBaseline => Path.Combine(

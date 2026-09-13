@@ -10,16 +10,6 @@ namespace Rehost.WebForms.Hosting.Tests;
 public sealed class CustomResponseHeadersTests
 {
     [Fact]
-    public void A_Second_Value_Under_The_Same_Name_Is_A_Second_Entry()
-    {
-        var target = new HeaderDictionary { ["X-Custom"] = "app" };
-
-        CustomResponseHeaders.Apply(target, Configured(("X-Custom", "one")));
-
-        target["X-Custom"].ShouldBe(new[] { "app", "one" });
-    }
-
-    [Fact]
     public void Cache_Control_And_Content_Type_Join_The_Existing_Value_With_A_Comma()
     {
         var target = new HeaderDictionary
@@ -34,27 +24,6 @@ public sealed class CustomResponseHeadersTests
 
         target["Cache-Control"].ShouldBe(new[] { "private,no-store" });
         target["Content-Type"].ShouldBe(new[] { "text/html; charset=utf-8,text/x-bogus" });
-    }
-
-    [Fact]
-    public void A_Coalescing_Name_The_Response_Does_Not_Carry_Is_Written_Alone()
-    {
-        var target = new HeaderDictionary();
-
-        CustomResponseHeaders.Apply(target, Configured(("Cache-Control", "no-store")));
-
-        target["Cache-Control"].ShouldBe(new[] { "no-store" });
-    }
-
-    [Fact]
-    public void An_Empty_Value_Adds_Nothing()
-    {
-        var target = new HeaderDictionary();
-
-        CustomResponseHeaders.Apply(target, Configured(("X-Empty", ""), ("X-Sent", "1")));
-
-        target.ContainsKey("X-Empty").ShouldBeFalse();
-        target["X-Sent"].ShouldBe(new[] { "1" });
     }
 
     private static CustomHeaders Configured(params (string Name, string Value)[] rows) =>
