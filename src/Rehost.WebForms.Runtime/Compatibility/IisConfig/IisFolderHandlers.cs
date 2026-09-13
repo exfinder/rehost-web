@@ -163,6 +163,7 @@ internal sealed class IisFolderHandlers
         RewriteSection.RefuseBelowTheRoot(document, configPath);
         CustomHeaderSection.RefuseBelowTheRoot(document, configPath);
         HttpErrorsSection.RefuseBelowTheRoot(document, configPath);
+        ClientCacheSection.RefuseBelowTheRoot(document, configPath);
         NativeAuthorization.Refuse(document, configPath);
 
         var handlersNode = document.SelectSingleNode(

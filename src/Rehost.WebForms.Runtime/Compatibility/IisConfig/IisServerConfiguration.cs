@@ -14,7 +14,7 @@ namespace System.Web.IisConfig;
 internal sealed class IisServerConfiguration
 {
     private static readonly IisCollectionSchema MimeMapSchema =
-        new("mimeMap", "fileExtension", "mimeType");
+        new("mimeMap", "fileExtension", "mimeType", ["clientCache"]);
 
     private static readonly IisCollectionSchema HiddenSegmentSchema =
         new("add", "segment", null);
@@ -41,7 +41,8 @@ internal sealed class IisServerConfiguration
         rewrite: null,
         CustomHeaders.Empty,
         RequestLimits.Unlimited,
-        HttpErrors.Default);
+        HttpErrors.Default,
+        ClientCache.Default);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -66,7 +67,8 @@ internal sealed class IisServerConfiguration
         RewriteSection? rewrite,
         CustomHeaders customHeaders,
         RequestLimits requestLimits,
-        HttpErrors httpErrors)
+        HttpErrors httpErrors,
+        ClientCache clientCache)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -84,6 +86,7 @@ internal sealed class IisServerConfiguration
         CustomHeaders = customHeaders;
         RequestLimits = requestLimits;
         HttpErrors = httpErrors;
+        ClientCache = clientCache;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -107,6 +110,8 @@ internal sealed class IisServerConfiguration
     internal RequestLimits RequestLimits { get; }
 
     internal HttpErrors HttpErrors { get; }
+
+    internal ClientCache ClientCache { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
         _folderHandlers.RoutesFor(path);
@@ -208,7 +213,8 @@ internal sealed class IisServerConfiguration
                 Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
                 extension => sections.StaticContent.TryGetValue(extension, out var mimeType)
                     ? mimeType
-                    : null));
+                    : null),
+            sections.ClientCache.Build());
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -246,6 +252,7 @@ internal sealed class IisServerConfiguration
         }
 
         sections.CustomHeaders.Apply(document, configPath);
+        sections.ClientCache.Apply(document, configPath);
         sections.RequestLimits.Apply(document, configPath);
         sections.HttpErrors.Apply(document, configPath);
 
@@ -372,6 +379,8 @@ internal sealed class IisServerConfiguration
         internal RequestLimitsSection RequestLimits { get; } = new();
 
         internal HttpErrorsSection HttpErrors { get; } = new();
+
+        internal ClientCacheSection ClientCache { get; } = new();
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();
 

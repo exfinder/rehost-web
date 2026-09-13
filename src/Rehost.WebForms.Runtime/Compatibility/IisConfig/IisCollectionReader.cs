@@ -10,17 +10,25 @@ namespace System.Web.IisConfig;
 // remove of an absent key is tolerated, clear empties the inherited entries.
 internal sealed class IisCollectionSchema
 {
-    internal IisCollectionSchema(string addElement, string keyAttribute, string? valueAttribute)
-        : this(addElement, [keyAttribute], valueAttribute)
+    internal IisCollectionSchema(
+        string addElement,
+        string keyAttribute,
+        string? valueAttribute,
+        IReadOnlyList<string>? siblingElements = null)
+        : this(addElement, [keyAttribute], valueAttribute, siblingElements)
     {
     }
 
     internal IisCollectionSchema(
-        string addElement, IReadOnlyList<string> keyAttributes, string? valueAttribute)
+        string addElement,
+        IReadOnlyList<string> keyAttributes,
+        string? valueAttribute,
+        IReadOnlyList<string>? siblingElements = null)
     {
         AddElement = addElement;
         KeyAttributes = keyAttributes;
         ValueAttribute = valueAttribute;
+        SiblingElements = siblingElements ?? Array.Empty<string>();
     }
 
     internal string AddElement { get; }
@@ -31,6 +39,8 @@ internal sealed class IisCollectionSchema
 
     // Null for membership-only collections (hiddenSegments); required when present (mimeMap).
     internal string? ValueAttribute { get; }
+
+    internal IReadOnlyList<string> SiblingElements { get; }
 }
 
 internal static class IisCollectionReader
@@ -141,13 +151,26 @@ internal static class IisCollectionReader
 
                 entries.Add(key, readValue(node, configPath));
             }
-            else
+            else if (!OwnedElsewhere(schema, node.Name))
             {
                 throw new ConfigurationErrorsException(
                     "'" + configPath + "' contains unsupported element <" + node.Name
                     + "> inside <" + sectionNode.Name + ">.");
             }
         }
+    }
+
+    private static bool OwnedElsewhere(IisCollectionSchema schema, string elementName)
+    {
+        foreach (var sibling in schema.SiblingElements)
+        {
+            if (elementName == sibling)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static string Describe(XmlNode node, IisCollectionSchema schema)
