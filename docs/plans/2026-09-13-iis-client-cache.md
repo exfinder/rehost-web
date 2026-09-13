@@ -8,22 +8,24 @@ Today the element fails activation as an unsupported child of `<staticContent>`.
 
 ## Decisions
 
-- All five attributes are honored: `cacheControlMode` (`NoControl`,
+- Four attributes are honored: `cacheControlMode` (`NoControl`,
   `UseMaxAge`, `UseExpires`, `DisableCache`), `cacheControlMaxAge`,
-  `httpExpires`, `cacheControlCustom`, `setEtag` (CC2-CC10).
+  `httpExpires`, `cacheControlCustom` (CC2-CC9). `setEtag="false"` fails
+  activation: the managed handler writes the `ETag` as a cache header the
+  bridge cannot remove, and honoring it would mean a guard in the reference
+  source; the gap goes to the backlog (CC10). `setEtag="true"` is accepted.
 - One `Cache-Control` header on every static answer the bridge produces, 200,
   `HEAD`, 206 and 304 alike, built from the caching profile's word, then
   `cacheControlCustom`, then `max-age=<seconds>` or `no-cache`, comma-joined
   with no space; nothing when every part is empty (CC1, CC4, CC8, CC11,
   CC13). `Expires` is sent verbatim under `UseExpires` alone (CC5-CC7).
-  `setEtag="false"` drops the `ETag` and keeps `Last-Modified` (CC10).
 - Managed answers are untouched (CC3, CC15).
 - Root `web.config` only; the element in a `<location>` block or a folder
   `web.config` fails activation naming the file (CC12 measured per-path
   scoping; the first cut matches the other static sections).
-- A span that does not parse, an unknown mode, or a CR/LF in `httpExpires` or
-  `cacheControlCustom` fails activation naming the file and attribute, where
-  IIS failed the static requests alone (CC14).
+- A span that does not parse, an unknown mode, `setEtag="false"`, or a CR/LF
+  in `httpExpires` or `cacheControlCustom` fails activation naming the file
+  and attribute, where IIS failed the static requests alone (CC14).
 - The shipped baseline writes the schema defaults out:
   `<clientCache cacheControlMode="NoControl" cacheControlMaxAge="1.00:00:00" setEtag="true" />`.
 - No reading or ledger IDs in code or config comments. No `Co-Authored-By`
@@ -38,7 +40,7 @@ Runtime only. Nothing under `System.Web.ReferenceSource` changes.
 ```text
 enum ClientCacheMode { NoControl, UseMaxAge, UseExpires, DisableCache }
 record ClientCache(ClientCacheMode Mode, TimeSpan MaxAge, string HttpExpires,
-    string Custom, bool SetEtag)
+    string Custom)
     string? CacheControl(string? profileWord)
     string? Expires
 ```
@@ -48,7 +50,8 @@ record ClientCache(ClientCacheMode Mode, TimeSpan MaxAge, string HttpExpires,
 `IisServerConfiguration.ApplyFile` for both files, baseline first, beside
 `CustomHeaderSection`: the mode through the shared `IisCollectionReader.EnumValue`,
 the span through `TimeSpan.TryParse` invariant, `setEtag` through
-`OptionalBoolean`, the two strings verbatim after the CR/LF check. It refuses
+`OptionalBoolean` and refused when false, the two strings verbatim after the
+CR/LF check. It refuses
 `//location//clientCache`; `RefuseBelowTheRoot` joins the others in
 `IisFolderHandlers.Load`. `IisCollectionReader.Apply` over `<staticContent>`
 skips the `clientCache` element instead of refusing it: the schema gains the
@@ -58,9 +61,8 @@ exposes the record.
 `StaticFileBridgeHandler`, after `StaticFileHandler.ProcessRequestInternal`
 returns: the block that writes the profile word becomes one call into the
 record with that word. Null suppresses the default header as today; a value is
-appended; `Expires` is appended when present; the `ETag` header is removed when
-`SetEtag` is false. The 304 and 206 branches return into this block, which is
-why one place covers them (CC11).
+appended; `Expires` is appended when present. The 304 and 206 branches return
+into this block, which is why one place covers them (CC11).
 
 ## Tests
 
@@ -68,15 +70,15 @@ Unit tests for what the port decides, one scenario for the wiring.
 
 - `Runtime.Tests/Compatibility/IisConfig/ClientCacheTests`: the baseline's
   defaults load and answer no header; an application's `UseMaxAge` with a
-  custom text and `setEtag="false"` loads; the header composition as one theory
+  custom text loads; the header composition as one theory
   over the measured shapes (mode, custom, profile word → `Cache-Control`,
-  `Expires`); the refusals as one theory (bad span, bad mode, CR in the
-  custom text, `<location>`, folder file), each asserting the file and
+  `Expires`); the refusals as one theory (bad span, bad mode, `setEtag="false"`, CR in
+  the custom text, `<location>`, folder file), each asserting the file and
   attribute. Two facts, two theories.
 - Scenario on the `body-customerrors` shared host, which gains
-  `<clientCache cacheControlMode="UseMaxAge" cacheControlMaxAge="00:01:00" cacheControlCustom="public" setEtag="false" />`
+  `<clientCache cacheControlMode="UseMaxAge" cacheControlMaxAge="00:01:00" cacheControlCustom="public" />`
   inside a new `<staticContent>`. `ClientCacheOverKestrelTests`: `he/err404.json`
-  served directly answers `Cache-Control: public,max-age=60`, no `ETag`, a
+  served directly answers `Cache-Control: public,max-age=60` and a
   `Last-Modified`; the same request with `If-Modified-Since` equal to that
   `Last-Modified` answers 304 with the same `Cache-Control`. One test. The
   host's other claims do not read static headers.
@@ -87,8 +89,8 @@ Unit tests for what the port decides, one scenario for the wiring.
    the bridge. Unit tests green.
 2. Fixture amendment and the scenario. macOS suite green.
 3. Docs: compatibility row `system.webServer/staticContent` names
-   `clientCache` with the boundaries above; ledger P105; the fixtures README
-   row for `body-customerrors`.
+   `clientCache` with the boundaries above; ledger P105; the `setEtag` gap in
+   `docs/backlog.md`; the fixtures README row for `body-customerrors`.
 4. Windows and Linux rounds on the committed head.
 
 ## Done when
