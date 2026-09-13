@@ -13,7 +13,7 @@ meet the same bar.
 | `farm` | Replays a payload captured from real .NET Framework (`Framework.postback`); its `Default.aspx` conflicts with `postback`'s. |
 | `body` | `maxRequestLength`/`requestLengthDiskThreshold` limits are the claim; the spilled-content save probe needs that same low threshold. |
 | `body-preload` | `asyncPreloadMode="All"` is a different application. |
-| `body-customerrors` | `customErrors` conversion of host rejections is the claim. |
+| `body-customerrors` | `customErrors` conversion of host rejections is the claim. It also carries `<httpErrors errorMode="Custom">` with a `File` row onto `he/err404.json`, which replaces every 404 this host answers, and the directory refusal here is the 403 no row covers. |
 | `codegen` | Compilation-substrate scenarios: runs mutate and inspect generated output. |
 | `legacy-target` / `modern-target` | `<httpRuntime targetFramework>` divergence is the claim; activation is what is under test. |
 | `timeout` | `executionTimeout="1"` plus a 2-second `rehost:RequestTimeoutScanSeconds` would time out any other fixture's slow requests; the real-timer chain firing is the claim. |
