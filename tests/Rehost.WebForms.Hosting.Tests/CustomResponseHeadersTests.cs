@@ -5,8 +5,8 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// What the module did to a response block that already carried the application's own headers
-// (CH5-CH7, CH15), over the dictionary Kestrel writes from.
+// What the module did to a response block that already carried the application's own headers,
+// over the dictionary Kestrel writes from.
 public sealed class CustomResponseHeadersTests
 {
     [Fact]

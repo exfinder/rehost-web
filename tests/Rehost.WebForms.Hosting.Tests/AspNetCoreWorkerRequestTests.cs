@@ -50,8 +50,8 @@ public sealed class AspNetCoreWorkerRequestTests
         Create(context).GetRawUrl().ShouldBe("/a b/c?x=%2F");
     }
 
-    // A rule rewrote the request before the pipeline, and IIS kept RawUrl on what the client asked
-    // for while every path member followed the rewritten URL (UR9).
+    // A rule rewrote the request before the pipeline, and IIS kept RawUrl on what the client
+    // asked for while every path member followed the rewritten URL.
     [Fact]
     public void Raw_Url_Is_The_Original_When_A_Rule_Rewrote_The_Request()
     {

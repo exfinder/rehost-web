@@ -8,7 +8,7 @@ using Xunit;
 namespace Rehost.WebForms.Hosting.Tests;
 
 // The rewrite step the host runs before the managed pipeline, against the measured IIS answers
-// (readings UR5-UR11, UR34, UR38) rather than the importer's own.
+// rather than the importer's own.
 public sealed class RewriteRulesTests : IDisposable
 {
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("rehost-rewriterules-");

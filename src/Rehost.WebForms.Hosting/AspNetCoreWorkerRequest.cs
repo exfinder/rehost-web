@@ -264,9 +264,9 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
     // variables, unset ones ""), so none is null. Site topology takes IIS's shape for a single
     // site; the certificate and TLS-strength set is "" as on an IIS site without client
     // certificates (the negotiated strengths have no non-obsolete source on Kestrel).
-    // WEBSOCKET_VERSION and the four rewrite variables are the exception and must stay out of that
-    // collection: integrated answers them here while AllKeys omits them and Count stays 45 (IV23,
-    // UR9).
+    // WEBSOCKET_VERSION and the four rewrite variables are the exception and must stay out of
+    // that collection: integrated answers them here while AllKeys omits them and Count stays 45
+    // (IV23).
     public override string? GetServerVariable(string name)
     {
         return name switch

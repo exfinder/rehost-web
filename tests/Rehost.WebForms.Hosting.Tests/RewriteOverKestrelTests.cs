@@ -4,8 +4,7 @@ using Xunit;
 namespace Rehost.WebForms.Hosting.Tests;
 
 // The IIS URL Rewrite module's inbound rules over the fixture's <rewrite> section: every pattern
-// sits under rw/ so no other class's request on this host meets one (readings UR9, UR12, UR26,
-// UR27, UR30).
+// sits under rw/ so no other class's request on this host meets one.
 public sealed class RewriteOverKestrelTests(WebServerLiveScenario scenario)
     : IClassFixture<WebServerLiveScenario>
 {
@@ -30,7 +29,7 @@ public sealed class RewriteOverKestrelTests(WebServerLiveScenario scenario)
 
     // The first pass judges the script file the handler map claims, not the whole URL: path info
     // after an existing page passes while a denied name in a URL no handler claims is refused
-    // before any rule (UR42, UR43).
+    // before any rule.
     [Fact]
     public async Task The_First_Pass_Judges_The_Script_File_Not_The_Path_Info()
     {
@@ -47,7 +46,7 @@ public sealed class RewriteOverKestrelTests(WebServerLiveScenario scenario)
     }
 
     // The rewritten URL faces request filtering again, so a rule cannot reach hidden content; the
-    // un-hidden sibling is the control that the rule itself works (UR27).
+    // un-hidden sibling is the control that the rule itself works.
     [Fact]
     public async Task A_Rule_Cannot_Reach_A_Hidden_Segment()
     {

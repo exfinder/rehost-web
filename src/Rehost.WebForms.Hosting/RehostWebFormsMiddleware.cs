@@ -19,7 +19,7 @@ internal sealed class RehostWebFormsMiddleware
     internal async Task InvokeAsync(HttpContext context)
     {
         // Every answer below is a response IIS's protocol module would have stamped, its own
-        // refusals and the rewrite step's early answers included (CH2, CH3, CH24).
+        // refusals and the rewrite step's early answers included.
         CustomResponseHeaders.Register(context, _activation.CustomHeaders);
 
         // Kestrel's limit fires on a read, so whether the handler already ran would otherwise

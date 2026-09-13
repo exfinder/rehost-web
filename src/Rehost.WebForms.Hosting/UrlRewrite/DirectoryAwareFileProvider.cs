@@ -5,8 +5,8 @@ using System.IO;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
-// PhysicalFileProvider answers Exists=false for a real folder, which leaves the rules' IsDirectory
-// condition false and sends directory requests down a catch-all IIS never took (UR18, UR22).
+// PhysicalFileProvider answers Exists=false for a real folder, which leaves the rules'
+// IsDirectory condition false and sends directory requests down a catch-all IIS never took.
 internal sealed class DirectoryAwareFileProvider : IFileProvider
 {
     private readonly PhysicalFileProvider _physical;

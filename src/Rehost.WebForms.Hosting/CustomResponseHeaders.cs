@@ -8,7 +8,7 @@ using Microsoft.Extensions.Primitives;
 
 // IIS's protocol module wrote the configured rows as the head left, after managed code was done
 // with the response, which is why an application's Headers.Remove and ClearHeaders never reached
-// one (CH8, CH21).
+// one.
 internal static class CustomResponseHeaders
 {
     internal static void Register(HttpContext context, CustomHeaders headers)

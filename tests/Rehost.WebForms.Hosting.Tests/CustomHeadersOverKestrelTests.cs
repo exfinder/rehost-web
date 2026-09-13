@@ -4,8 +4,8 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// The fixture's <customHeaders> over the shipped baseline's inherited X-Powered-By row: what rides
-// which responses (CH1-CH4), and what the application can do about it (CH5, CH6, CH8).
+// The fixture's <customHeaders> over the shipped baseline's inherited X-Powered-By row: what
+// rides which responses, and what the application can do about it.
 public sealed class CustomHeadersOverKestrelTests(WebServerLiveScenario scenario)
     : IClassFixture<WebServerLiveScenario>
 {

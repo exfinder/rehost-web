@@ -9,7 +9,7 @@ namespace System.Web.IisConfig;
 internal readonly record struct CustomHeader(string Name, string Value);
 
 // requestFiltering's removeServerHeader is the only switch for the server's own Server header: a
-// <remove name="Server" /> row is accepted and inert (CH19, CH20).
+// <remove name="Server" /> row is accepted and inert.
 internal sealed record CustomHeaders(IReadOnlyList<CustomHeader> Rows, bool RemoveServerHeader)
 {
     internal static CustomHeaders Empty { get; } =
@@ -79,7 +79,7 @@ internal sealed class CustomHeaderSection
         }
     }
 
-    // IIS wrote a configured name and value onto the wire unvalidated (CH23); Kestrel faults the
+    // IIS wrote a configured name and value onto the wire unvalidated; Kestrel faults the
     // response instead, so a row that could not be written is refused while the file is readable.
     private static string ReadValue(XmlNode node, string configPath)
     {

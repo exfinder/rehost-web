@@ -30,7 +30,7 @@ internal readonly struct RewriteOutcome(RewriteOutcomeKind kind, string? origina
 }
 
 // The parser's own answers for the abort, the query order, the Location shape and the response
-// body differ from IIS (UR5, UR6, UR11, UR38), so this owns all four rather than the middleware.
+// body differ from IIS, so this owns all four rather than the middleware.
 internal sealed class RewriteRules
 {
     private readonly IReadOnlyList<IRule> _rules;
@@ -147,7 +147,7 @@ internal sealed class RewriteRules
         }
 
         // AbortRequest is the rule that ends the request having set nothing: the importer leaves
-        // the status at 200 and writes no body, where IIS reset the connection (UR5).
+        // the status at 200 and writes no body, where IIS reset the connection.
         if (response.StatusCode == StatusCodes.Status200OK)
         {
             context.Abort();
@@ -185,7 +185,7 @@ internal sealed class RewriteRules
     }
 
     // IIS put the rule's own query first and the request's after it; the importer appends the
-    // other way round (UR11).
+    // other way round.
     private static QueryString RuleQueryFirst(QueryString original, QueryString rewritten)
     {
         var carried = original.ToUriComponent();

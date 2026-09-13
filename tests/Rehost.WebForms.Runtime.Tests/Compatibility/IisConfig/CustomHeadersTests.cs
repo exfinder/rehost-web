@@ -6,8 +6,8 @@ using Xunit;
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.IisConfig;
 
 // The collection as an application receives it: the shipped baseline's row first, then the
-// application's own in document order (CH1-CH4, CH10, CH11). The refusals are the ones IIS
-// answered with a 500.19 (CH12-CH14) plus the two shapes IIS wrote raw and Kestrel cannot (CH23).
+// application's own in document order. The refusals are the ones IIS answered with a 500.19 plus
+// the two shapes IIS wrote raw and Kestrel cannot.
 public sealed class CustomHeadersTests : IDisposable
 {
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("rehost-headers-");

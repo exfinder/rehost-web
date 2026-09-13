@@ -5,7 +5,7 @@ using Xunit;
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.IisConfig;
 
 // The section the host parses is carried, and the shapes the importer would accept and then drop
-// in silence stop activation instead, as IIS answered them with a 500 (readings UR24, UR25, UR54).
+// in silence stop activation instead, as IIS answered them with a 500.
 public sealed class RewriteSectionTests : IDisposable
 {
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("rehost-rewrite-");
