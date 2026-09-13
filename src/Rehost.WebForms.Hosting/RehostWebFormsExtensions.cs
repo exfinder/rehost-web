@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 public static class RehostWebFormsExtensions
 {
@@ -33,6 +34,13 @@ public static class RehostWebFormsExtensions
             CustomHeaders = serverConfiguration.CustomHeaders,
             RequestLimits = serverConfiguration.RequestLimits,
         });
+
+        // Ahead of every host callback, so a host's own Kestrel body limit, registered before or
+        // after this call, layers over the application's number rather than under it.
+        builder.Services.Insert(0, ServiceDescriptor.Singleton<IConfigureOptions<KestrelServerOptions>>(
+            new ConfigureOptions<KestrelServerOptions>(kestrel =>
+                kestrel.Limits.MaxRequestBodySize =
+                    serverConfiguration.RequestLimits.MaxAllowedContentLength)));
 
         builder.Services.Configure<KestrelServerOptions>(kestrel =>
         {
