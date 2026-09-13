@@ -1,7 +1,7 @@
 # IIS httpErrors readings
 
 Evidence for the `system.webServer/httpErrors` tenant in the
-[IIS configuration plan](../follow-ups/iis-integration-plan.md). HE1-HE24 were
+[IIS configuration plan](../follow-ups/iis-integration-plan.md). HE1-HE27 were
 observed on full IIS 10 on `winbox`, 2026-09-13.
 
 ## Method
@@ -61,6 +61,9 @@ what `DetailedLocalOnly` distinguishes.
 | HE22 | `defaultPath="def.htm"` in the application file. | Every erroring request 500.19 `0x80070021` "Lock violation"; 200 pages serve. The server file has `lockAttributes="allowAbsolutePathsWhenDelegated,defaultPath"`. | `defaultPath` and `allowAbsolutePathsWhenDelegated` are locked below the server. |
 | HE23 | `defaultResponseMode="File"`, `<clear />`, one 404 row with no `responseMode`; then an app-set 500 and a directory 403. | 404: the row's file. 500 and 403: the built-in lines. | `defaultResponseMode` is delegated; `<clear />` drops the inherited file rows and the built-in text remains the floor. |
 | HE24 | `Connection: close` and `X-Powered-By` across every shape above. | The request-filtering `Connection: close` survives the custom page; `X-Powered-By` rides every answer, the `ExecuteURL` page included. | The custom page replaces the entity, not the status's headers. |
+| HE25 | `File` rows naming `err.json` and `err.txt`. | `Content-Type: application/json` and `text/plain`, the file's bytes, `Content-Length` the file's size. | The file's extension picks the type through the static MIME map. |
+| HE26 | A `File` row naming a file that does not exist. | The built-in one-line text for the status; no 500.19, no log line. | A missing file falls back to the built-in text silently. |
+| HE27 | A page that sets 404, writes, calls `Response.Flush`, sleeps, then writes more. | `404`, `Transfer-Encoding: chunked`, `Content-Type` the row's `application/json`; the body is the row's file followed by the page's second write. The same with 200 streams both writes untouched. | The module acts once, when the head leaves: it replaces what is buffered at that moment and later writes pass through. |
 
 ## Conclusions for the port
 
@@ -74,7 +77,10 @@ what `DetailedLocalOnly` distinguishes.
   `PassThrough` shape. `existingResponse` and the skip flag decide this and
   both are cheap to honor at the point the head is written.
 - `File` and `Redirect` rows are one file read or one 302 at that same
-  point (HE17, HE18). `ExecuteURL` is a second managed run on the error
+  point (HE17, HE18, HE25). The moment is the head commit, whether a
+  mid-request flush or the end of the request brings it: what is buffered
+  then is replaced and what the page writes afterwards flows through (HE27).
+  A row whose file is missing falls back to the built-in text (HE26). `ExecuteURL` is a second managed run on the error
   page's URL after the first has finished, with the `<status>;<original>`
   query, `RawUrl` frozen and the status reset to 200 (HE13, HE14); the
   rewrite step's child-execution seam is the nearest counterpart.
