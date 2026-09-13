@@ -75,7 +75,22 @@ internal static class IisCollectionReader
         IisCollectionSchema schema,
         IDictionary<string, TValue> entries,
         string configPath,
-        Func<XmlNode, string, TValue> readValue)
+        Func<XmlNode, string, TValue> readValue) =>
+        Apply(
+            sectionNode,
+            schema,
+            entries,
+            configPath,
+            readValue,
+            (node, path) => RequireAttribute(node, schema.KeyAttribute, path));
+
+    internal static void Apply<TValue>(
+        XmlNode sectionNode,
+        IisCollectionSchema schema,
+        IDictionary<string, TValue> entries,
+        string configPath,
+        Func<XmlNode, string, TValue> readValue,
+        Func<XmlNode, string, string> readKey)
     {
         foreach (XmlNode node in sectionNode.ChildNodes)
         {
@@ -90,11 +105,11 @@ internal static class IisCollectionReader
             }
             else if (node.Name == "remove")
             {
-                entries.Remove(RequireAttribute(node, schema.KeyAttribute, configPath));
+                entries.Remove(readKey(node, configPath));
             }
             else if (node.Name == schema.AddElement)
             {
-                var key = RequireAttribute(node, schema.KeyAttribute, configPath);
+                var key = readKey(node, configPath);
                 if (entries.ContainsKey(key))
                 {
                     throw new ConfigurationErrorsException(

@@ -40,7 +40,8 @@ internal sealed class IisServerConfiguration
         IisFolderHandlers.Empty,
         rewrite: null,
         CustomHeaders.Empty,
-        RequestLimits.Unlimited);
+        RequestLimits.Unlimited,
+        HttpErrors.Default);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -64,7 +65,8 @@ internal sealed class IisServerConfiguration
         IisFolderHandlers folderHandlers,
         RewriteSection? rewrite,
         CustomHeaders customHeaders,
-        RequestLimits requestLimits)
+        RequestLimits requestLimits,
+        HttpErrors httpErrors)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -81,6 +83,7 @@ internal sealed class IisServerConfiguration
         Rewrite = rewrite;
         CustomHeaders = customHeaders;
         RequestLimits = requestLimits;
+        HttpErrors = httpErrors;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -102,6 +105,8 @@ internal sealed class IisServerConfiguration
     internal CustomHeaders CustomHeaders { get; }
 
     internal RequestLimits RequestLimits { get; }
+
+    internal HttpErrors HttpErrors { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
         _folderHandlers.RoutesFor(path);
@@ -198,7 +203,12 @@ internal sealed class IisServerConfiguration
                 sections.HiddenSegments),
             sections.Rewrite,
             sections.CustomHeaders.Build(),
-            sections.RequestLimits.Build());
+            sections.RequestLimits.Build(),
+            sections.HttpErrors.Build(
+                Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
+                extension => sections.StaticContent.TryGetValue(extension, out var mimeType)
+                    ? mimeType
+                    : null));
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -237,6 +247,7 @@ internal sealed class IisServerConfiguration
 
         sections.CustomHeaders.Apply(document, configPath);
         sections.RequestLimits.Apply(document, configPath);
+        sections.HttpErrors.Apply(document, configPath);
 
         var staticContentNode = document.SelectSingleNode(
             "/configuration/system.webServer/staticContent");
@@ -359,6 +370,8 @@ internal sealed class IisServerConfiguration
         internal CustomHeaderSection CustomHeaders { get; } = new();
 
         internal RequestLimitsSection RequestLimits { get; } = new();
+
+        internal HttpErrorsSection HttpErrors { get; } = new();
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();
 

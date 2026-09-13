@@ -12,16 +12,21 @@ internal static class NativeRefusal
         response.Clear();
         response.SuppressDefaultCacheControlHeader = true;
         response.StatusCode = status;
-        response.ContentType = "text/html";
         response.AppendHeader("Connection", "close");
         if (status == 405)
         {
             response.AppendHeader("Allow", "GET, HEAD, OPTIONS, TRACE");
         }
-        // IIS's httpErrors default is DetailedLocalOnly: the path-bearing detail stays off the wire
-        // for a remote client.
-        var detailLine = detail == null || !context.Request.IsLocal ? "" : $"<p>{HttpUtility.HtmlEncode(detail)}</p>";
-        response.Write(IisErrorBodies.Refusal(status, detailLine));
+
+        // Anything but a detailed body is the host's to write as the head leaves, where IIS's
+        // custom-error module wrote it; the entity stays empty here for it to replace.
+        if (IisServerConfiguration.Current.HttpErrors.DetailedFor(context.Request.IsLocal))
+        {
+            response.ContentType = "text/html";
+            var detailLine = detail == null ? "" : $"<p>{HttpUtility.HtmlEncode(detail)}</p>";
+            response.Write(IisErrorBodies.Refusal(status, detailLine));
+        }
+
         context.ApplicationInstance.CompleteRequest();
     }
 }
