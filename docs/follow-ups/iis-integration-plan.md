@@ -1,7 +1,7 @@
 # IIS configuration tenants
 
 The Layer-0 configuration model and delivered tenants are recorded by ledger
-P60/P67/P83/P85-P87 and P99-P101. This file owns only remaining IIS-derived
+P60/P67/P83/P85-P87 and P99-P102. This file owns only remaining IIS-derived
 behavior.
 
 ## Placement rule
@@ -20,7 +20,6 @@ ignored.
 
 | Section | Required result |
 | --- | --- |
-| `security/requestFiltering` limits | Reconcile `maxAllowedContentLength`, `maxRequestLength`, query/URL limits, verbs, and Kestrel ownership without duplicate refusals. Measured 2026-09-13: [request limits readings RL1-RL24](../research/iis-request-limits-readings.md); plan in [2026-09-13-iis-request-limits](../plans/2026-09-13-iis-request-limits.md) |
 | `httpErrors` | Define pre-pipeline error bodies and `existingResponse` interaction with managed `customErrors`. Reading D16: the directory-request 403 (D6) is answered natively and bypasses `customErrors`; the port throws it into the managed pipeline, so `customErrors` redirects instead |
 | `staticContent`, `defaultDocument`, `hiddenSegments` below app root | Decide and test per-folder merge behavior; root behavior already ships |
 | Remaining sections | Explicitly classify as future tenant or tolerated no-op |
