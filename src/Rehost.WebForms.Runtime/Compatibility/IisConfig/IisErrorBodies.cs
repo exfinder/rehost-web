@@ -13,6 +13,8 @@ internal static class IisErrorBodies
                 "You do not have permission to view this directory or page."),
             405 => ("405 - HTTP verb used to access this page is not allowed.",
                 "The page you are looking for cannot be displayed because an invalid method (HTTP verb) is being used."),
+            413 => ("413 - Request entity too large.",
+                "The page you are looking for cannot be displayed because the request entity is larger than the Web server is configured to allow."),
             _ => ("404 - File or directory not found.",
                 "The resource you are looking for has been removed, had its name changed, or is temporarily unavailable."),
         };

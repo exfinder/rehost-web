@@ -708,6 +708,9 @@ namespace System.Web {
             if (HiddenSegments.Refuses(_request.FilePath) || ForbiddenExtensions.Refuses(_request.FilePath)) {
                 IisConfig.NativeRefusal.Respond(this, 404);
             }
+            else if (RequestFiltering.Judge(_request.HttpMethod, _request.FilePath, _request.QueryStringText) is string refused) {
+                IisConfig.NativeRefusal.Respond(this, 404, refused);
+            }
 #endif
         }
 

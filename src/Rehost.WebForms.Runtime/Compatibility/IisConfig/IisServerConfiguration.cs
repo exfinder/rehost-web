@@ -39,7 +39,8 @@ internal sealed class IisServerConfiguration
         Array.Empty<IisHandlerRoute>(),
         IisFolderHandlers.Empty,
         rewrite: null,
-        CustomHeaders.Empty);
+        CustomHeaders.Empty,
+        RequestLimits.Unlimited);
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -62,7 +63,8 @@ internal sealed class IisServerConfiguration
         IReadOnlyList<IisHandlerRoute> handlerRoutes,
         IisFolderHandlers folderHandlers,
         RewriteSection? rewrite,
-        CustomHeaders customHeaders)
+        CustomHeaders customHeaders,
+        RequestLimits requestLimits)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -78,6 +80,7 @@ internal sealed class IisServerConfiguration
         _folderHandlers = folderHandlers;
         Rewrite = rewrite;
         CustomHeaders = customHeaders;
+        RequestLimits = requestLimits;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -97,6 +100,8 @@ internal sealed class IisServerConfiguration
     internal RewriteSection? Rewrite { get; }
 
     internal CustomHeaders CustomHeaders { get; }
+
+    internal RequestLimits RequestLimits { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
         _folderHandlers.RoutesFor(path);
@@ -192,7 +197,8 @@ internal sealed class IisServerConfiguration
                 sections.ClassicSectionsWaived,
                 sections.HiddenSegments),
             sections.Rewrite,
-            sections.CustomHeaders.Build());
+            sections.CustomHeaders.Build(),
+            sections.RequestLimits.Build());
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -229,6 +235,7 @@ internal sealed class IisServerConfiguration
         }
 
         sections.CustomHeaders.Apply(document, configPath);
+        sections.RequestLimits.Apply(document, configPath);
 
         var staticContentNode = document.SelectSingleNode(
             "/configuration/system.webServer/staticContent");
@@ -362,6 +369,8 @@ internal sealed class IisServerConfiguration
         internal RewriteSection? Rewrite { get; set; }
 
         internal CustomHeaderSection CustomHeaders { get; } = new();
+
+        internal RequestLimitsSection RequestLimits { get; } = new();
 
         internal DefaultDocumentSection DefaultDocuments { get; } = new();
 
