@@ -104,12 +104,13 @@ Carried from earlier milestones as unresolved detail:
   [ambient statics audit](follow-ups/ambient-statics-audit.md).
 - Integrated-mode divergences the [round-4 readings](research/iis-modules-handlers-readings.md)
   measured and this runtime has not closed:
-  - `system.webServer/security/authorization` is not read at all. An application
-    that protected a folder with the native section — the only one of the two that
-    reaches a static file (MH36) — gets no protection here and no error.
-    `<handlers accessPolicy>` is unread too: IIS Web Core answered 403.1 for a
-    verb outside the policy, identically in both pipeline modes (IV29), and the
-    port serves the request.
+  - `system.webServer/security/authorization` and `<handlers accessPolicy>` are
+    refused at activation, not enforced (ledger P103). The real tenant is
+    per-path enforcement of both, covering static files, which the native
+    section reaches and `system.web/authorization` does not (MH36): 401.2 from
+    `UrlAuthorizationModule` for a `Deny` row, 403.1 from IIS Web Core for
+    `accessPolicy="Read"`, both ahead of managed code and identical in the two
+    pipeline modes (IV29).
   - `OPTIONS` answers 405 where IIS answers 200 with an `Allow` header and an
     obsolete `Public` carrying the same list, and `TRACE` answers 405 where IIS
     answers 501 unless `EnableTraceMethod` is set (MH37, MH38).

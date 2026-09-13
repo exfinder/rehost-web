@@ -91,7 +91,7 @@ refusal outright (ledger P93). No APP-VISIBLE OPEN entry remains in this audit.
 | `AssignContext` | `Debug.Assert` | PLUMBING | |
 | `AsyncAppEventHandlersTable.AddHandler` | Also adds an `AsyncEventExecutionStep` to the module's event map | PLUMBING | Event maps are the native dispatch table |
 | `AsyncEventExecutionStep` ctor chaining | Passes the mode to an overload that ignores the parameter | PLUMBING | Parameter unused in both arms |
-| `CallHandlerExecutionStep.Execute` | `IIS7WorkerRequest.IsHandlerExecutionDenied()` → 403 with `PageForbiddenErrorFormatter` | RESOLVED | Not a pipeline-mode divergence: IV29 measured both native denial paths refusing ahead of managed code and identically on the two pools — `security/authorization` `Deny` gives 401.2 from `UrlAuthorizationModule`, `handlers accessPolicy="Read"` gives 403.1 from IIS Web Core. The port reads neither section, which is the Later entry under MH36 |
+| `CallHandlerExecutionStep.Execute` | `IIS7WorkerRequest.IsHandlerExecutionDenied()` → 403 with `PageForbiddenErrorFormatter` | RESOLVED | Not a pipeline-mode divergence: IV29 measured both native denial paths refusing ahead of managed code and identically on the two pools — `security/authorization` `Deny` gives 401.2 from `UrlAuthorizationModule`, `handlers accessPolicy="Read"` gives 403.1 from IIS Web Core. The port refuses both sections at activation (P103); enforcement stays the backlog entry under MH36 |
 | `CallFilterExecutionStep.Execute` | Disables the `LogRequest` notification after `UpdateRequestCache` | PLUMBING | Notification suppression |
 | `StepManager.CompleteRequest` | Marks `NotificationContext.RequestCompleted` | PLUMBING | |
 
@@ -350,8 +350,8 @@ Remaining open items, in descending likelihood:
 - `CallHandlerExecutionStep`'s `IsHandlerExecutionDenied` 403 — **closed as a non-divergence**
   (job 5). IV29: `security/authorization` `Deny` answers 401.2 from `UrlAuthorizationModule`
   and `handlers accessPolicy="Read"` answers 403.1 from IIS Web Core, both ahead of managed
-  code and both identical across the pools. The port's gap is that it reads neither section,
-  which stays the Later entry under MH36.
+  code and both identical across the pools. The port refuses both sections at activation
+  (P103); enforcement stays the backlog entry under MH36.
 - `HostingEnvironment.MaxConcurrent*PerCPU` (4 sites, one behavior — the refusal kept, the
   message reworded); `DefaultAuthentication.Authenticate` and `DefaultHttpHandler` (inverse
   gates the audience never exercised, now refused as integrated refused them). **Landed**
