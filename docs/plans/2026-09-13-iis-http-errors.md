@@ -87,9 +87,13 @@ and `error[@responseMode='ExecuteURL']`. `RefuseBelowTheRoot` beside the
 `customHeaders` one in `IisFolderHandlers.Load`.
 
 `IisServerConfiguration.HttpErrors` exposes the record. The baseline gains
-`<httpErrors>` with IIS's ten rows, `prefixLanguageFilePath` and `path` as
-in the golden, under the existing "written out so an amendment has
-something to amend" comment style.
+`<httpErrors errorMode="DetailedLocalOnly" existingResponse="Auto"
+defaultResponseMode="File">` with IIS's ten rows, `prefixLanguageFilePath`
+and `path` as in the golden `applicationHost.config`; the three attributes
+are the schema's defaults (`IIS_schema.xml`), written out under the
+existing "written out so an amendment has something to amend" comment
+style. The schema also fixes the ranges the reader enforces: `statusCode`
+400-999, `subStatusCode` -1 to 999, both forming the combined key.
 
 `NativeRefusal.Respond` takes the mode from `IisServerConfiguration.Current`
 and writes `IisErrorBodies.Refusal` only when `DetailedFor(IsLocal)`;
