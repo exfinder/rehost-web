@@ -120,13 +120,14 @@ Evidence: `IisServerConfigurationTests`, `IisRegistrationsTests`,
 `WebServerAmendmentsOverKestrelTests`, `ModulesOverKestrelTests`,
 `HandlersOverKestrelTests`, `MigratedAppOverKestrelTests`,
 `ClassicSectionRefusalOverKestrelTests`, `HiddenSegmentsOverKestrelTests`,
-`CachingProfilesTests`, `CachingProfilesReportTests`, and
+`CachingProfilesTests`, `CachingProfilesReportTests`,
+`ClientCacheTests`, `ClientCacheOverKestrelTests`, and
 `StaticFilesOverKestrelTests`.
 
 | Capability | State | Boundary |
 | --- | --- | --- |
 | Framework-derived machine/root web configuration | Supported | Versioned assets default under `AppContext.BaseDirectory/configs` and may be overridden explicitly; application `web.config` is optional |
-| App-root `system.webServer/staticContent` | Supported | `add`/`remove`/`clear`, MIME types, duplicate validation, and inherited baseline |
+| App-root `system.webServer/staticContent` | Partial | `add`/`remove`/`clear`, MIME types, duplicate validation, and inherited baseline. `clientCache` composes the one `Cache-Control` the static bridge writes, on 200, HEAD, 206 and 304 alike: the caching profile's word, then `cacheControlCustom`, then `max-age=<seconds>` under `UseMaxAge` or `no-cache` under `DisableCache`, comma-joined without spaces, and nothing at all when every part is empty; `httpExpires` rides as `Expires` verbatim under `UseExpires` alone, and managed answers keep their own headers (CC1-CC9, CC11, CC13, CC15). Boundaries: `setEtag="false"` fails activation, since the managed static handler writes the `ETag` with the response's cache headers and nothing in this port can take it back, where IIS dropped it and kept `Last-Modified` (CC10, backlog); the section is honored in the application root alone, where IIS scoped it per path (CC12), so the element in a `<location>` block or a folder `web.config` fails activation; and a span that does not parse, an unknown mode or a CR/LF in `httpExpires` or `cacheControlCustom` fails activation naming the file and the attribute, where IIS failed the static requests alone (CC14) ([CC1-CC15](research/iis-client-cache-readings.md), ledger P105) |
 | App-root `requestFiltering/hiddenSegments` | Supported | Case-insensitive add/remove/clear; request refusal currently has an app-shaped response rather than IIS substatus 404.8 |
 | App-root `requestFiltering/fileExtensions` | Partial | IIS deny-list and application `add`/`remove`/`clear`/`allowUnlisted` semantics are supported; denials return 404 and invalid entries fail activation. The section is root-only, while IIS resolves it per path (ledger P86, MH29-MH32) |
 | URL canonicalization, path-info, `Request.RawUrl` | Supported | Adapter matches 127-request reading for slashes, encoded separators, dot segments, root-climb 403, handler path-info split and canonical path + verbatim query (P72). Two static wire-status deltas remain on IIS follow-up |

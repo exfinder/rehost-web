@@ -66,6 +66,13 @@ Carried from earlier milestones as unresolved detail:
   application root, and targets in another application. Also open: the
   parser-internal gaps named in the compatibility row, and the original
   request's second `LogRequest`/`EndRequest` tail (UR3).
+- `staticContent/clientCache` `setEtag="false"`. IIS dropped the `ETag` and kept
+  `Last-Modified` on every static answer ([CC10](research/iis-client-cache-readings.md));
+  the port refuses the value at activation instead, because the managed static handler
+  appends the tag with the response's cache headers, which no API outside the reference
+  source can take back. Honoring it means guarding the three `ETag` writes in
+  `StaticFileHandler` on the configured value, with the provenance deviation that comes
+  with an imported-source change.
 - Adapter residuals: HTTP/3, proxied client certificates, integrated-mode
   server variables: [host adapter](follow-ups/aspnet-core-host-adapter.md).
 - Terminal-event and cancellation coverage:
