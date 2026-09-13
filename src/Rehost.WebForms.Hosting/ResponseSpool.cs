@@ -3,8 +3,10 @@ namespace Rehost.WebForms.Hosting;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.IisConfig;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
@@ -108,6 +110,76 @@ internal sealed class ResponseSpool : IDisposable
         IsSealed = true;
     }
 
+    internal bool HasEntity => _segments.Count != 0;
+
+    // Raised once, before the head is published, whether a mid-request flush or the end of the
+    // request brings it: that is the moment IIS's custom-error module judged the response.
+    internal Action<ResponseSpool, HttpContext>? BeforeHeadCommit { get; set; }
+
+    internal void ReplaceEntity(string contentType, byte[] body)
+    {
+        ArgumentNullException.ThrowIfNull(body);
+        DiscardEntity();
+
+        var run = new FileBufferingWriteStream(
+            _memoryThreshold,
+            bufferLimit: null,
+            tempFileDirectoryAccessor: _temporaryDirectoryAccessor);
+        run.Write(body, 0, body.Length);
+        _segments.Add(run);
+        PublishEntityHead(contentType, body.Length);
+    }
+
+    internal void ReplaceEntityWithFile(string contentType, string path, long length)
+    {
+        DiscardEntity();
+        _segments.Add(new FileRange(path, 0, length));
+        PublishEntityHead(contentType, length);
+    }
+
+    internal void Redirect(string location)
+    {
+        ReplaceEntity(
+            "text/html; charset=UTF-8",
+            Encoding.UTF8.GetBytes(IisErrorBodies.ObjectMoved(location)));
+        StatusCode = StatusCodes.Status302Found;
+        ReasonPhrase = "Redirect";
+        _headers.Add(new ResponseHeader("Location", location));
+    }
+
+    private void PublishEntityHead(string contentType, long length)
+    {
+        _headers.Add(new ResponseHeader("Content-Type", contentType));
+
+        // A response the application has not finished still has writes to come, and a length
+        // declared now would contradict them.
+        if (IsSealed)
+        {
+            ContentLength = length;
+        }
+    }
+
+    private void DiscardEntity()
+    {
+        if (HeadCommitted || DeliveryFaulted)
+        {
+            throw new InvalidOperationException(
+                "The response entity can only be replaced while the head is still open.");
+        }
+
+        foreach (var segment in _segments)
+        {
+            (segment as FileBufferingWriteStream)?.Dispose();
+        }
+
+        _segments.Clear();
+        _currentRun = null;
+        _delivered = 0;
+        _headers.RemoveAll(header =>
+            string.Equals(header.Name, "Content-Type", StringComparison.OrdinalIgnoreCase));
+        ContentLength = null;
+    }
+
     // A mid-request flush: the head goes out even when no bytes are pending, as IIS sent
     // Framework's headers on the first Flush.
     internal Task FlushAsync(HttpContext context, CancellationToken cancellationToken)
@@ -124,6 +196,12 @@ internal sealed class ResponseSpool : IDisposable
         if (DeliveryFaulted)
         {
             return;
+        }
+
+        if (!HeadCommitted && BeforeHeadCommit is { } beforeHeadCommit)
+        {
+            BeforeHeadCommit = null;
+            beforeHeadCommit(this, context);
         }
 
         var response = context.Response;

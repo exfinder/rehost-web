@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Http;
 using Rehost.WebForms.Hosting;
 using Shouldly;
@@ -143,6 +144,105 @@ public sealed class ResponseSpoolTests
         {
             temp.Delete(recursive: true);
         }
+    }
+
+    [Fact]
+    public async Task A_Swapped_Entity_Replaces_The_Spilled_Body_And_Deletes_Its_File()
+    {
+        var temp = Directory.CreateTempSubdirectory("rehost-spool-");
+        try
+        {
+            var delivered = new MemoryStream();
+            var context = new DefaultHttpContext();
+            context.Response.Body = delivered;
+
+            using (var spool = new ResponseSpool(() => temp.FullName, Threshold))
+            {
+                spool.Write(new byte[Threshold * 8], Threshold * 8);
+                temp.GetFiles().ShouldNotBeEmpty();
+
+                spool.Seal();
+                spool.ReplaceEntity("text/plain", "swapped"u8.ToArray());
+                temp.GetFiles().ShouldBeEmpty();
+
+                await spool.CommitAsync(context, TestContext.Current.CancellationToken);
+            }
+
+            Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("swapped");
+        }
+        finally
+        {
+            temp.Delete(recursive: true);
+        }
+    }
+
+    // IIS replaced the entity alone: the status and the headers its own refusal set stay on the
+    // custom page, and only the type and the length follow the new bytes.
+    [Fact]
+    public void A_Swap_Keeps_The_Status_And_Headers_And_Replaces_Only_The_Type_And_Length()
+    {
+        using var spool = new ResponseSpool(Path.GetTempPath, Threshold);
+        spool.SetStatus(405, "Method Not Allowed");
+        spool.AddHeader("Connection", "close");
+        spool.AddHeader("Content-Type", "text/html");
+        spool.AddHeader("Allow", "GET, HEAD");
+        spool.SetContentLength(9);
+        spool.Write("no method"u8.ToArray(), 9);
+        spool.Seal();
+
+        spool.ReplaceEntity("application/json", """{"no":1}"""u8.ToArray());
+
+        spool.StatusCode.ShouldBe(405);
+        spool.ReasonPhrase.ShouldBe("Method Not Allowed");
+        spool.Headers.Select(header => $"{header.Name}={header.Value}").ShouldBe(
+            ["Connection=close", "Allow=GET, HEAD", "Content-Type=application/json"]);
+        spool.ContentLength.ShouldBe(8);
+    }
+
+    [Fact]
+    public async Task A_Swap_After_The_Head_Was_Committed_Is_Refused()
+    {
+        var context = new DefaultHttpContext();
+        context.Response.Body = new MemoryStream();
+        using var spool = new ResponseSpool(Path.GetTempPath, Threshold);
+        spool.Write("first"u8.ToArray(), 5);
+
+        await spool.FlushAsync(context, TestContext.Current.CancellationToken);
+
+        Should.Throw<InvalidOperationException>(
+                () => spool.ReplaceEntity("text/plain", "late"u8.ToArray()))
+            .Message.ShouldContain("head is still open");
+    }
+
+    // The swap happens once, when the head leaves: what is buffered then is replaced and what the
+    // application writes afterwards flows through, which is chunked framing, not a declared length.
+    [Fact]
+    public async Task The_Head_Commit_Hook_Runs_Once_And_Later_Writes_Follow_The_Swap()
+    {
+        var delivered = new MemoryStream();
+        var context = new DefaultHttpContext();
+        context.Response.Body = delivered;
+        var hooks = 0;
+        using var spool = new ResponseSpool(Path.GetTempPath, Threshold);
+        spool.BeforeHeadCommit = (swapped, _) =>
+        {
+            hooks++;
+            swapped.ReplaceEntity("application/json", "[replaced]"u8.ToArray());
+        };
+
+        spool.SetStatus(404, "Not Found");
+        spool.Write("buffered"u8.ToArray(), 8);
+        await spool.FlushAsync(context, TestContext.Current.CancellationToken);
+
+        Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("[replaced]");
+        spool.ContentLength.ShouldBeNull();
+
+        spool.Write("|later"u8.ToArray(), 6);
+        spool.Seal();
+        await spool.CommitAsync(context, TestContext.Current.CancellationToken);
+
+        hooks.ShouldBe(1);
+        Encoding.ASCII.GetString(delivered.ToArray()).ShouldBe("[replaced]|later");
     }
 
     private sealed class FailingStream : Stream

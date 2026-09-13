@@ -33,6 +33,7 @@ public static class RehostWebFormsExtensions
                 options.PhysicalRootPath),
             CustomHeaders = serverConfiguration.CustomHeaders,
             RequestLimits = serverConfiguration.RequestLimits,
+            HttpErrors = serverConfiguration.HttpErrors,
         });
 
         // Ahead of every host callback, so a host's own Kestrel body limit, registered before or

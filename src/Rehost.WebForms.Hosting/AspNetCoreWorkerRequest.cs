@@ -60,6 +60,8 @@ internal sealed class AspNetCoreWorkerRequest : HttpWorkerRequest, IDisposable
 
     internal override bool SupportsWebSocketUpgrade => true;
 
+    internal override bool TrySkipIisCustomErrors { get; set; }
+
     // Framework's own "module not enabled" refusal when the WebSocket middleware is absent.
     internal override bool IsWebSocketUpgradeRequest()
     {

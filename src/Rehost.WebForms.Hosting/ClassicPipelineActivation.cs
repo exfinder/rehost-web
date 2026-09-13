@@ -38,6 +38,8 @@ internal sealed class ClassicPipelineActivation
 
     internal RequestLimits RequestLimits { get; init; } = RequestLimits.Unlimited;
 
+    internal HttpErrors HttpErrors { get; init; } = HttpErrors.Default;
+
     // Activation is deferred to the first request so that request observes a cold application:
     // activating at startup would make every served request a warm one.
     internal ClassicPipelineDispatcher Dispatcher => _dispatcher.Value;
