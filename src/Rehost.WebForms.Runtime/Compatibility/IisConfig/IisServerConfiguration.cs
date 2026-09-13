@@ -232,6 +232,7 @@ internal sealed class IisServerConfiguration
             sections.ClassicSectionsWaived =
                 ClassicSectionValidation.Validate(document, configPath);
             sections.Rewrite = RewriteSection.Read(document, configPath);
+            NativeAuthorization.Refuse(document, configPath);
         }
 
         sections.CustomHeaders.Apply(document, configPath);

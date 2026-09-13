@@ -162,6 +162,7 @@ internal sealed class IisFolderHandlers
         var folderWaiver = ClassicSectionValidation.Validate(document, configPath, waiver);
         RewriteSection.RefuseBelowTheRoot(document, configPath);
         CustomHeaderSection.RefuseBelowTheRoot(document, configPath);
+        NativeAuthorization.Refuse(document, configPath);
 
         var handlersNode = document.SelectSingleNode(
             "/configuration/system.webServer/handlers");
