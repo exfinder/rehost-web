@@ -2,7 +2,8 @@
 
 Evidence for ledger P83, P85, P86 and the `system.webServer/handlers` and `/modules`
 [compatibility rows](../compatibility.md). MH1-MH39 were observed on full IIS 10 on
-`winbox`, 2026-08-22–23. Tables retain the stimulus, observable result and conclusion;
+`winbox`, 2026-08-22–23; MH40-MH42 on 2026-09-17 (site `imprig`, `ApplicationPoolIdentity`
+pools, anonymous authentication as `IUSR`). Tables retain the stimulus, observable result and conclusion;
 repeated setup, request transcripts and teardown are omitted.
 
 ## Method
@@ -36,6 +37,9 @@ managed requests. Each app was isolated, so one invalid configuration could not 
 | MH24 | Put a module add in a subfolder `web.config`. | No failure, but the module never runs in or outside that folder. | Folder-level module sections are silently ignored. |
 | MH33 | Put classic `httpModules` or impersonation inside `<location>`. | No validation error; the module never runs, including inside the location. Root-level control still gives 500.22. | `ConfigurationValidationModule` does not inspect classic settings inside `<location>`; they are lost silently. |
 | MH34 | Put classic `httpModules` behind `configSource`. | Request gives 500.22. | Validation inspects resolved external section content. |
+| MH40 | Integrated pool, anonymous authentication, no `<identity>`; `Global.asax` and the page print `WindowsIdentity.GetCurrent().Name` at `BeginRequest`, `AuthenticateRequest`, `PostAuthenticateRequest`, `PreRequestHandlerExecute` and in `Page_Load`. | Every stage names the pool identity `IIS APPPOOL\<pool>`; `Request.LogonUserIdentity` names `NT AUTHORITY\IUSR`; `LOGON_USER` and `User.Identity.Name` are empty. | Without impersonation the whole managed pipeline runs as the process identity; the anonymous token is carried on the request, not applied to the thread. |
+| MH41 | Same app with `<identity impersonate="true" />` and `validateIntegratedModeConfiguration="false"`. | 200. `BeginRequest` and `AuthenticateRequest` still name the pool; `PostAuthenticateRequest`, `PreRequestHandlerExecute` and the page name `NT AUTHORITY\IUSR`; `Environment.UserName` in the page is `IUSR`. | With the waiver, integrated mode honors impersonation from `PostAuthenticateRequest` on. The two earliest events run unimpersonated. The waiver is not a no-op: the handler and every later module run as the client's token. |
+| MH42 | Same app without the waiver on the integrated pool, and with `impersonate="true"` on a classic pool. | Integrated: 500.24 from `ConfigurationValidationModule` at `BeginRequest`, naming `system.web/identity@impersonate`. Classic: 200 and every stage from `BeginRequest` names `NT AUTHORITY\IUSR`. | MH5 reconfirmed. Classic impersonates for the whole pipeline; integrated only after authentication, which is why validation refuses it unless waived. |
 
 ## Handler collection and matching
 
