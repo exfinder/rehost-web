@@ -6,9 +6,7 @@ using System.Xml;
 
 namespace System.Web.IisConfig;
 
-// The leaf lists are the whole contract: an element on the way to a leaf is walked into, an element
-// under a leaf is that reader's business, and anything else stops activation. A reader's own child
-// elements therefore do not belong here.
+// What sits under a leaf is that reader's business; a reader's own child elements do not belong here.
 internal static class UnhonoredSections
 {
     internal const string CompressionReason =

@@ -159,9 +159,9 @@ internal sealed class IisFolderHandlers
                 $"'{configPath}' is not well-formed XML: {failure.Message}", failure);
         }
 
-        var folderWaiver = ClassicSectionValidation.Validate(document, configPath, waiver);
         NativeAuthorization.Refuse(document, configPath);
         UnhonoredSections.RefuseInFolder(document, configPath);
+        var folderWaiver = ClassicSectionValidation.Validate(document, configPath, waiver);
 
         var handlersNode = document.SelectSingleNode(
             "/configuration/system.webServer/handlers");
