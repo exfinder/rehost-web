@@ -142,8 +142,8 @@ internal sealed class IisFolderHandlers
     }
 
     // A folder's <modules> section is silently ignored, which is what IIS does with it (MH24);
-    // reading one here would run modules IIS never ran. Nothing else in the folder file is honored
-    // either, so only <handlers> and the classic-section rule are consulted.
+    // reading one here would run modules IIS never ran. <validation> decides the waiver, and every
+    // other element stops activation rather than running as if it were absent.
     private static bool Apply(string configPath, IisRegistrationSection section, bool waiver)
     {
         var document = new XmlDocument();
@@ -160,11 +160,8 @@ internal sealed class IisFolderHandlers
         }
 
         var folderWaiver = ClassicSectionValidation.Validate(document, configPath, waiver);
-        RewriteSection.RefuseBelowTheRoot(document, configPath);
-        IisCollectionReader.RefuseBelowTheRoot(document, "customHeaders", configPath);
-        IisCollectionReader.RefuseBelowTheRoot(document, "httpErrors", configPath);
-        IisCollectionReader.RefuseBelowTheRoot(document, "clientCache", configPath);
         NativeAuthorization.Refuse(document, configPath);
+        UnhonoredSections.RefuseInFolder(document, configPath);
 
         var handlersNode = document.SelectSingleNode(
             "/configuration/system.webServer/handlers");

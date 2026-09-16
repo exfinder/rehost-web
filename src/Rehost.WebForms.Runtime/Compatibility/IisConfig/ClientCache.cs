@@ -77,8 +77,6 @@ internal sealed class ClientCacheSection
 
     internal void Apply(XmlDocument document, string configPath)
     {
-        IisCollectionReader.RefuseInsideLocation(document, "clientCache", configPath);
-
         var section = document.SelectSingleNode(
             "/configuration/system.webServer/staticContent/clientCache");
         if (section == null)

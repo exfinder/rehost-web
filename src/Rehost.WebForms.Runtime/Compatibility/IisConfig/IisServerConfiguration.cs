@@ -8,9 +8,10 @@ using System.Xml;
 namespace System.Web.IisConfig;
 
 // Shipped applicationHost baseline merged with the app root's <system.webServer> amendments,
-// published atomically at activation. Unhonored sections are ignored, as Framework ignored the
-// whole group. Only <handlers> is read from folder web.configs below the root, where IIS resolves
-// it per folder (MH27) and ignores everything else it finds there, <modules> included (MH24).
+// published atomically at activation. An element no reader here honors stops activation instead of
+// running as if it were absent. Only <handlers> is read from folder web.configs below the root,
+// where IIS resolves it per folder (MH27) and ignores everything else it finds there, <modules>
+// included (MH24).
 internal sealed class IisServerConfiguration
 {
     private static readonly IisCollectionSchema MimeMapSchema =
@@ -42,7 +43,8 @@ internal sealed class IisServerConfiguration
         CustomHeaders.Empty,
         RequestLimits.Unlimited,
         HttpErrors.Default,
-        ClientCache.Default);
+        ClientCache.Default,
+        Array.Empty<string>());
 
     private readonly Dictionary<string, string> _staticContent;
     private readonly Dictionary<string, string> _hiddenSegments;
@@ -50,6 +52,7 @@ internal sealed class IisServerConfiguration
     private readonly bool _allowUnlistedExtensions;
     private readonly Dictionary<string, IisCachingProfile> _cachingProfiles;
     private readonly IisFolderHandlers _folderHandlers;
+    private readonly IReadOnlyList<string> _warnedSections;
 
     private IisServerConfiguration(
         Dictionary<string, string> staticContent,
@@ -68,7 +71,8 @@ internal sealed class IisServerConfiguration
         CustomHeaders customHeaders,
         RequestLimits requestLimits,
         HttpErrors httpErrors,
-        ClientCache clientCache)
+        ClientCache clientCache,
+        IReadOnlyList<string> warnedSections)
     {
         _staticContent = staticContent;
         _hiddenSegments = hiddenSegments;
@@ -87,6 +91,7 @@ internal sealed class IisServerConfiguration
         RequestLimits = requestLimits;
         HttpErrors = httpErrors;
         ClientCache = clientCache;
+        _warnedSections = warnedSections;
     }
 
     internal static IisServerConfiguration Current => _current;
@@ -131,6 +136,14 @@ internal sealed class IisServerConfiguration
     internal void ReportUnsupported(string applicationConfigurationFilePath)
     {
         ReportIgnoredCachingProfiles(applicationConfigurationFilePath);
+
+        foreach (var element in _warnedSections)
+        {
+            Util.WebFormsRuntimeEventSource.Log.SectionNotHonored(
+                applicationConfigurationFilePath,
+                element,
+                UnhonoredSections.CompressionReason);
+        }
     }
 
     // Static or dynamic is the handler list's answer for a request, not a fixed extension list.
@@ -215,7 +228,8 @@ internal sealed class IisServerConfiguration
                 extension => sections.StaticContent.TryGetValue(extension, out var mimeType)
                     ? mimeType
                     : null),
-            sections.ClientCache.Build());
+            sections.ClientCache.Build(),
+            sections.WarnedSections);
     }
 
     internal static void Publish(IisServerConfiguration configuration)
@@ -246,10 +260,11 @@ internal sealed class IisServerConfiguration
 
         if (application)
         {
+            NativeAuthorization.Refuse(document, configPath);
+            sections.WarnedSections = UnhonoredSections.RefuseAtRoot(document, configPath);
             sections.ClassicSectionsWaived =
                 ClassicSectionValidation.Validate(document, configPath);
             sections.Rewrite = RewriteSection.Read(document, configPath);
-            NativeAuthorization.Refuse(document, configPath);
         }
 
         sections.CustomHeaders.Apply(document, configPath);
@@ -372,6 +387,8 @@ internal sealed class IisServerConfiguration
                 $"""<add fileExtension="{extension}" allowed="{value}">""", value, configPath);
 
         internal bool ClassicSectionsWaived { get; set; }
+
+        internal IReadOnlyList<string> WarnedSections { get; set; } = Array.Empty<string>();
 
         internal RewriteSection? Rewrite { get; set; }
 

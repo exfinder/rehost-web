@@ -108,8 +108,6 @@ internal sealed class HttpErrorsSection
 
     internal void Apply(XmlDocument document, string configPath)
     {
-        IisCollectionReader.RefuseInsideLocation(document, "httpErrors", configPath);
-
         var section = document.SelectSingleNode("/configuration/system.webServer/httpErrors");
         if (section == null)
         {

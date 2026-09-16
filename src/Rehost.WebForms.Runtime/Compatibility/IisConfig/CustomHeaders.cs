@@ -47,8 +47,6 @@ internal sealed class CustomHeaderSection
 
     internal void Apply(XmlDocument document, string configPath)
     {
-        IisCollectionReader.RefuseInsideLocation(document, "customHeaders", configPath);
-
         var section = document.SelectSingleNode(
             "/configuration/system.webServer/httpProtocol/customHeaders");
         if (section != null)

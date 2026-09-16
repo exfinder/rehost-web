@@ -198,5 +198,18 @@ namespace System.Web.Util {
         private void WriteCachingProfilesIgnored(string file, string extensions) {
             WriteEvent(11, file, extensions);
         }
+
+        [NonEvent]
+        internal void SectionNotHonored(string file, string element, string reason) {
+            Swallow(() => {
+                WebFormsRuntimeLogger.Logger.SectionNotHonored(file, element, reason);
+                WriteSectionNotHonored(file, element, reason);
+            });
+        }
+
+        [Event(12, Level = EventLevel.Warning, Message = "<{1}> in {0} is not honored; {2}")]
+        private void WriteSectionNotHonored(string file, string element, string reason) {
+            WriteEvent(12, file, element, reason);
+        }
     }
 }

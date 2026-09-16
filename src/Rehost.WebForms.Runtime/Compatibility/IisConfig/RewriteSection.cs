@@ -23,13 +23,6 @@ internal sealed class RewriteSection
 
     internal static RewriteSection? Read(XmlDocument document, string configPath)
     {
-        RefuseIfPresent(
-            document,
-            "//location//rewrite",
-            """<rewrite> inside <location>""",
-            configPath,
-            "is not honored: inbound rules are read from the application root <system.webServer>");
-
         var section = document.SelectSingleNode("/configuration/system.webServer/rewrite");
         if (section == null)
         {
@@ -72,14 +65,6 @@ internal sealed class RewriteSection
 
         return new RewriteSection(section.OuterXml, configPath);
     }
-
-    internal static void RefuseBelowTheRoot(XmlDocument document, string configPath) =>
-        RefuseIfPresent(
-            document,
-            "//rewrite",
-            "<rewrite>",
-            configPath,
-            "is honored only in the application root web.config");
 
     private static void RefuseDuplicateNames(XmlNode section, string configPath)
     {

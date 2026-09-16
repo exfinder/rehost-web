@@ -45,27 +45,6 @@ internal sealed class IisCollectionSchema
 
 internal static class IisCollectionReader
 {
-    internal const string RootOnlyRule =
-        "is honored only in the application root web.config.";
-
-    internal static void RefuseInsideLocation(XmlDocument document, string element, string configPath)
-    {
-        if (document.SelectSingleNode($"//location//{element}") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<{element}> inside <location> in '{configPath}' {RootOnlyRule}");
-        }
-    }
-
-    internal static void RefuseBelowTheRoot(XmlDocument document, string element, string configPath)
-    {
-        if (document.SelectSingleNode($"//{element}") != null)
-        {
-            throw new ConfigurationErrorsException(
-                $"<{element}> in '{configPath}' {RootOnlyRule}");
-        }
-    }
-
     internal const string BooleanRule =
         """is not a boolean; IIS accepts only "true" or "false".""";
 

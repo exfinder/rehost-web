@@ -88,6 +88,14 @@ internal static partial class WebFormsRuntimeLogger
         string file,
         string extensions);
 
+    [LoggerMessage(EventId = 12, Level = LogLevel.Warning, Message =
+        "<{element}> in {file} is not honored; {reason}")]
+    internal static partial void SectionNotHonored(
+        this ILogger logger,
+        string file,
+        string element,
+        string reason);
+
     [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(
         this ILogger logger,
