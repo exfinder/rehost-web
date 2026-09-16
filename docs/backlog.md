@@ -66,6 +66,18 @@ Carried from earlier milestones as unresolved detail:
   application root, and targets in another application. Also open: the
   parser-internal gaps named in the compatibility row, and the original
   request's second `LogRequest`/`EndRequest` tail (UR3).
+- `<handlers>` inside a `<location>` block, feeding `IisFolderHandlers`. The
+  block is refused today with the rest of `<system.webServer>` under
+  `<location>` (ledger P106), where IIS applied it to the path named. About two
+  days, and it needs winbox readings first: a location whose path names a file
+  rather than a folder, the order between a location block and a folder
+  `web.config` configuring the same path, and whether `<modules>` in a location
+  is honored where the folder file's is not (MH24).
+- `<location path=".">` and `path=""` folded into the application root before
+  the sections are read. Both name the root itself, so IIS merged them into it;
+  the port refuses them with every other location block. About half a day. None
+  of the sample applications carries one — the CMS applications and the old
+  publish-wizard wrapper are where the shape appears.
 - `staticContent/clientCache` `setEtag="false"`. IIS dropped the `ETag` and kept
   `Last-Modified` on every static answer ([CC10](research/iis-client-cache-readings.md));
   the port refuses the value at activation instead, because the managed static handler
