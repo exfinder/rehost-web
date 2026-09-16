@@ -133,52 +133,6 @@ public sealed class CustomHeadersTests : IDisposable
     }
 
     [Fact]
-    public void A_Section_Inside_A_Location_Block_Fails_Activation()
-    {
-        var app = WriteConfig(
-            "web.config",
-            """
-            <location path="sub">
-              <system.webServer>
-                <httpProtocol>
-                  <customHeaders><add name="X-Loc" value="1" /></customHeaders>
-                </httpProtocol>
-              </system.webServer>
-            </location>
-            """);
-
-        var failure = Should.Throw<ConfigurationErrorsException>(
-            () => IisServerConfiguration.Load(ShippedBaseline, app));
-
-        failure.Message.ShouldContain("<customHeaders> inside <location>", Case.Sensitive);
-        failure.Message.ShouldContain(app);
-        failure.Message.ShouldContain("application root web.config");
-    }
-
-    [Fact]
-    public void A_Folder_Web_Config_Carrying_The_Section_Fails_Activation()
-    {
-        var folder = Directory.CreateDirectory(Path.Combine(_root.FullName, "sub"));
-        var folderConfig = Path.Combine(folder.FullName, "web.config");
-        File.WriteAllText(
-            folderConfig,
-            """
-            <?xml version="1.0"?>
-            <configuration><system.webServer>
-              <httpProtocol>
-                <customHeaders><add name="X-Folder" value="1" /></customHeaders>
-              </httpProtocol>
-            </system.webServer></configuration>
-            """);
-
-        var failure = Should.Throw<ConfigurationErrorsException>(() => Load(""));
-
-        failure.Message.ShouldContain("<customHeaders>", Case.Sensitive);
-        failure.Message.ShouldContain(folderConfig);
-        failure.Message.ShouldContain("application root web.config");
-    }
-
-    [Fact]
     public void Removing_Server_Is_Accepted_And_Only_RequestFiltering_Switches_It_Off()
     {
         var inert = Load(

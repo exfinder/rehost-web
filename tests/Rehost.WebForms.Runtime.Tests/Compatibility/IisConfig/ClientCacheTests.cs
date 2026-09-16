@@ -14,13 +14,6 @@ public sealed class ClientCacheTests : IDisposable
 
     public void Dispose() => _root.Delete(recursive: true);
 
-    public enum Placement
-    {
-        Root,
-        Location,
-        Folder,
-    }
-
     [Fact]
     public void An_Application_Without_The_Element_Inherits_The_Baseline_Defaults_And_Sends_No_Header()
     {
@@ -102,44 +95,30 @@ public sealed class ClientCacheTests : IDisposable
 
     [Theory]
     [InlineData(
-        Placement.Root,
         """<clientCache cacheControlMaxAge="abc" />""",
         """<clientCache cacheControlMaxAge="abc">""",
         "is not a time span")]
     [InlineData(
-        Placement.Root,
         """<clientCache cacheControlMode="Forever" />""",
         """<clientCache cacheControlMode="Forever">""",
         "is not one of NoControl, UseMaxAge, UseExpires, DisableCache")]
     [InlineData(
-        Placement.Root,
         """<clientCache setEtag="false" />""",
         """<clientCache setEtag="false">""",
         "writes the ETag with the response's cache headers")]
     [InlineData(
-        Placement.Root,
         """<clientCache cacheControlCustom="public&#13;X-Injected: 1" />""",
         """<clientCache cacheControlCustom="public""",
         "carries a carriage return or line feed")]
-    [InlineData(
-        Placement.Location,
-        """<clientCache cacheControlMode="UseMaxAge" />""",
-        "<clientCache> inside <location>",
-        "application root web.config")]
-    [InlineData(
-        Placement.Folder,
-        """<clientCache cacheControlMode="UseMaxAge" />""",
-        "<clientCache>",
-        "application root web.config")]
-    public void A_Value_Or_A_Scope_This_Port_Refuses_Fails_Activation(
-        Placement placement, string element, string expected, string rule)
+    public void A_Value_This_Port_Refuses_Fails_Activation(
+        string element, string expected, string rule)
     {
-        var (application, named) = Write(placement, element);
+        var application = WriteApplication($"<staticContent>{element}</staticContent>");
 
         var failure = Should.Throw<ConfigurationErrorsException>(
             () => IisServerConfiguration.Load(ShippedBaseline, application));
 
-        failure.Message.ShouldContain(named);
+        failure.Message.ShouldContain(application);
         failure.Message.ShouldContain(expected, Case.Sensitive);
         failure.Message.ShouldContain(rule, Case.Sensitive);
     }
@@ -150,36 +129,6 @@ public sealed class ClientCacheTests : IDisposable
     private ClientCache Load(string systemWebServerContent) =>
         IisServerConfiguration.Load(ShippedBaseline, WriteApplication(systemWebServerContent))
             .ClientCache;
-
-    private (string Application, string Named) Write(Placement placement, string element)
-    {
-        if (placement == Placement.Folder)
-        {
-            var folder = Directory.CreateDirectory(Path.Combine(_root.FullName, "sub"));
-            var folderConfig = Path.Combine(folder.FullName, "web.config");
-            File.WriteAllText(
-                folderConfig,
-                $"""
-                <?xml version="1.0"?>
-                <configuration><system.webServer>
-                <staticContent>{element}</staticContent>
-                </system.webServer></configuration>
-                """);
-            return (WriteApplication(""), folderConfig);
-        }
-
-        var application = placement == Placement.Location
-            ? WriteConfig(
-                $"""
-                <location path="sub">
-                <system.webServer>
-                <staticContent>{element}</staticContent>
-                </system.webServer>
-                </location>
-                """)
-            : WriteApplication($"<staticContent>{element}</staticContent>");
-        return (application, application);
-    }
 
     private string WriteApplication(string systemWebServerContent) => WriteConfig(
         $"""

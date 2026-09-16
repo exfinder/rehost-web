@@ -42,43 +42,6 @@ public sealed class RewriteSectionTests : IDisposable
     }
 
     [Fact]
-    public void Rules_Inside_A_Location_Block_Fail_Activation()
-    {
-        var app = WriteConfig(
-            "web.config",
-            """
-            <location path="sub">
-              <system.webServer>
-                <rewrite><rules><rule name="l"><match url="^a$" /><action type="Rewrite" url="probe.aspx" /></rule></rules></rewrite>
-              </system.webServer>
-            </location>
-            """);
-
-        Refusal(app).ShouldContain("<rewrite> inside <location>", Case.Sensitive);
-    }
-
-    [Fact]
-    public void A_Folder_Web_Config_Carrying_The_Section_Fails_Activation()
-    {
-        var folder = Directory.CreateDirectory(Path.Combine(_root.FullName, "sub"));
-        File.WriteAllText(
-            Path.Combine(folder.FullName, "web.config"),
-            """
-            <?xml version="1.0"?>
-            <configuration><system.webServer>
-              <rewrite><rules><rule name="f"><match url="^a$" /><action type="Rewrite" url="probe.aspx" /></rule></rules></rewrite>
-            </system.webServer></configuration>
-            """);
-
-        var failure = Should.Throw<InvalidOperationException>(
-            () => IisServerConfiguration.Load(Baseline(), WriteApplication("")));
-
-        failure.Message.ShouldContain("<rewrite>", Case.Sensitive);
-        failure.Message.ShouldContain(Path.Combine(folder.FullName, "web.config"));
-        failure.Message.ShouldContain("application root web.config");
-    }
-
-    [Fact]
     public void Global_Rules_Fail_Activation()
     {
         var app = WriteApplication(

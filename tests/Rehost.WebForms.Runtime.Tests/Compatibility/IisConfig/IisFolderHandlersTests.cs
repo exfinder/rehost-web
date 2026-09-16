@@ -415,11 +415,6 @@ public sealed class IisFolderHandlersTests : IDisposable
             <?xml version="1.0"?>
             <configuration>
               <system.webServer>
-                <security>
-                  <requestFiltering>
-                    <hiddenSegments><add segment="App_Data" /></hiddenSegments>
-                  </requestFiltering>
-                </security>
                 <handlers>
                   <add name="SubW" path="*.aspx" verb="*" type="Probe.HandlerA" />
                 </handlers>

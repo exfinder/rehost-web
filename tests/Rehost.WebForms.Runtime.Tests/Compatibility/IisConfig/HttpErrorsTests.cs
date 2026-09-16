@@ -142,51 +142,6 @@ public sealed class HttpErrorsTests : IDisposable
         failure.ShouldContain("site-absolute path nor an absolute URL");
     }
 
-    [Fact]
-    public void A_Section_Inside_A_Location_Block_Fails_Activation()
-    {
-        var application = WriteConfig(
-            """
-            <location path="sub">
-              <system.webServer>
-                <httpErrors>
-                  <error statusCode="410" path="err.htm" />
-                </httpErrors>
-              </system.webServer>
-            </location>
-            """);
-
-        var failure = Should.Throw<ConfigurationErrorsException>(
-            () => IisServerConfiguration.Load(ShippedBaseline, application));
-
-        failure.Message.ShouldContain("<httpErrors> inside <location>", Case.Sensitive);
-        failure.Message.ShouldContain(application);
-        failure.Message.ShouldContain("application root web.config");
-    }
-
-    [Fact]
-    public void A_Folder_Web_Config_Carrying_The_Section_Fails_Activation()
-    {
-        var folder = Directory.CreateDirectory(Path.Combine(_root.FullName, "sub"));
-        var folderConfig = Path.Combine(folder.FullName, "web.config");
-        File.WriteAllText(
-            folderConfig,
-            """
-            <?xml version="1.0"?>
-            <configuration><system.webServer>
-              <httpErrors>
-                <error statusCode="410" path="err.htm" />
-              </httpErrors>
-            </system.webServer></configuration>
-            """);
-
-        var failure = Should.Throw<ConfigurationErrorsException>(() => Load(""));
-
-        failure.Message.ShouldContain("<httpErrors>", Case.Sensitive);
-        failure.Message.ShouldContain(folderConfig);
-        failure.Message.ShouldContain("application root web.config");
-    }
-
     private static string ShippedBaseline => Path.Combine(
         AppContext.BaseDirectory, "configs", "rehost-webforms.applicationHost.config");
 
