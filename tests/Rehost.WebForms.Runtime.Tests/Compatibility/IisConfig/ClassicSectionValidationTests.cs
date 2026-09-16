@@ -6,7 +6,8 @@ using Xunit;
 namespace Rehost.WebForms.Runtime.Tests.Compatibility.IisConfig;
 
 // The measured ConfigurationValidationModule rule (readings MH5, MH6, MH23): app-level classic
-// registration content or impersonation is refused unless the application waives the check.
+// registration content is refused unless the application waives the check. Impersonation is
+// refused either way.
 public sealed class ClassicSectionValidationTests : IDisposable
 {
     private readonly DirectoryInfo _root = Directory.CreateTempSubdirectory("rehost-iisvalid-");
@@ -77,16 +78,38 @@ public sealed class ClassicSectionValidationTests : IDisposable
         exception.Message.ShouldContain("validateIntegratedModeConfiguration", Case.Sensitive);
     }
 
-    // Reading MH5c: 500.24.
-    [Fact]
-    public void App_Level_Impersonation_Fails_Activation()
+    // Reading MH5c: 500.24. With the waiver IIS impersonated from PostAuthenticateRequest on,
+    // which the runtime cannot do, so the waiver does not make the element dead text.
+    [Theory]
+    [InlineData("")]
+    [InlineData("""<system.webServer><validation validateIntegratedModeConfiguration="false" /></system.webServer>""")]
+    public void Impersonation_Fails_Activation_Waived_Or_Not(string waiver)
     {
         var app = WriteConfig(
-            "web.config", """<system.web><identity impersonate="true" /></system.web>""");
+            "web.config", """<system.web><identity impersonate="true" /></system.web>""" + waiver);
+
+        var exception = Should.Throw<ConfigurationErrorsException>(
+            () => IisServerConfiguration.Load(Baseline(), app));
+
+        exception.Message.ShouldContain("""<identity impersonate="true">""", Case.Sensitive);
+        exception.Message.ShouldContain(app);
+        exception.Message.ShouldContain("does not waive it", Case.Sensitive);
+    }
+
+    [Fact]
+    public void Impersonation_Inside_A_Location_Element_Fails_Activation_Naming_The_Path()
+    {
+        var app = WriteConfig(
+            "web.config",
+            """
+            <location path="admin">
+              <system.web><identity impersonate="true" /></system.web>
+            </location>
+            """);
 
         Should.Throw<ConfigurationErrorsException>(
                 () => IisServerConfiguration.Load(Baseline(), app))
-            .Message.ShouldContain("impersonate");
+            .Message.ShouldContain("""inside <location path="admin">""", Case.Sensitive);
     }
 
     [Fact]
@@ -175,7 +198,6 @@ public sealed class ClassicSectionValidationTests : IDisposable
               <httpHandlers>
                 <add verb="*" path="probe3.axd" type="Probe.HandlerA" />
               </httpHandlers>
-              <identity impersonate="true" />
             </system.web>
             """
             + Waiver);

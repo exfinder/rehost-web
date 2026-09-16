@@ -7,9 +7,12 @@ using System.Xml;
 namespace System.Web.IisConfig;
 
 // IIS's ConfigurationValidationModule rule (MH5, MH6, MH23): app-level classic registration
-// content of any kind, or impersonation, fails every request with 500.22/500.23/500.24 unless the
-// application declares validateIntegratedModeConfiguration="false". Only the application's own
-// files are examined; the inherited classic defaults IIS ships are exempt.
+// content of any kind fails every request with 500.22/500.23 unless the application declares
+// validateIntegratedModeConfiguration="false". Only the application's own files are examined; the
+// inherited classic defaults IIS ships are exempt.
+//
+// Impersonation is refused before the waiver is consulted: with the flag false IIS ran the handler
+// as the client's token, which this runtime cannot do, so the flag must not turn it into dead text.
 //
 // A folder web.config below the application root is examined the same way, with the waiver
 // inherited from above unless the folder restates it. MH5 measured the application root; a
@@ -18,9 +21,16 @@ internal static class ClassicSectionValidation
 {
     private const string ValidationAttribute = "validateIntegratedModeConfiguration";
 
+    private const string ImpersonationRule =
+        "is not supported: this runtime runs every request as its process identity and cannot"
+        + " impersonate the client's Windows token. Remove the element;"
+        + " validateIntegratedModeConfiguration=\"false\" does not waive it.";
+
     internal static bool Validate(
         XmlDocument document, string configPath, bool inheritedWaiver = false)
     {
+        RefuseImpersonation(document, configPath);
+
         if (IsWaived(document, configPath) ?? inheritedWaiver)
         {
             return true;
@@ -29,7 +39,6 @@ internal static class ClassicSectionValidation
         var entries = new List<string>();
         CollectSection(document, "httpModules", "name", entries);
         CollectSection(document, "httpHandlers", "path", entries);
-        CollectImpersonation(document, entries);
 
         if (entries.Count == 0)
         {
@@ -92,15 +101,20 @@ internal static class ClassicSectionValidation
         }
     }
 
-    private static void CollectImpersonation(XmlDocument document, List<string> entries)
+    private static void RefuseImpersonation(XmlDocument document, string configPath)
     {
-        var impersonate = document
-            .SelectSingleNode("/configuration/system.web/identity")
-            ?.Attributes?["impersonate"]?.Value;
-
-        if (string.Equals(impersonate, "true", StringComparison.OrdinalIgnoreCase))
+        foreach (XmlNode identity in document.SelectNodes("//system.web/identity")!)
         {
-            entries.Add("<identity impersonate=\"true\">");
+            var impersonate = identity.Attributes?["impersonate"]?.Value;
+            if (!string.Equals(impersonate, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var path = identity.SelectSingleNode("ancestor::location")?.Attributes?["path"]?.Value;
+            var location = path == null ? string.Empty : $""" inside <location path="{path}">""";
+            throw new ConfigurationErrorsException(
+                $"""<identity impersonate="true">{location} in '{configPath}' {ImpersonationRule}""");
         }
     }
 }
