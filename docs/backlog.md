@@ -184,11 +184,11 @@ Carried from earlier milestones as unresolved detail:
 - Machine-key rotation and key-file encryption at rest (persistence and
   environment keys landed, [ADR 0010](adr/0010-machine-key-persistence.md)):
   [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
-- Define worker identity and impersonation policy; explicitly refuse
-  `<identity impersonate="true">` until a portable identity seam exists.
-  Observed in production candidates as likely-vestigial config beside
-  `authentication mode="None"`, so the refusal diagnostic should name the
-  setting and the removal fix.
+- Define worker identity and impersonation policy: a portable identity seam.
+  `<identity impersonate="true">` is refused at activation meanwhile, waiver
+  or not, naming the element and the removal fix (ledger P107, MH40-MH42);
+  production candidates carried it as likely-vestigial config beside
+  `authentication mode="None"`.
 - Decide port-or-substitute for `System.IdentityModel.Services` (WIF session
   and federation): Framework-only, never carried to modern .NET, yet
   production candidates register `SessionAuthenticationModule` and
