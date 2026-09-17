@@ -13,7 +13,7 @@ set -uo pipefail
 
 BASE="${1:-http://127.0.0.1:5087}"
 BASE="${BASE%/}"
-SITE="$(cd "$(dirname "$0")" && pwd)/YAF.Host/bin/site"
+SITE="$(cd "$(dirname "$0")" && pwd)/YAF.Host/rehost_root"
 MAIL_DIR="$SITE/App_Data/mail"
 ADMIN_USER='hostadmin'
 ADMIN_PASSWORD='Rehost!Dev2026'
