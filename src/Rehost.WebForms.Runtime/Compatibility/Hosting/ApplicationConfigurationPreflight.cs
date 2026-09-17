@@ -279,7 +279,8 @@ internal static class ApplicationConfigurationPreflight
         OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
     private static bool IsInside(string path, string directoryWithTrailingSeparator) =>
-        (path + Path.DirectorySeparatorChar).StartsWith(directoryWithTrailingSeparator, PathComparison);
+        (Path.TrimEndingDirectorySeparator(path) + Path.DirectorySeparatorChar)
+            .StartsWith(directoryWithTrailingSeparator, PathComparison);
 
     private static bool PathsEqual(string left, string right) =>
         String.Equals(left, right, PathComparison);
