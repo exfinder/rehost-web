@@ -280,17 +280,6 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
-    public void Default_Compilation_Temp_Directory_Is_Codegen_Beside_The_Host_Binaries()
-    {
-        using var application = TemporaryApplication.Create();
-
-        application.CreateConfiguration().DefaultCompilationTempDirectory.ShouldBe(
-            Path.Combine(
-                Path.TrimEndingDirectorySeparator(Path.GetFullPath(application.OutputDirectory)),
-                "codegen"));
-    }
-
-    [Fact]
     public void Environment_Variable_Supplies_The_Compilation_Temp_Directory()
     {
         using var application = TemporaryApplication.Create();

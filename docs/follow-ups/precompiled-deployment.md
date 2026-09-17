@@ -39,7 +39,7 @@ process replacement already substitutes for AppDomain cycling.
 
 ## Rejected shortcut: shipping a warm codegen root
 
-Copying a built `codegen/` directory into the publish breaks by construction:
+Copying a built codegen root into the publish breaks by construction:
 `CodegenDirectory.GenerationSegment` keys on a SHA-256 of the application's
 physical path, so any deployment path other than the build machine's misses,
 and preservation-file timestamp checks make copied sources hazardous. At most

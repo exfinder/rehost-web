@@ -22,7 +22,6 @@ internal sealed class ApplicationBootstrapConfiguration
         string rootWebConfigurationFilePath,
         string compilationTempDirectory,
         string compilationTempDirectoryOverride,
-        string defaultCompilationTempDirectory,
         string machineKeyDirectory,
         string machineKeyValidationKeyOverride,
         string machineKeyDecryptionKeyOverride,
@@ -35,7 +34,6 @@ internal sealed class ApplicationBootstrapConfiguration
         RootWebConfigurationFilePath = rootWebConfigurationFilePath;
         CompilationTempDirectory = compilationTempDirectory;
         CompilationTempDirectoryOverride = compilationTempDirectoryOverride;
-        DefaultCompilationTempDirectory = defaultCompilationTempDirectory;
         MachineKeyDirectory = machineKeyDirectory;
         MachineKeyValidationKeyOverride = machineKeyValidationKeyOverride;
         MachineKeyDecryptionKeyOverride = machineKeyDecryptionKeyOverride;
@@ -53,12 +51,10 @@ internal sealed class ApplicationBootstrapConfiguration
     internal string RootWebConfigurationFilePath { get; }
 
     // Null means no host-supplied root; resolution then falls to the environment variable, the
-    // configured tempDirectory, and the default. See CodegenDirectory.
+    // configured tempDirectory, and the per-user default. See CodegenDirectory.
     internal string CompilationTempDirectory { get; }
 
     internal string CompilationTempDirectoryOverride { get; }
-
-    internal string DefaultCompilationTempDirectory { get; }
 
     // Null means no host-supplied directory; resolution then falls to the per-user default. See
     // AutogenKeyStore.
@@ -118,9 +114,6 @@ internal sealed class ApplicationBootstrapConfiguration
                 "compilation temporary directory from " +
                     WebFormsApplicationOptions.CompilationTempDirectoryVariable,
                 WebFormsApplicationOptions.CompilationTempDirectoryVariable),
-            Path.Combine(
-                Path.TrimEndingDirectorySeparator(Path.GetFullPath(baseDirectory)),
-                "codegen"),
             NormalizeDirectoryOption(
                 options.MachineKeyDirectory,
                 "machine-key directory",

@@ -246,28 +246,40 @@ internal static class ApplicationConfigurationPreflight
         }
 
         var owner = host ?? environment;
+        var ownerSource = host != null
+            ? "host CompilationTempDirectory option"
+            : $"{WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment variable";
         var configured = compilation?.TempDirectory;
-        if (owner == null || String.IsNullOrWhiteSpace(configured))
+        string normalized = null;
+        if (!String.IsNullOrWhiteSpace(configured))
         {
-            return;
+            configured = configured.Trim();
+            normalized = Path.IsPathFullyQualified(configured)
+                ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(configured))
+                : configured;
         }
 
-        configured = configured.Trim();
-        var normalized = Path.IsPathFullyQualified(configured)
-            ? Path.TrimEndingDirectorySeparator(Path.GetFullPath(configured))
-            : configured;
-
-        if (!PathsEqual(normalized, owner))
+        if (owner != null && normalized != null && !PathsEqual(normalized, owner))
         {
-            var ownerSource = host != null
-                ? "host CompilationTempDirectory option"
-                : $"{WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment variable";
             throw new InvalidOperationException(
                 "The configured system.web/compilation tempDirectory conflicts with the " +
                 $"{ownerSource}. Configured='{configured}', " +
                 $"Supplied='{owner}'. Remove one of them.");
         }
+
+        var supplied = owner ?? normalized;
+        if (supplied != null && IsInside(supplied, configuration.PhysicalRootPath))
+        {
+            WebFormsRuntimeEventSource.Log.CompilationOutputInsideApplication(
+                supplied,
+                owner != null ? ownerSource : "system.web/compilation tempDirectory");
+        }
     }
+
+    private static bool IsInside(string path, string directoryWithTrailingSeparator) =>
+        (path + Path.DirectorySeparatorChar).StartsWith(
+            directoryWithTrailingSeparator,
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
     private static bool PathsEqual(string left, string right) =>
         String.Equals(

@@ -211,5 +211,32 @@ namespace System.Web.Util {
         private void WriteSectionNotHonored(string file, string element, string reason) {
             WriteEvent(12, file, element, reason);
         }
+
+        [NonEvent]
+        internal void CompilationOutput(string directory, string source) {
+            Swallow(() => {
+                WebFormsRuntimeLogger.Logger.CompilationOutput(directory, source);
+                WriteCompilationOutput(directory, source);
+            });
+        }
+
+        [Event(13, Level = EventLevel.Informational, Message = "Generated output goes to '{0}' (from {1}).")]
+        private void WriteCompilationOutput(string directory, string source) {
+            WriteEvent(13, directory, source);
+        }
+
+        [NonEvent]
+        internal void CompilationOutputInsideApplication(string directory, string source) {
+            Swallow(() => {
+                WebFormsRuntimeLogger.Logger.CompilationOutputInsideApplication(directory, source);
+                WriteCompilationOutputInsideApplication(directory, source);
+            });
+        }
+
+        [Event(14, Level = EventLevel.Warning, Message =
+            "The compilation temporary directory '{0}' from {1} is inside the application root; generated output there changes the application's own hash, so every restart recompiles. Move it outside the application.")]
+        private void WriteCompilationOutputInsideApplication(string directory, string source) {
+            WriteEvent(14, directory, source);
+        }
     }
 }

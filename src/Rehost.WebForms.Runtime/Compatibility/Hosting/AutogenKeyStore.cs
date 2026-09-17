@@ -23,17 +23,15 @@ internal static class AutogenKeyStore
     {
         get
         {
-            var profile = Environment.GetFolderPath(
-                Environment.SpecialFolder.UserProfile,
-                Environment.SpecialFolderOption.DoNotVerify);
-            if (String.IsNullOrEmpty(profile))
+            var profile = UserProfileDirectory.Resolve();
+            if (profile == null)
             {
                 throw new InvalidOperationException(
                     "Auto-generated machine keys persist under the user profile, but no user " +
                     "profile directory is available. Set the host MachineKeyDirectory option.");
             }
 
-            return Path.Combine(profile, ".rehost-webforms", "machine-keys");
+            return Path.Combine(profile, UserProfileDirectory.FolderName, "machine-keys");
         }
     }
 

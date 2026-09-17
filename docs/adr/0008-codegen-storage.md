@@ -8,18 +8,24 @@ the install directory holds no codegen root and is not writable, and
 
 The root resolves in order: the host `CompilationTempDirectory` option, the
 `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable, configured
-`tempDirectory`, then `codegen` under `AppContext.BaseDirectory`. The default
-sits beside the host binaries — where the `configs` default already lives, and
-where generated pages are visible during development — rather than in the
-reclaimable system temp root. Any two set sources that disagree fail at
-preflight as conflicting ownership rather than one silently losing. An
-unwritable root fails naming the path and the source that supplied it, instead
-of Framework's silent relocation to `%TEMP%`.
+`tempDirectory`, then `~/.rehost-webforms/codegen` under the user profile
+(amended 2026-09-17). The default is the portable analogue of `Temporary
+ASP.NET Files`: outside the reclaimable system temp root, outside the
+application, beside the machine keys of ADR 0010. It first sat beside the host
+binaries, which the staged site layout places in the application's `bin`; the
+`bin` tree feeds the top-level hash that decides reuse, so output written there
+invalidated itself and every restart recompiled. A profile-less process fails
+at boot naming the option and the variable, the same way the key store does.
+An explicit root inside the application root is accepted and warns once
+(event 14). Any two set sources that disagree fail at preflight as conflicting
+ownership rather than one silently losing. An unwritable root fails naming the
+path and the source that supplied it, instead of Framework's silent relocation
+to `%TEMP%`. The resolved directory is reported once at startup (event 13).
 
-The generation segment is eight hex characters of a digest of the application
-directory, keyed on that directory rather than the host application ID, so
-renaming a host label keeps the previous run's output. Distinct applications
-sharing one root never share a segment.
+The generation segment is sixteen hex characters of a digest of the
+application directory, keyed on that directory rather than the host
+application ID, so renaming a host label keeps the previous run's output.
+Distinct applications sharing one root never share a segment.
 
 ## Reuse and reclamation
 
@@ -40,10 +46,10 @@ and the marker is never written.
 ## Deployment
 
 Containers are the primary production target. The default root lives in the
-image's application directory, so every cold start recompiles, and a read-only
-root filesystem refuses it at boot. Both are answered by pointing the
-environment variable (or the host option) at a mounted writable volume — the
-variable exists so the operator can do this without rebuilding the image.
+container user's profile, so every cold start recompiles, and a read-only root
+filesystem refuses it at boot. Both are answered by pointing the environment
+variable (or the host option) at a mounted writable volume — the variable
+exists so the operator can do this without rebuilding the image.
 
 Reuse across image versions is not expected even then: `bin` and `App_Code`
 timestamps feed the top-level hash, so a rebuilt image invalidates it.

@@ -23,8 +23,9 @@ path properties are internal, for in-repo test hosts only.
 output; the `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable
 supplies the same root from the deployment. Any two of the option, the
 variable, and `<compilation tempDirectory>` that disagree fail preflight.
-Absent all three, the root is `codegen` under `AppContext.BaseDirectory`
-(ADR 0008).
+Absent all three, the root is `~/.rehost-webforms/codegen` under the user
+profile, and a process without a profile fails preflight naming the option and
+the variable (ADR 0008).
 
 The physical root is normalized with `Path.GetFullPath`, retains filesystem
 casing, and receives a trailing platform directory separator. The virtual root

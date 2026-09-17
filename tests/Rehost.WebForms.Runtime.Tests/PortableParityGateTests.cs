@@ -87,7 +87,7 @@ public sealed class PortableParityGateTests
 
             foreach (var segment in segments)
             {
-                Path.GetFileName(segment).ShouldMatch("^[0-9a-f]{8}$");
+                Path.GetFileName(segment).ShouldMatch("^[0-9a-f]{16}$");
                 File.Exists(Path.Combine(segment, "hash", "hash.web")).ShouldBeTrue();
             }
 

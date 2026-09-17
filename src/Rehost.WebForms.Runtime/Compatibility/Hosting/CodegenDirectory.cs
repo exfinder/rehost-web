@@ -21,9 +21,9 @@ internal static class CodegenDirectory
 
     internal const string ConfiguredSource = "system.web/compilation tempDirectory";
 
-    internal const string DefaultSource = "the default codegen directory beside the host binaries";
+    internal const string DefaultSource = "the default per-user codegen directory";
 
-    internal static string ResolveTempRoot(CompilationSection compilationSection)
+    internal static string ResolveTempRoot(CompilationSection compilationSection, out string source)
     {
         string configured = null;
         string attributeName = null;
@@ -39,7 +39,7 @@ internal static class CodegenDirectory
         var configuration = WebFormsApplication.RequireInitialized();
         var hostSupplied = configuration.CompilationTempDirectory
             ?? configuration.CompilationTempDirectoryOverride;
-        var source = configuration.CompilationTempDirectory != null
+        source = configuration.CompilationTempDirectory != null
             ? HostSource
             : configuration.CompilationTempDirectoryOverride != null
                 ? EnvironmentSource
@@ -50,11 +50,30 @@ internal static class CodegenDirectory
             attributeName,
             fileName,
             lineNumber,
-            configuration.DefaultCompilationTempDirectory);
+            hostSupplied == null && configured == null
+                ? DefaultTempRoot(UserProfileDirectory.Resolve())
+                : null);
 
         EnsureWritable(tempRoot, source);
 
         return tempRoot;
+    }
+
+    // The default must not sit under the application: the bin directory feeds the top-level hash
+    // that decides whether the previous run's output is reused, so generated output written
+    // there invalidates itself on every restart.
+    internal static string DefaultTempRoot(string userProfile)
+    {
+        if (String.IsNullOrEmpty(userProfile))
+        {
+            throw new InvalidOperationException(
+                "Generated output persists under the user profile, but no user profile directory " +
+                "is available. Set the host CompilationTempDirectory option or the " +
+                WebFormsApplicationOptions.CompilationTempDirectoryVariable +
+                " environment variable.");
+        }
+
+        return Path.Combine(userProfile, UserProfileDirectory.FolderName, "codegen");
     }
 
     internal static string SelectTempRoot(
@@ -100,7 +119,7 @@ internal static class CodegenDirectory
     // AppDomain.SetDynamicBase. It is keyed on the application directory rather than on the host
     // application ID, so renaming the host label keeps the previous run's compiled output.
     internal static string GenerationSegment(string physicalApplicationRoot) =>
-        ApplicationPathDigest.Segment(physicalApplicationRoot, byteCount: 4);
+        ApplicationPathDigest.Segment(physicalApplicationRoot, byteCount: 8);
 
     private static void EnsureWritable(string tempRoot, string source)
     {

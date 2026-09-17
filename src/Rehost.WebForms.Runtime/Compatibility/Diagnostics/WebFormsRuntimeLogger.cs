@@ -96,6 +96,22 @@ internal static partial class WebFormsRuntimeLogger
         string element,
         string reason);
 
+    [LoggerMessage(EventId = 13, Level = LogLevel.Information, Message =
+        "Generated output goes to '{directory}' (from {source}).")]
+    internal static partial void CompilationOutput(
+        this ILogger logger,
+        string directory,
+        string source);
+
+    [LoggerMessage(EventId = 14, Level = LogLevel.Warning, Message =
+        "The compilation temporary directory '{directory}' from {source} is inside the application " +
+        "root; generated output there changes the application's own hash, so every restart " +
+        "recompiles. Move it outside the application.")]
+    internal static partial void CompilationOutputInsideApplication(
+        this ILogger logger,
+        string directory,
+        string source);
+
     [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(
         this ILogger logger,

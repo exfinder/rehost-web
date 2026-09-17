@@ -52,9 +52,14 @@ Framework's `Temporary ASP.NET Files` becomes a per-application directory the
 host resolves at startup. Pick by deployment shape:
 
 - **Local development and plain servers** — declare nothing. Output lands in
-  `codegen` beside the host binaries, next to `configs`; it is safe to delete
-  (the next start recompiles) and an unchanged application restarts without
-  recompiling ([ADR 0008](adr/0008-codegen-storage.md)).
+  `~/.rehost-webforms/codegen/<site>/<hash>` under the user profile, beside the
+  machine keys; the startup log names the exact directory (event 13). It is
+  safe to delete (the next start recompiles) and an unchanged application
+  restarts without recompiling ([ADR 0008](adr/0008-codegen-storage.md)). Do
+  not delete the sibling `machine-keys` directory with it: that invalidates
+  every auto-generated key. Keep the root outside the application: a root
+  under the application's `bin` feeds the hash that decides reuse, so every
+  restart recompiles, and preflight warns once (event 14).
 - **Containers** — a read-only root filesystem refuses the default at boot.
   Point `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` (or the host
   `CompilationTempDirectory` option) at a mounted writable path.

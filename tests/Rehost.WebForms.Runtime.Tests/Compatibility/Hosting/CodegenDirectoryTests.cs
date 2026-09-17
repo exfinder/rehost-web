@@ -68,15 +68,36 @@ public sealed class CodegenDirectoryTests
     }
 
     [Fact]
-    public void Generation_Segment_Is_Eight_Stable_Hexadecimal_Characters()
+    public void Default_Temp_Root_Lives_Under_The_User_Profile()
     {
-        CodegenDirectory.GenerationSegment("/var/app").ShouldBe("c9d9badb");
+        var profile = Path.Combine(Path.GetTempPath(), "profile");
+
+        CodegenDirectory.DefaultTempRoot(profile)
+            .ShouldBe(Path.Combine(profile, ".rehost-webforms", "codegen"));
+    }
+
+    [Fact]
+    public void Default_Temp_Root_Without_A_Profile_Fails_Naming_Both_Ways_To_Supply_One()
+    {
+        var exception = Should.Throw<InvalidOperationException>(
+            () => CodegenDirectory.DefaultTempRoot(null));
+
+        exception.Message.ShouldContain("CompilationTempDirectory", Case.Sensitive);
+        exception.Message.ShouldContain(
+            "REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY",
+            Case.Sensitive);
+    }
+
+    [Fact]
+    public void Generation_Segment_Is_Sixteen_Stable_Hexadecimal_Characters()
+    {
+        CodegenDirectory.GenerationSegment("/var/app").ShouldBe("c9d9badb3f9a09df");
     }
 
     [Fact]
     public void Generation_Segment_Separates_Distinct_Application_Directories()
     {
-        CodegenDirectory.GenerationSegment("/var/app2").ShouldBe("b64d8089");
+        CodegenDirectory.GenerationSegment("/var/app2").ShouldBe("b64d8089f12c0e0a");
         CodegenDirectory.GenerationSegment("/var/app2")
             .ShouldNotBe(CodegenDirectory.GenerationSegment("/var/app"));
     }
@@ -85,7 +106,7 @@ public sealed class CodegenDirectoryTests
     public void Generation_Segment_Ignores_A_Trailing_Separator()
     {
         CodegenDirectory.GenerationSegment("/var/app" + Path.DirectorySeparatorChar)
-            .ShouldBe("c9d9badb");
+            .ShouldBe("c9d9badb3f9a09df");
     }
 
     [Fact]

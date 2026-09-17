@@ -901,7 +901,7 @@ namespace System.Web {
             // %TEMP% fallback below would silently relocate generated output. Resolution is the
             // host option, then configured tempDirectory, then a portable default, and an
             // unwritable result fails naming the path and its source.
-            tempDirectory = CodegenDirectory.ResolveTempRoot(compilationSection);
+            tempDirectory = CodegenDirectory.ResolveTempRoot(compilationSection, out string codegenSource);
 #else
             // These variables are used for error handling
             string tempDirAttribName = null;
@@ -1023,6 +1023,7 @@ namespace System.Web {
             // application directory, so distinct applications never share a directory and the
             // same application finds its previous run's output.
             _codegenDir = Path.Combine(codegenBase, CodegenDirectory.GenerationSegment(_appDomainAppPath));
+            WebFormsRuntimeEventSource.Log.CompilationOutput(_codegenDir, codegenSource);
 #endif
 
             // Create the codegen directory if needed

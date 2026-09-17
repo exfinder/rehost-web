@@ -76,7 +76,7 @@ Framework/adapter gates cover the managed-pipeline boundary; see
 | P05 | `HttpRuntime.Init` platform gate | Remove the unconditional Win32 requirement. |
 | P06 | `HttpConfigurationSystem.EnsureInit` host cast | Retain the write-only Framework field only under `NETFRAMEWORK`. |
 | P07 | `ApplicationImpersonationContext` | A zero application identity token leaves impersonation inert; explicit impersonation policy remains deferred. |
-| P08 | `SetUpCodegenDirectory` | See [codegen storage](adr/0008-codegen-storage.md). A portable leaf replaces the CLR install/dynamic-directory roots; host option, application configuration and portable default resolve deterministically, conflicts and unwritable roots fail explicitly. A stable application-derived segment preserves Framework reuse. |
+| P08 | `SetUpCodegenDirectory` | See [codegen storage](adr/0008-codegen-storage.md). A portable leaf replaces the CLR install/dynamic-directory roots; host option, application configuration and the per-user default resolve deterministically, conflicts and unwritable roots fail explicitly, and a root inside the application warns once (event 14). A stable application-derived segment preserves Framework reuse; the resolved directory is reported at startup (event 13). |
 | P09 | configuration map-path selection | The explicit hosting map is authoritative. No portable server authority exists for out-of-application paths. |
 | P10 | `IISMapPath.GetInstance` | Throw actionable `PlatformNotSupportedException`. |
 | P11 | `SystemInfo.GetNumProcessCPUs` | Use affinity-aware `Environment.ProcessorCount`. |
