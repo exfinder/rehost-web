@@ -5,6 +5,7 @@ using System.Configuration;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Web.Configuration;
+using System.Web.Hosting;
 using System.Web.SessionState;
 using System.Web.Util;
 
@@ -241,14 +242,12 @@ internal static class ApplicationConfigurationPreflight
         {
             throw new InvalidOperationException(
                 $"The {WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment " +
-                "variable conflicts with the host CompilationTempDirectory option. " +
+                $"variable conflicts with {CodegenDirectory.HostSource}. " +
                 $"Variable='{environment}', Host='{host}'. Remove one of them.");
         }
 
         var owner = host ?? environment;
-        var ownerSource = host != null
-            ? "host CompilationTempDirectory option"
-            : $"{WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment variable";
+        var ownerSource = host != null ? CodegenDirectory.HostSource : CodegenDirectory.EnvironmentSource;
         var configured = compilation?.TempDirectory;
         string normalized = null;
         if (!String.IsNullOrWhiteSpace(configured))
@@ -262,7 +261,7 @@ internal static class ApplicationConfigurationPreflight
         if (owner != null && normalized != null && !PathsEqual(normalized, owner))
         {
             throw new InvalidOperationException(
-                "The configured system.web/compilation tempDirectory conflicts with the " +
+                $"The configured {CodegenDirectory.ConfiguredSource} conflicts with " +
                 $"{ownerSource}. Configured='{configured}', " +
                 $"Supplied='{owner}'. Remove one of them.");
         }
@@ -272,20 +271,18 @@ internal static class ApplicationConfigurationPreflight
         {
             WebFormsRuntimeEventSource.Log.CompilationOutputInsideApplication(
                 supplied,
-                owner != null ? ownerSource : "system.web/compilation tempDirectory");
+                owner != null ? ownerSource : CodegenDirectory.ConfiguredSource);
         }
     }
 
+    private static readonly StringComparison PathComparison =
+        OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
     private static bool IsInside(string path, string directoryWithTrailingSeparator) =>
-        (path + Path.DirectorySeparatorChar).StartsWith(
-            directoryWithTrailingSeparator,
-            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+        (path + Path.DirectorySeparatorChar).StartsWith(directoryWithTrailingSeparator, PathComparison);
 
     private static bool PathsEqual(string left, string right) =>
-        String.Equals(
-            left,
-            right,
-            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+        String.Equals(left, right, PathComparison);
 
     // The two out-of-process stores construct eagerly in SessionStateModule's mode
     // switch, so without this the failure is a native PlatformNotSupportedException

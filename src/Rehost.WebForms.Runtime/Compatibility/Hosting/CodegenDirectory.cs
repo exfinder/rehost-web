@@ -59,9 +59,7 @@ internal static class CodegenDirectory
         return tempRoot;
     }
 
-    // The default must not sit under the application: the bin directory feeds the top-level hash
-    // that decides whether the previous run's output is reused, so generated output written
-    // there invalidates itself on every restart.
+    // Never under the application: bin feeds the hash that decides whether output is reused.
     internal static string DefaultTempRoot(string userProfile)
     {
         if (String.IsNullOrEmpty(userProfile))
@@ -69,8 +67,7 @@ internal static class CodegenDirectory
             throw new InvalidOperationException(
                 "Generated output persists under the user profile, but no user profile directory " +
                 "is available. Set the host CompilationTempDirectory option or the " +
-                WebFormsApplicationOptions.CompilationTempDirectoryVariable +
-                " environment variable.");
+                $"{WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment variable.");
         }
 
         return Path.Combine(userProfile, UserProfileDirectory.FolderName, "codegen");
