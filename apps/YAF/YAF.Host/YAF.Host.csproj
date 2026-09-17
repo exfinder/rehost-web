@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RehostSiteContentRoot>../yafsrc/YetAnotherForum.NET/</RehostSiteContentRoot>
+    <OutDir>rehost_root/bin/</OutDir>
     <NoWarn>$(NoWarn);NU1701</NoWarn>
     <!-- Application browser compilation is Unsupported and fails activation. The
          runtime already carries Framework 4.5's definitions, which is the version

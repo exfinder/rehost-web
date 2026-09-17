@@ -65,7 +65,7 @@ if ls "$NUGET_PACKAGES" | grep -qi -E '^rehost\.webforms\.(runtime|applicationse
   echo "FAIL  an unpublished component package was restored"; exit 1
 fi
 
-site="WebFormsApplication.Host/bin/site"
+site="WebFormsApplication.Host/rehost_root"
 echo "== staged site"
 ls "$site/bin" | grep -E '^Rehost\.WebForms.*\.dll$'
 ls "$site/bin/configs"

@@ -1,4 +1,5 @@
 **/bin/
+**/rehost_root/
 **/obj/
 apps/*/.vs/
 apps/*/packages/

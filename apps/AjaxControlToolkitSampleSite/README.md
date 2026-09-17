@@ -118,8 +118,8 @@ being run under a runtime with a 4.5 floor.
 
 - `RehostSiteContentRoot` on the Host turns on staging, the XDT pipeline and the
   `dotnet run` redirection, exactly as for a WAP.
-- Host dependencies reach the staged site's `bin/`. The staging targets copy
-  `$(TargetDir)**/*`, which is the Host's own output directory, so
+- Host dependencies reach the staged site's `bin/`. The Host builds with
+  `OutDir=rehost_root/bin/`, which is the staged site's own `bin/`, so
   `ProjectReference` outputs are included: `AjaxControlToolkit.dll`,
   `AjaxControlToolkit.HtmlEditor.Sanitizer.dll` and `HtmlAgilityPack.dll` all
   land there with no extra work. The sanitizer is also in the Host's

@@ -44,9 +44,11 @@ restore fail loudly instead of building stale. Packages are always packed
 `Release`; `-c` governs only the app and host projects.
 
 Build stages a runnable copy of the site to
-`WebFormsApplication.Host/bin/site/` (content + `bin/` payload + transformed
-`web.config`) incrementally — removed sources are deleted from the stage by
-manifest, never by wiping. `dotnet run` executes the staged copy. After
+`WebFormsApplication.Host/rehost_root/` (content + transformed `web.config`)
+incrementally — removed sources are deleted from the stage by manifest, never
+by wiping — and the Host compiles straight into `rehost_root/bin/`
+(`OutDir`), so there is one copy of the binaries and no `bin/Debug/`.
+`rehost_root/` is git-ignored. `dotnet run` executes the staged copy. After
 editing an `.aspx`, rebuild (fast, no compile) and refresh.
 
 ## web.config
@@ -65,7 +67,8 @@ transforms, exactly like F5 on Framework.
   legacy tree WAP-style: all `*.cs` except `App_*`, `bin`, `obj`, `packages`.
 - Host project: `RehostSiteContentRoot` (hosting package targets) turns on
   staging, the XDT pipeline, the `dotnet run` redirection, and the publish
-  site layout.
+  site layout; `OutDir=rehost_root/bin/` puts the payload in the staged
+  site's `bin/`, and the targets fail the build if it points elsewhere.
 - `apps/LocalFeed.props` + `apps/Directory.*` are repo-internal
   freshness machinery, not part of the consumer story; a real consumer
   restores from nuget.org and needs none of it.

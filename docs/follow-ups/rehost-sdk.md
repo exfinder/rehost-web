@@ -13,6 +13,7 @@ The next step in friction removal is an MSBuild SDK package:
 <Project Sdk="Rehost.WebForms.Sdk">
   <PropertyGroup>
     <RehostSiteContentRoot>../MyApp/</RehostSiteContentRoot>
+    <OutDir>rehost_root/bin/</OutDir>
   </PropertyGroup>
 </Project>
 ```
