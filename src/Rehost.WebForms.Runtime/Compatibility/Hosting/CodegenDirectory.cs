@@ -13,15 +13,14 @@ using Rehost.WebForms.Hosting;
 // finds the output of its previous run.
 internal static class CodegenDirectory
 {
-    internal const string HostSource = "the host CompilationTempDirectory option";
+    internal const string HostSource = "host CompilationTempDirectory option";
 
     internal const string EnvironmentSource =
-        "the " + WebFormsApplicationOptions.CompilationTempDirectoryVariable +
-        " environment variable";
+        WebFormsApplicationOptions.CompilationTempDirectoryVariable + " environment variable";
 
     internal const string ConfiguredSource = "system.web/compilation tempDirectory";
 
-    internal const string DefaultSource = "the default per-user codegen directory";
+    internal const string DefaultSource = "default per-user codegen directory";
 
     internal static string ResolveTempRoot(CompilationSection compilationSection, out string source)
     {
@@ -127,14 +126,14 @@ internal static class CodegenDirectory
         catch (Exception exception)
         {
             throw new HttpException(
-                $"The compilation temporary directory '{tempRoot}' cannot be created. It comes from {source}.",
+                $"The compilation temporary directory '{tempRoot}' cannot be created. It comes from the {source}.",
                 exception);
         }
 
         if (!System.Web.UI.Util.HasWriteAccessToDirectory(tempRoot))
         {
             throw new HttpException(
-                $"The compilation temporary directory '{tempRoot}' is not writable. It comes from {source}.");
+                $"The compilation temporary directory '{tempRoot}' is not writable. It comes from the {source}.");
         }
     }
 }

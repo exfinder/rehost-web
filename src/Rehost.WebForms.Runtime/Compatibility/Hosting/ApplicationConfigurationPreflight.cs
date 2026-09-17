@@ -242,7 +242,7 @@ internal static class ApplicationConfigurationPreflight
         {
             throw new InvalidOperationException(
                 $"The {WebFormsApplicationOptions.CompilationTempDirectoryVariable} environment " +
-                $"variable conflicts with {CodegenDirectory.HostSource}. " +
+                $"variable conflicts with the {CodegenDirectory.HostSource}. " +
                 $"Variable='{environment}', Host='{host}'. Remove one of them.");
         }
 
@@ -262,7 +262,7 @@ internal static class ApplicationConfigurationPreflight
         {
             throw new InvalidOperationException(
                 $"The configured {CodegenDirectory.ConfiguredSource} conflicts with " +
-                $"{ownerSource}. Configured='{configured}', " +
+                $"the {ownerSource}. Configured='{configured}', " +
                 $"Supplied='{owner}'. Remove one of them.");
         }
 

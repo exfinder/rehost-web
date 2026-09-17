@@ -220,7 +220,7 @@ namespace System.Web.Util {
             });
         }
 
-        [Event(13, Level = EventLevel.Informational, Message = "Generated output goes to '{0}' (from {1}).")]
+        [Event(13, Level = EventLevel.Informational, Message = "Generated output goes to '{0}' ({1}).")]
         private void WriteCompilationOutput(string directory, string source) {
             WriteEvent(13, directory, source);
         }
@@ -234,7 +234,7 @@ namespace System.Web.Util {
         }
 
         [Event(14, Level = EventLevel.Warning, Message =
-            "The compilation temporary directory '{0}' from {1} is inside the application root; generated output there changes the application's own hash, so every restart recompiles. Move it outside the application.")]
+            "The compilation temporary directory '{0}' from the {1} is inside the application root; generated output there changes the application's own hash, so every restart recompiles. Move it outside the application.")]
         private void WriteCompilationOutputInsideApplication(string directory, string source) {
             WriteEvent(14, directory, source);
         }
