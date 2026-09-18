@@ -43,6 +43,36 @@ falling through; coexistence needs a fall-through mode or a `MapWhen` on the
 Web Forms extensions. The cost that dominates is shared state: one
 authentication cookie both sides accept and one session store both read.
 
+## Why App and Host are two projects
+
+The App project is the old web project's DLL; the Host is the process that
+replaced IIS. One project can carry both properties, but each reason below is
+a cost every migrator would then meet alone.
+
+- **Compiler settings.** The legacy sources need `Nullable` and
+  `ImplicitUsings` off, a pinned `LangVersion` (7.3 for an old tree, 13 for
+  YAF) and `GenerateAssemblyInfo=false`, because the tree has its own
+  `AssemblyInfo.cs`. `Program.cs` uses top-level statements, which need C# 9.
+  A project has one set of settings.
+- **Name clashes.** The Web SDK imports `Microsoft.AspNetCore.Http` into every
+  file, and the legacy sources import `System.Web`. Both declare `HttpContext`,
+  `HttpRequest` and `HttpResponse`, so an unqualified use is ambiguous (CS0104).
+- **Assembly identity.** Configuration names the application assembly:
+  `type="WingtipToys.Models.ProductContext, WingtipToys"`, the OWIN startup key,
+  `<add assembly="..."/>`. The App project keeps that name through
+  `AssemblyName`; a single project would have to give it to the executable.
+- **No ASP.NET Core in the application.** An App project restores with
+  `Microsoft.NETCore.App` alone. `Microsoft.AspNetCore.App`, and with it
+  Kestrel, enters only through `Rehost.WebForms.Hosting`, which only the Host
+  references. The application code sees `System.Web` and nothing of the server
+  beneath it.
+- **References.** A migrator's test projects reference the App library as they
+  referenced the WAP's DLL. Multi-project applications fit the same way: YAF's
+  fourteen libraries and its App are all references of one Host.
+- **The end of the migration.** Stage 4 deletes the App project and
+  `rehost_root/` and keeps the Host. Host-only code, such as WingtipToys' local
+  PayPal responder, never enters the application assembly.
+
 ## Why the project sets `OutDir`
 
 The compiler writes the payload straight into the site's `bin/`, so it exists
