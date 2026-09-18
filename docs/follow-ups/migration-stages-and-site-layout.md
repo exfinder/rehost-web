@@ -97,6 +97,23 @@ Debug and Release share `rehost_root/bin/`. Publish keeps its own tree under
 never deletes files an earlier publish wrote, so delete the publish folder
 before judging its contents.
 
+## Publishing to a chosen folder
+
+`dotnet publish -o X` and `-p:RehostPublishSiteRoot=X/` both name the published
+site's root: content and `web.config` land in `X/`, the payload in `X/bin/`.
+`-o` needs help to get there. A command-line `PublishDir` wins over the value
+the targets assign, so the payload used to land flat in `X/` while the content
+went to the default `site-publish/`, and neither half could run. The targets
+recognize a command-line `PublishDir` by assigning a probe value that does not
+stick, take that folder as the site root, and `RehostRedirectPublishDir` points
+`PublishDir` at its `bin/` before the SDK copies anything; a target may
+reassign a global property where evaluation may not. Naming two different
+folders through `-o` and `RehostPublishSiteRoot` fails the publish.
+
+The stage manifest, which lets a later run delete files whose sources are gone,
+is kept per stage root. One manifest per project made a publish to one folder
+delete the content an earlier publish had staged in another.
+
 ## Why the hosts use `Microsoft.NET.Sdk.Web`
 
 For its runtime defaults, server GC first: the built `runtimeconfig.json`

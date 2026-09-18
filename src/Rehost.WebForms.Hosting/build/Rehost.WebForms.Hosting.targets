@@ -12,6 +12,18 @@
        runtimeconfig paths from it before package targets import, so a late override leaves
        them pointing at the default output folder. -->
 
+  <!-- A PublishDir from the command line (dotnet publish -o) cannot be reassigned during
+       evaluation, which is how the probe below recognizes it. The folder the user named
+       becomes the published site's root, and RehostRedirectPublishDir moves the payload to
+       its bin before the SDK copies anything. -->
+  <PropertyGroup Condition="'$(RehostSiteContentRoot)' != '' and '$(RehostPublishSiteLayout)' != 'false'">
+    <_RehostRequestedPublishDir>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '$(PublishDir)'))</_RehostRequestedPublishDir>
+    <PublishDir>rehost-publish-dir-probe/</PublishDir>
+    <_RehostPublishDirFromCommandLine Condition="'$(PublishDir)' != 'rehost-publish-dir-probe/'">true</_RehostPublishDirFromCommandLine>
+    <_RehostPublishSiteRootExplicit Condition="'$(RehostPublishSiteRoot)' != ''">true</_RehostPublishSiteRootExplicit>
+    <RehostPublishSiteRoot Condition="'$(RehostPublishSiteRoot)' == '' and '$(_RehostPublishDirFromCommandLine)' == 'true'">$(_RehostRequestedPublishDir)</RehostPublishSiteRoot>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(RehostSiteContentRoot)' != ''">
     <RehostSiteContentRoot>$([MSBuild]::EnsureTrailingSlash('$(RehostSiteContentRoot)'))</RehostSiteContentRoot>
     <RehostStageOnBuild Condition="'$(RehostStageOnBuild)' == ''">true</RehostStageOnBuild>
@@ -44,6 +56,22 @@
     <RunArguments>"$(RehostStagedSiteRoot)bin/$(TargetFileName)"</RunArguments>
     <RunWorkingDirectory>$(RehostStagedSiteRoot)</RunWorkingDirectory>
   </PropertyGroup>
+
+  <Target
+    Name="RehostRedirectPublishDir"
+    BeforeTargets="PrepareForPublish"
+    Condition="'$(RehostSiteContentRoot)' != '' and '$(RehostPublishSiteLayout)' != 'false' and '$(_RehostPublishDirFromCommandLine)' == 'true' and '$(_RehostStageInvocation)' == ''">
+    <PropertyGroup>
+      <_RehostPublishRoot>$([MSBuild]::NormalizeDirectory('$(RehostPublishSiteRoot)'))</_RehostPublishRoot>
+      <_RehostPublishBin>$([MSBuild]::NormalizeDirectory('$(RehostPublishSiteRoot)', 'bin'))</_RehostPublishBin>
+    </PropertyGroup>
+    <Error
+      Condition="'$(_RehostPublishSiteRootExplicit)' == 'true' and '$(_RehostRequestedPublishDir)' != '$(_RehostPublishRoot)' and '$(_RehostRequestedPublishDir)' != '$(_RehostPublishBin)'"
+      Text="The publish output '$(_RehostRequestedPublishDir)' and RehostPublishSiteRoot '$(_RehostPublishRoot)' name different folders. Remove one of them: either names the published site's root, and the payload goes to its bin." />
+    <PropertyGroup>
+      <PublishDir>$(_RehostPublishBin)</PublishDir>
+    </PropertyGroup>
+  </Target>
 
   <Target
     Name="RehostVerifyOutDir"
@@ -93,7 +121,9 @@
       <_RehostWebConfigTransform Condition="'$(_RehostWebConfigTransform)' == '' and Exists('$(MSBuildProjectDirectory)/Web.Rehost.config')">$(MSBuildProjectDirectory)/Web.Rehost.config</_RehostWebConfigTransform>
       <_RehostWebConfigTransform Condition="'$(_RehostWebConfigTransform)' == ''">$(MSBuildThisFileDirectory)Web.Rehost.config</_RehostWebConfigTransform>
       <_RehostConfigurationTransform>$(RehostSiteContentRoot)Web.$(Configuration).config</_RehostConfigurationTransform>
-      <_RehostStageManifest>$(IntermediateOutputPath)rehost-stage-$(_RehostStageInvocation).manifest</_RehostStageManifest>
+      <!-- One manifest per stage root: a manifest shared between roots makes a publish to one
+           folder delete the files an earlier publish staged in another. -->
+      <_RehostStageManifest>$(IntermediateOutputPath)rehost-stage-$(_RehostStageInvocation)-$([MSBuild]::StableStringHash('$(RehostStageRoot)')).manifest</_RehostStageManifest>
     </PropertyGroup>
 
     <ItemGroup>
