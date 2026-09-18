@@ -246,8 +246,13 @@ Carried from earlier milestones as unresolved detail:
   by hand; the checklist step is the spec.
 - `Rehost.WebForms.Sdk` MSBuild SDK package for minimal consumer csproj files:
   [Rehost SDK](follow-ups/rehost-sdk.md).
-- In-place development run via a host-provided bin seam, restoring the
-  edit-markup-refresh loop: [in-place dev run](follow-ups/in-place-dev-run.md).
+- In-place development run via a content sync or a host-provided bin seam,
+  restoring the edit-markup-refresh loop:
+  [in-place dev run](follow-ups/in-place-dev-run.md).
+- Migration stages from side-by-side to a plain ASP.NET Core host, the
+  `rehost_root/` layout, and the Web Forms fall-through mode and state bridges
+  coexistence needs:
+  [migration stages](follow-ups/migration-stages-and-site-layout.md).
 - Verify license metadata and notices against the seven packages #12
   produces; sample-app redistribution gaps:
   [package license](follow-ups/package-license.md).
