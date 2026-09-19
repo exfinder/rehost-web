@@ -140,6 +140,25 @@ hosting targets answer:
   published `bin/`, so `IsWebConfigTransformDisabled` is set. The site's own
   `web.config` at the root is the one that applies.
 
+## Rejected: splitting Host and App files
+
+Host and runtime files flat beside `Host.dll`, the application's closure alone
+in `rehost_root/bin/`: the old GAC-versus-`bin` division, with no change to
+imported code. A prototype (2026-09-19, macOS) ran the stock template and the
+Identity application through their smokes this way, loading the application
+side through `GeneratedAssemblyLoader`.
+
+It fails on the first package with per-OS assets. `Microsoft.Data.SqlClient`
+on the application side threw `PlatformNotSupportedException`: the package
+ships a stub at `lib/` and the real assemblies under `runtimes/unix` and
+`runtimes/win`, and only the host's `deps.json` resolution chooses between
+them. Native libraries needed a hand-written resolver as well. The split moves
+the application's closure out of the host's resolver (per-OS managed assets,
+native libraries, satellites, one unified NuGet graph) and would reimplement
+each. A flat layout, if wanted, comes from the bin seam
+([in-place dev run](in-place-dev-run.md)), which keeps every assembly in one
+folder that `deps.json` resolves.
+
 ## Open
 
 - The edit-markup-refresh loop. In stage 1 a source `.aspx` reaches the stage
