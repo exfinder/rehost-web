@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Web;
 
 /// <summary>
 /// The module scanner
@@ -76,10 +77,7 @@ public class ModuleScanner
     /// </returns>
     private static string GetAppBaseDirectory()
     {
-        var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        var searchPath = AppDomain.CurrentDomain.RelativeSearchPath;
-
-        return searchPath.IsNotSet() ? baseDirectory : Path.Combine(baseDirectory, searchPath);
+        return HttpRuntime.BinDirectory;
     }
 
     /// <summary>
