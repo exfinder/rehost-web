@@ -180,9 +180,16 @@ Measured on the prototype (2026-09-19/20), with the resolver wired into
 `GeneratedAssemblyLoader` ahead of the file-name probe:
 
 - The reference needs `ExcludeAssets="runtime;native"`; `runtime` alone lets
-  native assets into the host folder. A multi-project App also needs
-  `DisableTransitiveProjectReferences` on the Host, or its library projects
-  land on both sides and load from the host folder.
+  native assets into the host folder.
+- A multi-project App marks each of its direct project references
+  `PrivateAssets="all"`, or its libraries land on both sides and load from the
+  host folder. The flag on the App alone hides the whole chain behind it; the
+  libraries stay unchanged (YAF: seven lines in `YAF.App.csproj`).
+  `DisableTransitiveProjectReferences` on the Host also stops the leak but
+  applies to every reference the Host has: a new ASP.NET Core project's own
+  dependencies are then copied yet missing from `Host.deps.json`, so their
+  native and per-OS assets stop resolving and the Host cannot compile against
+  them.
 - The stock template, the Identity application and YAF (install plus 59
   checks) pass. App-only `Microsoft.Data.SqlClient` and SQLite work from a
   compiled page, and the resolver probe passes on macOS, Linux and Windows,
