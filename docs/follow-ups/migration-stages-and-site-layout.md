@@ -176,9 +176,41 @@ on the host side and 13 on the application side):
   refuse a plain reference the way `RehostVerifyOutDir` refuses a wrong
   `OutDir`.
 
-Open before it could ship: assemblies dropped into `bin` outside the App's
-closure still need the file-name probe, and development and publish wiring,
-Windows and Linux are untested.
+Measured on the prototype (2026-09-19/20), with the resolver wired into
+`GeneratedAssemblyLoader` ahead of the file-name probe:
+
+- The reference needs `ExcludeAssets="runtime;native"`; `runtime` alone lets
+  native assets into the host folder. A multi-project App also needs
+  `DisableTransitiveProjectReferences` on the Host, or its library projects
+  land on both sides and load from the host folder.
+- The stock template, the Identity application and YAF (install plus 59
+  checks) pass. App-only `Microsoft.Data.SqlClient` and SQLite work from a
+  compiled page, and the resolver probe passes on macOS, Linux and Windows,
+  choosing `runtimes/win` or `runtimes/unix` correctly.
+- Publish is two ordinary publishes, the Host to `X/` and the App to
+  `X/rehost_root/bin/`, portable or for one runtime identifier; both pass the
+  smoke.
+- `AppDomain.CurrentDomain.BaseDirectory` becomes the host folder, and YAF's
+  module scanner then finds no provider. Setting `APP_CONTEXT_BASE_DIRECTORY`
+  to `<root>/bin/`, today's value, fixes it; eShop expects the site root there,
+  as Framework had it, which is already wrong today.
+- `RoslynCSharpCompiler` prefers an out-of-band copy of a framework assembly
+  only when it sits in `AppContext.BaseDirectory`; an App-side copy would be
+  missed.
+- The resolver must be installed before any method that names an App type is
+  compiled, which for Razor pages using App models means process start.
+- `bin/` still receives the runtime's files as unused duplicates, because the
+  add-on packages depend on the runtime; an `ExcludeAssets` on the App's
+  package reference does not trim them. Deleting from `bin/` what the host
+  folder holds does (18 files for the stock template).
+- Start time is unchanged (cold 1.9 s against 1.7 s, warm 0.8 s against
+  0.7 s). After a Host-only rebuild the split reuses every compiled page
+  (0.6 s) where the classic layout recompiles them (1.6 s).
+
+Open before it could ship: what `BaseDirectory` should be, who trims `bin/`,
+where the resolver is installed, the targets' development and publish wiring,
+and assemblies dropped into `bin` outside the App's closure, which still need
+the file-name probe.
 
 ## Open
 
