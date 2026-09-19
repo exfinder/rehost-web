@@ -4,7 +4,7 @@ using System;
 
 internal interface IApplicationBootstrapEnvironment
 {
-    string BaseDirectory { get; }
+    string HostDirectory { get; }
 
     void Preflight(ApplicationBootstrapConfiguration configuration);
 
@@ -13,7 +13,7 @@ internal interface IApplicationBootstrapEnvironment
 
 internal sealed class ProcessApplicationBootstrapEnvironment : IApplicationBootstrapEnvironment
 {
-    public string BaseDirectory => AppContext.BaseDirectory;
+    public string HostDirectory => Hosting.HostDirectory.Path;
 
     public void Preflight(ApplicationBootstrapConfiguration configuration)
     {

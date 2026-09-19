@@ -77,9 +77,10 @@ a cost every migrator would then meet alone.
 A host has a Web Forms root and an ASP.NET Core content root, and neither may
 depend on the directory the process was started from:
 
-- `PhysicalRootPath` is the parent of `AppContext.BaseDirectory`: the site
-  root, `rehost_root/` in development and the published folder in deployment.
-- `ContentRootPath` is `AppContext.BaseDirectory` itself, the site's `bin/`.
+- `PhysicalRootPath` is the parent of `AppContext.BaseDirectory` as `Program.cs`
+  reads it at start: the site root, `rehost_root/` in development and the
+  published folder in deployment.
+- `ContentRootPath` is that start value itself, the site's `bin/`.
   The Web SDK copies `appsettings.json` there, and publishes `wwwroot/` there,
   so that is where ASP.NET Core must look. Left at its default the content
   root is the working directory, which `dotnet run` sets to the site root and
@@ -186,10 +187,8 @@ It would retire the `OutDir` line and its check, the `-o` redirect and the
 content-root line. Until then the [Rehost SDK](rehost-sdk.md) can take the
 `OutDir` line out of the csproj.
 
-Readings that hold for either layout: `AppDomain.CurrentDomain.BaseDirectory`
-is `<root>/bin/` today, the site root on Framework; YAF's module scanner relies
-on the first and eShop expects the second. After a Host-only rebuild the split
-reused every compiled page (0.6 s) where this layout recompiles them (1.6 s),
+A reading that holds for either layout: after a Host-only rebuild the split reused
+every compiled page (0.6 s) where this layout recompiles them (1.6 s),
 because the top-level hash covers `bin/`.
 
 ## Open

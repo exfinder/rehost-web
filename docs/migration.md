@@ -71,6 +71,21 @@ sources.
 Carrying over from Framework: a `tempDirectory` attribute holding a Windows
 path fails on Linux/macOS — remove it and use the default or the variable.
 
+## The base directory
+
+`AppDomain.CurrentDomain.BaseDirectory` and `AppContext.BaseDirectory` are the
+site root with a trailing separator, as on Framework, from the first Web Forms
+request on. Until then they are the folder holding the host's binaries, the
+site's `bin/`.
+
+- Host code that needs the binaries' folder later (an options callback that
+  runs on a request, for example) reads `AppContext.BaseDirectory` into a local
+  at the top of `Program.cs`.
+- Application code that combines `BaseDirectory` with
+  `AppDomain.RelativeSearchPath` to find `bin` gets the site root instead,
+  because modern .NET never sets `RelativeSearchPath`. Use
+  `HttpRuntime.BinDirectory`.
+
 ## Root configuration files
 
 The runtime ships its own machine.config and root web.config (structurally

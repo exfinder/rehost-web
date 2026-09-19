@@ -40,7 +40,7 @@ internal sealed class ApplicationBootstrap
 
         try
         {
-            var configuration = ApplicationBootstrapConfiguration.Create(options, _environment.BaseDirectory);
+            var configuration = ApplicationBootstrapConfiguration.Create(options, _environment.HostDirectory);
             System.Web.Util.WebFormsRuntimeLogger.Publish(configuration.LoggerFactory);
             var serverConfiguration = System.Web.IisConfig.IisServerConfiguration.Load(
                 configuration.ServerConfigurationFilePath,

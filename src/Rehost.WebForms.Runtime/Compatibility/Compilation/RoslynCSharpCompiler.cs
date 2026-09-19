@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
+using Rehost.WebForms.Hosting;
 
 namespace System.Web.Compilation;
 
@@ -317,7 +318,7 @@ internal sealed class RoslynCSharpCompiler : ICodeCompiler
             // An out-of-band package advances an assembly the shared framework also ships, and the
             // copy deployed with the application is the one that loads. Compiling against the
             // framework's older copy instead fails every page referencing it with CS1705.
-            var deployed = Path.Combine(AppContext.BaseDirectory, Path.GetFileName(path));
+            var deployed = Path.Combine(HostDirectory.Path, Path.GetFileName(path));
             var selected = File.Exists(deployed) ? deployed : path;
 
             // The shared framework ships native libraries beside managed assemblies, and only on

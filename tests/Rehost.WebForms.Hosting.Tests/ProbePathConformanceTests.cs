@@ -32,6 +32,7 @@ public sealed class ProbePathConformanceTests
         ["ScenarioHandler"] = ProbePaths.ScenarioDefault,
         ["ModuleListHandler"] = ProbePaths.ModuleList,
         ["RuntimeIdentityProbe"] = ProbePaths.RuntimeIdentity,
+        ["BaseDirectoryProbe"] = ProbePaths.BaseDirectory,
         ["UnloadProbe"] = ProbePaths.Unload,
         ["LifecycleReportProbe"] = ProbePaths.Lifecycle,
         ["IntegratedMembersProbe"] = ProbePaths.Integrated,

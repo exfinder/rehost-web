@@ -715,11 +715,11 @@ public sealed class ApplicationBootstrapTests
 
         internal RecordingEnvironment(string baseDirectory, Action? preflight = null)
         {
-            BaseDirectory = baseDirectory;
+            HostDirectory = baseDirectory;
             _preflight = preflight ?? (() => { });
         }
 
-        public string BaseDirectory { get; }
+        public string HostDirectory { get; }
 
         internal int PreflightCount { get; private set; }
 

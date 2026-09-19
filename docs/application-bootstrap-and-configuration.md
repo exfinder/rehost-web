@@ -16,7 +16,7 @@ Required options:
 - absolute virtual root (`/` or an application subpath).
 
 Machine and root-web configuration always come from the `configs` directory
-under `AppContext.BaseDirectory`. The shipped baselines are frozen — no public
+beside the runtime assembly. The shipped baselines are frozen — no public
 override; applications customize through their own web.config (ADR 0004). The
 path properties are internal, for in-repo test hosts only.
 `CompilationTempDirectory` optionally supplies the writable root for generated

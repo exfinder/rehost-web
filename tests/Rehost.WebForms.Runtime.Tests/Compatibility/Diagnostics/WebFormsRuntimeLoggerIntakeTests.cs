@@ -60,7 +60,7 @@ public sealed class WebFormsRuntimeLoggerIntakeTests : IDisposable
 
     private sealed class PreflightingEnvironment(string baseDirectory) : IApplicationBootstrapEnvironment
     {
-        public string BaseDirectory { get; } = baseDirectory;
+        public string HostDirectory { get; } = baseDirectory;
 
         public void Preflight(ApplicationBootstrapConfiguration configuration)
         {

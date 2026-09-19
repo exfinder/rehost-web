@@ -27,6 +27,7 @@ public static class ProbePaths
     public const string ScenarioDefault = "/default";
     public const string ModuleList = "/module-list.axd";
     public const string RuntimeIdentity = "/runtime-identity";
+    public const string BaseDirectory = "/base-directory";
     public const string Unload = "/unload";
     public const string Lifecycle = "/lifecycle";
     public const string Integrated = "/integrated";

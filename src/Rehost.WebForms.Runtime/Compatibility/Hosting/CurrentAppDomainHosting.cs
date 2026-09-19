@@ -50,6 +50,7 @@ internal static class CurrentAppDomainHosting
         var physicalPath = NormalizeHostPhysicalPath(appHost.GetPhysicalPath());
         var virtualPath = VirtualPath.Create(appHost.GetVirtualPath()).VirtualPathString;
         ValidateBinding(configuration, appId, physicalPath, virtualPath);
+        HostDirectory.PublishBaseDirectory(configuration.PhysicalRootPath);
 
         hostingParameters ??= new HostingEnvironmentParameters();
         if (hostingParameters.FcnMode != FcnMode.NotSet &&

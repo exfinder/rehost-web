@@ -80,7 +80,7 @@ internal sealed class ApplicationBootstrapConfiguration
 
     internal static ApplicationBootstrapConfiguration Create(
         WebFormsApplicationOptions options,
-        string baseDirectory)
+        string hostDirectory)
     {
         ArgumentNullException.ThrowIfNull(options);
 
@@ -88,7 +88,7 @@ internal sealed class ApplicationBootstrapConfiguration
         var physicalRootPath = NormalizePhysicalRoot(options.PhysicalRootPath);
         var virtualRootPath = NormalizeVirtualRoot(options.VirtualRootPath);
         var configurationDirectory = Path.Combine(
-            Path.GetFullPath(baseDirectory),
+            Path.GetFullPath(hostDirectory),
             "configs");
         var machineConfigurationFilePath = NormalizeConfigurationFilePath(
             options.MachineConfigurationFilePath,
