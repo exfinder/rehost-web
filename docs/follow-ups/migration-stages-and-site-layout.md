@@ -159,11 +159,26 @@ imported code. Two prototypes (2026-09-19, macOS) settle the mechanism.
   native library, and the host folder held host files only. This is the .NET
   plugin contract, so the host's resolution rules are reused, not copied.
 
-Open before it could ship: Host and App become two NuGet graphs, and a library
-both sides carry loads from the host side, so an App that needs a newer version
-fails at run time; the build has to compare the two and stop. Assemblies
-dropped into `bin` outside the App's closure still need the file-name probe.
-Development and publish wiring, and Windows and Linux, are untested.
+How the Host refers to the App decides the rest (probe with Newtonsoft.Json 12
+on the host side and 13 on the application side):
+
+- No reference: two NuGet graphs. The build passes and the App fails at run
+  time with `FileLoadException`, because the host side's 12 loads first.
+- Plain `ProjectReference`: one graph, so NuGet stops the clash at restore
+  (NU1605). Once fixed it runs, but `App.dll` is copied beside the Host and
+  that copy loads; `bin/` holds dead duplicates, and building the App alone
+  leaves the loaded copy stale.
+- `<ProjectReference ... Private="false" ExcludeAssets="runtime" />`: one
+  graph and the same NU1605 guard, `App.dll` absent from the host folder and
+  from `Host.deps.json`, loaded from `bin/`; shared libraries load from the
+  host side at the unified version. Host code compiles against App types,
+  which coexistence needs anyway. This is the shape to use, and the targets can
+  refuse a plain reference the way `RehostVerifyOutDir` refuses a wrong
+  `OutDir`.
+
+Open before it could ship: assemblies dropped into `bin` outside the App's
+closure still need the file-name probe, and development and publish wiring,
+Windows and Linux are untested.
 
 ## Open
 
