@@ -220,9 +220,22 @@ namespace System.Web.Util {
             });
         }
 
-        [Event(13, Level = EventLevel.Informational, Message = "Generated output goes to '{0}' ({1}).")]
+        [Event(13, Level = EventLevel.Informational, Message = "Rehost compilation temp path: {0} ({1}).")]
         private void WriteCompilationOutput(string directory, string source) {
             WriteEvent(13, directory, source);
+        }
+
+        [NonEvent]
+        internal void PhysicalRoot(string directory) {
+            Swallow(() => {
+                WebFormsRuntimeLogger.Logger.PhysicalRoot(directory);
+                WritePhysicalRoot(directory);
+            });
+        }
+
+        [Event(15, Level = EventLevel.Informational, Message = "Rehost physical root path: {0}")]
+        private void WritePhysicalRoot(string directory) {
+            WriteEvent(15, directory);
         }
 
         [NonEvent]

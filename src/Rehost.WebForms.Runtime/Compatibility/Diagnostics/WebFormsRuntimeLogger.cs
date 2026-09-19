@@ -97,7 +97,7 @@ internal static partial class WebFormsRuntimeLogger
         string reason);
 
     [LoggerMessage(EventId = 13, Level = LogLevel.Information, Message =
-        "Generated output goes to '{directory}' ({source}).")]
+        "Rehost compilation temp path: {directory} ({source}).")]
     internal static partial void CompilationOutput(
         this ILogger logger,
         string directory,
@@ -111,6 +111,12 @@ internal static partial class WebFormsRuntimeLogger
         this ILogger logger,
         string directory,
         string source);
+
+    [LoggerMessage(EventId = 15, Level = LogLevel.Information, Message =
+        "Rehost physical root path: {directory}")]
+    internal static partial void PhysicalRoot(
+        this ILogger logger,
+        string directory);
 
     [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(

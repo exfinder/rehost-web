@@ -51,6 +51,7 @@ internal static class CurrentAppDomainHosting
         var virtualPath = VirtualPath.Create(appHost.GetVirtualPath()).VirtualPathString;
         ValidateBinding(configuration, appId, physicalPath, virtualPath);
         HostDirectory.PublishBaseDirectory(configuration.PhysicalRootPath);
+        WebFormsRuntimeEventSource.Log.PhysicalRoot(configuration.PhysicalRootPath);
 
         hostingParameters ??= new HostingEnvironmentParameters();
         if (hostingParameters.FcnMode != FcnMode.NotSet &&
