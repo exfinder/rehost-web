@@ -4,7 +4,7 @@ using Rehost.WebForms.Hosting;
 
 var url = args.Length > 0 ? args[0] : "http://127.0.0.1:5080";
 
-var builder = WebApplication.CreateBuilder();
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ContentRootPath = AppContext.BaseDirectory });
 builder.WebHost.UseUrls(url);
 
 builder.AddRehostWebForms(options =>
