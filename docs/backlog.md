@@ -250,8 +250,8 @@ Carried from earlier milestones as unresolved detail:
   restoring the edit-markup-refresh loop:
   [in-place dev run](follow-ups/in-place-dev-run.md).
 - Migration stages from side-by-side to a plain ASP.NET Core host, the
-  `rehost_root/` layout, and the Web Forms fall-through mode and state bridges
-  coexistence needs:
+  `rehost_root/` layout, the Web Forms fall-through mode and state bridges
+  coexistence needs, and the split layout to revisit on the .NET 11 SDK:
   [migration stages](follow-ups/migration-stages-and-site-layout.md).
 - Verify license metadata and notices against the seven packages #12
   produces; sample-app redistribution gaps:

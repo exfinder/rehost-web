@@ -140,84 +140,57 @@ hosting targets answer:
   published `bin/`, so `IsWebConfigTransformDisabled` is set. The site's own
   `web.config` at the root is the one that applies.
 
-## Candidate: splitting Host and App files
+## Split layout: measured, not adopted
 
-Host and runtime files flat beside `Host.dll`, the application's closure alone
-in `rehost_root/bin/`: the old GAC-versus-`bin` division, with no change to
-imported code. Two prototypes (2026-09-19, macOS) settle the mechanism.
+Host files flat beside `Host.dll` and the application's closure alone in
+`rehost_root/bin/`, the old GAC-versus-`bin` division, was prototyped three ways
+on 2026-09-19. The layout above stays.
 
-- Loading the application side by file name does not hold. The stock template
-  and the Identity application passed their smokes, but
-  `Microsoft.Data.SqlClient` threw `PlatformNotSupportedException`: the package
-  ships a stub at `lib/` and the real assemblies under `runtimes/unix` and
-  `runtimes/win`, and a file-name probe takes the stub. Native libraries needed
-  a hand-written resolver too.
-- `AssemblyDependencyResolver` over the application's own `deps.json` does
-  hold. The App builds with `EnableDynamicLoading`, and the default context's
-  `Resolving` and `ResolvingUnmanagedDll` handlers ask the resolver. SqlClient
-  loaded from `runtimes/unix/lib` and reached SQL Server, SQLite loaded its
-  native library, and the host folder held host files only. This is the .NET
-  plugin contract, so the host's resolution rules are reused, not copied.
+- **Two NuGet graphs** (the Host references the App compile-only, the App hides
+  its libraries with `PrivateAssets="all"`, `AssemblyDependencyResolver` loads
+  `bin/` from the App's own `deps.json`). Everything built, and YAF failed at
+  run time with `FileLoadException`: a library pinned
+  `System.Runtime.Caching` 10.0.11 while the host side carried 10.0.10, and
+  neither restore saw the other. Two graphs in one process is the Framework
+  binding-redirect problem again. Rejected: one process has one NuGet graph.
+- **One graph, two manifests.** Without `PrivateAssets`, NuGet resolves one
+  graph and its `ExcludeAssets` flags already mark what is reached only through
+  the App; NU1605 stops a downgrade at restore. The SDK ignores the flag for
+  transitive project references, so their DLLs land beside the Host unless a
+  target re-marks them, and the resolver and its install before `Main` remain.
+- **One graph, one manifest** ([`poc/SplitDependencyGraph`](../../poc/SplitDependencyGraph/README.md)).
+  The .NET 10 host reads an optional `localPath` on each `deps.json` asset, so
+  `bin/` files sit on the trusted-assembly list like any other: no resolver, no
+  second `deps.json`, one copy of every file. A task sets
+  `DestinationSubDirectory` on the App's closure and a second one adds
+  `localPath` to the SDK's `deps.json`. Build, publish (portable, for one
+  runtime identifier, self-contained) and per-OS and native assets
+  (`Microsoft.Data.SqlClient` on macOS, Linux and Windows) all passed.
 
-How the Host refers to the App decides the rest (probe with Newtonsoft.Json 12
-on the host side and 13 on the application side):
+Why the last one still waits:
 
-- No reference: two NuGet graphs. The build passes and the App fails at run
-  time with `FileLoadException`, because the host side's 12 loads first.
-- Plain `ProjectReference`: one graph, so NuGet stops the clash at restore
-  (NU1605). Once fixed it runs, but `App.dll` is copied beside the Host and
-  that copy loads; `bin/` holds dead duplicates, and building the App alone
-  leaves the loaded copy stale.
-- `<ProjectReference ... Private="false" ExcludeAssets="runtime" />`: one
-  graph and the same NU1605 guard, `App.dll` absent from the host folder and
-  from `Host.deps.json`, loaded from `bin/`; shared libraries load from the
-  host side at the unified version. Host code compiles against App types,
-  which coexistence needs anyway. This is the shape to use, and the targets can
-  refuse a plain reference the way `RehostVerifyOutDir` refuses a wrong
-  `OutDir`.
+- It moves few files. The App references `Rehost.WebForms`, so the runtime and
+  Roslyn belong to its closure; the host folder would keep `Host.dll`, the
+  hosting assembly and the Host's own packages. Those are harmless in `bin/`:
+  pages do not import their namespaces, and `/bin` is never served.
+- It costs two MSBuild tasks shipped in a package, a rewrite of an SDK output, a
+  private SDK item name (`_ResolvedCopyLocalBuildAssets`) for publish, and a
+  task assembly that has not been loaded by Visual Studio's MSBuild.
+- The SDK writes `localPath` itself from `DestinationSubDirectory` starting with
+  .NET 11 (dotnet/sdk#50120; not in any 10.0 band). After that the split needs
+  one task that sets documented metadata.
 
-Measured on the prototype (2026-09-19), with the resolver wired into
-`GeneratedAssemblyLoader` ahead of the file-name probe:
+Revisit when the .NET 11 SDK is the floor, or when a stage 3 application shows
+that Razor pages, `wwwroot/` and new libraries inside `rehost_root/bin/` hurt.
+It would retire the `OutDir` line and its check, the `-o` redirect and the
+content-root line. Until then the [Rehost SDK](rehost-sdk.md) can take the
+`OutDir` line out of the csproj.
 
-- The reference needs `ExcludeAssets="runtime;native"`; `runtime` alone lets
-  native assets into the host folder.
-- A multi-project App marks each of its direct project references
-  `PrivateAssets="all"`, or its libraries land on both sides and load from the
-  host folder. The flag on the App alone hides the whole chain behind it; the
-  libraries stay unchanged (YAF: seven lines in `YAF.App.csproj`).
-  `DisableTransitiveProjectReferences` on the Host also stops the leak but
-  applies to every reference the Host has: a new ASP.NET Core project's own
-  dependencies are then copied yet missing from `Host.deps.json`, so their
-  native and per-OS assets stop resolving and the Host cannot compile against
-  them.
-- The stock template, the Identity application and YAF (install plus 59
-  checks) pass. App-only `Microsoft.Data.SqlClient` and SQLite work from a
-  compiled page, and the resolver probe passes on macOS, Linux and Windows,
-  choosing `runtimes/win` or `runtimes/unix` correctly.
-- Publish is two ordinary publishes, the Host to `X/` and the App to
-  `X/rehost_root/bin/`, portable or for one runtime identifier; both pass the
-  smoke.
-- `AppDomain.CurrentDomain.BaseDirectory` becomes the host folder, and YAF's
-  module scanner then finds no provider. Setting `APP_CONTEXT_BASE_DIRECTORY`
-  to `<root>/bin/`, today's value, fixes it; eShop expects the site root there,
-  as Framework had it, which is already wrong today.
-- `RoslynCSharpCompiler` prefers an out-of-band copy of a framework assembly
-  only when it sits in `AppContext.BaseDirectory`; an App-side copy would be
-  missed.
-- The resolver must be installed before any method that names an App type is
-  compiled, which for Razor pages using App models means process start.
-- `bin/` still receives the runtime's files as unused duplicates, because the
-  add-on packages depend on the runtime; an `ExcludeAssets` on the App's
-  package reference does not trim them. Deleting from `bin/` what the host
-  folder holds does (18 files for the stock template).
-- Start time is unchanged (cold 1.9 s against 1.7 s, warm 0.8 s against
-  0.7 s). After a Host-only rebuild the split reuses every compiled page
-  (0.6 s) where the classic layout recompiles them (1.6 s).
-
-Open before it could ship: what `BaseDirectory` should be, who trims `bin/`,
-where the resolver is installed, the targets' development and publish wiring,
-and assemblies dropped into `bin` outside the App's closure, which still need
-the file-name probe.
+Readings that hold for either layout: `AppDomain.CurrentDomain.BaseDirectory`
+is `<root>/bin/` today, the site root on Framework; YAF's module scanner relies
+on the first and eShop expects the second. After a Host-only rebuild the split
+reused every compiled page (0.6 s) where this layout recompiles them (1.6 s),
+because the top-level hash covers `bin/`.
 
 ## Open
 

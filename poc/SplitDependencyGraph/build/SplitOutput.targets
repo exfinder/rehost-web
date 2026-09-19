@@ -1,0 +1,66 @@
+<Project>
+  <PropertyGroup>
+    <SplitOutputEnabled Condition="'$(SplitOutputEnabled)' == ''">true</SplitOutputEnabled>
+    <SplitOutputSubdirectory Condition="'$(SplitOutputSubdirectory)' == ''">rehost_root/bin</SplitOutputSubdirectory>
+    <_SplitTasksProject>$(MSBuildThisFileDirectory)SplitOutput.Tasks.csproj</_SplitTasksProject>
+    <_SplitTasksAssembly>$(MSBuildThisFileDirectory)bin/$(Configuration)/net10.0/SplitOutput.Tasks.dll</_SplitTasksAssembly>
+  </PropertyGroup>
+
+  <UsingTask TaskName="SplitOutput.Tasks.ComputeSplitLayout" AssemblyFile="$(_SplitTasksAssembly)" />
+  <UsingTask TaskName="SplitOutput.Tasks.RewriteSplitDependencies" AssemblyFile="$(_SplitTasksAssembly)" />
+
+  <Target Name="BuildSplitOutputTasks">
+    <MSBuild
+      Projects="$(_SplitTasksProject)"
+      Targets="Restore;Build"
+      Properties="Configuration=$(Configuration)"
+      RemoveProperties="TargetFramework;RuntimeIdentifier;SelfContained;PublishDir;OutDir;OutputPath;BaseOutputPath;BaseIntermediateOutputPath;IntermediateOutputPath" />
+  </Target>
+
+  <Target
+    Name="ComputeApplicationSplitLayout"
+    BeforeTargets="GenerateBuildDependencyFile;_CopyFilesMarkedCopyLocal;_ResolveCopyLocalAssetsForPublish"
+    DependsOnTargets="ResolveReferences;BuildSplitOutputTasks"
+    Condition="'$(SplitOutputEnabled)' == 'true'">
+    <Error Condition="'$(SplitApplicationProject)' == ''" Text="Set SplitApplicationProject to the App project path." />
+    <Error Condition="'$(PublishAot)' == 'true' or '$(PublishSingleFile)' == 'true' or '$(PublishTrimmed)' == 'true'"
+           Text="This sample supports multi-file, untrimmed builds and publishes only." />
+    <ComputeSplitLayout
+      AssetsFile="$(ProjectAssetsFile)"
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      ApplicationProject="$(SplitApplicationProject)"
+      TargetFramework="$(TargetFramework)"
+      RuntimeIdentifier="$(RuntimeIdentifier)"
+      Subdirectory="$(SplitOutputSubdirectory)"
+      References="@(ReferenceCopyLocalPaths)">
+      <Output TaskParameter="RelocatedReferences" ItemName="_SplitReferences" />
+      <Output TaskParameter="AssetLocations" ItemName="_SplitAssetLocations" />
+      <Output TaskParameter="ApplicationLibraries" ItemName="_SplitApplicationLibraries" />
+    </ComputeSplitLayout>
+    <ItemGroup>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(_SplitReferences)" />
+    </ItemGroup>
+    <ComputeSplitLayout
+      AssetsFile="$(ProjectAssetsFile)"
+      ProjectDirectory="$(MSBuildProjectDirectory)"
+      ApplicationProject="$(SplitApplicationProject)"
+      TargetFramework="$(TargetFramework)"
+      RuntimeIdentifier="$(RuntimeIdentifier)"
+      Subdirectory="$(SplitOutputSubdirectory)"
+      References="@(_ResolvedCopyLocalBuildAssets)">
+      <Output TaskParameter="RelocatedReferences" ItemName="_SplitPublishAssets" />
+    </ComputeSplitLayout>
+    <ItemGroup>
+      <_ResolvedCopyLocalBuildAssets Remove="@(_ResolvedCopyLocalBuildAssets)" />
+      <_ResolvedCopyLocalBuildAssets Include="@(_SplitPublishAssets)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RewriteApplicationSplitDependencies" AfterTargets="GenerateBuildDependencyFile"
+          Condition="'$(SplitOutputEnabled)' == 'true'">
+    <RewriteSplitDependencies DepsFile="$(ProjectDepsFilePath)" AssetLocations="@(_SplitAssetLocations)"
+                              ApplicationLibraries="@(_SplitApplicationLibraries)" />
+  </Target>
+
+</Project>

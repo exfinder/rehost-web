@@ -24,28 +24,28 @@ It is also the natural home for a `Microsoft.WebApplication.targets`
 replacement if the Web Site project model lands
 ([web-site-vs-wap-project-models](web-site-vs-wap-project-models.md)).
 
-## Prototype with the split layout (2026-09-19, macOS)
+## Prototype (2026-09-19, macOS)
 
 Two SDK packages, one for the App over `Microsoft.NET.Sdk` and one for the
-Host over `Microsoft.NET.Sdk.Web`, built the stock
-template in the [split layout](migration-stages-and-site-layout.md) and passed
-its smoke, first through explicit imports and then packed and consumed as
-`<Project Sdk="<id>/0.0.1-proto">`. Each csproj shrank to its
-package and project references.
+Host over `Microsoft.NET.Sdk.Web`, built the stock template and passed its
+smoke, first through explicit imports and then packed and consumed as
+`<Project Sdk="<id>/0.0.1-proto">`. Each csproj shrank to its package and
+project references. The prototype ran on a split layout that was
+[not adopted](migration-stages-and-site-layout.md); what it showed about SDKs
+holds for the current one.
 
 - An SDK's targets run before the .NET SDK derives the output paths, so it can
-  set `OutDir`, which a package's targets cannot. The App SDK sends the build
-  to `<Host>/rehost_root/bin/`; the csproj carries no `OutDir` and no check.
-- The App SDK sets the legacy compile defaults, `EnableDynamicLoading`, the
-  assembly name without `.App`, and `PrivateAssets="all"` on every project
-  reference. The Host SDK marks the `*.App` reference `Private="false"
-  ExcludeAssets="runtime;native"`, defaults `RehostSiteContentRoot`, and deletes
-  from `bin/` what the host folder already holds (19 files left).
+  set `OutDir`, which a package's targets cannot. The Host SDK can send the
+  build to `rehost_root/bin/`; the csproj then carries no `OutDir` line and
+  `RehostVerifyOutDir` is needed only by the long form.
+- The App SDK sets the legacy compile defaults and the assembly name without
+  `.App`. The Host SDK defaults `RehostSiteContentRoot`. The `-o` redirect
+  stays, inside the hosting targets.
 - A csproj value wins in both places: defaults in `Sdk.props` are overwritten
   by the project body, defaults in `Sdk.targets` are conditional. Verified for
   `GenerateAssemblyInfo`, `Nullable` and `OutDir`.
 - Item metadata cannot be read in the condition of an evaluation-time
-  `Update`; the App reference is matched by pattern (`../*/*.App.csproj`).
+  `Update`; a reference is matched by pattern (`../*/*.App.csproj`).
 - A second build with no change took two seconds and left `bin/` as it was.
 
 ## Two packages, not one (decided 2026-09-19)
@@ -63,11 +63,11 @@ visible. Two ids give one short name per project kind and no order rule, which
 is the smaller thing for a migrator to hold. Leaving is one edit either way:
 at the last migration stage the Host's `Sdk` becomes `Microsoft.NET.Sdk.Web`.
 
-Open: how the Host finds `rehost_root/` in development and after publish
-without probing, injecting the `Rehost.WebForms` package references, publish
-wiring, and Windows and Linux. The NuGet SDK
-resolver reads `NuGet.config` only, so the apps' local feed needs a config
-entry beside `RestoreAdditionalProjectSources`.
+Open: injecting the `Rehost.WebForms` package references, publish, and
+Windows and Linux. The NuGet SDK resolver reads `NuGet.config` only and runs at
+evaluation, so the apps' local feed needs a config entry beside
+`RestoreAdditionalProjectSources`, and a clean clone must still build with one
+command before the feed is packed.
 
 Costs that kept it out of M2: SDK resolution and version pinning move to
 `global.json` (a second version surface beside PackageReference), defaults
