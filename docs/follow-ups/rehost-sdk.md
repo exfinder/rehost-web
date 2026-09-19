@@ -1,4 +1,4 @@
-# Rehost.WebForms.Sdk MSBuild SDK package
+# Rehost.WebForms.Sdk.App and .Host MSBuild SDK packages
 
 Today a ported application is two SDK projects whose consumer contract rides in
 package `build/`/`buildTransitive/` targets: the app library sets
@@ -10,16 +10,15 @@ targets).
 The next step in friction removal is an MSBuild SDK package:
 
 ```xml
-<Project Sdk="Rehost.WebForms.Sdk">
-  <PropertyGroup>
-    <RehostSiteContentRoot>../MyApp/</RehostSiteContentRoot>
-    <OutDir>rehost_root/bin/</OutDir>
-  </PropertyGroup>
+<Project Sdk="Rehost.WebForms.Sdk.Host/1.0.0">
+  <ItemGroup>
+    <ProjectReference Include="../MyApp.App/MyApp.App.csproj" />
+  </ItemGroup>
 </Project>
 ```
 
-An SDK can own both project shapes (`Rehost.WebForms.Sdk` /
-`Rehost.WebForms.Sdk.Host`), inject the `Rehost.WebForms` reference, and replace the
+Two SDKs own the two project shapes (`Rehost.WebForms.Sdk.App` /
+`Rehost.WebForms.Sdk.Host`, named after the `.App` and `.Host` projects), inject the `Rehost.WebForms` reference, and replace the
 remaining boilerplate (TFM, AssemblyName, GenerateAssemblyInfo) with defaults.
 It is also the natural home for a `Microsoft.WebApplication.targets`
 replacement if the Web Site project model lands
@@ -27,11 +26,11 @@ replacement if the Web Site project model lands
 
 ## Prototype with the split layout (2026-09-20, macOS)
 
-Two SDK packages, `Rehost.WebForms.Sdk` for the App over `Microsoft.NET.Sdk` and
-`Rehost.WebForms.Sdk.Host` over `Microsoft.NET.Sdk.Web`, built the stock
+Two SDK packages, one for the App over `Microsoft.NET.Sdk` and one for the
+Host over `Microsoft.NET.Sdk.Web`, built the stock
 template in the [split layout](migration-stages-and-site-layout.md) and passed
 its smoke, first through explicit imports and then packed and consumed as
-`<Project Sdk="Rehost.WebForms.Sdk/0.0.1-proto">`. Each csproj shrank to its
+`<Project Sdk="<id>/0.0.1-proto">`. Each csproj shrank to its
 package and project references.
 
 - An SDK's targets run before the .NET SDK derives the output paths, so it can
@@ -49,9 +48,24 @@ package and project references.
   `Update`; the App reference is matched by pattern (`../*/*.App.csproj`).
 - A second build with no change took two seconds and left `bin/` as it was.
 
+## Two packages, not one (decided 2026-09-20)
+
+A property in the csproj cannot choose between the App and the Host shape: the
+base SDK is imported by `Sdk.props`, before the project body is read. One
+add-on package does work when it is listed ahead of the base SDK
+(`Sdk="Rehost.WebForms.Sdk/x;Microsoft.NET.Sdk.Web"`): its targets still run
+before the output paths are derived, the base SDK names the kind, defaults
+(including `TargetFramework`) and csproj overrides behave, and the stock
+template passed its smoke. It was not chosen. The line is long and
+order-sensitive, a reversed order sets `OutDir` too late, and a missing base SDK
+builds nothing while reporting success; both need a check of ours to be
+visible. Two ids give one short name per project kind and no order rule, which
+is the smaller thing for a migrator to hold. Leaving is one edit either way:
+at the last migration stage the Host's `Sdk` becomes `Microsoft.NET.Sdk.Web`.
+
 Open: how the Host finds `rehost_root/` in development and after publish
-without probing, one SDK package or two, injecting the `Rehost.WebForms`
-package references, publish wiring, and Windows and Linux. The NuGet SDK
+without probing, injecting the `Rehost.WebForms` package references, publish
+wiring, and Windows and Linux. The NuGet SDK
 resolver reads `NuGet.config` only, so the apps' local feed needs a config
 entry beside `RestoreAdditionalProjectSources`.
 
