@@ -6,8 +6,8 @@
     <RootNamespace>Rehost.WebForms.SampleApp</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Classic Web Site shape: assemblies directly in bin/, no configuration/tfm segments. -->
-    <OutputPath>bin</OutputPath>
+    <!-- Classic Web Site shape: assemblies directly in the site's bin/, no configuration/tfm segments. -->
+    <OutputPath>rehost_root/bin</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -22,11 +22,13 @@
        them in no item group. -->
   <ItemGroup>
     <None
-      Update="**/*.aspx;**/*.master;Global.asax;web.config;**/*.css;**/*.png"
-      CopyToPublishDirectory="PreserveNewest" />
+      Update="rehost_root/**/*.aspx;rehost_root/**/*.ascx;rehost_root/**/*.master;rehost_root/Global.asax;rehost_root/web.config;rehost_root/**/*.css;rehost_root/**/*.png"
+      CopyToPublishDirectory="PreserveNewest"
+      TargetPath="$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)/rehost_root', '%(FullPath)'))" />
     <None
-      Include="App_Code/**;App_GlobalResources/**"
-      CopyToPublishDirectory="PreserveNewest" />
+      Include="rehost_root/App_Code/**;rehost_root/App_GlobalResources/**"
+      CopyToPublishDirectory="PreserveNewest"
+      TargetPath="$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)/rehost_root', '%(FullPath)'))" />
   </ItemGroup>
 
   <ItemGroup>

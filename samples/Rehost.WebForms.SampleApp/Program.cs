@@ -20,7 +20,7 @@ app.UseRehostWebForms();
 Console.WriteLine($"Sample Web Forms application: {url}/Default.aspx");
 app.Run();
 
-// The application lays out like a classic Web Site — pages, App_Code, and web.config at the
+// rehost_root/ lays out like a classic Web Site — pages, App_Code, and web.config at its
 // root, binaries under bin/ — so the root is the nearest ancestor of the binary carrying the
 // web.config, and pages are compiled from source: an edit needs a restart, not a rebuild.
 static string FindApplicationRoot()

@@ -11,10 +11,11 @@ dotnet run --project samples/Rehost.WebForms.SampleApp
 Then open <http://127.0.0.1:5080/Default.aspx>. Pass a different URL as the
 first argument to move the endpoint.
 
-The project lays out like a classic Web Site: pages, `App_Code`,
-`App_GlobalResources`, and `web.config` at the root, binaries under `bin/`.
-Pages compile from source at first request, so editing an `.aspx` needs only a
-restart, not a rebuild. The layout is a demo convenience — the primary
+The site lives in `rehost_root/`, laid out like a classic Web Site: pages,
+`App_Code`, `App_GlobalResources`, and `web.config` at its root, binaries under
+`rehost_root/bin/`. `Program.cs`, the project file and `obj/` stay outside it,
+so the runtime cannot serve them. Pages compile from source at first request, so
+editing an `.aspx` needs only a restart, not a rebuild. The layout is a demo convenience — the primary
 compatibility target is the Web Application Project model that real
 enterprise applications use, which `WapDemo.aspx` demonstrates:
 `CodeBehind` + `Inherits` + designer partial compiled by MSBuild into the
