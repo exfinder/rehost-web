@@ -140,24 +140,30 @@ hosting targets answer:
   published `bin/`, so `IsWebConfigTransformDisabled` is set. The site's own
   `web.config` at the root is the one that applies.
 
-## Rejected: splitting Host and App files
+## Candidate: splitting Host and App files
 
 Host and runtime files flat beside `Host.dll`, the application's closure alone
 in `rehost_root/bin/`: the old GAC-versus-`bin` division, with no change to
-imported code. A prototype (2026-09-19, macOS) ran the stock template and the
-Identity application through their smokes this way, loading the application
-side through `GeneratedAssemblyLoader`.
+imported code. Two prototypes (2026-09-19, macOS) settle the mechanism.
 
-It fails on the first package with per-OS assets. `Microsoft.Data.SqlClient`
-on the application side threw `PlatformNotSupportedException`: the package
-ships a stub at `lib/` and the real assemblies under `runtimes/unix` and
-`runtimes/win`, and only the host's `deps.json` resolution chooses between
-them. Native libraries needed a hand-written resolver as well. The split moves
-the application's closure out of the host's resolver (per-OS managed assets,
-native libraries, satellites, one unified NuGet graph) and would reimplement
-each. A flat layout, if wanted, comes from the bin seam
-([in-place dev run](in-place-dev-run.md)), which keeps every assembly in one
-folder that `deps.json` resolves.
+- Loading the application side by file name does not hold. The stock template
+  and the Identity application passed their smokes, but
+  `Microsoft.Data.SqlClient` threw `PlatformNotSupportedException`: the package
+  ships a stub at `lib/` and the real assemblies under `runtimes/unix` and
+  `runtimes/win`, and a file-name probe takes the stub. Native libraries needed
+  a hand-written resolver too.
+- `AssemblyDependencyResolver` over the application's own `deps.json` does
+  hold. The App builds with `EnableDynamicLoading`, and the default context's
+  `Resolving` and `ResolvingUnmanagedDll` handlers ask the resolver. SqlClient
+  loaded from `runtimes/unix/lib` and reached SQL Server, SQLite loaded its
+  native library, and the host folder held host files only. This is the .NET
+  plugin contract, so the host's resolution rules are reused, not copied.
+
+Open before it could ship: Host and App become two NuGet graphs, and a library
+both sides carry loads from the host side, so an App that needs a newer version
+fails at run time; the build has to compare the two and stop. Assemblies
+dropped into `bin` outside the App's closure still need the file-name probe.
+Development and publish wiring, and Windows and Linux, are untested.
 
 ## Open
 
