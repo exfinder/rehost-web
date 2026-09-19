@@ -26,7 +26,8 @@ if (!File.Exists(identityDatabase))
     schema.ExecuteNonQuery();
 }
 
-var builder = WebApplication.CreateBuilder();
+// The content root defaults to the working directory, wherever the process was started.
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ContentRootPath = AppContext.BaseDirectory });
 builder.WebHost.UseUrls(url);
 builder.AddRehostWebForms(options =>
 {

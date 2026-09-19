@@ -7,7 +7,8 @@ using WingtipToys.Host;
 var url = args.Length > 0 ? args[0] : "http://127.0.0.1:5085";
 var physicalRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
 
-var builder = WebApplication.CreateBuilder();
+// The content root defaults to the working directory, wherever the process was started.
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ContentRootPath = AppContext.BaseDirectory });
 builder.WebHost.UseUrls(url);
 builder.Services.AddHostedService<PayPalNvpResponder>();
 builder.AddRehostWebForms(options =>

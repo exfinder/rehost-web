@@ -1,5 +1,6 @@
 **/bin/
 **/rehost_root/
+/publish/
 **/obj/
 apps/*/.vs/
 apps/*/packages/

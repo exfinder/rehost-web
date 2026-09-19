@@ -29,11 +29,10 @@ stages is whether it is a copy or the source.
    csproj, remove the ignore line. The App project owns the `*.cs` directly.
    The published shape was already this one.
 3. **Coexistence with ASP.NET Core.** Razor pages and components compile into
-   the host assembly; `wwwroot/` and `Pages/` sit beside `rehost_root/`, not
-   under it, because the ASP.NET Core content root is the host project folder
-   and the Web Forms physical root is `rehost_root/`. Core endpoints run
-   first and Web Forms is the fallback. A page migrates by adding the Razor
-   page at the same URL and deleting the `.aspx`.
+   the host assembly; `wwwroot/` and `Pages/` sit beside `rehost_root/` in the
+   project, not under it. Core endpoints run first and Web Forms is the
+   fallback. A page migrates by adding the Razor page at the same URL and
+   deleting the `.aspx`.
 4. **Done.** The last `.aspx` is gone; `rehost_root/`, the package references
    and these targets come out, leaving the stock flat ASP.NET Core publish.
 
@@ -72,6 +71,19 @@ a cost every migrator would then meet alone.
 - **The end of the migration.** Stage 4 deletes the App project and
   `rehost_root/` and keeps the Host. Host-only code, such as WingtipToys' local
   PayPal responder, never enters the application assembly.
+
+## Two roots, both derived from the binaries
+
+A host has a Web Forms root and an ASP.NET Core content root, and neither may
+depend on the directory the process was started from:
+
+- `PhysicalRootPath` is the parent of `AppContext.BaseDirectory`: the site
+  root, `rehost_root/` in development and the published folder in deployment.
+- `ContentRootPath` is `AppContext.BaseDirectory` itself, the site's `bin/`.
+  The Web SDK copies `appsettings.json` there, and publishes `wwwroot/` there,
+  so that is where ASP.NET Core must look. Left at its default the content
+  root is the working directory, which `dotnet run` sets to the site root and
+  a deployment sets to anything; YAF's Serilog settings went unread that way.
 
 ## Why the project sets `OutDir`
 

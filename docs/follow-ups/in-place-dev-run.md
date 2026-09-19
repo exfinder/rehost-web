@@ -33,3 +33,16 @@ interact with `AppContext.BaseDirectory` loading, whether `PreApplicationStart`
 scanning follows the override, and what Framework behavior says about
 `PrivateBinPath` fidelity. This is runtime architecture, not app plumbing —
 design before implementing.
+
+The same seam is what a flat ASP.NET Core publish layout would need (binaries
+at the publish root, `rehost_root/` holding content only): the deployment shape
+would then stay fixed through every
+[migration stage](migration-stages-and-site-layout.md) and `dotnet publish -o`
+would need no redirect. The classic `<root>/bin` layout stays until the seam is
+designed. Of the runtime's uses of `bin`, loading is the easy one, since
+`LoadAllAssembliesFromAppDomainBinDirectory` reads the top level only. The
+top-level hash is the hard one: `AddDirectory(bin)` recurses, so at a flat root
+it would take in the content folders and every markup edit would invalidate the
+whole site, the way generated output under `bin` once did (ADR 0008).
+Applications that probe `~/bin` by path, as DNN does, need the classic layout
+to remain available.
