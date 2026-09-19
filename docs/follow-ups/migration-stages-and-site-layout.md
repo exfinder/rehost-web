@@ -176,7 +176,7 @@ on the host side and 13 on the application side):
   refuse a plain reference the way `RehostVerifyOutDir` refuses a wrong
   `OutDir`.
 
-Measured on the prototype (2026-09-19/20), with the resolver wired into
+Measured on the prototype (2026-09-19), with the resolver wired into
 `GeneratedAssemblyLoader` ahead of the file-name probe:
 
 - The reference needs `ExcludeAssets="runtime;native"`; `runtime` alone lets

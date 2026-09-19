@@ -24,7 +24,7 @@ It is also the natural home for a `Microsoft.WebApplication.targets`
 replacement if the Web Site project model lands
 ([web-site-vs-wap-project-models](web-site-vs-wap-project-models.md)).
 
-## Prototype with the split layout (2026-09-20, macOS)
+## Prototype with the split layout (2026-09-19, macOS)
 
 Two SDK packages, one for the App over `Microsoft.NET.Sdk` and one for the
 Host over `Microsoft.NET.Sdk.Web`, built the stock
@@ -48,7 +48,7 @@ package and project references.
   `Update`; the App reference is matched by pattern (`../*/*.App.csproj`).
 - A second build with no change took two seconds and left `bin/` as it was.
 
-## Two packages, not one (decided 2026-09-20)
+## Two packages, not one (decided 2026-09-19)
 
 A property in the csproj cannot choose between the App and the Host shape: the
 base SDK is imported by `Sdk.props`, before the project body is read. One
