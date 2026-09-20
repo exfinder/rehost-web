@@ -184,8 +184,8 @@ Why the last one still waits:
 Revisit when the .NET 11 SDK is the floor, or when a stage 3 application shows
 that Razor pages, `wwwroot/` and new libraries inside `rehost_root/bin/` hurt.
 It would retire the `OutDir` line and its check, the `-o` redirect and the
-content-root line. Until then the [Rehost SDK](rehost-sdk.md) can take the
-`OutDir` line out of the csproj.
+content-root line. The [Rehost SDK](rehost-sdk.md) could take the `OutDir`
+line out of the csproj sooner, and is parked as too little gain on its own.
 
 A reading that holds for either layout: after a Host-only rebuild the split reused
 every compiled page (0.6 s) where this layout recompiles them (1.6 s),

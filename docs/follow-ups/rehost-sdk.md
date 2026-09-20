@@ -24,6 +24,47 @@ It is also the natural home for a `Microsoft.WebApplication.targets`
 replacement if the Web Site project model lands
 ([web-site-vs-wap-project-models](web-site-vs-wap-project-models.md)).
 
+## Parked (2026-09-20)
+
+Not built. With the split layout [not adopted](migration-stages-and-site-layout.md),
+the SDK no longer carries layout wiring. What is left is about seven lines per
+csproj: `TargetFramework`, `OutputType`, `ImplicitUsings`, `Nullable`,
+`GenerateAssemblyInfo`, the assembly name, the two Rehost package references, and
+`OutDir`, the one line a package cannot take. The consumer contract stays in the
+package targets either way.
+
+A migrator's csproj is already the one under `apps/`. The `Directory.Build.*`,
+`LocalFeed.props` and `eng/LocalFeed.targets` files there only pack `src/` into a
+local feed; `eng/external-consumer.sh` builds the stock pair without them, from a
+feed and nuget.org. The only edit is a literal package version. Writing those
+lines once is the scaffold tool's job ([backlog](../backlog.md), migration
+tooling).
+
+Costs for seven lines: two more packages to ship and version, one more thing to
+remove at the last migration stage, and no way for this repo to consume its own
+SDK by id on a clean clone (below).
+
+Revisit if the Web Site project model lands and needs a
+`Microsoft.WebApplication.targets` replacement, or if the split layout returns.
+
+### An SDK cannot be resolved from a local path
+
+Measured on SDK 10.0.302, macOS. `<Project Sdk="…">` takes a name and a version,
+never a path or a property, and MSBuild resolves it while it evaluates the first
+line, before any target of ours can pack a feed. The NuGet SDK resolver reads
+`NuGet.config` only, not `RestoreAdditionalProjectSources`.
+
+- `MSBuildSDKsPath=<folder>` alone: the SDK is not found.
+- `DOTNET_MSBUILD_SDK_RESOLVER_SDKS_DIR=<folder>` alone: not found.
+- Both: the local SDK resolves and `Microsoft.NET.Sdk` no longer does. The
+  variables replace the SDK folder instead of adding to it, and a repo file
+  cannot set them.
+
+In this repo the choices are a pack step before the first build, or importing
+`Sdk/Sdk.props` and `Sdk/Sdk.targets` by path from `src/` (one command, two
+`Import` lines per csproj, agreed as the route if the SDK is built). A migrator
+on nuget.org has neither problem.
+
 ## Prototype (2026-09-19, macOS)
 
 Two SDK packages, one for the App over `Microsoft.NET.Sdk` and one for the

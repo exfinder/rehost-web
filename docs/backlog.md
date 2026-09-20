@@ -244,7 +244,8 @@ Carried from earlier milestones as unresolved detail:
   `Web.Rehost.config` seeded with the known refusals (trust, missing
   `httpRuntime targetFramework`). Three imported apps each did both halves
   by hand; the checklist step is the spec.
-- `Rehost.WebForms.Sdk.App` / `.Host` MSBuild SDK packages for minimal consumer csproj files:
+- `Rehost.WebForms.Sdk.App` / `.Host` MSBuild SDK packages for minimal consumer csproj files.
+  Parked 2026-09-20: about seven lines per csproj once the split layout was dropped:
   [Rehost SDK](follow-ups/rehost-sdk.md).
 - In-place development run via a content sync or a host-provided bin seam,
   restoring the edit-markup-refresh loop:
