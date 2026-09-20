@@ -65,6 +65,7 @@ transforms, exactly like F5 on Framework.
 
 - App project: `RehostAppContentRoot` (runtime package targets) compiles the
   legacy tree WAP-style: all `*.cs` except `App_*`, `bin`, `obj`, `packages`.
+  `RehostAppContentExcludes` leaves more files out.
 - Host project: `RehostSiteContentRoot` (hosting package targets) turns on
   staging, the XDT pipeline, the `dotnet run` redirection, and the publish
   site layout; `OutDir=rehost_root/bin/` puts the payload in the staged

@@ -19,7 +19,7 @@
   <ItemGroup Condition="'$(RehostAppContentRoot)' != ''">
     <Compile
       Include="$(RehostAppContentRoot)**/*.cs"
-      Exclude="$(RehostAppContentRoot)bin/**;$(RehostAppContentRoot)obj/**;$(RehostAppContentRoot)packages/**" />
+      Exclude="$(RehostAppContentRoot)bin/**;$(RehostAppContentRoot)obj/**;$(RehostAppContentRoot)packages/**;$(RehostAppContentExcludes)" />
   </ItemGroup>
 
   <!-- The runtime compiles these folders itself, into their own assemblies that page

@@ -3,19 +3,13 @@
   <PropertyGroup>
     <AssemblyName>YAF</AssemblyName>
     <RootNamespace>YAF</RootNamespace>
-    <Source>$(YafSrc)YetAnotherForum.NET/</Source>
+    <RehostAppContentRoot>$(YafSrc)YetAnotherForum.NET/</RehostAppContentRoot>
+    <RehostAppContentExcludes>$(RehostAppContentRoot)Pages/ModForumUser.ascx.cs;$(RehostAppContentRoot)Pages/ModForumUser.ascx.designer.cs;$(RehostAppContentRoot)Pages/Moderating.ascx.cs;$(RehostAppContentRoot)Pages/Moderating.ascx.designer.cs</RehostAppContentExcludes>
     <!-- Controls/ForumList.ascx.cs uses the C# 14 field keyword, so this one
          assembly cannot take Sidecar.props's pinned 13. -->
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <!-- Not RehostAppContentRoot: that contract globs the whole tree, and four
-         orphaned code-behind files on disk are absent from the frozen project's
-         explicit list. Their markup is gone and they name a namespace that no
-         longer exists, so compiling them fails. -->
-    <Compile Include="$(Source)**/*.cs"
-             Exclude="$(Source)Pages/ModForumUser.ascx.cs;$(Source)Pages/ModForumUser.ascx.designer.cs;$(Source)Pages/Moderating.ascx.cs;$(Source)Pages/Moderating.ascx.designer.cs"
-             Link="%(RecursiveDir)%(Filename)%(Extension)" />
     <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -35,9 +35,9 @@ normalisation. Import exclusions and every source deviation are in the provenanc
 | `YAF.Host/` | The process: a ~25-line Kestrel host with Serilog request logging to the console, levels set in `appsettings.json`, and the app's `Web.Rehost.config`. |
 | `Sidecar.props` | Settings every frozen sidecar shares, including the pinned language version. |
 
-The sidecars glob the frozen tree rather than using `RehostAppContentRoot`: four orphaned
-code-behind files sit on disk that the frozen project never compiles, whose markup is gone
-and whose namespace no longer exists.
+`YAF.App` compiles the frozen tree through `RehostAppContentRoot`, with
+`RehostAppContentExcludes` leaving out four orphaned code-behind files that the frozen
+project never compiles: their markup is gone and their namespace no longer exists.
 
 ## Commands
 
