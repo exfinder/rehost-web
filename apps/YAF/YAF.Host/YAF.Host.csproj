@@ -10,7 +10,6 @@
     <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
     <PackageReference Include="Rehost.WebForms.Hosting" Version="$(RehostWebFormsVersion)" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <ProjectReference Include="../YAF.App/YAF.App.csproj" />
