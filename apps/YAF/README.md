@@ -44,7 +44,7 @@ project never compiles: their markup is gone and their namespace no longer exist
 ```text
 dotnet build apps/YAF/YAF.slnx
 dotnet run --project apps/YAF/YAF.Host
-# http://127.0.0.1:5087/ (pass a URL as the first argument to change)
+# http://127.0.0.1:5087/ (add `-- --urls <url>` to change)
 
 apps/YAF/smoke.sh                     # against the default URL
 eng/app-linux-smoke.sh YAF 5087       # the same, in a Linux container

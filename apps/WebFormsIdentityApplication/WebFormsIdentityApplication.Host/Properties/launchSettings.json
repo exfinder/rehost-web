@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "WebFormsIdentityApplication.Host": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "applicationUrl": "http://127.0.0.1:5082",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

@@ -8,12 +8,13 @@ Kestrel.
 dotnet run --project samples/Rehost.WebForms.SampleApp
 ```
 
-Then open <http://127.0.0.1:5080/Default.aspx>. Pass a different URL as the
-first argument to move the endpoint.
+Then open <http://127.0.0.1:5080/Default.aspx>. Add `-- --urls <url>` to move
+the endpoint.
 
 `dotnet publish samples/Rehost.WebForms.SampleApp -o X` gives the same shape:
 `X/` is the site root and the binaries go to `X/bin/`. Start it with
-`dotnet X/bin/Rehost.WebForms.SampleApp.dll`.
+`dotnet X/bin/Rehost.WebForms.SampleApp.dll --urls http://127.0.0.1:5080`;
+`launchSettings.json` is a development file and is not published.
 
 The site lives in `rehost_root/`, laid out like a classic Web Site: pages,
 `App_Code`, `App_GlobalResources`, and `web.config` at its root, binaries under

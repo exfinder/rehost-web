@@ -74,7 +74,7 @@ grep -q 'assembly="Rehost.WebForms.Optimization.WebForms"' "$site/web.config" ||
 echo "PASS  staged web.config carries the XDT result"
 
 echo "== run"
-dotnet "$site/bin/WebFormsApplication.Host.dll" "$BASE" > "$WORK/host.log" 2>&1 &
+dotnet "$site/bin/WebFormsApplication.Host.dll" --urls "$BASE" > "$WORK/host.log" 2>&1 &
 host=$!
 for _ in $(seq 1 60); do
   curl -fsS -o /dev/null "$BASE/" 2>/dev/null && break

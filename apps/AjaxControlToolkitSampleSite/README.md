@@ -28,7 +28,7 @@ prebuilt app assembly.
 ```text
 dotnet build apps/AjaxControlToolkitSampleSite/AjaxControlToolkitSampleSite.slnx
 dotnet run --project apps/AjaxControlToolkitSampleSite/AjaxControlToolkitSampleSite.Host
-# http://127.0.0.1:5084/ (pass a URL as the first argument to change)
+# http://127.0.0.1:5084/ (add `-- --urls <url>` to change)
 
 apps/AjaxControlToolkitSampleSite/smoke.sh                       # journey against the running host
 eng/app-linux-smoke.sh AjaxControlToolkitSampleSite 5084         # the same, in a Linux container

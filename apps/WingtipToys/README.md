@@ -52,7 +52,7 @@ docker run -d --name rehost-wingtip-sql -e ACCEPT_EULA=Y \
 
 dotnet build apps/WingtipToys/WingtipToys.slnx
 dotnet run --project apps/WingtipToys/WingtipToys.Host
-# http://127.0.0.1:5085/ (pass a URL as the first argument to change)
+# http://127.0.0.1:5085/ (add `-- --urls <url>` to change)
 
 apps/WingtipToys/smoke.sh                    # against the default URL
 apps/WingtipToys/smoke.sh http://127.0.0.1:5085

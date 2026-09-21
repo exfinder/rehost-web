@@ -20,7 +20,7 @@ host exe adds `Rehost.WebForms.Hosting`; the legacy folder is never touched.**
 ```text
 dotnet build apps/WebFormsApplication/WebFormsApplication.slnx
 dotnet run --project apps/WebFormsApplication/WebFormsApplication.Host
-# http://127.0.0.1:5081/Default (pass a URL as the first argument to change)
+# http://127.0.0.1:5081/Default (add `-- --urls <url>` to change)
 
 dotnet publish apps/WebFormsApplication/WebFormsApplication.Host -c Release
 # deployable site: WebFormsApplication.Host/bin/Release/net10.0/site-publish/

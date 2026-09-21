@@ -76,7 +76,7 @@ export plain `sqlite3_*` symbols the mangled managed assembly cannot call.
 ```text
 dotnet build apps/WebFormsIdentityApplication/WebFormsIdentityApplication.slnx
 dotnet run --project apps/WebFormsIdentityApplication/WebFormsIdentityApplication.Host
-# http://127.0.0.1:5082/ (pass a URL as the first argument to change)
+# http://127.0.0.1:5082/ (add `-- --urls <url>` to change)
 
 apps/WebFormsIdentityApplication/smoke.sh            # against the default URL
 apps/WebFormsIdentityApplication/smoke.sh http://127.0.0.1:5082

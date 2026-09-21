@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Rehost.WebForms.Hosting;
 
-var url = args.Length > 0 ? args[0] : "http://127.0.0.1:5082";
 var physicalRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
 // Provider services come from <entityFramework> in web.config, but the factory behind them
 // cannot: .NET dropped the <system.data> registry the Framework read. SQLiteFactory, not the
@@ -27,8 +26,11 @@ if (!File.Exists(identityDatabase))
 }
 
 // The content root defaults to the working directory, wherever the process was started.
-var builder = WebApplication.CreateBuilder(new WebApplicationOptions { ContentRootPath = AppContext.BaseDirectory });
-builder.WebHost.UseUrls(url);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory,
+});
 builder.AddRehostWebForms(options =>
 {
     options.ApplicationId = "webforms-identity-application";

@@ -30,7 +30,7 @@ remains the only one. The pre-import analysis is
 ```text
 dotnet build apps/eShopLegacyWebForms/eShopLegacyWebForms.slnx
 dotnet run --project apps/eShopLegacyWebForms/eShopLegacyWebForms.Host
-# http://127.0.0.1:5083/ (pass a URL as the first argument to change)
+# http://127.0.0.1:5083/ (add `-- --urls <url>` to change)
 
 apps/eShopLegacyWebForms/smoke.sh                    # against the default URL
 eng/app-linux-smoke.sh eShopLegacyWebForms 5083      # the same, in a Linux container
