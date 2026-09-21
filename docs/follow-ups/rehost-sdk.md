@@ -37,8 +37,9 @@ A migrator's csproj is already the one under `apps/`. The `Directory.Build.*`,
 `LocalFeed.props` and `eng/LocalFeed.targets` files there only pack `src/` into a
 local feed; `eng/external-consumer.sh` builds the stock pair without them, from a
 feed and nuget.org. The only edit is a literal package version. Writing those
-lines once is the scaffold tool's job ([backlog](../backlog.md), migration
-tooling).
+lines once is the job of the `Rehost.WebForms.Templates` package
+(`dotnet new rehost-webforms`, [getting started](../getting-started.md)), which
+landed on 2026-09-21.
 
 Costs for seven lines: two more packages to ship and version, one more thing to
 remove at the last migration stage, and no way for this repo to consume its own

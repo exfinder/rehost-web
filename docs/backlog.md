@@ -243,7 +243,10 @@ Carried from earlier milestones as unresolved detail:
   projects (or Host-only for a Web Site), slnx, package mapping, and a
   `Web.Rehost.config` seeded with the known refusals (trust, missing
   `httpRuntime targetFramework`). Three imported apps each did both halves
-  by hand; the checklist step is the spec.
+  by hand; the checklist step is the spec. The `Rehost.WebForms.Templates`
+  package (`dotnet new rehost-webforms`, [getting started](getting-started.md))
+  writes the WAP pair from a folder name; it does not read the legacy project,
+  so the package list, the Web Site shape and the seeded refusals remain here.
 - `Rehost.WebForms.Sdk.App` / `.Host` MSBuild SDK packages for minimal consumer csproj files.
   Parked 2026-09-20: about seven lines per csproj once the split layout was dropped:
   [Rehost SDK](follow-ups/rehost-sdk.md).

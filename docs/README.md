@@ -5,6 +5,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 
 ## Current truth
 
+- [Getting started](getting-started.md)
 - [Compatibility and evidence](compatibility.md)
 - [Migrating an application](migration.md)
 - [Unresolved work](backlog.md)
