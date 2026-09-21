@@ -18,6 +18,7 @@
     <Project Path="src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
     <Project Path="src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
     <Project Path="src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
+    <Project Path="src/Rehost.WebForms.Templates/Rehost.WebForms.Templates.csproj" />
     <Project Path="src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
   </Folder>
   <Folder Name="/tests/parity/">

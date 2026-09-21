@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>dotnet new template that adds the Rehost.WebForms App and Host projects beside a legacy ASP.NET Web Forms application.</Description>
+    <PackageType>Template</PackageType>
+    <PackageTags>dotnet-new;templates;webforms;aspnet</PackageTags>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeSymbols>false</IncludeSymbols>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content
+      Include="templates/**/*"
+      Exclude="templates/**/bin/**;templates/**/obj/**;templates/**/.template.config/template.json"
+      PackagePath="content" />
+  </ItemGroup>
+
+  <!-- The generated package references must name this package's own version, which is
+       known only at pack time. -->
+  <Target Name="StampTemplateVersion" BeforeTargets="_GetPackageFiles">
+    <PropertyGroup>
+      <_TemplateJsonSource>$(MSBuildProjectDirectory)/templates/rehost-webforms/.template.config/template.json</_TemplateJsonSource>
+      <_TemplateJsonStamped>$(IntermediateOutputPath)template.json</_TemplateJsonStamped>
+    </PropertyGroup>
+    <WriteLinesToFile
+      File="$(_TemplateJsonStamped)"
+      Lines="$([System.IO.File]::ReadAllText('$(_TemplateJsonSource)').Replace('REHOST_PACKAGE_VERSION', '$(PackageVersion)'))"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <Content
+        Include="$(_TemplateJsonStamped)"
+        Pack="true"
+        PackagePath="content/rehost-webforms/.template.config/" />
+    </ItemGroup>
+  </Target>
+</Project>

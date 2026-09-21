@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Prove the candidate packages work for a stranger: copy the stock WAP App/Host pair out
-# of the checkout into a fresh folder, restore it with an empty package cache from the
-# candidate feed plus nuget.org only, build, run the smoke journey, publish, and list
-# what publish produced. bash + curl + dotnet; runs on macOS, Linux, and Git bash.
+# Prove the candidate packages work for a stranger: copy the stock WAP out of the checkout
+# into a fresh folder, add its App/Host pair with the candidate dotnet new template, restore
+# with an empty package cache from the candidate feed plus nuget.org only, build, run the
+# smoke journey, publish, and list what publish produced. bash + curl + dotnet; runs on
+# macOS, Linux, and Git bash.
 #
 #   eng/external-consumer.sh <candidate-feed-dir> [version] [port]
 #
@@ -33,7 +34,7 @@ trap cleanup EXIT
 native() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
 
 mkdir -p "$APP"
-for item in WebFormsApplication WebFormsApplication.App WebFormsApplication.Host WebFormsApplication.slnx smoke.sh; do
+for item in WebFormsApplication smoke.sh; do
   cp -R "$REPO/apps/WebFormsApplication/$item" "$APP/"
 done
 rm -rf "$APP"/*/bin "$APP"/*/obj
@@ -46,7 +47,9 @@ export NUGET_PACKAGES="$WORK/nuget/packages"
 export NUGET_HTTP_CACHE_PATH="$WORK/nuget/http-cache"
 export NUGET_PLUGINS_CACHE_PATH="$WORK/nuget/plugins-cache"
 export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
-mkdir -p "$NUGET_PACKAGES" "$NUGET_HTTP_CACHE_PATH" "$NUGET_PLUGINS_CACHE_PATH"
+# dotnet new install writes to the user profile; keep the run off the machine's own list.
+export DOTNET_CLI_HOME="$WORK/dotnet-home"
+mkdir -p "$NUGET_PACKAGES" "$NUGET_HTTP_CACHE_PATH" "$NUGET_PLUGINS_CACHE_PATH" "$DOTNET_CLI_HOME"
 
 cd "$APP"
 echo "== toolchain"
@@ -56,8 +59,17 @@ dotnet --list-runtimes | grep -E '^Microsoft\.(NETCore|AspNetCore)\.App 10\.' | 
 echo "== candidate feed: $FEED"
 ls "$FEED" | grep -E '\.nupkg$' | grep -v snupkg
 
+legacy_listing() { (cd WebFormsApplication && find . -type f -exec cksum {} + | sort -k3); }
+
+echo "== dotnet new"
+legacy_listing > "$WORK/legacy.before"
+dotnet new install "Rehost.WebForms.Templates::$VERSION"
+dotnet new rehost-webforms --webapp WebFormsApplication
+ls
+grep -q "Version=\"$VERSION\"" WebFormsApplication.Host/WebFormsApplication.Host.csproj || { echo "FAIL  the template did not write the candidate version"; exit 1; }
+
 echo "== restore + build (Release)"
-dotnet build WebFormsApplication.slnx -c Release -p:RehostWebFormsVersion="$VERSION" -v q
+dotnet build WebFormsApplication.Rehost.slnx -c Release -v q
 
 echo "== restored Rehost packages (expect the seven public IDs, no components)"
 ls "$NUGET_PACKAGES" | grep -i '^rehost' | sort
@@ -84,11 +96,14 @@ done
 ./smoke.sh "$BASE"
 
 echo "== publish (Release)"
-dotnet publish WebFormsApplication.Host -c Release -p:RehostWebFormsVersion="$VERSION" -v q
+dotnet publish WebFormsApplication.Host -c Release -v q
 publish="WebFormsApplication.Host/bin/Release/net10.0/site-publish"
 echo "publish root: $(ls "$publish" | tr '\n' ' ')"
 echo "publish bin files: $(find "$publish/bin" -type f | wc -l | tr -d ' ')"
 echo "publish content files: $(find "$publish" -path "$publish/bin" -prune -o -type f -print | wc -l | tr -d ' ')"
 grep -q 'debug="true"' "$publish/web.config" && { echo "FAIL  publish did not apply Web.Release.config"; exit 1; }
 echo "PASS  published web.config carries the Release transform"
+legacy_listing > "$WORK/legacy.after"
+cmp -s "$WORK/legacy.before" "$WORK/legacy.after" || { echo "FAIL  the legacy folder changed"; diff "$WORK/legacy.before" "$WORK/legacy.after" | head; exit 1; }
+echo "PASS  template, build, run and publish left the legacy folder unchanged"
 echo "== done"

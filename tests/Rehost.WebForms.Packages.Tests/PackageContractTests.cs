@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Xml.Linq;
 using Shouldly;
 using Xunit;
 
@@ -6,6 +8,8 @@ namespace Rehost.WebForms.Packages.Tests;
 public sealed class PackageContractTests
 {
     private const string Bundle = "Rehost.WebForms";
+    private const string Templates = "Rehost.WebForms.Templates";
+    private const string TemplateRoot = "content/rehost-webforms/";
 
     private static readonly string[] PublicPackages =
     [
@@ -16,6 +20,7 @@ public sealed class PackageContractTests
         "Rehost.WebForms.Optimization.WebForms",
         "Rehost.WebForms.Owin.Host.SystemWeb",
         "Rehost.WebForms.ScriptManager.Bundles",
+        "Rehost.WebForms.Templates",
     ];
 
     private static readonly string[] UnpublishedComponents =
@@ -26,12 +31,15 @@ public sealed class PackageContractTests
         "Rehost.WebForms.WebServices",
     ];
 
+    private static IEnumerable<CandidatePackage> Satellites =>
+        PackageFeed.Packages.Where(p => p.Id != Bundle && p.Id != Templates);
+
     [Fact]
-    public void FeedHoldsTheSevenPublicPackagesAtOneVersion()
+    public void FeedHoldsTheEightPublicPackagesAtOneVersion()
     {
         PackageFeed.Packages.Select(p => p.Id).ShouldBe(PublicPackages.Order(StringComparer.Ordinal));
         PackageFeed.Packages.Select(p => p.Version).Distinct().ShouldHaveSingleItem();
-        PackageFeed.Packages.ShouldAllBe(p => p.SymbolFiles.Any(f => f.EndsWith(".pdb")));
+        PackageFeed.Packages.Where(p => p.Id != Templates).ShouldAllBe(p => p.SymbolFiles.Any(f => f.EndsWith(".pdb")));
     }
 
     [Fact]
@@ -86,7 +94,7 @@ public sealed class PackageContractTests
     {
         var version = PackageFeed.Package(Bundle).Version;
 
-        foreach (var satellite in PackageFeed.Packages.Where(p => p.Id != Bundle))
+        foreach (var satellite in Satellites)
         {
             satellite.Dependencies.ShouldContainKeyAndValue(Bundle, version, satellite.Id);
         }
@@ -140,9 +148,79 @@ public sealed class PackageContractTests
     [Fact]
     public void EachSatelliteShipsExactlyItsOwnAssembly()
     {
-        foreach (var satellite in PackageFeed.Packages.Where(p => p.Id != Bundle))
+        foreach (var satellite in Satellites)
         {
             satellite.LibraryFiles.ShouldBe([$"lib/net10.0/{satellite.Id}.dll"], satellite.Id);
         }
+    }
+
+    [Fact]
+    public void TemplatesIsATemplatePackageCarryingOnlyItsContent()
+    {
+        var templates = PackageFeed.Package(Templates);
+
+        templates.PackageTypes.ShouldBe(["Template"]);
+        templates.LibraryFiles.ShouldBeEmpty();
+        templates.Dependencies.ShouldBeEmpty();
+        templates.Files.Where(f => f.StartsWith("content/")).Order(StringComparer.Ordinal).ShouldBe(
+        [
+            $"{TemplateRoot}.template.config/template.json",
+            $"{TemplateRoot}MyApp.App/MyApp.App.csproj",
+            $"{TemplateRoot}MyApp.Host/.gitignore",
+            $"{TemplateRoot}MyApp.Host/MyApp.Host.csproj",
+            $"{TemplateRoot}MyApp.Host/Program.cs",
+            $"{TemplateRoot}MyApp.Host/Properties/launchSettings.json",
+            $"{TemplateRoot}MyApp.Host/Web.Rehost.config",
+            $"{TemplateRoot}MyApp.Rehost.slnx",
+        ]);
+    }
+
+    [Fact]
+    public void TemplateWritesPackageReferencesAtTheFeedVersion()
+    {
+        var templates = PackageFeed.Package(Templates);
+        using var json = JsonDocument.Parse(templates.ReadText($"{TemplateRoot}.template.config/template.json"));
+        var version = json.RootElement.GetProperty("symbols").GetProperty("rehostVersion");
+
+        version.GetProperty("parameters").GetProperty("value").GetString().ShouldBe(templates.Version);
+
+        var token = version.GetProperty("replaces").GetString()!;
+        foreach (var project in new[] { "MyApp.App/MyApp.App.csproj", "MyApp.Host/MyApp.Host.csproj" })
+        {
+            var references = XDocument.Parse(templates.ReadText(TemplateRoot + project))
+                .Descendants("PackageReference")
+                .ToList();
+
+            references.ShouldNotBeEmpty(project);
+            references.ShouldAllBe(r => (string)r.Attribute("Version")! == token);
+        }
+    }
+
+    [Fact]
+    public void TemplateTransformRepeatsEveryDefaultAdjustment()
+    {
+        var defaults = Adjustments(PackageFeed.Package("Rehost.WebForms.Hosting").ReadText("build/Web.Rehost.config"));
+        var template = Adjustments(PackageFeed.Package(Templates).ReadText($"{TemplateRoot}MyApp.Host/Web.Rehost.config"));
+
+        defaults.ShouldNotBeEmpty();
+        foreach (var adjustment in defaults)
+        {
+            template.ShouldContain(adjustment);
+        }
+    }
+
+    private static List<string> Adjustments(string transform)
+    {
+        XNamespace xdt = "http://schemas.microsoft.com/XML-Document-Transform";
+
+        return XDocument.Parse(transform)
+            .Descendants()
+            .Where(e => e.Attribute(xdt + "Transform") != null)
+            .Select(e => string.Join(
+                "/",
+                e.AncestorsAndSelf().Reverse().Select(a => a.Name.LocalName)) + " " + string.Join(
+                " ",
+                e.Attributes().OrderBy(a => a.Name.ToString(), StringComparer.Ordinal).Select(a => $"{a.Name.LocalName}={a.Value}")))
+            .ToList();
     }
 }
