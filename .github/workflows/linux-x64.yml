@@ -76,12 +76,10 @@ jobs:
       - name: Build the applications from the candidate
         run: |
           version=$(ls candidate/Rehost.WebForms.Hosting.*.nupkg | sed 's/.*Hosting\.//; s/\.nupkg$//')
-          echo "RehostWebFormsVersion=$version" >> "$GITHUB_ENV"
-          echo "RestoreAdditionalProjectSources=$PWD/candidate" >> "$GITHUB_ENV"
-          echo "RehostSkipLocalFeed=true" >> "$GITHUB_ENV"
+          echo "CANDIDATE_PROPS=-p:RehostSkipLocalFeed=true -p:RehostWebFormsVersion=$version -p:RestoreAdditionalProjectSources=$PWD/candidate" >> "$GITHUB_ENV"
       - name: WebFormsApplication journey
         run: |
-          dotnet build apps/WebFormsApplication/WebFormsApplication.slnx -v q
+          dotnet build apps/WebFormsApplication/WebFormsApplication.slnx -v q $CANDIDATE_PROPS
           dotnet run --project apps/WebFormsApplication/WebFormsApplication.Host --no-build > host.log 2>&1 &
           host=$!
           for _ in $(seq 1 60); do curl -fsS -o /dev/null http://127.0.0.1:5081/ && break; sleep 2; done
@@ -89,7 +87,7 @@ jobs:
           kill $host; wait $host || true
       - name: YAF journey
         run: |
-          dotnet build apps/YAF/YAF.slnx -v q
+          dotnet build apps/YAF/YAF.slnx -v q $CANDIDATE_PROPS
           dotnet run --project apps/YAF/YAF.Host --no-build > yaf.log 2>&1 &
           host=$!
           for _ in $(seq 1 90); do curl -sS -o /dev/null http://127.0.0.1:5087/ && break; sleep 2; done
