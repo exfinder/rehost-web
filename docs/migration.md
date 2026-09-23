@@ -1,9 +1,159 @@
 # Migrating an application
 
-Recipes for consumers moving a Web Forms application from Framework/IIS onto
-this runtime. Each topic states the deployment shape first, then what must
-carry over from the old hosting for behavior to survive the cutover.
-[Compatibility](compatibility.md) owns the support claims.
+The walkthrough after the first run. [Getting started](getting-started.md)
+gets the stock template to its first page; this page takes a real application
+the rest of the way, in the order the problems appear. Each section is short
+and links the application under `apps/` where the evidence and the full
+reasoning live. [Compatibility](compatibility.md) owns the support claims.
+
+## Package mapping
+
+Every `packages.config` line becomes a `PackageReference` in the App project.
+Three groups:
+
+- **Built on `System.Web`.** These bind to Microsoft's strong-named assembly
+  and must use the Rehost counterpart: `Microsoft.AspNet.FriendlyUrls`,
+  `Microsoft.AspNet.Web.Optimization` and `.WebForms`,
+  `Microsoft.AspNet.ScriptManager.*`, `Microsoft.Owin.Host.SystemWeb`. The
+  getting-started table lists the names.
+- **Pure managed.** Entity Framework 6.3+, the Katana `Microsoft.Owin.*`
+  packages, ASP.NET Identity 2.2, Newtonsoft.Json, Autofac, log4net are
+  referenced as they are, often at a newer version than the legacy line.
+  Packages that ship only a `net45` build restore under `NU1701`, which the
+  template silences.
+- **Dropped.** `Microsoft.Web.Infrastructure` (Katana 4.x calls
+  `HttpApplication.RegisterModule` directly), `Microsoft.AspNet.Providers.Core`
+  when only `<sessionState customProvider>` names it, and `WebGrease`/`Antlr`,
+  which the Optimization package carries itself. The `AspNet.ScriptManager.jQuery`
+  and `.bootstrap` packages register names only; re-register them in a
+  `PreApplicationStartCode.cs` in the App project.
+
+The worked table with every decision is in
+[Wingtip Toys, packages.config to PackageReference](../apps/WingtipToys/README.md);
+the Identity template's shorter one is in
+[WebFormsIdentityApplication](../apps/WebFormsIdentityApplication/README.md).
+
+## Configuration
+
+The legacy `Web.config` is never edited. The build applies
+`<Host>/Web.Rehost.config`, an XDT transform, and writes the result to
+`rehost_root/web.config`; publish applies `Web.$(Configuration).config` first.
+A `Web.Rehost.config` beside the Host replaces the package default wholesale, so
+keep its three adjustments (remove `<runtime>`, remove `<system.codedom>`,
+rewrite the Optimization controls assembly) and add the application's own
+below them. Typical additions:
+
+- connection strings for the environment (LocalDb is Windows-only; a named
+  catalog on a server or a container replaces `AttachDbFilename`);
+- removal of `<modules>` and `<handlers>` rows whose assembly cannot load here
+  (Elmah, Application Insights, `Microsoft.AspNet.SessionState`), and of the
+  `<location>` blocks that only registered them;
+- an explicit `<machineKey>` where the cookie must survive process
+  replacement (see Machine keys below).
+
+Examples: [Wingtip Toys](../apps/WingtipToys/README.md#webconfig),
+[eShopLegacyWebForms](../apps/eShopLegacyWebForms/README.md),
+[YAF](../apps/YAF/README.md#webconfig). Settings the runtime refuses fail
+activation with a message naming the file and the entry; the list is in
+[compatibility](compatibility.md).
+
+## Preserved source
+
+`RehostAppContentRoot` compiles every `*.cs` under the legacy folder, as the WAP
+csproj did, and leaves the markup for run-time compilation. Two differences
+from the csproj's explicit file list:
+
+- files on disk that the legacy project never listed are compiled too; name
+  them in `RehostAppContentExcludes` (YAF has four orphaned code-behind files);
+- `App_Code`, `App_Data`, `App_GlobalResources` and `App_LocalResources` are
+  removed from the compile, because the runtime compiles them itself. A WAP
+  that kept an `App_Code` folder by accident compiled it into the assembly;
+  here the same types would exist twice (CS0433).
+
+A Web Site project (no csproj, `CodeFile=` pages, code in `App_Code`) runs, but
+the hosting targets stage a WAP: the `*.cs` sources are excluded from the copy,
+and a Host-local target has to copy them. That is the state recorded in
+[AjaxControlToolkitSampleSite](../apps/AjaxControlToolkitSampleSite/README.md)
+and the open
+[project models](follow-ups/web-site-vs-wap-project-models.md) follow-up; the
+template does not write a Web Site shape yet.
+
+## Libraries bound to System.Web
+
+A third-party binary that references Microsoft's `System.Web` fails at load
+with a `FileNotFoundException` for `System.Web, Version=4.0.0.0,
+PublicKeyToken=b03f5f7f11d50a3a`, or later with a type that cannot be cast.
+There is no redirect to fix this; the assembly needs recompiling against this
+runtime. The order of work that has held for six applications:
+
+1. Probe the package as shipped from a throwaway .NET 10 console project,
+   driving the code paths the application invokes, not only the reference.
+   A package proven in one application can still fail in the next through a
+   path the first never called.
+2. Recompile only proven blockers, verbatim, with a provenance record
+   (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb` is the one
+   the alpha ships as `Rehost.WebForms.Owin.Host.SystemWeb`; the AJAX Control
+   Toolkit, Autofac's Web integration and YAF's fourteen projects are rebuilt
+   as source under `apps/`.
+3. Expect a Framework facade now and then: Katana's Google provider constructs
+   `System.Net.Http.WebRequest.WebRequestHandler`, a type .NET 10 does not
+   carry, and a 15-line stand-in assembly closes it
+   ([Wingtip Toys](../apps/WingtipToys/README.md#the-one-unanticipated-blocker-systemnethttpwebrequest)).
+
+## Custom build steps
+
+Inventory `PostBuildEvent`, `BeforeBuild`/`AfterBuild` and custom targets in
+every legacy project file before the first build. They ran invisibly on
+Framework machines, and their output can be load-bearing and absent from source
+control. The AJAX Control Toolkit sample site's static resources exist only as
+the output of a Windows-only hard-link step; the port serves the same assets
+embedded instead
+([AjaxControlToolkitSampleSite](../apps/AjaxControlToolkitSampleSite/README.md)).
+Content generators (T4, `.resx` to designer, XSD data sets) need the same check;
+the XSD build provider is
+[unsupported](xsd-build-provider-compatibility.md).
+
+## Language pins
+
+The App project compiles the legacy sources with the C# 14 compiler. Old trees
+compile unchanged in most cases, but two things change meaning:
+
+- C# 14 lets implicit span conversions into overload resolution, so
+  `array.Contains(x)` can bind to `MemoryExtensions` instead of `Enumerable`;
+  code that builds expression trees from such calls then fails. Pin
+  `<LangVersion>13</LangVersion>` for a rebuilt frozen tree
+  ([YAF](../apps/YAF/README.md#language-version)).
+- `Nullable` and `ImplicitUsings` stay off in the App project, and
+  `GenerateAssemblyInfo` is false because the tree has its own
+  `AssemblyInfo.cs`. The template sets all three.
+
+## Startup troubleshooting
+
+The first run usually fails in one of four places. The console log names each:
+
+1. **Restore or compile.** A missing type from `Microsoft.AspNet.*` means the
+   original package was added instead of the Rehost one. CS0433 means a folder
+   the runtime compiles itself was also compiled into the assembly. CS0246 in
+   a file the legacy project never listed means an exclude is missing.
+2. **Configuration.** A `web.config` entry the runtime refuses fails
+   activation with the file and the entry in the message; a `web.config` it
+   cannot parse answers every request with ASP.NET's Configuration Error page
+   and ends the process with exit code 82. Fix the entry in
+   `Web.Rehost.config`, not in `rehost_root/web.config`, which the next build
+   overwrites.
+3. **`Application_Start`.** A throw there latches: every request answers 500
+   for ten seconds, then the process is replaced and `Application_Start`
+   runs again, as integrated IIS did. The exception is in the log once.
+4. **First request.** A `FileNotFoundException` for a Framework assembly
+   (`System.Web`, `System.Net.Http.WebRequest`, `System.Configuration` facades)
+   points at a library from the section above. A 404 for a page that exists
+   usually means the URL is served by a handler or a rewrite rule the port
+   does not honor; [compatibility](compatibility.md) lists them.
+
+The two lines `Rehost physical root path` and `Rehost compilation temp path` at
+the top of the log tell where the site was staged and where generated
+assemblies go; `AppContext.BaseDirectory` is the site root, as on Framework
+(see The base directory below).
 
 ## Machine keys
 

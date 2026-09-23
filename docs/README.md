@@ -7,7 +7,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 
 - [Getting started](getting-started.md)
 - [Compatibility and evidence](compatibility.md)
-- [Migrating an application](migration.md)
+- [Migrating an application](migration.md), the walkthrough after the first run
 - [Unresolved work](backlog.md)
 - [Reached portability edges](portability-ledger.md)
 - [Shared terminology](../CONTEXT.md)
