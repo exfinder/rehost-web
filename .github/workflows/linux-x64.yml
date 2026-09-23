@@ -49,6 +49,7 @@ jobs:
 
   apps:
     runs-on: ubuntu-latest
+    needs: consumer
     services:
       postgres:
         image: postgres:17-alpine
@@ -68,6 +69,16 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.302'
+      - uses: actions/download-artifact@v4
+        with:
+          name: candidate
+          path: candidate
+      - name: Build the applications from the candidate
+        run: |
+          version=$(ls candidate/Rehost.WebForms.Hosting.*.nupkg | sed 's/.*Hosting\.//; s/\.nupkg$//')
+          echo "RehostWebFormsVersion=$version" >> "$GITHUB_ENV"
+          echo "RestoreAdditionalProjectSources=$PWD/candidate" >> "$GITHUB_ENV"
+          echo "RehostSkipLocalFeed=true" >> "$GITHUB_ENV"
       - name: WebFormsApplication journey
         run: |
           dotnet build apps/WebFormsApplication/WebFormsApplication.slnx -v q
