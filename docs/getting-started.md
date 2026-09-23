@@ -1,9 +1,13 @@
 # Getting started
 
 How to run an existing ASP.NET Web Forms Web Application Project on .NET 10. The
-legacy project is not edited and keeps building on .NET Framework. You need the
-.NET 10 SDK. A Web Site project (no csproj, code in `App_Code`) is not covered by
-the template yet.
+legacy project is not edited and keeps building on .NET Framework. A Web Site
+project (no csproj, code in `App_Code`) is not covered by the template yet.
+
+You need the .NET SDK 10.0.302 or a later 10.0.3xx release, which carries the
+10.0.10 runtime the alpha was validated with. Nothing else: no database, no
+Docker, no IIS, no Visual Studio. Windows x64, Linux x64, Linux arm64 and macOS
+arm64 are the validated platforms.
 
 ## 1. Install the template
 
@@ -80,6 +84,13 @@ dotnet run --project Shop.Web.Host
 The URL comes from `Shop.Web.Host/Properties/launchSettings.json`. To use another
 one, add `-- --urls http://127.0.0.1:5090`. An edit to an `.aspx` file needs a
 rebuild, because the Host serves a copy under `rehost_root/`.
+
+What to expect on the Visual Studio template: `GET /` returns 200 and renders the
+home page; its form posts back to `./`; a `POST /` carrying the rendered
+`__VIEWSTATE`, `__VIEWSTATEGENERATOR` and `__EVENTVALIDATION` fields returns 200
+and renders the same page again. `/Default.aspx` answers 301 to `/Default`
+(Friendly URLs). `apps/WebFormsApplication/smoke.sh <url>` in the repository
+checks these rows and the script bundles.
 
 Name the project or the `.slnx` file in every command. The folder also holds the
 legacy `.sln`, and a bare `dotnet build` stops with MSB1011.
