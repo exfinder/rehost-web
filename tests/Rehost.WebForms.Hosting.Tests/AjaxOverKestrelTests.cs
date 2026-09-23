@@ -22,7 +22,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         string path, string panelsAndTarget, params (string Name, string Value)[] overrides)
     {
         var page = await GetAsBrowserAsync(path);
-        page.StatusCode.ShouldBe(200);
+        page.StatusCode.ShouldBe(200, page.Text);
         return await AsyncPostFromAsync(page.Text, path, panelsAndTarget, overrides);
     }
 
@@ -71,7 +71,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await GetAsBrowserAsync("/ajax/Panel.aspx");
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Text.ShouldContain("""<div id="Panel">""");
         response.Text.ShouldContain("inside:initial");
         response.Text.ShouldContain("Sys.WebForms.PageRequestManager._initialize", Case.Sensitive);
@@ -83,7 +83,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|Bump", ("Bump", "Bump"));
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Headers["Content-Type"].ShouldStartWith("text/plain");
         var segments = ParseDelta(response.Text);
         var panel = segments.Single(s => s.Type == "updatePanel" && s.Id == "Panel");
@@ -99,7 +99,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         var response = await AsyncPostAsync(
             "/ajax/Panel.aspx", "Panel|Refresh", ("Refresh", "Refresh"));
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         var segments = ParseDelta(response.Text);
         segments.Single(s => s.Type == "updatePanel" && s.Id == "Panel")
             .Content.ShouldContain("inside:refreshed");
@@ -130,7 +130,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
             ("X-MicrosoftAjax", "Delta=true"),
             ("User-Agent", BrowserUserAgent));
 
-        second.StatusCode.ShouldBe(200);
+        second.StatusCode.ShouldBe(200, second.Text);
         ParseDelta(second.Text)
             .Single(s => s.Type == "updatePanel" && s.Id == "Panel")
             .Content.ShouldContain("inside:refreshed");
@@ -141,7 +141,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|Fail", ("Fail", "Fail"));
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Headers["Content-Type"].ShouldStartWith("text/plain");
         var error = ParseDelta(response.Text).Single(s => s.Type == "error");
         error.Id.ShouldBe("500");
@@ -154,7 +154,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
         var response = await AsyncPostAsync(
             "/ajax/Panel.aspx", "Panel|Fail", ("Fail", "Fail"), ("Friendly", "yes"));
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         var error = ParseDelta(response.Text).Single(s => s.Type == "error");
         error.Content.ShouldBe("panel-friendly-message");
         response.Text.ShouldNotContain("panel-deliberate-failure");
@@ -165,7 +165,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|Go", ("Go", "Go"));
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         ParseDelta(response.Text).Single(s => s.Type == "pageRedirect")
             .Content.ShouldBe("%2fajax%2fPanel.aspx%3ffrom%3dredirect");
     }
@@ -175,7 +175,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await AsyncPostAsync("/ajax/Panel.aspx", "Panel|T", ("__EVENTTARGET", "T"));
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         ParseDelta(response.Text)
             .Single(s => s.Type == "updatePanel" && s.Id == "Panel")
             .Content.ShouldContain("clock:ticked");
@@ -186,7 +186,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await GetAsBrowserAsync("/ajax/Panel.aspx");
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Text.ShouldContain("PageMethods", Case.Sensitive);
         response.Text.ShouldContain("Echo", Case.Sensitive);
     }
@@ -199,7 +199,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
             Encoding.UTF8.GetBytes("{\"text\":\"hello\"}"),
             "application/json; charset=utf-8");
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Headers["Content-Type"].ShouldBe("application/json; charset=utf-8");
         response.Text.ShouldBe("{\"d\":\"pm:hello\"}");
     }
@@ -209,7 +209,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await scenario.Client.GetAsync("/ajax/Panel.aspx/Echo");
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Text.ShouldContain("<html");
         response.Text.ShouldNotContain("\"d\"");
     }
@@ -244,7 +244,7 @@ public sealed class AjaxOverKestrelTests(PageLiveScenario scenario)
     {
         var response = await scenario.Client.GetAsync("/ajax/Query.aspx");
 
-        response.StatusCode.ShouldBe(200);
+        response.StatusCode.ShouldBe(200, response.Text);
         response.Text.ShouldContain("[Grace:85][Linus:55][Ada:36]", Case.Sensitive);
         response.Text.ShouldNotContain("Brendan");
     }
