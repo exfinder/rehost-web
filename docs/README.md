@@ -54,6 +54,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 - [Parity rigs](../tests/parity/README.md)
 - [Windows validation](windows-validation-host.md)
 - Linux validation: `eng/linux-round.sh`
+- Linux x64 validation: GitHub Actions, `.github/workflows/linux-x64.yml`
 - Documentation checks: `python3 eng/check-docs.py`
 - [Reusable Markdown audit prompt](prompts/markdown-documentation-audit.md)
 

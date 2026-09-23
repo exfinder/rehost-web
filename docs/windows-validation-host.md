@@ -13,6 +13,10 @@ Cross-platform validation requires macOS arm64, Linux, and Windows x64 to
 pass. Linux uses [`eng/linux-round.sh`](../eng/linux-round.sh), which runs the
 container on the Docker daemon's native architecture — an emulated round costs
 minutes where a native one costs seconds.
+Linux x64 runs on GitHub Actions
+([`linux-x64.yml`](../.github/workflows/linux-x64.yml)) on every push to `main`:
+the solution tests, the packed packages through `eng/external-consumer.sh`, and
+the stock-template and YAF journeys against a PostgreSQL service.
 Defects found so far — path separators, hidden-file classification, native
 libraries keeping the `.dll` extension off Unix — have each appeared on only one
 platform. See the cross-platform validation policy in `AGENTS.md`.
