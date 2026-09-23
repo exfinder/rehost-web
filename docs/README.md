@@ -9,6 +9,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 - [Compatibility and evidence](compatibility.md)
 - [Migrating an application](migration.md), the walkthrough after the first run
 - [Unresolved work](backlog.md)
+- [Release notes](releases/0.1.0-alpha.1.md)
 - [Reached portability edges](portability-ledger.md)
 - [Shared terminology](../CONTEXT.md)
 
