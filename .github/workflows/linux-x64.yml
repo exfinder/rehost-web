@@ -1,0 +1,89 @@
+name: linux-x64
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet build Rehost.WebForms.slnx -v q
+      - run: dotnet test Rehost.WebForms.slnx --no-build
+
+  consumer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: Pack the candidate
+        run: |
+          for project in $(grep -o 'src/[^"]*\.csproj' eng/PackageProjects.props); do
+            dotnet pack "$project" -c Release -o candidate -v q
+          done
+          (cd candidate && sha256sum *.nupkg *.snupkg > SHA256SUMS)
+          cat candidate/SHA256SUMS
+      - name: Candidate version
+        id: version
+        run: |
+          echo "version=$(ls candidate/Rehost.WebForms.Hosting.*.nupkg | sed 's/.*Hosting\.//; s/\.nupkg$//')" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: candidate
+          path: candidate/
+          if-no-files-found: error
+      - name: External consumer
+        run: eng/external-consumer.sh candidate "${{ steps.version.outputs.version }}" 5181
+
+  apps:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: yaf
+          POSTGRES_PASSWORD: Rehost!Dev2026
+          POSTGRES_DB: yafnet
+        ports:
+          - 15432:5432
+        options: >-
+          --health-cmd "pg_isready -U yaf"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - name: WebFormsApplication journey
+        run: |
+          dotnet build apps/WebFormsApplication/WebFormsApplication.slnx -v q
+          dotnet run --project apps/WebFormsApplication/WebFormsApplication.Host --no-build > host.log 2>&1 &
+          host=$!
+          for _ in $(seq 1 60); do curl -fsS -o /dev/null http://127.0.0.1:5081/ && break; sleep 2; done
+          apps/WebFormsApplication/smoke.sh http://127.0.0.1:5081
+          kill $host; wait $host || true
+      - name: YAF journey
+        run: |
+          dotnet build apps/YAF/YAF.slnx -v q
+          dotnet run --project apps/YAF/YAF.Host --no-build > yaf.log 2>&1 &
+          host=$!
+          for _ in $(seq 1 90); do curl -sS -o /dev/null http://127.0.0.1:5087/ && break; sleep 2; done
+          apps/YAF/install.sh http://127.0.0.1:5087
+          apps/YAF/smoke.sh http://127.0.0.1:5087
+          kill $host; wait $host || true
+      - name: Host logs
+        if: failure()
+        run: tail -n 80 host.log yaf.log 2>/dev/null || true
