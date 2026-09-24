@@ -48,10 +48,13 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 ## Contributor workflow
 
 - [Bringing up an application](bringing-up-an-application.md)
+- [Architecture design principles](architecture-design-principles.md)
 - [Code style](code-style.md)
+- [Code comments](code-comments.md)
 - [Writing tests](writing-tests.md)
 - [Scenario fixture tenancy](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md)
 - [Parity rigs](../tests/parity/README.md)
+- [Cross-platform validation](cross-platform-validation.md)
 - [Windows validation](windows-validation-host.md)
 - Linux validation: `eng/linux-round.sh`
 - Linux x64 validation: GitHub Actions, `.github/workflows/linux-x64.yml`

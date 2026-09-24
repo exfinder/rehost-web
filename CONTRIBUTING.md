@@ -48,11 +48,12 @@ packages from outside the checkout, the way a consumer meets them.
 - **Provenance for imported code.** Reference Source and other imported trees
   stay unchanged where practical; a needed edit is surgical and gets a row in
   [docs/provenance/](docs/provenance/).
-- **Three platforms.** Runtime changes pass on Windows x64, Linux and macOS
-  arm64 before they are done. `eng/linux-round.sh` runs the committed HEAD in
-  a container; [docs/windows-validation-host.md](docs/windows-validation-host.md)
-  describes the Windows loop. A test-only or docs-only change validates on
-  one platform.
+- **Platform rounds.** A change validates on the current platform. A change to
+  platform-dependent runtime logic passes on Windows x64, Linux and macOS arm64
+  before it is done; [docs/cross-platform-validation.md](docs/cross-platform-validation.md)
+  lists what counts. `eng/linux-round.sh` runs the committed HEAD in a
+  container; [docs/windows-validation-host.md](docs/windows-validation-host.md)
+  describes the Windows loop.
 - **A conventional commit subject** (`type: summary`), a body only where the
   mechanism is not obvious from the diff, and no comments that explain what
   the code does or why the change is right.

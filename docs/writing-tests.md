@@ -87,7 +87,7 @@ response.Text.ShouldContain("...");
 
 - A test that a stub implementation would also satisfy is not covering the
   behavior. Know what the test looks like when it fails, and prefer inputs
-  that fail when the implementation degrades (AGENTS.md).
+  that fail when the implementation degrades.
 - A cache in front of the seam can answer for a removed implementation: the
   P57 case-folding test passed with the resolver hook deleted because the
   build cache's case-insensitive key served any casing once one compiled.

@@ -3,8 +3,8 @@
 Rules for authored C#. Imported Reference Source keeps its original shape;
 see [`provenance/`](provenance/).
 
-Commit-message and comment rules stay in [`../AGENTS.md`](../AGENTS.md);
-test-authoring rules are in [`writing-tests.md`](writing-tests.md).
+Comment rules are in [`code-comments.md`](code-comments.md); test-authoring
+rules are in [`writing-tests.md`](writing-tests.md).
 
 ## Files
 
@@ -20,8 +20,7 @@ Prefer `var` over an explicit local variable type.
 
 ## Comments
 
-The no-comments rule lives in [`../AGENTS.md`](../AGENTS.md), which every
-session loads. Not repeated here: two copies drift.
+Read [`code-comments.md`](code-comments.md).
 
 ## Building a string
 
@@ -67,3 +66,9 @@ var request = """
 ```
 
 Single-line content stays a single-line literal.
+
+## Commit messages
+
+Use concise Conventional Commit subjects (`type: summary`).
+Add a body only where the mechanism is not obvious from the diff. Existing commits carry long bodies; do not treat them as the standard.
+Do not add `Co-Authored-By` footers.

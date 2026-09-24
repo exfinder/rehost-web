@@ -23,7 +23,7 @@ the solution tests, the packed packages through `eng/external-consumer.sh`, and
 the stock-template and YAF journeys against a PostgreSQL service.
 Defects found so far — path separators, hidden-file classification, native
 libraries keeping the `.dll` extension off Unix — have each appeared on only one
-platform. See the cross-platform validation policy in `AGENTS.md`.
+platform. See the [cross-platform validation policy](cross-platform-validation.md).
 
 ## EC2 alternative: `win-oracle`
 
