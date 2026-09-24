@@ -73,3 +73,22 @@ This is a developer alpha maintained by volunteers.
   answer may be a backlog entry rather than a fix.
 - A fix ships as a new package set at one version, after the platform checks
   the change affects. There are no patches to an already published version.
+
+## Shipping an alpha fix
+
+1. Land the fix on `main` with its test. Bump `VersionSuffix` in
+   `src/Directory.Build.props` (`alpha.1` to `alpha.2`); every package takes the
+   new version, including ones that did not change, so internal dependencies
+   keep resolving to one version.
+2. Add `docs/releases/<version>.md` starting with `# <version>`: what changed,
+   and the build record. The push to `main` runs `linux-x64.yml`; its `consumer`
+   job packs the candidate and uploads it with `SHA256SUMS`.
+3. Rerun the checks the change touches from that candidate, not from a local
+   pack: `gh run download <run id> -n candidate -D candidate`, then
+   `eng/external-consumer.sh candidate <version> <port>` and the affected
+   application journeys on the platforms the change can reach (a path or
+   filesystem change: all four; a docs or harness change: none). Record the
+   results in the release page.
+4. Run `publish.yml` by hand with the run id and the tag, `dry_run` on, and read
+   the log. Then again with `dry_run` off. It pushes the packages and creates the
+   GitHub prerelease from the release page.
