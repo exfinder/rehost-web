@@ -93,8 +93,9 @@ drive root, and hosting an application at filesystem root remains unsupported.
 
 - Framework-only `FileEnumerator`, template-parser, LOS formatter, and
   multi-targeting branches.
-- Debug-only helpers and project `Compile Remove` files for browser generation,
-  remote configuration, strong-name/registration utilities, and transactions.
+- Debug-only helpers, Framework-only machine-wide browser generation, and
+  project `Compile Remove` files for remote configuration,
+  strong-name/registration utilities, and transactions.
 - IIS/Framework-install discovery and almost all legacy Web Services discovery
   source.
 - Extensions Client Services/WCF build-provider files outside the compiled

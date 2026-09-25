@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="UnderscoreAB" parentID="Default">
+    <identification>
+      <userAgent match="RehostUnderscore" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="UnderscoreAB" />
+      <capability name="rehostProbe" value="UnderscoreAB" />
+    </capabilities>
+  </browser>
+</browsers>

@@ -4,14 +4,15 @@ using Xunit;
 
 namespace Rehost.WebForms.Hosting.Tests;
 
-// Expected values are Framework's except RehostHyphen: Framework's culture sort ignored the hyphen
-// and put bw.browser first, where the port's directory order puts b-x.browser first.
+// Expected values are Framework's except RehostHyphen and RehostUnderscore: Framework's culture sort
+// put bw.browser before b-x.browser and a_b.browser before ab.browser; directory order does not.
 public sealed class ApplicationBrowsersOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
     [Theory]
     [InlineData("RehostOrder/1.0", "default,orderalpha", "OrderAlpha")]
     [InlineData("RehostHyphen/1.0", "default,hyphenbx", "HyphenBX")]
+    [InlineData("RehostUnderscore/1.0", "default,plainab", "PlainAB")]
     [InlineData("RehostDot/1.0", "default,dotfile", "DotFile")]
     [InlineData("RehostUpper/1.0", "default,upperext", "UpperExt")]
     [InlineData("RehostSub/1.0", "default,subroot", "SubRoot")]

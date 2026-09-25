@@ -63,9 +63,10 @@ files all see that order, so which duplicate a compile error blames, a theme's
 `<link>` order, and codegen reuse across restarts are the same on every
 machine. The claim is determinism, not Framework's exact sequence: Framework's
 batch order was a `Hashtable`'s, and its App_Code order scrambles past eight
-files. Its top-level `App_Browsers` order came from a culture sort that ignores
-a hyphen, so `bw.browser` came before `b-x.browser` there and comes after it
-here; only names differing by `-`, `_` or `'` are affected. Every custom-tree
+files. Its top-level `App_Browsers` order came from a culture sort, so
+`bw.browser` came before `b-x.browser` and `a_b.browser` before `ab.browser`
+there, and after them here; only names differing by `-`, `_` or `'` are
+affected. Every custom-tree
 level under `App_Browsers` is listed the same way, and `*.browser` matches in
 any casing (ledger P110, P111). The `bin`
 scan matches `.dll` case-insensitively on every filesystem and skips a file
