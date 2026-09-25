@@ -130,10 +130,6 @@ replacement, and removes `<system.net>`, which fails activation here and configu
 nothing on modern .NET either way
 ([reading](../../docs/follow-ups/system-net-mail-settings.md)).
 
-`App_Browsers/` is excluded from the staged site by `RehostSiteContentExcludes`:
-application browser compilation is Unsupported and fails activation. The rendered pages
-still emit `__doPostBack`, so the markup is not downlevel.
-
 `yafsrc/YetAnotherForum.NET/Web.config` is a byte copy of upstream's own
 `recommended.web.config`. Upstream generates `web.config` at install time and git-ignores
 it, so a source checkout ships none.
