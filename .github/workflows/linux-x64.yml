@@ -13,8 +13,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.302'
       - run: dotnet build Rehost.WebForms.slnx -v q
@@ -23,8 +23,8 @@ jobs:
   consumer:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.302'
       - name: Pack the candidate
@@ -39,7 +39,7 @@ jobs:
         id: version
         run: |
           echo "version=$(ls candidate/Rehost.WebForms.Hosting.*.nupkg | sed 's/.*Hosting\.//; s/\.nupkg$//')" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: candidate
           path: candidate/
@@ -65,11 +65,11 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.302'
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v8
         with:
           name: candidate
           path: candidate
