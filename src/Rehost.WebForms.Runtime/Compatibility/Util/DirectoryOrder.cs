@@ -16,9 +16,10 @@ internal static class DirectoryOrder
 {
     internal static readonly IComparer<string> NameComparer = Comparer<string>.Create(CompareNames);
 
-    internal static FileSystemInfo[] Sort(IEnumerable<FileSystemInfo> entries)
+    internal static T[] Sort<T>(IEnumerable<T> entries)
+        where T : FileSystemInfo
     {
-        var sorted = new List<FileSystemInfo>(entries).ToArray();
+        var sorted = new List<T>(entries).ToArray();
         Array.Sort(sorted, static (x, y) => CompareNames(x.Name, y.Name));
         return sorted;
     }

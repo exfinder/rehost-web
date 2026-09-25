@@ -17,8 +17,6 @@
     <Compile Remove="../System.Web.ReferenceSource/Compilation/WebReferencesBuildProvider.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Compilation/WsdlBuildProvider.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Compilation/XsdBuildProvider.cs" />
-    <Compile Remove="../System.Web.ReferenceSource/Compilation/BrowserCapabilitiesCompiler.cs" />
-    <Compile Remove="../System.Web.ReferenceSource/Configuration/BrowserCapabilitiesCodeGenerator.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Configuration/StrongNameUtility.cs" />
     <Compile Remove="../System.Web.ReferenceSource/InternalApis/NDP_Common/inc/StrongNameHelpers.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Configuration/IRemoteWebConfigurationHostServer.cs" />

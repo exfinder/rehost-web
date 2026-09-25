@@ -58,7 +58,9 @@ namespace System.Web.Configuration {
         private const string _headersRefName = "headers";
         private const string _resultVarName = "result";
         private const string _processRegexMethod = "ProcessRegex";
+#if NETFRAMEWORK
         private static readonly string _strongNameKeyFileName = browserCapsVariable + ".snk";
+#endif
         private static readonly string _publicKeyTokenFileName = browserCapsVariable + ".token";
         private static bool _publicKeyTokenLoaded;
         private static string _publicKeyToken;
@@ -173,6 +175,7 @@ namespace System.Web.Configuration {
         //then generate code for, compile, and gac the object
         [SecurityPermission(SecurityAction.Demand, Unrestricted=true)]
         public virtual void Create() {
+#if NETFRAMEWORK
             DirectoryInfo browserDirInfo = new DirectoryInfo(_browsersDirectory);
             //get all the browser files and put them in the "tree"
             FileInfo[] browserFiles = browserDirInfo.GetFiles("*.browser");
@@ -199,8 +202,16 @@ namespace System.Web.Configuration {
 
             // Restart w3svc service
             RestartW3SVCIfNecessary();
+#else
+            throw new PlatformNotSupportedException(MachineBrowserFilesUnsupported);
+#endif
         }
 
+#if !NETFRAMEWORK
+        private const string MachineBrowserFilesUnsupported =
+            "Machine-wide browser definitions (aspnet_regbrowsers) are not supported by Rehost.WebForms. "
+            + "Put .browser files in the application's App_Browsers folder instead.";
+#else
         internal bool UninstallInternal() {
             // Remove existing strong name public token file
             if (File.Exists(_publicKeyTokenFile)) {
@@ -216,9 +227,11 @@ namespace System.Web.Configuration {
 
             return true;
         }
+#endif
 
         [SecurityPermission(SecurityAction.Demand, Unrestricted = true)]
         public bool Uninstall() {
+#if NETFRAMEWORK
             // Restart w3svc service
             RestartW3SVCIfNecessary();
 
@@ -230,8 +243,12 @@ namespace System.Web.Configuration {
             RestartW3SVCIfNecessary();
 
             return true;
+#else
+            throw new PlatformNotSupportedException(MachineBrowserFilesUnsupported);
+#endif
         }
 
+#if NETFRAMEWORK
         private void RestartW3SVCIfNecessary() {
 #if !FEATURE_PAL
             try {
@@ -266,13 +283,14 @@ namespace System.Web.Configuration {
             }
 #endif // !FEATURE_PAL
         }
+#endif
 
         internal void ProcessBrowserFiles() {
             ProcessBrowserFiles(false, String.Empty);
         }
 
         private string NoPathFileName(string fullPath) {
-            int lastSlash = fullPath.LastIndexOf("\\", StringComparison.Ordinal);
+            int lastSlash = fullPath.LastIndexOfAny(new char[] { '\\', '/' });
             if(lastSlash > -1) {
                 return fullPath.Substring(lastSlash + 1);
             }
@@ -411,7 +429,11 @@ namespace System.Web.Configuration {
                 _browserFileList = new ArrayList();
             }
 
+#if NETFRAMEWORK
             _browserFileList.Sort();
+#else
+            _browserFileList = new ArrayList(DirectoryOrder.SortPaths((string[])_browserFileList.ToArray(typeof(string))));
+#endif
 //#if OPTIMIZE_FOR_DESKTOP_BROWSER
             string mozillaFile = null;
             string ieFile = null;
@@ -529,13 +551,17 @@ namespace System.Web.Configuration {
                 browserDirInfo = new DirectoryInfo(HostingEnvironment.MapPathInternal(virtualDir));
             }
 
+#if NETFRAMEWORK
             allBrowserSubDirectories = browserDirInfo.GetDirectories();
+#else
+            allBrowserSubDirectories = BrowserFileListing.Subdirectories(browserDirInfo);
+#endif
             
             int j = 0;
             int length = allBrowserSubDirectories.Length;
             browserSubDirectories = new DirectoryInfo[length];
             for (int i = 0; i < length; i++) {
-                if ((allBrowserSubDirectories[i].Attributes & FileAttributes.Hidden) != FileAttributes.Hidden) {
+                if (!HiddenFile.IsHidden(allBrowserSubDirectories[i])) {
                     browserSubDirectories[j] = allBrowserSubDirectories[i];
                     j++;
                 }
@@ -645,13 +671,23 @@ namespace System.Web.Configuration {
         private static FileInfo[] GetFilesNotHidden(DirectoryInfo rootDirectory, DirectoryInfo browserDirInfo) {
             ArrayList fileList = new ArrayList();
             FileInfo[] files;
+#if NETFRAMEWORK
             DirectoryInfo[] subDirectories = rootDirectory.GetDirectories("*", SearchOption.AllDirectories);
             
             files = rootDirectory.GetFiles("*.browser", SearchOption.TopDirectoryOnly);
+#else
+            DirectoryInfo[] subDirectories = BrowserFileListing.AllSubdirectories(rootDirectory);
+
+            files = BrowserFileListing.BrowserFiles(rootDirectory);
+#endif
             fileList.AddRange(files);
             for (int i = 0; i < subDirectories.Length; i++) {
                 if ((HasHiddenParent(subDirectories[i], browserDirInfo) == false)) {
+#if NETFRAMEWORK
                     files = subDirectories[i].GetFiles("*.browser", SearchOption.TopDirectoryOnly);
+#else
+                    files = BrowserFileListing.BrowserFiles(subDirectories[i]);
+#endif
                     fileList.AddRange(files);
                 }
             }
@@ -660,7 +696,7 @@ namespace System.Web.Configuration {
         
         private static bool HasHiddenParent(DirectoryInfo directory, DirectoryInfo browserDirInfo) {
             while(!String.Equals(directory.Parent.Name, browserDirInfo.Name)) {
-                if ((directory.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden) {
+                if (HiddenFile.IsHidden(directory)) {
                     return true;
                 }
                 directory = directory.Parent;
@@ -668,6 +704,7 @@ namespace System.Web.Configuration {
             return false;
         }
 
+#if NETFRAMEWORK
         //generate the code from the parsed BrowserDefinitionTree
         //compile it, and install it in the gac
         private void GenerateAssembly() {
@@ -833,14 +870,7 @@ namespace System.Web.Configuration {
                 throw new HttpCompileException(SR.GetString(SR.Browser_compile_error));
             }
 
-#if NETFRAMEWORK
             Assembly resultAssembly = results.CompiledAssembly;
-#else
-            // One load context for every generated assembly; see GeneratedAssemblyLoader. This
-            // file is excluded from the portable build, so the branch is inert until machine-level
-            // browser capability generation is supported.
-            Assembly resultAssembly = System.Web.Util.GeneratedAssemblyLoader.Load(results.PathToAssembly);
-#endif
 
             GacUtil gacutil = new GacUtil();
             gacutil.GacInstall(resultAssembly.Location);
@@ -857,6 +887,7 @@ namespace System.Web.Configuration {
                 }
             }
         }
+#endif
 
         private static string LoadPublicKeyTokenFromFile(string filename) {
             IStackWalk fileReadAccess = InternalSecurityPermissions.FileReadAccess(filename);

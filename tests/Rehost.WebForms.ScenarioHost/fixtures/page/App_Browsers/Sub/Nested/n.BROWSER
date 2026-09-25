@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="SubUpper" parentID="SubRoot">
+    <identification>
+      <userAgent match="RehostSubUpper" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="SubUpper" />
+      <capability name="rehostProbe" value="SubUpper" />
+    </capabilities>
+  </browser>
+</browsers>

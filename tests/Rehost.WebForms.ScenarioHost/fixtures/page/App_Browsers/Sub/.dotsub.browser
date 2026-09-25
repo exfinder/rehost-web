@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="SubDotFile" parentID="SubRoot">
+    <identification>
+      <userAgent match="RehostSubDot" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="SubDotFile" />
+      <capability name="rehostProbe" value="SubDotFile" />
+    </capabilities>
+  </browser>
+</browsers>

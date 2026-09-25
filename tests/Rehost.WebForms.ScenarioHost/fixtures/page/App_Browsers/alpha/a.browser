@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="TreeAlpha">
+    <identification>
+      <userAgent match="RehostTree" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="TreeAlpha" />
+      <capability name="rehostProbe" value="TreeAlpha" />
+    </capabilities>
+  </browser>
+</browsers>

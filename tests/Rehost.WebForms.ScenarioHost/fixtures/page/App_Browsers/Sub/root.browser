@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="SubRoot">
+    <identification>
+      <userAgent match="RehostSub" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="SubRoot" />
+      <capability name="rehostProbe" value="SubRoot" />
+    </capabilities>
+  </browser>
+</browsers>

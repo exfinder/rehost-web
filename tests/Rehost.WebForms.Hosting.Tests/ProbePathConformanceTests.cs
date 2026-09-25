@@ -33,6 +33,7 @@ public sealed class ProbePathConformanceTests
         ["ModuleListHandler"] = ProbePaths.ModuleList,
         ["RuntimeIdentityProbe"] = ProbePaths.RuntimeIdentity,
         ["BaseDirectoryProbe"] = ProbePaths.BaseDirectory,
+        ["BrowserCapabilitiesProbe"] = ProbePaths.BrowserCapabilities,
         ["UnloadProbe"] = ProbePaths.Unload,
         ["LifecycleReportProbe"] = ProbePaths.Lifecycle,
         ["IntegratedMembersProbe"] = ProbePaths.Integrated,

@@ -39,6 +39,7 @@ namespace System.Web.Compilation {
         internal static Assembly AspBrowserCapsFactoryAssembly { get; set; }
 
         static BrowserCapabilitiesCompiler() {
+#if NETFRAMEWORK
             Assembly assembly = null;
             String publicKeyToken = BrowserCapabilitiesCodeGenerator.BrowserCapAssemblyPublicKeyToken;
 
@@ -68,6 +69,9 @@ namespace System.Web.Compilation {
             else {
                 _browserCapabilitiesFactoryBaseType = assembly.GetType("ASP.BrowserCapabilitiesFactory", true);
             }
+#else
+            _browserCapabilitiesFactoryBaseType = typeof(System.Web.Configuration.BrowserCapabilitiesFactory);
+#endif
         }
 
         internal static BrowserCapabilitiesFactoryBase BrowserCapabilitiesFactory {

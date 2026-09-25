@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="DotFile" parentID="Default">
+    <identification>
+      <userAgent match="RehostDot" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="DotFile" />
+      <capability name="rehostProbe" value="DotFile" />
+    </capabilities>
+  </browser>
+</browsers>

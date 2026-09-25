@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="HyphenBW" parentID="Default">
+    <identification>
+      <userAgent match="RehostHyphen" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="HyphenBW" />
+      <capability name="rehostProbe" value="HyphenBW" />
+    </capabilities>
+  </browser>
+</browsers>

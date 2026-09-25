@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="SubHidden" parentID="SubRoot">
+    <identification>
+      <userAgent match="RehostSubHidden" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="SubHidden" />
+      <capability name="rehostProbe" value="SubHidden" />
+    </capabilities>
+  </browser>
+</browsers>

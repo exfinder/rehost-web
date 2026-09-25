@@ -9,8 +9,8 @@ namespace Rehost.WebForms.Hosting.Tests;
 public sealed class HiddenSegmentsOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
-    // The host is shared, and an App_Browsers folder left behind fails every later page
-    // request that evaluates Request.Browser; the file and any folder created here go away
+    // The host is shared, and a file or folder left behind in a compiled directory changes what
+    // the application builds for every later test; the file and any folder created here go away
     // before the next test sees the application.
     private async Task<int> StatusOfExistingAsync(string relativePath, string requestPath)
     {

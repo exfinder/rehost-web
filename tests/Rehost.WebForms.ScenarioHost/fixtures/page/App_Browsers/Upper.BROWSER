@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="UpperExt" parentID="Default">
+    <identification>
+      <userAgent match="RehostUpper" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="UpperExt" />
+      <capability name="rehostProbe" value="UpperExt" />
+    </capabilities>
+  </browser>
+</browsers>

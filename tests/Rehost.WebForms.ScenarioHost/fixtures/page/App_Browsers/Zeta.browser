@@ -1,0 +1,11 @@
+<browsers>
+  <browser id="OrderZeta" parentID="Default">
+    <identification>
+      <userAgent match="RehostOrder" />
+    </identification>
+    <capabilities>
+      <capability name="browser" value="OrderZeta" />
+      <capability name="rehostProbe" value="OrderZeta" />
+    </capabilities>
+  </browser>
+</browsers>
