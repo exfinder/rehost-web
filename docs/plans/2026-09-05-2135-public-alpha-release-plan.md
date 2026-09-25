@@ -145,8 +145,8 @@ them as candidate-validated, in which case #16 must rerun them too.
 YAF is a modified, rebuilt fixture: preserve disclosure of source deviations,
 its YAF/OrmLite/Web API sidecars and compatibility shims, Lucene package/namespace
 substitution, OWIN replacement, async OEmbed call, C# 13/14 pins, database switch,
-explicit machine key, pickup-mail adaptation, removed `system.net` configuration
-and excluded `App_Browsers`. The sample machine key and credentials are fixture
+explicit machine key, pickup-mail adaptation and removed `system.net`
+configuration. The sample machine key and credentials are fixture
 inputs, not shared deployment defaults. The OEmbed media path itself is untested.
 
 No YAF claim for image resizing/avatars (drawing paths are not portable),

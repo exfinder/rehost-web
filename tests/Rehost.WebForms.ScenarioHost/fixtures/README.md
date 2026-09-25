@@ -51,9 +51,10 @@ other classes' requests interleaving:
   filtered by class;
 - no write into the application directory may change application startup
   behavior. Paths no other class reads are not enough: the hidden-segment
-  probes seed directories like `App_Browsers/` that the port refuses at
-  startup, benign only while file-change notification stays inert and the
-  host never restarts.
+  probes write into folders like `App_Code/` and `App_Browsers/` that the
+  application compiles at startup, benign only because each file goes away
+  before the next test, file-change notification stays inert and the host
+  never restarts.
 - writes *beside* the application copy are the one sanctioned mutation:
   `ssi/` includes `../../shared/Banner.inc`, which `OutsideInclude.Write`
   places in the host's disposable root, outside the application, before the

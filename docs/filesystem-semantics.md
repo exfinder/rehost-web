@@ -14,7 +14,14 @@ spaces, embedded colons, and equivalent invalid shapes do not become supported
 because a Unix filesystem accepts them; a URL with a trailing space still
 runs an existence-agnostic handler here where IIS's mapping never matched it,
 and that is the recorded extent of the leniency. A file is hidden only when its
-filesystem `Hidden` attribute says so; dot-prefixed names remain ordinary.
+filesystem `Hidden` attribute says so; dot-prefixed names remain ordinary. .NET
+off Windows reports every dot-prefixed name as `Hidden`, so one helper
+(`HiddenFile`, ledger P109) decides for every hidden check the runtime compiles —
+virtual-path enumeration (`App_Code`, `App_Browsers` and every other listing
+through the virtual path provider), static files, browser custom-tree folders
+and physical discovery — and a leading dot alone does not count. Windows keeps
+the attribute as it is. The cost is on macOS: a dot-prefixed name that also
+carries the `chflags hidden` flag is ordinary here.
 
 Two filesystem traits are documented rather than masked. APFS folds Unicode
 normalization, so an NFD spelling finds an NFC file on macOS where NTFS and
@@ -51,11 +58,16 @@ code unit by code unit after upper-casing (`OrdinalIgnoreCase`), an `Ordinal`
 tiebreak for the case-only pair only a case-sensitive filesystem can hold —
 whatever order the filesystem returns (`DirectoryOrder`, ledger P73). App_Code
 and resource compilation, batch page compilation, themes, precompilation, the
-top-level directory hash, and the wildcard `bin` scan all see that order, so
-which duplicate a compile error blames, a theme's `<link>` order, and codegen
-reuse across restarts are the same on every machine. The claim is
-determinism, not Framework's exact sequence: Framework's batch order was a
-`Hashtable`'s, and its App_Code order scrambles past eight files. The `bin`
+top-level directory hash, the wildcard `bin` scan, and application browser
+files all see that order, so which duplicate a compile error blames, a theme's
+`<link>` order, and codegen reuse across restarts are the same on every
+machine. The claim is determinism, not Framework's exact sequence: Framework's
+batch order was a `Hashtable`'s, and its App_Code order scrambles past eight
+files. Its top-level `App_Browsers` order came from a culture sort that ignores
+a hyphen, so `bw.browser` came before `b-x.browser` there and comes after it
+here; only names differing by `-`, `_` or `'` are affected. Every custom-tree
+level under `App_Browsers` is listed the same way, and `*.browser` matches in
+any casing (ledger P110, P111). The `bin`
 scan matches `.dll` case-insensitively on every filesystem and skips a file
 with no managed metadata (native library, empty or text file named `.dll`) as
 Framework's forgiven `COR_E_ASSEMBLYEXPECTED` did; every other load failure
@@ -104,9 +116,10 @@ compositions are on `Path.DirectorySeparatorChar`; `\\`→`/` normalization of
 virtual paths and the `X:\\`/UNC shape checks stay by contract.
 
 Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, P71, P72, P73,
-P74, and P87; `FileUtilTests`, `SimpleWorkerRequestTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
+P74, P87, and P109-P112; `FileUtilTests`, `SimpleWorkerRequestTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
 `CodegenCompileErrorTests`, `CanonicalCasePathTests`, `CaseInsensitiveUrlOverKestrelTests`,
 `CaseSensitiveDirectoryConfigOverKestrelTests`, `IisFolderHandlersTests`, `PathCasingOverKestrelTests`,
 `PathClassificationOverKestrelTests`, `PathCanonicalizationOverKestrelTests`,
 `RequestPathCanonicalizerTests`, `RequestPathInfoTests`, `ServerIncludesOverKestrelTests`,
-`StaticFilesOverKestrelTests`, and `ServerTransferOverKestrelTests`.
+`StaticFilesOverKestrelTests`, `ServerTransferOverKestrelTests`, `HiddenFileTests`,
+and `ApplicationBrowsersOverKestrelTests`.

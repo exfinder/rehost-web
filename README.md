@@ -59,8 +59,7 @@ App/Host pair, built from the packages the way a consumer builds. Each has a
   explicit message where reached;
 - binary compatibility with Microsoft's strong-named `System.Web`: a library
   bound to it is recompiled against this runtime, not redirected;
-- Visual Basic pages, `App_Browsers`, XSD typed data sets and `.wsdl` build
-  providers;
+- Visual Basic pages, XSD typed data sets and `.wsdl` build providers;
 - partial trust and CAS policy; Dynamic Data, Entity and Mobile stay
   unassessed, as the map states per row.
 

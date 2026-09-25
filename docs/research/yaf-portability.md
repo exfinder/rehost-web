@@ -60,8 +60,8 @@ administrator. Fifty-four scripted checks pass on macOS arm64 and Linux.
   SQL Server install cannot create a board.
 - **Framework reflection permissiveness.** YAF sets a static `initonly` field by
   reflection during `Application_Start`; .NET refuses where Framework allowed it.
-- **`App_Browsers` fails activation**, which the map already records as
-  Unsupported. Excluding it leaves the rendered markup uplevel.
+- **`App_Browsers` failed activation** until application browser files were
+  supported (2026-09-25); the seven files now ship with the staged site.
 
 ### Still unmeasured
 

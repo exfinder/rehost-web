@@ -146,7 +146,7 @@ vendored log4net require direct probes or source rebuild decisions.
 - SQL Server Compact/attached MDF/LocalDB-style connection defaults;
 - `System.Web.DynamicData`, `System.Web.Entity`, and `System.Data.Linq`-dependent
   UI paths;
-- runtime VB page compilation and application `App_Browsers` compilation;
+- runtime VB page compilation;
 - arbitrary precompiled marketplace modules whose only artifact binds
   Microsoft's `System.Web`; and
 - MVC 5, Web API WebHost, WebPages/Razor and SPA modules until separately scoped.
@@ -388,7 +388,7 @@ website.
 | InProc session | Partial, meaningful commerce journey exists | Plausible for first slice |
 | SQL Server application data | Wingtip proves ordinary EF/SQL app behavior, not DNN provider/install chain | Critical app-level proof |
 | Web Forms pages, controls, resources | Broad supported core plus many unassessed controls | Critical breadth risk |
-| App_Browsers | Unsupported | DNN ships `App_Browsers`; must remove/substitute or show noncritical |
+| App_Browsers | Supported since 2026-09-25 (application folder only) | DNN's shipped `App_Browsers` should compile as-is; unmeasured against DNN's files |
 | DynamicData/Entity/Data.Linq | absent/unassessed/unsupported paths | Exclude reached modules or port separately |
 | MVC/Web API/Razor | no broad support claim | Out of first scope; likely major separate workstream |
 | Config reload/bin mutation | Partial; immutable generation/process replacement | Architecture decision |
@@ -515,7 +515,8 @@ heavily without answering feasibility.
 - Real ClientDependency handler/resource/cache behavior on Rehost.
 - DNN SQL provider compatibility with the selected modern SQL client and SQL
   Server container/host.
-- Whether shipped `App_Browsers` is load-bearing or removable.
+- Whether DNN's shipped `App_Browsers` compiles and identifies browsers as on
+  Framework.
 - Reached DynamicData/Entity/Data.Linq types in the bounded module.
 - Required System.Drawing paths in installation, login, page edit, and module
   rendering.

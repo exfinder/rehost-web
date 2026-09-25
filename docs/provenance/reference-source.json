@@ -302,6 +302,23 @@
    ],
    "reason": "StopMonitoringStreamForChanges returns when SupportsChangeNotifications is false (fenced !NETFRAMEWORK): the configuration system stops every stream it marked monitored, marking before it asks the host, so Stop arrives for streams Start never saw",
    "record": "tests/Rehost.WebForms.Runtime.Tests/Configuration/WebConfigurationHostTests.cs"
+  },
+  {
+   "files": [
+    "Compilation/BrowserCapabilitiesCompiler.cs",
+    "Configuration/BrowserCapabilitiesCodeGenerator.cs"
+   ],
+   "reason": "application App_Browsers compiles again: the built-in BrowserCapabilitiesFactory is the pinned base with no ASP.BrowserCapsFactory token-file or GAC probe, and the machine-wide Create/Uninstall throw PlatformNotSupportedException, their service-control, GAC and strong-name code fenced NETFRAMEWORK; top-level browser files sort in DirectoryOrder and custom trees list through BrowserFileListing (fenced !NETFRAMEWORK); parse errors cut the file name at either separator",
+   "record": "docs/portability-ledger.md P110-P112"
+  },
+  {
+   "files": [
+    "Util/FileEnumerator.cs",
+    "StaticFileHandler.cs",
+    "Configuration/BrowserCapabilitiesCodeGenerator.cs"
+   ],
+   "reason": "every hidden check asks HiddenFile, under which a leading dot alone does not hide a name off Windows, direct replacement",
+   "record": "docs/portability-ledger.md P109"
   }
  ]
 }

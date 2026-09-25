@@ -42,7 +42,7 @@ Evidence: `ApplicationBootstrapTests`, `ApplicationConfigurationPublicationTests
 Evidence: `CodegenSubstrateTests`, `PageCompilationTests`,
 `PageOverKestrelTests`, `MasterPagesOverKestrelTests`,
 `FriendlyUrlsOverKestrelTests`, `OwinCookieAuthenticationOverKestrelTests`,
-and `AjaxOverKestrelTests`.
+`AjaxOverKestrelTests`, and `ApplicationBrowsersOverKestrelTests`.
 
 | Capability | State | Boundary |
 | --- | --- | --- |
@@ -59,7 +59,8 @@ and `AjaxOverKestrelTests`.
 | `.asmx` serving | Supported | SOAP 1.1/1.2 doc/literal invoke, complex types, headers, faults, sessions, one-way, localhost form POST, `?wsdl`, `?disco`, help page, and `[ScriptService]` JSON are exercised over Kestrel on all three OSes ([web-services-compatibility](web-services-compatibility.md)) |
 | `.wsdl` build provider, `App_WebReferences`, encoded `?wsdl` | Unsupported | WSDL→proxy generation needs `System.Xml.Serialization` code-export APIs cut from modern .NET; entry points fail actionably and point at pre-generated clients |
 | `Request.Browser` capabilities | Supported | Compiled Framework 4.5 factory includes all 61 definitions. `<browserCaps>` uses `HttpBrowserCapabilities`; unreachable deprecated Mobile controls are the only lost subclass distinction |
-| `App_Browsers` and `.xsd` typed DataSets | Unsupported | Built-in browser definitions remain; application browser compilation and XSD build-provider generation fail explicitly |
+| Application `App_Browsers` | Supported | `.browser` files at the folder root and in custom-tree subfolders compile at activation over the built-in factory and extend `Request.Browser`. Every listing is in NTFS order, `*.browser` matches in any casing, and a dot-prefixed file or folder is ordinary (P109-P112). Boundaries: names differing only by `-`, `_` or `'` sort ordinally where Framework's culture sort ignored the hyphen; an edit takes effect at the next process start; machine-wide browser files and `aspnet_regbrowsers` are unsupported ([windows-administration](windows-administration-compatibility.md)) |
+| `.xsd` typed DataSets | Unsupported | XSD build-provider generation fails explicitly |
 | Precompiled deployment | Unassessed | Imported consumer path exists; neither consumer nor producer is proven cross-platform |
 | `System.Web.Extensions` / ScriptManager and UpdatePanel | Supported | IIS-byte-matched async deltas, triggers, Timer, errors and redirects; 13 generated release scripts via `ScriptResource.axd`. Debug/localized resources absent: Auto falls back to invariant release. Recognized browser required ([details](extensions-compatibility.md)) |
 | Page methods, `ServiceReference` proxies, profile/authentication/role application services | Partial | ASMX JSON, `/js`, `EnablePageMethods` and disabled-by-default built-in service routes work. Inline proxies compile but are unassessed; enabled provider-backed built-ins unassessed |

@@ -69,6 +69,13 @@
       ],
       "reason": "GetRelativePath built .discomap relative paths with literal backslashes; off Windows results carried rooted or absolute paths. Path.DirectorySeparatorChar, direct replacement",
       "record": "tests/Rehost.WebForms.WebServices.Tests/Discovery/DiscoveryClientProtocolGetRelativePathTests.cs"
+    },
+    {
+      "files": [
+        "System/Web/Services/Discovery/DynamicPhysicalDiscoSearcher.cs"
+      ],
+      "reason": "the Hidden bit of the directory check asks HiddenFile (linked from the runtime), under which a leading dot alone does not hide a folder off Windows; System and Temporary are unchanged. Direct replacement",
+      "record": "docs/portability-ledger.md P109"
     }
   ]
 }
