@@ -106,6 +106,7 @@ SQL Server on all three platforms before PostgreSQL became the default.
 | `System.Data.Linq` | `YAF.Compat` | One obsolete model uses one attribute |
 | `System.Web.DynamicData`, `System.Web.Entity`, `System.ServiceModel`, `EnterpriseServices` | dropped | Referenced by the frozen projects, reached by nothing in the closure |
 | `System.Drawing` | `System.Drawing.Common` | Compiles; image paths are unexercised and not portable off Windows |
+| `Microsoft.Win32.Registry` | unchanged | `SystemInfo` reads the Framework release key for the admin page; Windows-only, unexercised. `YAF.Core` and `YAF.App` silence CA1416 for it and the image paths |
 | `System.ServiceModel.Syndication` | modern package | RSS types only |
 
 `YAF.Compat` supplies `CallContext`, `System.Data.Linq.Mapping.TableAttribute`, an

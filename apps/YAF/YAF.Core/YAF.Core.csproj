@@ -4,6 +4,7 @@
     <AssemblyName>YAF.Core</AssemblyName>
     <RootNamespace>YAF.Core</RootNamespace>
     <Source>$(YafSrc)YAF.Core/</Source>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(Source)**/*.cs" Link="%(RecursiveDir)%(Filename)%(Extension)" />

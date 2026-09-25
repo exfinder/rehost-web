@@ -8,6 +8,7 @@
     <!-- Controls/ForumList.ascx.cs uses the C# 14 field keyword, so this one
          assembly cannot take Sidecar.props's pinned 13. -->
     <LangVersion>latest</LangVersion>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
