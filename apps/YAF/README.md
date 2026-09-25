@@ -128,7 +128,7 @@ repeats the default's `<runtime>` removal, then: points the `yafnet` connection 
 the container, inserts an explicit `<machineKey>` so the auth cookie survives a process
 replacement, and removes `<system.net>`, which fails activation here and configures
 nothing on modern .NET either way
-([reading](../../docs/follow-ups/system-net-mail-settings.md)).
+([reading](../../docs/research/system-net-mail-settings.md)).
 
 `yafsrc/YetAnotherForum.NET/Web.config` is a byte copy of upstream's own
 `recommended.web.config`. Upstream generates `web.config` at install time and git-ignores

@@ -53,7 +53,7 @@ administrator. Fifty-four scripted checks pass on macOS arm64 and Linux.
   frozen tree rebuilt on .NET 10 has this exposure.
 - **`<system.net>` fails activation outright**, and mail cannot be configured from
   `web.config` on modern .NET at all
-  ([reading](../follow-ups/system-net-mail-settings.md)). Every YAF
+  ([reading](system-net-mail-settings.md)). Every YAF
   user-creation path sends a verification mail, so this gates registration.
 - **An upstream YAF defect.** Since v3.2.14, `Migration01` returns before creating
   the five ASP.NET Identity tables on every provider except MySQL, so a fresh

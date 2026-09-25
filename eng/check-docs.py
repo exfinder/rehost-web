@@ -8,6 +8,7 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = (
+    ".claude/",
     "artifacts/",
     "src/System.Web.ReferenceSource/",
     "src/System.Web.ApplicationServices.ReferenceSource/",

@@ -1,7 +1,7 @@
 # Portable request diagnostics: boundary alternatives
 
 Research for [portable request diagnostics](../follow-ups/portable-request-diagnostics.md);
-also serves [silent exception swallowing](../follow-ups/silent-exception-swallowing.md),
+also serves [silent exception swallowing](silent-exception-swallowing.md),
 [portable runtime metrics](../follow-ups/portable-runtime-metrics.md), and
 [Windows platform diagnostics](../follow-ups/windows-platform-diagnostics.md).
 Question: what boundary should carry runtime diagnostics (startup, compilation,

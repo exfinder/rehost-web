@@ -88,7 +88,7 @@ debugging round on YAF.NET ([app notes](../apps/YAF/README.md)).
   `new SmtpClient()` took host, port, credentials and delivery method from
   `<system.net><mailSettings>`; modern .NET deleted that reading entirely, so
   the same call yields an unconfigured client
-  ([reading](follow-ups/system-net-mail-settings.md)). Treat any
+  ([reading](research/system-net-mail-settings.md)). Treat any
   configuration-driven BCL type as unconfigured until measured.
 - **Reflection is stricter.** Framework let `FieldInfo.SetValue` write a static
   `initonly` field; .NET refuses once the type is initialized. An application

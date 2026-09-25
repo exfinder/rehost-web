@@ -111,7 +111,7 @@ These assemblies bind `System.Web` or each other across the core request path:
 
 This is source/API compatibility after rebuild, not binary compatibility. The
 Rehost map explicitly calls Microsoft `System.Web` binary identity unsupported
-([map](../compatibility.md#microsoft-systemweb-binary-identity)).
+([map](../compatibility.md#application-and-deployment-model)).
 
 ### Candidate use as-is after reached-path probe
 
@@ -229,7 +229,7 @@ normal auth-cookie processing
 This conflicts with Rehost's immutable configuration generation and
 process-replacement lifecycle. Rehost supports static application configuration
 but configuration file watching is only Partial and requires explicit process
-replacement ([map](../compatibility.md#configuration-reload)). DNN installation
+replacement ([map](../compatibility.md#configuration-and-iis-derived-behavior)). DNN installation
 must therefore be one of:
 
 1. **Preferred initial architecture:** offline deployment step produces a
@@ -249,7 +249,7 @@ DNN config depends heavily on `system.webServer/modules` and `/handlers`, not
 only classic `<httpModules>`. Rehost now supports merged managed lists,
 conditions, lazy handlers, and native bridges, but some global/pre-send behavior
 and native authorization remain bounded
-([map](../compatibility.md#iis-integrated-configuration-and-pipeline-identity)).
+([map](../compatibility.md#configuration-and-iis-derived-behavior)).
 The DNN list is therefore plausible, not proven.
 
 Critical first-journey components:
@@ -306,7 +306,7 @@ identification, a literal 3DES/SHA1 machine key placeholder, and
 `SqlMembershipProvider`
 ([config](https://github.com/dnnsoftware/Dnn.Platform/blob/b417ffad45522ed718edb72c0a5d77f72249690e/DNN%20Platform/Website/release.config#L133-L165),
 [provider](https://github.com/dnnsoftware/Dnn.Platform/blob/b417ffad45522ed718edb72c0a5d77f72249690e/DNN%20Platform/Website/release.config#L201-L232)). Rehost supports forms cookies, literal/auto-generated machine keys, and partial roles/profiles/anonymous identity, but its real SQL-provider journey remains open
-([map](../compatibility.md#security-state-and-providers)).
+([map](../compatibility.md#state-security-and-ancillary-assemblies)).
 
 DNN also maintains its own users, roles, permissions, password policy, portal
 membership, and persisted auth-cookie records. The first journey must prove the

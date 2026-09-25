@@ -24,6 +24,7 @@ support or priority. Use [compatibility](../compatibility.md) and
 - [Backslash literals](backslash-literal-audit.md)
 - [Publication audit](publication-audit.md)
 - [Enumeration and wildcard bin loading](enumeration-order-and-bin-wildcard.md)
+- [Silent exception swallowing](silent-exception-swallowing.md)
 
 ## Application and companion assemblies
 
@@ -32,3 +33,4 @@ support or priority. Use [compatibility](../compatibility.md) and
 - [System.Web.Extensions inventory](system-web-extensions-inventory.md)
 - [System.Web.Extensions portability](system-web-extensions-portability.md)
 - [System.Web.Services portability](system-web-services-portability.md)
+- [`system.net` mail settings](system-net-mail-settings.md)
