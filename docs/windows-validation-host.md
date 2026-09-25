@@ -13,10 +13,12 @@ Cross-platform validation requires macOS arm64, Linux, and Windows x64 to
 pass. Linux uses [`eng/linux-round.sh`](../eng/linux-round.sh), which runs the
 container on the Docker daemon's native architecture — an emulated round costs
 minutes where a native one costs seconds.
-Under Git bash, run the `smoke.sh` scripts with `MSYS_NO_PATHCONV=1`: MSYS
-rewrites a `--data-urlencode` value that starts with `/` into a Windows path, and
-a `__VIEWSTATE` that happens to start with `/` then reaches the server as
-`C:/Program Files/Git/...` (seen 2026-09-23, YAF delete step, one run in two).
+Under Git bash, run the `smoke.sh` and `install.sh` scripts with
+`MSYS2_ARG_CONV_EXCL='__'`: MSYS rewrites an argument that starts with `/` into a
+Windows path, and a `__VIEWSTATE` that happens to start with `/` then reaches the
+server as `C:/Program Files/Git/...` (seen 2026-09-23, YAF delete step, one run
+in two). `MSYS_NO_PATHCONV=1` is not a substitute: it also leaves the scripts'
+`mktemp` paths unconverted, and Git's Windows `curl` cannot write to them.
 Linux x64 runs on GitHub Actions
 ([`linux-x64.yml`](../.github/workflows/linux-x64.yml)) on every push to `main`:
 the solution tests, the packed packages through `eng/external-consumer.sh`, and
