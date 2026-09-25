@@ -63,7 +63,7 @@ namespace System.Web.Services.Discovery {
             if ( !directory.Exists )
                 return null;
 
-            if ( 0 != (directory.Attributes & (FileAttributes.Hidden | FileAttributes.System | FileAttributes.Temporary))) {
+            if ( 0 != (directory.Attributes & (FileAttributes.System | FileAttributes.Temporary)) || System.Web.Util.HiddenFile.IsHidden(directory)) {
                 return null;
             }
                                        

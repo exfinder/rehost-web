@@ -104,7 +104,7 @@ internal abstract class FileData {
     }
 
     internal bool IsHidden {
-        get { return (_current.Attributes & FileAttributes.Hidden) != 0; }
+        get { return HiddenFile.IsHidden(_current); }
     }
 
     internal FindFileData GetFindFileData() {

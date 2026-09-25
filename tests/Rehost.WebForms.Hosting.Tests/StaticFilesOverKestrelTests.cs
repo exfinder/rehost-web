@@ -10,6 +10,15 @@ public sealed class StaticFilesOverKestrelTests(PageLiveScenario scenario)
     : IClassFixture<PageLiveScenario>
 {
     [Fact]
+    public async Task A_Dot_Prefixed_File_Is_Not_Hidden()
+    {
+        var response = await scenario.Client.GetAsync("/.dotted.txt");
+
+        response.StatusCode.ShouldBe(200, response.Text);
+        response.Text.ShouldBe("dot-file content\n");
+    }
+
+    [Fact]
     public async Task If_Modified_Since_Answers_304_Without_A_Body()
     {
         var baseline = await scenario.Client.GetAsync("/styles.css");

@@ -113,7 +113,7 @@ namespace System.Web {
             }
 
             // To be consistent with IIS, we won't serve out hidden files
-            if ((((int)fileInfo.Attributes) & ((int)FileAttributes.Hidden)) != 0) {
+            if (HiddenFile.IsHidden(fileInfo)) {
                 throw new HttpException(HttpStatus.NotFound,
                                         SR.GetString(SR.File_is_hidden));
             }

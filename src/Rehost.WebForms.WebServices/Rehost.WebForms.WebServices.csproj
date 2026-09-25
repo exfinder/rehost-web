@@ -26,6 +26,8 @@
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/NativeMethods.cs" />
     <!-- IIS-metabase (ADSI) dynamic discovery. -->
     <Compile Remove="../System.Web.Services.ReferenceSource/System/Web/Services/Discovery/DynamicVirtualDiscoSearcher.cs" />
+    <!-- One hidden-file rule for the runtime and this assembly, which sees none of its internals. -->
+    <Compile Include="../Rehost.WebForms.Runtime/Compatibility/Util/HiddenFile.cs" Link="Compatibility/Util/HiddenFile.cs" />
   </ItemGroup>
 
   <ItemGroup>
