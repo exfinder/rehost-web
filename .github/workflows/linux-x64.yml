@@ -11,7 +11,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -21,7 +21,7 @@ jobs:
       - run: dotnet test Rehost.WebForms.slnx --no-build
 
   consumer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -48,7 +48,7 @@ jobs:
         run: eng/external-consumer.sh candidate "${{ steps.version.outputs.version }}" 5181
 
   apps:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: consumer
     services:
       postgres:
