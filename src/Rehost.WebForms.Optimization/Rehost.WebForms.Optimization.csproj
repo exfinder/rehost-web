@@ -2,7 +2,6 @@
   <PropertyGroup>
     <RootNamespace>System.Web.Optimization</RootNamespace>
     <Description>ASP.NET script and stylesheet optimization for Rehost.WebForms.</Description>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <NoWarn>$(NoWarn);CS3001;CS3002;CS3003;SYSLIB0021</NoWarn>
@@ -10,6 +9,7 @@
 
   <ItemGroup>
     <Compile Include="../System.Web.Optimization.ReferenceSource/**/*.cs" />
+    <Compile Remove="../System.Web.Optimization.ReferenceSource/Properties/AssemblyInfo.cs" />
     <Compile Remove="../System.Web.Optimization.ReferenceSource/Properties/AssemblyMetadataAttribute.cs" />
     <Compile Remove="../System.Web.Optimization.ReferenceSource/PreApplicationStartCode.cs" />
     <EmbeddedResource

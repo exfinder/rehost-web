@@ -1063,7 +1063,7 @@ internal static class Program
 
     private sealed record AssemblyIdentity(
         string Name,
-        string Version,
+        string? Version,
         string Culture,
         string? PublicKeyToken,
         bool StrongNamed = true);

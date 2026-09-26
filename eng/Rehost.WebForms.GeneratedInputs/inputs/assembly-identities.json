@@ -1,7 +1,6 @@
 {
   "outputAssembly": {
     "name": "Rehost.WebForms.Runtime",
-    "version": "4.0.0.0",
     "culture": "neutral",
     "publicKeyToken": null,
     "strongNamed": false

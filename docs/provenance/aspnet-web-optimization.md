@@ -35,6 +35,18 @@ compiler resolves such a collision in favour of the local copy, which would hide
 calls it directly and keeps the upstream namespace and type name, so the
 imported `PreApplicationStartMethod` attribute still binds.
 
+Neither tree's `Properties/AssemblyInfo.cs` is compiled. Both pinned the
+1.1.0.0 assembly, file and informational versions, and the shipped assemblies
+carry the package family version from `src/Directory.Build.props` instead, so
+the SDK generates the version and description attributes. A local
+`AssemblyInfo.cs` in the Optimization project keeps the four attributes that
+still do something: `PreApplicationStartMethod`, `NeutralResourcesLanguage`,
+`CLSCompliant` and `ComVisible(false)`. The COM `Guid`, the `Serviceable`
+metadata, Microsoft's title and copyright text, and two `InternalsVisibleTo`
+rows naming upstream's test and WebForms assemblies are dropped; the WebForms
+project compiles as `Rehost.WebForms.Optimization.WebForms` and reaches no
+internals.
+
 WebGrease 1.6.0 is consumed unchanged for the reached JS/CSS bundle paths; the
 source names it as `Microsoft.Ajax.Utilities`, which ships inside it. Antlr and
 Newtonsoft.Json are WebGrease's own dependencies and are named explicitly only to

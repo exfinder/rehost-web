@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 using System.Xml.Linq;
 using Shouldly;
@@ -41,6 +43,48 @@ public sealed class PackageContractTests
         PackageFeed.Packages.Select(p => p.Id).ShouldBe(PublicPackages.Order(StringComparer.Ordinal));
         PackageFeed.Packages.Select(p => p.Version).Distinct().ShouldHaveSingleItem();
         PackageFeed.Packages.Where(p => p.Id != Templates).ShouldAllBe(p => p.SymbolFiles.Any(f => f.EndsWith(".pdb")));
+    }
+
+    [Fact]
+    public void EveryLibraryAssemblyCarriesTheFamilyVersion()
+    {
+        var packageVersion = PackageFeed.Packages[0].Version;
+        var familyVersion = packageVersion.Split('-', '+')[0] + ".0";
+
+        var versions = PackageFeed.Packages
+            .SelectMany(p => p.LibraryFiles.Where(f => f.EndsWith(".dll", StringComparison.Ordinal)).Select(f => (Package: p, File: f)))
+            .Select(entry =>
+            {
+                var path = entry.Package.ExtractToTemporaryFile(entry.File);
+                try
+                {
+                    return (
+                        Assembly: Path.GetFileName(entry.File),
+                        AssemblyVersion: AssemblyName.GetAssemblyName(path).Version!.ToString(),
+                        FileVersion: FileVersionInfo.GetVersionInfo(path).FileVersion);
+                }
+                finally
+                {
+                    File.Delete(path);
+                }
+            })
+            .ToList();
+
+        versions.Select(v => v.Assembly).Order(StringComparer.Ordinal).ShouldBe(
+            [
+                "Rehost.AspNet.WebApi.WebHost.dll",
+                "Rehost.WebForms.ApplicationServices.dll",
+                "Rehost.WebForms.Extensions.dll",
+                "Rehost.WebForms.FriendlyUrls.dll",
+                "Rehost.WebForms.Hosting.dll",
+                "Rehost.WebForms.Optimization.WebForms.dll",
+                "Rehost.WebForms.Optimization.dll",
+                "Rehost.WebForms.Owin.Host.SystemWeb.dll",
+                "Rehost.WebForms.Runtime.dll",
+                "Rehost.WebForms.ScriptManager.Bundles.dll",
+                "Rehost.WebForms.WebServices.dll",
+            ]);
+        versions.ShouldAllBe(v => v.AssemblyVersion == familyVersion && v.FileVersion == familyVersion);
     }
 
     [Fact]

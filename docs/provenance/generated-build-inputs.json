@@ -80,14 +80,14 @@
     },
     {
       "path": "eng/Rehost.WebForms.GeneratedInputs/inputs/assembly-identities.json",
-      "sha256": "3a1652021615fcbfd701af82d3326a975205816cb52e609d3f5a1f9ab15516bc",
+      "sha256": "2d2933cb1d2576d104ed84a61c9b5295ff4fac959f04f4e01faf9be6c2265ecb",
       "purpose": "Explicit unsigned Rehost output identity, neutral resource identity, legacy Microsoft identity strings, checked-in AssemblyRef constants, and product version policy.",
       "policySources": [
         "docs/generated-build-inputs.md identity constraints",
         "AssemblyRef and ThisAssembly usages in the pinned imported tree",
         "Microsoft public-key token literals already present in the pinned System.Web sources"
       ],
-      "identityDistinction": "The System.Web output is Version=4.0.0.0 with no strong-name token. AssemblyRef.MicrosoftPublicKey remains the legacy b03f5f7f11d50a3a reflection/configuration constant and does not claim that the Rehost output is Microsoft-signed."
+      "identityDistinction": "The System.Web output carries the package family version and no strong-name token. AssemblyRef.MicrosoftPublicKey remains the legacy b03f5f7f11d50a3a reflection/configuration constant and does not claim that the Rehost output is Microsoft-signed."
     }
   ],
   "verifiedOutputSha256": {

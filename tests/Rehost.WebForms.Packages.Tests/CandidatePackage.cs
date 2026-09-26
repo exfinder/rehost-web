@@ -32,6 +32,14 @@ public sealed class CandidatePackage
 
     public IEnumerable<string> LibraryFiles => Files.Where(f => f.StartsWith("lib/", StringComparison.Ordinal));
 
+    public string ExtractToTemporaryFile(string file)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"{Id}-{Guid.NewGuid():N}-{Path.GetFileName(file)}");
+        using var package = ZipFile.OpenRead(_path);
+        package.GetEntry(file)!.ExtractToFile(path);
+        return path;
+    }
+
     public string ReadText(string file)
     {
         using var package = ZipFile.OpenRead(_path);

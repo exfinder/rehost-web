@@ -24,7 +24,8 @@ Machine-readable source, hash, license, and transformation records:
 
 ## Identity constraints
 
-- Runtime assembly: `Rehost.WebForms.Runtime`, version `4.0.0.0`, unsigned.
+- Runtime assembly: `Rehost.WebForms.Runtime`, unsigned; its version follows the
+  package family in `src/Directory.Build.props`.
 - Neutral resource: `System.Web.resources`, base name `System.Web`.
 - Legacy Microsoft public-key tokens remain only in original
   reflection/configuration strings; they do not sign Rehost output.

@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>System.Web</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <ImplicitUsings>disable</ImplicitUsings>
     <NoWarn>$(NoWarn);CS0672;CS9191;SYSLIB0003;SYSLIB0051;CA1416</NoWarn>
     <IsPackable>false</IsPackable>
