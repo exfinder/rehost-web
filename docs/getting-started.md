@@ -65,6 +65,14 @@ Other packages (Entity Framework 6, Autofac, log4net, Newtonsoft.Json) are
 referenced as they are; `NU1701` is silenced because many ship only a .NET
 Framework build.
 
+A Rehost package depends on the pure-managed siblings its original depended
+on, so their `packages.config` lines can go: `Microsoft.AspNet.WebApi.Core` and
+`.Client` come with the Web API host, `Microsoft.Owin` and `Owin` with the OWIN
+host, `WebGrease`, `Antlr` and `Newtonsoft.Json` with Optimization. Keeping the
+line is harmless, it only repeats a transitive reference, unless it pins an
+older version than the Rehost package asks for, in which case NuGet takes the
+newer one anyway.
+
 ## 4. Adjust configuration
 
 `Shop.Web.Host/Web.Rehost.config` is an XDT transform, the same format as
