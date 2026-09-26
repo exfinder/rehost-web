@@ -41,4 +41,18 @@ public sealed class CodegenSubstrateTests(CodegenSubstrateFixture fixture)
         fixture.GlobalResourcesCount.ShouldBe(1);
         fixture.SatelliteCount.ShouldBe(1);
     }
+
+    [Fact]
+    public void Assembly_Load_Resolves_The_Fixed_Names_Of_Generated_Assemblies()
+    {
+        var first = fixture.FirstTrace;
+        var appCode = Value(first, TraceEvents.AppCode);
+
+        Value(first, TraceEvents.FixedName + "App_Code=").ShouldBe(appCode);
+        Value(first, TraceEvents.FixedName + "__code=").ShouldBe(appCode);
+        Value(first, TraceEvents.FixedName + "App_SubCode_Shared=")
+            .ShouldBe(Value(first, TraceEvents.SubCode));
+        Value(first, TraceEvents.FixedName + "App_GlobalResources=")
+            .ShouldStartWith("App_GlobalResources.", Case.Sensitive);
+    }
 }

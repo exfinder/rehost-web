@@ -12,4 +12,5 @@ public static class TraceEvents
     public const string AppCode = "app-code:";
     public const string SubCode = "sub-code:";
     public const string Resource = "resource:";
+    public const string FixedName = "fixed-name:";
 }

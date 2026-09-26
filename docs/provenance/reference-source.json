@@ -319,6 +319,13 @@
    ],
    "reason": "every hidden check asks HiddenFile, under which a leading dot alone does not hide a name off Windows, direct replacement",
    "record": "docs/portability-ledger.md P109"
+  },
+  {
+   "files": [
+    "Compilation/BuildManager.cs"
+   ],
+   "reason": "ResolveAssembly looks up the simple name of ResolveEventArgs.Name, which .NET gives as a full display name, direct replacement",
+   "record": "docs/portability-ledger.md P113"
   }
  ]
 }

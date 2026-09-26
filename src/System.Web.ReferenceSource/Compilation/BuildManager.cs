@@ -3291,7 +3291,7 @@ namespace System.Web.Compilation {
             if (_assemblyResolveMapping == null)
                 return null;
 
-            string name = e.Name;
+            string name = new AssemblyName(e.Name).Name;
             Assembly assembly = (Assembly)_assemblyResolveMapping[name];
 
             // Return the assembly if we have it in our mapping (VSWhidbey 276776)
