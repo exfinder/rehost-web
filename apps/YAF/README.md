@@ -16,7 +16,6 @@ import actually changed is [`docs/provenance/yafnet.md`](../../docs/provenance/y
 | --- | --- |
 | Upstream | `YAFNET/YAFNET`, tag `v3.2.16`, `339f1c15cad71bfcca7d12b44a9ead48563f410e` |
 | Imported | `yafsrc` tree `31e836d7aa1d6886821160162f83aa95e57c7451`, 2026-09-05 |
-| Web API host | `aspnet/AspNetWebStack`, tag `v3.3.0`, `1231b77d79956152831b75ad7f094f844251b97f` |
 
 The frozen tree keeps upstream bytes: `.gitattributes` exempts it from line-ending
 normalisation. Import exclusions and every source deviation are in the provenance record.
@@ -30,7 +29,6 @@ normalisation. Import exclusions and every source deviation are in the provenanc
 | `YAF.Types/`, `YAF.Configuration/`, `YAF.Core/`, `YAF.UrlRewriter/`, `YAF.Web/` | One sidecar per YAF library, each keeping its upstream assembly name. |
 | `YAF.Data.PostgreSQL/`, `YAF.Data.SqlServer/` | The two database backends. `YAF.App` references the PostgreSQL one; both build. |
 | `ServiceStack.OrmLite/`, `.PostgreSQL/`, `.SqlServer/` | Sidecars over the vendored OrmLite fork and its two dialects. |
-| `System.Web.Http.WebHost/` | Recompile of Web API's host, byte-identical upstream source plus one field. |
 | `YAF.Compat/` | Five shims for APIs modern .NET dropped, so the frozen sources need no edit. |
 | `YAF.Host/` | The process: a ~25-line Kestrel host with Serilog request logging to the console, levels set in `appsettings.json`, and the app's `Web.Rehost.config`. |
 | `Sidecar.props` | Settings every frozen sidecar shares, including the pinned language version. |
@@ -97,7 +95,7 @@ SQL Server on all three platforms before PostgreSQL became the default.
 | vendored OrmLite and its dialects | sidecars | `NETFX;NET481` from the frozen `ServiceStack/Directory.Build.props` must be repeated, or `PclExport.Instance` is null and every query dies in `Env`'s static constructor |
 | vendored Lucene, five projects | `Lucene.Net` 4.8.0-beta00018 packages | The tree vendors Lucene.NET renamed to `YAF.Lucene.Net`, which exists to avoid an identity clash under DNN hosting. Only `Services/Search.cs` names those types, so the packages replace 26 MB of source for ten `using` lines |
 | `Microsoft.AspNet.WebApi.Core` 5.3.0 | same package, unchanged | References no `System.Web` at all |
-| `Microsoft.AspNet.WebApi.WebHost` 5.3.0 | `System.Web.Http.WebHost/` | The one Framework-bound Web API assembly, and `Application_Start` reaches it |
+| `Microsoft.AspNet.WebApi.WebHost` 5.3.0 | `Rehost.AspNet.WebApi.WebHost` | The documented substitution for the one Framework-bound Web API assembly, which `Application_Start` reaches |
 | `Microsoft.Owin.Host.SystemWeb` 4.2.3 | `Rehost.WebForms.Owin.Host.SystemWeb` | The documented substitution |
 | `Microsoft.Owin.*`, `Microsoft.AspNet.Identity.*` | same packages, unchanged | Cookie sign-in and the Identity stores are exercised |
 | `OEmbed.Core` 2.0.7 | same package, `net10.0` asset | The package ships a different contract per target: `net481` has the sync `Embed`, `net10.0` only `EmbedAsync`. Taking the modern asset moves one call site to the async method |

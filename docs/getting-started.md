@@ -57,6 +57,7 @@ at run time because it binds to Microsoft's `System.Web`.
 | `Microsoft.AspNet.Web.Optimization.WebForms` | `Rehost.WebForms.Optimization.WebForms` |
 | `Microsoft.AspNet.ScriptManager.*` | `Rehost.WebForms.ScriptManager.Bundles` |
 | `Microsoft.Owin.Host.SystemWeb` | `Rehost.WebForms.Owin.Host.SystemWeb` |
+| `Microsoft.AspNet.WebApi.WebHost` | `Rehost.AspNet.WebApi.WebHost` |
 
 The template already lists the first four, because the Visual Studio template
 adds them to every project. Delete the ones your application does not use.

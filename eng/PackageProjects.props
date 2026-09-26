@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.AspNet.WebApi.WebHost/Rehost.AspNet.WebApi.WebHost.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms/Rehost.WebForms.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />

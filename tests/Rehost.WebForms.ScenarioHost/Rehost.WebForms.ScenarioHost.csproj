@@ -17,13 +17,14 @@
     <ProjectReference Include="../Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
   </ItemGroup>
 
-  <!-- Not referenced by the host: the OWIN assemblies are staged into the friendlyurls
-       fixture bin, where the application resolves them. -->
+  <!-- Not referenced by the host: the OWIN and Web API assemblies are staged into the
+       friendlyurls fixture bin, where the application resolves them. -->
   <ItemGroup>
     <PackageReference Include="Owin" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin.Security" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin.Security.Cookies" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Core" NoWarn="NU1701" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +51,9 @@
     <FixturePayloadProject
       Include="../../src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj"
       Bins="friendlyurls" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.AspNet.WebApi.WebHost/Rehost.AspNet.WebApi.WebHost.csproj"
+      Bins="friendlyurls" />
   </ItemGroup>
 
   <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageFixtures;StageFixtureBinPayload" />
@@ -61,6 +65,9 @@
       <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.ScenarioProtocol.dll" />
       <FixtureBinFile
         Include="$(TargetDir)Owin.dll;$(TargetDir)Microsoft.Owin.dll;$(TargetDir)Microsoft.Owin.Security.dll;$(TargetDir)Microsoft.Owin.Security.Cookies.dll"
+        Bins="friendlyurls" />
+      <FixtureBinFile
+        Include="$(TargetDir)System.Web.Http.dll;$(TargetDir)System.Net.Http.Formatting.dll;$(TargetDir)Newtonsoft.Json.dll"
         Bins="friendlyurls" />
       <FixtureBinDir Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')" />
     </ItemGroup>

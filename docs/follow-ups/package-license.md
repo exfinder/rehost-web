@@ -18,6 +18,7 @@ own licenses; nothing here replaces them.
 | `Rehost.WebForms.Optimization` | Apache-2.0 | Imported AspNetWebOptimization tree; project edits offered under Apache-2.0 |
 | `Rehost.WebForms.Optimization.WebForms` | Apache-2.0 | Same tree |
 | `Rehost.WebForms.Owin.Host.SystemWeb` | Apache-2.0 | Imported Katana tree; project edits offered under Apache-2.0 |
+| `Rehost.AspNet.WebApi.WebHost` | Apache-2.0 | Imported AspNetWebStack tree; project edits offered under Apache-2.0 |
 
 ## Evidence
 
@@ -28,6 +29,7 @@ own licenses; nothing here replaces them.
 | dotnet/msbuild `39950c62` | file header: MIT | `StronglyTypedResourceBuilder.cs` header only |
 | AspNetWebOptimization `65e3911f` | upstream has no license file; 51 of 52 `.cs` headers say Apache-2.0 | `third_party/aspnet/AspNetWebOptimization/LICENSE.txt` (standard text) |
 | AspNetKatana `v4.2.3` | upstream `LICENSE.txt` at that revision: Apache-2.0; no `NOTICE` file, so §4(d) adds nothing | `third_party/aspnet/AspNetKatana/LICENSE.txt` |
+| AspNetWebStack `v3.3.0` | upstream `LICENSE.txt` at that revision: Apache-2.0; no `NOTICE` file, so §4(d) adds nothing | `third_party/aspnet/AspNetWebStack/LICENSE.txt` |
 | Microsoft.Web.Xdt 3.2.11 | nuspec: `<license type="expression">MIT</license>` | none; text reproduced in the notices file |
 
 Consumer-restored dependencies are not bundled and carry their own metadata.

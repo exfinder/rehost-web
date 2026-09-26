@@ -69,38 +69,5 @@ The host's `Web.Rehost.config` transforms it; the copy itself is unedited.
 
 ## Web API host
 
-The `Microsoft.AspNet.WebApi.WebHost` 5.3.0 assembly binds Framework's
-strong-named `System.Web`, and `YAF.Core` reaches it from `Application_Start`,
-so it is rebuilt from source at
-`apps/YAF/System.Web.Http.WebHost`. `Microsoft.AspNet.WebApi.Core`
-5.3.0 is consumed as shipped: it references no `System.Web` at all.
-
-Import authority is the archived
-[`aspnet/AspNetWebStack`](https://github.com/aspnet/AspNetWebStack) repository
-at tag `v3.3.0`, revision `1231b77d79956152831b75ad7f094f844251b97f`, whose
-`src/System.Web.Http.WebHost` tree object is
-`835324b71109144dade2b88c919433409dbd6699`. That tree is copied byte-for-byte
-except its `.csproj`, `packages.config`, and one field in
-`HttpControllerRouteHandler.cs`; the seven `src/Common` files and
-`src/CommonAssemblyInfo.cs` its project linked in come with it, under `Common/`
-and at the root, matching upstream's `Link` paths. `ASPNETMVC` is defined as upstream's own build defines it, which is what selects
-`AssemblyVersion` 5.3.0.0.
-
-The one edit drops `readonly` from the private static `_instance` field.
-`WebApiConfig.Register` reaches into that field by reflection to install YAF's
-session-enabled route handler, which is the whole reason YAF's Web API
-controllers see session state. Framework's reflection permitted writing a
-static initonly field; .NET Core forbids it once the type is initialized, so
-the call raises `FieldAccessException` and takes `Application_Start` with it.
-Dropping the modifier reproduces the Framework outcome and changes nothing for
-any caller that does not reflect.
-
-The shipped 5.3.0 assembly reports informational version
-`5.3.0-61837 (ec2f0a5af7b4dbefba38e605c9025367a15a2f0f)`, and that revision is
-not public, so `v3.3.0` is the nearest published source. The gap is measured
-rather than assumed: decompiling both assemblies and comparing every `public`
-and `protected` declaration leaves one difference, the implicit
-`WebHostBufferPolicySelector()` constructor ILSpy renders for the shipped
-assembly and omits for the rebuild.
-
-Every source header declares Apache-2.0.
+YAF takes Web API's `System.Web` host from the `Rehost.AspNet.WebApi.WebHost`
+package, whose source record is [`aspnet-webstack.md`](aspnet-webstack.md).

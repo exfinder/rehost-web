@@ -14,11 +14,13 @@ Three groups:
 - **Built on `System.Web`.** These bind to Microsoft's strong-named assembly
   and must use the Rehost counterpart: `Microsoft.AspNet.FriendlyUrls`,
   `Microsoft.AspNet.Web.Optimization` and `.WebForms`,
-  `Microsoft.AspNet.ScriptManager.*`, `Microsoft.Owin.Host.SystemWeb`. The
-  getting-started table lists the names.
+  `Microsoft.AspNet.ScriptManager.*`, `Microsoft.Owin.Host.SystemWeb`,
+  `Microsoft.AspNet.WebApi.WebHost`. The getting-started table lists the names.
 - **Pure managed.** Entity Framework 6.3+, the Katana `Microsoft.Owin.*`
-  packages, ASP.NET Identity 2.2, Newtonsoft.Json, Autofac, log4net are
-  referenced as they are, often at a newer version than the legacy line.
+  packages, ASP.NET Identity 2.2, the other `Microsoft.AspNet.WebApi.*`
+  packages (`Core`, `Client`, `Cors`, `Tracing`, `Owin`), Newtonsoft.Json,
+  Autofac, log4net are referenced as they are, often at a newer version than
+  the legacy line.
   Packages that ship only a `net45` build restore under `NU1701`, which the
   template silences.
 - **Dropped.** `Microsoft.Web.Infrastructure` (Katana 4.x calls
@@ -91,10 +93,11 @@ runtime. The order of work that has held for six applications:
    A package proven in one application can still fail in the next through a
    path the first never called.
 2. Recompile only proven blockers, verbatim, with a provenance record
-   (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb` is the one
-   the alpha ships as `Rehost.WebForms.Owin.Host.SystemWeb`; the AJAX Control
-   Toolkit, Autofac's Web integration and YAF's fourteen projects are rebuilt
-   as source under `apps/`.
+   (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb` and Web API's
+   `Microsoft.AspNet.WebApi.WebHost` are the two the alpha ships, as
+   `Rehost.WebForms.Owin.Host.SystemWeb` and `Rehost.AspNet.WebApi.WebHost`;
+   the AJAX Control Toolkit, Autofac's Web integration and YAF's fourteen
+   projects are rebuilt as source under `apps/`.
 3. Expect a Framework facade now and then: Katana's Google provider constructs
    `System.Net.Http.WebRequest.WebRequestHandler`, a type .NET 10 does not
    carry, and a 15-line stand-in assembly closes it

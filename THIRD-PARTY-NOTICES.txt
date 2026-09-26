@@ -22,12 +22,14 @@ ASP.NET Web Optimization      github.com/aspnet/AspNetWebOptimization           
 Katana                        github.com/aspnet/AspNetKatana                     Apache-2.0   Rehost.WebForms.Owin.Host.SystemWeb
   Microsoft.Owin.Host.SystemWeb,  v4.2.3, ceea1fc0670221495b470f0b1ffcdd7526113a22
   Owin.Loader
+ASP.NET Web Stack             github.com/aspnet/AspNetWebStack                   Apache-2.0   Rehost.AspNet.WebApi.WebHost
+  System.Web.Http.WebHost     v3.3.0, 1231b77d79956152831b75ad7f094f844251b97f
 Microsoft.Web.Xdt 3.2.11      nuget.org/packages/Microsoft.Web.Xdt/3.2.11        MIT          Rehost.WebForms.Hosting
   (Microsoft.Web.XmlTransform.dll, build/tasks/)
 
 Packages restored from nuget.org by the consumer (WebGrease, Antlr,
-Newtonsoft.Json, Microsoft.Owin, Owin, Roslyn, System.* packages) are not
-bundled and carry their own license metadata.
+Newtonsoft.Json, Microsoft.Owin, Owin, Microsoft.AspNet.WebApi.Core and .Client,
+Roslyn, System.* packages) are not bundled and carry their own license metadata.
 
 
 Microsoft Reference Source
@@ -106,11 +108,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-ASP.NET Web Optimization and Katana
------------------------------------
+ASP.NET Web Optimization, Katana and ASP.NET Web Stack
+------------------------------------------------------
 Copyright (c) Microsoft Corporation and .NET Foundation. All rights reserved.
 Licensed under the Apache License, Version 2.0. Modified files are listed in
-docs/provenance/aspnet-web-optimization.md and docs/provenance/aspnet-katana.md.
+docs/provenance/aspnet-web-optimization.md, docs/provenance/aspnet-katana.md
+and docs/provenance/aspnet-webstack.md.
 
 
                                  Apache License

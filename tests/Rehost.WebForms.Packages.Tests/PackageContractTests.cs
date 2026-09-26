@@ -13,6 +13,7 @@ public sealed class PackageContractTests
 
     private static readonly string[] PublicPackages =
     [
+        "Rehost.AspNet.WebApi.WebHost",
         "Rehost.WebForms",
         "Rehost.WebForms.FriendlyUrls",
         "Rehost.WebForms.Hosting",
@@ -35,7 +36,7 @@ public sealed class PackageContractTests
         PackageFeed.Packages.Where(p => p.Id != Bundle && p.Id != Templates);
 
     [Fact]
-    public void FeedHoldsTheEightPublicPackagesAtOneVersion()
+    public void FeedHoldsTheNinePublicPackagesAtOneVersion()
     {
         PackageFeed.Packages.Select(p => p.Id).ShouldBe(PublicPackages.Order(StringComparer.Ordinal));
         PackageFeed.Packages.Select(p => p.Version).Distinct().ShouldHaveSingleItem();
