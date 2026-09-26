@@ -1,7 +1,6 @@
 # Web API 2 host readings
 
-Evidence for the `Rehost.AspNet.WebApi.WebHost` package
-([plan](../plans/2026-09-26-aspnet-webapi-webhost-package.md)). WA1-WA5 were
+Evidence for the `Rehost.AspNet.WebApi.WebHost` package. WA1-WA5 were
 observed on IIS Express 10.0.26013 on `winbox`, .NET Framework 4.8.9344,
 2026-09-26.
 
