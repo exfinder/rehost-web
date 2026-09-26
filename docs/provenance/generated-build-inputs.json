@@ -2,9 +2,9 @@
   "component": "System.Web generated build inputs",
   "generator": {
     "project": "eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj",
-    "projectSha256": "cbda77be076f6ff67d1a510c950892ab127591d8dec1e78eb4f9a23d48b41661",
+    "projectSha256": "f79fe8a3834adfc47719f5d513f4e6cab557545b504ae3f708bfa76367a625dd",
     "implementation": "eng/Rehost.WebForms.GeneratedInputs/Program.cs",
-    "implementationSha256": "cca9bb26562be1257d568ae4ee2a6b3f5c09cca7d015e769cc77aef52a616228",
+    "implementationSha256": "ab1a1b72abc91edf0221f667ed50c8d38bde9e03765acb7e7c6455d32bd93260",
     "targetFramework": "net10.0",
     "externalPackages": [],
     "outputPolicy": "Outputs are generated under the runtime project's obj/<Configuration>/net10.0/generated/System.Web directory and are not copied into src/System.Web.ReferenceSource."
@@ -26,7 +26,7 @@
     {
       "path": "src/System.Web.ReferenceSource/System.Web.txt",
       "upstreamPath": "System.Web/System.Web.txt",
-      "sha256": "6ddfeffe729e0fb131cff684d4e679d8583eca072250c27bfee8a3f8f1bcc0f5",
+      "sha256": "2a7b9625ba5799ea28db20f2eb4e3d74b10b29b5eb0478bbbc52bd57162cc25b",
       "outputs": [ "SR.g.cs", "System.Web.resources" ]
     },
     {
@@ -70,7 +70,7 @@
     },
     {
       "path": "eng/Rehost.WebForms.GeneratedInputs/inputs/native-names.json",
-      "sha256": "c25d47bee2566dc5e47a572d0f59d46d704886783adc3187a6678eaffd009069",
+      "sha256": "633363c0c71ceb160bec017ab086ae9f200e92d0ffd926d2c27bfa1f15dfca1c",
       "purpose": "Explicit desktop .NET Framework 4 Windows names.h macro values and FEATURE_PAL target selection required by Names.cspp.",
       "sourceStatus": "The public pinned Reference Source revision contains Names.cspp but does not contain its names.h include. Rehost records the reconstructed Windows profile as a project-owned input instead of selecting FEATURE_PAL or inheriting host-platform library names.",
       "evidence": [
@@ -80,7 +80,7 @@
     },
     {
       "path": "eng/Rehost.WebForms.GeneratedInputs/inputs/assembly-identities.json",
-      "sha256": "2d2933cb1d2576d104ed84a61c9b5295ff4fac959f04f4e01faf9be6c2265ecb",
+      "sha256": "a76bc742b9d3640ca474ccf3cedb6e605e884b025e9425d3f7ac27cc8fca1202",
       "purpose": "Explicit unsigned Rehost output identity, neutral resource identity, legacy Microsoft identity strings, checked-in AssemblyRef constants, and product version policy.",
       "policySources": [
         "docs/generated-build-inputs.md identity constraints",
@@ -93,10 +93,12 @@
   "verifiedOutputSha256": {
     "CacheExpires.g.cs": "6794fcc04ce57016c34fe2724afc444687dfe1dfc6ae31c48d5ac773d35457d4",
     "CacheUsage.g.cs": "8a0f297887215bea7bbc0a457d4944f41cdd2205632fa6b23019b1c6fcd42f7a",
-    "ModName.g.cs": "7e88a93b613fe1ac8d1f14db37cd407d297be940d966b5ac60c30674c378c940",
+    "ModName.g.cs": "595f915c303622e3eeaabf1b4b811ec770ad0179ff0d2676dcda835339f7d764",
     "RegularExpressions.g.cs": "35fe82ec2d2a2277e94e5d2f1633d073c8bf4042fab2175bdb80aa176eae7341",
-    "SR.g.cs": "0e747c11120d079160aaee055d8dd39c78c1e9c308b6929231521c2d2a996491",
-    "System.Web.resources": "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95"
+    "Res.g.cs": "391ed7f3954e2fb9683921f00dad485695582f0c92d2b5aa871e39722b4c07e3",
+    "SR.g.cs": "f8d9c318ee53bb5475c4ee64da4f9180d62e1dd3751db38b44069871c95ee5b9",
+    "System.Web.Services.resources": "331738cbb11131fa80e6f00d42478e971a1eb0438e8aa05bf8aadd8e9450e999",
+    "System.Web.resources": "2f46626b6c025ba8626994bfa22e9080526330148520a5fe034153aaf1e91eb7"
   },
   "pocComparisons": [
     {
@@ -105,7 +107,7 @@
       "path": "Portable.System.Web/System.Web.resources",
       "blob": "aa03faee17ac8feb1e83c50d37c0d7182e3c6f8d",
       "sha256": "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95",
-      "use": "Golden oracle: require byte-for-byte reproduction of the POC ResGen output from the pinned System.Web.txt without copying the binary into Rehost."
+      "use": "Historical golden: the generator reproduced this ResGen output byte-for-byte from System.Web.txt at blob 0beec0d0497dc6afd0b486e50aeee60308cd1905. Rehost has edited System.Web.txt since (first in 9bfaf5d0, 2026-09-08), so verify no longer pins these bytes; it parses the generated file with ResourceReader and requires every key and value to match System.Web.txt."
     },
     {
       "repository": "/Users/vm/repos/Portable.System.Web",
@@ -129,7 +131,7 @@
       "path": "Portable.System.Web.Common/AssemblyRef.cs",
       "blob": "7e6d59e6ed17edd3318ba9b522e4077a326b8178",
       "sha256": "002b74af2d81c1f6fa696676838945f163e629a39f6e06243612ced5049cd657",
-      "use": "Negative comparison: reject Portable.System.Web identities and the POC's System.Configuration.ConfigurationManager reflection string."
+      "use": "Negative comparison: reject Portable.System.Web identities. The System.Configuration.ConfigurationManager identity is not rejected: since fcc0372d the runtime binds System.Configuration internals through that package and AssemblyRef.SystemConfigurationManager names it."
     }
   ]
 }

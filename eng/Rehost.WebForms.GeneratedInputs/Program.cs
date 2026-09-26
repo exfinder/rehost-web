@@ -7,9 +7,6 @@ using System.Text.RegularExpressions;
 
 internal static class Program
 {
-    private const string SystemWebResourcesGoldenSha256 =
-        "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95";
-
     private static readonly UTF8Encoding Utf8WithoutBom = new(false);
     private static readonly string[] ArtifactNames =
     [
@@ -837,17 +834,12 @@ internal static class Program
 
     private static void VerifyResources(string path, SortedDictionary<string, string> expected)
     {
-        string sha256 = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();
-        Require(sha256 == SystemWebResourcesGoldenSha256,
-            "System.Web.resources does not byte-match the pinned POC ResGen output.");
-
         Dictionary<string, string> actual = new(StringComparer.Ordinal);
         using ResourceReader reader = new(path);
         foreach (DictionaryEntry entry in reader)
         {
             actual.Add((string)entry.Key, (string)entry.Value!);
         }
-        Require(actual.Count == 3327, $"Expected 3,327 resources, found {actual.Count}.");
         Require(actual.Count == expected.Count, "Resource count differs from System.Web.txt.");
         foreach ((string name, string value) in expected)
         {

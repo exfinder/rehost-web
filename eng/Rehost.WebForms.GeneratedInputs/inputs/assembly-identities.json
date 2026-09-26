@@ -21,7 +21,7 @@
     "MicrosoftVisualStudioWeb": "Microsoft.VisualStudio.Web",
     "Mscorlib": "mscorlib",
     "System": "System",
-    "SystemConfiguration": "System.Configuration",
+    "SystemConfigurationManager": "System.Configuration.ConfigurationManager",
     "SystemDesign": "System.Design",
     "SystemDrawingDesign": "System.Drawing.Design",
     "SystemWeb": "Rehost.WebForms.Runtime",
