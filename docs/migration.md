@@ -23,7 +23,10 @@ Three groups:
   the legacy line.
   Packages that ship only a `net45` build restore under `NU1701`, which the
   template silences.
-- **Dropped.** `Microsoft.Web.Infrastructure` (Katana 4.x calls
+- **Dropped.** `Microsoft.AspNet.WebApi`, the meta package: it would pull
+  `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host, and
+  `Rehost.AspNet.WebApi.WebHost` already brings `Core` and `Client`, so a Web API
+  application needs that one line. `Microsoft.Web.Infrastructure` (Katana 4.x calls
   `HttpApplication.RegisterModule` directly), `Microsoft.AspNet.Providers.Core`
   when only `<sessionState customProvider>` names it, and `WebGrease`/`Antlr`,
   which the Optimization package carries itself. The `AspNet.ScriptManager.jQuery`
