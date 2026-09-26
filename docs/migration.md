@@ -23,6 +23,12 @@ Three groups:
   the legacy line.
   Packages that ship only a `net45` build restore under `NU1701`, which the
   template silences.
+- **No counterpart yet.** `Microsoft.AspNet.WebPages` (ASP.NET Web Pages,
+  `.cshtml` widgets and admin pages rendered through Razor) binds `System.Web`
+  and has no Rehost package; the App project compiles against the original and
+  fails at run time, and `.cshtml` files have no build provider
+  ([issue 23](https://github.com/exfinder/rehost-webforms/issues/23)).
+  `Microsoft.AspNet.Razor` alone is pure managed.
 - **Dropped.** `Microsoft.AspNet.WebApi`, the meta package: it would pull
   `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host, and
   `Rehost.AspNet.WebApi.WebHost` already brings `Core` and `Client`, so a Web API

@@ -211,6 +211,18 @@ Carried from earlier milestones as unresolved detail:
 
 ### System.Web companion assemblies and client assets
 
+- ASP.NET Web Pages over the port
+  ([issue 23](https://github.com/exfinder/rehost-webforms/issues/23)):
+  `System.Web.WebPages`, `.Razor` and `.Deployment` recompiled from
+  `aspnet/AspNetWebStack` `v3.3.0` as one `Rehost.AspNet.WebPages` package, with
+  `Microsoft.AspNet.Razor` as shipped, on the Web API host pattern. Known
+  surgical spots: `WebPageHttpModule` registers through
+  `DynamicModuleUtility`; `WebPages.Deployment` probes the registry for the
+  installed version and loads `System.Web.WebPages` by version at start-up;
+  no `.cshtml` has yet compiled through the port's `BuildManager`, so a scratch
+  `RazorBuildProvider` run comes before the plan. `System.Web.Helpers` stays
+  out (`System.Web.DataVisualization`). Driving application: BlogEngine.NET
+  3.3.8, whose widgets and admin panel are `.cshtml`.
 - Complete general `System.Web` embedded-resource delivery beyond the eight
   release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
