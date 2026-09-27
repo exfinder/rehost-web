@@ -57,8 +57,14 @@ change how many requests see the failure, which is application-visible.
   a process manager), which the port cannot express in-process.
 - The rebuild is eager: the replacement process activates on its first
   request, where Framework rebuilds lazily inside the surviving worker
-  process. In-flight requests on other connections are lost to the exit,
-  which the AppDomain recycle drained instead.
+  process.
+- In-flight requests drain. `StopApplication()` starts the host's graceful
+  stop, which lets running requests finish up to `HostOptions.ShutdownTimeout`
+  before the process exits. Measured on macOS: a five-second request started
+  before `HttpRuntime.UnloadAppDomain()` answered 200 after the unload, and the
+  host then exited 82. New connections are the gap. The port refuses them
+  from the start of the drain until the replacement process listens, where
+  Framework handed them to the new AppDomain while the old one drained.
 - Two fenced deviations in imported source carry this: the latch in
   `HttpApplicationFactory.EnsureAppStartCalled` and the replay in
   `HttpRuntime.EnsureFirstRequestInit`, the latter standing in for the native
