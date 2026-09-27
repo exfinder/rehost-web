@@ -326,6 +326,13 @@
    ],
    "reason": "ResolveAssembly looks up the simple name of ResolveEventArgs.Name, which .NET gives as a full display name, direct replacement",
    "record": "docs/portability-ledger.md P113"
+  },
+  {
+   "files": [
+    "HttpException.cs"
+   ],
+   "reason": "a null message reads Framework's 'Exception of type ... was thrown.' through a Message override where .NET's ExternalException substitutes its own text (fenced !NETFRAMEWORK)",
+   "record": "docs/portability-ledger.md P114"
   }
  ]
 }

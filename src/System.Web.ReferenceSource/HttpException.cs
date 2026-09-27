@@ -38,6 +38,9 @@ namespace System.Web {
         private int _httpCode;
         private ErrorFormatter _errorFormatter;
         private int _webEventCode = WebEventCodes.UndefinedEventCode;
+#if !NETFRAMEWORK
+        private readonly bool _nullMessage;
+#endif
 
         // N.B. The last error code can be lost if we were to 
         // call UnsafeNativeMethods.GetLastError from this function
@@ -78,12 +81,18 @@ namespace System.Web {
         public HttpException(String message)
 
         : base(message) {
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
 
         internal HttpException(String message, Exception innerException, int code)
         
         : base(message, innerException) {
             _webEventCode = code;
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
         
 
@@ -94,6 +103,9 @@ namespace System.Web {
 
         : base(message) {
             HResult = hr;
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
 
 
@@ -105,6 +117,9 @@ namespace System.Web {
         public HttpException(String message, Exception innerException)
 
         : base(message, innerException) {
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
 
 
@@ -117,6 +132,9 @@ namespace System.Web {
 
         : base(message, innerException) {
             _httpCode = httpCode;
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
 
 
@@ -128,6 +146,9 @@ namespace System.Web {
 
         : base(message) {
             _httpCode = httpCode;
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
 
 
@@ -140,6 +161,9 @@ namespace System.Web {
         : base(message) {
             HResult = hr;
             _httpCode = httpCode;
+#if !NETFRAMEWORK
+            _nullMessage = message == null;
+#endif
         }
 
 
@@ -262,6 +286,13 @@ namespace System.Web {
             get { return _webEventCode; }
             internal set { _webEventCode = value; }
         }
+
+#if !NETFRAMEWORK
+        // .NET's ExternalException replaces a null message with its own text; Framework's kept it null.
+        public override string Message {
+            get { return _nullMessage ? $"Exception of type '{GetType()}' was thrown." : base.Message; }
+        }
+#endif
     }
 
 
