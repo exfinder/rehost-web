@@ -1,4 +1,5 @@
 using System.Web;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
 using Rehost.WebForms.ScenarioProbes;
 using Rehost.WebForms.ScenarioProbes.Dynamic;
 
@@ -8,9 +9,12 @@ using Rehost.WebForms.ScenarioProbes.Dynamic;
 
 namespace Rehost.WebForms.ScenarioProbes.Dynamic;
 
-// The registration channel Optimization and OWIN use. It lives in its own bin payload so only the
-// modules fixture carries a dynamically registered module.
+// Its own bin payload, so only the modules fixtures carry dynamically registered modules.
 public static class DynamicModuleRegistration
 {
-    public static void Start() => HttpApplication.RegisterModule(typeof(DynamicModuleProbe));
+    public static void Start()
+    {
+        HttpApplication.RegisterModule(typeof(DynamicModuleProbe));
+        DynamicModuleUtility.RegisterModule(typeof(DynamicModuleUtilityProbe));
+    }
 }

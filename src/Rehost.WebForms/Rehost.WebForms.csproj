@@ -3,20 +3,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS2008</NoWarn>
-    <Description>ASP.NET Web Forms runtime for modern .NET: the System.Web-compatible runtime and the companion assemblies the root configuration names.</Description>
+    <Description>ASP.NET Web Forms runtime for modern .NET: the System.Web-compatible runtime and its companion assemblies.</Description>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RehostBundleAssemblies</TargetsForTfmSpecificBuildOutput>
     <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);RehostBundleSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
   </PropertyGroup>
 
   <Import Project="Rehost.WebForms.Dependencies.props" />
 
-  <!-- PrivateAssets keeps the four unpublished package IDs out of the nuspec; the
+  <!-- PrivateAssets keeps the five unpublished package IDs out of the nuspec; the
        assemblies themselves are packed below. -->
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
     <ProjectReference Include="../Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" PrivateAssets="all" />
     <ProjectReference Include="../Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" PrivateAssets="all" />
     <ProjectReference Include="../Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,7 +42,7 @@
     </ItemGroup>
   </Target>
 
-  <!-- This project's own assembly is empty; the package's lib/ is the four components. -->
+  <!-- This project's own assembly is empty; the package's lib/ is the five components. -->
   <Target Name="RehostBundleAssemblies" DependsOnTargets="RehostResolveBundledAssemblies">
     <ItemGroup>
       <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />

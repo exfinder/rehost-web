@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Microsoft.Web.Infrastructure</RootNamespace>
+    <Description>Microsoft.Web.Infrastructure API for Rehost.WebForms.</Description>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Import Project="../Rehost.WebForms/Rehost.WebForms.Dependencies.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" />
+  </ItemGroup>
+</Project>

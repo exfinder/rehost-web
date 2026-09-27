@@ -33,7 +33,7 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         stages.ShouldBe(ModuleStages.Interleaved(
-            "unconditioned", "managed-handler", "webserver-copy", "dynamic"));
+            "unconditioned", "managed-handler", "webserver-copy", "dynamic", "dynamic-utility"));
     }
 
     // A rewrite moves the handler, not the managedHandler answer: the page serves the request
@@ -68,7 +68,7 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
         response.StatusCode.ShouldBe(200);
         response.Text.Trim().ShouldBe("STATIC-OK");
         stages.ShouldBe(ModuleStages.Interleaved(
-            "unconditioned", "managed-handler", "webserver-copy", "dynamic"));
+            "unconditioned", "managed-handler", "webserver-copy", "dynamic", "dynamic-utility"));
     }
 
     // MH10: the unconditioned module sees the static file and the managedHandler one does not. A
@@ -94,7 +94,7 @@ public sealed class ModulesOverKestrelTests(ModulesLiveScenario scenario)
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("HANDLED-BY:A");
         stages.ShouldBe(ModuleStages.Interleaved(
-            "unconditioned", "managed-handler", "webserver-copy", "dynamic"));
+            "unconditioned", "managed-handler", "webserver-copy", "dynamic", "dynamic-utility"));
     }
 
     // MH3 and MH7: the name registered in both sections runs once, from the webServer type, and a
@@ -121,6 +121,6 @@ public sealed class ModulesRunAllOverKestrelTests(ModulesRunAllLiveScenario scen
         var (response, stages) = await scenario.TracedGetAsync(this, "/asset.txt");
 
         response.StatusCode.ShouldBe(200);
-        stages.ShouldBe(ModuleStages.Interleaved("managed-handler", "dynamic"));
+        stages.ShouldBe(ModuleStages.Interleaved("managed-handler", "dynamic", "dynamic-utility"));
     }
 }

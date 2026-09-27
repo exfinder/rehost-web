@@ -1,5 +1,5 @@
 <Project>
-  <!-- One list for the four assemblies Rehost.WebForms ships: pack reads dependencies
+  <!-- One list for the five assemblies Rehost.WebForms ships: pack reads dependencies
        only from the packing project, so a list kept per component would silently drop
        from the package. -->
   <ItemGroup>

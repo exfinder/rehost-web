@@ -48,6 +48,8 @@ public sealed class ClassicOnlyModuleProbe() : ModuleEventProbe("classic-only");
 
 public sealed class DynamicModuleProbe() : ModuleEventProbe("dynamic");
 
+public sealed class DynamicModuleUtilityProbe() : ModuleEventProbe("dynamic-utility");
+
 // Rewrites at BeginRequest, ahead of the conditioned module's own step, so a request crosses the
 // static/managed line mid-pipeline. Records no stages: the order tests here assert exact
 // sequences and a fourth witness would move them.

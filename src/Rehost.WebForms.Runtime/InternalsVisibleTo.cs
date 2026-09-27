@@ -7,3 +7,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("Rehost.WebForms.ScenarioHost")]
 [assembly: InternalsVisibleTo("Rehost.WebForms.Parity.PortableHost")]
 [assembly: InternalsVisibleTo("Rehost.WebForms.Parity.AdapterHost")]
+[assembly: InternalsVisibleTo("Rehost.Web.Infrastructure")]

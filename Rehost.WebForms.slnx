@@ -9,6 +9,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Rehost.AspNet.WebApi.WebHost/Rehost.AspNet.WebApi.WebHost.csproj" />
+    <Project Path="src/Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" />
     <Project Path="src/Rehost.WebForms/Rehost.WebForms.csproj" />
     <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
     <Project Path="src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
@@ -32,6 +33,7 @@
     <Project Path="tests/parity/src/Rehost.WebForms.Parity.PortableHost/Rehost.WebForms.Parity.PortableHost.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Rehost.Web.Infrastructure.Tests/Rehost.Web.Infrastructure.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.CallContext.Contract.Tests/Rehost.WebForms.CallContext.Contract.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Extensions.Tests/Rehost.WebForms.Extensions.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.FixtureStaging.Tasks/Rehost.WebForms.FixtureStaging.Tasks.csproj" />

@@ -33,4 +33,7 @@ public static class ProbePaths
     public const string Lifecycle = "/lifecycle";
     public const string Integrated = "/integrated";
     public const string Disconnect = "/disconnect";
+    public const string DynamicValidation = "/dynamic-validation";
+    public const string ShutdownReason = "/shutdown-reason";
+    public const string InfrastructureUnload = "/infrastructure-unload";
 }

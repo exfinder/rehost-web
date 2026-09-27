@@ -121,6 +121,28 @@ public sealed class ApplicationStartFailureOverKestrelTests
         scenario.ExitCode.ShouldBe(RestartRequested);
     }
 
+    [Fact]
+    public async Task A_Request_Running_When_Application_Code_Unloads_Still_Completes()
+    {
+        var token = TestContext.Current.CancellationToken;
+        using var fault = new TempDirectory("rehost-appstart-");
+        using var gate = new ScenarioGate();
+        using var scenario = Start(fault.Path("fault"), gate);
+
+        var running = scenario.Client.GetAsync(ProbePaths.ShutdownReason);
+        await gate.WaitForArrivalAsync(StartWait, token);
+        gate.Release();
+        var unloading = await scenario.Client.GetAsync(ProbePaths.InfrastructureUnload);
+        var drained = await running;
+        var exited = scenario.WaitForExit(ExitWait);
+
+        unloading.StatusCode.ShouldBe(200);
+        drained.StatusCode.ShouldBe(200);
+        drained.Text.ShouldBe("UnloadAppDomainCalled");
+        exited.ShouldBeTrue();
+        scenario.ExitCode.ShouldBe(RestartRequested);
+    }
+
     private static LiveScenario Start(string marker, ScenarioGate? gate = null)
     {
         var environment = new Dictionary<string, string>

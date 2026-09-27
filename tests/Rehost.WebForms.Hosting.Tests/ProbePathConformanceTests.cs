@@ -38,6 +38,9 @@ public sealed class ProbePathConformanceTests
         ["LifecycleReportProbe"] = ProbePaths.Lifecycle,
         ["IntegratedMembersProbe"] = ProbePaths.Integrated,
         ["DisconnectProbe"] = ProbePaths.Disconnect,
+        ["DynamicValidationProbe"] = ProbePaths.DynamicValidation,
+        ["ShutdownReasonProbe"] = ProbePaths.ShutdownReason,
+        ["InfrastructureUnloadProbe"] = ProbePaths.InfrastructureUnload,
     };
 
     // The handler-walk markers report which row of the merged list won, so the path they sit at

@@ -11,7 +11,6 @@
     <Compile Include="../System.Web.Optimization.ReferenceSource/**/*.cs" />
     <Compile Remove="../System.Web.Optimization.ReferenceSource/Properties/AssemblyInfo.cs" />
     <Compile Remove="../System.Web.Optimization.ReferenceSource/Properties/AssemblyMetadataAttribute.cs" />
-    <Compile Remove="../System.Web.Optimization.ReferenceSource/PreApplicationStartCode.cs" />
     <EmbeddedResource
       Include="../System.Web.Optimization.ReferenceSource/Resources/OptimizationResources.resx"
       LogicalName="System.Web.Optimization.Resources.OptimizationResources.resources" />
@@ -23,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
     <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

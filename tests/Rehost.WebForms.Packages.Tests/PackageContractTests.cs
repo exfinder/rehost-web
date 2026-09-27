@@ -32,6 +32,7 @@ public sealed class PackageContractTests
         "Rehost.WebForms.ApplicationServices",
         "Rehost.WebForms.Extensions",
         "Rehost.WebForms.WebServices",
+        "Rehost.Web.Infrastructure",
     ];
 
     private static IEnumerable<CandidatePackage> Satellites =>
@@ -73,6 +74,7 @@ public sealed class PackageContractTests
         versions.Select(v => v.Assembly).Order(StringComparer.Ordinal).ShouldBe(
             [
                 "Rehost.AspNet.WebApi.WebHost.dll",
+                "Rehost.Web.Infrastructure.dll",
                 "Rehost.WebForms.ApplicationServices.dll",
                 "Rehost.WebForms.Extensions.dll",
                 "Rehost.WebForms.FriendlyUrls.dll",
@@ -88,7 +90,7 @@ public sealed class PackageContractTests
     }
 
     [Fact]
-    public void BundleCarriesTheFourComponentAssembliesAndNothingElseInLib()
+    public void BundleCarriesTheFiveComponentAssembliesAndNothingElseInLib()
     {
         var bundle = PackageFeed.Package(Bundle);
 
