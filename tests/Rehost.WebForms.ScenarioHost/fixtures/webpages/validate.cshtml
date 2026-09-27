@@ -1,0 +1,8 @@
+@{
+    string form;
+    string unvalidated;
+    try { form = Request.Form["x"]; } catch (Exception e) { form = e.GetType().FullName; }
+    try { unvalidated = Request.Unvalidated.Form["x"]; } catch (Exception e) { unvalidated = e.GetType().FullName; }
+}
+<p id="form">@form</p>
+<p id="unvalidated">@unvalidated</p>

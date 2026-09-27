@@ -10,12 +10,14 @@ namespace Rehost.WebForms.Packages.Tests;
 public sealed class PackageContractTests
 {
     private const string Bundle = "Rehost.WebForms";
+    private const string WebPages = "Rehost.AspNet.WebPages";
     private const string Templates = "Rehost.WebForms.Templates";
     private const string TemplateRoot = "content/rehost-webforms/";
 
     private static readonly string[] PublicPackages =
     [
         "Rehost.AspNet.WebApi.WebHost",
+        "Rehost.AspNet.WebPages",
         "Rehost.WebForms",
         "Rehost.WebForms.FriendlyUrls",
         "Rehost.WebForms.Hosting",
@@ -38,13 +40,21 @@ public sealed class PackageContractTests
     private static readonly Dictionary<string, string[]> AspNetWebStackAssemblies = new()
     {
         ["Rehost.AspNet.WebApi.WebHost"] = ["Rehost.Web.Http.WebHost"],
+        [WebPages] = ["Rehost.Web.WebPages", "Rehost.Web.WebPages.Deployment", "Rehost.Web.WebPages.Razor"],
     };
+
+    private static readonly string[] AssembliesReadingTheirOwnWebPagesVersion =
+    [
+        "Rehost.Web.WebPages.dll",
+        "Rehost.Web.WebPages.Deployment.dll",
+        "Rehost.Web.WebPages.Razor.dll",
+    ];
 
     private static IEnumerable<CandidatePackage> Satellites =>
         PackageFeed.Packages.Where(p => p.Id != Bundle && p.Id != Templates);
 
     [Fact]
-    public void FeedHoldsTheNinePublicPackagesAtOneVersion()
+    public void FeedHoldsTheTenPublicPackagesAtOneVersion()
     {
         PackageFeed.Packages.Select(p => p.Id).ShouldBe(PublicPackages.Order(StringComparer.Ordinal));
         PackageFeed.Packages.Select(p => p.Version).Distinct().ShouldHaveSingleItem();
@@ -80,6 +90,9 @@ public sealed class PackageContractTests
             [
                 "Rehost.Web.Http.WebHost.dll",
                 "Rehost.Web.Infrastructure.dll",
+                "Rehost.Web.WebPages.Deployment.dll",
+                "Rehost.Web.WebPages.Razor.dll",
+                "Rehost.Web.WebPages.dll",
                 "Rehost.WebForms.ApplicationServices.dll",
                 "Rehost.WebForms.Extensions.dll",
                 "Rehost.WebForms.FriendlyUrls.dll",
@@ -91,7 +104,11 @@ public sealed class PackageContractTests
                 "Rehost.WebForms.ScriptManager.Bundles.dll",
                 "Rehost.WebForms.WebServices.dll",
             ]);
-        versions.ShouldAllBe(v => v.AssemblyVersion == familyVersion && v.FileVersion == familyVersion);
+        versions.ShouldAllBe(v => v.FileVersion == familyVersion);
+        versions.Where(v => !AssembliesReadingTheirOwnWebPagesVersion.Contains(v.Assembly))
+            .ShouldAllBe(v => v.AssemblyVersion == familyVersion);
+        versions.Where(v => AssembliesReadingTheirOwnWebPagesVersion.Contains(v.Assembly))
+            .Select(v => v.AssemblyVersion).ShouldBe(["3.0.0.0", "3.0.0.0", "3.0.0.0"]);
     }
 
     [Fact]
@@ -180,6 +197,23 @@ public sealed class PackageContractTests
                 dependencyVersion.ShouldBe(PackageFeed.CentralVersions[id], $"{package.Id} -> {id}");
             }
         }
+    }
+
+    [Fact]
+    public void WebPagesDependsOnTheBundleAndRazorUnderApache()
+    {
+        var webPages = PackageFeed.Package(WebPages);
+        var license = XDocument.Parse(webPages.ReadText($"{WebPages}.nuspec"))
+            .Descendants()
+            .Single(e => e.Name.LocalName == "license");
+
+        webPages.Dependencies.OrderBy(d => d.Key, StringComparer.Ordinal).ShouldBe(
+        [
+            new("Microsoft.AspNet.Razor", "3.3.0"),
+            new(Bundle, PackageFeed.Package(Bundle).Version),
+        ]);
+        ((string)license.Attribute("type")!).ShouldBe("expression");
+        license.Value.ShouldBe("Apache-2.0");
     }
 
     [Fact]

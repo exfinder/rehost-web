@@ -142,6 +142,9 @@ public sealed class AsyncAppLiveScenario(ScenarioHostRegistry registry)
 public sealed class FriendlyUrlsLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.FriendlyUrls));
 
+public sealed class WebPagesLiveScenario(ScenarioHostRegistry registry)
+    : Scenario(registry.GetOrAdd(Fixtures.WebPages));
+
 public sealed class AuthLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.Auth));
 

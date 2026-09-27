@@ -34,6 +34,7 @@ meet the same bar.
 | `appstart` | Process death is the claim: `Application_Start` throws while a marker file outside the application is armed, the runtime latches the failure and ends the process, and the scenarios read the exit code. No other application can host a startup that fails. It carries the rest of the activation-and-shutdown record for the same reason — what `Application_Start`, `Init()` and module `Init` could read (IV22), and the stop signals a host stop and a recycle raise (IV30) — since both are written once per process and read after it ends. |
 | `config-error` | Its `web.config` carries a section no `machine.config` declares, so activation fails in `HostingInit` and the application answers 500 to its one request before the runtime ends the process. Nothing else can be hosted on a configuration the runtime refuses to load. |
 | `classic-unflagged` | Classic registrations without the validation flag: activation is refused, so this application can never serve a request. |
+| `webpages` | ASP.NET Web Pages: `WebPageHttpModule` registers application-wide and reroutes every extensionless request to a matching `.cshtml` page, which the other fixtures' routing claims cannot tolerate. The three Web Pages assemblies ride in its bin, never beside the host, with `System.Web.Razor` staged beside them. |
 
 ## Host tenancy
 

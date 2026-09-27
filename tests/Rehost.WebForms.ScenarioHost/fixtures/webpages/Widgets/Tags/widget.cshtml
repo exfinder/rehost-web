@@ -1,0 +1,13 @@
+@{
+    var title = Model.Title;
+    var tags = new[] { "<a>one</a>", "<a>two</a>" };
+}
+<div class="widget">
+    <h4 id="wtitle">@title</h4>
+    <ul>
+        @foreach (var tag in tags)
+        {
+        <li>@Html.Raw(tag)</li>
+        }
+    </ul>
+</div>

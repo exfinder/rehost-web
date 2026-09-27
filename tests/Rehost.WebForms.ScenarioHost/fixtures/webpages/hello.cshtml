@@ -1,0 +1,21 @@
+@{
+    Layout = "~/_Layout.cshtml";
+    Page.Title = "Hello page";
+    var name = Request.QueryString["name"] ?? "world";
+}
+<p id="greet">Hello, @name!</p>
+<p id="enc">@("<b>encoded</b>")</p>
+<p id="raw">@Html.Raw("<b>raw</b>")</p>
+<ul id="loop">@for (var i = 1; i <= 3; i++) {<li>@i</li>}</ul>
+<p id="helper">@Shout("hi")</p>
+<p id="fn">@Twice(21)</p>
+<p id="textbox">@Html.TextBox("q", "v")</p>
+<p id="href">@Href("~/x/y")</p>
+<p id="appstate">@AppState["started"]</p>
+<p id="ispost">@IsPost</p>
+<p id="urldata">@UrlData.Count|@UrlData[0]|@UrlData[1]</p>
+<p id="vpath">@VirtualPath</p>
+@helper Shout(string s) {<b>@s.ToUpperInvariant()</b>}
+@functions {
+    static int Twice(int x) { return x * 2; }
+}

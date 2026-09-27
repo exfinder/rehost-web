@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS2008</NoWarn>
+    <Description>ASP.NET Web Pages 3 over the Rehost.WebForms ASP.NET runtime: .cshtml pages, the Razor build provider and Web Pages deployment support.</Description>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RehostBundleAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);RehostBundleSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
+    <ProjectReference Include="../Rehost.Web.WebPages/Rehost.Web.WebPages.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.WebPages.Deployment/Rehost.Web.WebPages.Deployment.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Razor" NoWarn="NU1701" />
+  </ItemGroup>
+
+  <Target Name="RehostResolveBundledAssemblies" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_RehostBundledAssembly
+        Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' and '%(ReferenceCopyLocalPaths.PrivateAssets)' == 'all' and '%(Extension)' == '.dll'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RehostBundleAssemblies" DependsOnTargets="RehostResolveBundledAssemblies">
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />
+      <BuildOutputInPackage
+        Include="@(_RehostBundledAssembly)"
+        FinalOutputPath="%(FullPath)"
+        TargetPath="%(Filename)%(Extension)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RehostBundleSymbols" DependsOnTargets="RehostResolveBundledAssemblies">
+    <ItemGroup>
+      <DebugSymbolsProjectOutputGroupOutput Remove="@(DebugSymbolsProjectOutputGroupOutput)" />
+      <TfmSpecificDebugSymbolsFile
+        Include="@(_RehostBundledAssembly->'%(RootDir)%(Directory)%(Filename).pdb')"
+        TargetPath="%(Filename).pdb"
+        TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+</Project>

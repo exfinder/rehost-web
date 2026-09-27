@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>System.Web.WebPages.Razor</RootNamespace>
+    <Description>ASP.NET Web Pages Razor build provider over the Rehost.WebForms ASP.NET runtime.</Description>
+    <RehostAssemblyVersion>3.0.0.0</RehostAssemblyVersion>
+    <IsPackable>false</IsPackable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);ASPNETWEBPAGES</DefineConstants>
+    <NoWarn>$(NoWarn);CS3001;CS3003;CS3009</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Common/CommonResources.resx" LogicalName="System.Web.WebPages.Razor.Common.CommonResources.resources" />
+    <EmbeddedResource Update="Resources/RazorWebResources.resx" LogicalName="System.Web.WebPages.Razor.Resources.RazorWebResources.resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
+    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.WebPages/Rehost.Web.WebPages.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Razor" NoWarn="NU1701" />
+  </ItemGroup>
+</Project>

@@ -29,4 +29,5 @@ internal static class Fixtures
     internal static readonly ScenarioFixture HookupRefused = new("hookup-refused");
     internal static readonly ScenarioFixture DefaultAuthRefused = new("defaultauth-refused");
     internal static readonly ScenarioFixture ConfigError = new("config-error");
+    internal static readonly ScenarioFixture WebPages = new("webpages");
 }

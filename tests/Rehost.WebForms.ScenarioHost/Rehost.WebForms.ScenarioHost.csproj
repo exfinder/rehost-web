@@ -18,14 +18,15 @@
     <ProjectReference Include="../Rehost.WebForms.ScenarioProtocol/Rehost.WebForms.ScenarioProtocol.csproj" />
   </ItemGroup>
 
-  <!-- Not referenced by the host: the OWIN and Web API assemblies are staged into the
-       friendlyurls fixture bin, where the application resolves them. -->
+  <!-- Not referenced by the host: the OWIN, Web API and Razor assemblies are staged into the
+       friendlyurls and webpages fixture bins, where the application resolves them. -->
   <ItemGroup>
     <PackageReference Include="Owin" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin.Security" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin.Security.Cookies" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.AspNet.Razor" NoWarn="NU1701" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,6 +56,18 @@
     <FixturePayloadProject
       Include="../../src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj"
       Bins="friendlyurls" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.Web.WebPages/Rehost.Web.WebPages.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="webpages" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="webpages" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.Web.WebPages.Deployment/Rehost.Web.WebPages.Deployment.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="webpages" />
   </ItemGroup>
 
   <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageFixtures;StageFixtureBinPayload" />
@@ -70,6 +83,7 @@
       <FixtureBinFile
         Include="$(TargetDir)System.Web.Http.dll;$(TargetDir)System.Net.Http.Formatting.dll;$(TargetDir)Newtonsoft.Json.dll"
         Bins="friendlyurls" />
+      <FixtureBinFile Include="$(TargetDir)System.Web.Razor.dll" Bins="webpages" />
       <FixtureBinDir Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')" />
     </ItemGroup>
   </Target>

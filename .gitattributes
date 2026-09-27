@@ -11,6 +11,15 @@ src/System.Web.ReferenceSource/** -text
 apps/YAF/yafsrc/** -text
 src/Rehost.Web.Http.WebHost/** -text
 src/Rehost.Web.Http.WebHost/*.csproj text
+src/Rehost.Web.WebPages/** -text
+src/Rehost.Web.WebPages/*.csproj text
+src/Rehost.Web.WebPages/AssemblyInfo.cs text
+src/Rehost.Web.WebPages.Deployment/** -text
+src/Rehost.Web.WebPages.Deployment/*.csproj text
+src/Rehost.Web.WebPages.Deployment/AssemblyInfo.cs text
+src/Rehost.Web.WebPages.Razor/** -text
+src/Rehost.Web.WebPages.Razor/*.csproj text
+src/Rehost.Web.WebPages.Razor/AssemblyInfo.cs text
 
 # Recorded response bytes, not source. HttpWriter.WriteLine emits a hardcoded CRLF
 # pair while markup literals carry the source's LF, so these files are a deliberate

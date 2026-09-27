@@ -8,8 +8,12 @@
     <Project Path="samples/Rehost.WebForms.SampleApp/Rehost.WebForms.SampleApp.csproj" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/Rehost.AspNet.WebPages/Rehost.AspNet.WebPages.csproj" />
     <Project Path="src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
     <Project Path="src/Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" />
+    <Project Path="src/Rehost.Web.WebPages/Rehost.Web.WebPages.csproj" />
+    <Project Path="src/Rehost.Web.WebPages.Deployment/Rehost.Web.WebPages.Deployment.csproj" />
+    <Project Path="src/Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj" />
     <Project Path="src/Rehost.WebForms/Rehost.WebForms.csproj" />
     <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />
     <Project Path="src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
@@ -34,6 +38,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Rehost.Web.Infrastructure.Tests/Rehost.Web.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.WebPages.Deployment.Tests/Rehost.Web.WebPages.Deployment.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.CallContext.Contract.Tests/Rehost.WebForms.CallContext.Contract.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.Extensions.Tests/Rehost.WebForms.Extensions.Tests.csproj" />
     <Project Path="tests/Rehost.WebForms.FixtureStaging.Tasks/Rehost.WebForms.FixtureStaging.Tasks.csproj" />

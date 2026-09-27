@@ -13,4 +13,15 @@
         Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
     </ItemGroup>
   </Target>
+
+  <!-- After the SDK derives FileVersion from the package version, so only the assembly
+       version departs from the family version. -->
+  <Target
+    Name="RehostPinAssemblyVersion"
+    AfterTargets="GetAssemblyVersion"
+    Condition="'$(RehostAssemblyVersion)' != ''">
+    <PropertyGroup>
+      <AssemblyVersion>$(RehostAssemblyVersion)</AssemblyVersion>
+    </PropertyGroup>
+  </Target>
 </Project>
