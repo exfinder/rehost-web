@@ -35,6 +35,11 @@ public sealed class PackageContractTests
         "Rehost.Web.Infrastructure",
     ];
 
+    private static readonly Dictionary<string, string[]> AspNetWebStackAssemblies = new()
+    {
+        ["Rehost.AspNet.WebApi.WebHost"] = ["Rehost.Web.Http.WebHost"],
+    };
+
     private static IEnumerable<CandidatePackage> Satellites =>
         PackageFeed.Packages.Where(p => p.Id != Bundle && p.Id != Templates);
 
@@ -73,7 +78,7 @@ public sealed class PackageContractTests
 
         versions.Select(v => v.Assembly).Order(StringComparer.Ordinal).ShouldBe(
             [
-                "Rehost.AspNet.WebApi.WebHost.dll",
+                "Rehost.Web.Http.WebHost.dll",
                 "Rehost.Web.Infrastructure.dll",
                 "Rehost.WebForms.ApplicationServices.dll",
                 "Rehost.WebForms.Extensions.dll",
@@ -197,7 +202,11 @@ public sealed class PackageContractTests
     {
         foreach (var satellite in Satellites)
         {
-            satellite.LibraryFiles.ShouldBe([$"lib/net10.0/{satellite.Id}.dll"], satellite.Id);
+            var assemblies = AspNetWebStackAssemblies.GetValueOrDefault(satellite.Id, [satellite.Id]);
+
+            satellite.LibraryFiles.Order(StringComparer.Ordinal).ShouldBe(
+                assemblies.Select(a => $"lib/net10.0/{a}.dll").Order(StringComparer.Ordinal),
+                satellite.Id);
         }
     }
 

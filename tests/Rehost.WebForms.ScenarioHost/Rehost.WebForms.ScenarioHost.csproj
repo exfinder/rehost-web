@@ -53,7 +53,7 @@
       Include="../../src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj"
       Bins="friendlyurls" />
     <FixturePayloadProject
-      Include="../../src/Rehost.AspNet.WebApi.WebHost/Rehost.AspNet.WebApi.WebHost.csproj"
+      Include="../../src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj"
       Bins="friendlyurls" />
   </ItemGroup>
 

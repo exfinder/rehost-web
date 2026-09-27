@@ -8,7 +8,7 @@
     <Project Path="samples/Rehost.WebForms.SampleApp/Rehost.WebForms.SampleApp.csproj" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Rehost.AspNet.WebApi.WebHost/Rehost.AspNet.WebApi.WebHost.csproj" />
+    <Project Path="src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
     <Project Path="src/Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" />
     <Project Path="src/Rehost.WebForms/Rehost.WebForms.csproj" />
     <Project Path="src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj" />

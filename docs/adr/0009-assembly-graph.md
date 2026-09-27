@@ -59,3 +59,12 @@ contract, GitHub #8). Satellite packages reference the component projects with
 nuspecs name `Rehost.WebForms` alone. The consumer targets ship as
 `buildTransitive/`, because ordinary `build/` assets do not flow through package
 dependencies.
+
+An assembly ported from `aspnet/AspNetWebStack` keeps its upstream name with
+`System` replaced by `Rehost`, and its package ID is upstream's with
+`Microsoft` replaced by `Rehost`: `System.Web.Http.WebHost` ships as
+`Rehost.Web.Http.WebHost` in the `Rehost.AspNet.WebApi.WebHost` package.
+Namespaces stay upstream's. The project folder is named after the assembly and
+`<PackageId>` carries the package ID. The two are derived separately because
+upstream's packages and assemblies do not map one to one. The
+`Rehost.WebForms.*` family keeps its names.

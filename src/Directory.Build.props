@@ -23,7 +23,7 @@
 
   <!-- Imported Apache-2.0 trees make up nearly all of these four packages; the
        expression follows the payload, not the repository license. -->
-  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Owin.Host.SystemWeb' or '$(MSBuildProjectName)' == 'Rehost.AspNet.WebApi.WebHost'">
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Owin.Host.SystemWeb' or '$(MSBuildProjectName)' == 'Rehost.Web.Http.WebHost'">
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 

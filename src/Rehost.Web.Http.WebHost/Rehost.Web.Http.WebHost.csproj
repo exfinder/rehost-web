@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>System.Web.Http.WebHost</RootNamespace>
+    <PackageId>Rehost.AspNet.WebApi.WebHost</PackageId>
     <Description>ASP.NET Web API 2 host over the Rehost.WebForms ASP.NET request pipeline.</Description>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
