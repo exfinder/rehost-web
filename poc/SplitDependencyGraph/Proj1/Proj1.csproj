@@ -1,5 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="../Proj2/Proj2.csproj" />
-  </ItemGroup>
-</Project>

@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="Host/Host.csproj" />
-  <Project Path="Verify/Verify.csproj" />
-</Solution>

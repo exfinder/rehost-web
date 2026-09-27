@@ -1,5 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <PackageReference Include="NuGet.Versioning" Version="6.14.0" />
-  </ItemGroup>
-</Project>
