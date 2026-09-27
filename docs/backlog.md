@@ -270,13 +270,13 @@ Carried from earlier milestones as unresolved detail:
   `rehost_root/` layout, the Web Forms fall-through mode and state bridges
   coexistence needs, and the split layout to revisit on the .NET 11 SDK:
   [migration stages](follow-ups/migration-stages-and-site-layout.md).
-- Verify license metadata and notices against the seven packages #12
-  produces; sample-app redistribution gaps:
+- Verify license metadata and notices against the nine packages in
+  `eng/PackageProjects.props`; sample-app redistribution gaps:
   [package license](follow-ups/package-license.md).
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
 - Fail activation clearly when configuration names an absent companion
-  assembly; the seven-package alpha ships the five companions inside
+  assembly; the alpha ships the five companions inside
   `Rehost.WebForms`, so the case is a consumer that deploys a partial `bin`.
 - Rewrite each app's `smoke.sh` journey as a C# test project beside its App
   and Host (one method per check, a shared start-and-wait helper), so the
