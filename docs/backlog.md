@@ -216,13 +216,14 @@ Carried from earlier milestones as unresolved detail:
   `System.Web.WebPages`, `.Razor` and `.Deployment` recompiled from
   `aspnet/AspNetWebStack` `v3.3.0` as one `Rehost.AspNet.WebPages` package, with
   `Microsoft.AspNet.Razor` as shipped, on the Web API host pattern. Known
-  surgical spots: `WebPageHttpModule` registers through
-  `DynamicModuleUtility`; `WebPages.Deployment` probes the registry for the
-  installed version and loads `System.Web.WebPages` by version at start-up;
-  no `.cshtml` has yet compiled through the port's `BuildManager`, so a scratch
-  `RazorBuildProvider` run comes before the plan. `System.Web.Helpers` stays
-  out (`System.Web.DataVisualization`). Driving application: BlogEngine.NET
-  3.3.8, whose widgets and admin panel are `.cshtml`.
+  surgical spots: `Deployment/AppDomainHelper.cs` creates a second AppDomain,
+  used only by `GetIncompatibleDependencies`; `CryptoUtil` uses `SHA256Cng`;
+  `HtmlHelper.Input.cs` reaches `System.Data.Linq.Binary`. The
+  `WebPages.Deployment` registry read for the installed version compiles but
+  is unreachable when Web Pages is bin-deployed, and a scratch `.cshtml` run
+  through the port's `BuildManager` passed. `System.Web.Helpers` stays out
+  (`System.Web.DataVisualization`). Driving application: BlogEngine.NET 3.3.8,
+  whose widgets and admin panel are `.cshtml`.
 - Complete general `System.Web` embedded-resource delivery beyond the eight
   release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
@@ -275,7 +276,7 @@ Carried from earlier milestones as unresolved detail:
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
 - Fail activation clearly when configuration names an absent companion
-  assembly; the seven-package alpha ships the four companions inside
+  assembly; the seven-package alpha ships the five companions inside
   `Rehost.WebForms`, so the case is a consumer that deploys a partial `bin`.
 - Rewrite each app's `smoke.sh` journey as a C# test project beside its App
   and Host (one method per check, a shared start-and-wait helper), so the

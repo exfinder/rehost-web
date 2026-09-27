@@ -48,9 +48,12 @@ unchanged application parses `<asp:ScriptManager>`, and keeps the promise by
 shipping the four assemblies together. The `Rehost.WebForms` package carries
 `Rehost.WebForms.Runtime`, `Rehost.WebForms.ApplicationServices`,
 `Rehost.WebForms.Extensions` and `Rehost.WebForms.WebServices` in its `lib/`,
-owns the root configuration, and lists their external dependencies; the four
-remain separate assemblies and projects but are not packages of their own, and
-no public package names their project IDs as a dependency (public alpha
+owns the root configuration, and lists their external dependencies. A fifth
+component, `Rehost.Web.Infrastructure`, sits in the same `lib/` for a different
+reason. No configuration names it, but satellites and application code compile
+against it, and every one of them already depends on `Rehost.WebForms`. The
+five remain separate assemblies and projects but are not packages of their own,
+and no public package names their project IDs as a dependency (public alpha
 contract, GitHub #8). Satellite packages reference the component projects with
 `PrivateAssets="all"` and the bundle project for the dependency edge, so their
 nuspecs name `Rehost.WebForms` alone. The consumer targets ship as

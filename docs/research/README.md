@@ -29,6 +29,7 @@ support or priority. Use [compatibility](../compatibility.md) and
 ## Application and companion assemblies
 
 - [Friendly URLs inventory](friendly-urls-dependency-inventory.md)
+- [Microsoft.Web.Infrastructure](mwi-readings.md)
 - [WebForms Identity application](webforms-identity-application-gaps.md)
 - [System.Web.Extensions inventory](system-web-extensions-inventory.md)
 - [System.Web.Extensions portability](system-web-extensions-portability.md)

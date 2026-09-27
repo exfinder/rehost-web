@@ -25,15 +25,13 @@ dependencies are `System.Web`, `System.Configuration`,
 WebForms project contains one `BundleReference` control; its `System.Design`
 lookup is reflective.
 
-Both imported trees compile on .NET 10. The port drops two files. The 4.0-era
+Both imported trees compile on .NET 10. The port drops one file. The 4.0-era
 `AssemblyMetadataAttribute` polyfill now collides with the BCL type, and the
 compiler resolves such a collision in favour of the local copy, which would hide
 `[assembly: AssemblyMetadata]` from anything reading the real attribute.
-`PreApplicationStartCode` loses `Microsoft.Web.Infrastructure`, whose
-`DynamicModuleUtility.RegisterModule` is a delegate over
-`HttpApplication.RegisterModule` wherever that method exists; the replacement
-calls it directly and keeps the upstream namespace and type name, so the
-imported `PreApplicationStartMethod` attribute still binds.
+`PreApplicationStartCode` compiles as imported, against
+`Rehost.Web.Infrastructure` in the `Rehost.WebForms` package
+([provenance](microsoft-web-infrastructure.md)).
 
 Neither tree's `Properties/AssemblyInfo.cs` is compiled. Both pinned the
 1.1.0.0 assembly, file and informational versions, and the shipped assemblies

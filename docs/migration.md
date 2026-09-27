@@ -32,12 +32,14 @@ Three groups:
 - **Dropped.** `Microsoft.AspNet.WebApi`, the meta package: it would pull
   `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host, and
   `Rehost.AspNet.WebApi.WebHost` already brings `Core` and `Client`, so a Web API
-  application needs that one line. `Microsoft.Web.Infrastructure` (Katana 4.x calls
-  `HttpApplication.RegisterModule` directly), `Microsoft.AspNet.Providers.Core`
-  when only `<sessionState customProvider>` names it, and `WebGrease`/`Antlr`,
-  which the Optimization package carries itself. The `AspNet.ScriptManager.jQuery`
-  and `.bootstrap` packages register names only; re-register them in a
-  `PreApplicationStartCode.cs` in the App project.
+  application needs that one line. `Microsoft.Web.Infrastructure` goes because
+  `Rehost.WebForms` brings `Rehost.Web.Infrastructure` with the same API;
+  keeping the original line gives CS0433 wherever application code uses its
+  types. `Microsoft.AspNet.Providers.Core` goes when only
+  `<sessionState customProvider>` names it, and `WebGrease`/`Antlr` go because
+  the Optimization package carries them itself. The
+  `AspNet.ScriptManager.jQuery` and `.bootstrap` packages register names only;
+  re-register them in a `PreApplicationStartCode.cs` in the App project.
 
 The worked table with every decision is in
 [Wingtip Toys, packages.config to PackageReference](../apps/WingtipToys/README.md);
