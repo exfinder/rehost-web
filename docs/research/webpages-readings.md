@@ -1,8 +1,9 @@
 # ASP.NET Web Pages readings
 
-Evidence for the `Rehost.AspNet.WebPages` package. WP1-WP12 were observed on
+Evidence for the `Rehost.AspNet.WebPages` package. WP1-WP13 were observed on
 IIS Express 10.0.26013 on `winbox`, .NET Framework 4.8 with `System.Web`
-4.8.9344, integrated mode, 2026-09-28.
+4.8.9344, integrated mode, 2026-09-28; WP13 on the same site with its
+compilation cache cleared first.
 
 ## Method
 
@@ -52,6 +53,7 @@ headers, left out below.
 | WP10 | `GET /WidgetHost.aspx` | 200; the widget renders inside the Web Forms page with the anonymous-type Model's `Title`. No `X-AspNetWebPages-Version`: only a request Web Pages serves itself carries it |
 | WP11 | `HEAD /hello.cshtml` | 200, `Content-Length: 534`, the same headers as WP1, no body |
 | WP12 | `GET /ps/page` | 200: `start-before`, then the page with `fromstart=yes`, then `start-after` |
+| WP13 | Compilation cache cleared, then `GET /HELLO.CSHTML` as the first request, then `/hello.cshtml`, `/HELLO.CSHTML` and `/ps/PAGE.CSHTML` | The first `/HELLO.CSHTML`: 500, "There is no build provider registered for the extension '.CSHTML'"; the registry of build providers Web Pages adds matches the extension case-sensitively. `/hello.cshtml` then 200, and `/HELLO.CSHTML` 200 once the page has compiled. `/ps/PAGE.CSHTML`, never requested before, answered 200: the folder's other pages compiled together with the lower-case extensions they carry on disk, and the upper-case path found that result |
 
 ## The port, same pages
 

@@ -19,6 +19,7 @@ own licenses; nothing here replaces them.
 | `Rehost.WebForms.Optimization.WebForms` | Apache-2.0 | Same tree |
 | `Rehost.WebForms.Owin.Host.SystemWeb` | Apache-2.0 | Imported Katana tree; project edits offered under Apache-2.0 |
 | `Rehost.AspNet.WebApi.WebHost` | Apache-2.0 | Imported AspNetWebStack tree; project edits offered under Apache-2.0 |
+| `Rehost.AspNet.WebPages` | Apache-2.0 | Imported AspNetWebStack trees; project edits offered under Apache-2.0 |
 
 ## Evidence
 

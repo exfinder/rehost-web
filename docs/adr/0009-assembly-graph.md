@@ -66,5 +66,10 @@ An assembly ported from `aspnet/AspNetWebStack` keeps its upstream name with
 `Rehost.Web.Http.WebHost` in the `Rehost.AspNet.WebApi.WebHost` package.
 Namespaces stay upstream's. The project folder is named after the assembly and
 `<PackageId>` carries the package ID. The two are derived separately because
-upstream's packages and assemblies do not map one to one. The
-`Rehost.WebForms.*` family keeps its names.
+upstream's packages and assemblies do not map one to one:
+`Microsoft.AspNet.WebPages` carries `System.Web.WebPages`, `.Razor` and
+`.Deployment`, which ship as `Rehost.Web.WebPages`, `.Razor` and `.Deployment`
+in `Rehost.AspNet.WebPages`. `.Razor` references `Rehost.Web.WebPages`, so no
+component can carry all three, and a pack-only project bundles them the way
+`Rehost.WebForms` bundles its five. The `Rehost.WebForms.*` family keeps its
+names.

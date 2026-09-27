@@ -58,6 +58,7 @@ at run time because it binds to Microsoft's `System.Web`.
 | `Microsoft.AspNet.ScriptManager.*` | `Rehost.WebForms.ScriptManager.Bundles` |
 | `Microsoft.Owin.Host.SystemWeb` | `Rehost.WebForms.Owin.Host.SystemWeb` |
 | `Microsoft.AspNet.WebApi` and `.WebHost` | `Rehost.AspNet.WebApi.WebHost` (brings `Core` and `Client`) |
+| `Microsoft.AspNet.WebPages` | `Rehost.AspNet.WebPages` (brings `Microsoft.AspNet.Razor`) |
 
 The template already lists the first four, because the Visual Studio template
 adds them to every project. Delete the ones your application does not use.
@@ -68,10 +69,10 @@ Framework build.
 A Rehost package depends on the pure-managed siblings its original depended
 on, so their `packages.config` lines can go: `Microsoft.AspNet.WebApi.Core` and
 `.Client` come with the Web API host, `Microsoft.Owin` and `Owin` with the OWIN
-host, `WebGrease`, `Antlr` and `Newtonsoft.Json` with Optimization. Keeping the
-line is harmless, it only repeats a transitive reference, unless it pins an
-older version than the Rehost package asks for, in which case NuGet takes the
-newer one anyway.
+host, `WebGrease`, `Antlr` and `Newtonsoft.Json` with Optimization, and
+`Microsoft.AspNet.Razor` with Web Pages. Keeping a line is harmless when its
+version is the one the Rehost package asks for or newer. An older one is a
+package downgrade: restore fails with `NU1605`, so drop the line or raise it.
 
 ## 4. Adjust configuration
 

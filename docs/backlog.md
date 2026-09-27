@@ -211,19 +211,12 @@ Carried from earlier milestones as unresolved detail:
 
 ### System.Web companion assemblies and client assets
 
-- ASP.NET Web Pages over the port
-  ([issue 23](https://github.com/exfinder/rehost-webforms/issues/23)):
-  `System.Web.WebPages`, `.Razor` and `.Deployment` recompiled from
-  `aspnet/AspNetWebStack` `v3.3.0` as one `Rehost.AspNet.WebPages` package, with
-  `Microsoft.AspNet.Razor` as shipped, on the Web API host pattern. Known
-  surgical spots: `Deployment/AppDomainHelper.cs` creates a second AppDomain,
-  used only by `GetIncompatibleDependencies`; `CryptoUtil` uses `SHA256Cng`;
-  `HtmlHelper.Input.cs` reaches `System.Data.Linq.Binary`. The
-  `WebPages.Deployment` registry read for the installed version compiles but
-  is unreachable when Web Pages is bin-deployed, and a scratch `.cshtml` run
-  through the port's `BuildManager` passed. `System.Web.Helpers` stays out
-  (`System.Web.DataVisualization`). Driving application: BlogEngine.NET 3.3.8,
-  whose widgets and admin panel are `.cshtml`.
+- ASP.NET MVC over the port brings `Views/web.config`, whose section group
+  and Razor host factory name `System.Web.WebPages.Razor` and `System.Web.Mvc`
+  with version and key. That work needs a general alias for configuration type
+  strings that name an original AspNetWebStack assembly; Web Pages leaves them
+  unremapped and documents the Rehost names to write
+  ([compatibility](compatibility.md)).
 - Complete general `System.Web` embedded-resource delivery beyond the eight
   release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
@@ -270,7 +263,7 @@ Carried from earlier milestones as unresolved detail:
   `rehost_root/` layout, the Web Forms fall-through mode and state bridges
   coexistence needs, and the split layout to revisit on the .NET 11 SDK:
   [migration stages](follow-ups/migration-stages-and-site-layout.md).
-- Verify license metadata and notices against the nine packages in
+- Verify license metadata and notices against the packages in
   `eng/PackageProjects.props`; sample-app redistribution gaps:
   [package license](follow-ups/package-license.md).
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts

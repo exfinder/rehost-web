@@ -27,12 +27,13 @@ are in [Migrating an application](docs/migration.md).
 
 ## Packages
 
-Nine packages, one version: `Rehost.WebForms` (the runtime),
+Ten packages, one version: `Rehost.WebForms` (the runtime),
 `Rehost.WebForms.Hosting` (Kestrel host, site staging, XDT),
 `Rehost.WebForms.FriendlyUrls`, `Rehost.WebForms.Optimization`,
 `Rehost.WebForms.Optimization.WebForms`, `Rehost.WebForms.ScriptManager.Bundles`,
 `Rehost.WebForms.Owin.Host.SystemWeb` (Katana), `Rehost.AspNet.WebApi.WebHost`
-(Web API 2) and `Rehost.WebForms.Templates`.
+(Web API 2), `Rehost.AspNet.WebPages` (ASP.NET Web Pages, `.cshtml`) and
+`Rehost.WebForms.Templates`.
 Packages that were NuGet packages on .NET Framework map one to one; translate
 `packages.config` line by line.
 

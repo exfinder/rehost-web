@@ -15,7 +15,8 @@ Three groups:
   and must use the Rehost counterpart: `Microsoft.AspNet.FriendlyUrls`,
   `Microsoft.AspNet.Web.Optimization` and `.WebForms`,
   `Microsoft.AspNet.ScriptManager.*`, `Microsoft.Owin.Host.SystemWeb`,
-  `Microsoft.AspNet.WebApi.WebHost`. The getting-started table lists the names.
+  `Microsoft.AspNet.WebApi.WebHost`, `Microsoft.AspNet.WebPages`. The
+  getting-started table lists the names.
 - **Pure managed.** Entity Framework 6.3+, the Katana `Microsoft.Owin.*`
   packages, ASP.NET Identity 2.2, the other `Microsoft.AspNet.WebApi.*`
   packages (`Core`, `Client`, `Cors`, `Tracing`, `Owin`), Newtonsoft.Json,
@@ -23,12 +24,6 @@ Three groups:
   the legacy line.
   Packages that ship only a `net45` build restore under `NU1701`, which the
   template silences.
-- **No counterpart yet.** `Microsoft.AspNet.WebPages` (ASP.NET Web Pages,
-  `.cshtml` widgets and admin pages rendered through Razor) binds `System.Web`
-  and has no Rehost package; the App project compiles against the original and
-  fails at run time, and `.cshtml` files have no build provider
-  ([issue 23](https://github.com/exfinder/rehost-webforms/issues/23)).
-  `Microsoft.AspNet.Razor` alone is pure managed.
 - **Dropped.** `Microsoft.AspNet.WebApi`, the meta package: it would pull
   `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host, and
   `Rehost.AspNet.WebApi.WebHost` already brings `Core` and `Client`, so a Web API
@@ -37,7 +32,9 @@ Three groups:
   keeping the original line gives CS0433 wherever application code uses its
   types. `Microsoft.AspNet.Providers.Core` goes when only
   `<sessionState customProvider>` names it, and `WebGrease`/`Antlr` go because
-  the Optimization package carries them itself. The
+  the Optimization package carries them itself. `Microsoft.AspNet.Razor` goes
+  or rises to 3.3.0: `Rehost.AspNet.WebPages` requires 3.3.0, and a 3.2.3 line
+  beside it fails restore with `NU1605`, a package downgrade. The
   `AspNet.ScriptManager.jQuery` and `.bootstrap` packages register names only;
   re-register them in a `PreApplicationStartCode.cs` in the App project.
 
@@ -62,7 +59,15 @@ below them. Typical additions:
   (Elmah, Application Insights, `Microsoft.AspNet.SessionState`), and of the
   `<location>` blocks that only registered them;
 - an explicit `<machineKey>` where the cookie must survive process
-  replacement (see Machine keys below).
+  replacement (see Machine keys below);
+- the Rehost assembly names wherever configuration names a Web Pages assembly:
+  the `system.web.webPages.razor` section group and its sections, a `.cshtml`
+  build provider, or `<compilation><assemblies>`. `System.Web.WebPages`,
+  `System.Web.WebPages.Razor` and `System.Web.WebPages.Deployment` become
+  `Rehost.Web.WebPages`, `Rehost.Web.WebPages.Razor` and
+  `Rehost.Web.WebPages.Deployment`, with no version or public key token. The
+  runtime does not remap the original names, and the assemblies they name do
+  not exist here.
 
 Examples: [Wingtip Toys](../apps/WingtipToys/README.md#webconfig),
 [eShopLegacyWebForms](../apps/eShopLegacyWebForms/README.md),
@@ -104,11 +109,12 @@ runtime. The order of work that has held for six applications:
    A package proven in one application can still fail in the next through a
    path the first never called.
 2. Recompile only proven blockers, verbatim, with a provenance record
-   (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb` and Web API's
-   `Microsoft.AspNet.WebApi.WebHost` are the two the alpha ships, as
-   `Rehost.WebForms.Owin.Host.SystemWeb` and `Rehost.AspNet.WebApi.WebHost`;
-   the AJAX Control Toolkit, Autofac's Web integration and YAF's fourteen
-   projects are rebuilt as source under `apps/`.
+   (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb`, Web API's
+   `Microsoft.AspNet.WebApi.WebHost` and `Microsoft.AspNet.WebPages` are the
+   three the alpha ships, as `Rehost.WebForms.Owin.Host.SystemWeb`,
+   `Rehost.AspNet.WebApi.WebHost` and `Rehost.AspNet.WebPages`; the AJAX
+   Control Toolkit, Autofac's Web integration and YAF's fourteen projects are
+   rebuilt as source under `apps/`.
 3. Expect a Framework facade now and then: Katana's Google provider constructs
    `System.Net.Http.WebRequest.WebRequestHandler`, a type .NET 10 does not
    carry, and a 15-line stand-in assembly closes it
