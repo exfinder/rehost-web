@@ -147,6 +147,9 @@
   </Target>
 
   <Target Name="RehostCopyStagedFiles">
+    <ItemGroup Condition="'$(_RehostStageInvocation)' == 'build'">
+      <_RehostSiteContent Remove="@(_RehostSiteContent)" Condition="$([System.String]::Copy('%(RecursiveDir)').StartsWith('App_Data')) and Exists('$(RehostStageRoot)%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
     <Copy
       SourceFiles="@(_RehostSiteContent)"
       DestinationFiles="@(_RehostSiteContent->'$(RehostStageRoot)%(RecursiveDir)%(Filename)%(Extension)')"

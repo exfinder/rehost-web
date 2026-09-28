@@ -93,7 +93,9 @@ dotnet run --project Shop.Web.Host
 
 The URL comes from `Shop.Web.Host/Properties/launchSettings.json`. To use another
 one, add `-- --urls http://127.0.0.1:5090`. An edit to an `.aspx` file needs a
-rebuild, because the Host serves a copy under `rehost_root/`.
+rebuild, because the Host serves a copy under `rehost_root/`. A build copies an
+`App_Data` file only when `rehost_root/App_Data` lacks it, so data the
+application writes there survives rebuilds. Deleting `rehost_root/` deletes it.
 
 What to expect on the Visual Studio template: `GET /` returns 200 and renders the
 home page; its form posts back to `./`; a `POST /` carrying the rendered
