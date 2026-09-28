@@ -24,4 +24,6 @@
       <AssemblyVersion>$(RehostAssemblyVersion)</AssemblyVersion>
     </PropertyGroup>
   </Target>
+
+  <Target Name="RehostGetPackageId" Returns="$(PackageId)" />
 </Project>

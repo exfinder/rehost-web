@@ -15,6 +15,10 @@
     <RehostLocalPackageFeed>$(RehostLocalPackageRoot)feed/</RehostLocalPackageFeed>
     <RehostLocalPackageCache>$(RehostLocalPackageRoot)packages/</RehostLocalPackageCache>
     <RehostLocalPackageStamp>$(RehostLocalPackageRoot)local-packages.stamp</RehostLocalPackageStamp>
+    <!-- The hook runs inside the caller's restore pass, whose global properties are
+         restore-only optimizations (the CLI disables default item globs and package
+         imports there). Children here are real builds; those globals must not leak. -->
+    <_RehostRestorePassGlobals>EnableDefaultItems;EnableDefaultCompileItems;EnableDefaultEmbeddedResourceItems;EnableDefaultNoneItems;ExcludeRestorePackageImports;MSBuildIsRestoring;MSBuildRestoreSessionId</_RehostRestorePassGlobals>
     <_RehostLocalFeedEnabled>true</_RehostLocalFeedEnabled>
     <_RehostLocalFeedEnabled Condition="'$(RehostSkipLocalFeed)' == 'true' or '$(DesignTimeBuild)' == 'true' or '$(RehostLocalPackageRoot)' == ''">false</_RehostLocalFeedEnabled>
   </PropertyGroup>
@@ -25,24 +29,32 @@
     <RehostLocalBuildSupportProject Include="$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
   </ItemGroup>
 
+  <Target Name="_RehostResolveLocalPackageIds">
+    <MSBuild
+      Projects="@(RehostPackageProject)"
+      Targets="RehostGetPackageId"
+      BuildInParallel="false"
+      Properties="Configuration=Release;PackageVersion=$(RehostWebFormsVersion)"
+      RemoveProperties="$(_RehostRestorePassGlobals)">
+      <Output TaskParameter="TargetOutputs" ItemName="_RehostLocalPackageId" />
+    </MSBuild>
+  </Target>
+
   <Target
     Name="RehostPackLocalFeed"
     BeforeTargets="Restore"
+    DependsOnTargets="_RehostResolveLocalPackageIds"
     Condition="'$(_RehostLocalFeedEnabled)' == 'true'"
     Inputs="@(RehostPackageSource)"
     Outputs="$(RehostLocalPackageStamp)">
     <ItemGroup>
-      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(RehostPackageProject.Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
+      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(_RehostLocalPackageId.Identity)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
     </ItemGroup>
 
     <PropertyGroup>
       <!-- Stamp time is when packing began, not ended: a source edited while the pack ran
            must compare newer than the stamp, or the next build believes it is current. -->
       <_RehostPackStarted>$([System.DateTime]::UtcNow.ToString('o'))</_RehostPackStarted>
-      <!-- The hook runs inside the caller's restore pass, whose global properties are
-           restore-only optimizations (the CLI disables default item globs and package
-           imports there). Children here are real builds; those globals must not leak. -->
-      <_RehostRestorePassGlobals>EnableDefaultItems;EnableDefaultCompileItems;EnableDefaultEmbeddedResourceItems;EnableDefaultNoneItems;ExcludeRestorePackageImports;MSBuildIsRestoring;MSBuildRestoreSessionId</_RehostRestorePassGlobals>
     </PropertyGroup>
 
     <Message Importance="high" Text="Local Rehost packages are stale — repacking into $(RehostLocalPackageFeed)" />
@@ -76,11 +88,12 @@
   <Target
     Name="RehostVerifyLocalFeed"
     AfterTargets="Restore"
+    DependsOnTargets="_RehostResolveLocalPackageIds"
     Condition="'$(_RehostLocalFeedEnabled)' == 'true'">
     <ItemGroup>
-      <_RehostFeedCheck Include="@(RehostPackageProject->'%(Filename)')">
-        <FeedNupkg>$(RehostLocalPackageFeed)%(Filename).$(RehostWebFormsVersion).nupkg</FeedNupkg>
-        <CacheMetadata>$(RehostLocalPackageCache)$([System.String]::Copy('%(Filename)').ToLowerInvariant())/$(RehostWebFormsVersion)/.nupkg.metadata</CacheMetadata>
+      <_RehostFeedCheck Include="@(_RehostLocalPackageId)">
+        <FeedNupkg>$(RehostLocalPackageFeed)%(Identity).$(RehostWebFormsVersion).nupkg</FeedNupkg>
+        <CacheMetadata>$(RehostLocalPackageCache)$([System.String]::Copy('%(Identity)').ToLowerInvariant())/$(RehostWebFormsVersion)/.nupkg.metadata</CacheMetadata>
       </_RehostFeedCheck>
     </ItemGroup>
     <Error
