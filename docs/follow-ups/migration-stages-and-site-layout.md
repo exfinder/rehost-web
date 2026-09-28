@@ -159,7 +159,8 @@ on 2026-09-19. The layout above stays.
   the App; NU1605 stops a downgrade at restore. The SDK ignores the flag for
   transitive project references, so their DLLs land beside the Host unless a
   target re-marks them, and the resolver and its install before `Main` remain.
-- **One graph, one manifest** ([`poc/SplitDependencyGraph`](../../poc/SplitDependencyGraph/README.md)).
+- **One graph, one manifest** ([`poc/SplitDependencyGraph`](https://github.com/exfinder/rehost-webforms/tree/cf1910790beb5aafbf999e964a907172992e5f6e/poc/SplitDependencyGraph),
+  since removed from the tree).
   The .NET 10 host reads an optional `localPath` on each `deps.json` asset, so
   `bin/` files sit on the trusted-assembly list like any other: no resolver, no
   second `deps.json`, one copy of every file. A task sets
