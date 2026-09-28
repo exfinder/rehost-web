@@ -124,7 +124,18 @@
       <!-- One manifest per stage root: a manifest shared between roots makes a publish to one
            folder delete the files an earlier publish staged in another. -->
       <_RehostStageManifest>$(IntermediateOutputPath)rehost-stage-$(_RehostStageInvocation)-$([MSBuild]::StableStringHash('$(RehostStageRoot)')).manifest</_RehostStageManifest>
+      <_RehostWebConfigSources>$(RehostSiteContentRoot)Web.config;$(_RehostWebConfigTransform)</_RehostWebConfigSources>
+      <_RehostWebConfigSources Condition="'$(RehostApplyConfigurationTransform)' == 'true' and Exists('$(_RehostConfigurationTransform)')">$(_RehostWebConfigSources);$(_RehostConfigurationTransform)</_RehostWebConfigSources>
+      <!-- Timestamps alone miss a switch to sources older than the staged web.config. Keyed by
+           stage root only, because every configuration stages into the same root. -->
+      <_RehostWebConfigSourcesFile>$(BaseIntermediateOutputPath)rehost-stage-$([MSBuild]::StableStringHash('$(RehostStageRoot)')).webconfig-sources</_RehostWebConfigSourcesFile>
     </PropertyGroup>
+
+    <WriteLinesToFile
+      File="$(_RehostWebConfigSourcesFile)"
+      Lines="$(_RehostWebConfigSources)"
+      Overwrite="true"
+      WriteOnlyWhenDifferent="true" />
 
     <ItemGroup>
       <_RehostSiteContent
@@ -144,7 +155,7 @@
 
   <Target
     Name="RehostTransformStagedWebConfig"
-    Inputs="$(RehostSiteContentRoot)Web.config;$(_RehostWebConfigTransform);$(_RehostConfigurationTransform)"
+    Inputs="$(_RehostWebConfigSources);$(_RehostWebConfigSourcesFile)"
     Outputs="$(RehostStageRoot)web.config">
     <PropertyGroup>
       <_RehostConfigSource>$(RehostSiteContentRoot)Web.config</_RehostConfigSource>
