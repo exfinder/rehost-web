@@ -146,6 +146,14 @@ internal sealed class ApplicationBootstrapConfiguration
         return map;
     }
 
+    internal System.Configuration.Configuration OpenMappedConfiguration()
+    {
+        return WebConfigurationManager.OpenMappedWebConfiguration(
+            CreateFileMap(),
+            VirtualRootPath,
+            WebConfigurationHost.DefaultSiteID);
+    }
+
     private static string RequireNonWhiteSpace(string value, string parameterName)
     {
         if (String.IsNullOrWhiteSpace(value))

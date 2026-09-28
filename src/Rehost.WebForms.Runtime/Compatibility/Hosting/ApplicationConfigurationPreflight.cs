@@ -2,6 +2,7 @@ namespace Rehost.WebForms.Hosting;
 
 using System;
 using System.Configuration;
+using System.Data.Common;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Web.Configuration;
@@ -25,10 +26,7 @@ internal static class ApplicationConfigurationPreflight
 
         try
         {
-            var mappedConfiguration = WebConfigurationManager.OpenMappedWebConfiguration(
-                configuration.CreateFileMap(),
-                configuration.VirtualRootPath,
-                WebConfigurationHost.DefaultSiteID);
+            var mappedConfiguration = configuration.OpenMappedConfiguration();
             var httpRuntime = RequireSection<HttpRuntimeSection>(
                 mappedConfiguration,
                 "system.web/httpRuntime");
@@ -41,6 +39,9 @@ internal static class ApplicationConfigurationPreflight
             RequireSection<HostingEnvironmentSection>(
                 mappedConfiguration,
                 "system.web/hostingEnvironment");
+            RequireSection<DbProviderFactoriesSection>(
+                mappedConfiguration,
+                DbProviderFactoriesSection.SectionName);
 
             if (httpRuntime.FcnMode != FcnMode.Disabled)
             {

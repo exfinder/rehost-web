@@ -115,11 +115,6 @@ the same way.
 - **LocalDb is out of contract.** It is a Windows-only SQL Server flavour, so
   the connection string is the one application-visible edit a migration must
   make. `|DataDirectory|` itself is fine — the runtime points it at `App_Data`.
-- **A non-SqlClient provider cannot be registered from configuration.** The
-  factory registration above is host code because the runtime does not read
-  `<system.data><DbProviderFactories>`; the same gap reaches declarative markup
-  such as `<asp:SqlDataSource ProviderName="...">`:
-  [provider factory configuration](../../docs/follow-ups/db-provider-factories-config.md).
 - **SQLite is a fixture choice, not a compatibility claim.** It shows EF6 running
   on the port against a real engine without a server; SQL Server deployment
   belongs to Milestone 3.

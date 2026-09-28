@@ -1,6 +1,7 @@
 namespace Rehost.WebForms.Hosting;
 
 using System;
+using System.Data.Common;
 
 internal interface IApplicationBootstrapEnvironment
 {
@@ -23,5 +24,6 @@ internal sealed class ProcessApplicationBootstrapEnvironment : IApplicationBoots
     public void Bind(ApplicationBootstrapConfiguration configuration)
     {
         ApplicationBinding.Bind(configuration, new AppDomainApplicationData());
+        DbProviderFactoriesSection.Register(configuration.OpenMappedConfiguration());
     }
 }

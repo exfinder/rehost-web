@@ -176,11 +176,6 @@ Carried from earlier milestones as unresolved detail:
   [SQL session](follow-ups/session-sql.md).
 - Capture and implement the native state-server client protocol:
   [state server](follow-ups/session-state-server.md).
-- Let configuration name an ADO.NET provider again, which modern
-  `System.Data.Common` dropped along with the `<system.data>` handler; reaches
-  `SqlDataSource`'s `ProviderName`, and today every non-SqlClient provider is
-  host code (`WebFormsIdentityApplication` registers SQLite that way):
-  [provider factories](follow-ups/db-provider-factories-config.md).
 - Machine-key rotation and key-file encryption at rest (persistence and
   environment keys landed, [ADR 0010](adr/0010-machine-key-persistence.md)):
   [machine key](follow-ups/machine-key-and-viewstate-bootstrap.md).
