@@ -47,14 +47,13 @@ the app needs no server and no second connection string per platform:
 Data Source=|DataDirectory|Identity.db;Foreign Keys=True
 ```
 
-Three things the host has to do that SQL Server got for free:
+Three things SQLite needs that SQL Server got for free:
 
-- **Register the ADO.NET factory in code.** `<entityFramework><providers>`
-  supplies provider *services*, but the factory behind them cannot come from
-  configuration: .NET dropped the `<system.data><DbProviderFactories>` registry
-  the Framework read, leaving `DbProviderFactories.RegisterFactory` as the only
-  way in. It registers `SQLiteFactory`, not the EF6 provider factory, because EF
-  reverse-maps the connection's own factory type back to an invariant name.
+- **Name the ADO.NET factory in `<system.data>`.** `<entityFramework><providers>`
+  supplies provider *services*; the factory behind them is a
+  `<DbProviderFactories>` row that `Web.Rehost.config` adds. It names
+  `SQLiteFactory`, not the EF6 provider factory, because EF reverse-maps the
+  connection's own factory type back to an invariant name.
 - **Create the schema itself.** The EF6 SQLite provider generates no DDL, so
   `Database.Create()` throws instead of building the Identity tables.
   `Identity.schema.sql`, generated once from `ApplicationDbContext`'s model with

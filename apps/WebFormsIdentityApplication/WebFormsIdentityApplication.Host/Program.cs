@@ -1,14 +1,9 @@
-using System.Data.Common;
 using System.Data.SQLite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Rehost.WebForms.Hosting;
 
 var physicalRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
-// Provider services come from <entityFramework> in web.config, but the factory behind them
-// cannot: .NET dropped the <system.data> registry the Framework read. SQLiteFactory, not the
-// EF6 provider factory, because EF reverse-maps the connection's own factory type to a name.
-DbProviderFactories.RegisterFactory("System.Data.SQLite.EF6", SQLiteFactory.Instance);
 
 // Raw DDL rather than Entity Framework: reaching EF before the application initializes
 // installs the configuration system, and HostingEnvironment then refuses to start.
