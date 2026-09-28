@@ -333,6 +333,17 @@
    ],
    "reason": "a null message reads Framework's 'Exception of type ... was thrown.' through a Message override where .NET's ExternalException substitutes its own text (fenced !NETFRAMEWORK)",
    "record": "docs/portability-ledger.md P114"
+  },
+  {
+   "files": [
+    "HttpContext.cs",
+    "HttpResponse.cs",
+    "HttpApplication.cs",
+    "UI/Page.cs",
+    "UI/LegacyPageAsyncTask.cs"
+   ],
+   "reason": "Response.End's cancellable branch sets HttpContext.TerminationPending before it throws, standing in for Framework's pending thread abort; ExecuteStep and the async handler completion end the step as the termination when any exception escapes it while the mark is set, and they, Page's stop-the-unwind branch and LegacyPageAsyncTask's cancel catch clear it (fenced !NETFRAMEWORK)",
+   "record": "docs/portability-ledger.md P52"
   }
  ]
 }

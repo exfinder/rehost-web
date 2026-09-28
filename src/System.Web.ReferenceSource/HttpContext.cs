@@ -1833,6 +1833,10 @@ namespace System.Web {
             get { return (Volatile.Read(ref _timeoutState) == 1); }
         }
 
+#if !NETFRAMEWORK
+        internal bool TerminationPending { get; set; }
+#endif
+
         internal bool MustTimeout(DateTime utcNow) {
             // Note: The TimedOutToken is keyed off of the HttpContext creation time, not the most recent async
             // completion time (like the cooperative flag later in this method).

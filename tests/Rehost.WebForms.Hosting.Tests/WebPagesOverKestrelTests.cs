@@ -251,6 +251,22 @@ public sealed class WebPagesOverKestrelTests(WebPagesLiveScenario scenario)
         response.Text.ShouldBe("\n<i>start-before</i>\n<b>page fromstart=yes</b>\n\n<i>start-after</i>\n");
     }
 
+    [Fact]
+    public async Task RedirectEndsThePageWithTheObjectMovedResponse()
+    {
+        var response = await scenario.Client.GetAsync("/redirect.cshtml");
+
+        response.StatusCode.ShouldBe(302, response.Text);
+        response.Header("Location").ShouldBe("/");
+        response.Text.ShouldBe(
+            """
+            <html><head><title>Object moved</title></head><body>
+            <h2>Object moved to <a href="/">here</a>.</h2>
+            </body></html>
+
+            """.ReplaceLineEndings("\r\n"));
+    }
+
     private static string HelloPage(string name, string urlData, string virtualPath) =>
         $"""
         <!DOCTYPE html>

@@ -41,6 +41,7 @@ public sealed class ProbePathConformanceTests
         ["DynamicValidationProbe"] = ProbePaths.DynamicValidation,
         ["ShutdownReasonProbe"] = ProbePaths.ShutdownReason,
         ["InfrastructureUnloadProbe"] = ProbePaths.InfrastructureUnload,
+        ["ResponseEndCatchProbe"] = ProbePaths.ResponseEndCatch,
     };
 
     // The handler-walk markers report which row of the merged list won, so the path they sit at

@@ -3275,6 +3275,9 @@ namespace System.Web {
                     }
                 }
 
+#if !NETFRAMEWORK
+                _context.TerminationPending = true;
+#endif
                 AbortCurrentThread();
             }
             else {

@@ -1,4 +1,5 @@
 using Shouldly;
+using Rehost.WebForms.ScenarioProtocol;
 using Rehost.WebForms.TestSupport;
 using Xunit;
 
@@ -75,6 +76,62 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
         stages.ShouldNotContain("after-redirect");
         stages.ShouldContain("EndRequest");
         stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task A_Handler_Error_Without_End_Reaches_Application_Error()
+    {
+        var (response, stages) =
+            await scenario.TracedGetAsync(this, $"{ProbePaths.ResponseEndCatch}?case=error");
+
+        response.StatusCode.ShouldBe(500);
+        stages.ShouldContain("ApplicationError:InvalidOperationException:real;status=200");
+        stages.ShouldContain("EndRequest");
+    }
+
+    [Fact]
+    public async Task An_Exception_Wrapping_End_Terminates_The_Request()
+    {
+        var (response, stages) =
+            await scenario.TracedGetAsync(this, $"{ProbePaths.ResponseEndCatch}?case=wrap");
+
+        response.StatusCode.ShouldBe(200, response.Text);
+        response.Text.ShouldBe("before|");
+        stages.ShouldContain("PreRequestHandlerExecute");
+        stages.ShouldContain("EndRequest");
+        stages.ShouldContain("LastError-null");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
+        SkippedStages.ShouldAllBe(s => !stages.Contains(s));
+    }
+
+    [Fact]
+    public async Task An_Unrelated_Exception_From_A_Catch_Around_End_Terminates_The_Request()
+    {
+        var (response, stages) =
+            await scenario.TracedGetAsync(this, $"{ProbePaths.ResponseEndCatch}?case=rethrow");
+
+        response.StatusCode.ShouldBe(200, response.Text);
+        response.Text.ShouldBe("before|");
+        stages.ShouldContain("PreRequestHandlerExecute");
+        stages.ShouldContain("EndRequest");
+        stages.ShouldContain("LastError-null");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
+        SkippedStages.ShouldAllBe(s => !stages.Contains(s));
+    }
+
+    [Fact]
+    public async Task A_Handler_Swallowing_End_Keeps_Its_Output_Sealed()
+    {
+        var (response, stages) =
+            await scenario.TracedGetAsync(this, $"{ProbePaths.ResponseEndCatch}?case=swallow");
+
+        response.StatusCode.ShouldBe(200, response.Text);
+        response.Text.ShouldBe("before|");
+        stages.ShouldContain("PreRequestHandlerExecute");
+        stages.ShouldContain("EndRequest");
+        stages.ShouldContain("LastError-null");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
+        SkippedStages.ShouldAllBe(s => !stages.Contains(s));
     }
 
     [Fact]

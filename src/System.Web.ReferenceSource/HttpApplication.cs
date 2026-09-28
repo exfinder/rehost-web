@@ -2387,6 +2387,12 @@ namespace System.Web {
                     if (ImpersonationContext.CurrentThreadTokenExists) {
                         e.Data[System.Web.Management.WebThreadInformation.IsImpersonatingKey] = String.Empty;
                     }
+#if !NETFRAMEWORK
+                    if (_context.TerminationPending) {
+                        error = null;
+                        _stepManager.CompleteRequest();
+                    }
+#endif
                 }
 #pragma warning disable 1058
                 catch {
@@ -2411,6 +2417,9 @@ namespace System.Web {
                 }
             }
 
+#if !NETFRAMEWORK
+            _context.TerminationPending = false;
+#endif
             completedSynchronously = true;
             return error;
         }
@@ -3651,10 +3660,18 @@ namespace System.Web {
                         // Response.End happened during async operation
                         _application.CompleteRequest();
                     }
+#if !NETFRAMEWORK
+                    else if (context.TerminationPending) {
+                        _application.CompleteRequest();
+                    }
+#endif
                     else {
                         error = e;
                     }
                 }
+#if !NETFRAMEWORK
+                context.TerminationPending = false;
+#endif
 
                 bool shouldCallResumeSteps = _asyncStepCompletionInfo.RegisterAsyncCompletion(error);
                 if (!shouldCallResumeSteps) {

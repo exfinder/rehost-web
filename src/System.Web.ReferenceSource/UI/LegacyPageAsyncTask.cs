@@ -210,6 +210,10 @@ internal sealed class LegacyPageAsyncTask {
                // Clear the error for Response.End
                _error = null;
            }
+
+#if !NETFRAMEWORK
+           app.Context.TerminationPending = false;
+#endif
         }
         catch (Exception e) {
             _error = e;

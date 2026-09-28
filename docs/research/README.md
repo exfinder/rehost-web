@@ -17,6 +17,7 @@ support or priority. Use [compatibility](../compatibility.md) and
 - [IIS request filtering limits](iis-request-limits-readings.md)
 - [IIS httpErrors](iis-http-errors-readings.md)
 - [IIS staticContent/clientCache](iis-client-cache-readings.md)
+- [Response.End termination](response-end-readings.md)
 
 ## Portability audits
 

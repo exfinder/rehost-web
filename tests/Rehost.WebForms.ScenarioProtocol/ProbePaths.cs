@@ -36,4 +36,5 @@ public static class ProbePaths
     public const string DynamicValidation = "/dynamic-validation";
     public const string ShutdownReason = "/shutdown-reason";
     public const string InfrastructureUnload = "/infrastructure-unload";
+    public const string ResponseEndCatch = "/end-catch";
 }

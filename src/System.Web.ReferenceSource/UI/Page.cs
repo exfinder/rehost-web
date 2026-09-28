@@ -4892,6 +4892,9 @@ window.onload = WebForm_RestoreScrollPosition;
                 _context.ApplicationInstance != null &&                             // application must be non-null so we can complete the request
                 !cancelException.Timeout) {                                         // this is Response.End
                 _context.ApplicationInstance.CompleteRequest();
+#if !NETFRAMEWORK
+                _context.TerminationPending = false;
+#endif
             }
             else {
                 CheckRemainingAsyncTasks(true);
@@ -5211,6 +5214,9 @@ window.onload = WebForm_RestoreScrollPosition;
                 _context.ApplicationInstance != null &&                             // application must be non-null so we can complete the request
                 !cancelException.Timeout) {                                         // this is Response.End
                 _context.ApplicationInstance.CompleteRequest();
+#if !NETFRAMEWORK
+                _context.TerminationPending = false;
+#endif
             }
             else {
                 CheckRemainingAsyncTasks(true);
