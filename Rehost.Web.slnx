@@ -13,6 +13,7 @@
     <Project Path="src/Rehost.AspNet.WebPages/Rehost.AspNet.WebPages.csproj" />
     <Project Path="src/Rehost.Owin.Host.SystemWeb/Rehost.Owin.Host.SystemWeb.csproj" />
     <Project Path="src/Rehost.ScriptManager.MSAjax/Rehost.ScriptManager.MSAjax.csproj" />
+    <Project Path="src/Rehost.ScriptManager.WebForms/Rehost.ScriptManager.WebForms.csproj" />
     <Project Path="src/Rehost.Web.ApplicationServices/Rehost.Web.ApplicationServices.csproj" />
     <Project Path="src/Rehost.Web.AspNetCore/Rehost.Web.AspNetCore.csproj" />
     <Project Path="src/Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" />

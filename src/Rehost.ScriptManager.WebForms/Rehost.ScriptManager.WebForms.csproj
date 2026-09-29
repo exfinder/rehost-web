@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Rehost.ScriptManager.MSAjax</RootNamespace>
-    <PackageId>Rehost.AspNet.ScriptManager.MSAjax</PackageId>
-    <Description>ScriptManager mappings for MsAjaxBundle and the MicrosoftAjax scripts on Rehost.Web, replacing Microsoft.AspNet.ScriptManager.MSAjax.</Description>
+    <RootNamespace>Rehost.ScriptManager.WebForms</RootNamespace>
+    <PackageId>Rehost.AspNet.ScriptManager.WebForms</PackageId>
+    <Description>ScriptManager mapping for WebFormsBundle on Rehost.Web, replacing Microsoft.AspNet.ScriptManager.WebForms.</Description>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

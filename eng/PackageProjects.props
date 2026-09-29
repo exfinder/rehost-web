@@ -10,6 +10,7 @@
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.AspNet.WebPages/Rehost.AspNet.WebPages.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Owin.Host.SystemWeb/Rehost.Owin.Host.SystemWeb.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.ScriptManager.MSAjax/Rehost.ScriptManager.MSAjax.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.ScriptManager.WebForms/Rehost.ScriptManager.WebForms.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.AspNetCore/Rehost.Web.AspNetCore.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Optimization/Rehost.Web.Optimization.csproj" />

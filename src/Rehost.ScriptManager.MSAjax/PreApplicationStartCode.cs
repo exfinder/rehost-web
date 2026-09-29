@@ -18,11 +18,6 @@ public static class PreApplicationStartCode
             "~/bundles/MsAjaxJs",
             "http://ajax.aspnetcdn.com/ajax/4.5.1/1/MsAjaxBundle.js",
             "window.Sys");
-        AddDefinition(
-            "WebFormsBundle",
-            "~/bundles/WebFormsJs",
-            "http://ajax.aspnetcdn.com/ajax/4.5.1/1/WebFormsBundle.js",
-            "window.WebForm_PostBackOptions");
         AddMsAjaxDefinition("MicrosoftAjax.js", "window.Sys && Sys._Application && Sys.Observer");
         AddMsAjaxDefinition("MicrosoftAjaxCore.js", "window.Type && Sys.Observer");
         AddMsAjaxDefinition("MicrosoftAjaxGlobalization.js", "window.Sys && Sys.CultureInfo");

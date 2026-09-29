@@ -5,6 +5,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/Rehost.ScriptManager.MSAjax/Rehost.ScriptManager.MSAjax.csproj" />
+    <ProjectReference Include="../../src/Rehost.ScriptManager.WebForms/Rehost.ScriptManager.WebForms.csproj" />
     <ProjectReference Include="../../src/Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" />
     <ProjectReference Include="../../src/Rehost.Web/Rehost.Web.csproj" />
   </ItemGroup>

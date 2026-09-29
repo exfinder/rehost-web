@@ -18,6 +18,7 @@ public sealed class PackageContractTests
     [
         "Rehost.AspNet.FriendlyUrls",
         "Rehost.AspNet.ScriptManager.MSAjax",
+        "Rehost.AspNet.ScriptManager.WebForms",
         "Rehost.AspNet.Web.Optimization",
         "Rehost.AspNet.Web.Optimization.WebForms",
         "Rehost.AspNet.WebApi.WebHost",
@@ -49,6 +50,7 @@ public sealed class PackageContractTests
     private static readonly Dictionary<string, string[]> SatelliteAssemblies = new()
     {
         ["Rehost.AspNet.ScriptManager.MSAjax"] = ["Rehost.ScriptManager.MSAjax"],
+        ["Rehost.AspNet.ScriptManager.WebForms"] = ["Rehost.ScriptManager.WebForms"],
         ["Rehost.AspNet.Web.Optimization"] = ["Rehost.Web.Optimization"],
         ["Rehost.AspNet.WebApi.WebHost"] = ["Rehost.Web.Http.WebHost"],
         [WebPages] = ["Rehost.Web.WebPages", "Rehost.Web.WebPages.Deployment", "Rehost.Web.WebPages.Razor"],
@@ -65,7 +67,7 @@ public sealed class PackageContractTests
         PackageFeed.Packages.Where(p => p.Id != Bundle && p.Id != Templates);
 
     [Fact]
-    public void FeedHoldsTheTenPublicPackagesAtOneVersion()
+    public void FeedHoldsTheElevenPublicPackagesAtOneVersion()
     {
         PackageFeed.Packages.Select(p => p.Id).ShouldBe(PublicPackages.Order(StringComparer.Ordinal));
         PackageFeed.Packages.Select(p => p.Version).Distinct().ShouldHaveSingleItem();
@@ -103,6 +105,7 @@ public sealed class PackageContractTests
                 "Rehost.AspNet.Web.Optimization.WebForms.dll",
                 "Rehost.Owin.Host.SystemWeb.dll",
                 "Rehost.ScriptManager.MSAjax.dll",
+                "Rehost.ScriptManager.WebForms.dll",
                 "Rehost.Web.ApplicationServices.dll",
                 "Rehost.Web.AspNetCore.dll",
                 "Rehost.Web.Extensions.dll",

@@ -38,7 +38,7 @@ jobs:
           cd candidate
           sha256sum -c SHA256SUMS
           version="${{ inputs.tag }}"; version="${version#v}"
-          ls Rehost.*."$version".nupkg | wc -l | grep -qx 10 || { echo "expected ten packages at $version"; ls; exit 1; }
+          ls Rehost.*."$version".nupkg | wc -l | grep -qx 11 || { echo "expected eleven packages at $version"; ls; exit 1; }
           grep -q "^# $version" ../docs/releases/"$version".md || { echo "docs/releases/$version.md does not start with # $version"; exit 1; }
       - name: Stop before publishing (dry run)
         if: inputs.dry_run

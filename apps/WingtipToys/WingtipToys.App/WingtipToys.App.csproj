@@ -17,6 +17,7 @@
     <PackageReference Include="Rehost.AspNet.Web.Optimization.WebForms" Version="$(RehostVersion)" />
     <PackageReference Include="Rehost.Owin.Host.SystemWeb" Version="$(RehostVersion)" />
     <PackageReference Include="Rehost.AspNet.ScriptManager.MSAjax" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.ScriptManager.WebForms" Version="$(RehostVersion)" />
   </ItemGroup>
 
   <ItemGroup>

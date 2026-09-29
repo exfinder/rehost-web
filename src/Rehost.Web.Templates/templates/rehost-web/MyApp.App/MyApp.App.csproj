@@ -16,5 +16,6 @@
     <PackageReference Include="Rehost.AspNet.Web.Optimization" Version="REHOST_VERSION" />
     <PackageReference Include="Rehost.AspNet.Web.Optimization.WebForms" Version="REHOST_VERSION" />
     <PackageReference Include="Rehost.AspNet.ScriptManager.MSAjax" Version="REHOST_VERSION" />
+    <PackageReference Include="Rehost.AspNet.ScriptManager.WebForms" Version="REHOST_VERSION" />
   </ItemGroup>
 </Project>
