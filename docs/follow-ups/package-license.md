@@ -11,13 +11,13 @@ own licenses; nothing here replaces them.
 
 | Package | Expression | Why |
 | --- | --- | --- |
-| `Rehost.WebForms` (Runtime, ApplicationServices, Extensions, WebServices) | MIT | Reference Source, dotnet/winforms and dotnet/msbuild imports are MIT; project code is MIT |
-| `Rehost.WebForms.Hosting` | MIT | Project code; bundled `Microsoft.Web.XmlTransform.dll` 3.2.11 is MIT per its nuspec |
-| `Rehost.WebForms.FriendlyUrls` | MIT | Project code |
-| `Rehost.WebForms.ScriptManager.Bundles` | MIT | Project code |
-| `Rehost.WebForms.Optimization` | Apache-2.0 | Imported AspNetWebOptimization tree; project edits offered under Apache-2.0 |
-| `Rehost.WebForms.Optimization.WebForms` | Apache-2.0 | Same tree |
-| `Rehost.WebForms.Owin.Host.SystemWeb` | Apache-2.0 | Imported Katana tree; project edits offered under Apache-2.0 |
+| `Rehost.Web` (runtime, ApplicationServices, Extensions, Services) | MIT | Reference Source, dotnet/winforms and dotnet/msbuild imports are MIT; project code is MIT |
+| `Rehost.Web.AspNetCore` | MIT | Project code; bundled `Microsoft.Web.XmlTransform.dll` 3.2.11 is MIT per its nuspec |
+| `Rehost.AspNet.FriendlyUrls` | MIT | Project code |
+| `Rehost.AspNet.ScriptManager.MSAjax` | MIT | Project code |
+| `Rehost.AspNet.Web.Optimization` | Apache-2.0 | Imported AspNetWebOptimization tree; project edits offered under Apache-2.0 |
+| `Rehost.AspNet.Web.Optimization.WebForms` | Apache-2.0 | Same tree |
+| `Rehost.Owin.Host.SystemWeb` | Apache-2.0 | Imported Katana tree; project edits offered under Apache-2.0 |
 | `Rehost.AspNet.WebApi.WebHost` | Apache-2.0 | Imported AspNetWebStack tree; project edits offered under Apache-2.0 |
 | `Rehost.AspNet.WebPages` | Apache-2.0 | Imported AspNetWebStack trees; project edits offered under Apache-2.0 |
 
@@ -26,7 +26,7 @@ own licenses; nothing here replaces them.
 | Component | Primary source read | Local copy |
 | --- | --- | --- |
 | Reference Source `ec9fa9ae` | upstream `LICENSE.txt` at that revision: MIT | `third_party/microsoft/referencesource/LICENSE.txt` |
-| dotnet/winforms `195f89af` | `LICENSE.TXT` snapshot: MIT, .NET Foundation | `src/Rehost.WebForms.Runtime/Compatibility/Resources/WinForms195f89a/` |
+| dotnet/winforms `195f89af` | `LICENSE.TXT` snapshot: MIT, .NET Foundation | `src/Rehost.Web/Compatibility/Resources/WinForms195f89a/` |
 | dotnet/msbuild `39950c62` | file header: MIT | `StronglyTypedResourceBuilder.cs` header only |
 | AspNetWebOptimization `65e3911f` | upstream has no license file; 51 of 52 `.cs` headers say Apache-2.0 | `third_party/aspnet/AspNetWebOptimization/LICENSE.txt` (standard text) |
 | AspNetKatana `v4.2.3` | upstream `LICENSE.txt` at that revision: Apache-2.0; no `NOTICE` file, so §4(d) adds nothing | `third_party/aspnet/AspNetKatana/LICENSE.txt` |

@@ -2,7 +2,7 @@
   <!-- The baseline root configuration names these in <compilation><assemblies>;
        activation hard-loads them, so every application-activating project deploys them. -->
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../src/Rehost.WebForms.Extensions/Rehost.WebForms.Extensions.csproj" />
-    <ProjectReference Include="$(MSBuildThisFileDirectory)../src/Rehost.WebForms.WebServices/Rehost.WebForms.WebServices.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../src/Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)../src/Rehost.Web.Services/Rehost.Web.Services.csproj" />
   </ItemGroup>
 </Project>

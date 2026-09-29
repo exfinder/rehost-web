@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Microsoft.AspNet.FriendlyUrls</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

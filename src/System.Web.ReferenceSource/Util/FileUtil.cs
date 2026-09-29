@@ -78,7 +78,7 @@ internal class FileUtil {
             exists = File.Exists(filename);
         }
         catch (Exception swallowedException) {
-            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                 $"{nameof(FileUtil)}.{nameof(FileExists)}", swallowedException, "File.Exists");
         }
 
@@ -333,7 +333,7 @@ internal class FileUtil {
             exists = Directory.Exists(dirname);
         }
         catch (Exception swallowedException) {
-            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                 $"{nameof(FileUtil)}.{nameof(DirectoryExists)}", swallowedException, "Directory.Exists");
         }
 
@@ -350,7 +350,7 @@ internal class FileUtil {
             accessible = (new DirectoryInfo(dirname)).Exists;
         }
         catch (Exception swallowedException) {
-            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                 $"{nameof(FileUtil)}.{nameof(DirectoryAccessible)}", swallowedException, "new DirectoryInfo");
         }
 

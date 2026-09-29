@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net481;net10.0</TargetFrameworks>
+    <AssemblyName>Rehost.Web.Parity.Harness</AssemblyName>
+    <RootNamespace>Rehost.Web.Parity.Harness</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Parity.Contracts/Rehost.Web.Parity.Contracts.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <ProjectReference Include="../../../Rehost.Web.TestSupport/Rehost.Web.TestSupport.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+    <PackageReference Include="System.Text.Json" />
+  </ItemGroup>
+</Project>

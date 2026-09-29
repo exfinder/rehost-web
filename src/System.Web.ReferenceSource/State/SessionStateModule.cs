@@ -1513,7 +1513,7 @@ namespace System.Web.SessionState {
                     OnReleaseState(context.ApplicationInstance, null);
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(SessionStateModule)}.{nameof(ReleaseSessionState)}", swallowedException, "OnReleaseState");
                 }
             }

@@ -2,7 +2,7 @@
   <!-- Single source for the apps' shared local-feed location, used by the project-level
        and solution-level restore hooks. -->
   <PropertyGroup>
-    <RehostWebFormsVersion>1.0.0-local</RehostWebFormsVersion>
+    <RehostVersion>1.0.0-local</RehostVersion>
     <RehostLocalPackageRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..', 'artifacts', 'apps'))</RehostLocalPackageRoot>
     <RestoreAdditionalProjectSources>$(RehostLocalPackageRoot)feed</RestoreAdditionalProjectSources>
     <RestorePackagesPath>$(RehostLocalPackageRoot)packages</RestorePackagesPath>

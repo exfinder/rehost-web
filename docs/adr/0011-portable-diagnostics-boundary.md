@@ -10,10 +10,10 @@ log pipeline. Evidence and the options survey live in
 [the research note](../research/portable-request-diagnostics-alternatives.md).
 
 The decision: diagnostics leave the runtime through one choke point,
-`WebFormsRuntimeEventSource`, which publishes every event on two channels —
+`RehostWebEventSource`, which publishes every event on two channels —
 the `EventSource` itself (string payloads, reachable out-of-process via
 EventPipe with no host attached) and `Microsoft.Extensions.Logging.ILogger`
-(live `Exception` objects, category `Rehost.WebForms.Runtime`, delivered into
+(live `Exception` objects, category `Rehost.Web`, delivered into
 the host's pipeline). Neither channel replaces the other: `EventSource` is the
 only one that works with no host and during broken bootstrap; `ILogger` is the
 only one operators and exception-telemetry sinks actually consume. This is the
@@ -29,7 +29,7 @@ forward, because rendering the string payload runs a caller-supplied
 `ToString()` and a provider can throw during or after shutdown. A guarded
 failure loses the report, never the request.
 
-Everything logs under one category, `Rehost.WebForms.Runtime`, which is also
+Everything logs under one category, `Rehost.Web`, which is also
 the `EventSource` name, so a single `Logging:LogLevel` entry filters the whole
 runtime. A payload reshape carries an `[Event]` `Version` bump; event 2 became
 `(site, swallowed, context)` at version 2.
@@ -51,10 +51,10 @@ source generation, and ecosystem familiarity, while every supported host
 already carries the abstractions via `Microsoft.AspNetCore.App`.
 
 The host hands over an `ILoggerFactory` as an explicit option on the existing
-`WebFormsApplication.Initialize` intake, default `NullLoggerFactory`. An
-ASP.NET Core adapter has no factory at that point — `AddRehostWebForms` runs
+`RehostWebApplication.Initialize` intake, default `NullLoggerFactory`. An
+ASP.NET Core adapter has no factory at that point — `AddRehostWeb` runs
 before `builder.Build()` — so it attaches the built host's factory in
-`UseRehostWebForms`, after the container exists and before Kestrel accepts.
+`UseRehostWeb`, after the container exists and before Kestrel accepts.
 Events raised in that bootstrap window reach only the `EventSource`; they are
 not replayed, because a fatal startup error already reaches the console
 through the crash path and the one non-fatal window event (the machine-key

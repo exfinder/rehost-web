@@ -215,7 +215,7 @@ namespace System.Web.UI.WebControls {
 
         protected override DbProviderFactory GetDbProviderFactory() {
             throw new PlatformNotSupportedException(
-                "AccessDataSource requires Windows OLE DB and is not supported by Rehost.WebForms. " +
+                "AccessDataSource requires Windows OLE DB and is not supported by Rehost.Web. " +
                 "Migrate to SqlDataSource with a portable provider.");
         }
 

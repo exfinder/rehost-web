@@ -52,7 +52,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 - [Code style](code-style.md)
 - [Code comments](code-comments.md)
 - [Writing tests](writing-tests.md)
-- [Scenario fixture tenancy](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md)
+- [Scenario fixture tenancy](../tests/Rehost.Web.ScenarioHost/fixtures/README.md)
 - [Parity rigs](../tests/parity/README.md)
 - [Cross-platform validation](cross-platform-validation.md)
 - [Windows validation](windows-validation-host.md)

@@ -402,7 +402,7 @@ namespace System.Web.Management {
         static internal void RaiseRuntimeError(Exception e, object source) {
             Debug.Trace("WebEventRaiseError", "Error Event is raised; type=" + e.GetType().Name);
 
-            WebFormsRuntimeEventSource.Log.RuntimeError(e, source);
+            RehostWebEventSource.Log.RuntimeError(e, source);
 
             if (!HealthMonitoringManager.Enabled) {
                 return;
@@ -432,7 +432,7 @@ namespace System.Web.Management {
                 WebBaseEvent.RaiseSystemEvent(source, eventCode, eventDetailsCode, eStack);
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(WebBaseEvent)}.{nameof(RaiseRuntimeError)}", swallowedException, "e.GetType");
             }
         }
@@ -2433,7 +2433,7 @@ namespace System.Web.Management {
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HealthMonitoringManager)}.{nameof(Dispose)}", swallowedException, "s_heartbeatTimer.Dispose");
             }
         }

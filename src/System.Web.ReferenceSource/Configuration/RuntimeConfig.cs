@@ -183,7 +183,7 @@ namespace System.Web.Configuration {
                 success = true;
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(RuntimeConfig)}.{nameof(GetLKGConfig)}", swallowedException, "GetConfig");
             }
 
@@ -212,7 +212,7 @@ namespace System.Web.Configuration {
                 success = true;
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(RuntimeConfig)}.{nameof(GetAppLKGConfig)}", swallowedException, "GetAppConfig");
             }
 
@@ -728,7 +728,7 @@ namespace System.Web.Configuration {
                 return GetRootWebConfig();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(RuntimeConfig)}.{nameof(GetLKGRuntimeConfig)}", swallowedException, "GetRootWebConfig");
             }
 
@@ -736,7 +736,7 @@ namespace System.Web.Configuration {
                 return GetMachineConfig();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(RuntimeConfig)}.{nameof(GetLKGRuntimeConfig)}#2", swallowedException, "GetMachineConfig");
             }
 

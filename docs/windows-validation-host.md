@@ -5,7 +5,7 @@ tools, and credentials before relying on them; none is a support claim.
 
 Windows x64 validation runs on `winbox` (an ssh alias for `sshuser@<host>`, defined
 in `~/.ssh/config` with ControlMaster/ControlPersist so connections are reused),
-in a dedicated persistent clone at `~\source\repos\rehost-webforms`.
+in a dedicated persistent clone at `~\source\repos\rehost-web`.
 The clone may be reset freely. `winbox` is LAN-only; see the EC2 alternative
 below when it is unreachable.
 
@@ -51,7 +51,7 @@ each round instead, and delete it on the remote at the end of the same ssh call:
 ```bash
 git add -A                       # separate call — do not combine with the push
 REF=$(git commit-tree $(git write-tree) -p HEAD -m wip)
-git push "winbox:source/repos/rehost-webforms" \
+git push "winbox:source/repos/rehost-web" \
   "${REF}:refs/heads/wip/win-<topic>"     # quote it: zsh eats $REF:refs as a :r modifier
 # remote, one call: git checkout -f -B wintest wip/win-<topic>; git clean -fd;
 #                   build; test; git branch -D wip/win-<topic>
@@ -92,7 +92,7 @@ before investigating the code.
 
 ## Auth and shell
 
-`origin` is `git@github.com:exfinder/rehost-webforms.git` over SSH keys and
+`origin` is `git@github.com:exfinder/rehost-web.git` over SSH keys and
 works non-interactively. HTTPS does not — the `wincredman` credential store
 needs an interactive desktop session.
 
@@ -112,7 +112,7 @@ PowerShell Core directly and needs no wrapper shell.
 End every one-shot `ssh` command with `; exit $LASTEXITCODE`:
 
 ```bash
-ssh winbox 'dotnet test Rehost.WebForms.slnx --no-build; exit $LASTEXITCODE'
+ssh winbox 'dotnet test Rehost.Web.slnx --no-build; exit $LASTEXITCODE'
 ```
 
 The `pwsh` that sshd invokes reports its own success or failure, not the wrapped

@@ -17,8 +17,8 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.302'
-      - run: dotnet build Rehost.WebForms.slnx -v q
-      - run: dotnet test Rehost.WebForms.slnx --no-build
+      - run: dotnet build Rehost.Web.slnx -v q
+      - run: dotnet test Rehost.Web.slnx --no-build
 
   consumer:
     runs-on: ubuntu-26.04
@@ -29,7 +29,7 @@ jobs:
           dotnet-version: '10.0.302'
       - name: Pack the candidate
         run: |
-          dotnet restore Rehost.WebForms.slnx
+          dotnet restore Rehost.Web.slnx
           for project in $(grep -o 'src/[^"]*\.csproj' eng/PackageProjects.props); do
             dotnet pack "$project" -c Release -o candidate -v q
           done
@@ -38,7 +38,7 @@ jobs:
       - name: Candidate version
         id: version
         run: |
-          echo "version=$(ls candidate/Rehost.WebForms.Hosting.*.nupkg | sed 's/.*Hosting\.//; s/\.nupkg$//')" >> "$GITHUB_OUTPUT"
+          echo "version=$(ls candidate/Rehost.Web.AspNetCore.*.nupkg | sed 's/.*AspNetCore\.//; s/\.nupkg$//')" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v7
         with:
           name: candidate
@@ -75,8 +75,8 @@ jobs:
           path: candidate
       - name: Build the applications from the candidate
         run: |
-          version=$(ls candidate/Rehost.WebForms.Hosting.*.nupkg | sed 's/.*Hosting\.//; s/\.nupkg$//')
-          echo "CANDIDATE_PROPS=-p:RehostSkipLocalFeed=true -p:RehostWebFormsVersion=$version -p:RestoreAdditionalProjectSources=$PWD/candidate" >> "$GITHUB_ENV"
+          version=$(ls candidate/Rehost.Web.AspNetCore.*.nupkg | sed 's/.*AspNetCore\.//; s/\.nupkg$//')
+          echo "CANDIDATE_PROPS=-p:RehostSkipLocalFeed=true -p:RehostVersion=$version -p:RestoreAdditionalProjectSources=$PWD/candidate" >> "$GITHUB_ENV"
       - name: WebFormsApplication journey
         run: |
           dotnet build apps/WebFormsApplication/WebFormsApplication.slnx -v q $CANDIDATE_PROPS

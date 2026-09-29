@@ -594,7 +594,7 @@ namespace System.Web.Hosting {
                             siteId = Int32.Parse(appHost.GetSiteID(), CultureInfo.InvariantCulture);
                         }
                         catch (Exception swallowedException) {
-                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                 $"{nameof(ApplicationManager)}.{nameof(GetAppDomainInfos)}", swallowedException, "Int32.Parse");
                         }
                     }
@@ -1352,8 +1352,8 @@ setup,
 
             // Framework's own map points at the CLR's machine.config location; the host supplies
             // that path explicitly here.
-            Rehost.WebForms.Hosting.ApplicationBootstrapConfiguration bootstrap =
-                Rehost.WebForms.Hosting.WebFormsApplication.RequireInitialized();
+            Rehost.Web.Hosting.ApplicationBootstrapConfiguration bootstrap =
+                Rehost.Web.Hosting.RehostWebApplication.RequireInitialized();
             Configuration appConfig = WebConfigurationManager.OpenMappedWebConfiguration(
                 bootstrap.CreateFileMap(),
                 bootstrap.VirtualRootPath);
@@ -1371,7 +1371,7 @@ setup,
                 || !String.Equals(targetFrameworkName.Identifier, ".NETFramework", StringComparison.Ordinal)
                 || targetFrameworkName.Version < VersionUtil.Framework45) {
                 throw new ConfigurationErrorsException(
-                    "Rehost.WebForms requires <httpRuntime targetFramework=\"4.5\" /> or later. This application declares "
+                    "Rehost.Web requires <httpRuntime targetFramework=\"4.5\" /> or later. This application declares "
                     + (targetFrameworkName == null ? "no target framework" : targetFrameworkName.ToString()) + ".");
             }
 

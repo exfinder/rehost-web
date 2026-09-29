@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
     <PackageReference Include="Autofac" Version="4.9.1" />
   </ItemGroup>
 </Project>

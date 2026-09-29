@@ -8,16 +8,16 @@ updates [`../ROADMAP.md`](../ROADMAP.md) when milestone scope changes.
 
 ### Public alpha release
 
-The [Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
+The [Public alpha milestone](https://github.com/exfinder/rehost-web/milestone/1)
 owns tasks and completion status. The
 [release plan](plans/2026-09-05-2135-public-alpha-release-plan.md) records the
-agreed scope and sequence; [#8](https://github.com/exfinder/rehost-webforms/issues/8)
+agreed scope and sequence; [#8](https://github.com/exfinder/rehost-web/issues/8)
 preserves the decision.
 
 Remaining work: licensing, publication audit, unsupported security settings,
 consumer packages, documentation, release validation, a user trial, and launch.
 Production readiness and further app ports are not alpha requirements.
-The [minimal WAP helper](https://github.com/exfinder/rehost-webforms/issues/21)
+The [minimal WAP helper](https://github.com/exfinder/rehost-web/issues/21)
 is optional; broader migration automation stays under Build system and packaging.
 
 ### Production baseline
@@ -56,8 +56,7 @@ Carried from earlier milestones as unresolved detail:
 
 ### Hosting and request boundary
 
-- IIS URL Rewrite remainder. Inbound rules landed as
-  [2026-09-12-iis-url-rewrite](plans/2026-09-12-iis-url-rewrite.md) planned,
+- IIS URL Rewrite remainder. Inbound rules landed as planned,
   against [readings UR1-UR55](research/iis-url-rewrite-readings.md) and
   recorded as ledger P100. What stays refused at activation, each because IIS
   answered it from state one application cannot carry or the parser drops it in
@@ -215,7 +214,7 @@ Carried from earlier milestones as unresolved detail:
 - Complete general `System.Web` embedded-resource delivery beyond the eight
   release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
-  `Rehost.WebForms.ScriptManager.Bundles`; its first slice registers names only
+  `Rehost.AspNet.ScriptManager.MSAjax`; its first slice registers names only
   and expects application-owned physical files.
 - Remaining Extensions scope after the 2026-08-22 AJAX activation (enabled
   application services, `customErrors`-On async errors, debug/localized
@@ -244,11 +243,11 @@ Carried from earlier milestones as unresolved detail:
   projects (or Host-only for a Web Site), slnx, package mapping, and a
   `Web.Rehost.config` seeded with the known refusals (trust, missing
   `httpRuntime targetFramework`). Three imported apps each did both halves
-  by hand; the checklist step is the spec. The `Rehost.WebForms.Templates`
-  package (`dotnet new rehost-webforms`, [getting started](getting-started.md))
+  by hand; the checklist step is the spec. The `Rehost.Web.Templates`
+  package (`dotnet new rehost-web`, [getting started](getting-started.md))
   writes the WAP pair from a folder name; it does not read the legacy project,
   so the package list, the Web Site shape and the seeded refusals remain here.
-- `Rehost.WebForms.Sdk.App` / `.Host` MSBuild SDK packages for minimal consumer csproj files.
+- `Rehost.Web.Sdk.App` / `.Host` MSBuild SDK packages for minimal consumer csproj files.
   Parked 2026-09-20: about seven lines per csproj once the split layout was dropped:
   [Rehost SDK](follow-ups/rehost-sdk.md).
 - In-place development run via a content sync or a host-provided bin seam,
@@ -265,7 +264,7 @@ Carried from earlier milestones as unresolved detail:
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
 - Fail activation clearly when configuration names an absent companion
   assembly; the alpha ships the five companions inside
-  `Rehost.WebForms`, so the case is a consumer that deploys a partial `bin`.
+  `Rehost.Web`, so the case is a consumer that deploys a partial `bin`.
 - Rewrite each app's `smoke.sh` journey as a C# test project beside its App
   and Host (one method per check, a shared start-and-wait helper), so the
   external-consumer rig and a future CI matrix run journeys through

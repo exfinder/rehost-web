@@ -1,25 +1,25 @@
-Rehost WebForms third-party notices
-===================================
+Rehost.Web third-party notices
+==============================
 
-The Rehost WebForms packages contain source code, resources and one binary
+The Rehost.Web packages contain source code, resources and one binary
 from the projects below. Each keeps its own license, reproduced after the
 table. Modifications to imported files are listed in the repository under
 docs/provenance/.
 
 Component                     Upstream / pinned revision                         License      Ships in
 ----------------------------  -------------------------------------------------  -----------  -----------------------------------------
-Microsoft Reference Source    github.com/microsoft/referencesource               MIT          Rehost.WebForms (Runtime, ApplicationServices,
-  System.Web,                 ec9fa9ae770d522a5b5f0607898044b7478574a3                        Extensions, WebServices assemblies), including
+Microsoft Reference Source    github.com/microsoft/referencesource               MIT          Rehost.Web (runtime, ApplicationServices,
+  System.Web,                 ec9fa9ae770d522a5b5f0607898044b7478574a3                        Extensions, Services assemblies), including
   System.Web.ApplicationServices,                                                             the embedded WebForms/AJAX scripts, images,
   System.Web.Services,                                                                        resources and DefaultWsdlHelpGenerator.aspx
   System.Web.Extensions
-dotnet/winforms ResX code     github.com/dotnet/winforms                         MIT          Rehost.WebForms (Runtime assembly)
+dotnet/winforms ResX code     github.com/dotnet/winforms                         MIT          Rehost.Web (runtime assembly)
                               195f89af79d550c2da1711c45c379efd63519ac1
-dotnet/msbuild                github.com/dotnet/msbuild                          MIT          Rehost.WebForms (Runtime assembly)
+dotnet/msbuild                github.com/dotnet/msbuild                          MIT          Rehost.Web (runtime assembly)
   StronglyTypedResourceBuilder  39950c6284e1fe6e68890e3655ea7704b42e6a32
-ASP.NET Web Optimization      github.com/aspnet/AspNetWebOptimization            Apache-2.0   Rehost.WebForms.Optimization,
-                              65e3911ffed89a5a24e15e593ae74fb0f4cd6cde                        Rehost.WebForms.Optimization.WebForms
-Katana                        github.com/aspnet/AspNetKatana                     Apache-2.0   Rehost.WebForms.Owin.Host.SystemWeb
+ASP.NET Web Optimization      github.com/aspnet/AspNetWebOptimization            Apache-2.0   Rehost.AspNet.Web.Optimization,
+                              65e3911ffed89a5a24e15e593ae74fb0f4cd6cde                        Rehost.AspNet.Web.Optimization.WebForms
+Katana                        github.com/aspnet/AspNetKatana                     Apache-2.0   Rehost.Owin.Host.SystemWeb
   Microsoft.Owin.Host.SystemWeb,  v4.2.3, ceea1fc0670221495b470f0b1ffcdd7526113a22
   Owin.Loader
 ASP.NET Web Stack             github.com/aspnet/AspNetWebStack                   Apache-2.0   Rehost.AspNet.WebApi.WebHost,
@@ -27,7 +27,7 @@ ASP.NET Web Stack             github.com/aspnet/AspNetWebStack                  
   System.Web.WebPages,
   System.Web.WebPages.Razor,
   System.Web.WebPages.Deployment
-Microsoft.Web.Xdt 3.2.11      nuget.org/packages/Microsoft.Web.Xdt/3.2.11        MIT          Rehost.WebForms.Hosting
+Microsoft.Web.Xdt 3.2.11      nuget.org/packages/Microsoft.Web.Xdt/3.2.11        MIT          Rehost.Web.AspNetCore
   (Microsoft.Web.XmlTransform.dll, build/tasks/)
 
 Packages restored from nuget.org by the consumer (WebGrease, Antlr,

@@ -440,7 +440,7 @@ namespace System.Web.Security {
                         try {
                             (new SqlCommand("ROLLBACK TRANSACTION", holder.Connection)).ExecuteNonQuery();
                         } catch (Exception swallowedException) {
-                              System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                              System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                   $"{nameof(SqlRoleProvider)}.{nameof(AddUsersToRoles)}", swallowedException, "ExecuteNonQuery");
                           }
                         beginTranCalled = false;

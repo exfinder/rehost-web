@@ -3,13 +3,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS2008</NoWarn>
-    <Description>ASP.NET Web Pages 3 over the Rehost.WebForms ASP.NET runtime: .cshtml pages, the Razor build provider and Web Pages deployment support.</Description>
+    <Description>ASP.NET Web Pages 3 over the Rehost.Web ASP.NET runtime: .cshtml pages, the Razor build provider and Web Pages deployment support.</Description>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RehostBundleAssemblies</TargetsForTfmSpecificBuildOutput>
     <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);RehostBundleSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
     <ProjectReference Include="../Rehost.Web.WebPages/Rehost.Web.WebPages.csproj" PrivateAssets="all" />
     <ProjectReference Include="../Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj" PrivateAssets="all" />
     <ProjectReference Include="../Rehost.Web.WebPages.Deployment/Rehost.Web.WebPages.Deployment.csproj" PrivateAssets="all" />

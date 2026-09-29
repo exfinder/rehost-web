@@ -12,7 +12,7 @@ See docs/windows-host-cpu-throttling.md for the measurements and for the
 machine-wide registry setting this pairs with.
 
 .EXAMPLE
-pwsh -NoProfile -File eng/Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.WebForms.slnx --no-build'
+pwsh -NoProfile -File eng/Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.Web.slnx --no-build'
 #>
 [CmdletBinding()]
 param(

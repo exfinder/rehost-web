@@ -36,6 +36,6 @@ exec docker run --rm $TTY ${PLATFORM:+--platform "$PLATFORM"} \
     git clean -qfd
     echo "HEAD $(git rev-parse --short HEAD) on $(uname -m), $(. /etc/os-release && echo "$PRETTY_NAME")"
     rm -rf /work/candidate
-    dotnet pack Rehost.WebForms.slnx -c Release -o /work/candidate -v q
+    dotnet pack Rehost.Web.slnx -c Release -o /work/candidate -v q
     eng/external-consumer.sh /work/candidate
   '

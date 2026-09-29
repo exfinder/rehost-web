@@ -1,4 +1,4 @@
-# Rehost WebForms
+# Rehost.Web
 
 ## Mission
 
@@ -15,7 +15,7 @@ strong-named assembly.
 ## Architecture
 
 - Microsoft Reference Source remains the implementation baseline.
-- `Rehost.WebForms.Runtime` owns the System.Web-compatible runtime.
+- `Rehost.Web` owns the System.Web-compatible runtime.
 - Hosting integration stays behind host-neutral request and lifecycle seams.
 - Application Services and Web Services keep sibling assembly boundaries where
   their original identities matter.

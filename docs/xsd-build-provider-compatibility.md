@@ -12,5 +12,5 @@ The Framework path depends on the substantially larger
 typed DataSets enter the supported profile.
 
 Implementation:
-`src/Rehost.WebForms.Runtime/Compatibility/Compilation/XsdBuildProvider.cs`.
-Tests: `tests/Rehost.WebForms.Runtime.Tests/XsdBuildProviderTests.cs`.
+`src/Rehost.Web/Compatibility/Compilation/XsdBuildProvider.cs`.
+Tests: `tests/Rehost.Web.Tests/XsdBuildProviderTests.cs`.

@@ -1679,7 +1679,7 @@ namespace System.Web {
                                 WebBaseEvent.RaiseRuntimeError(eActual, this);
                             }
                             catch (Exception swallowedException) {
-                                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                     $"{nameof(HttpApplication)}.{nameof(ProcessSpecialRequest)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
                             }
                         }
@@ -1974,7 +1974,7 @@ namespace System.Web {
                         _moduleCollection[i].Dispose();
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(HttpApplication)}.{nameof(DisposeInternal)}", swallowedException, "_moduleCollection.GetKey");
                     }
                 }
@@ -4387,7 +4387,7 @@ namespace System.Web {
                                         threadContext.DisassociateFromCurrentThread();
                                     }
                                     catch (Exception swallowedException) {
-                                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                             $"{nameof(ApplicationStepManager)}.{nameof(ResumeSteps)}", swallowedException, "threadContext.DisassociateFromCurrentThread");
                                     }
                                 }

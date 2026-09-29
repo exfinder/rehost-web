@@ -1,4 +1,4 @@
-using Rehost.WebForms.Hosting;
+using Rehost.Web.AspNetCore;
 using Serilog;
 
 var physicalRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
@@ -16,7 +16,7 @@ builder.Services.AddSerilog((services, logger) => logger
     .Enrich.FromLogContext()
     .WriteTo.Console());
 
-builder.AddRehostWebForms(options =>
+builder.AddRehostWeb(options =>
 {
     options.ApplicationId = "yetanotherforum";
     options.PhysicalRootPath = physicalRoot;
@@ -25,5 +25,5 @@ builder.AddRehostWebForms(options =>
 
 var app = builder.Build();
 app.UseSerilogRequestLogging();
-app.UseRehostWebForms();
+app.UseRehostWeb();
 app.Run();

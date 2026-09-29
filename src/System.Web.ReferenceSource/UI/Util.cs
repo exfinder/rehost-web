@@ -312,7 +312,7 @@ internal static class Util {
             fs = new FileStream(dummyFile, FileMode.Create);
         }
         catch (Exception swallowedException) {
-            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                 $"{nameof(Util)}.{nameof(HasWriteAccessToDirectory)}", swallowedException, "new FileStream");
         }
         finally {

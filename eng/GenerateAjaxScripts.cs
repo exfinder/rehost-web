@@ -7,7 +7,7 @@ const string Copyright = "// Copyright (C) Microsoft Corporation. All rights res
 
 var repo = Directory.GetCurrentDirectory();
 var scriptRoot = Path.Combine(repo, "src", "System.Web.Extensions.ReferenceSource", "Script");
-var outputRoot = Path.Combine(repo, "src", "Rehost.WebForms.Extensions", "Scripts");
+var outputRoot = Path.Combine(repo, "src", "Rehost.Web.Extensions", "Scripts");
 
 if (!Directory.Exists(scriptRoot))
 {

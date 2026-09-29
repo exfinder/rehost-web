@@ -1,4 +1,4 @@
-# Rehost WebForms
+# Rehost.Web
 
 Run ASP.NET Web Forms applications on .NET 10, on Windows, Linux and macOS,
 with the legacy project untouched. The runtime is a port of `System.Web` from
@@ -14,8 +14,8 @@ this release; see the [roadmap](ROADMAP.md).
 In the folder that contains the legacy web application folder:
 
 ```text
-dotnet new install Rehost.WebForms.Templates
-dotnet new rehost-webforms --webapp MyApp
+dotnet new install Rehost.Web.Templates
+dotnet new rehost-web --webapp MyApp
 dotnet run --project MyApp.Host
 ```
 
@@ -27,13 +27,13 @@ are in [Migrating an application](docs/migration.md).
 
 ## Packages
 
-Ten packages, one version: `Rehost.WebForms` (the runtime),
-`Rehost.WebForms.Hosting` (Kestrel host, site staging, XDT),
-`Rehost.WebForms.FriendlyUrls`, `Rehost.WebForms.Optimization`,
-`Rehost.WebForms.Optimization.WebForms`, `Rehost.WebForms.ScriptManager.Bundles`,
-`Rehost.WebForms.Owin.Host.SystemWeb` (Katana), `Rehost.AspNet.WebApi.WebHost`
+Ten packages, one version: `Rehost.Web` (the runtime),
+`Rehost.Web.AspNetCore` (Kestrel host, site staging, XDT),
+`Rehost.AspNet.FriendlyUrls`, `Rehost.AspNet.Web.Optimization`,
+`Rehost.AspNet.Web.Optimization.WebForms`, `Rehost.AspNet.ScriptManager.MSAjax`,
+`Rehost.Owin.Host.SystemWeb` (Katana), `Rehost.AspNet.WebApi.WebHost`
 (Web API 2), `Rehost.AspNet.WebPages` (ASP.NET Web Pages, `.cshtml`) and
-`Rehost.WebForms.Templates`.
+`Rehost.Web.Templates`.
 Packages that were NuGet packages on .NET Framework map one to one; translate
 `packages.config` line by line.
 

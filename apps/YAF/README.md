@@ -96,7 +96,7 @@ SQL Server on all three platforms before PostgreSQL became the default.
 | vendored Lucene, five projects | `Lucene.Net` 4.8.0-beta00018 packages | The tree vendors Lucene.NET renamed to `YAF.Lucene.Net`, which exists to avoid an identity clash under DNN hosting. Only `Services/Search.cs` names those types, so the packages replace 26 MB of source for ten `using` lines |
 | `Microsoft.AspNet.WebApi.Core` 5.3.0 | same package, unchanged | References no `System.Web` at all |
 | `Microsoft.AspNet.WebApi.WebHost` 5.3.0 | `Rehost.AspNet.WebApi.WebHost` | The documented substitution for the one Framework-bound Web API assembly, which `Application_Start` reaches |
-| `Microsoft.Owin.Host.SystemWeb` 4.2.3 | `Rehost.WebForms.Owin.Host.SystemWeb` | The documented substitution |
+| `Microsoft.Owin.Host.SystemWeb` 4.2.3 | `Rehost.Owin.Host.SystemWeb` | The documented substitution |
 | `Microsoft.Owin.*`, `Microsoft.AspNet.Identity.*` | same packages, unchanged | Cookie sign-in and the Identity stores are exercised |
 | `OEmbed.Core` 2.0.7 | same package, `net10.0` asset | The package ships a different contract per target: `net481` has the sync `Embed`, `net10.0` only `EmbedAsync`. Taking the modern asset moves one call site to the async method |
 | `Autofac` 9.3.2, `Newtonsoft.Json`, `Farsi.Library` | same packages, unchanged | Autofac is activation-critical |

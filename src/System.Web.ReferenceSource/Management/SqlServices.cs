@@ -633,7 +633,7 @@ namespace System.Web.Management {
                         sqlConnection.Close();
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(SqlServices)}.{nameof(SetupApplicationServices)}", swallowedException, "sqlConnection.Close");
                     }
                     finally {
@@ -686,7 +686,7 @@ namespace System.Web.Management {
                         sqlConnection.Close();
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(SqlServices)}.{nameof(SetupSessionState)}", swallowedException, "sqlConnection.Close");
                     }
                     finally {

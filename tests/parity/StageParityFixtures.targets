@@ -19,11 +19,11 @@
   <!-- Declared before the import: the shared module derives the payload's build-graph edge
        from this item, and item evaluation is file-ordered. -->
   <ItemGroup>
-    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Contracts/Rehost.WebForms.Parity.Contracts.csproj" />
-    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Runner/Rehost.WebForms.Parity.Runner.csproj" />
-    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Harness/Rehost.WebForms.Parity.Harness.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.Web.Parity.Contracts/Rehost.Web.Parity.Contracts.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.Web.Parity.Runner/Rehost.Web.Parity.Runner.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)src/Rehost.Web.Parity.Harness/Rehost.Web.Parity.Harness.csproj" />
     <FixturePayloadProject
-      Include="$(MSBuildThisFileDirectory)src/Rehost.WebForms.Parity.Probes/Rehost.WebForms.Parity.Probes.csproj"
+      Include="$(MSBuildThisFileDirectory)src/Rehost.Web.Parity.Probes/Rehost.Web.Parity.Probes.csproj"
       AdditionalProperties="TargetFramework=$(ParityProbeTargetFramework)"
       MustNotLeakBesideHost="true" />
   </ItemGroup>
@@ -38,7 +38,7 @@
       <_TempDirectoryQuery>/configuration/system.web/compilation/@tempDirectory</_TempDirectoryQuery>
     </PropertyGroup>
     <ItemGroup>
-      <FixtureBinPayload Include="$(TargetDir)Rehost.WebForms.Parity.Contracts.dll;$(TargetDir)Rehost.WebForms.Parity.Runner.dll" />
+      <FixtureBinPayload Include="$(TargetDir)Rehost.Web.Parity.Contracts.dll;$(TargetDir)Rehost.Web.Parity.Runner.dll" />
       <FixtureBinDir Include="$(TargetDir)fixture/app/bin;$(TargetDir)fixture/app-errors/bin" />
       <FixtureStagedFile Include="$(MSBuildThisFileDirectory)fixture/web.config" StagedAs="$(TargetDir)fixture/app/web.config" />
       <FixtureStagedFile Include="$(MSBuildThisFileDirectory)fixture/errors.web.config" StagedAs="$(TargetDir)fixture/app-errors/web.config" />

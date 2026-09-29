@@ -68,7 +68,7 @@ namespace System.Web.Util {
 #if NETFRAMEWORK
             UnsafeNativeMethods.ReportUnhandledException(eventInfo);
 #else
-            WebFormsRuntimeEventSource.Log.UnhandledException(e, eventInfo);
+            RehostWebEventSource.Log.UnhandledException(e, eventInfo);
 #endif
         }
 

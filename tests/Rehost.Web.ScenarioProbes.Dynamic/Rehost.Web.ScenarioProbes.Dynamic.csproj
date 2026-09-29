@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../eng/Repo.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Rehost.Web/Rehost.Web.csproj" />
+    <ProjectReference Include="../../src/Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" />
+    <ProjectReference Include="../Rehost.Web.ScenarioProbes/Rehost.Web.ScenarioProbes.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(RehostRepoRoot)src/Rehost.Web.Package/build/Rehost.Web.targets" />
+</Project>

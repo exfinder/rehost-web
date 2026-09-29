@@ -41,7 +41,7 @@ naming `System.Web.Mvc`, `System.Web.Helpers` and upstream's test assemblies
 are dropped.
 
 Web Pages' `Microsoft.Web.Infrastructure` calls compile unchanged against
-`Rehost.Web.Infrastructure` in the `Rehost.WebForms` package
+`Rehost.Web.Infrastructure` in the `Rehost.Web` package
 ([provenance](microsoft-web-infrastructure.md)), and `Microsoft.AspNet.Razor`
 3.3.0 (`System.Web.Razor`) is consumed as shipped under `NU1701`.
 

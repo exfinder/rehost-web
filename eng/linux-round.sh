@@ -49,8 +49,8 @@ cd /work/repo
 git fetch -q /src HEAD
 git checkout -q -f FETCH_HEAD
 git clean -qfd
-dotnet build Rehost.WebForms.slnx -v q
-dotnet test Rehost.WebForms.slnx --no-build
+dotnet build Rehost.Web.slnx -v q
+dotnet test Rehost.Web.slnx --no-build
 INNER
     chmod 755 /usr/local/bin/round
 

@@ -63,10 +63,10 @@ factory, event, or callback dependencies.
 
 ## Initialization sequence
 
-1. Host calls `AddRehostWebForms` with application options.
+1. Host calls `AddRehostWeb` with application options.
 2. Static bootstrap validates configuration, binds current-AppDomain identity,
    publishes the IIS baseline, and becomes `Initialized` before listen.
-3. `UseRehostWebForms` wires host-stop cleanup, registers the forwarded-headers
+3. `UseRehostWeb` wires host-stop cleanup, registers the forwarded-headers
    middleware (framework trust default; `ASPNETCORE_FORWARDEDHEADERS_ENABLED`
    widens it behind a proxy), and installs terminal middleware.
 4. The first routed request evaluates the activation service's thread-safe
@@ -126,7 +126,7 @@ host. That is an accepted target in
 | Component | Created/initialized by | Owns/calls | Lifetime |
 | --- | --- | --- | --- |
 | Kestrel/modern CLR | executable host | adapter and process | process |
-| static application bootstrap | `AddRehostWebForms` | immutable config, AppDomain binding, IIS baseline | process |
+| static application bootstrap | `AddRehostWeb` | immutable config, AppDomain binding, IIS baseline | process |
 | `ClassicPipelineActivation` | host DI registration | lazy dispatcher activation and host-stop cleanup | process |
 | `ApplicationManager` | retained static accessor | hosting context and registered-object creation | process/current AppDomain singleton |
 | `HostingEnvironment` | `ApplicationManager` portable creation leaf | config installation, registered objects, busy count, shutdown | one application generation |

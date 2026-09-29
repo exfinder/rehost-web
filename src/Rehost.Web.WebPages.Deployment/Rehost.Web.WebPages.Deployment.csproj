@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>System.Web.WebPages.Deployment</RootNamespace>
-    <Description>ASP.NET Web Pages deployment support over the Rehost.WebForms ASP.NET runtime.</Description>
+    <Description>ASP.NET Web Pages deployment support over the Rehost.Web ASP.NET runtime.</Description>
     <RehostAssemblyVersion>3.0.0.0</RehostAssemblyVersion>
     <IsPackable>false</IsPackable>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
     <ProjectReference Include="../Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" PrivateAssets="all" />
   </ItemGroup>
 </Project>

@@ -48,9 +48,9 @@ The implementation derives from Microsoft Reference Source commit
 publishing them would imply unsupported general remoting compatibility.
 
 Implementation:
-`src/Rehost.WebForms.Runtime/Compatibility/Remoting/CallContext.cs`.
-Tests: `tests/Rehost.WebForms.Runtime.Tests/CallContextTests.cs`.
-Contract suite: `tests/Rehost.WebForms.CallContext.Contract.Tests` runs the same
+`src/Rehost.Web/Compatibility/Remoting/CallContext.cs`.
+Tests: `tests/Rehost.Web.Tests/CallContextTests.cs`.
+Contract suite: `tests/Rehost.Web.CallContext.Contract.Tests` runs the same
 bodies against mscorlib (net481, Windows round only) and the port (net10.0); the
 Framework leg is the authority for illogical isolation. Note that mscorlib's
 `ExecutionContext.IsDefaultFTContext` ignores a lone illogical `HostContext`, so

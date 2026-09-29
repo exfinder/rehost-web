@@ -233,7 +233,7 @@ namespace System.Web.Configuration {
                     return true;
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(CustomErrorsSection)}.{nameof(CustomErrorsEnabled)}", swallowedException, "");
             }
 

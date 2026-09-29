@@ -791,7 +791,7 @@ namespace System.Web {
                     return uri.LocalPath;
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(ErrorFormatter)}.{nameof(GetVirtualPathFromHttpLinePragma)}", swallowedException, "new Uri");
             }
 
@@ -1066,7 +1066,7 @@ namespace System.Web {
                                 assemblyDir = System.Web.UI.Util.GetAssemblyCodeBase(declaringType.Assembly);
                             }
                             catch (Exception swallowedException) {
-                                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                     $"{nameof(UnhandledErrorFormatter)}.{nameof(ColoredSquare2Content)}_get", swallowedException, "System.Web.UI.Util.GetAssemblyCodeBase");
                             }
 
@@ -1477,7 +1477,7 @@ namespace System.Web {
                     reader = new StreamReader(fileName, encoding, true, 4096);
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(FormatterWithFileInfo)}.{nameof(GetSourceFileLines)}", swallowedException, "new StreamReader");
             }
 

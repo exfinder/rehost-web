@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms.Hosting" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.Optimization" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web.AspNetCore" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.Web.Optimization" Version="$(RehostVersion)" />
     <ProjectReference Include="../AjaxControlToolkit/AjaxControlToolkit.csproj" />
     <ProjectReference Include="../AjaxControlToolkit.HtmlEditor.Sanitizer/AjaxControlToolkit.HtmlEditor.Sanitizer.csproj" />
   </ItemGroup>

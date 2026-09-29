@@ -18,11 +18,11 @@ Walk down; stop at the first rung that fits.
    test on the platform that triggers it. A standing test below this rung
    must name the port-owned seam it guards.
 1. **Plain unit test** — the default. Lives in the folder mirroring the source
-   it covers (`tests/Rehost.WebForms.Runtime.Tests/<mirrored path>/`), uses a
+   it covers (`tests/Rehost.Web.Tests/<mirrored path>/`), uses a
    disposable temp directory if it touches disk, spawns nothing.
 2. **Scenario over the shared host** — for claims about a running application
    over Kestrel. Join an existing fixture's shared host (`Fixtures.*` in
-   Hosting.Tests); add a probe or page to the fixture and assert by response.
+   AspNetCore.Tests); add a probe or page to the fixture and assert by response.
    The API enforces this: `ScenarioHostRegistry.GetOrAdd(fixture, role)` is the
    only door to a shared host, and a private process exists only through
    `LiveScenario.StartIsolated`, which demands a structural `IsolationReason`
@@ -32,7 +32,7 @@ Walk down; stop at the first rung that fits.
    and a whole-host negative assertion (a claim that the host *never* did
    something, meaningful only on a pristine process); a new fixture app is
    additionally recorded in
-   [the fixtures README](../tests/Rehost.WebForms.ScenarioHost/fixtures/README.md).
+   [the fixtures README](../tests/Rehost.Web.ScenarioHost/fixtures/README.md).
    The host is shared for real: classes on the `page` fixture reach one
    process through the registry, and `PageHostSharingTests` pins it.
    Probes default to precompiled `ScenarioProbes` handlers registered by

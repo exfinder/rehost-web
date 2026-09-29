@@ -1,5 +1,5 @@
 <Project>
-  <!-- Shared shipping metadata for the Rehost.WebForms packages. The version is the
+  <!-- Shared shipping metadata for the Rehost.Web packages. The version is the
        single source for the whole family; local app feeds override it on the command
        line with PackageVersion=1.0.0-local. -->
   <PropertyGroup>
@@ -10,10 +10,10 @@
   <PropertyGroup>
     <VersionPrefix>0.1.0</VersionPrefix>
     <VersionSuffix>alpha.1</VersionSuffix>
-    <Authors>Rehost WebForms contributors</Authors>
-    <RepositoryUrl>https://github.com/exfinder/rehost-webforms</RepositoryUrl>
+    <Authors>Rehost.Web contributors</Authors>
+    <RepositoryUrl>https://github.com/exfinder/rehost-web</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageProjectUrl>https://github.com/exfinder/rehost-webforms</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/exfinder/rehost-web</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
@@ -23,7 +23,7 @@
 
   <!-- Imported Apache-2.0 trees make up nearly all of these five packages; the
        expression follows the payload, not the repository license. -->
-  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.WebForms.Owin.Host.SystemWeb' or '$(MSBuildProjectName)' == 'Rehost.Web.Http.WebHost' or '$(MSBuildProjectName)' == 'Rehost.AspNet.WebPages'">
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.Web.Optimization' or '$(MSBuildProjectName)' == 'Rehost.AspNet.Web.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.Owin.Host.SystemWeb' or '$(MSBuildProjectName)' == 'Rehost.Web.Http.WebHost' or '$(MSBuildProjectName)' == 'Rehost.AspNet.WebPages'">
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 

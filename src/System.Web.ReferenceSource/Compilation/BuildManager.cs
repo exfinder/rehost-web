@@ -2516,7 +2516,7 @@ namespace System.Web.Compilation {
             }
 #else
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(BuildManager)}.{nameof(DeletePrecompTargetDirectory)}", swallowedException, "FileEnumerator.Create");
             }
 #endif

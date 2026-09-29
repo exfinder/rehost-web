@@ -11,7 +11,7 @@
 
   <PropertyGroup>
     <RehostRepoRoot>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', '..'))</RehostRepoRoot>
-    <RehostWebFormsVersion Condition="'$(RehostWebFormsVersion)' == ''">1.0.0-local</RehostWebFormsVersion>
+    <RehostVersion Condition="'$(RehostVersion)' == ''">1.0.0-local</RehostVersion>
     <RehostLocalPackageFeed>$(RehostLocalPackageRoot)feed/</RehostLocalPackageFeed>
     <RehostLocalPackageCache>$(RehostLocalPackageRoot)packages/</RehostLocalPackageCache>
     <RehostLocalPackageStamp>$(RehostLocalPackageRoot)local-packages.stamp</RehostLocalPackageStamp>
@@ -26,7 +26,7 @@
   <Import Project="PackageProjects.props" />
 
   <ItemGroup>
-    <RehostLocalBuildSupportProject Include="$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj" />
+    <RehostLocalBuildSupportProject Include="$(RehostRepoRoot)eng/Rehost.Web.GeneratedInputs/Rehost.Web.GeneratedInputs.csproj" />
   </ItemGroup>
 
   <Target Name="_RehostResolveLocalPackageIds">
@@ -34,7 +34,7 @@
       Projects="@(RehostPackageProject)"
       Targets="RehostGetPackageId"
       BuildInParallel="false"
-      Properties="Configuration=Release;PackageVersion=$(RehostWebFormsVersion)"
+      Properties="Configuration=Release;PackageVersion=$(RehostVersion)"
       RemoveProperties="$(_RehostRestorePassGlobals)">
       <Output TaskParameter="TargetOutputs" ItemName="_RehostLocalPackageId" />
     </MSBuild>
@@ -48,7 +48,7 @@
     Inputs="@(RehostPackageSource)"
     Outputs="$(RehostLocalPackageStamp)">
     <ItemGroup>
-      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(_RehostLocalPackageId.Identity)').ToLowerInvariant())/$(RehostWebFormsVersion)" />
+      <_RehostLocalCacheEntry Include="$(RehostLocalPackageCache)$([System.String]::Copy('%(_RehostLocalPackageId.Identity)').ToLowerInvariant())/$(RehostVersion)" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -69,13 +69,13 @@
       Projects="@(RehostPackageProject)"
       Targets="Restore"
       BuildInParallel="false"
-      Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostWebFormsVersion)"
+      Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostVersion)"
       RemoveProperties="$(_RehostRestorePassGlobals)" />
     <MSBuild
       Projects="@(RehostPackageProject)"
       Targets="Pack"
       BuildInParallel="false"
-      Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostWebFormsVersion)"
+      Properties="Configuration=Release;PackageOutputPath=$(RehostLocalPackageFeed);PackageVersion=$(RehostVersion)"
       RemoveProperties="$(_RehostRestorePassGlobals)" />
     <!-- Same version string every pack, so the extracted copies must go; restore then
          re-extracts from the fresh feed. -->
@@ -92,8 +92,8 @@
     Condition="'$(_RehostLocalFeedEnabled)' == 'true'">
     <ItemGroup>
       <_RehostFeedCheck Include="@(_RehostLocalPackageId)">
-        <FeedNupkg>$(RehostLocalPackageFeed)%(Identity).$(RehostWebFormsVersion).nupkg</FeedNupkg>
-        <CacheMetadata>$(RehostLocalPackageCache)$([System.String]::Copy('%(Identity)').ToLowerInvariant())/$(RehostWebFormsVersion)/.nupkg.metadata</CacheMetadata>
+        <FeedNupkg>$(RehostLocalPackageFeed)%(Identity).$(RehostVersion).nupkg</FeedNupkg>
+        <CacheMetadata>$(RehostLocalPackageCache)$([System.String]::Copy('%(Identity)').ToLowerInvariant())/$(RehostVersion)/.nupkg.metadata</CacheMetadata>
       </_RehostFeedCheck>
     </ItemGroup>
     <Error

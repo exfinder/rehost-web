@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Rehost.Web contributors",
+  "classifications": [ "Web", "WebForms", "Migration" ],
+  "identity": "Rehost.Web.Templates.WebApplication",
+  "name": "Rehost.Web App and Host",
+  "description": "Adds the App and Host projects beside a legacy ASP.NET Web Forms application. Run it in the folder that contains the legacy web application folder.",
+  "shortName": "rehost-web",
+  "tags": { "language": "C#", "type": "solution" },
+  "preferNameDirectory": false,
+  "symbols": {
+    "webapp": {
+      "type": "parameter",
+      "datatype": "string",
+      "isRequired": true,
+      "description": "Path to the legacy web application folder, from the current folder. Its last segment names the new projects and the application assembly."
+    },
+    "assembly": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "",
+      "description": "The legacy application's assembly name, when it differs from the folder name."
+    },
+    "webappPath": {
+      "type": "generated",
+      "generator": "regex",
+      "datatype": "string",
+      "replaces": "WEBAPP_PATH",
+      "parameters": {
+        "source": "webapp",
+        "steps": [
+          { "regex": "\\\\", "replacement": "/" },
+          { "regex": "/+$", "replacement": "" }
+        ]
+      }
+    },
+    "webappName": {
+      "type": "generated",
+      "generator": "regex",
+      "datatype": "string",
+      "parameters": {
+        "source": "webappPath",
+        "steps": [ { "regex": "^.*/", "replacement": "" } ]
+      }
+    },
+    "projectName": {
+      "type": "generated",
+      "generator": "coalesce",
+      "datatype": "string",
+      "replaces": "MyApp",
+      "fileRename": "MyApp",
+      "parameters": {
+        "sourceVariableName": "assembly",
+        "fallbackVariableName": "webappName"
+      }
+    },
+    "rehostVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "datatype": "string",
+      "replaces": "REHOST_VERSION",
+      "parameters": { "value": "REHOST_PACKAGE_VERSION" }
+    }
+  }
+}

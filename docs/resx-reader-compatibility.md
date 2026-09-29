@@ -11,9 +11,9 @@ conversion. Legacy serialized and drawing paths remain but their breadth and
 platform behavior are unassessed.
 
 The donor closure lives under
-`src/Rehost.WebForms.Runtime/Compatibility/Resources/WinForms195f89a/`;
+`src/Rehost.Web/Compatibility/Resources/WinForms195f89a/`;
 its attribution is in `SOURCE.md`. `ResXBuildProvider` uses the project-owned
-reader through `src/Rehost.WebForms.Runtime/Compatibility/Resources`.
+reader through `src/Rehost.Web/Compatibility/Resources`.
 
 ## Deliberate deviation
 
@@ -27,7 +27,7 @@ compatibility behavior. They are not safe for untrusted `.resx` files and can
 remain platform-limited.
 
 Tests:
-`tests/Rehost.WebForms.Runtime.Tests/ResXResourceReaderTests.cs`.
+`tests/Rehost.Web.Tests/ResXResourceReaderTests.cs`.
 
 Uncovered edge cases:
 [ResX compatibility](follow-ups/resx-compatibility.md).

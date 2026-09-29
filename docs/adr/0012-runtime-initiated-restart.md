@@ -17,7 +17,7 @@ of the process on partial initialization, with no second `Application_Start`.
 ## Decision
 
 A shutdown the runtime initiates ends the process with exit code
-`WebFormsExitCodes.RestartRequested` (82), and the supervisor's replacement
+`RehostWebExitCodes.RestartRequested` (82), and the supervisor's replacement
 process is the rebuilt application. The port takes the integrated-mode
 contract for `Application_Start`: the failure latches, every request inside
 the window replays it, and Classic's partial-init continue is not reproduced.

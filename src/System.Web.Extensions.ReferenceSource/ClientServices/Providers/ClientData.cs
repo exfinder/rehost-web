@@ -220,7 +220,7 @@ namespace System.Web.ClientServices.Providers
                         }
                     }
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(ClientData)}.{nameof(Load)}", swallowedException, "IsolatedStorageFile.GetUserStoreForAssembly");
                   } // ignore exceptions
 
@@ -235,7 +235,7 @@ namespace System.Web.ClientServices.Providers
                         }
                     }
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(ClientData)}.{nameof(Load)}#2", swallowedException, "File.Exists");
                   } // ignore exceptions
             }

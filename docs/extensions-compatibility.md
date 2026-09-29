@@ -2,7 +2,7 @@
 
 ## Implemented surface
 
-`Rehost.WebForms.Extensions` compiles the `System.Web.Extensions` closure a
+`Rehost.Web.Extensions` compiles the `System.Web.Extensions` closure a
 frozen Web Forms application reaches, minus the exclusions below: the
 full-page ScriptManager stack (`ScriptManager`, `UpdatePanel`,
 `UpdateProgress`, `Timer`, script/service/history plumbing,
@@ -29,7 +29,7 @@ Rehost assembly names: the `system.web.extensions` section group,
 `ScriptModule-4.0`, the `*_AppService.axd` handler, and the
 `System.Web.UI.WebControls.Expressions` tag mapping.
 
-Scenario evidence: `tests/Rehost.WebForms.Hosting.Tests/AjaxOverKestrelTests.cs`
+Scenario evidence: `tests/Rehost.Web.AspNetCore.Tests/AjaxOverKestrelTests.cs`
 over the shared page fixture (`ajax/Panel.aspx`, `ajax/Query.aspx`);
 `AjaxScriptResourceTests` gates the generated scripts. The sample app's
 `Ajax.aspx` passed one real-browser journey (async timer ticks and button
@@ -81,6 +81,6 @@ Deviations from the imported tree are listed in
 [provenance](provenance/system-web-extensions.md).
 
 Implementation:
-`src/Rehost.WebForms.Extensions`.
+`src/Rehost.Web.Extensions`.
 Remaining scope:
 [Extensions](follow-ups/extensions-ajax-activation.md).

@@ -794,7 +794,7 @@ namespace System.Web.Configuration {
                         }
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(HttpRuntimeSection)}.{nameof(VersionHeader)}_get", swallowedException, "version.LastIndexOf");
                     }
 

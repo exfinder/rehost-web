@@ -58,7 +58,7 @@ namespace System.Web.UI {
                         type = ucTypeResService.GetType(tagPrefix, tagName);
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(BaseTemplateParser)}.{nameof(GetDesignTimeUserControlType)}", swallowedException, "ucTypeResService.GetType");
                     }
                 }

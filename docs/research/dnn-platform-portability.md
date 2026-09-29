@@ -1,6 +1,6 @@
 # DNN Platform portability assessment
 
-Preliminary static assessment of DNN Platform on Rehost WebForms. This is not
+Preliminary static assessment of DNN Platform on Rehost.Web. This is not
 an import plan or support claim. No DNN build, installer, or application code
 was executed. Any later baseline or probe must use a disposable copy, never the
 source checkout. The [compatibility map](../compatibility.md) remains the sole

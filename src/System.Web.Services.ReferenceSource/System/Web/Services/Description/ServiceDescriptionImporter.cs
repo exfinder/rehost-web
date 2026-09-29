@@ -127,7 +127,7 @@ namespace System.Web.Services.Description {
             // The SOAP WSDL importers need System.Xml.Serialization code-export APIs that
             // were cut from modern .NET (SoapSchemaImporter, XmlCodeExporter, ...).
             throw new PlatformNotSupportedException(
-                "WSDL proxy generation is not supported by Rehost.WebForms. " +
+                "WSDL proxy generation is not supported by Rehost.Web. " +
                 "Generate the client with dotnet-svcutil (or reuse a committed Reference.cs) and compile it with the application.");
 #else
             Type[] importerTypes = WebServicesSection.Current.ProtocolImporterTypes;

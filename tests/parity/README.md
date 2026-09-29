@@ -2,7 +2,7 @@
 
 Differential gates for the port. `sessions.json` declares the sessions; the
 committed golden under `artifacts/golden/` is what the suite verifies against.
-Shared machinery lives in `src/Rehost.WebForms.Parity.Harness`; probes and
+Shared machinery lives in `src/Rehost.Web.Parity.Harness`; probes and
 runners are single projects compiled for both runtimes (`net481;net10.0`).
 
 ## Columns
@@ -11,7 +11,7 @@ runners are single projects compiled for both runtimes (`net481;net10.0`).
 | --- | --- | --- | --- |
 | oracle (`OracleHost`, net481) | real .NET Framework 4.8.1 | `HttpRuntime.ProcessRequest` via `ApplicationManager` | generates the golden; runs only on Windows |
 | portable (`PortableHost`) | the port | same managed entry, recording worker request | strict comparison against the golden |
-| adapter (`AdapterHost`) | the port over Kestrel | `AddRehostWebForms`/`UseRehostWebForms`, real sockets | transport-aware comparison |
+| adapter (`AdapterHost`) | the port over Kestrel | `AddRehostWeb`/`UseRehostWeb`, real sockets | transport-aware comparison |
 
 A session is one process, one fixture, and ordered steps of concurrent
 requests; process-per-session is what makes "cold" mean cold. Current
@@ -43,7 +43,7 @@ When a regeneration is warranted, on the Windows box
 ([eng/win-oracle.md](../../eng/win-oracle.md)):
 
 ```text
-Rehost.WebForms.Parity.OracleHost.exe generate --output artifacts\generated\sessions.json
+Rehost.Web.Parity.OracleHost.exe generate --output artifacts\generated\sessions.json
 ```
 
 Review the indented diff against `artifacts/golden/sessions.json`, promote by

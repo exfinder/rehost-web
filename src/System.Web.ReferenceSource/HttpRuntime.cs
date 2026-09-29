@@ -366,7 +366,7 @@ namespace System.Web {
                 ShutdownAppDomain(ApplicationShutdownReason.InitializationError, "Initialization Error");
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(AppDomainShutdownTimerCallback)}", swallowedException, "DisposeAppDomainShutdownTimer");
             } // ignore exceptions
         }
@@ -1023,7 +1023,7 @@ namespace System.Web {
             // application directory, so distinct applications never share a directory and the
             // same application finds its previous run's output.
             _codegenDir = Path.Combine(codegenBase, CodegenDirectory.GenerationSegment(_appDomainAppPath));
-            WebFormsRuntimeEventSource.Log.CompilationOutput(_codegenDir, codegenSource);
+            RehostWebEventSource.Log.CompilationOutput(_codegenDir, codegenSource);
 #endif
 
             // Create the codegen directory if needed
@@ -1215,12 +1215,12 @@ namespace System.Web {
                     // If Load failed, try LoadFrom (VSWhidbey 493725)
                     try { Assembly.LoadFrom(fi.FullName); }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(HttpRuntime)}.{nameof(PreloadAssembliesFromBinRecursive)}", swallowedException, "Assembly.LoadFrom");
                     }
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(HttpRuntime)}.{nameof(PreloadAssembliesFromBinRecursive)}#2", swallowedException, "Assembly.Load");
                 }
             }
@@ -1292,7 +1292,7 @@ namespace System.Web {
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(SetThreadPoolLimits)}", swallowedException, "RuntimeConfig.GetMachineConfig");
             }
         }
@@ -1430,7 +1430,7 @@ namespace System.Web {
                 fGetStoredKeys = (UnsafeNativeMethods.EcbCallISAPI(IntPtr.Zero, UnsafeNativeMethods.CallISAPIFunc.GetAutogenKeys,
                                                                    bKeysRandom, bKeysRandom.Length, bKeysStored, bKeysStored.Length) == 1);
 #else
-            byte[] bKeysPersisted = Rehost.WebForms.Hosting.AutogenKeyStore.TryGetPersistedKeys();
+            byte[] bKeysPersisted = Rehost.Web.Hosting.AutogenKeyStore.TryGetPersistedKeys();
             if (bKeysPersisted != null && bKeysPersisted.Length == bKeysStored.Length) {
                 bKeysStored = bKeysPersisted;
                 fGetStoredKeys = true;
@@ -1645,7 +1645,7 @@ namespace System.Web {
                     context.Response.UpdateNativeResponse(sendHeaders);
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(HttpRuntime)}.{nameof(FinishRequestNotification)}", swallowedException, "context.Response.UpdateNativeResponse");
                 }
             }
@@ -1871,7 +1871,7 @@ namespace System.Web {
                             response.FinalFlushAtTheEndOfRequestProcessing();
                         }
                         catch (Exception swallowedException) {
-                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                 $"{nameof(HttpRuntime)}.{nameof(FinishRequest)}", swallowedException, "ReportAppOfflineErrorMessage");
                         }
                     }
@@ -1903,7 +1903,7 @@ namespace System.Web {
                                 response.FinalFlushAtTheEndOfRequestProcessing();
                             }
                             catch (Exception eReportFailure) {
-                                WebFormsRuntimeEventSource.Log.SwallowedException(
+                                RehostWebEventSource.Log.SwallowedException(
                                     "HttpRuntime.FinishRequest",
                                     eReportFailure,
                                     "request: " + e);
@@ -1983,7 +1983,7 @@ namespace System.Web {
                 PerfCounters.IncrementGlobalCounter(GlobalPerfCounter.APPLICATION_RESTARTS);
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(ReleaseResourcesAndUnloadAppDomain)}", swallowedException, "PerfCounters.IncrementGlobalCounter");
             }
 
@@ -1992,7 +1992,7 @@ namespace System.Web {
                 Dispose();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(ReleaseResourcesAndUnloadAppDomain)}#2", swallowedException, "Dispose");
             }
 
@@ -2298,7 +2298,7 @@ namespace System.Web {
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(CoalesceNotifications)}", swallowedException, "RuntimeConfig.GetAppLKGConfig");
             }
 
@@ -2316,7 +2316,7 @@ namespace System.Web {
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(CoalesceNotifications)}#2", swallowedException, "_theRuntime.LastShutdownAttemptTime.AddSeconds");
             }
         }
@@ -2377,7 +2377,7 @@ namespace System.Web {
                     }
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(HttpRuntime)}.{nameof(ShutdownAppDomain)}", swallowedException, "RuntimeConfig.GetAppLKGConfig");
                 }
             }
@@ -2394,7 +2394,7 @@ namespace System.Web {
 
             if (!HostingEnvironment.ShutdownInitiated) {
                 // This shutdown is not triggered by hosting environment - let it do the job
-                WebFormsRuntimeEventSource.Log.RestartRequested(ShutdownReason);
+                RehostWebEventSource.Log.RestartRequested(ShutdownReason);
                 HostingEnvironment.InitiateShutdownWithoutDemand();
                 return true;
             }
@@ -2801,7 +2801,7 @@ namespace System.Web {
                     return path;
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpRuntime)}.{nameof(GetSafePath)}", swallowedException, "HasPathDiscoveryPermission");
             }
 
@@ -3661,7 +3661,7 @@ namespace System.Web {
                     _DefaultPhysicalPathOnMapPathFailure = Path.Combine(_appDomainAppPath, "NOT_A_VALID_FILESYSTEM_PATH");
                 }
             } catch (Exception swallowedException) {
-                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                  System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                       $"{nameof(HttpRuntime)}.{nameof(RelaxMapPathIfRequired)}", swallowedException, "RuntimeConfig.GetAppConfig");
               }
         }

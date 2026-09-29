@@ -13,5 +13,5 @@ snapshots and the legacy CAS unrestricted-port demand are omitted because
 System.Web does not use them and modern .NET cannot enforce CAS.
 
 Implementation:
-`src/Rehost.WebForms.Runtime/Compatibility/Configuration/SmtpSection.cs`.
-Tests: `tests/Rehost.WebForms.Runtime.Tests/SmtpSectionTests.cs`.
+`src/Rehost.Web/Compatibility/Configuration/SmtpSection.cs`.
+Tests: `tests/Rehost.Web.Tests/SmtpSectionTests.cs`.

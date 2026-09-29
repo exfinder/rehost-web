@@ -6,7 +6,7 @@ change.
 
 ## Why
 
-`RehostWebFormsMiddleware` runs `ProcessRequest` inline on the ASP.NET Core
+`RehostWebMiddleware` runs `ProcessRequest` inline on the ASP.NET Core
 request thread. A synchronous entity read blocks that pooled worker awaiting a
 `PipeReader` completion that Kestrel schedules back onto the same pool, so
 blocked threads delay the very continuations that would release them. The

@@ -47,9 +47,9 @@ No database and no network: `UseMockData=true` (`Web.config:15`) keeps
 | `Autofac.Web` 4.0.0 | `Autofac.Integration.Web/` | The one library recompile |
 | `EntityFramework` 6.2.0 | same package at 6.5.2 | 6.3+ ships `netstandard2.1`; unreached under mock data |
 | `log4net` 2.0.10 | same package, unchanged | Pure managed |
-| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `WebGrease`, `Antlr`, `Newtonsoft.Json` | `Rehost.WebForms.Optimization`, `.Optimization.WebForms` | The `<controls>` assembly rewrite is in this app's XDT |
-| `Microsoft.AspNet.ScriptManager.MSAjax`, `.WebForms` | `Rehost.WebForms.ScriptManager.Bundles` | Registers `MsAjaxJs`, `WebFormsJs` and the MicrosoftAjax names |
-| `Microsoft.AspNet.FriendlyUrls`, `.Core` | `Rehost.WebForms.FriendlyUrls` | Reached through `IsMobileView` on the view switcher |
+| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `WebGrease`, `Antlr`, `Newtonsoft.Json` | `Rehost.AspNet.Web.Optimization`, `.WebForms` | The `<controls>` assembly rewrite is in this app's XDT |
+| `Microsoft.AspNet.ScriptManager.MSAjax`, `.WebForms` | `Rehost.AspNet.ScriptManager.MSAjax` | Registers `MsAjaxJs`, `WebFormsJs` and the MicrosoftAjax names |
+| `Microsoft.AspNet.FriendlyUrls`, `.Core` | `Rehost.AspNet.FriendlyUrls` | Reached through `IsMobileView` on the view switcher |
 | `AspNet.ScriptManager.jQuery` 3.3.1, `.bootstrap` 4.3.1 | `eShopLegacyWebForms.App/PreApplicationStartCode.cs` | Names only, so the definitions are re-registered by hand |
 | `Microsoft.AspNet.SessionState.SessionStateModule` | dropped by XDT | Binds Framework's strong-named `System.Web`; the built-in module is identical for `mode="InProc"` |
 | `Microsoft.ApplicationInsights.*`, `Microsoft.AspNet.TelemetryCorrelation` | dropped by XDT | Same binding, and the collectors are Windows-only |
@@ -73,7 +73,7 @@ which resolve against the recompile.
 
 `<%$ RouteUrl:… %>` on `Default.aspx` resolves through the baseline
 `<expressionBuilders>` registration in the port's own
-[`rehost-webforms.web.config`](../../src/Rehost.WebForms.Runtime/configs/rehost-webforms.web.config).
+[`rehost.web.config`](../../src/Rehost.Web/configs/rehost.web.config).
 
 ## Covered by `smoke.sh`
 

@@ -63,8 +63,8 @@ legacy_listing() { (cd WebFormsApplication && find . -type f -exec cksum {} + | 
 
 echo "== dotnet new"
 legacy_listing > "$WORK/legacy.before"
-dotnet new install "Rehost.WebForms.Templates::$VERSION"
-dotnet new rehost-webforms --webapp WebFormsApplication
+dotnet new install "Rehost.Web.Templates::$VERSION"
+dotnet new rehost-web --webapp WebFormsApplication
 ls
 grep -q "Version=\"$VERSION\"" WebFormsApplication.Host/WebFormsApplication.Host.csproj || { echo "FAIL  the template did not write the candidate version"; exit 1; }
 
@@ -73,16 +73,16 @@ dotnet build WebFormsApplication.Rehost.slnx -c Release -v q
 
 echo "== restored Rehost packages (expect the seven public IDs, no components)"
 ls "$NUGET_PACKAGES" | grep -i '^rehost' | sort
-if ls "$NUGET_PACKAGES" | grep -qi -E '^rehost\.webforms\.(runtime|applicationservices|extensions|webservices)$'; then
+if ls "$NUGET_PACKAGES" | grep -qi -E '^rehost\.web\.(runtime|applicationservices|extensions|services)$'; then
   echo "FAIL  an unpublished component package was restored"; exit 1
 fi
 
 site="WebFormsApplication.Host/rehost_root"
 echo "== staged site"
-ls "$site/bin" | grep -E '^Rehost\.WebForms.*\.dll$'
+ls "$site/bin" | grep -E '^Rehost\..*\.dll$'
 ls "$site/bin/configs"
 grep -q '<runtime' "$site/web.config" && { echo "FAIL  XDT did not remove <runtime>"; exit 1; }
-grep -q 'assembly="Rehost.WebForms.Optimization.WebForms"' "$site/web.config" || { echo "FAIL  XDT did not rewrite the Optimization controls assembly"; exit 1; }
+grep -q 'assembly="Rehost.AspNet.Web.Optimization.WebForms"' "$site/web.config" || { echo "FAIL  XDT did not rewrite the Optimization controls assembly"; exit 1; }
 echo "PASS  staged web.config carries the XDT result"
 
 echo "== run"

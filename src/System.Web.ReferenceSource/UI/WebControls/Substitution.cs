@@ -113,7 +113,7 @@ namespace System.Web.UI.WebControls {
                  callback = GetDelegate(target.GetType(), MethodName);
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Substitution)}.{nameof(RenderMarkup)}", swallowedException, "GetDelegate");
             }
 

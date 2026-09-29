@@ -295,7 +295,7 @@ namespace System.Web.Caching {
                         WebBaseEvent.RaiseRuntimeError(e, this);
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(CacheEntry)}.{nameof(CallCacheItemRemovedCallback)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
                     }
                 }
@@ -308,7 +308,7 @@ namespace System.Web.Caching {
                     }
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(CacheEntry)}.{nameof(CallCacheItemRemovedCallback)}#2", swallowedException, "new ApplicationImpersonationContext");
                 }
             }

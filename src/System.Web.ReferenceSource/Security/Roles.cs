@@ -199,7 +199,7 @@ namespace System.Web.Security {
                     user.SetDirty();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(DeleteRole)}", swallowedException, "GetCurrentUser");
             }
 
@@ -232,7 +232,7 @@ namespace System.Web.Security {
                     user.SetDirty();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(AddUserToRole)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -258,7 +258,7 @@ namespace System.Web.Security {
                     user.SetDirty();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(AddUserToRoles)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -289,7 +289,7 @@ namespace System.Web.Security {
                         }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(AddUsersToRole)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -325,7 +325,7 @@ namespace System.Web.Security {
                         }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(AddUsersToRoles)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -343,7 +343,7 @@ namespace System.Web.Security {
                     user.SetDirty();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(RemoveUserFromRole)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -369,7 +369,7 @@ namespace System.Web.Security {
                     user.SetDirty();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(RemoveUserFromRoles)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -400,7 +400,7 @@ namespace System.Web.Security {
                         }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(RemoveUsersFromRole)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -436,7 +436,7 @@ namespace System.Web.Security {
                         }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(Roles)}.{nameof(RemoveUsersFromRoles)}", swallowedException, "GetCurrentUser");
             }
         }
@@ -589,7 +589,7 @@ namespace System.Web.Security {
                         s_Provider = s_Providers[settings.DefaultProvider];
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(Roles)}.{nameof(InitializeDefaultProvider)}", swallowedException, "");
                     }
                 }

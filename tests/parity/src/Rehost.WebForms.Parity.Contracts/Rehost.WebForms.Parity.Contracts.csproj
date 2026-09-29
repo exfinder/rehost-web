@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Rehost.WebForms.Parity.Contracts</AssemblyName>
-    <RootNamespace>Rehost.WebForms.Parity.Contracts</RootNamespace>
-  </PropertyGroup>
-</Project>

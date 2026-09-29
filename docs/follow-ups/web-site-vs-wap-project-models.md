@@ -47,7 +47,7 @@ This is a measurement, not a production-deployment promise.
 - Add an explicit Web Site publish mode carrying runtime-owned source,
   including `App_Code`, `App_GlobalResources`, and `CodeFile` files.
 - Decide whether the WAP build contract belongs in a
-  `Rehost.WebForms.Sdk` package.
+  `Rehost.Web.Sdk` package.
 
 ## Done when
 

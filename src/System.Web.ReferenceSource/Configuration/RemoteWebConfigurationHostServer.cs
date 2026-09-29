@@ -88,7 +88,7 @@ namespace System.Web.Configuration {
                     fileInfo = new FileInfo(fileName);
                     fileAttributes = fileInfo.Attributes;
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(RemoteWebConfigurationHostServer)}.{nameof(WriteData)}", swallowedException, "new FileInfo");
                   }
                 if (((int)(fileAttributes & (FileAttributes.ReadOnly | FileAttributes.Hidden))) != 0)
@@ -126,7 +126,7 @@ namespace System.Web.Configuration {
                 try {
                     DuplicateFileAttributes(fileName, tempFile);
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(RemoteWebConfigurationHostServer)}.{nameof(WriteData)}#2", swallowedException, "DuplicateFileAttributes");
                   }
             }
@@ -134,7 +134,7 @@ namespace System.Web.Configuration {
                 try {
                     DuplicateTemplateAttributes(fileName, templateFileName);
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(RemoteWebConfigurationHostServer)}.{nameof(WriteData)}#3", swallowedException, "DuplicateTemplateAttributes");
                   }
             }

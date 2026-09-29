@@ -209,7 +209,7 @@ namespace System.Web.Configuration {
 
 #if !NETFRAMEWORK
         private const string MachineBrowserFilesUnsupported =
-            "Machine-wide browser definitions (aspnet_regbrowsers) are not supported by Rehost.WebForms. "
+            "Machine-wide browser definitions (aspnet_regbrowsers) are not supported by Rehost.Web. "
             + "Put .browser files in the application's App_Browsers folder instead.";
 #else
         internal bool UninstallInternal() {

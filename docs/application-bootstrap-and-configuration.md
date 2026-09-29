@@ -5,8 +5,8 @@ lifecycle remains in [ADR 0002](adr/0002-application-lifecycle.md).
 
 ## Host contract
 
-`AddRehostWebForms` builds `WebFormsApplicationOptions` and calls the static
-`WebFormsApplication.Initialize` synchronously. Initialization must complete
+`AddRehostWeb` builds `RehostWebOptions` and calls the static
+`RehostWebApplication.Initialize` synchronously. Initialization must complete
 before the host listens and may be called exactly once per process.
 
 Required options:
@@ -20,10 +20,10 @@ beside the runtime assembly. The shipped baselines are frozen — no public
 override; applications customize through their own web.config (ADR 0004). The
 path properties are internal, for in-repo test hosts only.
 `CompilationTempDirectory` optionally supplies the writable root for generated
-output; the `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable
+output; the `REHOST_COMPILATION_TEMPDIRECTORY` environment variable
 supplies the same root from the deployment. Any two of the option, the
 variable, and `<compilation tempDirectory>` that disagree fail preflight.
-Absent all three, the root is `~/.rehost-webforms/codegen` under the user
+Absent all three, the root is `~/.rehost/codegen` under the user
 profile, and a process without a profile fails preflight naming the option and
 the variable (ADR 0008).
 
@@ -62,9 +62,9 @@ global state mutated, so process replacement is required.
 The host output carries:
 
 ```text
-configs/rehost-webforms.machine.config
-configs/rehost-webforms.web.config
-configs/rehost-webforms.applicationHost.config
+configs/rehost.machine.config
+configs/rehost.web.config
+configs/rehost.applicationHost.config
 ```
 
 The first two paths may be overridden explicitly. The IIS baseline is resolved
@@ -85,7 +85,7 @@ worked example. Assembly-identity and portability deltas are inventoried in
 
 ## Activation and shutdown
 
-Bootstrap is separate from managed-pipeline activation. `UseRehostWebForms`
+Bootstrap is separate from managed-pipeline activation. `UseRehostWeb`
 registers host-stop cleanup. The first routed request evaluates a thread-safe
 `Lazy<ClassicPipelineDispatcher>` and calls `ApplicationManager.CreateObject`.
 That retained path creates the current-AppDomain `HostingEnvironment`, installs
@@ -102,7 +102,7 @@ is currently wired.
 - Configuration is immutable; changes require process replacement.
 - No IIS, registry, secondary-AppDomain, or native configuration-token lookup.
 - Runtime always uses full trust.
-- `FEATURE_PAL` is not defined by the Runtime project. Narrow portable
+- `FEATURE_PAL` is not defined by the runtime project. Narrow portable
   deviations retain Framework behavior under `NETFRAMEWORK`.
 
 Open lifecycle work is indexed in the [backlog](backlog.md).

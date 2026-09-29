@@ -55,7 +55,7 @@ namespace System.Web.Util {
                     try {
                         timeoutSetInAppDomain = AppDomain.CurrentDomain.GetData("REGEX_DEFAULT_MATCH_TIMEOUT") != null;
                     } catch (Exception swallowedException) {
-                          System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                          System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                               $"{nameof(RegexUtil)}.{nameof(IsRegexTimeoutSetInAppDomain)}_get", swallowedException, "AppDomain.CurrentDomain.GetData");
                       }
                     _isRegexTimeoutSetInAppDomain = timeoutSetInAppDomain;

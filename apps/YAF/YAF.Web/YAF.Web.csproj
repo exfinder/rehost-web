@@ -10,7 +10,7 @@
     <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
     <PackageReference Include="OEmbed.Core" Version="2.0.7" />
     <ProjectReference Include="../YAF.Configuration/YAF.Configuration.csproj" />
     <ProjectReference Include="../YAF.Core/YAF.Core.csproj" />

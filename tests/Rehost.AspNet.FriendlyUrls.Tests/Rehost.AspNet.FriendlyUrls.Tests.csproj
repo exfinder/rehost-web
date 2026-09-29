@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Rehost.AspNet.FriendlyUrls/Rehost.AspNet.FriendlyUrls.csproj" />
+    <ProjectReference Include="../../src/Rehost.Web/Rehost.Web.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -28,7 +28,7 @@ Three groups:
   `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host, and
   `Rehost.AspNet.WebApi.WebHost` already brings `Core` and `Client`, so a Web API
   application needs that one line. `Microsoft.Web.Infrastructure` goes because
-  `Rehost.WebForms` brings `Rehost.Web.Infrastructure` with the same API;
+  `Rehost.Web` brings `Rehost.Web.Infrastructure` with the same API;
   keeping the original line gives CS0433 wherever application code uses its
   types. `Microsoft.AspNet.Providers.Core` goes when only
   `<sessionState customProvider>` names it, and `WebGrease`/`Antlr` go because
@@ -111,7 +111,7 @@ runtime. The order of work that has held for six applications:
 2. Recompile only proven blockers, verbatim, with a provenance record
    (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb`, Web API's
    `Microsoft.AspNet.WebApi.WebHost` and `Microsoft.AspNet.WebPages` are the
-   three the alpha ships, as `Rehost.WebForms.Owin.Host.SystemWeb`,
+   three the alpha ships, as `Rehost.Owin.Host.SystemWeb`,
    `Rehost.AspNet.WebApi.WebHost` and `Rehost.AspNet.WebPages`; the AJAX
    Control Toolkit, Autofac's Web integration and YAF's fourteen projects are
    rebuilt as source under `apps/`.
@@ -181,12 +181,12 @@ Pick by deployment shape:
 
 - **Single instance on a machine or a container with a mounted volume** —
   declare nothing. Auto-generated keys persist in a per-application key file
-  (host `MachineKeyDirectory` option, default `~/.rehost-webforms/machine-keys`),
+  (host `MachineKeyDirectory` option, default `~/.rehost/machine-keys`),
   so restarts keep ViewState, forms tickets, and Katana cookies valid
   ([ADR 0010](adr/0010-machine-key-persistence.md)).
 - **Containers and farms** — keep key attributes auto-generated in config and
-  supply the keys through `REHOST_WEBFORMS_MACHINEKEY_VALIDATIONKEY` and
-  `REHOST_WEBFORMS_MACHINEKEY_DECRYPTIONKEY`. Each variable substitutes the
+  supply the keys through `REHOST_MACHINEKEY_VALIDATIONKEY` and
+  `REHOST_MACHINEKEY_DECRYPTIONKEY`. Each variable substitutes the
   whole attribute string before parsing, exactly as if written in web.config.
   Set both variables or neither — a lone one fails at startup, as does an
   explicit configured key alongside a set variable.
@@ -222,7 +222,7 @@ Framework's `Temporary ASP.NET Files` becomes a per-application directory the
 host resolves at startup. Pick by deployment shape:
 
 - **Local development and plain servers** — declare nothing. Output lands in
-  `~/.rehost-webforms/codegen/<site>/<hash>` under the user profile, beside the
+  `~/.rehost/codegen/<site>/<hash>` under the user profile, beside the
   machine keys; the startup log names the exact directory (event 13). It is
   safe to delete (the next start recompiles) and an unchanged application
   restarts without recompiling ([ADR 0008](adr/0008-codegen-storage.md)). Do
@@ -231,7 +231,7 @@ host resolves at startup. Pick by deployment shape:
   under the application's `bin` feeds the hash that decides reuse, so every
   restart recompiles, and preflight warns once (event 14).
 - **Containers** — a read-only root filesystem refuses the default at boot.
-  Point `REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` (or the host
+  Point `REHOST_COMPILATION_TEMPDIRECTORY` (or the host
   `CompilationTempDirectory` option) at a mounted writable path.
 
 Say it in at most one place: the option, the variable, and a web.config

@@ -11,10 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.FriendlyUrls" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.Optimization" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.Optimization.WebForms" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.ScriptManager.Bundles" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.FriendlyUrls" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.Web.Optimization" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.Web.Optimization.WebForms" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.ScriptManager.MSAjax" Version="$(RehostVersion)" />
   </ItemGroup>
 </Project>

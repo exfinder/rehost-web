@@ -319,7 +319,7 @@ namespace System.Web.Caching {
                 WebBaseEvent.RaiseRuntimeError(e, typeof(OutputCache));
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(OutputCache)}.{nameof(HandleErrorWithoutContext)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
             }
         }

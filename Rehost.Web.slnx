@@ -1,0 +1,58 @@
+<Solution>
+  <Folder Name="/eng/">
+    <Project Path="eng/Rehost.Web.Build.Tasks/Rehost.Web.Build.Tasks.csproj" />
+    <Project Path="eng/Rehost.Web.GeneratedInputs/Rehost.Web.GeneratedInputs.csproj" />
+    <Project Path="eng/Rehost.Web.ReferenceSource.BuildInputs/Rehost.Web.ReferenceSource.BuildInputs.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Rehost.Web.SampleApp/Rehost.Web.SampleApp.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Rehost.AspNet.FriendlyUrls/Rehost.AspNet.FriendlyUrls.csproj" />
+    <Project Path="src/Rehost.AspNet.Web.Optimization.WebForms/Rehost.AspNet.Web.Optimization.WebForms.csproj" />
+    <Project Path="src/Rehost.AspNet.WebPages/Rehost.AspNet.WebPages.csproj" />
+    <Project Path="src/Rehost.Owin.Host.SystemWeb/Rehost.Owin.Host.SystemWeb.csproj" />
+    <Project Path="src/Rehost.ScriptManager.MSAjax/Rehost.ScriptManager.MSAjax.csproj" />
+    <Project Path="src/Rehost.Web.ApplicationServices/Rehost.Web.ApplicationServices.csproj" />
+    <Project Path="src/Rehost.Web.AspNetCore/Rehost.Web.AspNetCore.csproj" />
+    <Project Path="src/Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" />
+    <Project Path="src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
+    <Project Path="src/Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" />
+    <Project Path="src/Rehost.Web.Optimization/Rehost.Web.Optimization.csproj" />
+    <Project Path="src/Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <Project Path="src/Rehost.Web.Services/Rehost.Web.Services.csproj" />
+    <Project Path="src/Rehost.Web.Templates/Rehost.Web.Templates.csproj" />
+    <Project Path="src/Rehost.Web.WebPages.Deployment/Rehost.Web.WebPages.Deployment.csproj" />
+    <Project Path="src/Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj" />
+    <Project Path="src/Rehost.Web.WebPages/Rehost.Web.WebPages.csproj" />
+    <Project Path="src/Rehost.Web/Rehost.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/parity/">
+    <Project Path="tests/parity/src/Rehost.Web.Parity.Contracts/Rehost.Web.Parity.Contracts.csproj" />
+    <Project Path="tests/parity/src/Rehost.Web.Parity.Harness/Rehost.Web.Parity.Harness.csproj" />
+    <Project Path="tests/parity/src/Rehost.Web.Parity.Probes/Rehost.Web.Parity.Probes.csproj" />
+    <Project Path="tests/parity/src/Rehost.Web.Parity.Runner/Rehost.Web.Parity.Runner.csproj" />
+    <Project Path="tests/parity/src/Rehost.Web.Parity.OracleHost/Rehost.Web.Parity.OracleHost.csproj" />
+    <Project Path="tests/parity/src/Rehost.Web.Parity.AdapterHost/Rehost.Web.Parity.AdapterHost.csproj" />
+    <Project Path="tests/parity/src/Rehost.Web.Parity.PortableHost/Rehost.Web.Parity.PortableHost.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Rehost.Web.Infrastructure.Tests/Rehost.Web.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.WebPages.Deployment.Tests/Rehost.Web.WebPages.Deployment.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.CallContext.Contract.Tests/Rehost.Web.CallContext.Contract.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.Extensions.Tests/Rehost.Web.Extensions.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.FixtureStaging.Tasks/Rehost.Web.FixtureStaging.Tasks.csproj" />
+    <Project Path="tests/Rehost.AspNet.FriendlyUrls.Tests/Rehost.AspNet.FriendlyUrls.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.AspNetCore.Tests/Rehost.Web.AspNetCore.Tests.csproj" />
+    <Project Path="tests/Rehost.Owin.Host.SystemWeb.Tests/Rehost.Owin.Host.SystemWeb.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.Packages.Tests/Rehost.Web.Packages.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.Tests/Rehost.Web.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.ScenarioProtocol/Rehost.Web.ScenarioProtocol.csproj" />
+    <Project Path="tests/Rehost.ScriptManager.Tests/Rehost.ScriptManager.Tests.csproj" />
+    <Project Path="tests/Rehost.Web.ScenarioHost/Rehost.Web.ScenarioHost.csproj" />
+    <Project Path="tests/Rehost.Web.TestSupport/Rehost.Web.TestSupport.csproj" />
+    <Project Path="tests/Rehost.Web.ScenarioProbes/Rehost.Web.ScenarioProbes.csproj" />
+    <Project Path="tests/Rehost.Web.ScenarioProbes.Dynamic/Rehost.Web.ScenarioProbes.Dynamic.csproj" />
+    <Project Path="tests/Rehost.Web.Services.Tests/Rehost.Web.Services.Tests.csproj" />
+  </Folder>
+</Solution>

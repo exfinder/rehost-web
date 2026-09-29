@@ -10,7 +10,7 @@
     <EmbeddedResource Include="$(Source)Messages.resx" Link="Messages.resx" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
     <ProjectReference Include="../YAF.Configuration/YAF.Configuration.csproj" />
     <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />
   </ItemGroup>

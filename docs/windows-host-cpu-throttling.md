@@ -52,7 +52,7 @@ policy being disabled is execution speed throttling, hence the API constant
 | `0` | `0` | system-managed, the throttled default over SSH |
 
 ```powershell
-pwsh -NoProfile -File eng\Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.WebForms.slnx --no-build'
+pwsh -NoProfile -File eng\Invoke-Unthrottled.ps1 -Command 'dotnet test Rehost.Web.slnx --no-build'
 ```
 
 A copy lives at `~\bin\Invoke-Unthrottled.ps1` so the wrapper
@@ -71,7 +71,7 @@ the reason given in
 [windows-validation-host.md](windows-validation-host.md#exit-codes-over-ssh):
 
 ```bash
-ssh winbox 'pwsh -NoProfile -File $HOME\bin\Invoke-Unthrottled.ps1 -WorkingDirectory $HOME\source\repos\rehost-webforms -Command "dotnet test Rehost.WebForms.slnx --no-build"; exit $LASTEXITCODE'
+ssh winbox 'pwsh -NoProfile -File $HOME\bin\Invoke-Unthrottled.ps1 -WorkingDirectory $HOME\source\repos\rehost-web -Command "dotnet test Rehost.Web.slnx --no-build"; exit $LASTEXITCODE'
 ```
 
 ## What does not work

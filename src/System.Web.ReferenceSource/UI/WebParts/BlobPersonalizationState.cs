@@ -1170,7 +1170,7 @@ namespace System.Web.UI.WebControls.WebParts {
                         propertySet = true;
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(BlobPersonalizationState)}.{nameof(SetPersonalizedProperties)}", swallowedException, "FastPropertyAccessor.SetProperty");
                     }
                 }

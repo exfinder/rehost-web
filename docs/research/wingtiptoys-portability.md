@@ -115,12 +115,12 @@ Windows- or platform-bound.
 | Package | Class | Disposition |
 | --- | --- | --- |
 | `Microsoft.Owin` 2.1.0, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Facebook`, `.Twitter`, `.MicrosoftAccount`, `Owin` 1.0 | B | Consumed from nuget.org at 4.2.3, exactly as `WebFormsIdentityApplication.App` does (`apps/WebFormsIdentityApplication/WebFormsIdentityApplication.App/…csproj:27-36`) |
-| `Microsoft.Owin.Host.SystemWeb` 2.1.0 | A | `Rehost.WebForms.Owin.Host.SystemWeb` — the Katana recompile already landed. **No new recompile needed** |
+| `Microsoft.Owin.Host.SystemWeb` 2.1.0 | A | `Rehost.Owin.Host.SystemWeb` — the Katana recompile already landed. **No new recompile needed** |
 | `Microsoft.AspNet.Identity.Core` / `.Owin` / `.EntityFramework` 2.1.0 | B | Same packages at 2.2.4 from nuget.org, the Identity-application precedent |
 | `EntityFramework` 6.1.1 | B | 6.5.2 from nuget.org, the Identity/eShop precedent |
-| `Microsoft.AspNet.Web.Optimization` 1.1.3, `.WebForms`, `WebGrease` 1.5.2, `Antlr` 3.4.1.9004, `Newtonsoft.Json` 6.0.3 | A | `Rehost.WebForms.Optimization`, `.Optimization.WebForms`; the `<controls>` assembly rewrite is in the default XDT (`src/Rehost.WebForms.Hosting/build/Web.Rehost.config:13-15`) |
-| `Microsoft.AspNet.FriendlyUrls` + `.Core` 1.0.2 | A | `Rehost.WebForms.FriendlyUrls` |
-| `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.WebForms.ScriptManager.Bundles` registers `MsAjaxBundle`, `WebFormsBundle` and the MicrosoftAjax names |
+| `Microsoft.AspNet.Web.Optimization` 1.1.3, `.WebForms`, `WebGrease` 1.5.2, `Antlr` 3.4.1.9004, `Newtonsoft.Json` 6.0.3 | A | `Rehost.AspNet.Web.Optimization`, `.WebForms`; the `<controls>` assembly rewrite is in the default XDT (`src/Rehost.Web.AspNetCore/build/Web.Rehost.config:13-15`) |
+| `Microsoft.AspNet.FriendlyUrls` + `.Core` 1.0.2 | A | `Rehost.AspNet.FriendlyUrls` |
+| `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.AspNet.ScriptManager.MSAjax` registers `MsAjaxBundle`, `WebFormsBundle` and the MicrosoftAjax names |
 | `AspNet.ScriptManager.jQuery` 1.10.2 | **C, blocking** | Registers the `jquery` `ScriptResourceMapping`. Unregistered here, and unlike eShop the consequence is provably fatal — see gap 1 |
 | `AspNet.ScriptManager.bootstrap` 3.0.0 | **C** | Registers `bootstrap`, referenced from `Site.Master:26` on every page. Same shim |
 | `Microsoft.AspNet.Providers.Core` 2.0.0 (`System.Web.Providers`) | **C, inert** | Named only as `<sessionState customProvider>`, which `mode="InProc"` never resolves. `WebFormsIdentityApplication` carries the identical line and records that it "parses and activates exactly as it does on Framework" (`apps/WebFormsIdentityApplication/README.md`, web.config section) |
@@ -148,10 +148,10 @@ work has no consumer here**.
 | `<membership>`, `<profile>`, `<roleManager>` each with `<clear />` (`:36-59`) | A | The template's "membership disabled" comment blocks. **No provider is configured anywhere in this application**; roles come from Identity claims |
 | `<customErrors mode="On" defaultRedirect="ErrorPage.aspx…">` + 404 row (`:21-23`) | A (unverified) | Surface exists; no compatibility claim. It will mask real bring-up failures behind a friendly page — turn it off while diagnosing |
 | `<pages><namespaces>`/`<controls>` webopt registration (`:27-35`) | A | Default XDT rewrites the assembly name |
-| `<httpModules>` with three Elmah rows (`:71-75`) | A (dead text) | `<validation validateIntegratedModeConfiguration="false" />` at `:80` waives the classic block; `ClassicSectionValidation.Validate` returns early (`src/Rehost.WebForms.Runtime/Compatibility/IisConfig/ClassicSectionValidation.cs:21-46`). Same as eShop |
+| `<httpModules>` with three Elmah rows (`:71-75`) | A (dead text) | `<validation validateIntegratedModeConfiguration="false" />` at `:80` waives the classic block; `ClassicSectionValidation.Validate` returns early (`src/Rehost.Web/Compatibility/IisConfig/ClassicSectionValidation.cs:21-46`). Same as eShop |
 | `<system.webServer><modules>` (`:77-79`) | **C, blocking** | Effective list: `<remove name="FormsAuthentication" />` (unhonored, as in the Identity application) plus `ErrorLog`, `ErrorMail`, `ErrorFilter` — all `Elmah.*`. A module row whose type will not load fails its URLs with the entry named (MH22a) |
 | `<configSections>` `elmah` sectionGroup with four `Elmah.*` handler types (`:10-15`) and `<elmah><security/></elmah>` (`:107-112`) | A (unverified) | Section-handler types resolve lazily on Framework; whether the port's activation-time configuration load touches them is unmeasured. Cheapest answer is to drop the whole ELMAH surface in one XDT |
-| `<location path="elmah.axd">` with `<httpHandlers>` and `<handlers>` (`:113-132`) | A (unverified) | The port builds folder handler lists by discovering folder `Web.config` files (`src/Rehost.WebForms.Runtime/Compatibility/IisConfig/IisFolderHandlers.cs:14-21`), not from root `<location>` blocks — the same reading the AjaxControlToolkit analysis recorded. Probably inert; nothing in the journey visits `elmah.axd` |
+| `<location path="elmah.axd">` with `<httpHandlers>` and `<handlers>` (`:113-132`) | A (unverified) | The port builds folder handler lists by discovering folder `Web.config` files (`src/Rehost.Web/Compatibility/IisConfig/IisFolderHandlers.cs:14-21`), not from root `<location>` blocks — the same reading the AjaxControlToolkit analysis recorded. Probably inert; nothing in the journey visits `elmah.axd` |
 | `<connectionStrings>` `DefaultConnection` = `(LocalDb)\v11.0`, `WingtipToys` = `(LocalDB)\v11.0` + `AttachDbFilename=\|DataDirectory\|\wingtiptoys.mdf` (`:16-19`) | **D** | LocalDb is a Windows-only engine. `AttachDbFilename` is a LocalDb/Express user-instance feature with no container equivalent — the swap must become a plain `Initial Catalog=`, not just a server rename |
 | `<entityFramework><defaultConnectionFactory type="…LocalDbConnectionFactory"><parameter value="v11.0" />` (`:97-102`) | **D** | Must go with the connection strings |
 | `<runtime><assemblyBinding>` — Newtonsoft, WebGrease, EntityFramework (`:81-96`) | A (dropped) | Default XDT removes `<runtime>` wholesale |
@@ -289,7 +289,7 @@ as static files, and not hidden by name.
 
 **Expected to run with no library recompile.** This is the first application
 whose entire third-party closure is already solved: the OWIN host is
-`Rehost.WebForms.Owin.Host.SystemWeb`, Identity 2.x / EF6 / Owin.Security come
+`Rehost.Owin.Host.SystemWeb`, Identity 2.x / EF6 / Owin.Security come
 from nuget.org unchanged, Optimization and FriendlyUrls have `Rehost.*`
 packages, and the one remaining `System.Web`-binding assembly (ELMAH) is
 unreferenced by application code and can be dropped rather than ported.
@@ -335,7 +335,7 @@ value providers; `customErrors` end to end.
    `Account/Login.aspx` — the journey's first two pages — carry
    `RequiredFieldValidator`s. The definition came from the
    `AspNet.ScriptManager.jQuery` package, which the port replaces with
-   `Rehost.WebForms.ScriptManager.Bundles` (names only). Fix: an
+   `Rehost.AspNet.ScriptManager.MSAjax` (names only). Fix: an
    `apps/WingtipToys/WingtipToys.App/PreApplicationStartCode.cs` in the shape of
    `apps/eShopLegacyWebForms/eShopLegacyWebForms.App/PreApplicationStartCode.cs:16-30`,
    pointing at `~/Scripts/jquery-1.10.2.min.js` and `~/Scripts/bootstrap.min.js`.

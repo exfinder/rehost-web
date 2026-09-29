@@ -9,8 +9,8 @@ Imports:
 
 | Upstream tree | Tree object | Files taken | Local destination |
 | --- | --- | ---: | --- |
-| `src/Microsoft.Owin.Host.SystemWeb` | `cb19ba15b1d524a42842d8bad9d5ce88857e8193` | 58 of 60 | `src/Rehost.WebForms.Owin.Host.SystemWeb` |
-| `src/Owin.Loader` | `82745d870dd9c258831870f1fd66e09b01b27f3b` | 3 of 7 | `src/Rehost.WebForms.Owin.Host.SystemWeb/Loader` |
+| `src/Microsoft.Owin.Host.SystemWeb` | `cb19ba15b1d524a42842d8bad9d5ce88857e8193` | 58 of 60 | `src/Rehost.Owin.Host.SystemWeb` |
+| `src/Owin.Loader` | `82745d870dd9c258831870f1fd66e09b01b27f3b` | 3 of 7 | `src/Rehost.Owin.Host.SystemWeb/Loader` |
 
 The sibling checkout is never a build input. Both trees are copied
 byte-for-byte, keeping upstream directory layout, namespaces, and the
@@ -32,9 +32,9 @@ the checked-in `.Designer.cs` files pass to `ResourceManager`.
 Every source header declares Apache-2.0; the repository's `LICENSE.txt` is
 preserved at `third_party/aspnet/AspNetKatana/LICENSE.txt`.
 
-The port ships as the standalone `Rehost.WebForms.Owin.Host.SystemWeb` package,
-not inside `Rehost.WebForms`. It depends on
-`Rehost.WebForms` plus the unmodified nuget.org `Microsoft.Owin` 4.2.3
+The port ships as the standalone `Rehost.Owin.Host.SystemWeb` package,
+not inside `Rehost.Web`. It depends on
+`Rehost.Web` plus the unmodified nuget.org `Microsoft.Owin` 4.2.3
 and `Owin` 1.0.0 packages, consumed under `NU1701`. `Microsoft.Web.Infrastructure`
 is not needed: Katana 4.x already calls `HttpApplication.RegisterModule`
 directly, so the `PreApplicationStartMethod` attribute binds as imported.

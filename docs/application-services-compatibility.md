@@ -1,6 +1,6 @@
 # Application Services compatibility
 
-`Rehost.WebForms.ApplicationServices` preserves the Reference Source
+`Rehost.Web.ApplicationServices` preserves the Reference Source
 membership/application-services sibling boundary. Its pinned Microsoft sources
 remain authoritative.
 
@@ -14,6 +14,6 @@ friend-assembly relationship. Shared assembly identity constants come from the
 compile-time-only BuildInputs project; it is not a product dependency.
 
 Current assembly:
-`src/Rehost.WebForms.ApplicationServices/Rehost.WebForms.ApplicationServices.csproj`.
+`src/Rehost.Web.ApplicationServices/Rehost.Web.ApplicationServices.csproj`.
 Loader adaptation:
-`src/Rehost.WebForms.ApplicationServices/Compatibility/CustomLoaderHelper.cs`.
+`src/Rehost.Web.ApplicationServices/Compatibility/CustomLoaderHelper.cs`.

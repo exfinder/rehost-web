@@ -926,7 +926,7 @@ namespace System.Web.Caching {
                         dbState.ReleaseConnection(ref sqlConn, ref sqlCmd, pollExpt != null);
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(SqlCacheDependencyManager)}.{nameof(PollDatabaseForChanges)}", swallowedException, "sqlReader.Close");
                     }
 
@@ -947,7 +947,7 @@ namespace System.Web.Caching {
                                     cacheInternal.Remove(GetMoniterKey(dbState._database, (string)key));
                                 }
                                 catch (Exception swallowedException) {
-                                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                         $"{nameof(SqlCacheDependencyManager)}.{nameof(PollDatabaseForChanges)}#2", swallowedException, "cacheInternal.Remove");
                                 }
                                 
@@ -1719,7 +1719,7 @@ namespace System.Web.Caching {
                     }
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(SqlCacheDependencyAdmin)}.{nameof(GetEnabledTables)}", swallowedException, "sqlReader.Close");
                 }
             }

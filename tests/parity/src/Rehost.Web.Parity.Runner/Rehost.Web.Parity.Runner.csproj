@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net481;net10.0</TargetFrameworks>
+    <AssemblyName>Rehost.Web.Parity.Runner</AssemblyName>
+    <RootNamespace>Rehost.Web.Parity.Runner</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Parity.Contracts/Rehost.Web.Parity.Contracts.csproj" />
+    <ProjectReference Include="../Rehost.Web.Parity.Harness/Rehost.Web.Parity.Harness.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+    <Compile Remove="PortableSessionRunner.cs;AdapterSessionRunner.cs" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <Compile Remove="OracleSessionRunner.cs" />
+    <ProjectReference Include="../../../../src/Rehost.Web/Rehost.Web.csproj" />
+  </ItemGroup>
+</Project>

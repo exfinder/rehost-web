@@ -7,7 +7,7 @@ which owns the wider drain/recycle policy.
 ## Problem
 
 `SYSLIB0024` is suppressed project-wide in
-`src/Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj`, hiding every new
+`src/Rehost.Web/Rehost.Web.csproj`, hiding every new
 `AppDomain.Unload` use from a warnings-as-errors build.
 
 ## Current state
@@ -34,6 +34,6 @@ explicit unsupported behavior records the boundary.
 ## Done when
 
 - `ProcessHost.cs:1240` is unreachable or explicitly unsupported.
-- `SYSLIB0024` is absent from the `Rehost.WebForms.Runtime` `NoWarn` list.
+- `SYSLIB0024` is absent from the `Rehost.Web` `NoWarn` list.
 - The runtime still builds with warnings treated as errors.
 - Any remaining suppression is narrow and documented at its site.

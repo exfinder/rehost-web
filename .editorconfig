@@ -15,5 +15,5 @@ dotnet_diagnostic.CA1416.severity = none
 [src/System.Web.Extensions.ReferenceSource/**.cs]
 dotnet_diagnostic.CA1416.severity = none
 
-[src/Rehost.WebForms.Runtime/Compatibility/Resources/**.cs]
+[src/Rehost.Web/Compatibility/Resources/**.cs]
 dotnet_diagnostic.CA1416.severity = none

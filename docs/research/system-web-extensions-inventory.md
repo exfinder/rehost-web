@@ -75,7 +75,7 @@ Behavior-critical uses include:
 - BuildManager/runtime assembly discovery
   ([selection](../../src/System.Web.Extensions.ReferenceSource/ui/ScriptManager.cs#L312-L342)).
 
-The approved sibling `Rehost.WebForms.Extensions` assembly uses direct Runtime friend access,
+The approved sibling `Rehost.Web.Extensions` assembly uses direct Runtime friend access,
 preserving the seam without public adapters or Framework identity claims.
 
 Framework configuration also registers the section group, compilation assembly, handlers,

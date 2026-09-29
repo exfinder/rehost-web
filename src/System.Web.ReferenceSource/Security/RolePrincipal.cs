@@ -114,7 +114,7 @@ namespace System.Web.Security {
                 ms = new System.IO.MemoryStream(bTicket);
                 rp = (new BinaryFormatter()).Deserialize(ms) as RolePrincipal;
             } catch (Exception swallowedException) {
-                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                  System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                       $"{nameof(RolePrincipal)}.{nameof(InitFromEncryptedTicket)}", swallowedException, "new System.IO.MemoryStream");
               } finally {
                 ms.Close();
@@ -376,7 +376,7 @@ namespace System.Web.Security {
             try {
                 _Identity = info.GetValue("_Identity", typeof(IIdentity)) as IIdentity;
             } catch (Exception swallowedException) {
-                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                  System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                       $"{nameof(RolePrincipal)}.ctor", swallowedException, "info.GetValue");
               } // Ignore Exceptions
             _ProviderName = info.GetString("_ProviderName");
@@ -423,7 +423,7 @@ namespace System.Web.Security {
                         break;
                     default:
                         throw new PlatformNotSupportedException(
-                            "Rehost.WebForms restores RolePrincipal only from a role cookie payload. Entry '" + entry.Name +
+                            "Rehost.Web restores RolePrincipal only from a role cookie payload. Entry '" + entry.Name +
                             "' comes from ClaimsPrincipal.GetObjectData, and ClaimsPrincipal cannot be deserialized on this platform.");
                 }
             }
@@ -448,7 +448,7 @@ namespace System.Web.Security {
             try {
                 info.AddValue("_Identity", _Identity);
             } catch (Exception swallowedException) {
-                  System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                  System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                       $"{nameof(RolePrincipal)}.{nameof(GetObjectData)}", swallowedException, "info.AddValue");
               } // Ignore Exceptions
             info.AddValue("_ProviderName", _ProviderName);

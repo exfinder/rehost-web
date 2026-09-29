@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>System.Web.Optimization</RootNamespace>
+    <PackageId>Rehost.AspNet.Web.Optimization</PackageId>
+    <Description>ASP.NET script and stylesheet optimization for Rehost.Web.</Description>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);CS3001;CS3002;CS3003;SYSLIB0021</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../System.Web.Optimization.ReferenceSource/**/*.cs" />
+    <Compile Remove="../System.Web.Optimization.ReferenceSource/Properties/AssemblyInfo.cs" />
+    <Compile Remove="../System.Web.Optimization.ReferenceSource/Properties/AssemblyMetadataAttribute.cs" />
+    <EmbeddedResource
+      Include="../System.Web.Optimization.ReferenceSource/Resources/OptimizationResources.resx"
+      LogicalName="System.Web.Optimization.Resources.OptimizationResources.resources" />
+    <EmbeddedResource
+      Include="../System.Web.Optimization.ReferenceSource/BundleManifestSchema.xsd"
+      LogicalName="System.Web.Optimization.BundleManifestSchema.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antlr" NoWarn="NU1701" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="WebGrease" NoWarn="NU1701" />
+  </ItemGroup>
+</Project>

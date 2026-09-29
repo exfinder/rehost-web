@@ -227,7 +227,7 @@ namespace System.Web {
                             Directory.CreateDirectory(tempDir);
                         }
                         catch (Exception swallowedException) {
-                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                 $"{nameof(TempFile)}.ctor", swallowedException, "Directory.CreateDirectory");
                         }
                     }
@@ -254,7 +254,7 @@ namespace System.Web {
                         ((IDisposable)_tempFiles).Dispose();
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(TempFile)}.{nameof(Dispose)}", swallowedException, "_filestream.Close");
                     }
                 }

@@ -1,6 +1,6 @@
 # BlogEngine.NET portability assessment
 
-Preliminary static assessment of BlogEngine.NET on Rehost WebForms. This is
+Preliminary static assessment of BlogEngine.NET on Rehost.Web. This is
 not an import plan or support claim. No BlogEngine build, setup flow, or
 application code was executed. Any later baseline or probe must use a
 disposable copy, never the source checkout. The

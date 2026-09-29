@@ -8,7 +8,7 @@ Microsoft's build compiled each assembly against the previously built binary
 rather than from one dependency-ordered graph, and neither assembly's project
 file was published. MSBuild cannot express that shape at all.
 
-Every satellite therefore depends on `Rehost.WebForms.Runtime` and none is
+Every satellite therefore depends on `Rehost.Web` and none is
 depended upon by it, which is the direction Framework's layering actually ran.
 The port first carried the `System.Web.Services` edge inverted, with a
 config-only leaf supplying `<webServices>`. That compiled, and it silently made
@@ -22,7 +22,7 @@ stayed config-only. The ASMX port (2026-08) reversed that: the reference-source
 section is the assembly's wiring hub — it instantiates the server protocol
 factories and exposes `internal` members the protocol machinery consumes — so
 it can only compile alongside that machinery. The full section now lives in
-`Rehost.WebForms.WebServices`, imported unmodified; the runtime carries no
+`Rehost.Web.Services`, imported unmodified; the runtime carries no
 `System.Web.Services.Configuration` types at all. The runtime's single
 compile-time need, the typed `SystemWebSectionGroup.WebServices` getter, is
 disabled surgically; the root-config `<section>` entry names the satellite and
@@ -43,20 +43,20 @@ A handler entry is the mild case: `validate="False"`, as Framework uses for
 missing satellite costs that path rather than every activation.
 
 Framework could keep such promises because the GAC guaranteed the assemblies.
-This port names `Rehost.WebForms.Extensions` under `<controls>` so that an
+This port names `Rehost.Web.Extensions` under `<controls>` so that an
 unchanged application parses `<asp:ScriptManager>`, and keeps the promise by
-shipping the four assemblies together. The `Rehost.WebForms` package carries
-`Rehost.WebForms.Runtime`, `Rehost.WebForms.ApplicationServices`,
-`Rehost.WebForms.Extensions` and `Rehost.WebForms.WebServices` in its `lib/`,
+shipping the four assemblies together. The `Rehost.Web` package carries
+`Rehost.Web`, `Rehost.Web.ApplicationServices`,
+`Rehost.Web.Extensions` and `Rehost.Web.Services` in its `lib/`,
 owns the root configuration, and lists their external dependencies. A fifth
 component, `Rehost.Web.Infrastructure`, sits in the same `lib/` for a different
 reason. No configuration names it, but satellites and application code compile
-against it, and every one of them already depends on `Rehost.WebForms`. The
+against it, and every one of them already depends on `Rehost.Web`. The
 five remain separate assemblies and projects but are not packages of their own,
 and no public package names their project IDs as a dependency (public alpha
 contract, GitHub #8). Satellite packages reference the component projects with
 `PrivateAssets="all"` and the bundle project for the dependency edge, so their
-nuspecs name `Rehost.WebForms` alone. The consumer targets ship as
+nuspecs name `Rehost.Web` alone. The consumer targets ship as
 `buildTransitive/`, because ordinary `build/` assets do not flow through package
 dependencies.
 
@@ -71,5 +71,5 @@ upstream's packages and assemblies do not map one to one:
 `.Deployment`, which ship as `Rehost.Web.WebPages`, `.Razor` and `.Deployment`
 in `Rehost.AspNet.WebPages`. `.Razor` references `Rehost.Web.WebPages`, so no
 component can carry all three, and a pack-only project bundles them the way
-`Rehost.WebForms` bundles its five. The `Rehost.WebForms.*` family keeps its
+`Rehost.Web` bundles its five. The `Rehost.Web.*` family keeps its
 names.

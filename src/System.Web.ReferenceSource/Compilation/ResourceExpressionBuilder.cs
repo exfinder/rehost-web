@@ -46,7 +46,7 @@ namespace System.Web.Compilation {
                 fields = ParseExpressionInternal(expression);
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(ResourceExpressionBuilder)}.{nameof(ParseExpression)}", swallowedException, "ParseExpressionInternal");
             }
 
@@ -71,7 +71,7 @@ namespace System.Web.Compilation {
                         o = resourceProvider.GetObject(fields.ResourceKey, CultureInfo.InvariantCulture);
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(ResourceExpressionBuilder)}.{nameof(ParseExpression)}#2", swallowedException, "resourceProvider.GetObject");
                     }
                 }

@@ -10,7 +10,7 @@ The API comes from the 2.0.0 assembly's metadata, confirmed by compiling a
 seven methods, in the original namespaces `Microsoft.Web.Infrastructure`,
 `Microsoft.Web.Infrastructure.DynamicModuleHelper` and
 `Microsoft.Web.Infrastructure.DynamicValidationHelper`. The assembly carries the
-package family version and ships inside `Rehost.WebForms`
+package family version and ships inside `Rehost.Web`
 ([ADR 0009](../adr/0009-assembly-graph.md)).
 
 Every method is new code that calls what the port's `System.Web` already has:

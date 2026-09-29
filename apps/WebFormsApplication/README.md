@@ -11,9 +11,9 @@ runtime from packages — the way an external consumer would.
 | `WebFormsApplication.App/` | The port of the app assembly: compiles the legacy folder's `*.cs` into `WebFormsApplication.dll`, exactly what the WAP produced in `bin/`. |
 | `WebFormsApplication.Host/` | The process: a ~30-line Kestrel host. |
 
-The mental model for a migration: **the GAC becomes the `Rehost.WebForms`
+The mental model for a migration: **the GAC becomes the `Rehost.Web`
 package; each `packages.config` line maps to a `Rehost.*` package; the
-host exe adds `Rehost.WebForms.Hosting`; the legacy folder is never touched.**
+host exe adds `Rehost.Web.AspNetCore`; the legacy folder is never touched.**
 
 ## Commands
 

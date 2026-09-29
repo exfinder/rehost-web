@@ -23,7 +23,7 @@ on Windows x64, Linux, and macOS arm64:
   bundles, static assets, mobile master and view switching).
 - [`apps/WebFormsIdentityApplication`](apps/WebFormsIdentityApplication/README.md)
   — the "Individual User Accounts" template: OWIN (Katana recompiled as
-  `Rehost.WebForms.Owin.Host.SystemWeb`), ASP.NET Identity 2.2 and Entity
+  `Rehost.Owin.Host.SystemWeb`), ASP.NET Identity 2.2 and Entity
   Framework 6.4 consumed from nuget.org, SQL Server in a container. `smoke.sh`
   matches every row of the IIS Express baseline (register, log in, log off,
   URL authorization challenge, cookies).
@@ -78,7 +78,7 @@ the release. The stock template is the first run; YAF is the richer example.
 
 The [release plan](docs/plans/2026-09-05-2135-public-alpha-release-plan.md)
 owns the agreed release details. The
-[Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1)
+[Public alpha milestone](https://github.com/exfinder/rehost-web/milestone/1)
 owns execution. Further app ports, production readiness and the optional
 migration helper do not block alpha.
 

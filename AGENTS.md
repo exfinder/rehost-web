@@ -21,16 +21,16 @@ the test-authoring rules: [`docs/writing-tests.md`](docs/writing-tests.md).
 
 ## Build and test commands
 
-Example how to build the Runtime project:
+Example how to build the runtime project:
 
 ```text
-dotnet build src/Rehost.WebForms.Runtime
+dotnet build src/Rehost.Web
 ```
 
 Run tests per project (or solution-wide — both are supported):
 
 ```text
-dotnet test tests/Rehost.WebForms.Runtime.Tests --no-build
+dotnet test tests/Rehost.Web.Tests --no-build
 ```
 
 ### Codex CLI

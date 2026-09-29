@@ -22,7 +22,7 @@ namespace System.Web.Configuration {
         static internal IConfigMapPath GetInstance() {
 #if !NETFRAMEWORK
             throw new PlatformNotSupportedException(
-                "IIS configuration mapping is unavailable. Supply explicit Rehost configuration paths through WebFormsApplication.Initialize.");
+                "IIS configuration mapping is unavailable. Supply explicit Rehost configuration paths through RehostWebApplication.Initialize.");
 #else
             // IIS 7 bits on <= IIS 6.x: use the metabase
             if (ServerConfig.UseMetabase) {

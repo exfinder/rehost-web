@@ -10,7 +10,7 @@ Diagnostics must not mask errors or introduce a Windows-only supported path.
 
 [ADR 0011](../adr/0011-portable-diagnostics-boundary.md) fixed the host-neutral
 boundary: one choke point publishing every event on the `EventSource` and on
-`ILogger` under the single category `Rehost.WebForms.Runtime`, a never-throw
+`ILogger` under the single category `Rehost.Web`, a never-throw
 wrapper, request errors delivered above the `healthMonitoring` gate, and
 compilation and startup failures carrying their live exception. Legacy
 health-monitoring providers and IIS trace APIs stay unsupported; the managed

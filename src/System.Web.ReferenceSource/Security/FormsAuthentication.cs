@@ -142,7 +142,7 @@ namespace System.Web.Security {
                 try {
                     bBlob = CryptoUtil.HexToBinary(encryptedTicket);
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(FormsAuthentication)}.{nameof(Decrypt)}", swallowedException, "CryptoUtil.HexToBinary");
                   }
             }

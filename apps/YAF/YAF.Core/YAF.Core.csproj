@@ -11,9 +11,9 @@
     <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.WebForms.Owin.Host.SystemWeb" Version="$(RehostWebFormsVersion)" />
-    <PackageReference Include="Rehost.AspNet.WebApi.WebHost" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.Owin.Host.SystemWeb" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.WebApi.WebHost" Version="$(RehostVersion)" />
     <PackageReference Include="Autofac" Version="9.3.2" />
     <PackageReference Include="Farsi.Library" Version="2.7.0" />
     <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.4" />

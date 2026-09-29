@@ -12,10 +12,10 @@ You need the .NET SDK 10.0.302 or a later 10.0.3xx release. Docker is needed
 only for the applications with a database and for the Linux round.
 
 ```text
-dotnet build Rehost.WebForms.slnx
-dotnet test tests/Rehost.WebForms.Runtime.Tests/Rehost.WebForms.Runtime.Tests.csproj --no-build
-dotnet test tests/Rehost.WebForms.Hosting.Tests/Rehost.WebForms.Hosting.Tests.csproj --no-build
-dotnet test tests/Rehost.WebForms.Packages.Tests/Rehost.WebForms.Packages.Tests.csproj --no-build
+dotnet build Rehost.Web.slnx
+dotnet test tests/Rehost.Web.Tests/Rehost.Web.Tests.csproj --no-build
+dotnet test tests/Rehost.Web.AspNetCore.Tests/Rehost.Web.AspNetCore.Tests.csproj --no-build
+dotnet test tests/Rehost.Web.Packages.Tests/Rehost.Web.Packages.Tests.csproj --no-build
 ```
 
 Build the solution before a `--no-build` test run: the hosting tests start a

@@ -1138,7 +1138,7 @@ namespace System.Web.Configuration
                     if (_AutoGenValidationKeySize < 1)
                         _AutoGenValidationKeySize = RoundupNumBitsToNumBytes(alg.OutputBlockSize);
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(MachineKeySection)}.{nameof(InitValidationAndEncyptionSizes)}", swallowedException, "RoundupNumBitsToNumBytes");
                   }
 

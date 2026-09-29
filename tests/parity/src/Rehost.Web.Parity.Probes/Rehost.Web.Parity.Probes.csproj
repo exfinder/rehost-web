@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    One probe assembly compiled against both System.Web implementations: real Framework for the
+    oracle, the port for the replay columns. The differential compares runtimes, not probes.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net481;net10.0</TargetFrameworks>
+    <AssemblyName>Rehost.Web.Parity.Probes</AssemblyName>
+    <RootNamespace>Rehost.Web.Parity.Probes</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Parity.Contracts/Rehost.Web.Parity.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <ProjectReference Include="../../../../src/Rehost.Web/Rehost.Web.csproj" />
+  </ItemGroup>
+</Project>

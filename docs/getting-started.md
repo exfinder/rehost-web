@@ -12,7 +12,7 @@ arm64 are the validated platforms.
 ## 1. Install the template
 
 ```text
-dotnet new install Rehost.WebForms.Templates
+dotnet new install Rehost.Web.Templates
 ```
 
 ## 2. Add the App and Host projects
@@ -22,7 +22,7 @@ usually the folder of the old `.sln` file.
 
 ```text
 cd path/to/solution
-dotnet new rehost-webforms --webapp Shop.Web
+dotnet new rehost-web --webapp Shop.Web
 ```
 
 `--webapp` is the path to the legacy folder from where you stand. Its last
@@ -40,7 +40,7 @@ new assembly must keep the old name. If the legacy assembly name is not the
 folder name, say so:
 
 ```text
-dotnet new rehost-webforms --webapp Web --assembly Shop.Web
+dotnet new rehost-web --webapp Web --assembly Shop.Web
 ```
 
 ## 3. Carry your packages over
@@ -52,11 +52,11 @@ at run time because it binds to Microsoft's `System.Web`.
 
 | Legacy package | Use |
 | --- | --- |
-| `Microsoft.AspNet.FriendlyUrls` | `Rehost.WebForms.FriendlyUrls` |
-| `Microsoft.AspNet.Web.Optimization` | `Rehost.WebForms.Optimization` |
-| `Microsoft.AspNet.Web.Optimization.WebForms` | `Rehost.WebForms.Optimization.WebForms` |
-| `Microsoft.AspNet.ScriptManager.*` | `Rehost.WebForms.ScriptManager.Bundles` |
-| `Microsoft.Owin.Host.SystemWeb` | `Rehost.WebForms.Owin.Host.SystemWeb` |
+| `Microsoft.AspNet.FriendlyUrls` | `Rehost.AspNet.FriendlyUrls` |
+| `Microsoft.AspNet.Web.Optimization` | `Rehost.AspNet.Web.Optimization` |
+| `Microsoft.AspNet.Web.Optimization.WebForms` | `Rehost.AspNet.Web.Optimization.WebForms` |
+| `Microsoft.AspNet.ScriptManager.*` | `Rehost.AspNet.ScriptManager.MSAjax` |
+| `Microsoft.Owin.Host.SystemWeb` | `Rehost.Owin.Host.SystemWeb` |
 | `Microsoft.AspNet.WebApi` and `.WebHost` | `Rehost.AspNet.WebApi.WebHost` (brings `Core` and `Client`) |
 | `Microsoft.AspNet.WebPages` | `Rehost.AspNet.WebPages` (brings `Microsoft.AspNet.Razor`) |
 
@@ -124,7 +124,7 @@ dotnet publish Shop.Web.Host -c Release -o site
 | --- | --- |
 | `Shop.Web.App.csproj` | `RehostAppContentRoot` points at the legacy folder; every `*.cs` under it compiles into the application assembly. `RehostAppContentExcludes` leaves files out. |
 | `Shop.Web.Host.csproj` | `RehostSiteContentRoot` points at the same folder; pages and content are copied to `rehost_root/`. `OutDir` sends the binaries to `rehost_root/bin/`. |
-| `Program.cs` | The ASP.NET Core host. `AddRehostWebForms` and `UseRehostWebForms` are the two calls. |
+| `Program.cs` | The ASP.NET Core host. `AddRehostWeb` and `UseRehostWeb` are the two calls. |
 | `Web.Rehost.config` | The transform from step 4. |
 | `Properties/launchSettings.json` | The development URL. |
 | `.gitignore` | Keeps `rehost_root/` out of source control; it is build output. |

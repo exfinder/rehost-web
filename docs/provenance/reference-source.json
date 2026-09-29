@@ -153,7 +153,7 @@
    "files": [
     "Management/WebEvents.cs"
    ],
-   "reason": "RaiseRuntimeError writes the raised error to WebFormsRuntimeEventSource before the HealthMonitoringManager.Enabled gate, so request errors are delivered without healthMonitoring configuration; the gated body is unchanged and the addition is unfenced because Framework has no equivalent call",
+   "reason": "RaiseRuntimeError writes the raised error to RehostWebEventSource before the HealthMonitoringManager.Enabled gate, so request errors are delivered without healthMonitoring configuration; the gated body is unchanged and the addition is unfenced because Framework has no equivalent call",
    "record": "docs/adr/0011-portable-diagnostics-boundary.md"
   },
   {
@@ -301,7 +301,7 @@
     "Configuration/WebConfigurationHost.cs"
    ],
    "reason": "StopMonitoringStreamForChanges returns when SupportsChangeNotifications is false (fenced !NETFRAMEWORK): the configuration system stops every stream it marked monitored, marking before it asks the host, so Stop arrives for streams Start never saw",
-   "record": "tests/Rehost.WebForms.Runtime.Tests/Configuration/WebConfigurationHostTests.cs"
+   "record": "tests/Rehost.Web.Tests/Configuration/WebConfigurationHostTests.cs"
   },
   {
    "files": [

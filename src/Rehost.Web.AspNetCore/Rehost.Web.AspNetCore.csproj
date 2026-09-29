@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Rehost.Web.AspNetCore</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+    <ProjectReference
+      Include="../../eng/Rehost.Web.Build.Tasks/Rehost.Web.Build.Tasks.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None
+      Update="build/Rehost.Web.AspNetCore.props"
+      Pack="true"
+      PackagePath="build/Rehost.Web.AspNetCore.props" />
+    <None
+      Update="build/Rehost.Web.AspNetCore.targets"
+      Pack="true"
+      PackagePath="build/Rehost.Web.AspNetCore.targets" />
+    <None
+      Update="build/Web.Rehost.config"
+      Pack="true"
+      PackagePath="build/Web.Rehost.config" />
+    <!-- Bundled, not a package dependency: the task assembly is build-time tooling. -->
+    <None
+      Include="../../eng/Rehost.Web.Build.Tasks/bin/$(Configuration)/net10.0/Rehost.Web.Build.Tasks.dll;../../eng/Rehost.Web.Build.Tasks/bin/$(Configuration)/net10.0/Microsoft.Web.XmlTransform.dll"
+      Pack="true"
+      PackagePath="build/tasks/"
+      Visible="false" />
+  </ItemGroup>
+</Project>

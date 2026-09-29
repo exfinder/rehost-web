@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Rehost.ScriptManager.MSAjax</RootNamespace>
+    <PackageId>Rehost.AspNet.ScriptManager.MSAjax</PackageId>
+    <Description>Stock Web Forms ScriptManager mappings for Rehost.Web.</Description>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

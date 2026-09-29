@@ -572,7 +572,7 @@ namespace System.Web {
                     }
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(HttpContext)}.{nameof(GetEurl)}", swallowedException, "UnsafeNativeMethods.GetExtensionlessUrlAppendage");
                 } // ignore all exceptions
                 s_eurl = eurl;
@@ -1153,7 +1153,7 @@ namespace System.Web {
                     }
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(HttpContext)}.{nameof(ReportRuntimeErrorIfExists)}", swallowedException, "String.IsNullOrEmpty");
                 }
             }
@@ -1168,7 +1168,7 @@ namespace System.Web {
 
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(HttpContext)}.{nameof(ReportRuntimeErrorIfExists)}#2", swallowedException, "HttpRuntime.ReportAppOfflineErrorMessage");
                 }
             }
@@ -1195,7 +1195,7 @@ namespace System.Web {
                             }
                         }
                         catch (Exception swallowedException) {
-                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                 $"{nameof(HttpContext)}.{nameof(ReportRuntimeErrorIfExists)}#3", swallowedException, "Response.ReportRuntimeError");
                         }
                     }

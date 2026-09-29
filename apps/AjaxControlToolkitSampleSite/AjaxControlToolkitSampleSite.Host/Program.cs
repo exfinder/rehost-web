@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Rehost.WebForms.Hosting;
+using Rehost.Web.AspNetCore;
 
 var physicalRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ".."));
 
@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     Args = args,
     ContentRootPath = AppContext.BaseDirectory,
 });
-builder.AddRehostWebForms(options =>
+builder.AddRehostWeb(options =>
 {
     options.ApplicationId = "ajaxcontroltoolkit-samplesite";
     options.PhysicalRootPath = physicalRoot;
@@ -18,5 +18,5 @@ builder.AddRehostWebForms(options =>
 });
 
 var app = builder.Build();
-app.UseRehostWebForms();
+app.UseRehostWeb();
 app.Run();

@@ -181,7 +181,7 @@ namespace System.Web.Hosting {
                 try {
                     WebBaseEvent.RaiseRuntimeError(e, this);
                 } catch (Exception swallowedException) {
-                      System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                      System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(ISAPIRuntime)}.{nameof(ProcessRequest)}", swallowedException, "WebBaseEvent.RaiseRuntimeError");
                   }
                 
@@ -251,7 +251,7 @@ namespace System.Web.Hosting {
                 HttpRuntime.AddAppDomainTraceMessage(SR.GetString(SR.App_Domain_Restart));
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(ISAPIRuntime)}.{nameof(RemoveThisAppDomainFromUnmanagedTable)}", swallowedException, "Debug.Trace");
             }
         }

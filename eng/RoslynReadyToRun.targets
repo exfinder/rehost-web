@@ -3,7 +3,7 @@
     ReadyToRun images for the two Roslyn assemblies, so processes that compile pages do not
     pay ~450 ms of compiler JIT per process (docs/follow-ups/roslyn-compile-cold-start.md).
 
-    Roles: Rehost.WebForms.Runtime sets RehostRoslynR2RProducer and crossgens the images
+    Roles: Rehost.Web sets RehostRoslynR2RProducer and crossgens the images
     into artifacts/ exactly once per Roslyn version + RID; every other importer is a
     consumer whose copy-local Roslyn entries are replaced by the images, so the output
     directory is correct by construction and an incremental build never reverts it to IL.
@@ -110,7 +110,7 @@
 
   <!-- Existence is checked here rather than in the substitution: ResolvePackageAssets runs
        before project references are built, so on a fresh clone the images do not exist yet
-       at substitution time. By copy time the referenced Rehost.WebForms.Runtime build —
+       at substitution time. By copy time the referenced Rehost.Web build —
        including RehostRoslynR2RProduce — has completed. -->
   <Target
     Name="RehostRoslynR2RVerify"
@@ -120,6 +120,6 @@
 
     <Error
       Condition="'@(_RoslynR2RInput)' != '' and !Exists('%(_RoslynR2RImage.Identity)')"
-      Text="Missing Roslyn R2R image %(_RoslynR2RImage.Identity). Build src/Rehost.WebForms.Runtime first." />
+      Text="Missing Roslyn R2R image %(_RoslynR2RImage.Identity). Build src/Rehost.Web first." />
   </Target>
 </Project>

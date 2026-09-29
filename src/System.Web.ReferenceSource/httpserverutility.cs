@@ -77,7 +77,7 @@ namespace System.Web {
 #endif // !FEATURE_PAL
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpServerUtility)}.{nameof(CreateObject)}", swallowedException, "Type.GetTypeFromProgID");
             }
 
@@ -150,7 +150,7 @@ namespace System.Web {
                 obj = Activator.CreateInstance(type);
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(HttpServerUtility)}.{nameof(CreateObjectFromClsid)}", swallowedException, "Type.GetTypeFromCLSID");
             }
 

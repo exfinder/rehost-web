@@ -272,7 +272,7 @@ namespace System.Web.Configuration {
             }
         }
 #else
-        // WebServicesSection lives in Rehost.WebForms.WebServices, which references this
+        // WebServicesSection lives in Rehost.Web.Services, which references this
         // assembly; the typed getter would recreate Framework's assembly cycle (ADR-0009).
         [ConfigurationProperty("webServices")]
         public ConfigurationSection WebServices {

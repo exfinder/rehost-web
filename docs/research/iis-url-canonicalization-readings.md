@@ -6,7 +6,7 @@ TCP socket (no client-side URL normalization) to full IIS 10 + .NET Framework 4.
 filtering, `httpErrors errorMode="Detailed"`, a junction `link` → a directory outside the
 site, an application `/app` beside a plain folder `/app2`), and the same list to the port
 (macOS, `ScenarioHost --serve`, same probe assembly and files, after the P72 changes).
-The probe is `Rehost.WebForms.Parity.Probes.PathProbeHandler` mapped as `*.probe`
+The probe is `Rehost.Web.Parity.Probes.PathProbeHandler` mapped as `*.probe`
 (`resourceType="Unspecified"` on IIS), printing every path view a handler has of its
 request; static rows are real files. `/app` rows are not comparable (the port hosts a
 single application) and are kept for the IIS column only.
@@ -204,7 +204,7 @@ IIS either.
 | `/nothere.txt` | 404 IIS 404.0 | 404 ASP.NET 404 |
 | `/web.config` | 404 IIS 404.8 | 403 ASP.NET 403 (forbidden handler) |
 | `/sub/secret.config` | 404 IIS 404.7 | 403 ASP.NET 403 (forbidden handler) |
-| `/bin/Rehost.WebForms.Parity.Probes.dll` | 404 IIS 404.8 | 404 ASP.NET 404 |
+| `/bin/Rehost.Web.Parity.Probes.dll` | 404 IIS 404.8 | 404 ASP.NET 404 |
 | `/echo.probe/bin/x` | 200 `Path=/echo.probe/bin/x` `FilePath=/echo.probe` `PathInfo=/bin/x` | = |
 
 ## 10 short names

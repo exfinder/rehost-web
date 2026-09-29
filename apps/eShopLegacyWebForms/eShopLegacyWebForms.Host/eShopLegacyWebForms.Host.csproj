@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms.Hosting" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web.AspNetCore" Version="$(RehostVersion)" />
     <ProjectReference Include="../eShopLegacyWebForms.App/eShopLegacyWebForms.App.csproj" />
   </ItemGroup>
 </Project>

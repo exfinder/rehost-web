@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Microsoft.Owin.Host.SystemWeb</RootNamespace>
+    <Description>OWIN host over the Rehost.Web ASP.NET request pipeline.</Description>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);CS3001;CS3002;CS3003;SYSLIB0057</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Owin" NoWarn="NU1701" />
+    <PackageReference Include="Owin" NoWarn="NU1701" />
+  </ItemGroup>
+</Project>

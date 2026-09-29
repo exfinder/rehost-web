@@ -4,7 +4,7 @@
 
 `Microsoft.AspNet.FriendlyUrls.Core` 1.0.2 had no missing `System.Web` API type
 in the runtime, but its strong-named Framework binary was unusable. The resulting
-source-compatible `Rehost.WebForms.FriendlyUrls` package now preserves the
+source-compatible `Rehost.AspNet.FriendlyUrls` package now preserves the
 public API without imitating Microsoft identity. The frozen application consumes
 that package and builds through Friendly URLs to the next missing dependency.
 
@@ -56,7 +56,7 @@ Current support lives in the
 
 | Phase | Implicit dependency | State | Minimum implication |
 | --- | --- | --- | --- |
-| Compile | `System.Web` types referenced by the DLL | **Available after recompile** | Metadata found every referenced type/member name in `Rehost.WebForms.Runtime`; binary assembly identity remains incompatible. |
+| Compile | `System.Web` types referenced by the DLL | **Available after recompile** | Metadata found every referenced type/member name in `Rehost.Web`; binary assembly identity remains incompatible. |
 | Startup | `PreApplicationStartMethod`, `HttpApplication.RegisterModule`, post-map event | **Available, uncertain integration** | Core metadata registers a pre-start hook and contains a redirect module. Pre-start execution is supported, but package discovery/copy in the WAP host needs an integration gate. |
 | Startup | `RouteTable`, `RouteCollection`, `RouteBase`, `Route`, route names | **Available** | Add friendly inbound route and switch-view route in Framework order; preserve settings defaults. |
 | Request routing | `UrlRoutingModule` | **Missing registration** | The class exists, but the shipped root configuration omits all default modules. Restore it in the runtime root configuration at its canonical Framework position; Friendly URLs owns routes, not module activation ([module boundary](../follow-ups/shipped-http-modules.md#what-registration-does-not-settle), [module contract](https://learn.microsoft.com/en-us/dotnet/api/system.web.routing/urlroutingmodule?view=netframework-4.8.1)). |
@@ -76,9 +76,9 @@ the core DLL references only `mscorlib`, `System`, `System.Core`, and
 
 ## Implementation scope
 
-1. Package and assembly `Rehost.WebForms.FriendlyUrls`, preserving the complete
+1. Package and assembly `Rehost.AspNet.FriendlyUrls`, preserving the complete
    original public API under `Microsoft.AspNet.FriendlyUrls`; depend only on
-   `Rehost.WebForms.Runtime`. Do not imitate Microsoft's binary identity.
+   `Rehost.Web`. Do not imitate Microsoft's binary identity.
 2. Implement settings/default validation, route registration, `.aspx`
    extensionless resolution, segment capture, handler creation/preprocessing,
    permanent physical-URL redirect, and the named view-switch route.
@@ -131,7 +131,7 @@ reusable oracle or decompiled implementation:
   allow and one deny integration case.
 - Delivery: first routing, resolution, caching, redirects, and authorization;
   then mobile detection, view switching, and mobile-master selection.
-- Identity: package and assembly `Rehost.WebForms.FriendlyUrls`; original public
+- Identity: package and assembly `Rehost.AspNet.FriendlyUrls`; original public
   namespaces; no Microsoft strong-name identity imitation.
 - Language: modern C# internally, nullable enabled, implicit usings disabled,
   warnings as errors, SDK-default language version, original public type shapes.

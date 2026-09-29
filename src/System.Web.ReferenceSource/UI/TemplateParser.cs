@@ -2093,7 +2093,7 @@ public abstract class TemplateParser : BaseParser, IAssemblyDependencyParser {
                     baseType = GetType(baseTypeNameWithNS);
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(TemplateParser)}.{nameof(ProcessInheritsAttribute)}", swallowedException, "GetType");
                 }
 

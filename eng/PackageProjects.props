@@ -5,16 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.AspNet.FriendlyUrls/Rehost.AspNet.FriendlyUrls.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.AspNet.Web.Optimization.WebForms/Rehost.AspNet.Web.Optimization.WebForms.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.AspNet.WebPages/Rehost.AspNet.WebPages.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Owin.Host.SystemWeb/Rehost.Owin.Host.SystemWeb.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.ScriptManager.MSAjax/Rehost.ScriptManager.MSAjax.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.AspNetCore/Rehost.Web.AspNetCore.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms/Rehost.WebForms.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.FriendlyUrls/Rehost.WebForms.FriendlyUrls.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Hosting/Rehost.WebForms.Hosting.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Optimization.WebForms/Rehost.WebForms.Optimization.WebForms.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Owin.Host.SystemWeb/Rehost.WebForms.Owin.Host.SystemWeb.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.ScriptManager.Bundles/Rehost.WebForms.ScriptManager.Bundles.csproj" />
-    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.WebForms.Templates/Rehost.WebForms.Templates.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Optimization/Rehost.Web.Optimization.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Templates/Rehost.Web.Templates.csproj" />
   </ItemGroup>
 
   <!-- Everything a package's content can depend on. Broad on purpose: a hand-maintained
@@ -22,7 +22,7 @@
        package. False repacks are cheap; stale packages are not. -->
   <ItemGroup>
     <RehostPackageSource
-      Include="$(RehostRepoRoot)src/**/*;$(RehostRepoRoot)eng/Rehost.WebForms.Build.Tasks/**/*;$(RehostRepoRoot)eng/Rehost.WebForms.GeneratedInputs/**/*"
+      Include="$(RehostRepoRoot)src/**/*;$(RehostRepoRoot)eng/Rehost.Web.Build.Tasks/**/*;$(RehostRepoRoot)eng/Rehost.Web.GeneratedInputs/**/*"
       Exclude="$(RehostRepoRoot)src/**/bin/**;$(RehostRepoRoot)src/**/obj/**;$(RehostRepoRoot)eng/**/bin/**;$(RehostRepoRoot)eng/**/obj/**" />
     <RehostPackageSource Include="$(RehostRepoRoot)Directory.Packages.props;$(RehostRepoRoot)global.json;$(MSBuildThisFileFullPath)" />
   </ItemGroup>

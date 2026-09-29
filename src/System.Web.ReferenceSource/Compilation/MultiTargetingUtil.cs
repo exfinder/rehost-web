@@ -479,7 +479,7 @@ namespace System.Web.Compilation {
                 return ver;
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(MultiTargetingUtil)}.{nameof(GetVersion)}", swallowedException, "new Version");
             }
             return null;

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Rehost.Web.Parity.OracleHost</AssemblyName>
+    <RootNamespace>Rehost.Web.Parity.OracleHost</RootNamespace>
+    <ParityProbeTargetFramework>net481</ParityProbeTargetFramework>
+    <ParityStageGoldenSessions>false</ParityStageGoldenSessions>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+  </ItemGroup>
+
+  <Import Project="../../StageParityFixtures.targets" />
+</Project>

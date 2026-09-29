@@ -1,10 +1,10 @@
 <Project>
   <!-- One in-repo copy for every src project; the packaged
-       build/Rehost.WebForms.targets carries the same target as the consumer
+       build/Rehost.Web.targets carries the same target as the consumer
        contract. The .NET ref pack's System.Web/System.Web.HttpUtility facades would
        otherwise shadow the runtime's types. -->
   <Target
-    Name="PreferRehostWebFormsRuntimeTypes"
+    Name="PreferRehostRuntimeTypes"
     AfterTargets="ResolveAssemblyReferences"
     BeforeTargets="CoreCompile">
     <ItemGroup>

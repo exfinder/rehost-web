@@ -1,4 +1,4 @@
-# Rehost.WebForms.Sdk.App and .Host MSBuild SDK packages
+# Rehost.Web.Sdk.App and .Host MSBuild SDK packages
 
 Today a ported application is two SDK projects whose consumer contract rides in
 package `build/`/`buildTransitive/` targets: the app library sets
@@ -10,15 +10,15 @@ targets).
 The next step in friction removal is an MSBuild SDK package:
 
 ```xml
-<Project Sdk="Rehost.WebForms.Sdk.Host/1.0.0">
+<Project Sdk="Rehost.Web.Sdk.Host/1.0.0">
   <ItemGroup>
     <ProjectReference Include="../MyApp.App/MyApp.App.csproj" />
   </ItemGroup>
 </Project>
 ```
 
-Two SDKs own the two project shapes (`Rehost.WebForms.Sdk.App` /
-`Rehost.WebForms.Sdk.Host`, named after the `.App` and `.Host` projects), inject the `Rehost.WebForms` reference, and replace the
+Two SDKs own the two project shapes (`Rehost.Web.Sdk.App` /
+`Rehost.Web.Sdk.Host`, named after the `.App` and `.Host` projects), inject the `Rehost.Web` reference, and replace the
 remaining boilerplate (TFM, AssemblyName, GenerateAssemblyInfo) with defaults.
 It is also the natural home for a `Microsoft.WebApplication.targets`
 replacement if the Web Site project model lands
@@ -37,8 +37,8 @@ A migrator's csproj is already the one under `apps/`. The `Directory.Build.*`,
 `LocalFeed.props` and `eng/LocalFeed.targets` files there only pack `src/` into a
 local feed; `eng/external-consumer.sh` builds the stock pair without them, from a
 feed and nuget.org. The only edit is a literal package version. Writing those
-lines once is the job of the `Rehost.WebForms.Templates` package
-(`dotnet new rehost-webforms`, [getting started](../getting-started.md)), which
+lines once is the job of the `Rehost.Web.Templates` package
+(`dotnet new rehost-web`, [getting started](../getting-started.md)), which
 landed on 2026-09-21.
 
 Costs for seven lines: two more packages to ship and version, one more thing to
@@ -95,7 +95,7 @@ holds for the current one.
 A property in the csproj cannot choose between the App and the Host shape: the
 base SDK is imported by `Sdk.props`, before the project body is read. One
 add-on package does work when it is listed ahead of the base SDK
-(`Sdk="Rehost.WebForms.Sdk/x;Microsoft.NET.Sdk.Web"`): its targets still run
+(`Sdk="Rehost.Web.Sdk/x;Microsoft.NET.Sdk.Web"`): its targets still run
 before the output paths are derived, the base SDK names the kind, defaults
 (including `TargetFramework`) and csproj overrides behave, and the stock
 template passed its smoke. It was not chosen. The line is long and
@@ -105,7 +105,7 @@ visible. Two ids give one short name per project kind and no order rule, which
 is the smaller thing for a migrator to hold. Leaving is one edit either way:
 at the last migration stage the Host's `Sdk` becomes `Microsoft.NET.Sdk.Web`.
 
-Open: injecting the `Rehost.WebForms` package references, publish, and
+Open: injecting the `Rehost.Web` package references, publish, and
 Windows and Linux. The NuGet SDK resolver reads `NuGet.config` only and runs at
 evaluation, so the apps' local feed needs a config entry beside
 `RestoreAdditionalProjectSources`, and a clean clone must still build with one

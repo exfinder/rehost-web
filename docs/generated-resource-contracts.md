@@ -17,8 +17,8 @@ The type remains internal and cross-platform. Existing
 `System.Web.resources` deterministic generation is unchanged.
 
 Implementation:
-`src/Rehost.WebForms.Runtime/Compatibility/Resources/StronglyTypedResourceBuilder.cs`.
+`src/Rehost.Web/Compatibility/Resources/StronglyTypedResourceBuilder.cs`.
 Tests:
-`tests/Rehost.WebForms.Runtime.Tests/StronglyTypedResourceBuilderTests.cs`.
+`tests/Rehost.Web.Tests/StronglyTypedResourceBuilderTests.cs`.
 Remaining oracle/provider work:
 [generated resources](follow-ups/generated-resource-compatibility.md).

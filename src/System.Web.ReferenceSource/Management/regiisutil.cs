@@ -119,7 +119,7 @@ namespace System.Web.Management {
                         File.Delete(System.IO.Path.Combine(binaryDirectory, "AspNetMMCExt.tlb"));
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(RegiisUtility)}.{nameof(RegisterAsnetMmcAssembly)}", swallowedException, "File.Delete");
                     }
                 }

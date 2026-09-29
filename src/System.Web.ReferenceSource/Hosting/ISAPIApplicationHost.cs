@@ -123,7 +123,7 @@ namespace System.Web.Hosting {
                     token = IdentitySection.CreateUserToken(username, password, out error);
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(ISAPIApplicationHost)}.{nameof(IApplicationHost.GetConfigToken)}", swallowedException, "IdentitySection.CreateUserToken");
                 }
             }

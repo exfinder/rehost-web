@@ -2,12 +2,12 @@
 
 ## Contract
 
-`eng/Rehost.WebForms.GeneratedInputs` recreates generated/preprocessed inputs
+`eng/Rehost.Web.GeneratedInputs` recreates generated/preprocessed inputs
 required by pinned System.Web Reference Source. Outputs are deterministic,
 package-free intermediates under:
 
 ```text
-src/Rehost.WebForms.Runtime/obj/<Configuration>/net10.0/generated/System.Web/
+src/Rehost.Web/obj/<Configuration>/net10.0/generated/System.Web/
 ```
 
 | Input | Output |
@@ -24,7 +24,7 @@ Machine-readable source, hash, license, and transformation records:
 
 ## Identity constraints
 
-- Runtime assembly: `Rehost.WebForms.Runtime`, unsigned; its version follows the
+- Runtime assembly: `Rehost.Web`, unsigned; its version follows the
   package family in `src/Directory.Build.props`.
 - Neutral resource: `System.Web.resources`, base name `System.Web`.
 - Legacy Microsoft public-key tokens remain only in original
@@ -38,7 +38,7 @@ Machine-readable source, hash, license, and transformation records:
 ## Verify
 
 ```text
-dotnet run --project eng/Rehost.WebForms.GeneratedInputs/Rehost.WebForms.GeneratedInputs.csproj -- verify <repository-root>
+dotnet run --project eng/Rehost.Web.GeneratedInputs/Rehost.Web.GeneratedInputs.csproj -- verify <repository-root>
 ```
 
 MSBuild runs generation automatically when inputs are newer than outputs.

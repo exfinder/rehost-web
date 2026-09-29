@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../eng/Repo.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Rehost.Web.AspNetCore/Rehost.Web.AspNetCore.csproj" />
+    <ProjectReference Include="../parity/src/Rehost.Web.Parity.Harness/Rehost.Web.Parity.Harness.csproj" />
+    <ProjectReference Include="../Rehost.Web.TestSupport/Rehost.Web.TestSupport.csproj" />
+    <ProjectReference Include="../Rehost.Web.ScenarioProtocol/Rehost.Web.ScenarioProtocol.csproj" />
+    <!--
+      Built but not referenced: the scenario tests launch this host as a child process from
+      its own output directory, which carries its own copy of the hosting assembly. Without
+      this, building only the test project leaves that copy stale and the scenario tests
+      silently exercise the previous build.
+    -->
+    <ProjectReference
+      Include="../Rehost.Web.ScenarioHost/Rehost.Web.ScenarioHost.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+    <!-- Built but not referenced: the adapter gate launches this host as a child process. -->
+    <ProjectReference
+      Include="../parity/src/Rehost.Web.Parity.AdapterHost/Rehost.Web.Parity.AdapterHost.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
+
+  <Import Project="$(RehostRepoRoot)src/Rehost.Web.Package/build/Rehost.Web.targets" />
+
+  <Import Project="../BaselineNamedAssemblies.props" />
+</Project>

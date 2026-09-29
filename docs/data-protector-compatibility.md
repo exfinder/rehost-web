@@ -14,6 +14,6 @@ binary compatibility with `System.Security.dll` are unsupported.
 explicit Windows migration and re-protection.
 
 Implementation:
-`src/Rehost.WebForms.Runtime/Compatibility/DataProtector.cs`.
+`src/Rehost.Web/Compatibility/DataProtector.cs`.
 Concrete provider and wire-format work:
 [data protection provider](follow-ups/data-protection-provider.md).

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>System.Web.Http.WebHost</RootNamespace>
     <PackageId>Rehost.AspNet.WebApi.WebHost</PackageId>
-    <Description>ASP.NET Web API 2 host over the Rehost.WebForms ASP.NET request pipeline.</Description>
+    <Description>ASP.NET Web API 2 host over the Rehost.Web ASP.NET request pipeline.</Description>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <DefineConstants>$(DefineConstants);ASPNETMVC</DefineConstants>
@@ -15,8 +15,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Rehost.WebForms/Rehost.WebForms.csproj" />
-    <ProjectReference Include="../Rehost.WebForms.Runtime/Rehost.WebForms.Runtime.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

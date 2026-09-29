@@ -20,6 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-This license covers code authored by the Rehost WebForms project. Imported
+This license covers code authored by the Rehost.Web project. Imported
 third-party source, generated resources and the sample applications under
 apps/ keep their own licenses. See THIRD-PARTY-NOTICES.txt and apps/NOTICE.md.

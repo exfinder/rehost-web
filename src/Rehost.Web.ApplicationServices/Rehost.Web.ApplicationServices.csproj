@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>System.Web</RootNamespace>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <NoWarn>$(NoWarn);CS0672;CS9191;SYSLIB0003;SYSLIB0051;CA1416</NoWarn>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <Import Project="../Rehost.Web.Package/Rehost.Web.Dependencies.props" />
+
+  <ItemGroup>
+    <Compile
+      Include="../System.Web.ApplicationServices.ReferenceSource/**/*.cs"
+      Exclude="../System.Web.ApplicationServices.ReferenceSource/Hosting/CustomLoaderHelper.cs" />
+    <EmbeddedResource
+      Include="../System.Web.ApplicationServices.ReferenceSource/ApplicationServicesStrings.resx"
+      LogicalName="System.Web.ApplicationServicesStrings.resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference
+      Include="../../eng/Rehost.Web.ReferenceSource.BuildInputs/Rehost.Web.ReferenceSource.BuildInputs.csproj"
+      Private="false"
+      PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

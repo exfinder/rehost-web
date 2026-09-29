@@ -1291,7 +1291,7 @@ namespace System.Web.Caching {
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(CacheSingle)}.{nameof(TrimIfNecessary)}", swallowedException, "_expires.FlushExpiredItems");
             }
             

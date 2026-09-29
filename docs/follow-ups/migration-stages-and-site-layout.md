@@ -36,7 +36,7 @@ stages is whether it is a copy or the source.
 4. **Done.** The last `.aspx` is gone; `rehost_root/`, the package references
    and these targets come out, leaving the stock flat ASP.NET Core publish.
 
-Stage 3 needs runtime work that does not exist yet. `UseRehostWebForms()` is
+Stage 3 needs runtime work that does not exist yet. `UseRehostWeb()` is
 terminal (`app.Run`), so an unmapped path gets System.Web's 404 rather than
 falling through; coexistence needs a fall-through mode or a `MapWhen` on the
 Web Forms extensions. The cost that dominates is shared state: one
@@ -62,7 +62,7 @@ a cost every migrator would then meet alone.
   `AssemblyName`; a single project would have to give it to the executable.
 - **No ASP.NET Core in the application.** An App project restores with
   `Microsoft.NETCore.App` alone. `Microsoft.AspNetCore.App`, and with it
-  Kestrel, enters only through `Rehost.WebForms.Hosting`, which only the Host
+  Kestrel, enters only through `Rehost.Web.AspNetCore`, which only the Host
   references. The application code sees `System.Web` and nothing of the server
   beneath it.
 - **References.** A migrator's test projects reference the App library as they
@@ -159,7 +159,7 @@ on 2026-09-19. The layout above stays.
   the App; NU1605 stops a downgrade at restore. The SDK ignores the flag for
   transitive project references, so their DLLs land beside the Host unless a
   target re-marks them, and the resolver and its install before `Main` remain.
-- **One graph, one manifest** ([`poc/SplitDependencyGraph`](https://github.com/exfinder/rehost-webforms/tree/cf1910790beb5aafbf999e964a907172992e5f6e/poc/SplitDependencyGraph),
+- **One graph, one manifest** ([`poc/SplitDependencyGraph`](https://github.com/exfinder/rehost-web/tree/cf1910790beb5aafbf999e964a907172992e5f6e/poc/SplitDependencyGraph),
   since removed from the tree).
   The .NET 10 host reads an optional `localPath` on each `deps.json` asset, so
   `bin/` files sit on the trusted-assembly list like any other: no resolver, no
@@ -171,7 +171,7 @@ on 2026-09-19. The layout above stays.
 
 Why the last one still waits:
 
-- It moves few files. The App references `Rehost.WebForms`, so the runtime and
+- It moves few files. The App references `Rehost.Web`, so the runtime and
   Roslyn belong to its closure; the host folder would keep `Host.dll`, the
   hosting assembly and the Host's own packages. Those are harmless in `bin/`:
   pages do not import their namespaces, and `/bin` is never served.

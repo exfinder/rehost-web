@@ -1,0 +1,5 @@
+<Project>
+  <UsingTask
+    TaskName="Rehost.Web.Build.Tasks.ApplyXdtTransform"
+    AssemblyFile="$(MSBuildThisFileDirectory)tasks/Rehost.Web.Build.Tasks.dll" />
+</Project>

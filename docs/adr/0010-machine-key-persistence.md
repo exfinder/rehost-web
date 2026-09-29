@@ -26,7 +26,7 @@ master preserves the guarantee that matters — distinct applications never shar
 keys — and the isolation suffix derivation stays untouched on top.
 
 The directory resolves to the host `MachineKeyDirectory` option, else
-`~/.rehost-webforms/machine-keys` under the user profile — the portable
+`~/.rehost/machine-keys` under the user profile — the portable
 analogue of the per-identity registry hive, and outside both the reclaimable
 temp root and the (possibly read-only, disposable) application directory.
 
@@ -44,7 +44,7 @@ at the next restart) surfaces far from its cause.
 
 Containers are the primary production target, and a container keeps neither
 the user profile nor a writable web.config, so explicit keys arrive through
-`REHOST_WEBFORMS_MACHINEKEY_VALIDATIONKEY` / `_DECRYPTIONKEY`. A variable
+`REHOST_MACHINEKEY_VALIDATIONKEY` / `_DECRYPTIONKEY`. A variable
 substitutes the whole attribute string before parsing — isolation suffixes
 included — so it behaves exactly as the same value written in web.config; the
 scenario proof is a forms-ticket interchange against a config-keyed host. A

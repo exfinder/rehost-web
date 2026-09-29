@@ -33,7 +33,7 @@ backslash-separated and resolve against `Script`. Nine inputs carry a UTF-8 BOM
 that a naive reader splices into the middle of the output.
 
 `eng/GenerateAjaxScripts.cs` runs the recipes with `dotnet run`, minifies, and
-writes `src/Rehost.WebForms.Extensions/Scripts`. No symbol is defined, which
+writes `src/Rehost.Web.Extensions/Scripts`. No symbol is defined, which
 yields the 13 release names the assembly declares. `COPYRIGHT` stays undefined:
 the shipped script carries one generated banner whose rule length follows the
 copyright line, not the 62 per-file headers. `DEBUGINTERNAL` never ships.
@@ -66,10 +66,10 @@ the drop. `ScriptReference.ShouldUseDebugScript` falls back to the release
 script under the default `ScriptMode.Auto`, so an absent debug resource degrades
 quietly where a preprocessed-but-unvalidated one would mislead.
 
-`Rehost.WebForms.Extensions` compiles the closure the frozen templates reach,
+`Rehost.Web.Extensions` compiles the closure the frozen templates reach,
 plus `Script/Services` (the ASMX JSON chain: `ScriptHandlerFactory`,
 `RestHandler`, the client proxy generators) against
-`Rehost.WebForms.WebServices`. `Script/Services/ProxyGenerator.cs` stays out:
+`Rehost.Web.Services`. `Script/Services/ProxyGenerator.cs` stays out:
 it generates proxies for WCF service endpoints and only the uncompiled
 `WCFBuildProvider` reaches it.
 `WebFormsIdentityApplication` added the second slice: `ListView` and the

@@ -26,7 +26,7 @@ namespace System.Web {
         // Constants inline at compile time; INVALID_HANDLE_VALUE is a field, so reading it refuses too.
         static UnsafeNativeMethods() {
             throw new PlatformNotSupportedException(
-                "Rehost.WebForms does not call into native ASP.NET libraries.");
+                "Rehost.Web does not call into native ASP.NET libraries.");
         }
 #endif
 

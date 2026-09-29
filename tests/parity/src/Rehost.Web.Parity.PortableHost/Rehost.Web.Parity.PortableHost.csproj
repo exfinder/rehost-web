@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../../eng/Repo.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Rehost.Web.Parity.PortableHost</AssemblyName>
+    <RootNamespace>Rehost.Web.Parity.PortableHost</RootNamespace>
+    <ParityClearErrorsTempDirectory>true</ParityClearErrorsTempDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../../src/Rehost.Web/Rehost.Web.csproj" />
+  </ItemGroup>
+
+  <Import Project="../../StageParityFixtures.targets" />
+  <Import Project="$(RehostRepoRoot)src/Rehost.Web.Package/build/Rehost.Web.targets" />
+  <Import Project="$(RehostRepoRoot)eng/RoslynReadyToRun.targets" />
+
+  <Import Project="../../../BaselineNamedAssemblies.props" />
+</Project>

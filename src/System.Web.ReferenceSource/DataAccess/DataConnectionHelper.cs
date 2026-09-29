@@ -87,7 +87,7 @@ namespace System.Web.DataAccess
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(DataConnectionHelper)}.{nameof(GetCurrentName)}", swallowedException, "UnsafeNativeMethods.ConvertStringSidToSid");
             }
             finally

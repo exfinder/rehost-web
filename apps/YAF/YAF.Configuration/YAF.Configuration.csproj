@@ -10,7 +10,7 @@
     <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Rehost.WebForms" Version="$(RehostWebFormsVersion)" />
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <ProjectReference Include="../YAF.Types/YAF.Types.csproj" />
   </ItemGroup>

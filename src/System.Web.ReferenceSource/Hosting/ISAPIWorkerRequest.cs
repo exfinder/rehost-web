@@ -865,7 +865,7 @@ internal abstract class ISAPIWorkerRequest : HttpWorkerRequest {
                         ((MemoryBytes)_cachedResponseBodyBytes[i]).UnlockMemory();
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(ISAPIWorkerRequest)}.{nameof(UnlockCachedResponseBytesOnceAfterIoComplete)}", swallowedException, "UnlockMemory");
                     }
                 }
@@ -980,7 +980,7 @@ internal abstract class ISAPIWorkerRequest : HttpWorkerRequest {
                     _endOfRequestCallback(this, _endOfRequestCallbackArg);
                 }
                 catch (Exception swallowedException) {
-                    System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                    System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                         $"{nameof(ISAPIWorkerRequest)}.{nameof(CallEndOfRequestCallbackOnceAfterAllIoComplete)}", swallowedException, "_endOfRequestCallback");
                 }
             }

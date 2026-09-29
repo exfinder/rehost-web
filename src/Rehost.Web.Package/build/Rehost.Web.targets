@@ -1,0 +1,55 @@
+<Project>
+  <Target
+    Name="PreferRehostRuntimeTypes"
+    AfterTargets="ResolveAssemblyReferences"
+    BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <ReferencePath
+        Remove="@(ReferencePath)"
+        Condition="'%(ReferencePath.NuGetPackageId)' == 'Microsoft.NETCore.App.Ref' and ('%(ReferencePath.FileName)' == 'System.Web' or '%(ReferencePath.FileName)' == 'System.Web.HttpUtility')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Consumer contract: pointing RehostAppContentRoot at a legacy WAP folder compiles
+       its code-behind the way the WAP csproj did — every .cs into the app assembly,
+       leaving markup for runtime compilation. -->
+  <PropertyGroup Condition="'$(RehostAppContentRoot)' != ''">
+    <RehostAppContentRoot>$([MSBuild]::EnsureTrailingSlash('$(RehostAppContentRoot)'))</RehostAppContentRoot>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(RehostAppContentRoot)' != ''">
+    <Compile
+      Include="$(RehostAppContentRoot)**/*.cs"
+      Exclude="$(RehostAppContentRoot)bin/**;$(RehostAppContentRoot)obj/**;$(RehostAppContentRoot)packages/**;$(RehostAppContentExcludes)" />
+  </ItemGroup>
+
+  <!-- The runtime compiles these folders itself, into their own assemblies that page
+       compilation references. Letting the SDK also compile them into the host assembly puts
+       the same types in two assemblies and every page referencing them fails with CS0433 —
+       the classic "App_Code inside a Web Application Project" trap, which Visual Studio
+       warned against for the same reason. -->
+  <ItemGroup Condition="'$(RehostCompileWebSiteFolders)' != 'true'">
+    <Compile Remove="**/App_Code/**;**/App_Data/**" />
+    <EmbeddedResource Remove="**/App_GlobalResources/**;**/App_LocalResources/**" />
+  </ItemGroup>
+
+  <!-- The SDK writes this switch as false, and it latches on first read, so a consuming
+       application must carry it in its own runtimeconfig rather than rely on load order.
+       The property covers imports evaluated before the SDK targets; the target covers the
+       package import, which lands after the SDK has already read the property. -->
+  <PropertyGroup>
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
+  </PropertyGroup>
+
+  <Target
+    Name="RehostEnableUnsafeBinaryFormatterSerialization"
+    BeforeTargets="_GenerateRuntimeConfigurationFilesInputCache">
+    <ItemGroup>
+      <RuntimeHostConfigurationOption
+        Remove="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization" />
+      <RuntimeHostConfigurationOption
+        Include="System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization"
+        Value="true"
+        Trim="true" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -12,7 +12,7 @@ semantics.
 ## Thread-pool coupling
 
 The occupied thread and the continuation that releases it come from the same
-pool. `RehostWebFormsMiddleware` runs `ProcessRequest` inline on the ASP.NET Core
+pool. `RehostWebMiddleware` runs `ProcessRequest` inline on the ASP.NET Core
 request thread, a pooled worker, which a synchronous `ReadEntityBody` then blocks
 awaiting `PipeReader.ReadAsync` — whose completion Kestrel schedules back onto
 that pool. IIS did not have this shape: the blocked managed thread and the native

@@ -95,7 +95,7 @@ namespace System.Web.Services.Discovery {
                        // DynamicVirtualDiscoSearcher (ADSI) is not compiled; there is no
                        // IIS metabase to search here.
                        throw new PlatformNotSupportedException(
-                           "IIS-metabase (virtual) dynamic discovery is not supported by Rehost.WebForms.");
+                           "IIS-metabase (virtual) dynamic discovery is not supported by Rehost.Web.");
 #endif
                     }
                     else

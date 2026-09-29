@@ -18,18 +18,18 @@
        `dotnet build-server shutdown` or a stale task keeps running (silently on Unix, as a
        file lock on Windows). -->
   <UsingTask
-    TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageFixtureTree"
-    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
+    TaskName="Rehost.Web.FixtureStaging.Tasks.StageFixtureTree"
+    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.Web.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.Web.FixtureStaging.Tasks.dll" />
   <UsingTask
-    TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageMappedFiles"
-    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
+    TaskName="Rehost.Web.FixtureStaging.Tasks.StageMappedFiles"
+    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.Web.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.Web.FixtureStaging.Tasks.dll" />
   <UsingTask
-    TaskName="Rehost.WebForms.FixtureStaging.Tasks.StageFixtureBins"
-    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.WebForms.FixtureStaging.Tasks.dll" />
+    TaskName="Rehost.Web.FixtureStaging.Tasks.StageFixtureBins"
+    AssemblyFile="$(MSBuildThisFileDirectory)Rehost.Web.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.Web.FixtureStaging.Tasks.dll" />
 
   <ItemGroup>
     <ProjectReference
-      Include="$(MSBuildThisFileDirectory)Rehost.WebForms.FixtureStaging.Tasks/Rehost.WebForms.FixtureStaging.Tasks.csproj"
+      Include="$(MSBuildThisFileDirectory)Rehost.Web.FixtureStaging.Tasks/Rehost.Web.FixtureStaging.Tasks.csproj"
       ReferenceOutputAssembly="false"
       PrivateAssets="all"
       SetTargetFramework="TargetFramework=net10.0" />

@@ -98,7 +98,7 @@ namespace System.Web.UI {
                 }
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(PropertyConverter)}.{nameof(ObjectFromString)}", swallowedException, "EnumFromString");
             }
 
@@ -117,7 +117,7 @@ namespace System.Web.UI {
                         ret = Util.InvokeMethod(methodInfo, null, parameters);
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(PropertyConverter)}.{nameof(ObjectFromString)}#2", swallowedException, "Util.InvokeMethod");
                     }
                 }
@@ -133,7 +133,7 @@ namespace System.Web.UI {
                             ret = Util.InvokeMethod(methodInfo, null, parameters);
                         }
                         catch (Exception swallowedException) {
-                            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                                 $"{nameof(PropertyConverter)}.{nameof(ObjectFromString)}#3", swallowedException, "Util.InvokeMethod");
                         }
                     }

@@ -57,7 +57,7 @@ namespace System.Web {
                 );
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(TelemetryLogger)}.{nameof(LogHttpHandler)}", swallowedException, "s_TelemetryLogger.Write");
             }
         }
@@ -78,7 +78,7 @@ namespace System.Web {
                 );
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(TelemetryLogger)}.{nameof(LogTargetFramework)}", swallowedException, "s_TelemetryLogger.Write");
             }
         }
@@ -99,7 +99,7 @@ namespace System.Web {
                 );
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(TelemetryLogger)}.{nameof(LogProvider)}", swallowedException, "s_TelemetryLogger.Write");
             }
         }

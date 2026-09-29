@@ -19,8 +19,8 @@ evidence. T1/T2 have since landed; see [current state](#relationship-to-current-
 
 ## Method and build facts
 
-A scratch project named `Rehost.WebForms.Extensions` compiled all sources against `net10.0`, the
-Rehost Runtime/WebServices/ApplicationServices assemblies, the repo facade-removal target, and
+A scratch project named `Rehost.Web.Extensions` compiled all sources against `net10.0`, the
+Rehost.Web runtime/Services/ApplicationServices assemblies, the repo facade-removal target, and
 `System.CodeDom`, ConfigurationManager, Security.Permissions, ServiceModel client packages,
 Runtime.Serialization.Schema and OleDb. Iterative shimming ended at zero errors, proving all
 unshimmed references present. A source sweep covered native calls, registry, COM, identity,

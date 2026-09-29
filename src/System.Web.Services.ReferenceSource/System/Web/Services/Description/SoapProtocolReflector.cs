@@ -60,7 +60,7 @@ namespace System.Web.Services.Description {
         // Only WSDL generation is lost; serving encoded requests never passes through here.
         static Exception EncodedWsdlNotSupported() {
             return new PlatformNotSupportedException(
-                "Generating WSDL for SOAP-encoded services is not supported by Rehost.WebForms. " +
+                "Generating WSDL for SOAP-encoded services is not supported by Rehost.Web. " +
                 "Serve a static WSDL document or convert the service to document/literal.");
         }
 #endif

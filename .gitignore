@@ -1,6 +1,6 @@
 **/bin/
 **/rehost_root/
-!samples/Rehost.WebForms.SampleApp/rehost_root/
+!samples/Rehost.Web.SampleApp/rehost_root/
 /publish/
 **/obj/
 apps/*/.vs/

@@ -14,8 +14,8 @@ callback, CAS demand, performance counter, or ambient transaction behavior is
 claimed.
 
 Implementation:
-`src/Rehost.WebForms.Runtime/Compatibility/EnterpriseServices`.
+`src/Rehost.Web/Compatibility/EnterpriseServices`.
 Tests:
-`tests/Rehost.WebForms.Runtime.Tests/EnterpriseServicesContractTests.cs`.
+`tests/Rehost.Web.Tests/EnterpriseServicesContractTests.cs`.
 Remaining scope:
 [Enterprise Services](follow-ups/enterprise-services.md).

@@ -632,7 +632,7 @@ internal abstract class DiskBuildResultCache: BuildResultCache {
             return true;
         } 
         catch (Exception swallowedException) {
-            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                 $"{nameof(DiskBuildResultCache)}.{nameof(TryDeleteFile)}", swallowedException, "f.Delete");
         }
 
@@ -663,7 +663,7 @@ internal abstract class DiskBuildResultCache: BuildResultCache {
             Debug.Trace("DiskBuildResultCache", "CheckAndRemoveDotDeleteFile deleted " + f.Name);
         } 
         catch (Exception swallowedException) {
-            System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+            System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                 $"{nameof(DiskBuildResultCache)}.{nameof(CheckAndRemoveDotDeleteFile)}", swallowedException, "f.Delete");
         }
         

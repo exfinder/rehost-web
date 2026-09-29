@@ -6,7 +6,7 @@ workloads.
 
 ## Result
 
-All sources compiled on .NET 10 against `Rehost.WebForms.Runtime` with a generated 424-line
+All sources compiled on .NET 10 against `Rehost.Web` with a generated 424-line
 resource class and 85 lines of proven-missing API shims. Runtime SOAP serving/consumption is
 portable and probe-verified. WSDL-to-proxy source generation is the clean cut: eleven removed
 XML-serialization/Data.Design APIs are confined to four importer files and unreachable from the

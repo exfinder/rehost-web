@@ -2,7 +2,7 @@
 
 ## Implemented surface
 
-`Rehost.WebForms.WebServices` compiles the full `System.Web.Services`
+`Rehost.Web.Services` compiles the full `System.Web.Services`
 reference source minus the exclusions below: the ASMX server runtime (SOAP
 1.1/1.2 doc/literal and rpc/encoded serving, SOAP headers and extensions,
 session-enabled and one-way methods, HTTP GET/POST bindings including the
@@ -16,13 +16,13 @@ Framework's protocol defaults (`HttpSoap`, `HttpSoap12`, `HttpPostLocalhost`,
 `Documentation` when configuration says nothing).
 
 The baseline root configuration maps `*.asmx` through Framework's chain:
-`ScriptHandlerFactory` (in `Rehost.WebForms.Extensions`) answers JSON
+`ScriptHandlerFactory` (in `Rehost.Web.Extensions`) answers JSON
 script-service calls (`[ScriptService]`, `/js` proxy scripts) and hands
 everything else to `WebServiceHandlerFactory`. Both satellite assemblies are
 named in `<compilation><assemblies>` as Framework named their originals; the
-`Rehost.WebForms` package ships both.
+`Rehost.Web` package ships both.
 
-Scenario evidence: `tests/Rehost.WebForms.Hosting.Tests/AsmxOverKestrelTests.cs`
+Scenario evidence: `tests/Rehost.Web.AspNetCore.Tests/AsmxOverKestrelTests.cs`
 over the shared page fixture (`Calc.asmx`, `ScriptCalc.asmx`).
 
 ## Wire readings vs full IIS (2026-08-21)
@@ -73,6 +73,6 @@ deviation is listed in
 [provenance](provenance/system-web-services-reference-source.json).
 
 Implementation:
-`src/Rehost.WebForms.WebServices`.
+`src/Rehost.Web.Services`.
 Remaining scope:
 [Web Services](follow-ups/web-services.md).

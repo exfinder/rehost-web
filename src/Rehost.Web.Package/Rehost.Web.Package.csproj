@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Rehost.Web</PackageId>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>$(NoWarn);CS2008</NoWarn>
+    <Description>ASP.NET Web Forms runtime for modern .NET: the System.Web-compatible runtime and its companion assemblies.</Description>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RehostBundleAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);RehostBundleSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
+  </PropertyGroup>
+
+  <Import Project="Rehost.Web.Dependencies.props" />
+
+  <!-- PrivateAssets keeps the five unpublished package IDs out of the nuspec; the
+       assemblies themselves are packed below. -->
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.ApplicationServices/Rehost.Web.ApplicationServices.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Services/Rehost.Web.Services.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None
+      Include="../Rehost.Web/configs/*"
+      Pack="true"
+      PackagePath="contentFiles/any/any/configs/"
+      PackageCopyToOutput="true" />
+    <!-- buildTransitive as well: a host reaches this package through its App project,
+         and plain build/ assets do not flow through a dependency. -->
+    <None
+      Update="build/Rehost.Web.targets"
+      Pack="true"
+      PackagePath="build/Rehost.Web.targets;buildTransitive/Rehost.Web.targets" />
+  </ItemGroup>
+
+  <Target Name="RehostResolveBundledAssemblies" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_RehostBundledAssembly
+        Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' and '%(Extension)' == '.dll'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- This project's own assembly is empty; the package's lib/ is the five components. -->
+  <Target Name="RehostBundleAssemblies" DependsOnTargets="RehostResolveBundledAssemblies">
+    <ItemGroup>
+      <BuiltProjectOutputGroupOutput Remove="@(BuiltProjectOutputGroupOutput)" />
+      <BuildOutputInPackage
+        Include="@(_RehostBundledAssembly)"
+        FinalOutputPath="%(FullPath)"
+        TargetPath="%(Filename)%(Extension)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RehostBundleSymbols" DependsOnTargets="RehostResolveBundledAssemblies">
+    <ItemGroup>
+      <DebugSymbolsProjectOutputGroupOutput Remove="@(DebugSymbolsProjectOutputGroupOutput)" />
+      <TfmSpecificDebugSymbolsFile
+        Include="@(_RehostBundledAssembly->'%(RootDir)%(Directory)%(Filename).pdb')"
+        TargetPath="%(Filename).pdb"
+        TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
+</Project>

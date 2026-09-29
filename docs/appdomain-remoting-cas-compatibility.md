@@ -37,7 +37,7 @@ only honest replacement.
 The implementation keeps viable local behavior and rejects contracts that
 require unavailable boundaries. Relevant source is under
 `src/System.Web.ReferenceSource/Hosting`, `Compilation`, `HttpRuntime.cs`, and
-`src/Rehost.WebForms.Runtime/Compatibility`.
+`src/Rehost.Web/Compatibility`.
 
 Application identity, roots, configuration sources, and process binding are
 defined by

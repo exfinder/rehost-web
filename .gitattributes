@@ -27,7 +27,7 @@ src/Rehost.Web.WebPages.Razor/AssemblyInfo.cs text
 *.expected.html -text
 
 # Generated to match the bytes the Framework assembly embeds, banner CRLF included.
-src/Rehost.WebForms.Extensions/Scripts/** -text
+src/Rehost.Web.Extensions/Scripts/** -text
 
 # Verbatim Microsoft file shipped beside machine.config; keep upstream bytes.
-src/Rehost.WebForms.Runtime/configs/DefaultWsdlHelpGenerator.aspx -text
+src/Rehost.Web/configs/DefaultWsdlHelpGenerator.aspx -text

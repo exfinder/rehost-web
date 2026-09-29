@@ -7,8 +7,8 @@ the install directory holds no codegen root and is not writable, and
 `SetDynamicBase` and `DynamicDirectory` are inert outside .NET Framework.
 
 The root resolves in order: the host `CompilationTempDirectory` option, the
-`REHOST_WEBFORMS_COMPILATION_TEMPDIRECTORY` environment variable, configured
-`tempDirectory`, then `~/.rehost-webforms/codegen` under the user profile
+`REHOST_COMPILATION_TEMPDIRECTORY` environment variable, configured
+`tempDirectory`, then `~/.rehost/codegen` under the user profile
 (amended 2026-09-17). The default is the portable analogue of `Temporary
 ASP.NET Files`: outside the reclaimable system temp root, outside the
 application, beside the machine keys of ADR 0010. It first sat beside the host

@@ -30,7 +30,7 @@ Both imported trees compile on .NET 10. The port drops one file. The 4.0-era
 compiler resolves such a collision in favour of the local copy, which would hide
 `[assembly: AssemblyMetadata]` from anything reading the real attribute.
 `PreApplicationStartCode` compiles as imported, against
-`Rehost.Web.Infrastructure` in the `Rehost.WebForms` package
+`Rehost.Web.Infrastructure` in the `Rehost.Web` package
 ([provenance](microsoft-web-infrastructure.md)).
 
 Neither tree's `Properties/AssemblyInfo.cs` is compiled. Both pinned the
@@ -42,7 +42,7 @@ still do something: `PreApplicationStartMethod`, `NeutralResourcesLanguage`,
 `CLSCompliant` and `ComVisible(false)`. The COM `Guid`, the `Serviceable`
 metadata, Microsoft's title and copyright text, and two `InternalsVisibleTo`
 rows naming upstream's test and WebForms assemblies are dropped; the WebForms
-project compiles as `Rehost.WebForms.Optimization.WebForms` and reaches no
+project compiles as `Rehost.AspNet.Web.Optimization.WebForms` and reaches no
 internals.
 
 WebGrease 1.6.0 is consumed unchanged for the reached JS/CSS bundle paths; the

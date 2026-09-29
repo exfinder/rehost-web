@@ -14,13 +14,13 @@ visibility, publish packages, or contact testers.
 ## Execution tracking
 
 GitHub owns tasks and completion status in the
-[Public alpha milestone](https://github.com/exfinder/rehost-webforms/milestone/1).
+[Public alpha milestone](https://github.com/exfinder/rehost-web/milestone/1).
 This document owns release scope; #8 preserves the decision. Issue bodies own
 acceptance checklists. Do not copy them into the roadmap or backlog.
 
 ## Public-alpha contract
 
-Decision record: [#8](https://github.com/exfinder/rehost-webforms/issues/8).
+Decision record: [#8](https://github.com/exfinder/rehost-web/issues/8).
 This fixes release scope, not current readiness. Evidence was inspected at
 `3aaf93c6` and rechecked at `88f46bd4`, preserving the existing release-planning
 edits. Maintainer confirmed the contract in #8. No builds or application journeys
@@ -48,27 +48,27 @@ The public alpha has seven NuGet packages:
 
 | Package | Payload / Rehost package dependencies |
 | --- | --- |
-| `Rehost.WebForms` | Bundles the Runtime, ApplicationServices, Extensions and WebServices assemblies, root configuration, runtime build assets and their external dependency closure |
-| `Rehost.WebForms.Hosting` | Kestrel and staging/XDT integration; depends on `Rehost.WebForms` |
-| `Rehost.WebForms.FriendlyUrls` | Friendly URLs; depends on `Rehost.WebForms` |
-| `Rehost.WebForms.Optimization` | Bundling/minification; depends on `Rehost.WebForms` |
-| `Rehost.WebForms.Optimization.WebForms` | Bundle controls; depends on `Rehost.WebForms.Optimization` and the core bundle as needed |
-| `Rehost.WebForms.ScriptManager.Bundles` | Script-name mappings; depends on `Rehost.WebForms`; physical scripts remain application-owned |
-| `Rehost.WebForms.Owin.Host.SystemWeb` | Katana host replacement; depends on `Rehost.WebForms` |
+| `Rehost.Web` | Bundles the runtime, ApplicationServices, Extensions and Services assemblies, root configuration, runtime build assets and their external dependency closure |
+| `Rehost.Web.AspNetCore` | Kestrel and staging/XDT integration; depends on `Rehost.Web` |
+| `Rehost.AspNet.FriendlyUrls` | Friendly URLs; depends on `Rehost.Web` |
+| `Rehost.AspNet.Web.Optimization` | Bundling/minification; depends on `Rehost.Web` |
+| `Rehost.AspNet.Web.Optimization.WebForms` | Bundle controls; depends on `Rehost.AspNet.Web.Optimization` and the core bundle as needed |
+| `Rehost.AspNet.ScriptManager.MSAjax` | Script-name mappings; depends on `Rehost.Web`; physical scripts remain application-owned |
+| `Rehost.Owin.Host.SystemWeb` | Katana host replacement; depends on `Rehost.Web` |
 
 This is package consolidation, not assembly merging or renaming. The four
 component assemblies keep their identities and project boundaries; they are not
 separately published NuGet packages. No package in the public graph may depend
 on their unpublished package IDs.
 
-Verified current implementation differs: [Rehost.WebForms.csproj](../../src/Rehost.WebForms/Rehost.WebForms.csproj)
+Verified current implementation differs: [Rehost.Web.Package.csproj](../../src/Rehost.Web.Package/Rehost.Web.Package.csproj)
 is a metapackage with four project/package dependencies, and
 [LocalFeed.targets](../../eng/LocalFeed.targets) packs eleven packages.
-[#12](https://github.com/exfinder/rehost-webforms/issues/12) owns consolidation
+[#12](https://github.com/exfinder/rehost-web/issues/12) owns consolidation
 and external-consumer proof: include all four DLLs, embedded resources, root
 configuration, direct/transitive build behavior and external dependencies;
 reconcile the local feed and consumers without changing assembly identities.
-[#16](https://github.com/exfinder/rehost-webforms/issues/16) verifies the final
+[#16](https://github.com/exfinder/rehost-web/issues/16) verifies the final
 seven-package graph, payload, symbols, notices and aligned versions.
 
 Hosting continues to bundle its build task and XDT dependency; `eng/` projects
@@ -76,16 +76,16 @@ are not additional public packages. App-specific recompiles/shims remain source
 examples: YAF libraries, OrmLite/dialects, `YAF.Compat`, its modified Web API host,
 eShop's Autofac integration, Wingtip's WebRequest shim and AJAX Control Toolkit
 recompiles. Existing upstream packages retain their own identities and versions.
-[#9](https://github.com/exfinder/rehost-webforms/issues/9) inventories the actual
+[#9](https://github.com/exfinder/rehost-web/issues/9) inventories the actual
 bundled contents and repository examples before licensing is settled.
 
 ### Onboarding and prerequisites
 
 One predominantly managed C# Web Application Project, rebuilt with an App
 library and a Kestrel Host executable targeting `net10.0`; one application per
-OS process/current AppDomain, full trust. App references `Rehost.WebForms` and
-needed feature packages; Host explicitly references `Rehost.WebForms` and
-`Rehost.WebForms.Hosting`. Preserve original application inputs; apply XDT to
+OS process/current AppDomain, full trust. App references `Rehost.Web` and
+needed feature packages; Host explicitly references `Rehost.Web` and
+`Rehost.Web.AspNetCore`. Preserve original application inputs; apply XDT to
 the staged copy. Explain rebuild-after-markup-edit behavior. Additional library
 recompiles are manual compatibility work, not a broader onboarding promise.
 
@@ -165,11 +165,11 @@ unsupported-security diagnostics or existing compatibility limits.
 
 | Start | Work |
 | --- | --- |
-| Now, in parallel | [#9 License](https://github.com/exfinder/rehost-webforms/issues/9), [#10 publication audit](https://github.com/exfinder/rehost-webforms/issues/10), [#11 security settings](https://github.com/exfinder/rehost-webforms/issues/11), [#12 consumer packages](https://github.com/exfinder/rehost-webforms/issues/12) |
-| Draft now; verify after #12 | [#13 Documentation and onboarding](https://github.com/exfinder/rehost-webforms/issues/13) |
-| After code, packages, license and docs | [#16 Build and validate release](https://github.com/exfinder/rehost-webforms/issues/16) |
-| With a prepared candidate | [#18 User trial and feedback](https://github.com/exfinder/rehost-webforms/issues/18); fixes return through #16 |
-| After all required work | [#19 Publish](https://github.com/exfinder/rehost-webforms/issues/19) |
+| Now, in parallel | [#9 License](https://github.com/exfinder/rehost-web/issues/9), [#10 publication audit](https://github.com/exfinder/rehost-web/issues/10), [#11 security settings](https://github.com/exfinder/rehost-web/issues/11), [#12 consumer packages](https://github.com/exfinder/rehost-web/issues/12) |
+| Draft now; verify after #12 | [#13 Documentation and onboarding](https://github.com/exfinder/rehost-web/issues/13) |
+| After code, packages, license and docs | [#16 Build and validate release](https://github.com/exfinder/rehost-web/issues/16) |
+| With a prepared candidate | [#18 User trial and feedback](https://github.com/exfinder/rehost-web/issues/18); fixes return through #16 |
+| After all required work | [#19 Publish](https://github.com/exfinder/rehost-web/issues/19) |
 
 Repository visibility may precede packages: complete #9/#10 for the exposed
 scope and obtain maintainer approval. Review material additions since the audit.
@@ -182,7 +182,7 @@ support expectations belong to #13/#18. Exact artifact and environment records
 belong to #16. Preparation does not authorize publication, invitations or history
 rewrites. Reopen the scope decision before changing the agreed release contract.
 
-The [migration helper](https://github.com/exfinder/rehost-webforms/issues/21)
+The [migration helper](https://github.com/exfinder/rehost-web/issues/21)
 remains optional. Further ports, general migration automation and production
 readiness remain outside alpha. Continuing feedback collection is not a release
 gate.

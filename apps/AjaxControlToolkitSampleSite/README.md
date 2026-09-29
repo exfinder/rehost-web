@@ -126,7 +126,7 @@ being run under a runtime with a 4.5 floor.
   `deps.json`, so the `Type.GetType("…, AjaxControlToolkit.HtmlEditor.Sanitizer")`
   in `EditPanel` can resolve it by simple name.
 - `packages.config` maps as usual: `Microsoft.AspNet.Web.Optimization` →
-  `Rehost.WebForms.Optimization` on the Host (`Antlr`, `WebGrease` and
+  `Rehost.AspNet.Web.Optimization` on the Host (`Antlr`, `WebGrease` and
   `Newtonsoft.Json` come with it), `HtmlAgilityPack` → nuget.org, and
   `Microsoft.Web.Infrastructure` is dropped as in every other app here.
 - **`AjaxControlToolkit.StaticResources` is deliberately not ported.** Its only

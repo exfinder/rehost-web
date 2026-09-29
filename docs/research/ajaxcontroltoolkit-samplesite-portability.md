@@ -84,9 +84,9 @@ Windows- or platform-bound.
 | `ObjectDataSource` + `[DataObject]` over `DataSet`/XML | A (unassessed) | `HoverMenu/HoverMenu.aspx:88`, `ReorderList/ReorderList.aspx:54`, `App_Code/TodoXmlDataObject.cs`; `src/System.Web.ReferenceSource/UI/WebControls/ObjectDataSource.cs` |
 | `GridView`, `Repeater`, `CompositeControl`, `ITemplate`, `HtmlGenericControl` | A (unassessed) | present in `src/`, no claim |
 | Custom `ConfigurationSection` via `WebConfigurationManager.GetSection` | A | map: static `ConfigurationManager` inside the application — Supported; `ToolkitConfig.cs:16` |
-| `File.ReadAllText(Server.MapPath("~/App_Data/ControlReference/…"))` on every page render | A | `Layout.master.cs:23,31`. Runtime targets strip `App_Data` from **compilation** only (`src/Rehost.WebForms.Runtime/build/Rehost.WebForms.Runtime.targets:31`); the 102 HTML fragments must still ship as site content |
+| `File.ReadAllText(Server.MapPath("~/App_Data/ControlReference/…"))` on every page render | A | `Layout.master.cs:23,31`. Runtime targets strip `App_Data` from **compilation** only (`src/Rehost.Web.Package/build/Rehost.Web.targets:31`); the 102 HTML fragments must still ship as site content |
 | Client callbacks (`ICallbackEventHandler`, `GetCallbackEventReference`) | A (unassessed) | `src/System.Web.ReferenceSource/UI/ClientScriptManager.cs:262`; reached by `Rating/Rating.cs:332` and `ExtenderBase/ComponentDescriber.cs:166` |
-| `System.Web`'s own `WebForms.js` etc. via `WebResource.axd` | A | The site stages no `Scripts/WebForms/` folder, so these must come from the assembly. `Rehost.WebForms.Runtime.csproj:30-35` embeds every `RuntimeScripts/*.js` |
+| `System.Web`'s own `WebForms.js` etc. via `WebResource.axd` | A | The site stages no `Scripts/WebForms/` folder, so these must come from the assembly. `Rehost.Web.csproj:30-35` embeds every `RuntimeScripts/*.js` |
 
 ### System.Web surface reached by the toolkit
 
@@ -110,7 +110,7 @@ Windows- or platform-bound.
 
 | Package / reference | Class | Disposition |
 | --- | --- | --- |
-| `Microsoft.AspNet.Web.Optimization` 1.1.3, `WebGrease` 1.5.2, `Antlr` 3.4.1.9004, `Newtonsoft.Json` 5.0.4 | A | `Rehost.WebForms.Optimization` already carries `Antlr`, `WebGrease` and `Newtonsoft.Json` as package references (`src/Rehost.WebForms.Optimization/Rehost.WebForms.Optimization.csproj:28-31`). The `<runtime>` WebGrease binding redirect (`Web.config:46-53`) is removed by the default XDT |
+| `Microsoft.AspNet.Web.Optimization` 1.1.3, `WebGrease` 1.5.2, `Antlr` 3.4.1.9004, `Newtonsoft.Json` 5.0.4 | A | `Rehost.AspNet.Web.Optimization` already carries `Antlr`, `WebGrease` and `Newtonsoft.Json` as package references (`src/Rehost.Web.Optimization/Rehost.Web.Optimization.csproj:28-31`). The `<runtime>` WebGrease binding redirect (`Web.config:46-53`) is removed by the default XDT |
 | `Microsoft.Web.Infrastructure` 1.0.0 | A (dropped) | Same disposition as both Milestone 1 applications and eShop |
 | `HtmlAgilityPack` 1.4.9 | B | Modern HtmlAgilityPack ships `netstandard2.0`; `DefaultHtmlSanitizer.cs` uses only `HtmlDocument`, `HtmlNode`, `HtmlAttribute` and the three `Option*` flags |
 | `System.Web`, `System.Web.Extensions` | A | Rehost identity after recompile |
@@ -123,16 +123,16 @@ Windows- or platform-bound.
 
 | Entry | Class | Note |
 | --- | --- | --- |
-| `<trust level="Medium"/>` (`:39`) | **C, blocking** | `src/Rehost.WebForms.Runtime/Compatibility/Hosting/ApplicationConfigurationPreflight.cs:49-53` throws `PlatformNotSupportedException` unless the level is exactly `Full`. Activation never completes. One-line XDT removal |
+| `<trust level="Medium"/>` (`:39`) | **C, blocking** | `src/Rehost.Web/Compatibility/Hosting/ApplicationConfigurationPreflight.cs:49-53` throws `PlatformNotSupportedException` unless the level is exactly `Full`. Activation never completes. One-line XDT removal |
 | **no `<httpRuntime>` element** | **C, blocking** | map: `<httpRuntime targetFramework="4.5" />` or later is **Required**. `ApplicationConfigurationPublicationTests.An_Application_Declaring_No_Target_Framework_Is_Refused_Per_Request` shows the observable: every request renders a 500 naming `targetFramework` (ledger P40). One-line XDT insertion |
 | `<compilation debug="true" targetFramework="4.0"/>` (`:26`) | A (unassessed) | `compilation targetFramework="4.0"` selects 4.0-era `controlRenderingCompatibilityVersion` and `MultiTargetingUtil` branches (`src/System.Web.ReferenceSource/Compilation/MultiTargetingUtil.cs:442`). No port claim covers pre-4.5 rendering compatibility |
 | `<machineKey>` with literal SHA1 keys (`:27`) | A | map: view-state protection with an explicit literal `<machineKey>` — Supported |
 | `<configSections>` + `<ajaxControlToolkit …>` (`:7-14`) | A | Custom sections work; `requirePermission="false"` is a partial-trust artifact and inert |
-| `<location path="Temp"><system.webServer><handlers><clear/>…` (`:15-24`) | **unverified** | The port builds folder handler lists by discovering folder `web.config` files (`src/Rehost.WebForms.Runtime/Compatibility/IisConfig/IisFolderHandlers.cs:14-21`), not from `<location>` blocks in the root file. The `<modules><clear/>` half is inert on IIS too (MH24). Hardening only; no demo journey depends on it |
+| `<location path="Temp"><system.webServer><handlers><clear/>…` (`:15-24`) | **unverified** | The port builds folder handler lists by discovering folder `web.config` files (`src/Rehost.Web/Compatibility/IisConfig/IisFolderHandlers.cs:14-21`), not from `<location>` blocks in the root file. The `<modules><clear/>` half is inert on IIS too (MH24). Hardening only; no demo journey depends on it |
 | `<siteMap><providers>` (`:28-32`) | A (unassessed) | Named provider; `SiteMapDataSource` selects it explicitly, so the root default provider is never asked for `Web.sitemap` — **unverified** |
 | `<pages><controls>` toolkit + `namespace="InfoBlock"` with no assembly (`:33-38`) | A (unverified) | The assembly-less form resolves against the `App_Code` assembly |
 | `<system.webServer><handlers>` `AjaxFileUploadHandler.axd` (`:41-45`) | A | map: handlers Supported. Note `path` has no leading `*`/`/` |
-| `<runtime><assemblyBinding>` WebGrease redirect (`:46-53`) | A (dropped) | Default XDT removes `<runtime>` wholesale (`src/Rehost.WebForms.Hosting/build/Web.Rehost.config:7`) |
+| `<runtime><assemblyBinding>` WebGrease redirect (`:46-53`) | A (dropped) | Default XDT removes `<runtime>` wholesale (`src/Rehost.Web.AspNetCore/build/Web.Rehost.config:7`) |
 
 There is no `<httpModules>` block, no `<sessionState>` element, no connection
 string and no database. Nothing in the site talks to SQL.
@@ -199,7 +199,7 @@ this and wrote it down:
 
 > `System.Drawing.Common` is Windows-gated, and the real `ToolboxBitmapAttribute`
 > reaches GDI+ from its type initializer, which the page parser triggers.
-> — `src/Rehost.WebForms.Runtime/Compatibility/DesignTime/DrawingMarkers.cs:1-2`
+> — `src/Rehost.Web/Compatibility/DesignTime/DrawingMarkers.cs:1-2`
 
 The toolkit carries 51 `[ToolboxBitmap(typeof(ToolboxIcons.Accessor), …)]`
 attributes (e.g. `Accordion/Accordion.cs:26`, `Tabs/TabContainer.cs:25`) and 58

@@ -7,7 +7,7 @@ AWS state before provisioning or cost decisions.
 ## Current shape
 
 Spot `t3a.xlarge` (persistent, stop-on-interruption), 40GB gp3, `unlimited`
-credits, baked AMI via SSM `/win-oracle/ami`, repo at `C:\repos\rehost-webforms`.
+credits, baked AMI via SSM `/win-oracle/ami`, repo at `C:\repos\rehost-web`.
 Launch to usable login ~1m40s. Idle-stop after 60 min; `ssh win-oracle` wakes it.
 
 ## Measurements
@@ -60,7 +60,7 @@ so every wake throttles to baseline within minutes.
 
 ## Test suite
 
-`dotnet test Rehost.WebForms.slnx` (whole solution) is supported: after the
+`dotnet test Rehost.Web.slnx` (whole solution) is supported: after the
 2026-08 suite refactoring it passed three consecutive clean runs on this 4-vCPU
 host with no parallelism capping. The historical `*OverKestrel*`
 cross-project flake predated process consolidation. The abort-scenario flake was

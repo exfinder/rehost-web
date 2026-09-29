@@ -211,7 +211,7 @@ namespace System.Web.DataAccess {
                             HttpRuntime.RestrictIISFolders(context);
                     }
                     catch (Exception swallowedException) {
-                        System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                        System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                             $"{nameof(SqlConnectionHelper)}.{nameof(CreateMdfFile)}", swallowedException, "HttpRuntime.RestrictIISFolders");
                     }
                 }
@@ -274,7 +274,7 @@ namespace System.Web.DataAccess {
                 command.ExecuteNonQuery();
             }
             catch (Exception swallowedException) {
-                System.Web.Util.WebFormsRuntimeEventSource.Log.SwallowedException(
+                System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                     $"{nameof(SqlConnectionHelper)}.{nameof(DetachDB)}", swallowedException, "connection.Open");
             }
             finally {

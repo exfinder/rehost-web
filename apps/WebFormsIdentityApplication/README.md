@@ -23,9 +23,9 @@ nuget.org unchanged, and the connection string has to move off LocalDb.
 
 | `packages.config` | Here | Note |
 | --- | --- | --- |
-| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | `Rehost.WebForms.Owin.Host.SystemWeb` | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/provenance/aspnet-katana.md) |
+| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | `Rehost.Owin.Host.SystemWeb` | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/provenance/aspnet-katana.md) |
 | `Microsoft.Web.Infrastructure` 2.0 | dropped | Only Katana's `DynamicModuleUtility` dependency, and Katana 4.x calls `HttpApplication.RegisterModule` directly |
-| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `Microsoft.AspNet.FriendlyUrls*`, `Microsoft.AspNet.ScriptManager.*` | `Rehost.WebForms.Optimization`, `.Optimization.WebForms`, `.FriendlyUrls`, `.ScriptManager.Bundles` | Same mapping as `WebFormsApplication` |
+| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `Microsoft.AspNet.FriendlyUrls*`, `Microsoft.AspNet.ScriptManager.*` | `Rehost.AspNet.Web.Optimization`, `.WebForms`, `Rehost.AspNet.FriendlyUrls`, `Rehost.AspNet.ScriptManager.MSAjax` | Same mapping as `WebFormsApplication` |
 | `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` | dropped | The runtime owns compiler selection; `<system.codedom>` is removed by XDT |
 | `Owin`, `Microsoft.Owin`, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Security.Facebook`, `.Security.Twitter`, `.Security.MicrosoftAccount` | same packages from nuget.org | Pure managed; consumed as shipped under `NU1701` |
 | `Microsoft.AspNet.Identity.Core`, `.Owin`, `.EntityFramework` 2.2.4 | same packages from nuget.org | Pure managed |
@@ -34,7 +34,7 @@ nuget.org unchanged, and the connection string has to move off LocalDb.
 | `Newtonsoft.Json` 13.0.3 | same package, pinned | `Microsoft.Owin.Security` still asks for 6.0.4 (NU1903) |
 | Antlr, WebGrease, bootstrap, jQuery, Modernizr | unchanged content/dependencies | Same as `WebFormsApplication` |
 
-`Rehost.WebForms` and `Rehost.WebForms.Hosting` replace what the GAC gave the
+`Rehost.Web` and `Rehost.Web.AspNetCore` replace what the GAC gave the
 Framework app; the host adds the latter.
 
 ## Database
