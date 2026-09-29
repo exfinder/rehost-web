@@ -64,7 +64,7 @@ Windows- or platform-bound.
 | --- | --- | --- |
 | `Microsoft.AspNet.Web.Optimization` 1.1.3, `.WebForms`, `WebGrease` 1.6, `Antlr` 3.5.0.2 | A | `Rehost.AspNet.Web.Optimization`, `.WebForms`; the `<controls>` assembly rewrite is already in the default XDT (`src/Rehost.Web.AspNetCore/build/Web.Rehost.config:13-15`) |
 | `Microsoft.AspNet.FriendlyUrls` + `.Core` 1.0.2 | A | `Rehost.AspNet.FriendlyUrls` |
-| `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.AspNet.ScriptManager.MSAjax` registers `MsAjaxBundle`, `WebFormsBundle` and the 11 MicrosoftAjax names (`PreApplicationStartCode.cs:16-36`) |
+| `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.AspNet.ScriptManager.MSAjax` registers `MsAjaxBundle` and the 11 MicrosoftAjax names, `Rehost.AspNet.ScriptManager.WebForms` registers `WebFormsBundle` |
 | `AspNet.ScriptManager.bootstrap` 4.3.1 | **C** | Registers the `bootstrap` `ScriptResourceMapping` name that `Site.Master:27` asks for. No port registrar exists; backlog already records that the Bundles package "registers names only" for the MsAjax/WebForms set |
 | `AspNet.ScriptManager.jQuery` 3.3.1 | C (low risk) | Registers `jquery`. Also unregistered in the port, yet both frozen templates use `<asp:ScriptReference Name="jquery" />` and pass, so the reference is non-fatal today; the definition itself is still absent |
 | `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` 2.0.1, `Microsoft.Net.Compilers` 2.10.0 | A (dropped) | The runtime owns compiler selection; `<system.codedom>` is removed by the default XDT (`Web.Rehost.config:9`) |
@@ -236,8 +236,8 @@ boundary plus a sidecar substitution rather than by port work.
 4. **`bootstrap` (and `jquery`) `ScriptResourceMapping` names are
    unregistered.** `Site.Master:26-28` is on every page. `respond` the
    application registers itself; the other two came from packages the port
-   replaces with `Rehost.AspNet.ScriptManager.MSAjax`, which registers only
-   the MsAjax/WebForms names. Severity is **unverified**: the frozen templates
+   replaces with `Rehost.AspNet.ScriptManager.MSAjax` and `.WebForms`, which
+   register only the MsAjax/WebForms names. Severity is **unverified**: the frozen templates
    already reference `jquery` unregistered and pass, so an unresolved name is
    probably not fatal — but that has never been measured, and `bootstrap` is new.
 5. **Classic page routing breadth.** Six `MapPageRoute` entries, `Page.RouteData`

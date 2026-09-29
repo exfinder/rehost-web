@@ -15,6 +15,7 @@ own licenses; nothing here replaces them.
 | `Rehost.Web.AspNetCore` | MIT | Project code; bundled `Microsoft.Web.XmlTransform.dll` 3.2.11 is MIT per its nuspec |
 | `Rehost.AspNet.FriendlyUrls` | MIT | Project code |
 | `Rehost.AspNet.ScriptManager.MSAjax` | MIT | Project code |
+| `Rehost.AspNet.ScriptManager.WebForms` | MIT | Project code |
 | `Rehost.AspNet.Web.Optimization` | Apache-2.0 | Imported AspNetWebOptimization tree; project edits offered under Apache-2.0 |
 | `Rehost.AspNet.Web.Optimization.WebForms` | Apache-2.0 | Same tree |
 | `Rehost.Owin.Host.SystemWeb` | Apache-2.0 | Imported Katana tree; project edits offered under Apache-2.0 |

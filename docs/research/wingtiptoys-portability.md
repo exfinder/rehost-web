@@ -120,7 +120,7 @@ Windows- or platform-bound.
 | `EntityFramework` 6.1.1 | B | 6.5.2 from nuget.org, the Identity/eShop precedent |
 | `Microsoft.AspNet.Web.Optimization` 1.1.3, `.WebForms`, `WebGrease` 1.5.2, `Antlr` 3.4.1.9004, `Newtonsoft.Json` 6.0.3 | A | `Rehost.AspNet.Web.Optimization`, `.WebForms`; the `<controls>` assembly rewrite is in the default XDT (`src/Rehost.Web.AspNetCore/build/Web.Rehost.config:13-15`) |
 | `Microsoft.AspNet.FriendlyUrls` + `.Core` 1.0.2 | A | `Rehost.AspNet.FriendlyUrls` |
-| `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.AspNet.ScriptManager.MSAjax` registers `MsAjaxBundle`, `WebFormsBundle` and the MicrosoftAjax names |
+| `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.AspNet.ScriptManager.MSAjax` registers `MsAjaxBundle` and the MicrosoftAjax names, `Rehost.AspNet.ScriptManager.WebForms` registers `WebFormsBundle` |
 | `AspNet.ScriptManager.jQuery` 1.10.2 | **C, blocking** | Registers the `jquery` `ScriptResourceMapping`. Unregistered here, and unlike eShop the consequence is provably fatal — see gap 1 |
 | `AspNet.ScriptManager.bootstrap` 3.0.0 | **C** | Registers `bootstrap`, referenced from `Site.Master:26` on every page. Same shim |
 | `Microsoft.AspNet.Providers.Core` 2.0.0 (`System.Web.Providers`) | **C, inert** | Named only as `<sessionState customProvider>`, which `mode="InProc"` never resolves. `WebFormsIdentityApplication` carries the identical line and records that it "parses and activates exactly as it does on Framework" (`apps/WebFormsIdentityApplication/README.md`, web.config section) |
@@ -335,7 +335,7 @@ value providers; `customErrors` end to end.
    `Account/Login.aspx` — the journey's first two pages — carry
    `RequiredFieldValidator`s. The definition came from the
    `AspNet.ScriptManager.jQuery` package, which the port replaces with
-   `Rehost.AspNet.ScriptManager.MSAjax` (names only). Fix: an
+   the `Rehost.AspNet.ScriptManager.*` packages (names only). Fix: an
    `apps/WingtipToys/WingtipToys.App/PreApplicationStartCode.cs` in the shape of
    `apps/eShopLegacyWebForms/eShopLegacyWebForms.App/PreApplicationStartCode.cs:16-30`,
    pointing at `~/Scripts/jquery-1.10.2.min.js` and `~/Scripts/bootstrap.min.js`.

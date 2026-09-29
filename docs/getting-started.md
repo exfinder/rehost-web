@@ -1,8 +1,9 @@
 # Getting started
 
-How to run an existing ASP.NET Web Forms Web Application Project on .NET 10. The
-legacy project is not edited and keeps building on .NET Framework. A Web Site
-project (no csproj, code in `App_Code`) is not covered by the template yet.
+How to run an existing ASP.NET Web Application Project on .NET 10, whether it
+serves Web Forms, Web Pages or Web API. The legacy project is not edited and
+keeps building on .NET Framework. A Web Site project (no csproj, code in
+`App_Code`) is not covered by the template yet.
 
 You need the .NET SDK 10.0.302 or a later 10.0.3xx release, which carries the
 10.0.10 runtime the alpha was validated with. Nothing else: no database, no
@@ -48,31 +49,15 @@ dotnet new rehost-web --webapp Web --assembly Shop.Web
 Open `Shop.Web.App/Shop.Web.App.csproj` and add a `PackageReference` for each
 line of the legacy `packages.config`. Packages that are built on `System.Web` have
 a Rehost counterpart. Use it, not the original: the original compiles, then fails
-at run time because it binds to Microsoft's `System.Web`.
+at run time because it binds to Microsoft's `System.Web`. The
+[package mapping](migration.md#package-mapping) gives the counterpart for each
+one, and says which lines a Rehost package already brings.
 
-| Legacy package | Use |
-| --- | --- |
-| `Microsoft.AspNet.FriendlyUrls` | `Rehost.AspNet.FriendlyUrls` |
-| `Microsoft.AspNet.Web.Optimization` | `Rehost.AspNet.Web.Optimization` |
-| `Microsoft.AspNet.Web.Optimization.WebForms` | `Rehost.AspNet.Web.Optimization.WebForms` |
-| `Microsoft.AspNet.ScriptManager.*` | `Rehost.AspNet.ScriptManager.MSAjax` |
-| `Microsoft.Owin.Host.SystemWeb` | `Rehost.Owin.Host.SystemWeb` |
-| `Microsoft.AspNet.WebApi` and `.WebHost` | `Rehost.AspNet.WebApi.WebHost` (brings `Core` and `Client`) |
-| `Microsoft.AspNet.WebPages` | `Rehost.AspNet.WebPages` (brings `Microsoft.AspNet.Razor`) |
-
-The template already lists the first four, because the Visual Studio template
-adds them to every project. Delete the ones your application does not use.
-Other packages (Entity Framework 6, Autofac, log4net, Newtonsoft.Json) are
-referenced as they are; `NU1701` is silenced because many ship only a .NET
-Framework build.
-
-A Rehost package depends on the pure-managed siblings its original depended
-on, so their `packages.config` lines can go: `Microsoft.AspNet.WebApi.Core` and
-`.Client` come with the Web API host, `Microsoft.Owin` and `Owin` with the OWIN
-host, `WebGrease`, `Antlr` and `Newtonsoft.Json` with Optimization, and
-`Microsoft.AspNet.Razor` with Web Pages. Keeping a line is harmless when its
-version is the one the Rehost package asks for or newer. An older one is a
-package downgrade: restore fails with `NU1605`, so drop the line or raise it.
+The template already lists the Friendly URLs, Optimization and ScriptManager
+packages, because the Visual Studio Web Forms template adds them to every
+project. Delete the ones your application does not use. Other packages (Entity
+Framework 6, Autofac, log4net, Newtonsoft.Json) are referenced as they are;
+`NU1701` is silenced because many ship only a .NET Framework build.
 
 ## 4. Adjust configuration
 

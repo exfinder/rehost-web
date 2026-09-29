@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS2008</NoWarn>
-    <Description>ASP.NET Web Forms runtime for modern .NET: the System.Web-compatible runtime and its companion assemblies.</Description>
+    <Description>System.Web on modern .NET for ASP.NET Web Forms, Web Pages and Web API applications: the System.Web-compatible runtime and its companion assemblies.</Description>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);RehostBundleAssemblies</TargetsForTfmSpecificBuildOutput>
     <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);RehostBundleSymbols</TargetsForTfmSpecificDebugSymbolsInPackage>
   </PropertyGroup>

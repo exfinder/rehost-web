@@ -8,35 +8,53 @@ reasoning live. [Compatibility](compatibility.md) owns the support claims.
 
 ## Package mapping
 
-Every `packages.config` line becomes a `PackageReference` in the App project.
-Three groups:
+Every `packages.config` line becomes a `PackageReference` in the App project,
+or goes. A package built on `System.Web` binds to Microsoft's strong-named
+assembly, so it compiles and then fails at run time. It takes its Rehost
+counterpart, which carries the original name with `Microsoft` changed to
+`Rehost`. The in-box assemblies follow the same rule with `System`. A line that
+a counterpart already brings goes.
 
-- **Built on `System.Web`.** These bind to Microsoft's strong-named assembly
-  and must use the Rehost counterpart: `Microsoft.AspNet.FriendlyUrls`,
-  `Microsoft.AspNet.Web.Optimization` and `.WebForms`,
-  `Microsoft.AspNet.ScriptManager.*`, `Microsoft.Owin.Host.SystemWeb`,
-  `Microsoft.AspNet.WebApi.WebHost`, `Microsoft.AspNet.WebPages`. The
-  getting-started table lists the names.
-- **Pure managed.** Entity Framework 6.3+, the Katana `Microsoft.Owin.*`
-  packages, ASP.NET Identity 2.2, the other `Microsoft.AspNet.WebApi.*`
-  packages (`Core`, `Client`, `Cors`, `Tracing`, `Owin`), Newtonsoft.Json,
-  Autofac, log4net are referenced as they are, often at a newer version than
-  the legacy line.
-  Packages that ship only a `net45` build restore under `NU1701`, which the
-  template silences.
-- **Dropped.** `Microsoft.AspNet.WebApi`, the meta package: it would pull
-  `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host, and
-  `Rehost.AspNet.WebApi.WebHost` already brings `Core` and `Client`, so a Web API
-  application needs that one line. `Microsoft.Web.Infrastructure` goes because
-  `Rehost.Web` brings `Rehost.Web.Infrastructure` with the same API;
-  keeping the original line gives CS0433 wherever application code uses its
-  types. `Microsoft.AspNet.Providers.Core` goes when only
-  `<sessionState customProvider>` names it, and `WebGrease`/`Antlr` go because
-  the Optimization package carries them itself. `Microsoft.AspNet.Razor` goes
-  or rises to 3.3.0: `Rehost.AspNet.WebPages` requires 3.3.0, and a 3.2.3 line
-  beside it fails restore with `NU1605`, a package downgrade. The
-  `AspNet.ScriptManager.jQuery` and `.bootstrap` packages register names only;
-  re-register them in a `PreApplicationStartCode.cs` in the App project.
+| Legacy reference | Rehost |
+| --- | --- |
+| `System.Web`, `System.Web.Extensions`, `System.Web.ApplicationServices`, `System.Web.Services` (in-box) | `Rehost.Web`, which ships the assemblies `Rehost.Web`, `Rehost.Web.Extensions`, `Rehost.Web.ApplicationServices` and `Rehost.Web.Services` |
+| `Microsoft.AspNet.FriendlyUrls` | `Rehost.AspNet.FriendlyUrls` |
+| `Microsoft.AspNet.FriendlyUrls.Core` | drop, covered by `Rehost.AspNet.FriendlyUrls` |
+| `Microsoft.AspNet.Web.Optimization` | `Rehost.AspNet.Web.Optimization` |
+| `Microsoft.AspNet.Web.Optimization.WebForms` | `Rehost.AspNet.Web.Optimization.WebForms` |
+| `WebGrease`, `Antlr` | drop, covered by `Rehost.AspNet.Web.Optimization` |
+| `Microsoft.AspNet.ScriptManager.MSAjax` | `Rehost.AspNet.ScriptManager.MSAjax` |
+| `Microsoft.AspNet.ScriptManager.WebForms` | `Rehost.AspNet.ScriptManager.WebForms` |
+| `AspNet.ScriptManager.jQuery`, `AspNet.ScriptManager.bootstrap` | drop, re-register by hand |
+| `Microsoft.Owin.Host.SystemWeb` | `Rehost.Owin.Host.SystemWeb` |
+| `Microsoft.Web.Infrastructure` | drop, covered by `Rehost.Web` |
+| `Microsoft.AspNet.WebApi.WebHost` | `Rehost.AspNet.WebApi.WebHost` |
+| `Microsoft.AspNet.WebApi` | drop, covered by `Rehost.AspNet.WebApi.WebHost` |
+| `Microsoft.AspNet.WebApi.Core`, `Microsoft.AspNet.WebApi.Client` | drop, covered by `Rehost.AspNet.WebApi.WebHost` |
+| `Microsoft.AspNet.WebPages` | `Rehost.AspNet.WebPages` |
+| `Microsoft.AspNet.Razor` | drop, covered by `Rehost.AspNet.WebPages` |
+| `Microsoft.AspNet.Providers.Core` | drop when only `<sessionState customProvider>` names it |
+
+A covered line may stay if its version is the one the Rehost package asks for
+or newer. An older one is a package downgrade, and restore fails with `NU1605`.
+`Rehost.AspNet.WebPages` needs `Microsoft.AspNet.Razor` 3.3.0, so a 3.2.3 line
+beside it fails. Four drops have a reason of their own:
+
+- `Microsoft.AspNet.WebApi` is a meta package that pulls
+  `Microsoft.AspNet.WebApi.WebHost` back in beside the Rehost host.
+- `Microsoft.Web.Infrastructure` gives CS0433 wherever application code uses
+  its types, because `Rehost.Web` carries `Rehost.Web.Infrastructure` with the
+  same API.
+- `AspNet.ScriptManager.jQuery` and `.bootstrap` register script names only.
+  Register the same names in a `PreApplicationStartCode.cs` in the App project.
+- `Microsoft.AspNet.Providers.Core` is inert while `mode="InProc"` never
+  resolves the provider `<sessionState customProvider>` names.
+
+Pure managed packages stay as they are, often at a newer version than the
+legacy line: Entity Framework 6.3+, the Katana `Microsoft.Owin.*` packages,
+ASP.NET Identity 2.2, the other `Microsoft.AspNet.WebApi.*` packages (`Cors`,
+`Tracing`, `Owin`), Newtonsoft.Json, Autofac and log4net. Packages that ship
+only a `net45` build restore under `NU1701`, which the template silences.
 
 The worked table with every decision is in
 [Wingtip Toys, packages.config to PackageReference](../apps/WingtipToys/README.md);

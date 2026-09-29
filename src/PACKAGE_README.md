@@ -1,14 +1,16 @@
 # Rehost.Web
 
-Run predominantly managed ASP.NET Web Forms applications on modern .NET across
-Windows, Linux, and macOS with minimal application-source changes.
+System.Web on modern .NET. Run predominantly managed ASP.NET Web Forms, Web
+Pages and Web API applications across Windows, Linux, and macOS with minimal
+application-source changes.
 
 The `Rehost.Web` package is the starting point: it carries the
 `System.Web`-compatible runtime and its companion assemblies, among them the
 ones the root configuration names, so `asp:` tags parse out of the box.
-Packages that were NuGet packages on .NET Framework (`FriendlyUrls`, `Optimization`,
-`ScriptManager`) map one-to-one to their `Rehost.*` counterparts — translate
-your `packages.config` line by line. A host executable references
+Packages that were NuGet packages on .NET Framework map to `Rehost.*`
+counterparts, so your `packages.config` translates line by line; the
+[package mapping](https://github.com/exfinder/rehost-web/blob/main/docs/migration.md#package-mapping)
+lists each one. A host executable references
 `Rehost.Web.AspNetCore` and serves the site through the classic managed
 pipeline on Kestrel.
 

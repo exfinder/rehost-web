@@ -1,7 +1,8 @@
 # Rehost.Web
 
-Run ASP.NET Web Forms applications on .NET 10, on Windows, Linux and macOS,
-with the legacy project untouched. The runtime is a port of `System.Web` from
+System.Web on modern .NET. Rehost.Web runs ASP.NET Web Forms, Web Pages and
+Web API applications on .NET 10, on Windows, Linux and macOS, with the legacy
+project untouched. The runtime is a port of `System.Web` from
 Microsoft's Reference Source; applications keep their markup, code-behind and
 `Web.config`, and gain a Kestrel host, `dotnet build` and `dotnet publish`.
 
@@ -27,15 +28,13 @@ are in [Migrating an application](docs/migration.md).
 
 ## Packages
 
-Ten packages, one version: `Rehost.Web` (the runtime),
-`Rehost.Web.AspNetCore` (Kestrel host, site staging, XDT),
-`Rehost.AspNet.FriendlyUrls`, `Rehost.AspNet.Web.Optimization`,
-`Rehost.AspNet.Web.Optimization.WebForms`, `Rehost.AspNet.ScriptManager.MSAjax`,
-`Rehost.Owin.Host.SystemWeb` (Katana), `Rehost.AspNet.WebApi.WebHost`
-(Web API 2), `Rehost.AspNet.WebPages` (ASP.NET Web Pages, `.cshtml`) and
-`Rehost.Web.Templates`.
-Packages that were NuGet packages on .NET Framework map one to one; translate
-`packages.config` line by line.
+Eleven packages, one version. `Rehost.Web` is the runtime and takes the place
+of the in-box assemblies, `Rehost.Web.AspNetCore` is the Kestrel host, and
+`Rehost.Web.Templates` carries `dotnet new rehost-web`. Every other package
+replaces the NuGet package of the same name with `Microsoft` changed to
+`Rehost`, so `packages.config` translates line by line; the
+[package mapping](docs/migration.md#package-mapping) lists each legacy
+reference and its counterpart.
 
 ## Examples
 

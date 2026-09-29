@@ -125,9 +125,10 @@ being run under a runtime with a 4.5 floor.
   land there with no extra work. The sanitizer is also in the Host's
   `deps.json`, so the `Type.GetType("…, AjaxControlToolkit.HtmlEditor.Sanitizer")`
   in `EditPanel` can resolve it by simple name.
-- `packages.config` maps as usual: `Microsoft.AspNet.Web.Optimization` →
-  `Rehost.AspNet.Web.Optimization` on the Host (`Antlr`, `WebGrease` and
-  `Newtonsoft.Json` come with it), `HtmlAgilityPack` → nuget.org, and
+- `packages.config` maps as the
+  [package mapping](../../docs/migration.md#package-mapping) says. The
+  Optimization counterpart goes on the Host (`Antlr`, `WebGrease` and
+  `Newtonsoft.Json` come with it), `HtmlAgilityPack` comes from nuget.org, and
   `Microsoft.Web.Infrastructure` is dropped as in every other app here.
 - **`AjaxControlToolkit.StaticResources` is deliberately not ported.** Its only
   content is a `PreApplicationStartMethod` that registers script mappings to the

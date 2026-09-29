@@ -214,8 +214,8 @@ Carried from earlier milestones as unresolved detail:
 - Complete general `System.Web` embedded-resource delivery beyond the eight
   release scripts reached and embedded by the frozen template.
 - Define general-consumer JS content deployment for
-  `Rehost.AspNet.ScriptManager.MSAjax`; its first slice registers names only
-  and expects application-owned physical files.
+  `Rehost.AspNet.ScriptManager.MSAjax` and `.WebForms`; they register names only
+  and expect application-owned physical files.
 - Remaining Extensions scope after the 2026-08-22 AJAX activation (enabled
   application services, `customErrors`-On async errors, debug/localized
   scripts, and the excluded LINQ-to-SQL/WCF/Client Services stacks):
@@ -247,6 +247,12 @@ Carried from earlier milestones as unresolved detail:
   package (`dotnet new rehost-web`, [getting started](getting-started.md))
   writes the WAP pair from a folder name; it does not read the legacy project,
   so the package list, the Web Site shape and the seeded refusals remain here.
+- `dotnet new rehost-web` picks packages from the legacy project's references.
+  Today it always writes the Web Forms set the Visual Studio template carries
+  (Friendly URLs, Optimization and its controls, both ScriptManager packages),
+  and a Web Pages or Web API application deletes them by hand. Reading
+  `packages.config` would write the counterparts the
+  [package mapping](migration.md#package-mapping) names.
 - `Rehost.Web.Sdk.App` / `.Host` MSBuild SDK packages for minimal consumer csproj files.
   Parked 2026-09-20: about seven lines per csproj once the split layout was dropped:
   [Rehost SDK](follow-ups/rehost-sdk.md).

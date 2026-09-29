@@ -93,15 +93,19 @@ It needs no network beyond the host and the database container.
 
 ## packages.config → PackageReference
 
+Packages built on `System.Web` take the Rehost counterpart the
+[package mapping](../../docs/migration.md#package-mapping) names; the table records this
+application's decisions.
+
 | `packages.config` | Here | Note |
 | --- | --- | --- |
-| `Microsoft.Owin.Host.SystemWeb` 2.1.0 | `Rehost.Owin.Host.SystemWeb` | Already landed with the Identity application; **no new recompile** |
+| `Microsoft.Owin.Host.SystemWeb` 2.1.0 | Rehost counterpart | Already landed with the Identity application; **no new recompile** |
 | `Owin`, `Microsoft.Owin`, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Facebook`, `.Twitter`, `.MicrosoftAccount` 2.1.0 | same packages from nuget.org at 4.2.3 | Consumed as shipped under `NU1701`, the Identity-application precedent — with one exception, below |
 | `Microsoft.AspNet.Identity.Core`, `.Owin`, `.EntityFramework` 2.1.0 | same packages at 2.2.4 | Pure managed |
 | `EntityFramework` 6.1.1 | same package at 6.5.2 | 6.3+ ships `netstandard2.1` |
-| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `WebGrease`, `Antlr`, `Newtonsoft.Json` | `Rehost.AspNet.Web.Optimization`, `.WebForms` | The `<controls>` assembly rewrite is in the default XDT |
-| `Microsoft.AspNet.FriendlyUrls`, `.Core` | `Rehost.AspNet.FriendlyUrls` | Genuinely active here: `RedirectMode.Permanent` |
-| `Microsoft.AspNet.ScriptManager.MSAjax`, `.WebForms` | `Rehost.AspNet.ScriptManager.MSAjax` | Registers `MsAjaxBundle`, `WebFormsBundle` and the MicrosoftAjax names |
+| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `WebGrease`, `Antlr`, `Newtonsoft.Json` | Rehost counterparts | The `<controls>` assembly rewrite is in the default XDT |
+| `Microsoft.AspNet.FriendlyUrls`, `.Core` | Rehost counterpart | Genuinely active here: `RedirectMode.Permanent` |
+| `Microsoft.AspNet.ScriptManager.MSAjax`, `.WebForms` | Rehost counterparts | `Site.Master` asks for `MsAjaxBundle` and `WebFormsBundle` |
 | `AspNet.ScriptManager.jQuery`, `.bootstrap` | `WingtipToys.App/PreApplicationStartCode.cs` | Names only, so the definitions are re-registered by hand; see below |
 | `elmah`, `elmah.corelibrary` 1.2.2 | dropped by XDT | Binds Framework's strong-named `System.Web`, no portable build, and no application code references it |
 | `Microsoft.AspNet.Providers.Core` | dropped | Named only as `<sessionState customProvider>`, which `mode="InProc"` never resolves — parses and activates exactly as on Framework |

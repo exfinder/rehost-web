@@ -14,6 +14,8 @@ runtime from packages — the way an external consumer would.
 The mental model for a migration: **the GAC becomes the `Rehost.Web`
 package; each `packages.config` line maps to a `Rehost.*` package; the
 host exe adds `Rehost.Web.AspNetCore`; the legacy folder is never touched.**
+The [package mapping](../../docs/migration.md#package-mapping) lists each
+line's counterpart.
 
 ## Commands
 

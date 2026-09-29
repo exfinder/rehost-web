@@ -2,9 +2,10 @@
 
 ## Mission
 
-Enable predominantly managed ASP.NET Web Forms applications without intrinsic
-Windows or IIS dependencies to rebuild and run on modern .NET across Windows,
-Linux, and macOS with minimal application-source changes.
+Enable predominantly managed ASP.NET applications built on `System.Web` (Web
+Forms, Web Pages, Web API, MVC) without intrinsic Windows or IIS dependencies to
+rebuild and run on modern .NET across Windows, Linux, and macOS with minimal
+application-source changes.
 
 Preserve observable `System.Web` behavior where the portability contract permits.
 When exact behavior cannot survive, recover the Framework intent, choose the

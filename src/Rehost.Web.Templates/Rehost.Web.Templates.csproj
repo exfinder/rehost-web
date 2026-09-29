@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>dotnet new template that adds the Rehost.Web App and Host projects beside a legacy ASP.NET Web Forms application.</Description>
+    <Description>dotnet new template that adds the Rehost.Web App and Host projects beside a legacy ASP.NET application built on System.Web.</Description>
     <PackageType>Template</PackageType>
     <PackageTags>dotnet-new;templates;webforms;aspnet</PackageTags>
     <IncludeBuildOutput>false</IncludeBuildOutput>

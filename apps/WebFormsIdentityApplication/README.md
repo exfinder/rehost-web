@@ -21,11 +21,15 @@ nuget.org unchanged, and the connection string has to move off LocalDb.
 
 ## packages.config → PackageReference
 
+Packages built on `System.Web` take the Rehost counterpart the
+[package mapping](../../docs/migration.md#package-mapping) names; the table records this
+application's decisions.
+
 | `packages.config` | Here | Note |
 | --- | --- | --- |
-| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | `Rehost.Owin.Host.SystemWeb` | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/provenance/aspnet-katana.md) |
+| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | Rehost counterpart | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/provenance/aspnet-katana.md) |
 | `Microsoft.Web.Infrastructure` 2.0 | dropped | Only Katana's `DynamicModuleUtility` dependency, and Katana 4.x calls `HttpApplication.RegisterModule` directly |
-| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `Microsoft.AspNet.FriendlyUrls*`, `Microsoft.AspNet.ScriptManager.*` | `Rehost.AspNet.Web.Optimization`, `.WebForms`, `Rehost.AspNet.FriendlyUrls`, `Rehost.AspNet.ScriptManager.MSAjax` | Same mapping as `WebFormsApplication` |
+| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `Microsoft.AspNet.FriendlyUrls*`, `Microsoft.AspNet.ScriptManager.*` | Rehost counterparts | Same set as `WebFormsApplication` |
 | `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` | dropped | The runtime owns compiler selection; `<system.codedom>` is removed by XDT |
 | `Owin`, `Microsoft.Owin`, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Security.Facebook`, `.Security.Twitter`, `.Security.MicrosoftAccount` | same packages from nuget.org | Pure managed; consumed as shipped under `NU1701` |
 | `Microsoft.AspNet.Identity.Core`, `.Owin`, `.EntityFramework` 2.2.4 | same packages from nuget.org | Pure managed |

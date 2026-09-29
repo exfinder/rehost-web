@@ -2,7 +2,7 @@
 
 Terms shared across architecture, contracts, and work packets:
 
-- **Managed Web Forms runtime** — portable application startup, managed request
+- **Managed System.Web runtime** — portable application startup, managed request
   processing, dynamic compilation, and completion. Avoid “core.”
 - **Classic managed pipeline** — supported request path where System.Web owns
   the lifecycle through `HttpRuntime.ProcessRequest(HttpWorkerRequest)`.
@@ -15,7 +15,7 @@ Terms shared across architecture, contracts, and work packets:
 - **Adapter integration probe** — Kestrel test of translation, completion,
   disconnect, and host lifecycle; not evidence of internal System.Web parity.
 - **Application runtime** — process-scoped owner of validation, activation,
-  request admission, and shutdown for one Web Forms application.
+  request admission, and shutdown for one System.Web application.
 - **Host registration** — mutation-free creation of an application runtime from
   explicit host options.
 - **Application activation** — once-only transition from validated host state to

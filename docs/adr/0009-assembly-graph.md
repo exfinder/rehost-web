@@ -60,16 +60,39 @@ nuspecs name `Rehost.Web` alone. The consumer targets ship as
 `buildTransitive/`, because ordinary `build/` assets do not flow through package
 dependencies.
 
-An assembly ported from `aspnet/AspNetWebStack` keeps its upstream name with
-`System` replaced by `Rehost`, and its package ID is upstream's with
-`Microsoft` replaced by `Rehost`: `System.Web.Http.WebHost` ships as
-`Rehost.Web.Http.WebHost` in the `Rehost.AspNet.WebApi.WebHost` package.
-Namespaces stay upstream's. The project folder is named after the assembly and
-`<PackageId>` carries the package ID. The two are derived separately because
-upstream's packages and assemblies do not map one to one:
-`Microsoft.AspNet.WebPages` carries `System.Web.WebPages`, `.Razor` and
-`.Deployment`, which ship as `Rehost.Web.WebPages`, `.Razor` and `.Deployment`
-in `Rehost.AspNet.WebPages`. `.Razor` references `Rehost.Web.WebPages`, so no
-component can carry all three, and a pack-only project bundles them the way
-`Rehost.Web` bundles its five. The `Rehost.Web.*` family keeps its
-names.
+Names follow one rule, so a migrator can map each `packages.config` line and
+each in-box assembly to its counterpart by eye:
+
+- A leading `System` or `Microsoft` becomes `Rehost` in assembly names and in
+  package IDs. `System.Web` ships as `Rehost.Web`, `System.Web.Services` as
+  `Rehost.Web.Services`, `Microsoft.Owin.Host.SystemWeb` as
+  `Rehost.Owin.Host.SystemWeb`, and `System.Web.Http.WebHost` as
+  `Rehost.Web.Http.WebHost` in the `Rehost.AspNet.WebApi.WebHost` package.
+  Names with no Microsoft original start with `Rehost.Web`: the Kestrel host
+  `Rehost.Web.AspNetCore` and the template package `Rehost.Web.Templates`.
+- Namespaces of ported code stay upstream's. The project's own code uses
+  `Rehost.*` namespaces.
+- The project folder is named after the assembly and `<PackageId>` carries the
+  package ID. The two are derived separately because upstream's packages and
+  assemblies do not map one to one. `Microsoft.AspNet.Web.Optimization`
+  carries `System.Web.Optimization`, which ships as `Rehost.Web.Optimization`
+  in `Rehost.AspNet.Web.Optimization`.
+- A pack-only project carries a bundle. `Microsoft.AspNet.WebPages` carries
+  `System.Web.WebPages`, `.Razor` and `.Deployment`, which ship as
+  `Rehost.Web.WebPages`, `.Razor` and `.Deployment` in `Rehost.AspNet.WebPages`;
+  `.Razor` references `Rehost.Web.WebPages`, so no component can carry all
+  three.
+
+The `Rehost.Web` package is the bundle for the in-box assemblies. It is packed
+from `src/Rehost.Web.Package`, because the runtime project owns the name
+`Rehost.Web` for its folder and assembly, and carries the five components above.
+The runtime project's `<PackageId>` is `Rehost.Web.Runtime`, a restore identity
+only, since NuGet names projects by package ID and two projects named
+`Rehost.Web` fail restore as ambiguous.
+
+The ScriptManager mappings keep Microsoft's split into two packages, each with
+its own start code. `Rehost.AspNet.ScriptManager.MSAjax`, assembly
+`Rehost.ScriptManager.MSAjax`, maps `MsAjaxBundle` and the eleven
+`MicrosoftAjax*.js` names as `Microsoft.AspNet.ScriptManager.MSAjax` did.
+`Rehost.AspNet.ScriptManager.WebForms`, assembly `Rehost.ScriptManager.WebForms`,
+maps `WebFormsBundle`.
