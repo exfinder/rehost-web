@@ -45,7 +45,7 @@ App/Host pair, built from the packages the way a consumer builds. Each has a
 | Application | What it proves |
 | --- | --- |
 | [WebFormsApplication](apps/WebFormsApplication/README.md) | The Visual Studio template: default document, postback, Friendly URLs, bundles, mobile master. No database. |
-| [WebFormsIdentityApplication](apps/WebFormsIdentityApplication/README.md) | The "Individual User Accounts" template: OWIN, ASP.NET Identity 2.2, Entity Framework 6, SQL Server in a container. |
+| [WebFormsIdentityApplication](apps/WebFormsIdentityApplication/README.md) | The "Individual User Accounts" template: OWIN, ASP.NET Identity 2.2, Entity Framework 6, SQLite. |
 | [eShopLegacyWebForms](apps/eShopLegacyWebForms/README.md) | Microsoft's catalog manager: Autofac, EF6 on mock data, log4net, `MapPageRoute`. |
 | [WingtipToys](apps/WingtipToys/README.md) | The tutorial store: register, sign in, session cart, role-gated admin, checkout, against SQL Server. |
 | [AjaxControlToolkitSampleSite](apps/AjaxControlToolkitSampleSite/README.md) | A Web Site project and a large third-party control library, recompiled. |
