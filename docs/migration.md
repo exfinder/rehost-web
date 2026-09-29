@@ -27,6 +27,7 @@ a counterpart already brings goes.
 | `Microsoft.AspNet.ScriptManager.WebForms` | `Rehost.AspNet.ScriptManager.WebForms` |
 | `AspNet.ScriptManager.jQuery`, `AspNet.ScriptManager.bootstrap` | drop, re-register by hand |
 | `Microsoft.Owin.Host.SystemWeb` | `Rehost.Owin.Host.SystemWeb` |
+| `Microsoft.Owin`, `Owin` | drop, covered by `Rehost.Owin.Host.SystemWeb` |
 | `Microsoft.Web.Infrastructure` | drop, covered by `Rehost.Web` |
 | `Microsoft.AspNet.WebApi.WebHost` | `Rehost.AspNet.WebApi.WebHost` |
 | `Microsoft.AspNet.WebApi` | drop, covered by `Rehost.AspNet.WebApi.WebHost` |
@@ -51,7 +52,7 @@ beside it fails. Four drops have a reason of their own:
   resolves the provider `<sessionState customProvider>` names.
 
 Pure managed packages stay as they are, often at a newer version than the
-legacy line: Entity Framework 6.3+, the Katana `Microsoft.Owin.*` packages,
+legacy line: Entity Framework 6.3+, the other Katana `Microsoft.Owin.*` packages,
 ASP.NET Identity 2.2, the other `Microsoft.AspNet.WebApi.*` packages (`Cors`,
 `Tracing`, `Owin`), Newtonsoft.Json, Autofac and log4net. Packages that ship
 only a `net45` build restore under `NU1701`, which the template silences.
