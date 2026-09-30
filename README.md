@@ -40,17 +40,13 @@ eShopLegacyWebForms, and the AJAX Control Toolkit sample site.
 
 ## Limitations
 
-- Windows/IIS-dependent features, including the registry, COM, DPAPI, and
-  WindowsDesktop, are unsupported.
+- Features tied to Windows or IIS are unsupported.
 - Libraries bound to the .NET Framework's `System.Web` need recompilation or a
   [replacement package](docs/migration.md#package-mapping).
-- Visual Basic pages, XSD typed datasets, `.wsdl` build providers, and partial
-  trust/CAS are unsupported.
-- Dynamic Data, Entity, and Mobile remain unassessed.
+- Visual Basic pages are unsupported. The quickstart covers Web Application
+  Projects; Web Site projects need separate setup.
 
-The quickstart covers Web Application Projects; Web Site projects need separate
-setup. See the [compatibility map](docs/compatibility.md) for supported features
-and known boundaries.
+Check the [full compatibility map](docs/compatibility.md) for your app's features.
 
 ## Documentation
 
