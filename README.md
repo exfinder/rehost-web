@@ -6,8 +6,8 @@ Rehost.Web brings classic ASP.NET applications to .NET 10 with minimal
 application changes. Keep your `.aspx` pages, code-behind, and `Web.config`.
 Also supports Web Pages and Web API.
 
-It ports Microsoft's `System.Web` runtime from Reference Source and uses
-Kestrel to host your application in place of IIS.
+It ports the .NET Framework's `System.Web` runtime from Microsoft Reference
+Source and uses Kestrel to host your application in place of IIS.
 
 **Alpha.** Tested with real applications.
 See [compatibility](docs/compatibility.md) and the [roadmap](ROADMAP.md).
@@ -40,13 +40,17 @@ eShopLegacyWebForms, and the AJAX Control Toolkit sample site.
 
 ## Limitations
 
-- Features tied to Windows or IIS are unsupported.
-- Libraries bound to Microsoft's `System.Web` need recompilation or a
+- Windows/IIS-dependent features, including the registry, COM, DPAPI, and
+  WindowsDesktop, are unsupported.
+- Libraries bound to the .NET Framework's `System.Web` need recompilation or a
   [replacement package](docs/migration.md#package-mapping).
-- Visual Basic pages are unsupported. The quickstart covers Web Application
-  Projects; Web Site projects need separate setup.
+- Visual Basic pages, XSD typed datasets, `.wsdl` build providers, and partial
+  trust/CAS are unsupported.
+- Dynamic Data, Entity, and Mobile remain unassessed.
 
-Check the [full compatibility map](docs/compatibility.md) for your app's features.
+The quickstart covers Web Application Projects; Web Site projects need separate
+setup. See the [compatibility map](docs/compatibility.md) for supported features
+and known boundaries.
 
 ## Documentation
 
