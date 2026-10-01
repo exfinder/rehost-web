@@ -70,7 +70,7 @@ is closed: the migrating audience ran integrated mode, and each divergence now
 ends as integrated behavior or a fail-fast diagnostic naming the boundary —
 never silence. Six jobs, one per session, landed as ledger P90-P93.
 
-## Current — public developer alpha
+## Current — public developer release
 
 Make the existing runtime usable by external developers: resolve publication
 and licensing, finish consumer packaging, document a quickstart, and validate
@@ -78,11 +78,11 @@ the release. The stock template is the first run; YAF is the richer example.
 
 The [release plan](docs/plans/2026-09-05-2135-public-alpha-release-plan.md)
 owns the agreed release details. The
-[Public alpha milestone](https://github.com/exfinder/rehost-web/milestone/1)
+[Public release milestone](https://github.com/exfinder/rehost-web/milestone/1)
 owns execution. Further app ports, production readiness and the optional
-migration helper do not block alpha.
+migration helper do not block this release.
 
-## Following alpha — Milestone 4: production baseline
+## Next — Milestone 4: production baseline
 
 Turn a running milestone application into a production deployment baseline:
 real SQL operations, deterministic Windows/Linux publish, containers, graceful

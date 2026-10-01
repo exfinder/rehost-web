@@ -53,7 +53,7 @@ component, `Rehost.Web.Infrastructure`, sits in the same `lib/` for a different
 reason. No configuration names it, but satellites and application code compile
 against it, and every one of them already depends on `Rehost.Web`. The
 five remain separate assemblies and projects but are not packages of their own,
-and no public package names their project IDs as a dependency (public alpha
+and no public package names their project IDs as a dependency (public release
 contract, GitHub #8). Satellite packages reference the component projects with
 `PrivateAssets="all"` and the bundle project for the dependency edge, so their
 nuspecs name `Rehost.Web` alone. The consumer targets ship as

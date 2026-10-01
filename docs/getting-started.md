@@ -6,7 +6,7 @@ keeps building on .NET Framework. A Web Site project (no csproj, code in
 `App_Code`) is not covered by the template yet.
 
 You need the .NET SDK 10.0.302 or a later 10.0.3xx release, which carries the
-10.0.10 runtime the alpha was validated with. Nothing else: no database, no
+10.0.10 runtime used for validation. Nothing else: no database, no
 Docker, no IIS, no Visual Studio. Windows x64, Linux x64, Linux arm64 and macOS
 arm64 are the validated platforms.
 

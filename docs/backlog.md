@@ -6,9 +6,9 @@ updates [`../ROADMAP.md`](../ROADMAP.md) when milestone scope changes.
 
 ## Current
 
-### Public alpha release
+### Public release
 
-The [Public alpha milestone](https://github.com/exfinder/rehost-web/milestone/1)
+The [Public release milestone](https://github.com/exfinder/rehost-web/milestone/1)
 owns tasks and completion status. The
 [release plan](plans/2026-09-05-2135-public-alpha-release-plan.md) records the
 agreed scope and sequence; [#8](https://github.com/exfinder/rehost-web/issues/8)
@@ -16,7 +16,7 @@ preserves the decision.
 
 Remaining work: licensing, publication audit, unsupported security settings,
 consumer packages, documentation, release validation, a user trial, and launch.
-Production readiness and further app ports are not alpha requirements.
+Production readiness and further app ports are not requirements for this release.
 The [minimal WAP helper](https://github.com/exfinder/rehost-web/issues/21)
 is optional; broader migration automation stays under Build system and packaging.
 
@@ -269,7 +269,7 @@ Carried from earlier milestones as unresolved detail:
 - Roslyn ReadyToRun delivery for package consumers (today only in-repo hosts
   get R2R Roslyn): [Roslyn R2R packaging](follow-ups/roslyn-r2r-packaging.md).
 - Fail activation clearly when configuration names an absent companion
-  assembly; the alpha ships the five companions inside
+  assembly; the package ships the five companions inside
   `Rehost.Web`, so the case is a consumer that deploys a partial `bin`.
 - Rewrite each app's `smoke.sh` journey as a C# test project beside its App
   and Host (one method per check, a shared start-and-wait helper), so the

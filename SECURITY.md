@@ -4,7 +4,7 @@ Report a vulnerability privately through GitHub: open the repository's
 **Security** tab and choose **Report a vulnerability**. Do not open a public
 issue and do not include the details in a pull request.
 
-- Supported: the latest published alpha only. A fix ships as a new package set;
+- Supported: the latest published release only. A fix ships as a new package set;
   there are no patches to an older version.
 - Response: an acknowledgement within 7 days, then a decision on scope and a
   fix or a documented boundary.

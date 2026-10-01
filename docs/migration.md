@@ -130,7 +130,7 @@ runtime. The order of work that has held for six applications:
 2. Recompile only proven blockers, verbatim, with a provenance record
    (`docs/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb`, Web API's
    `Microsoft.AspNet.WebApi.WebHost` and `Microsoft.AspNet.WebPages` are the
-   three the alpha ships, as `Rehost.Owin.Host.SystemWeb`,
+   three shipped as `Rehost.Owin.Host.SystemWeb`,
    `Rehost.AspNet.WebApi.WebHost` and `Rehost.AspNet.WebPages`; the AJAX
    Control Toolkit, Autofac's Web integration and YAF's fourteen projects are
    rebuilt as source under `apps/`.

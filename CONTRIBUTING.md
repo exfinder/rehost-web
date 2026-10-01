@@ -61,9 +61,9 @@ packages from outside the checkout, the way a consumer meets them.
 Documentation is checked with `python3 eng/check-docs.py`. Contracts, rationale
 and boundaries go in `docs/`; mechanics stay in code and tests.
 
-## Support expectations for the alpha
+## Support expectations
 
-This is a developer alpha maintained by volunteers.
+Rehost.Web is maintained by volunteers.
 
 - Bugs go through the [issue template](.github/ISSUE_TEMPLATE/bug_report.md);
   security reports go through [SECURITY.md](SECURITY.md), never an issue.
@@ -75,10 +75,10 @@ This is a developer alpha maintained by volunteers.
 - A fix ships as a new package set at one version, after the platform checks
   the change affects. There are no patches to an already published version.
 
-## Shipping an alpha fix
+## Shipping a fix
 
-1. Land the fix on `main` with its test. Bump `VersionSuffix` in
-   `src/Directory.Build.props` (`alpha.1` to `alpha.2`); every package takes the
+1. Land the fix on `main` with its test. Update the package version in
+   `src/Directory.Build.props`; every package takes the
    new version, including ones that did not change, so internal dependencies
    keep resolving to one version.
 2. Add `docs/releases/<version>.md` starting with `# <version>`: what changed,

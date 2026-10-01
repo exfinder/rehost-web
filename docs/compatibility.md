@@ -1,4 +1,7 @@
-# Compatibility
+# Detailed compatibility reference
+
+Contributor reference for exact behavior, limitations, and test evidence.
+For an application overview, start with [Will my app work?](what-works.md).
 
 This is the sole current support map. Detail documents explain mechanisms and
 rationale but do not widen these claims.

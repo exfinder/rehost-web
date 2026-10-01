@@ -25,7 +25,7 @@ Host carries a local `StageWebSiteSources` target — the reference input for th
 publish-mode decision below. `App_GlobalResources` and Web Site
 publish/precompile remain unexercised.
 
-## Measured WAP publish (2026-09-12, alpha packaging)
+## Measured WAP publish (2026-09-12, candidate packaging)
 
 `eng/external-consumer.sh` publishes the stock template Host from the
 `0.1.0-alpha.1` candidate packages outside the checkout. `dotnet publish -c

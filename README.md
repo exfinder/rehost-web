@@ -10,7 +10,7 @@ It ports the .NET Framework's `System.Web` runtime from Microsoft Reference
 Source and uses Kestrel to host your application in place of IIS.
 
 **Alpha.** Tested with real applications.
-See [compatibility](docs/compatibility.md) and the [roadmap](ROADMAP.md).
+See [compatibility](docs/what-works.md) and the [roadmap](ROADMAP.md).
 
 ## Quick start
 
@@ -46,13 +46,13 @@ eShopLegacyWebForms, and the AJAX Control Toolkit sample site.
 - Visual Basic pages are unsupported. The quickstart covers Web Application
   Projects; Web Site projects need separate setup.
 
-Check the [full compatibility map](docs/compatibility.md) for your app's features.
+Check [what works](docs/what-works.md) for your app's features.
 
 ## Documentation
 
 [Getting started](docs/getting-started.md) ·
 [Migration guide](docs/migration.md) ·
-[All docs](docs/README.md) ·
+[Documentation](docs/README.md) ·
 [Contributing](CONTRIBUTING.md)
 
 [MIT license](LICENSE). Imported code retains its original licenses;

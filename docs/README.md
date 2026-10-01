@@ -1,19 +1,25 @@
 # Documentation
 
+## Using Rehost.Web
+
+- [Will my app work?](what-works.md): application types, tested features, and limits.
+- [Getting started](getting-started.md): build and run your first application.
+- [Migration guide](migration.md): packages, configuration, and troubleshooting.
+
+## Developing Rehost.Web
+
 Read [`../PROJECT.md`](../PROJECT.md), then
 [`../ROADMAP.md`](../ROADMAP.md).
 
-## Current truth
+### Project references
 
-- [Getting started](getting-started.md)
-- [Compatibility and evidence](compatibility.md)
-- [Migrating an application](migration.md), the walkthrough after the first run
+- [Detailed compatibility reference](compatibility.md)
 - [Unresolved work](backlog.md)
 - [Release notes](releases/0.1.0-alpha.1.md)
 - [Reached portability edges](portability-ledger.md)
 - [Shared terminology](../CONTEXT.md)
 
-## Runtime contracts
+### Runtime contracts
 
 - [Classic managed runtime model](classic-managed-runtime-model.md)
 - [Application bootstrap and configuration](application-bootstrap-and-configuration.md)
@@ -22,7 +28,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 - [Application Services assembly boundary](application-services-compatibility.md)
 - [Dependency decisions](dependency-decisions.md)
 
-## Focused compatibility
+### Focused compatibility
 
 - [Extensions](extensions-compatibility.md) and
   [Web Services](web-services-compatibility.md)
@@ -37,7 +43,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
   [Windows administration](windows-administration-compatibility.md)
 - [Filesystem semantics](filesystem-semantics.md)
 
-## Decisions and evidence
+### Decisions and evidence
 
 - [Current architecture decisions](adr/README.md)
 - [Background research](research/README.md)
@@ -45,7 +51,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 - [Framework configuration reference](framework-config-reference.md)
 - [IIS configuration reference](iis-config-reference.md)
 
-## Contributor workflow
+### Contributor workflow
 
 - [Bringing up an application](bringing-up-an-application.md)
 - [Architecture design principles](architecture-design-principles.md)
