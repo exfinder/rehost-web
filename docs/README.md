@@ -6,7 +6,7 @@
 - [Getting started](getting-started.md): build and run your first application.
 - [Troubleshooting](troubleshooting.md): fix build and startup problems.
 - [Build and publish](build-and-publish.md): manage output files and publish your app.
-- [Migration guide](migration.md): packages, configuration, and troubleshooting.
+- [Migration guide](migration.md): a checklist for adapting an existing application.
 
 ## Developing Rehost.Web
 
@@ -16,6 +16,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 ### Project references
 
 - [Detailed compatibility reference](compatibility.md)
+- [Migration reference](migration-reference.md)
 - [Unresolved work](backlog.md)
 - [Release notes](releases/0.1.0-alpha.1.md)
 - [Reached portability edges](portability-ledger.md)

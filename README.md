@@ -42,7 +42,7 @@ eShopLegacyWebForms, and the AJAX Control Toolkit sample site.
 
 - Features tied to Windows or IIS are unsupported.
 - Libraries bound to the .NET Framework's `System.Web` need recompilation or a
-  [replacement package](docs/migration.md#package-mapping).
+  [replacement package](docs/package-reference.md).
 - Visual Basic pages are unsupported. The quickstart covers Web Application
   Projects; Web Site projects need separate setup.
 

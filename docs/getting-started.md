@@ -46,7 +46,7 @@ The folder name also becomes the application assembly name. If these differ,
 ## 3. Add your dependencies
 
 Open `Shop.Web.App/Shop.Web.App.csproj`. Use the
-[package mapping](migration.md#package-mapping) to carry over dependencies from
+[package mapping](package-reference.md) to carry over dependencies from
 your old `packages.config`, replacing packages tied to `System.Web`.
 
 The template includes Friendly URLs, Optimization, and ScriptManager packages.

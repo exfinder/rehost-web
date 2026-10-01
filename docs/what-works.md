@@ -31,7 +31,7 @@ See the [Web Forms template](../apps/WebFormsApplication/README.md),
 ## What might need changing?
 
 - Replace packages tied to the .NET Framework's `System.Web` with their
-  [Rehost counterparts](migration.md#package-mapping), or rebuild the libraries.
+  [Rehost counterparts](package-reference.md), or rebuild the libraries.
 - Adjust connection strings and configuration through the generated
   `Web.Rehost.config`. Your original `Web.config` stays untouched.
 - Replace Windows-specific dependencies. For example, LocalDB needs a different

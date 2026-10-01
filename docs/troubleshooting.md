@@ -1,12 +1,13 @@
 # Troubleshooting
 
-Use these checks when following [Getting started](getting-started.md).
+Use these checks when following [Getting started](getting-started.md) or
+[migrating an application](migration.md).
 
 ## Missing package types
 
 If a type from `Microsoft.AspNet.*` or `Microsoft.Owin.Host.SystemWeb` is
 missing, add its Rehost counterpart from the
-[package mapping](migration.md#package-mapping).
+[package mapping](package-reference.md).
 
 An original package bound to the .NET Framework's `System.Web` may compile
 but fail at runtime. Use a replacement package or
@@ -52,6 +53,60 @@ dotnet build Shop.Web.Rehost.slnx
 APIs requiring the registry, COM, or DPAPI cannot run in the portable runtime.
 Check [compatibility](what-works.md#what-is-unavailable-or-untested) and
 replace the dependency or change the application path that uses it.
+
+## CS0433 from duplicate types
+
+Check whether a folder compiled at runtime was also compiled into your App
+assembly. `App_Code` is a common cause. See
+[source inclusion](migration-reference.md#preserved-source).
+
+Also remove an explicit `Microsoft.Web.Infrastructure` package reference:
+`Rehost.Web` already includes the same API. The
+[package reference](package-reference.md#remove-redundant-references) lists
+other redundant packages.
+
+## Configuration errors
+
+A refused configuration setting fails activation with the file and entry in
+the message. A `web.config` that cannot be parsed returns ASP.NET's
+Configuration Error page on every request, then ends the process with exit
+code 82.
+
+Fix the setting through `Web.Rehost.config`. Editing `rehost_root/web.config`
+directly loses the change on the next build. See
+[configuration changes](migration.md#configuration) and the
+[detailed compatibility reference](compatibility.md#configuration-and-iis-derived-behavior)
+for individual settings.
+
+## Application_Start fails
+
+The exception is logged once. Every request receives HTTP 500 for ten seconds,
+then the process exits for replacement. With a supervisor configured to
+replace it, `Application_Start` runs again, matching integrated IIS behavior.
+
+Fix the startup exception before retrying. Rehost.Web uses process replacement
+for restarts; it does not restart an AppDomain inside the same process.
+
+## An assembly is missing on the first request
+
+A `FileNotFoundException` naming `System.Web`, `System.Net.Http.WebRequest`,
+or a `System.Configuration` facade can come from a library built for .NET
+Framework. Check the library's runtime dependencies and
+[rebuild it if necessary](migration-reference.md#libraries-bound-to-systemweb).
+
+## A page exists but returns 404
+
+Check the handlers and rewrite rules serving that URL. Your application may
+depend on a rule or handler the port does not honor. See the
+[configuration reference](compatibility.md#configuration-and-iis-derived-behavior).
+
+## Find the application's files
+
+The startup log prints `Rehost physical root path` for the staged site and
+`Rehost compilation temp path` for generated assemblies.
+`AppContext.BaseDirectory` becomes the site root from the first Web Forms
+request; before then, it points at the host binaries. See
+[base-directory behavior](migration-reference.md#the-base-directory).
 
 ## Check the stock Web Forms template
 
