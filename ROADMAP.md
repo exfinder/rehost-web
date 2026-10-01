@@ -1,99 +1,44 @@
 # Roadmap
 
-This file alone owns milestone order and current direction. Capability status
-lives in [`docs/compatibility.md`](docs/compatibility.md); detailed unresolved
-work lives in [`docs/backlog.md`](docs/backlog.md).
+Development follows real applications. The next priorities are easier adoption
+and a production deployment baseline. See [what works](docs/what-works.md)
+for current compatibility.
 
-## Completed — portable runtime foundation
+## Current
 
-The retained classic managed pipeline now starts under a process-scoped host,
-compiles and runs dynamic pages, and serves representative request, response,
-page, control, async, upload, static-file, and IIS-derived configuration paths.
-The former slices 0–4 are implementation history, not the roadmap.
+Make Rehost.Web easier to try with existing applications:
 
-## Completed — Milestone 1: stock Visual Studio applications
+- Finish packaging, publication, and licensing.
+- Improve setup, migration guides, and examples.
 
-Both .NET Framework 4.8.1 Visual Studio Web Forms templates run unmodified as
-real Web Application Projects on .NET 10, from locally produced NuGet packages,
-on Windows x64, Linux, and macOS arm64:
+Follow the [public release milestone](https://github.com/exfinder/rehost-web/milestone/1)
+for progress. More application ports and the optional migration helper do not
+block this release.
 
-- [`apps/WebFormsApplication`](apps/WebFormsApplication/README.md) — the plain
-  template. `smoke.sh` walks the browser journey (default document and its
-  postback target, Friendly URLs, the `.aspx` redirect, script and style
-  bundles, static assets, mobile master and view switching).
-- [`apps/WebFormsIdentityApplication`](apps/WebFormsIdentityApplication/README.md)
-  — the "Individual User Accounts" template: OWIN (Katana recompiled as
-  `Rehost.Owin.Host.SystemWeb`), ASP.NET Identity 2.2 and Entity
-  Framework 6.4 consumed from nuget.org, SQL Server in a container. `smoke.sh`
-  matches every row of the IIS Express baseline (register, log in, log off,
-  URL authorization challenge, cookies).
+## Next
 
-Each app is a frozen tree plus a sidecar `.App`/`.Host` pair; the packages it
-consumes are packed from `src/` into a shared local feed. Boundaries recorded
-along the way: LocalDb is a Windows-only engine (the connection string is the
-one app-visible change). Auto-generated keys later gained host-resolvable
-file persistence ([ADR 0010](docs/adr/0010-machine-key-persistence.md)); the
-`ListView`/`DataPager` family joined the Extensions closure and Dynamic Data
-stays absent (ledger P69). The gap analysis and its closure live in
-[`docs/research/webforms-identity-application-gaps.md`](docs/research/webforms-identity-application-gaps.md).
+Establish a production deployment baseline for a running application:
 
-## Completed — Milestone 2: eShopLegacyWebForms
+- Reliable Windows/Linux publishing and containers.
+- Graceful shutdown, readiness checks, metrics, and diagnostics.
+- External configuration, secrets, and multiple instances.
 
-Microsoft's eShopLegacyWebForms runs with its C#, markup, and `Web.config`
-frozen, on mock data, from [`apps/eShopLegacyWebForms`](apps/eShopLegacyWebForms/README.md).
-The catalog journeys (the application has no purchase flow) pass on all three
-platforms; closure work landed as two XDT module drops, an
-`Autofac.Integration.Web` recompile, the baseline `expressionBuilders`
-registration, and a script-mapping shim. The AJAX Control Toolkit spike rode
-the same patterns: the toolkit recompiles against the port and its 50-page
-sample site runs as a Web Site project
-([`apps/AjaxControlToolkitSampleSite`](apps/AjaxControlToolkitSampleSite/README.md)).
+## Later
 
-## Completed — Milestone 3: Wingtip Toys
+Expand compatibility through additional representative applications and
+address the gaps they reveal.
 
-The frozen Wingtip Toys tutorial store runs its stateful commerce journey on
-all three platforms against containerized SQL Server, from
-[`apps/WingtipToys`](apps/WingtipToys/README.md): Identity 2.2 register and
-sign-in, claims-role authorization, the session-keyed database cart, and
-checkout through the order write against a local NVP responder standing in
-for PayPal — with `customErrors` as authored, zero frozen-source edits, zero
-`src/` changes, and no library recompiles. Provider behavior
-(membership/role/profile providers) proved structurally unreachable here: the
-application clears every provider section and runs roles from Identity
-claims, so the SQL-provider journey stays in the backlog.
+Broader migration automation remains in the backlog.
 
-## Completed — integrated-divergence closure
+## Scope
 
-Every open item of the
-[integrated-vs-classic divergence audit](docs/research/integrated-divergence-audit.md)
-is closed: the migrating audience ran integrated mode, and each divergence now
-ends as integrated behavior or a fail-fast diagnostic naming the boundary —
-never silence. Six jobs, one per session, landed as ledger P90-P93.
+- Progress comes from running applications; complete `System.Web` coverage is
+  not a prerequisite.
+- Libraries bound to the .NET Framework's `System.Web` require recompilation
+  or replacement packages.
+- The runtime stays portable across Windows, Linux, and macOS.
+- Application ports aim to preserve existing source.
 
-## Current — public developer release
-
-Make the existing runtime usable by external developers: resolve publication
-and licensing, finish consumer packaging, document a quickstart, and validate
-the release. The stock template is the first run; YAF is the richer example.
-
-The [release plan](docs/plans/2026-09-05-2135-public-alpha-release-plan.md)
-owns the agreed release details. The
-[Public release milestone](https://github.com/exfinder/rehost-web/milestone/1)
-owns execution. Further app ports, production readiness and the optional
-migration helper do not block this release.
-
-## Next — Milestone 4: production baseline
-
-Turn a running milestone application into a production deployment baseline:
-real SQL operations, deterministic Windows/Linux publish, containers, graceful
-lifecycle, readiness/health, metrics and diagnostics, external configuration
-and secrets, and multi-instance operation. Wingtip already exercises production
-bundle combination/minification; broader Optimization caching and `VaryBy`
-behavior remain in the backlog.
-
-## Rejected directions
-
-- Full `System.Web` completeness as a prerequisite to application progress.
-- Binary drop-in compatibility with Microsoft's strong-named assemblies.
-- A Windows-only runtime profile.
-- Rewriting the milestone applications to fit the port.
+See [completed milestones](docs/milestones.md) for past work and the
+[development backlog](docs/backlog.md) for detailed tasks. This roadmap sets
+milestone order and direction.

@@ -17,6 +17,7 @@ Read [`../PROJECT.md`](../PROJECT.md), then
 
 - [Detailed compatibility reference](compatibility.md)
 - [Migration reference](migration-reference.md)
+- [Completed milestones](milestones.md)
 - [Unresolved work](backlog.md)
 - [Release notes](releases/0.1.0-alpha.1.md)
 - [Reached portability edges](portability-ledger.md)
