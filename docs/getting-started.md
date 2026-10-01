@@ -3,10 +3,12 @@
 Run an existing C# ASP.NET Web Application Project on .NET 10. Your original
 project stays unchanged and can still build on .NET Framework.
 
+To try Rehost.Web before migrating your app, run the
+[Web Forms example](../apps/WebFormsApplication/README.md).
+
 ## Before you start
 
-- Install .NET SDK 10.0.302 or a later 10.0.3xx release. Validation used runtime
-  10.0.10 on Windows x64, Linux x64 and arm64, and macOS arm64.
+- Install the .NET 10 SDK (10.0.302 or later).
 - Have your web application folder ready, including its `.csproj` and
   `Web.config`. Web Site projects (no `.csproj`, code in `App_Code`) need
   separate setup.
@@ -24,20 +26,20 @@ dotnet new install Rehost.Web.Templates
 ## 2. Add projects to build and host your app
 
 Go to the folder containing your web application, usually beside the old `.sln`.
-Replace `Shop.Web` with your application's folder name:
+Replace `MyApp` with your application's folder name:
 
 ```text
 cd path/to/solution
-dotnet new rehost-web --webapp Shop.Web
+dotnet new rehost-web --webapp MyApp
 ```
 
 The result:
 
 ```text
-Shop.Web/                  legacy application, untouched
-Shop.Web.App/              compiles the legacy *.cs into Shop.Web.dll
-Shop.Web.Host/             the process that replaces IIS
-Shop.Web.Rehost.slnx
+MyApp/                  legacy application, untouched
+MyApp.App/              compiles the legacy *.cs into MyApp.dll
+MyApp.Host/             the process that replaces IIS
+MyApp.Rehost.slnx
 ```
 
 The folder name also becomes the application assembly name. If these differ,
@@ -45,7 +47,7 @@ The folder name also becomes the application assembly name. If these differ,
 
 ## 3. Add your dependencies
 
-Open `Shop.Web.App/Shop.Web.App.csproj`. Use the
+Open `MyApp.App/MyApp.App.csproj`. Use the
 [package mapping](package-reference.md) to carry over dependencies from
 your old `packages.config`, replacing packages tied to `System.Web`.
 
@@ -55,7 +57,7 @@ Autofac, log4net, and Newtonsoft.Json keep their original names.
 
 ## 4. Adjust configuration
 
-Open `Shop.Web.Host/Web.Rehost.config`. This file applies changes to a copy of
+Open `MyApp.Host/Web.Rehost.config`. This file applies changes to a copy of
 your `Web.config`; it uses the same XDT format as `Web.Release.config`.
 
 Keep the three supplied adjustments. Add changes your app needs, such as
@@ -65,13 +67,14 @@ See [configuration examples](migration.md#configuration).
 ## 5. Run
 
 ```text
-dotnet run --project Shop.Web.Host
+dotnet run --project MyApp.Host
 ```
 
 Open the URL printed in the terminal. For the stock Visual Studio Web Forms
 template, the home page should render and postbacks should work.
 
-After editing pages, rebuild and restart to serve the updated copy.
+After editing pages or configuration, stop the host with **Ctrl+C** and run
+the same command again. This rebuilds the site and starts a new process.
 
 ## Next steps
 

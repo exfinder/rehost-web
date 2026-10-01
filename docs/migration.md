@@ -34,8 +34,9 @@ for exact legacy names, redundant references, and version conflicts.
 
 ## Configuration
 
-Edit `<Host>/Web.Rehost.config`, which applies changes to a copy of your
-`Web.config`. Keep the three supplied adjustments and add your own below them.
+Edit the generated Host project's `Web.Rehost.config`, which applies changes
+to a copy of your `Web.config`. Keep the three supplied adjustments and add
+your own below them.
 
 Check these settings:
 
@@ -51,7 +52,7 @@ Carry over any application settings previously supplied by the server's
 `machine.config`, root `web.config`, or `applicationHost.config`.
 
 Examples: [Wingtip Toys](../apps/WingtipToys/DEVELOPMENT.md#webconfig),
-[eShopLegacyWebForms](../apps/eShopLegacyWebForms/DEVELOPMENT.md), and
+[eShopLegacyWebForms](../apps/eShopLegacyWebForms/DEVELOPMENT.md#webconfig), and
 [YAF](../apps/YAF/DEVELOPMENT.md#webconfig).
 
 ## Preserved source
@@ -93,7 +94,7 @@ and limits when sharing keys with .NET Framework.
 ## Check your application
 
 Run the flows your users rely on: sign-in, postbacks, uploads, and any stateful
-operations. The [example applications](../apps/) show concrete journeys.
+operations. The [example applications](../apps/README.md) show concrete journeys.
 
 - For startup failures, use [Troubleshooting](troubleshooting.md).
 - For publishing, use [Build and publish](build-and-publish.md).

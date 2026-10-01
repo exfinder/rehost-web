@@ -7,8 +7,8 @@ rebuilt with compatibility changes.
 
 ## Run it
 
-Requires the .NET 10 SDK (10.0.302 or later), Docker running, and a clone of this repository.
-Run these commands from the repository root.
+Requires the .NET 10 SDK (10.0.302 or later), Docker running Linux containers,
+and a clone of this repository. Run these commands from the repository root.
 
 ### 1. Start PostgreSQL
 

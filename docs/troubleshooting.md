@@ -28,12 +28,12 @@ your legacy project may have left out. List unused files in
 
 The template uses the application's folder name as its assembly name.
 `Web.config` may refer to that assembly in a setting such as
-`type="…, Shop.Web"`.
+`type="…, MyApp"`.
 
-If the original assembly is `Shop.Web` but its folder is `Web`, supply both:
+If the original assembly is `MyApp` but its folder is `Web`, supply both:
 
 ```text
-dotnet new rehost-web --webapp Web --assembly Shop.Web
+dotnet new rehost-web --webapp Web --assembly MyApp
 ```
 
 The template uses the supplied assembly name for both new projects and the
@@ -45,7 +45,7 @@ Name the project or solution explicitly. The old `.sln` and new `.slnx` are in
 the same folder. For example:
 
 ```text
-dotnet build Shop.Web.Rehost.slnx
+dotnet build MyApp.Rehost.slnx
 ```
 
 ## Windows-only dependencies

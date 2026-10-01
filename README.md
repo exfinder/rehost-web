@@ -14,18 +14,25 @@ See [compatibility](docs/what-works.md) and the [roadmap](ROADMAP.md).
 
 ## Quick start
 
-Requires the [.NET 10 SDK](docs/getting-started.md). From the folder containing
+Requires the [.NET 10 SDK](docs/getting-started.md#before-you-start). From the folder containing
 your existing web application folder, replace `MyApp` with that folder's name:
 
 ```text
 dotnet new install Rehost.Web.Templates
 dotnet new rehost-web --webapp MyApp
-dotnet run --project MyApp.Host
 ```
 
 The template adds projects to build and host your app, leaving the original
-project untouched. Before running, carry over your dependencies and adjust
-configuration as described in [Getting started](docs/getting-started.md).
+project untouched. Before running,
+[add your dependencies and adjust configuration](docs/getting-started.md#3-add-your-dependencies).
+
+Then run:
+
+```text
+dotnet run --project MyApp.Host
+```
+
+Open the URL printed in the terminal.
 
 ## Running examples
 
@@ -52,7 +59,7 @@ Check [what works](docs/what-works.md) for your app's features.
 
 [Getting started](docs/getting-started.md) ·
 [Migration guide](docs/migration.md) ·
-[Documentation](docs/README.md) ·
+[All guides](docs/README.md) ·
 [Contributing](CONTRIBUTING.md)
 
 [MIT license](LICENSE). Imported code retains its original licenses;

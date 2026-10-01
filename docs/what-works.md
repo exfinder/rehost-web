@@ -36,7 +36,7 @@ See the [Web Forms template](../apps/WebFormsApplication/README.md),
   `Web.Rehost.config`. Your original `Web.config` stays untouched.
 - Replace Windows-specific dependencies. For example, LocalDB needs a different
   database connection.
-- Rebuild after page edits and restart after configuration changes.
+- Rebuild and restart after editing pages or configuration.
   Automatic file-change reload is not implemented.
 
 The [migration guide](migration.md) explains these steps.
