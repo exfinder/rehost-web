@@ -17,7 +17,7 @@ own staging, XDT transformation, and publish layout. One target cannot infer
 which owner should compile or publish `*.aspx.cs` safely.
 
 The AjaxControlToolkit sample site
-([`apps/AjaxControlToolkitSampleSite`](../../apps/AjaxControlToolkitSampleSite/README.md))
+([`apps/AjaxControlToolkitSampleSite`](../../apps/AjaxControlToolkitSampleSite/DEVELOPMENT.md))
 runs the Web Site model end-to-end: `App_Code`, `CodeFile` pages, inline
 `Global.asax`, and `.asmx` services all compile at runtime on macOS and Linux.
 The gap is confined to staging: the hosting targets exclude `**/*.cs`, so its

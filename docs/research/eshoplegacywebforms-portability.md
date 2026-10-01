@@ -270,4 +270,4 @@ boundary plus a sidecar substitution rather than by port work.
 - Milestone 1 precedents:
   [Identity application findings](webforms-identity-application-gaps.md),
   [`apps/WebFormsApplication/DEVELOPMENT.md`](../../apps/WebFormsApplication/DEVELOPMENT.md),
-  [`apps/WebFormsIdentityApplication/README.md`](../../apps/WebFormsIdentityApplication/README.md)
+  [`apps/WebFormsIdentityApplication/DEVELOPMENT.md`](../../apps/WebFormsIdentityApplication/DEVELOPMENT.md)

@@ -30,8 +30,8 @@ below them. Typical additions:
   runtime does not remap the original names, and the assemblies they name do
   not exist here.
 
-Examples: [Wingtip Toys](../apps/WingtipToys/README.md#webconfig),
-[eShopLegacyWebForms](../apps/eShopLegacyWebForms/README.md),
+Examples: [Wingtip Toys](../apps/WingtipToys/DEVELOPMENT.md#webconfig),
+[eShopLegacyWebForms](../apps/eShopLegacyWebForms/DEVELOPMENT.md),
 [YAF](../apps/YAF/DEVELOPMENT.md#webconfig). Settings the runtime refuses fail
 activation with a message naming the file and the entry; the list is in
 [compatibility](compatibility.md).
@@ -52,7 +52,7 @@ Two differences from the old project's explicit file list:
 A Web Site project (no csproj, `CodeFile=` pages, code in `App_Code`) runs, but
 the hosting targets stage a WAP: the `*.cs` sources are excluded from the copy,
 and a Host-local target has to copy them. That is the state recorded in
-[AjaxControlToolkitSampleSite](../apps/AjaxControlToolkitSampleSite/README.md)
+[AjaxControlToolkitSampleSite](../apps/AjaxControlToolkitSampleSite/DEVELOPMENT.md)
 and the open
 [project models](follow-ups/web-site-vs-wap-project-models.md) follow-up; the
 template does not write a Web Site shape yet.
@@ -79,7 +79,7 @@ runtime. The order of work that has held for six applications:
 3. Expect a Framework facade now and then: Katana's Google provider constructs
    `System.Net.Http.WebRequest.WebRequestHandler`, a type .NET 10 does not
    carry, and a 15-line stand-in assembly closes it
-   ([Wingtip Toys](../apps/WingtipToys/README.md#the-one-unanticipated-blocker-systemnethttpwebrequest)).
+   ([Wingtip Toys](../apps/WingtipToys/DEVELOPMENT.md#the-one-unanticipated-blocker-systemnethttpwebrequest)).
 
 ## Custom build steps
 
@@ -89,7 +89,7 @@ Framework machines, and their output can be load-bearing and absent from source
 control. The AJAX Control Toolkit sample site's static resources exist only as
 the output of a Windows-only hard-link step; the port serves the same assets
 embedded instead
-([AjaxControlToolkitSampleSite](../apps/AjaxControlToolkitSampleSite/README.md)).
+([AjaxControlToolkitSampleSite](../apps/AjaxControlToolkitSampleSite/DEVELOPMENT.md)).
 Content generators (T4, `.resx` to designer, XSD data sets) need the same check;
 the XSD build provider is
 [unsupported](xsd-build-provider-compatibility.md).

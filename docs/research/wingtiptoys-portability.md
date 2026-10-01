@@ -123,7 +123,7 @@ Windows- or platform-bound.
 | `Microsoft.AspNet.ScriptManager.MSAjax` / `.WebForms` 5.0.0 | A | `Rehost.AspNet.ScriptManager.MSAjax` registers `MsAjaxBundle` and the MicrosoftAjax names, `Rehost.AspNet.ScriptManager.WebForms` registers `WebFormsBundle` |
 | `AspNet.ScriptManager.jQuery` 1.10.2 | **C, blocking** | Registers the `jquery` `ScriptResourceMapping`. Unregistered here, and unlike eShop the consequence is provably fatal — see gap 1 |
 | `AspNet.ScriptManager.bootstrap` 3.0.0 | **C** | Registers `bootstrap`, referenced from `Site.Master:26` on every page. Same shim |
-| `Microsoft.AspNet.Providers.Core` 2.0.0 (`System.Web.Providers`) | **C, inert** | Named only as `<sessionState customProvider>`, which `mode="InProc"` never resolves. `WebFormsIdentityApplication` carries the identical line and records that it "parses and activates exactly as it does on Framework" (`apps/WebFormsIdentityApplication/README.md`, web.config section) |
+| `Microsoft.AspNet.Providers.Core` 2.0.0 (`System.Web.Providers`) | **C, inert** | Named only as `<sessionState customProvider>`, which `mode="InProc"` never resolves. `WebFormsIdentityApplication` carries the identical line and records that it "parses and activates exactly as it does on Framework" (`apps/WebFormsIdentityApplication/DEVELOPMENT.md`, web.config section) |
 | `elmah` 1.2.2 + `elmah.corelibrary` 1.2.2 | **C, blocking** | `Elmah.dll` binds Microsoft's strong-named `System.Web`; last published 2011, no `netstandard` build, and modern `ElmahCore` is a different API for ASP.NET Core. Registered as three `<modules>` rows. **No application code references Elmah** (a full scan over `*.cs`/`*.aspx`/`*.master`/`*.ascx` returns nothing) |
 | `Microsoft.Web.Infrastructure` 1.0.0 | A (dropped) | Same disposition as all three prior applications |
 | `jQuery` 1.10.2, `bootstrap` 3.0.0, `Modernizr` 2.6.2, `Respond` 1.2.0 | — | Content only; committed under `Scripts/`, `Content/`, `fonts/` |
@@ -298,7 +298,7 @@ unreferenced by application code and can be dropped rather than ported.
 Identity application exercised, but `UseGoogleAuthentication` constructs
 `WebRequestHandler` from the Framework-only `System.Net.Http.WebRequest`
 facade at module init, failing every request. The app-side facade shim in
-[`apps/WingtipToys`](../../apps/WingtipToys/README.md) closes it. Consume-as-is
+[`apps/WingtipToys`](../../apps/WingtipToys/DEVELOPMENT.md) closes it. Consume-as-is
 ratings are per invoked code path, not per package. There is
 no Autofac, no Application Insights, no telemetry stack, no `System.Design`
 closure, no `App_Code`, no Web Site project model, no build customisation.
@@ -451,7 +451,7 @@ question rather than an application quirk.
 
    *Resolved as (c).* The frozen class exposes no configuration seam, so the
    redirection is `WebRequest.RegisterPrefix` in the host; the responder and its
-   boundaries are in [`apps/WingtipToys`](../../apps/WingtipToys/README.md).
+   boundaries are in [`apps/WingtipToys`](../../apps/WingtipToys/DEVELOPMENT.md).
 3. **ELMAH.** Drop it by XDT (no application code touches it) or recompile
    `elmah.corelibrary` under Rehost identity. Dropping is right on cost; keeping
    it would preserve the tutorial's final chapter as written and prove one more
@@ -494,4 +494,4 @@ question rather than an application quirk.
 - Precedents: [eShop portability](eshoplegacywebforms-portability.md),
   [AjaxControlToolkit sample site portability](ajaxcontroltoolkit-samplesite-portability.md),
   [Identity application findings](webforms-identity-application-gaps.md),
-  [`apps/WebFormsIdentityApplication/README.md`](../../apps/WebFormsIdentityApplication/README.md)
+  [`apps/WebFormsIdentityApplication/DEVELOPMENT.md`](../../apps/WebFormsIdentityApplication/DEVELOPMENT.md)

@@ -71,7 +71,7 @@ compatibility.
 
 ## Worked examples
 
-- [Wingtip Toys](../apps/WingtipToys/README.md): package-by-package migration decisions.
-- [Web Forms Identity template](../apps/WebFormsIdentityApplication/README.md): a smaller dependency list.
+- [Wingtip Toys](../apps/WingtipToys/DEVELOPMENT.md): package-by-package migration decisions.
+- [Web Forms Identity template](../apps/WebFormsIdentityApplication/DEVELOPMENT.md): a smaller dependency list.
 
 Return to the [migration checklist](migration.md).

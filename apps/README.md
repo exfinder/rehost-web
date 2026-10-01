@@ -1,27 +1,20 @@
 # Example applications
 
-Start with one of these. Each guide has prerequisites, run commands, and things
-to try in the browser.
+Start with the Web Forms template for the quickest setup. All examples need
+the .NET 10 SDK (10.0.302 or later) and a clone of this repository.
+Each guide has run commands, things to try in the browser, and known limits.
 
-| Example | What it demonstrates | Needs |
+| Example | What it demonstrates | Extra setup |
 | --- | --- | --- |
-| [Web Forms template](WebFormsApplication/README.md) | Master pages, postbacks, friendly URLs, script and style bundles | .NET 10 SDK |
-| [YAF forum](YAF/README.md) | Registration, sign-in, topics, replies, moderation, search | .NET 10 SDK and Docker for PostgreSQL |
+| [Web Forms template](WebFormsApplication/README.md) | Master pages, postbacks, friendly URLs, script and style bundles | None |
+| [Web Forms with user accounts](WebFormsIdentityApplication/README.md) | Registration and sign-in | SQLite database created automatically |
+| [eShop catalog](eShopLegacyWebForms/README.md) | Routed catalog pages with mock data | None |
+| [AJAX Control Toolkit](AjaxControlToolkitSampleSite/README.md) | Interactive controls and runtime page compilation | None |
+| [Wingtip Toys store](WingtipToys/README.md) | Shopping cart, administrator tools, simulated checkout | Docker for SQL Server |
+| [YAF forum](YAF/README.md) | Registration, topics, replies, moderation, search | Docker for PostgreSQL |
 
 To run your own application, follow [Getting started](../docs/getting-started.md).
 
-## More examples
-
-These applications have development notes with setup and validation details:
-
-- [Web Forms with user accounts](WebFormsIdentityApplication/README.md):
-  the Visual Studio template with Identity and a SQLite database.
-- [Wingtip Toys](WingtipToys/README.md): a store with a shopping cart,
-  administrator tools, and a checkout journey against SQL Server.
-- [eShopLegacyWebForms](eShopLegacyWebForms/README.md): a catalog manager
-  using mock data, without a database.
-- [AJAX Control Toolkit sample site](AjaxControlToolkitSampleSite/README.md):
-  a Web Site project with AJAX controls and runtime compilation.
-
-Each example records what was exercised and what remains untested.
-See [Will my app work?](../docs/what-works.md) for runtime compatibility.
+Each guide links to separate development notes for configuration, dependency
+decisions, and validation evidence. See
+[Will my app work?](../docs/what-works.md) for runtime compatibility.

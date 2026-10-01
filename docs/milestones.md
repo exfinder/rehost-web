@@ -22,7 +22,7 @@ on Windows x64, Linux, and macOS arm64:
   template. `smoke.sh` walks the browser journey (default document and its
   postback target, Friendly URLs, the `.aspx` redirect, script and style
   bundles, static assets, mobile master and view switching).
-- [`apps/WebFormsIdentityApplication`](../apps/WebFormsIdentityApplication/README.md)
+- [`apps/WebFormsIdentityApplication`](../apps/WebFormsIdentityApplication/DEVELOPMENT.md)
   — the "Individual User Accounts" template: OWIN (Katana recompiled as
   `Rehost.Owin.Host.SystemWeb`), ASP.NET Identity 2.2 and Entity
   Framework 6.4 consumed from nuget.org, SQL Server in a container. `smoke.sh`
@@ -41,20 +41,20 @@ stays absent (ledger P69). The gap analysis and its closure live in
 ## Milestone 2: eShopLegacyWebForms
 
 Microsoft's eShopLegacyWebForms runs with its C#, markup, and `Web.config`
-frozen, on mock data, from [`apps/eShopLegacyWebForms`](../apps/eShopLegacyWebForms/README.md).
+frozen, on mock data, from [`apps/eShopLegacyWebForms`](../apps/eShopLegacyWebForms/DEVELOPMENT.md).
 The catalog journeys (the application has no purchase flow) pass on all three
 platforms; closure work landed as two XDT module drops, an
 `Autofac.Integration.Web` recompile, the baseline `expressionBuilders`
 registration, and a script-mapping shim. The AJAX Control Toolkit spike rode
 the same patterns: the toolkit recompiles against the port and its 50-page
 sample site runs as a Web Site project
-([`apps/AjaxControlToolkitSampleSite`](../apps/AjaxControlToolkitSampleSite/README.md)).
+([`apps/AjaxControlToolkitSampleSite`](../apps/AjaxControlToolkitSampleSite/DEVELOPMENT.md)).
 
 ## Milestone 3: Wingtip Toys
 
 The frozen Wingtip Toys tutorial store runs its stateful commerce journey on
 all three platforms against containerized SQL Server, from
-[`apps/WingtipToys`](../apps/WingtipToys/README.md): Identity 2.2 register and
+[`apps/WingtipToys`](../apps/WingtipToys/DEVELOPMENT.md): Identity 2.2 register and
 sign-in, claims-role authorization, the session-keyed database cart, and
 checkout through the order write against a local NVP responder standing in
 for PayPal — with `customErrors` as authored, zero frozen-source edits, zero

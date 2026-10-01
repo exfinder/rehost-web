@@ -50,8 +50,8 @@ Check these settings:
 Carry over any application settings previously supplied by the server's
 `machine.config`, root `web.config`, or `applicationHost.config`.
 
-Examples: [Wingtip Toys](../apps/WingtipToys/README.md#webconfig),
-[eShopLegacyWebForms](../apps/eShopLegacyWebForms/README.md), and
+Examples: [Wingtip Toys](../apps/WingtipToys/DEVELOPMENT.md#webconfig),
+[eShopLegacyWebForms](../apps/eShopLegacyWebForms/DEVELOPMENT.md), and
 [YAF](../apps/YAF/DEVELOPMENT.md#webconfig).
 
 ## Preserved source

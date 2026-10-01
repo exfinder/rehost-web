@@ -2,7 +2,7 @@
 
 Evidence from bringing up the frozen Visual Studio Individual User Accounts
 template. Current application status lives in
-[its README](../../apps/WebFormsIdentityApplication/README.md).
+[its development notes](../../apps/WebFormsIdentityApplication/DEVELOPMENT.md).
 
 ## Result
 
