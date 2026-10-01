@@ -122,5 +122,5 @@ From this repository, check that journey and the script bundles with:
 apps/WebFormsApplication/smoke.sh <url>
 ```
 
-The [application notes](../apps/WebFormsApplication/README.md) describe the
+The [application notes](../apps/WebFormsApplication/DEVELOPMENT.md) describe the
 sample's setup and checks.

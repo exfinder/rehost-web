@@ -269,5 +269,5 @@ boundary plus a sidecar substitution rather than by port work.
 - Unresolved work referenced: [backlog](../backlog.md)
 - Milestone 1 precedents:
   [Identity application findings](webforms-identity-application-gaps.md),
-  [`apps/WebFormsApplication/README.md`](../../apps/WebFormsApplication/README.md),
+  [`apps/WebFormsApplication/DEVELOPMENT.md`](../../apps/WebFormsApplication/DEVELOPMENT.md),
   [`apps/WebFormsIdentityApplication/README.md`](../../apps/WebFormsIdentityApplication/README.md)

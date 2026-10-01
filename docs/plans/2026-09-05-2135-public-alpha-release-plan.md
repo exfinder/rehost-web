@@ -133,13 +133,13 @@ them as candidate-validated, in which case #16 must rerun them too.
 
 - **Stock template quickstart:** default document and postback, Friendly URLs,
   `.aspx` redirect, static assets, script/style bundles, mobile master and view
-  switching. [App notes](../../apps/WebFormsApplication/README.md).
+  switching. [App notes](../../apps/WebFormsApplication/DEVELOPMENT.md).
 - **YAF 3.2.16 richer example:** PostgreSQL installation, guest/member/admin
   authorization, registration with pickup-mail verification, OWIN sign-in,
   topic/reply/moderation, Forum Web API and Lucene search API (59 scripted
   checks). Repeat the separately documented manual process-replacement check
   with the same cookie jar and database to advertise cookie/content persistence;
-  it is not part of `smoke.sh`. [App notes](../../apps/YAF/README.md) and
+  it is not part of `smoke.sh`. [App notes](../../apps/YAF/DEVELOPMENT.md) and
   [source deviations](../provenance/yafnet.md).
 
 YAF is a modified, rebuilt fixture: preserve disclosure of source deviations,

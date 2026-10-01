@@ -2,7 +2,7 @@
 
 Everything below the horizontal rule is the original static assessment, kept as
 written so its predictions can be scored. The bring-up has since run: see
-[the app notes](../../apps/YAF/README.md) and
+[the app notes](../../apps/YAF/DEVELOPMENT.md) and
 [the provenance record](../provenance/yafnet.md). Neither this document nor those
 widen [`compatibility.md`](../compatibility.md).
 

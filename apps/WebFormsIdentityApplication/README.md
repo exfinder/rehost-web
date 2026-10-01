@@ -14,7 +14,7 @@ external consumer would.
 | `WebFormsIdentityApplication.Host/` | The process: a ~30-line Kestrel host, plus the app's own `Web.Rehost.config`. |
 
 The migration is the same one
-[`WebFormsApplication`](../WebFormsApplication/README.md) shows — every
+[`WebFormsApplication`](../WebFormsApplication/DEVELOPMENT.md) shows — every
 `packages.config` line becomes a package reference, the legacy folder is never
 touched — with two additions: most of this app's dependencies come from
 nuget.org unchanged, and the connection string has to move off LocalDb.

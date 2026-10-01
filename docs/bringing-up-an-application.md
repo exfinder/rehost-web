@@ -55,7 +55,7 @@ step designed to find it.
 
 Not app bugs. These are ways a tree that built on net481 means something else
 once the same sources go through a modern compiler and BCL, and each cost a
-debugging round on YAF.NET ([app notes](../apps/YAF/README.md)).
+debugging round on YAF.NET ([app notes](../apps/YAF/DEVELOPMENT.md)).
 
 - **The frozen tree has its own build files.** Sidecars that glob sources sit
   outside them, so `Directory.Build.props` beside the vendored code never

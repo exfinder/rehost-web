@@ -52,7 +52,7 @@ Carry over any application settings previously supplied by the server's
 
 Examples: [Wingtip Toys](../apps/WingtipToys/README.md#webconfig),
 [eShopLegacyWebForms](../apps/eShopLegacyWebForms/README.md), and
-[YAF](../apps/YAF/README.md#webconfig).
+[YAF](../apps/YAF/DEVELOPMENT.md#webconfig).
 
 ## Preserved source
 

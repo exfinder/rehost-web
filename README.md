@@ -33,9 +33,9 @@ configuration as described in [Getting started](docs/getting-started.md).
   Visual Studio app, with working postbacks, routing, scripts, and styles.
 - [YAF forum](apps/YAF/README.md): registration, sign-in, topics, replies,
   moderation, and search, backed by PostgreSQL. Rebuilt with compatibility
-  changes; see its [porting notes](docs/provenance/yafnet.md).
+  changes.
 
-More [example applications](apps/), including Wingtip Toys,
+More [example applications](apps/README.md), including Wingtip Toys,
 eShopLegacyWebForms, and the AJAX Control Toolkit sample site.
 
 ## Limitations

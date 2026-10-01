@@ -61,4 +61,4 @@ diagnostics error 10 naming the file, since nothing on .NET reads any of it
 
 YAF.NET calls `new SmtpClient()` in `YAF.Core/Services/MailService.cs`, and every
 user-creation path sends a verification mail, so no second user can be created
-without an answer here ([app notes](../../apps/YAF/README.md)).
+without an answer here ([app notes](../../apps/YAF/DEVELOPMENT.md)).

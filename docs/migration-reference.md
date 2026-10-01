@@ -32,7 +32,7 @@ below them. Typical additions:
 
 Examples: [Wingtip Toys](../apps/WingtipToys/README.md#webconfig),
 [eShopLegacyWebForms](../apps/eShopLegacyWebForms/README.md),
-[YAF](../apps/YAF/README.md#webconfig). Settings the runtime refuses fail
+[YAF](../apps/YAF/DEVELOPMENT.md#webconfig). Settings the runtime refuses fail
 activation with a message naming the file and the entry; the list is in
 [compatibility](compatibility.md).
 
@@ -103,7 +103,7 @@ compile unchanged in most cases, but two things change meaning:
   `array.Contains(x)` can bind to `MemoryExtensions` instead of `Enumerable`;
   code that builds expression trees from such calls then fails. Pin
   `<LangVersion>13</LangVersion>` for a rebuilt frozen tree
-  ([YAF](../apps/YAF/README.md#language-version)).
+  ([YAF](../apps/YAF/DEVELOPMENT.md#language-version)).
 - `Nullable` and `ImplicitUsings` stay off in the App project, and
   `GenerateAssemblyInfo` is false because the tree has its own
   `AssemblyInfo.cs`. The template sets all three.
