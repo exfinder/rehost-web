@@ -341,10 +341,11 @@ In rough order of how unproven each was going in.
   rename: a named catalog on a server instead of an attached file.
 - **Currency rendering follows the host machine's culture.** The application
   sets no `<globalization>`, and every price goes through
-  `String.Format("{0:c}")`. On a `uk-UA` machine the cart reads `145,45 UAH`.
-  `smoke.sh` compares digits only for that reason. The same culture makes the
-  admin page's `double.Parse("1.00")` throw — an application assumption, not a
-  port defect.
+  `String.Format("{0:c}")`. On an `en-US` machine the cart reads `$145.45`;
+  other cultures change the symbol and the decimal separator, so `smoke.sh`
+  compares digits only. Under a comma-decimal culture the admin page's
+  `double.Parse("1.00")` throws. That is an application assumption, not a port
+  defect.
 - **`<machineKey>` is auto-generated.** The application declares none, so keys
   are per-application and host-resolvable (ADR 0010); sign-ins survive a
   restart, but two instances cannot share them.
