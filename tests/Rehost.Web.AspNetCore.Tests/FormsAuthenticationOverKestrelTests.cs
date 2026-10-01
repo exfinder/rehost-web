@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Rehost.Web.AspNetCore.Tests;
 
-// Expected values come from readings R-FA1 to R-FA9 in docs/follow-ups/forms-authentication.md,
+// Expected values come from readings R-FA1 to R-FA9 in docs/dev/follow-ups/forms-authentication.md,
 // taken on IIS Express over 4.8.1 against the same provider shapes.
 public sealed class FormsAuthenticationOverKestrelTests(AuthLiveScenario scenario)
     : IClassFixture<AuthLiveScenario>

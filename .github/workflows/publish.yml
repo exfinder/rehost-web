@@ -39,7 +39,7 @@ jobs:
           sha256sum -c SHA256SUMS
           version="${{ inputs.tag }}"; version="${version#v}"
           ls Rehost.*."$version".nupkg | wc -l | grep -qx 11 || { echo "expected eleven packages at $version"; ls; exit 1; }
-          grep -q "^# $version" ../docs/releases/"$version".md || { echo "docs/releases/$version.md does not start with # $version"; exit 1; }
+          grep -q "^# $version" ../docs/dev/releases/"$version".md || { echo "docs/dev/releases/$version.md does not start with # $version"; exit 1; }
       - name: Stop before publishing (dry run)
         if: inputs.dry_run
         run: 'echo "dry run: candidate ${{ inputs.run_id }} verified for ${{ inputs.tag }}; nothing pushed"'
@@ -54,7 +54,7 @@ jobs:
         run: |
           version="${{ inputs.tag }}"; version="${version#v}"
           gh release create "${{ inputs.tag }}" --prerelease --target "$GITHUB_SHA" \
-            --title "${{ inputs.tag }}" --notes-file "docs/releases/$version.md" \
+            --title "${{ inputs.tag }}" --notes-file "docs/dev/releases/$version.md" \
             candidate/*.nupkg candidate/*.snupkg candidate/SHA256SUMS
         env:
           GH_TOKEN: ${{ github.token }}

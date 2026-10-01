@@ -8,9 +8,9 @@ database-backed shopping cart, role-gated administration and a PayPal Express
 checkout — running on the ported runtime from packages, against a containerized
 SQL Server. The Milestone 3 application.
 
-Nothing here is a support claim; [`docs/compatibility.md`](../../docs/compatibility.md)
+Nothing here is a support claim; [`docs/dev/compatibility.md`](../../docs/dev/compatibility.md)
 remains the only one. The pre-import analysis is
-[`docs/research/wingtiptoys-portability.md`](../../docs/research/wingtiptoys-portability.md);
+[`docs/dev/research/wingtiptoys-portability.md`](../../docs/dev/research/wingtiptoys-portability.md);
 this file records what actually happened when it ran.
 
 ## Provenance
@@ -369,7 +369,7 @@ already disposed. Nothing calls it.
 ## Rows this evidence backs
 
 The claims themselves live in
-[`docs/compatibility.md`](../../docs/compatibility.md), which names this
+[`docs/dev/compatibility.md`](../../docs/dev/compatibility.md), which names this
 application in five rows.
 
 | Row | What Wingtip Toys adds |

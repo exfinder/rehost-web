@@ -9,7 +9,7 @@ namespace Rehost.Web.CallContext.Contract.Tests;
 // illogical data in the ExecutionContext and does not copy it on capture, so the flow sees
 // nothing; over AsyncLocal the port cannot tell that flow from a return out of a nested Run, so
 // it shows the scope's own data. Unreachable through System.Web (every caller clears before the
-// thread leaves); stated in docs/call-context-compatibility.md. Compiled for the Framework leg
+// thread leaves); stated in docs/dev/call-context-compatibility.md. Compiled for the Framework leg
 // only, so the reading of the boundary is what this file pins.
 public sealed class FrameworkOnlyIsolationTests
 {

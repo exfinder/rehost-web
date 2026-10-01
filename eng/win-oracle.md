@@ -73,7 +73,7 @@ any configuration) is all the parity gates need.
 
 `ilspycmd` is installed globally on this host. Methodology and the
 published-source-lags-binaries finding:
-[windows-validation-host.md](../docs/windows-validation-host.md).
+[windows-validation-host.md](../docs/dev/windows-validation-host.md).
 ## AMI
 
 Not sysprepped: SSH host key survives (no `known_hosts` churn), but EC2Launch's

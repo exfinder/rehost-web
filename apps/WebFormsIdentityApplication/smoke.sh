@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Register, log in, and log off against a running WebFormsIdentityApplication.Host,
 # asserting the .NET Framework baseline recorded in
-# docs/research/webforms-identity-application-gaps.md. bash + curl only, so the same
+# docs/dev/research/webforms-identity-application-gaps.md. bash + curl only, so the same
 # script runs on macOS, Linux, and Git bash on Windows.
 #
 #   apps/WebFormsIdentityApplication/smoke.sh [base-url]

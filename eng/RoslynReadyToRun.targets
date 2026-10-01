@@ -1,7 +1,7 @@
 <Project>
   <!--
     ReadyToRun images for the two Roslyn assemblies, so processes that compile pages do not
-    pay ~450 ms of compiler JIT per process (docs/follow-ups/roslyn-compile-cold-start.md).
+    pay ~450 ms of compiler JIT per process (docs/dev/follow-ups/roslyn-compile-cold-start.md).
 
     Roles: Rehost.Web sets RehostRoslynR2RProducer and crossgens the images
     into artifacts/ exactly once per Roslyn version + RID; every other importer is a

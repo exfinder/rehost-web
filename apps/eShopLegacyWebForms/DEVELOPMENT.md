@@ -7,9 +7,9 @@ Application Project with Autofac dependency injection, EF6 behind a mock-data
 switch, log4net, classic `MapPageRoute` URLs and Application Insights — running
 on the ported runtime from packages. The Milestone 2 application.
 
-Nothing here is a support claim; [`docs/compatibility.md`](../../docs/compatibility.md)
+Nothing here is a support claim; [`docs/dev/compatibility.md`](../../docs/dev/compatibility.md)
 remains the only one. The pre-import analysis is
-[`docs/research/eshoplegacywebforms-portability.md`](../../docs/research/eshoplegacywebforms-portability.md).
+[`docs/dev/research/eshoplegacywebforms-portability.md`](../../docs/dev/research/eshoplegacywebforms-portability.md).
 
 ## Provenance
 

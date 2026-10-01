@@ -39,6 +39,6 @@ Broader migration automation remains in the backlog.
 - The runtime stays portable across Windows, Linux, and macOS.
 - Application ports aim to preserve existing source.
 
-See [completed milestones](docs/milestones.md) for past work and the
-[development backlog](docs/backlog.md) for detailed tasks. This roadmap sets
+See [completed milestones](docs/dev/milestones.md) for past work and the
+[development backlog](docs/dev/backlog.md) for detailed tasks. This roadmap sets
 milestone order and direction.

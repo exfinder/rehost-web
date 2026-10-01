@@ -6,9 +6,9 @@ The AJAX Control Toolkit sample site (archived v20.1), running on the ported
 runtime from packages. Exploratory spike, not a milestone: the port's first
 **Web Site** consumer and its first large third-party control library.
 
-Nothing here is a support claim; [`docs/compatibility.md`](../../docs/compatibility.md)
+Nothing here is a support claim; [`docs/dev/compatibility.md`](../../docs/dev/compatibility.md)
 remains the only one. The pre-import analysis is
-[`docs/research/ajaxcontroltoolkit-samplesite-portability.md`](../../docs/research/ajaxcontroltoolkit-samplesite-portability.md);
+[`docs/dev/research/ajaxcontroltoolkit-samplesite-portability.md`](../../docs/dev/research/ajaxcontroltoolkit-samplesite-portability.md);
 this file records what actually happened when it ran.
 
 ## Layout
@@ -155,7 +155,7 @@ sources are already compiled into the app assembly. A Web Site ships them as
 content, so without them the staged site has no code behind any page. The Host
 carries a local `StageWebSiteSources` target as the smallest unblocking
 workaround. The real fix belongs to the open
-[project models](../../docs/follow-ups/web-site-vs-wap-project-models.md)
+[project models](../../docs/dev/follow-ups/web-site-vs-wap-project-models.md)
 follow-up, which already names Web Site publish as unscoped — this spike is the
 first evidence of exactly what is missing.
 

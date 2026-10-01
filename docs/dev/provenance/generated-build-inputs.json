@@ -1,0 +1,137 @@
+{
+  "component": "System.Web generated build inputs",
+  "generator": {
+    "project": "eng/Rehost.Web.GeneratedInputs/Rehost.Web.GeneratedInputs.csproj",
+    "projectSha256": "f79fe8a3834adfc47719f5d513f4e6cab557545b504ae3f708bfa76367a625dd",
+    "implementation": "eng/Rehost.Web.GeneratedInputs/Program.cs",
+    "implementationSha256": "2651a509671c569ee6c035948345d26dfa6453105df41dddf7bc58dd7d2faa78",
+    "targetFramework": "net10.0",
+    "externalPackages": [],
+    "outputPolicy": "Outputs are generated under the runtime project's obj/<Configuration>/net10.0/generated/System.Web directory and are not copied into src/System.Web.ReferenceSource."
+  },
+  "integration": {
+    "targets": "eng/Rehost.Web.GeneratedInputs/Rehost.Web.GeneratedInputs.targets",
+    "targetsSha256": "33a88198a9f06a3a334c0aaa10eb8e14dc44b4b0103e4057ff040ce18eefecdd",
+    "runtimeImport": "src/Rehost.Web/Rehost.Web.csproj",
+    "incrementalPolicy": "MSBuild skips generation when all six outputs exist and are newer than the generator, manifests, and pinned Reference Source inputs."
+  },
+  "staticBuildInputs": {
+    "project": "eng/Rehost.Web.ReferenceSource.BuildInputs/Rehost.Web.ReferenceSource.BuildInputs.csproj",
+    "projectSha256": "a2b8525e38d089bf87736578b10873deefdde705b9fa6f9bdd5099ccea8a4dd5",
+    "assemblyRef": "eng/Rehost.Web.ReferenceSource.BuildInputs/AssemblyRef.cs",
+    "assemblyRefSha256": "5e29bab92c40f92f05f2882fe18089849664fd2406c08b091794585e2ea7d0ba",
+    "policy": "One internal compile-time constants type is friend-visible to product assemblies. The non-packable helper is not copied to product output and does not appear in product dependency metadata."
+  },
+  "pinnedTreeInputs": [
+    {
+      "path": "src/System.Web.ReferenceSource/System.Web.txt",
+      "upstreamPath": "System.Web/System.Web.txt",
+      "sha256": "2a7b9625ba5799ea28db20f2eb4e3d74b10b29b5eb0478bbbc52bd57162cc25b",
+      "outputs": [ "SR.g.cs", "System.Web.resources" ]
+    },
+    {
+      "path": "src/System.Web.ReferenceSource/Names.cspp",
+      "upstreamPath": "System.Web/Names.cspp",
+      "sha256": "97499c5487b6aa08cf3a14ccf23b37236815c8367f9944324eae2dc57d1ba977",
+      "outputs": [ "ModName.g.cs" ]
+    },
+    {
+      "path": "src/System.Web.ReferenceSource/cacheusage.cspp",
+      "upstreamPath": "System.Web/cacheusage.cspp",
+      "sha256": "6315a49416fba608f15c4b9a0dafd2968c61c9b68338f8221f78b01d75222a48",
+      "outputs": [ "CacheUsage.g.cs" ]
+    },
+    {
+      "path": "src/System.Web.ReferenceSource/cacheexpires.cspp",
+      "upstreamPath": "System.Web/cacheexpires.cspp",
+      "sha256": "d8c194924b02242f2b9da2a0be6d131a36755e6fbac9f7856da5aa6f11ac03cf",
+      "outputs": [ "CacheExpires.g.cs" ]
+    }
+  ],
+  "explicitInputsOutsideImportedTree": [
+    {
+      "path": "eng/Rehost.Web.GeneratedInputs/inputs/regular-expressions.json",
+      "sha256": "8972901094998665cfe3a0a34bec379075b09729c607a318bb5e7af2d812c27e",
+      "purpose": "Normalized declarations for the 27 constructible System.Web.RegularExpressions types, including patterns, options, visibility, and timeout constructors.",
+      "generatedImplementation": "Generated constructors pass the original declared options plus RegexOptions.Compiled to the .NET 10 Regex base constructor.",
+      "derivedFrom": {
+        "repository": "https://github.com/microsoft/referencesource.git",
+        "revision": "ec9fa9ae770d522a5b5f0607898044b7478574a3",
+        "path": "regcomp/RegexPreCompiler.cs",
+        "blob": "a1aec6b452bb8261d3b9ba16da14d32ca7027efa",
+        "sha256": "39279a965f1e90e8039223ca0e5ddb21bbd046494ede2165a06f312d1fe6c91b",
+        "member": "System.Rgc.GetAspnetRegexes"
+      },
+      "originalGeneratedOutputComparison": {
+        "path": "regexes/System.Web.RegularExpressions.ilpp",
+        "blob": "c6fa1e0cbe8a1961f3925872d6fd8cc2dfcb0297",
+        "sha256": "6ea63a08576a8d2ab10a7f332649986cd88ac3891bc1e2956737f0326f11a2d4"
+      }
+    },
+    {
+      "path": "eng/Rehost.Web.GeneratedInputs/inputs/native-names.json",
+      "sha256": "48a58d88cbf8f103a1aaed7b3093dd85e2e1db1713a456713007cd553698532a",
+      "purpose": "Explicit desktop .NET Framework 4 Windows names.h macro values and FEATURE_PAL target selection required by Names.cspp.",
+      "sourceStatus": "The public pinned Reference Source revision contains Names.cspp but does not contain its names.h include. Rehost records the reconstructed Windows profile as a project-owned input instead of selecting FEATURE_PAL or inheriting host-platform library names.",
+      "evidence": [
+        "Names.cspp macro usages in the pinned imported tree",
+        "Microsoft .NET Framework 4.x module and registry identities represented by the compiled ModName constants"
+      ]
+    },
+    {
+      "path": "eng/Rehost.Web.GeneratedInputs/inputs/assembly-identities.json",
+      "sha256": "467857e2eedb482621f5ffd88998a3cb76d56d590a055ea67d175fd5144f2fbb",
+      "purpose": "Explicit unsigned Rehost output identity, neutral resource identity, legacy Microsoft identity strings, checked-in AssemblyRef constants, and product version policy.",
+      "policySources": [
+        "docs/dev/generated-build-inputs.md identity constraints",
+        "AssemblyRef and ThisAssembly usages in the pinned imported tree",
+        "Microsoft public-key token literals already present in the pinned System.Web sources"
+      ],
+      "identityDistinction": "The System.Web output carries the package family version and no strong-name token. AssemblyRef.MicrosoftPublicKey remains the legacy b03f5f7f11d50a3a reflection/configuration constant and does not claim that the Rehost output is Microsoft-signed."
+    }
+  ],
+  "verifiedOutputSha256": {
+    "CacheExpires.g.cs": "6794fcc04ce57016c34fe2724afc444687dfe1dfc6ae31c48d5ac773d35457d4",
+    "CacheUsage.g.cs": "8a0f297887215bea7bbc0a457d4944f41cdd2205632fa6b23019b1c6fcd42f7a",
+    "ModName.g.cs": "eb6ee03b613cf4396582d6b6b792f6246f662d1288ebfb2a86cb8716de3966d1",
+    "RegularExpressions.g.cs": "35fe82ec2d2a2277e94e5d2f1633d073c8bf4042fab2175bdb80aa176eae7341",
+    "Res.g.cs": "391ed7f3954e2fb9683921f00dad485695582f0c92d2b5aa871e39722b4c07e3",
+    "SR.g.cs": "f8d9c318ee53bb5475c4ee64da4f9180d62e1dd3751db38b44069871c95ee5b9",
+    "System.Web.Services.resources": "331738cbb11131fa80e6f00d42478e971a1eb0438e8aa05bf8aadd8e9450e999",
+    "System.Web.resources": "2f46626b6c025ba8626994bfa22e9080526330148520a5fe034153aaf1e91eb7"
+  },
+  "pocComparisons": [
+    {
+      "repository": "/Users/vm/repos/Portable.System.Web",
+      "revision": "c9c908fa24dd8dd116fd613de8ffe584a715b4b1",
+      "path": "Portable.System.Web/System.Web.resources",
+      "blob": "aa03faee17ac8feb1e83c50d37c0d7182e3c6f8d",
+      "sha256": "b8a905c4bd9cdd67c80e0e2812802ededfa6c4cbc00e3dcd102971374137fa95",
+      "use": "Historical golden: the generator reproduced this ResGen output byte-for-byte from System.Web.txt at blob 0beec0d0497dc6afd0b486e50aeee60308cd1905. Rehost has edited System.Web.txt since (first in 9bfaf5d0, 2026-09-08), so verify no longer pins these bytes; it parses the generated file with ResourceReader and requires every key and value to match System.Web.txt."
+    },
+    {
+      "repository": "/Users/vm/repos/Portable.System.Web",
+      "revision": "c9c908fa24dd8dd116fd613de8ffe584a715b4b1",
+      "path": "Portable.System.Web/ModName.cs",
+      "blob": "1d703aae1a8ba4275b74edd3676892e25df8dc47",
+      "sha256": "6c339ccc8a3f9c878064902c52a945b5ed06f0d9ee244b1a5c1315dc73afe681",
+      "use": "Comparison only: confirm reconstructed desktop Windows ModName values."
+    },
+    {
+      "repository": "/Users/vm/repos/Portable.System.Web",
+      "revision": "c9c908fa24dd8dd116fd613de8ffe584a715b4b1",
+      "path": "Portable.System.Web/RegularExpressions/Regexes.cs",
+      "blob": "9f23c7c4aaa133e0efc0b4ba67122904e815771a",
+      "sha256": "bb1caef5bcfbe1475e30f0aebbb30b79a49db10ba46f303e84dad2e654a2cffb",
+      "use": "Comparison only: confirm pattern text and options after deriving the manifest from Microsoft's RegexPreCompiler.cs. The POC caller rewrites and static GeneratedRegex API were not copied."
+    },
+    {
+      "repository": "/Users/vm/repos/Portable.System.Web",
+      "revision": "c9c908fa24dd8dd116fd613de8ffe584a715b4b1",
+      "path": "Portable.System.Web.Common/AssemblyRef.cs",
+      "blob": "7e6d59e6ed17edd3318ba9b522e4077a326b8178",
+      "sha256": "002b74af2d81c1f6fa696676838945f163e629a39f6e06243612ced5049cd657",
+      "use": "Negative comparison: reject Portable.System.Web identities. The System.Configuration.ConfigurationManager identity is not rejected: since fcc0372d the runtime binds System.Configuration internals through that package and AssemblyRef.SystemConfigurationManager names it."
+    }
+  ]
+}

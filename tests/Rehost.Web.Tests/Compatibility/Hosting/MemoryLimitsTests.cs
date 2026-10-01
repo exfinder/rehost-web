@@ -6,7 +6,7 @@ namespace Rehost.Web.Tests.Compatibility.Hosting;
 
 // The arithmetic below only diverges from Framework's once a container limit exists, which neither
 // supported platform imposes on itself. Synthetic readings are the only way to reach those shapes
-// without one; see docs/follow-ups/container-memory-validation.md.
+// without one; see docs/dev/follow-ups/container-memory-validation.md.
 public sealed class MemoryLimitsTests
 {
     private const long MiB = 1024 * 1024;

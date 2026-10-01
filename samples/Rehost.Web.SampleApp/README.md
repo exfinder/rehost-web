@@ -25,7 +25,7 @@ compatibility target is the Web Application Project model that real
 enterprise applications use, which `WapDemo.aspx` demonstrates:
 `CodeBehind` + `Inherits` + designer partial compiled by MSBuild into the
 `bin` assembly (see
-[web-site-vs-wap-project-models](../../docs/follow-ups/web-site-vs-wap-project-models.md)).
+[web-site-vs-wap-project-models](../../docs/dev/follow-ups/web-site-vs-wap-project-models.md)).
 
 It demonstrates the currently supported surface: `Site.master` chrome,
 `App_Code` (including a control-state control), `App_GlobalResources` with a

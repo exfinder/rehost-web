@@ -45,7 +45,7 @@ Check these settings:
   run on modern .NET, including any related `<location>` blocks.
 - **Web Pages assemblies:** use the Rehost assembly names in Razor sections,
   build providers, and assembly registrations. See the
-  [exact names](migration-reference.md#configuration).
+  [exact names](dev/migration-reference.md#configuration).
 
 Carry over any application settings previously supplied by the server's
 `machine.config`, root `web.config`, or `applicationHost.config`.
@@ -61,12 +61,12 @@ If it picks up files your old project excluded, add them to
 `RehostAppContentExcludes`.
 
 Special folders such as `App_Code` are compiled by the runtime. See
-[source inclusion](migration-reference.md#preserved-source) if you encounter
+[source inclusion](dev/migration-reference.md#preserved-source) if you encounter
 duplicate types or are moving a Web Site project.
 
 Check your old custom build steps too: generated code or assets may not exist
 until those steps run. The
-[build-step reference](migration-reference.md#custom-build-steps) covers examples.
+[build-step reference](dev/migration-reference.md#custom-build-steps) covers examples.
 
 ## Libraries bound to System.Web
 
@@ -74,9 +74,9 @@ A library referencing the .NET Framework's `System.Web` needs a replacement
 or recompilation against Rehost.Web; binding redirects cannot fix it.
 
 Try the application's actual code paths before deciding to rebuild a library.
-See [library migration](migration-reference.md#libraries-bound-to-systemweb)
+See [library migration](dev/migration-reference.md#libraries-bound-to-systemweb)
 for examples. Older C# code that fails under the newer compiler may need a
-[language-version setting](migration-reference.md#language-pins).
+[language-version setting](dev/migration-reference.md#language-pins).
 
 ## Machine keys
 
@@ -87,7 +87,7 @@ cookies valid.
 For multiple instances, supply shared keys through both
 `REHOST_MACHINEKEY_*` variables or explicit `<machineKey>` values. Do not mix
 environment overrides with explicit keys. See
-[key configuration](migration-reference.md#machine-keys) for exact settings
+[key configuration](dev/migration-reference.md#machine-keys) for exact settings
 and limits when sharing keys with .NET Framework.
 
 ## Check your application
@@ -98,4 +98,4 @@ operations. The [example applications](../apps/) show concrete journeys.
 - For startup failures, use [Troubleshooting](troubleshooting.md).
 - For publishing, use [Build and publish](build-and-publish.md).
 - For containers or custom file locations, check the
-  [runtime storage settings](migration-reference.md#generated-output-codegen).
+  [runtime storage settings](dev/migration-reference.md#generated-output-codegen).

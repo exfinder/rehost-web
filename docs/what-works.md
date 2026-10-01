@@ -52,5 +52,5 @@ Dynamic Data, `EntityDataSource`, and legacy Mobile controls remain unassessed.
 A feature missing from this overview may be supported, limited, or untested.
 
 For a specific API or configuration setting, consult the
-[detailed compatibility reference](compatibility.md). It contains the exact
+[detailed compatibility reference](dev/compatibility.md). It contains the exact
 boundaries and test evidence behind this overview.

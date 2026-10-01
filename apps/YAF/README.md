@@ -69,6 +69,6 @@ Starting the same container again keeps the board and posts.
   are untested. Search is checked through its API; the browser search page is untested.
 
 [Development notes](DEVELOPMENT.md) cover dependencies, configuration, SQL Server
-setup, and automated checks. The [porting record](../../docs/provenance/yafnet.md)
+setup, and automated checks. The [porting record](../../docs/dev/provenance/yafnet.md)
 lists the source changes. For build or startup errors, see
 [Troubleshooting](../../docs/troubleshooting.md).

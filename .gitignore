@@ -14,7 +14,7 @@ artifacts/candidate/
 
 .DS_Store
 
-# Golden .NET Framework configuration, pulled locally; see docs/framework-config-reference.md
+# Golden .NET Framework configuration, pulled locally; see docs/dev/framework-config-reference.md
 third_party/microsoft/framework-config/
 
 # Oracle output awaiting review; only artifacts/golden/ is committed

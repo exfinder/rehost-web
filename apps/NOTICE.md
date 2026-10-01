@@ -3,7 +3,7 @@
 Every directory here is a third-party application kept to demonstrate
 migration. Each keeps its upstream license; the repository `LICENSE` (MIT)
 covers only the sidecar projects, shims and scripts this project wrote.
-Provenance detail lives in each app's `README.md` and `docs/provenance/`.
+Provenance detail lives in each app's `README.md` and `docs/dev/provenance/`.
 
 | App | Upstream | License | Third-party parts inside | Gaps |
 | --- | --- | --- | --- | --- |

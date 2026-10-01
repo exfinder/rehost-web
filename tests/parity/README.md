@@ -37,7 +37,7 @@ the Windows box.
 
 ## Golden lifecycle
 
-Regeneration is exceptional ([evidence strategy](../../docs/adr/0005-evidence-and-test-strategy.md)):
+Regeneration is exceptional ([evidence strategy](../../docs/dev/adr/0005-evidence-and-test-strategy.md)):
 new Framework evidence prefers captured fixtures or ad-hoc oracle readings.
 When a regeneration is warranted, on the Windows box
 ([eng/win-oracle.md](../../eng/win-oracle.md)):
@@ -49,4 +49,4 @@ Rehost.Web.Parity.OracleHost.exe generate --output artifacts\generated\sessions.
 Review the indented diff against `artifacts/golden/sessions.json`, promote by
 copy, and verify with the oracle's `verify --expected` plus both local gates.
 The golden is generated evidence — values are never hand-authored; mechanical
-reformatting is not authoring ([evidence strategy](../../docs/adr/0005-evidence-and-test-strategy.md)).
+reformatting is not authoring ([evidence strategy](../../docs/dev/adr/0005-evidence-and-test-strategy.md)).

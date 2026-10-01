@@ -61,7 +61,7 @@ def anchors(text):
 def main():
     errors = []
     anchor_cache = {}
-    allowed_state = {ROOT / "ROADMAP.md", ROOT / "docs/backlog.md"}
+    allowed_state = {ROOT / "ROADMAP.md", ROOT / "docs/dev/backlog.md"}
 
     for path in markdown_files():
         text = path.read_text(encoding="utf-8-sig")
@@ -88,10 +88,10 @@ def main():
                         f"{resolved.relative_to(ROOT)}"
                     )
 
-    backlog = (ROOT / "docs/backlog.md").read_text(encoding="utf-8")
-    for path in sorted((ROOT / "docs/follow-ups").glob("*.md")):
+    backlog = (ROOT / "docs/dev/backlog.md").read_text(encoding="utf-8")
+    for path in sorted((ROOT / "docs/dev/follow-ups").glob("*.md")):
         if path.name not in backlog:
-            errors.append(f"docs/backlog.md: missing follow-up {path.name}")
+            errors.append(f"docs/dev/backlog.md: missing follow-up {path.name}")
         text = path.read_text(encoding="utf-8-sig")
         if PROJECT_STATE.search(text):
             errors.append(f"{path.relative_to(ROOT)}: follow-up carries duplicate status")

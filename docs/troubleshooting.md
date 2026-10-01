@@ -58,7 +58,7 @@ replace the dependency or change the application path that uses it.
 
 Check whether a folder compiled at runtime was also compiled into your App
 assembly. `App_Code` is a common cause. See
-[source inclusion](migration-reference.md#preserved-source).
+[source inclusion](dev/migration-reference.md#preserved-source).
 
 Also remove an explicit `Microsoft.Web.Infrastructure` package reference:
 `Rehost.Web` already includes the same API. The
@@ -75,7 +75,7 @@ code 82.
 Fix the setting through `Web.Rehost.config`. Editing `rehost_root/web.config`
 directly loses the change on the next build. See
 [configuration changes](migration.md#configuration) and the
-[detailed compatibility reference](compatibility.md#configuration-and-iis-derived-behavior)
+[detailed compatibility reference](dev/compatibility.md#configuration-and-iis-derived-behavior)
 for individual settings.
 
 ## Application_Start fails
@@ -92,13 +92,13 @@ for restarts; it does not restart an AppDomain inside the same process.
 A `FileNotFoundException` naming `System.Web`, `System.Net.Http.WebRequest`,
 or a `System.Configuration` facade can come from a library built for .NET
 Framework. Check the library's runtime dependencies and
-[rebuild it if necessary](migration-reference.md#libraries-bound-to-systemweb).
+[rebuild it if necessary](dev/migration-reference.md#libraries-bound-to-systemweb).
 
 ## A page exists but returns 404
 
 Check the handlers and rewrite rules serving that URL. Your application may
 depend on a rule or handler the port does not honor. See the
-[configuration reference](compatibility.md#configuration-and-iis-derived-behavior).
+[configuration reference](dev/compatibility.md#configuration-and-iis-derived-behavior).
 
 ## Find the application's files
 
@@ -106,7 +106,7 @@ The startup log prints `Rehost physical root path` for the staged site and
 `Rehost compilation temp path` for generated assemblies.
 `AppContext.BaseDirectory` becomes the site root from the first Web Forms
 request; before then, it points at the host binaries. See
-[base-directory behavior](migration-reference.md#the-base-directory).
+[base-directory behavior](dev/migration-reference.md#the-base-directory).
 
 ## Check the stock Web Forms template
 

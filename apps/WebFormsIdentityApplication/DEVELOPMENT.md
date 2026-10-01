@@ -29,7 +29,7 @@ application's decisions.
 
 | `packages.config` | Here | Note |
 | --- | --- | --- |
-| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | Rehost counterpart | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/provenance/aspnet-katana.md) |
+| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | Rehost counterpart | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/dev/provenance/aspnet-katana.md) |
 | `Microsoft.Web.Infrastructure` 2.0 | dropped | Only Katana's `DynamicModuleUtility` dependency, and Katana 4.x calls `HttpApplication.RegisterModule` directly |
 | `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `Microsoft.AspNet.FriendlyUrls*`, `Microsoft.AspNet.ScriptManager.*` | Rehost counterparts | Same set as `WebFormsApplication` |
 | `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` | dropped | The runtime owns compiler selection; `<system.codedom>` is removed by XDT |
@@ -90,7 +90,7 @@ apps/WebFormsIdentityApplication/smoke.sh http://127.0.0.1:5082
 `smoke.sh` is bash + curl only — macOS, Linux, and Git bash on Windows all run
 it. It registers a per-run user, signs in and out, and asserts every row of the
 IIS Express baseline recorded in
-[the gaps document](../../docs/research/webforms-identity-application-gaps.md):
+[the gaps document](../../docs/dev/research/webforms-identity-application-gaps.md):
 status codes, the absolute `Location` of the challenge redirect, the
 `.AspNet.ApplicationCookie` set and later expired, the expired `.ASPXAUTH` that
 `LoginStatus` writes, and the page markers. Every row matches; there is no
@@ -127,4 +127,4 @@ the same way.
   none. The runtime stores keys per application, so sign-ins survive process
   restarts. Multiple instances need shared explicit or environment-supplied
   keys; see [machine-key setup](../../docs/migration.md#machine-keys) and
-  [ADR 0010](../../docs/adr/0010-machine-key-persistence.md).
+  [ADR 0010](../../docs/dev/adr/0010-machine-key-persistence.md).

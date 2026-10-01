@@ -4,7 +4,7 @@ Rehost.Web third-party notices
 The Rehost.Web packages contain source code, resources and one binary
 from the projects below. Each keeps its own license, reproduced after the
 table. Modifications to imported files are listed in the repository under
-docs/provenance/.
+docs/dev/provenance/.
 
 Component                     Upstream / pinned revision                         License      Ships in
 ----------------------------  -------------------------------------------------  -----------  -----------------------------------------
@@ -116,8 +116,8 @@ ASP.NET Web Optimization, Katana and ASP.NET Web Stack
 ------------------------------------------------------
 Copyright (c) Microsoft Corporation and .NET Foundation. All rights reserved.
 Licensed under the Apache License, Version 2.0. Modified files are listed in
-docs/provenance/aspnet-web-optimization.md, docs/provenance/aspnet-katana.md
-and docs/provenance/aspnet-webstack.md.
+docs/dev/provenance/aspnet-web-optimization.md, docs/dev/provenance/aspnet-katana.md
+and docs/dev/provenance/aspnet-webstack.md.
 
 
                                  Apache License

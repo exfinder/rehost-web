@@ -8,7 +8,7 @@ EcoQoS: confined to E-cores and frequency-clamped. Pinning a process at High QoS
 is a per-process attribute that is NOT inherited by children, so a build or test
 run has to have every descendant pinned individually as it appears.
 
-See docs/windows-host-cpu-throttling.md for the measurements and for the
+See docs/dev/windows-host-cpu-throttling.md for the measurements and for the
 machine-wide registry setting this pairs with.
 
 .EXAMPLE

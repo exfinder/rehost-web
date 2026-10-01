@@ -1,6 +1,6 @@
 namespace Rehost.Web.AspNetCore.Tests;
 
-// The structural reasons docs/writing-tests.md accepts for a private host process. Closed on
+// The structural reasons docs/dev/writing-tests.md accepts for a private host process. Closed on
 // purpose: a new reason is a doc amendment plus a member here, never ad-hoc prose.
 internal enum IsolationReason
 {

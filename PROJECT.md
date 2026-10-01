@@ -46,7 +46,7 @@ strong-named assembly.
   source checkout.
 
 Current support claims and evidence live only in
-[`docs/compatibility.md`](docs/compatibility.md).
+[`docs/dev/compatibility.md`](docs/dev/compatibility.md).
 
 ## Engineering principles
 
@@ -72,7 +72,7 @@ Use, in order:
 5. Mono and earlier prototypes only as design evidence.
 
 Source revisions, licenses, and transformations live under
-[`docs/provenance`](docs/provenance/). Imported source stays unchanged where
+[`docs/dev/provenance`](docs/dev/provenance/). Imported source stays unchanged where
 practical. A shipped 4.8.1 binary reading overrides an older published-source
 snapshot when they measurably disagree.
 
@@ -80,7 +80,7 @@ snapshot when they measurably disagree.
 
 [`ROADMAP.md`](ROADMAP.md) owns milestones and priority. The project advances by
 running increasingly representative applications, not by pursuing abstract API
-completeness. [`docs/backlog.md`](docs/backlog.md) preserves all unresolved work.
+completeness. [`docs/dev/backlog.md`](docs/dev/backlog.md) preserves all unresolved work.
 
 ## Documentation
 
@@ -88,4 +88,4 @@ Code and tests are canonical for mechanics. Documentation keeps current
 contracts, non-obvious rationale, compatibility boundaries, authoritative
 evidence, and unresolved work. Git keeps chronology.
 
-Start at [`docs/README.md`](docs/README.md).
+Start at [Contributor documentation](docs/dev/README.md).

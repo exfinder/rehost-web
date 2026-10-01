@@ -1,5 +1,5 @@
 # A postback captured from a .NET Framework 4.8.1 node, replayed against this port to prove a
-# load-balanced farm may span both. See docs/follow-ups/mixed-farm-incremental-migration.md.
+# load-balanced farm may span both. See docs/dev/follow-ups/mixed-farm-incremental-migration.md.
 #
 # Runtime:   .NET Framework 4.8.1, release key 533509 (Windows Server 2025, x64)
 # Activated: System.Web.Hosting.ApplicationManager.CreateObject
