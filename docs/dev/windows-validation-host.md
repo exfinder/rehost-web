@@ -1,6 +1,6 @@
 # Windows validation host
 
-Operational snapshot last recorded 2026-08-22. Verify host address, image,
+Verify host address, image,
 tools, and credentials before relying on them; none is a support claim.
 
 Windows x64 validation runs on `winbox` (an ssh alias for `sshuser@<host>`, defined
@@ -16,8 +16,7 @@ minutes where a native one costs seconds.
 Under Git bash, run the `smoke.sh` and `install.sh` scripts with
 `MSYS2_ARG_CONV_EXCL='__'`: MSYS rewrites an argument that starts with `/` into a
 Windows path, and a `__VIEWSTATE` that happens to start with `/` then reaches the
-server as `C:/Program Files/Git/...` (seen 2026-09-23, YAF delete step, one run
-in two). `MSYS_NO_PATHCONV=1` is not a substitute: it also leaves the scripts'
+server as `C:/Program Files/Git/...`. `MSYS_NO_PATHCONV=1` is not a substitute: it also leaves the scripts'
 `mktemp` paths unconverted, and Git's Windows `curl` cannot write to them.
 Linux x64 runs on GitHub Actions
 ([`linux-x64.yml`](../../.github/workflows/linux-x64.yml)) on every push to `main`:
@@ -75,12 +74,11 @@ tree. Do not add `-x`: ignored `obj/`, `bin/`, and package caches must survive.
 
 ## Build cache
 
-Never `git clean -xdf` on the host. Measured 88s cold vs. 6.8s warm — keeping
+Never `git clean -xdf` on the host. Keeping
 `obj/`, `bin/`, and the NuGet cache between rounds is the entire speed win.
 
-Run the remote build and test through `eng/Invoke-Unthrottled.ps1`, or the round
-takes about 60s instead of 15s. Windows throttles SSH-launched processes; the
-mechanism and the host setup it depends on are in
+Run remote build and test through `eng/Invoke-Unthrottled.ps1` when Windows QoS
+throttles SSH processes; the mechanism and required host setup are in
 [windows-host-cpu-throttling.md](windows-host-cpu-throttling.md).
 
 A failed remote build leaves the previous binaries in place, and
@@ -161,9 +159,4 @@ The rig's sources are committed at [`eng/wire-rig`](../../eng/wire-rig)
 the `Web-Server`/`Web-Asp-Net45` features if absent and creates the `WireRig`
 IIS site on port 8099), `read.ps1 -Path '/page.aspx?...'` (raw capture,
 printed ISO-8859-1). Add stimuli by editing the probe pages and re-reading;
-record the result near the consuming contract or portability-ledger row.
-
-Probe before coding an assumption about IIS: readings have repeatedly
-contradicted beliefs already written down — `remove`-of-absent is tolerated
-where a draft had coded it strict (C2), and IIS omits `Last-Modified` on
-304s where the obvious shape re-sends it.
+encode the result in a fixture or test and update the current contract if needed.

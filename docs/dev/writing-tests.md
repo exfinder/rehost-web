@@ -7,16 +7,12 @@ is [the evidence and test ADR](adr/0005-evidence-and-test-strategy.md).
 
 Walk down; stop at the first rung that fits.
 
-0. **No standing test.** When the behavior is decided by untouched Reference
-   Source and its path runs entirely over substrate already exercised on all
-   supported platforms — no first reach of a platform-sensitive leaf (registry, native
-   interop, filesystem semantics, crypto, culture/NLS) — the default evidence
-   is a recorded measurement (a Framework reading and/or one-off exploration)
-   plus a compatibility-map entry. "Untouched" alone is not the guarantee;
-   untouched imported code failed hard early on precisely at such leaves, and
-   first reach of one is the ledger rule's territory: a row plus a focused
-   test on the platform that triggers it. A standing test below this rung
-   must name the port-owned seam it guards.
+0. **Reuse existing coverage.** Untouched imported behavior over substrate already
+   exercised on every supported platform may rely on that coverage and the current
+   compatibility boundary. First reach of registry, native interop, filesystem,
+   crypto or culture behavior requires a focused test on the triggering platform.
+   An additional test must guard a meaningful seam; keep evidence in tests rather
+   than separate reading tables or inventories.
 1. **Plain unit test** — the default. Lives in the folder mirroring the source
    it covers (`tests/Rehost.Web.Tests/<mirrored path>/`), uses a
    disposable temp directory if it touches disk, spawns nothing.
@@ -68,14 +64,13 @@ response.Text.ShouldContain("...");
   the deterministic client (no redirects, no cookies, exact HTTP/1.1).
 - Evidence recording must never be able to fail the request being observed:
   a probe that throws from its own recording turns the evidence channel into
-  the failure (the lost-reset post-mortem).
+  the failure.
 - Assertion hierarchy: the typed response first; server-side facts through a
   traced request — `scenario.TracedGetAsync(this, …)` returns the response
   together with its stage stream and throws on an empty one, so a stage
   negative cannot pass vacuously — or, on markers whose base class grants the
   whole-process witness, `scenario.Witness`. Nothing may poll the trace
-  file for assertions — a polled shared file once lost an abort marker to
-  Windows sharing semantics. Raw trace strings never appear in tests —
+  file for assertions; Windows sharing can drop a marker observed through polling. Raw trace strings never appear in tests —
   string negatives over a trace can pass vacuously.
 - Tests spawn at most one level of child processes, and only because a child
   is one application activation. Orchestration stays in the test process.
@@ -88,18 +83,15 @@ response.Text.ShouldContain("...");
 - A test that a stub implementation would also satisfy is not covering the
   behavior. Know what the test looks like when it fails, and prefer inputs
   that fail when the implementation degrades.
-- A cache in front of the seam can answer for a removed implementation: the
-  P57 case-folding test passed with the resolver hook deleted because the
-  build cache's case-insensitive key served any casing once one compiled.
-  Arrange a cache miss (request the wrongly-cased path first), and verify a
-  new test by mutation — stash the implementation out and watch it fail.
+- A cache can answer for a removed seam. Arrange a miss first (for case folding,
+  request the wrongly-cased path before warming compilation), then mutate the
+  implementation to verify the test fails.
 - Shouldly's string `ShouldContain`, `ShouldStartWith` and `ShouldEndWith`
   compare case-insensitively unless the call passes `Case.Sensitive`;
   `ShouldBe` and the collection overloads do not. Pass `Case.Sensitive`
   wherever casing carries the claim: markup and control ids, wire header
   text, `Boolean.ToString()`, encoded values, paths on a case-sensitive
-  volume. A response filter test once asserted its own output was not
-  upper-cased and could not fail. Where the whole value is known, prefer
+  volume. Where the whole value is known, prefer
   `ShouldBe`, which is exact and also catches extra content. The negative
   form is the other way round: `ShouldNotContain` is stricter while it stays
   insensitive, so leave it alone.

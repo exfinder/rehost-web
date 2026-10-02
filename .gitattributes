@@ -4,8 +4,6 @@
 # validation host has core.autocrlf=true at system level, so an unpinned .aspx
 # would render CRLF there and LF on macOS.
 
-# Verbatim imports are hash- and tree-verified against upstream; converting line
-# endings would break docs/dev/provenance/*.json.
 third_party/** -text
 src/System.Web.ReferenceSource/** -text
 apps/YAF/yafsrc/** -text

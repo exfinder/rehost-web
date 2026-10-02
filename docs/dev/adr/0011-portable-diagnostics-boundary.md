@@ -4,10 +4,7 @@ Framework runtime diagnostics end in Windows-only sinks: unhandled and
 swallowed errors go through `webengine4.dll` to the Windows Event Log, health
 monitoring delivers request errors and failure audits to the Event Log by
 default, and request tracing is IIS ETW. None of those exists in the port, so
-raised events were classified and delivered nowhere, and a first-request
-failure could be invisible in the place a modern operator looks — the host's
-log pipeline. Evidence and the options survey live in
-[the research note](../research/portable-request-diagnostics-alternatives.md).
+diagnostics must reach the modern host's log pipeline through portable channels.
 
 The decision: diagnostics leave the runtime through one choke point,
 `RehostWebEventSource`, which publishes every event on two channels —
@@ -31,8 +28,8 @@ failure loses the report, never the request.
 
 Everything logs under one category, `Rehost.Web`, which is also
 the `EventSource` name, so a single `Logging:LogLevel` entry filters the whole
-runtime. A payload reshape carries an `[Event]` `Version` bump; event 2 became
-`(site, swallowed, context)` at version 2.
+runtime. Payload reshapes increment `[Event]` `Version`; swallowed-exception
+events carry `(site, swallowed, context)`.
 
 `WebBaseEvent.RaiseRuntimeError` writes to the choke point above the
 `healthMonitoring` gate, so request errors are delivered whether or not an

@@ -48,9 +48,9 @@ packages from outside the checkout, the way a consumer meets them.
   reading from .NET Framework 4.8.1 or IIS decides, and the change names it.
   Uncertain behavior is recorded in [docs/dev/backlog.md](docs/dev/backlog.md), not
   shipped as partial support.
-- **Provenance for imported code.** Reference Source and other imported trees
-  stay unchanged where practical; a needed edit is surgical and gets a row in
-  [docs/dev/provenance/](docs/dev/provenance/).
+- **Imported source.** Keep needed edits surgical. Update the
+  [source table](docs/dev/sources.md) only when importing or upgrading source;
+  preserve upstream licenses and notices.
 - **Platform rounds.** A change validates on the current platform. A change to
   platform-dependent runtime logic passes on Windows x64, Linux and macOS arm64
   before it is done; [docs/dev/cross-platform-validation.md](docs/dev/cross-platform-validation.md)

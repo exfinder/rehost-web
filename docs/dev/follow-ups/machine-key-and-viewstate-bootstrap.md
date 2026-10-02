@@ -1,7 +1,7 @@
 # Machine key and ViewState bootstrap
 
 The portable Framework-4.5+ algorithms and literal-key interoperability are
-settled (ledger P15/P40/P48). Auto-generated keys now persist per application
+settled. Auto-generated keys now persist per application
 ([ADR 0010](../adr/0010-machine-key-persistence.md)): restart on one machine
 keeps ViewState, Forms Authentication, and Katana cookies valid, and containers
 or farms supply explicit keys through the `REHOST_MACHINEKEY_*`
@@ -11,7 +11,7 @@ environment variables or `<machineKey>`.
 
 `,IsolateApps` and `,IsolateByAppId` overwrite key bytes (legacy path) or add
 derivation purposes (4.5 path) from an application hash. Framework and this
-runtime deliberately use different stable hash algorithms (ledger P38/P48), so
+runtime deliberately use different stable hash algorithms, so
 even identical literal keys with either suffix cannot interoperate.
 Mixed-runtime deployments must use bare keys.
 

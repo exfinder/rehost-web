@@ -14,4 +14,3 @@ System.Web does not use them and modern .NET cannot enforce CAS.
 
 Implementation:
 `src/Rehost.Web/Compatibility/Configuration/SmtpSection.cs`.
-Tests: `tests/Rehost.Web.Tests/SmtpSectionTests.cs`.

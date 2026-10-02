@@ -1,20 +1,15 @@
-# Golden Framework configuration reference
+# Framework configuration reference
 
-The pinned .NET Framework 4.8.1 configuration files, kept locally as the
-comparison baseline for portable configuration work. They are the authority for
-what a Framework application inherits before its own `web.config` is read.
-
-Not committed: `third_party/microsoft/framework-config/` is git-ignored, because
-these are verbatim Microsoft files. Pulled 2026-07-29 from
-`C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config` on the `winbox`
-validation host — Framework release `533509`, `clr.dll` `4.8.9337.0`. 37 files,
-640 KB, including `Browsers/`.
+Framework configuration supplies inherited defaults for portable configuration
+work. Local comparison files under `third_party/microsoft/framework-config` are
+ignored; obtain them from a Framework 4.8.1 installation's
+`Windows/Microsoft.NET/Framework64/v4.0.30319/Config` directory.
 
 ## What each file answers
 
 `web.config.default` is the important one. The ASP.NET defaults live in the root
 web configuration, not in `machine.config`; `machine.config` only declares the
-section handlers. It supplies the golden `<compilation>` element — the
+section handlers. It supplies the inherited `<compilation>` element — the
 `<assemblies>` list an application inherits, `<buildProviders>`, and the
 `<system.codedom><compilers>` entries with their `warningLevel` and
 `providerOption` values.
@@ -23,8 +18,7 @@ section handlers. It supplies the golden `<compilation>` element — the
 every attribute, including those absent from the config itself. They are the only
 written source for defaults that exist solely in Framework code.
 
-`DefaultWsdlHelpGenerator.aspx` is a real, Microsoft-authored 70 KB page. It is a
-useful compilation input once dynamic page compilation exists.
+`DefaultWsdlHelpGenerator.aspx` supplies the ASMX documentation page.
 
 `web_*trust.config` and `legacy.web_*trust.config` are the named trust policy
 files referenced by `<trustLevel>`. `Browsers/*.browser` are the browser
@@ -32,15 +26,8 @@ capability definitions behind `<browserCaps>`.
 
 ## Prefer the `.default` copies
 
-Microsoft ships each config beside a pristine `.default`. Installers mutate the
-live file; the `.default` is what shipped. On this host only `machine.config` and
-`web.config` differ from their `.default` — every trust policy file is identical.
-
-The live `web.config` differs substantively: Visual Studio appended
-`Microsoft.VisualStudio.Web.PageInspector.Loader` *after* `<add assembly="*"/>`
-inside `<assemblies>`, and added `Microsoft.VisualStudio.Enterprise.AspNetHelper`
-to `<partialTrustVisibleAssemblies>`. Reading the live file would import a local
-Visual Studio installation into the port's baseline. **Derive from `.default`.**
+Use pristine `.default` files. Installers and Visual Studio can add local assembly
+registrations to live configuration; those must not become portable defaults.
 
 ## Re-pulling
 

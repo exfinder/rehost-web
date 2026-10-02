@@ -1,10 +1,10 @@
 # Response buffer ownership and zero-copy send
 
-Ledger P28 records the current safe contract:
+The current safe contract:
 `HttpResponseManagedBufferElement` accumulates in a rented array, then hands
 the worker request an exact-size copy. The rented array never escapes, so no
 adapter or transport owns its lifetime. Streaming, long file send, and
-WebSockets are independently supported by ledger P78-P80.
+WebSockets are independently supported.
 
 Framework avoided this copy through native pooled buffers with explicit retain
 and release. The managed `byte[]` worker-request API carries no lease, so a

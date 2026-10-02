@@ -1,7 +1,8 @@
 # Code style
 
 Rules for authored C#. Imported Reference Source keeps its original shape;
-see [`provenance/`](provenance/).
+see [imported sources](sources.md). Keep portability edits surgical; the source
+table changes only on imports or upgrades.
 
 Comment rules are in [`code-comments.md`](code-comments.md); test-authoring
 rules are in [`writing-tests.md`](writing-tests.md).

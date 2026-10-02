@@ -16,10 +16,10 @@ remains a frozen regression gate. Prefer captured fixtures or ad-hoc
 Framework readings for new evidence; do not create a golden session merely
 because a new feature renders output.
 
-Untouched imported behavior over already-exercised portable substrate may use a
-recorded measurement plus the compatibility map. First reach of a
-platform-sensitive leaf requires a portability-ledger row and a focused test on
-the platform that triggers it.
+Tests provide executable evidence; compatibility records current support
+boundaries. First reach of a platform-sensitive leaf requires a focused test on
+the platform that triggers it. Historical measurements and test inventories do
+not need separate documentation.
 
 ## Consequences
 

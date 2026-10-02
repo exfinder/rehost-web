@@ -34,7 +34,7 @@ segments. The compilation temp directory is normalized without a trailing
 separator and must not name a file.
 
 Bootstrap does not resolve symlinks or establish descendant containment; the
-adapter does, per [filesystem semantics](filesystem-semantics.md) (ledger P72).
+adapter does, per [filesystem semantics](filesystem-semantics.md).
 
 ## One-shot state and publication
 
@@ -80,8 +80,8 @@ default state of these files and needs no annotation; a *deviation* is what
 carries a reason, in the file where it is not self-evident — `<browserCaps>`
 substituting `HttpCapabilitiesBase` for the absent `MobileCapabilities` is the
 worked example. Assembly-identity and portability deltas are inventoried in
-[dependency decisions](dependency-decisions.md) and the
-[portability ledger](portability-ledger.md).
+[dependency decisions](dependency-decisions.md) and
+[compatibility](compatibility.md).
 
 ## Activation and shutdown
 
@@ -93,8 +93,9 @@ mapped configuration, initializes `HttpRuntime`, and creates the registered
 dispatcher. The same request then enters `HttpRuntime.ProcessRequest`.
 
 Host shutdown stops the registered dispatcher, requests application shutdown,
-and closes `ApplicationManager`. No runtime-originated host-stop notification
-is currently wired.
+and closes `ApplicationManager`. Runtime-originated restart requests set exit
+code 82 and stop the host through its registered callback; a supervisor owns
+process replacement. See [runtime restart](adr/0012-runtime-initiated-restart.md).
 
 ## Portability boundary
 

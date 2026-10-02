@@ -1,73 +1,33 @@
 # Runtime-initiated restart
 
-.NET Framework answers a runtime-initiated shutdown by unloading the AppDomain
-and building a new one in the same worker process: an initialization failure,
-a configuration or content change, and `HttpRuntime.UnloadAppDomain()` all end
-there. Modern .NET cannot unload the current AppDomain, and this runtime keeps
-one application per process, so the rebuild has no in-process form.
+## Decision and rationale
 
-Measured on winbox (IIS 10, .NET Framework 4.8, 2026-08-30). Integrated mode
-latches a failing `Application_Start` in `HttpRuntime.InitializationException`
-for the life of the AppDomain, replays that 500 on every request, unloads the
-domain on a hardcoded 10-second timer, and re-runs `Application_Start` in the
-domain the next request builds — so a fault the operator clears is gone on the
-next retry. Classic mode fails only the first request and then serves the rest
-of the process on partial initialization, with no second `Application_Start`.
+One application runs per process, and modern .NET cannot unload its current
+AppDomain. Runtime shutdown therefore requests exit code
+RehostWebExitCodes.RestartRequested (82); a supervisor starts the replacement.
+Application_Start failure follows integrated semantics: latch the error, replay
+500 throughout the unchanged ten-second window and rerun start in the next process.
+Classic partial-initialization continuation is unacceptable.
 
-## Decision
+The app-start post-lock check runs on every call, including requests that passed
+FirstRequestInit before a slow start failed. Otherwise waiters can miss the latch
+and enter a partially initialized application.
 
-A shutdown the runtime initiates ends the process with exit code
-`RehostWebExitCodes.RestartRequested` (82), and the supervisor's replacement
-process is the rebuilt application. The port takes the integrated-mode
-contract for `Application_Start`: the failure latches, every request inside
-the window replays it, and Classic's partial-init continue is not reproduced.
-Requests already in flight when a slow start fails also receive the latched
-failure, as integrated requests do at their `BeginRequest` gate. Classic
-places `Application_Start` after the per-request `FirstRequestInit` gate, so
-a request can pass that gate before the latch exists and reach app start
-after it, whether parked on the lock or past the `_appOnStartCalled` fast
-path; the post-lock check therefore runs on every call into
-`EnsureAppStartCalled`, not only on the calls that entered the guard
-(measured: all integrated waiters get the failure. A self-referential
-customErrors page caps at 302 → 500 via the `aspxerrorpath` guard only when
-`defaultRedirect` carries no query string; a query-carrying `defaultRedirect`
-never receives the marker the guard keys on and loops unboundedly —
-identically on IIS integrated and the port, app healthy or not, since
-`HttpResponse.RedirectToErrorPage` is inherited unmodified).
+Initiation direction, not shutdown cause, determines the exit code. A dispatcher
+Stop caused by the runtime requests restart; a host that already claimed teardown
+leaves the exit code alone so normal SIGTERM does not trigger failure restart.
 
-The direction of initiation decides, not the cause. `ClassicPipelineDispatcher`
-registers itself with the hosting environment, as `ISAPIRuntime` does, so a
-runtime-initiated shutdown reaches its `Stop`; `ClassicPipelineActivation`
-classifies that `Stop` by whether the host's `ApplicationStopping` had already
-claimed the teardown. A host-initiated stop — SIGTERM, `StopApplication` —
-leaves the exit code alone, or every clean shutdown would read as a failure
-under `Restart=on-failure`.
-
-Exit is cooperative: the callback sets `Environment.ExitCode` and calls
-`IHostApplicationLifetime.StopApplication()`. No `Environment.Exit`, no
-watchdog; the host's own `ShutdownTimeout` bounds the drain. One code covers
-every cause, with the cause carried in the diagnostics channel and
-`ApplicationShutdownReason`, because a supervisor's response to all of them is
-the same. Framework's 10-second latch window is untouched: shortening it would
-change how many requests see the failure, which is application-visible.
+The callback sets Environment.ExitCode and calls StopApplication. It never forces
+Environment.Exit. Host ShutdownTimeout bounds drain; diagnostics and
+ApplicationShutdownReason carry cause, while all restart causes share one code.
 
 ## Consequences
 
-- Restart policy and backoff belong to the supervisor (systemd, Kubernetes,
-  a process manager), which the port cannot express in-process.
-- The rebuild is eager: the replacement process activates on its first
-  request, where Framework rebuilds lazily inside the surviving worker
-  process.
-- In-flight requests drain. `StopApplication()` starts the host's graceful
-  stop, which lets running requests finish up to `HostOptions.ShutdownTimeout`
-  before the process exits. Measured on macOS: a five-second request started
-  before `HttpRuntime.UnloadAppDomain()` answered 200 after the unload, and the
-  host then exited 82. New connections are the gap. The port refuses them
-  from the start of the drain until the replacement process listens, where
-  Framework handed them to the new AppDomain while the old one drained.
-- Two fenced deviations in imported source carry this: the latch in
-  `HttpApplicationFactory.EnsureAppStartCalled` and the replay in
-  `HttpRuntime.EnsureFirstRequestInit`, the latter standing in for the native
-  module integrated mode registers for the same replay.
-- Configuration-change and file-change shutdowns ride the same seam and are
-  untested; they are in the [backlog](../backlog.md).
+- The supervisor owns restart/backoff policy and replacement process startup.
+- In-flight requests drain to the host deadline. New connections are refused
+  until the replacement listens; Framework could hand them to a new AppDomain
+  while the old one drained.
+- Managed latch/replay stand in for integrated native failure replay without
+  changing the classic execution engine.
+- Configuration/file-change causes need validation and detection work in
+  [configuration reload](../follow-ups/configuration-reload-and-process-restart.md).

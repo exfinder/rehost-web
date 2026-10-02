@@ -10,6 +10,13 @@ Runtime public APIs expose concrete legacy `System.Data.SqlClient` types.
 may coexist, but provider identity or adapter changes require an ADR and
 differential tests.
 
+## Web Optimization dependencies
+
+The Optimization project explicitly references `Antlr` and `Newtonsoft.Json` to
+override WebGrease's older transitive versions. Its C# sources do not use these
+packages directly; keep the references so dependency cleanup cannot undo the
+servicing overrides.
+
 ## CodeDOM and MSBuild
 
 System.Web runtime compilation uses `System.CodeDom` and executes MSBuild task
@@ -106,3 +113,12 @@ runtime-owned sink abstraction. See
 The full `Microsoft.Extensions.Logging` implementation and any provider
 packages stay host-side; the runtime holds an `ILoggerFactory` handed in at
 initialization or attached by the adapter afterwards, never a container.
+
+## API replacements
+
+Friendly URLs and Microsoft.Web.Infrastructure are authored replacements, not
+source imports. Use public API metadata/documentation and targeted Framework
+behavior checks; upstream/decompiled method bodies are not implementation inputs.
+Friendly URLs keeps its original namespaces and resolver caching modes; the
+application owns the former meta-package's content. Framework routing-module
+registration stays runtime-owned, while Friendly URLs owns its routes.

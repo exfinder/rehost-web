@@ -4,8 +4,7 @@ System.Web restores two internal build/runtime contracts:
 
 - `SYSTEM_WEB`, selecting the original shared `LocalizableString.cs` branch;
 - `System.Resources.Tools.StronglyTypedResourceBuilder`, adapted from
-  `dotnet/msbuild` commit
-  `39950c6284e1fe6e68890e3655ea7704b42e6a32`.
+  dotnet/msbuild; identity and license are in [sources](sources.md).
 
 The builder is checked-in source, not a generator. It retains only the
 `IDictionary` path used by `BaseResourcesBuildProvider`, Framework identifier
@@ -18,7 +17,5 @@ The type remains internal and cross-platform. Existing
 
 Implementation:
 `src/Rehost.Web/Compatibility/Resources/StronglyTypedResourceBuilder.cs`.
-Tests:
-`tests/Rehost.Web.Tests/StronglyTypedResourceBuilderTests.cs`.
 Remaining oracle/provider work:
 [generated resources](follow-ups/generated-resource-compatibility.md).

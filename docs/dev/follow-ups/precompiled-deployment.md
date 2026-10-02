@@ -4,16 +4,11 @@ This records what exists, the shape of the work, and the decisions it needs.
 
 ## Motivation
 
-With Roslyn prejitted and a `PublishReadyToRun` publish, the sample
-application's first request measures ~600 ms against an empty codegen root and
-~150 ms against a warm one (historical local measurement).
-The remaining ~450 ms is real page compilation, paid on every process start —
-and process replacement is the restart model. Framework's answer was
-`aspnet_compiler`: compile at deployment time, serve from precompiled
-assemblies, never invoke the compiler in production. A fully precompiled
-non-updatable site also needs no page sources deployed and, in principle, no
-Roslyn in the publish at all (~30 MB of R2R images plus the compile
-infrastructure).
+Cold or invalidated codegen caches require page compilation even with ReadyToRun
+binaries. Unchanged applications can reuse persisted page assemblies across
+process replacement.
+A precompiled site can serve assemblies without invoking Roslyn at runtime and,
+for a non-updatable layout, omit page sources and compiler deployment.
 
 ## What the imported source already has
 

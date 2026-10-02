@@ -18,7 +18,7 @@ state.
 - `FileChangesMonitor`'s six `UrlPath.IsAbsolutePhysicalPath(alias)` checks
   (past today's `IsFCNDisabled` return) refuse every Unix-rooted alias with
   `E_INVALIDARG`; enabling notification needs a rooted-path test there
-  (ledger P71).
+.
 
 ## Done when
 

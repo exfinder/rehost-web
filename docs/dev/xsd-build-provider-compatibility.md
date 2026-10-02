@@ -13,4 +13,3 @@ typed DataSets enter the supported profile.
 
 Implementation:
 `src/Rehost.Web/Compatibility/Compilation/XsdBuildProvider.cs`.
-Tests: `tests/Rehost.Web.Tests/XsdBuildProviderTests.cs`.

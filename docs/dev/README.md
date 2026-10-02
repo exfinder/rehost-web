@@ -2,17 +2,18 @@
 
 [User guides](../README.md) · [Contributing](../../CONTRIBUTING.md)
 
-Read [PROJECT.md](../../PROJECT.md), then
-[ROADMAP.md](../../ROADMAP.md).
+Read [PROJECT.md](../../PROJECT.md), then [ROADMAP.md](../../ROADMAP.md).
+
+Internal docs keep current contracts, boundaries, architectural rationale and
+unresolved work. Code owns mechanics; tests provide evidence. Consumer guides
+and app READMEs intentionally offer simpler summaries. Git retains history.
 
 ## Project references
 
 - [Detailed compatibility reference](compatibility.md)
 - [Migration reference](migration-reference.md)
-- [Completed milestones](milestones.md)
 - [Unresolved work](backlog.md)
 - [Release notes](releases/0.1.0-alpha.1.md)
-- [Reached portability edges](portability-ledger.md)
 - [Shared terminology](../../CONTEXT.md)
 
 ## Runtime contracts
@@ -39,11 +40,10 @@ Read [PROJECT.md](../../PROJECT.md), then
   [Windows administration](windows-administration-compatibility.md)
 - [Filesystem semantics](filesystem-semantics.md)
 
-## Decisions and evidence
+## Decisions and sources
 
 - [Current architecture decisions](adr/README.md)
-- [Background research](research/README.md)
-- [Source and transformation records](provenance/)
+- [Imported sources](sources.md)
 - [Framework configuration reference](framework-config-reference.md)
 - [IIS configuration reference](iis-config-reference.md)
 

@@ -1,28 +1,21 @@
 # IIS-role behaviors
 
-Kestrel replaces IIS behavior that lived outside System.Web. Delivered pieces
-are recorded in the portability ledger; this file tracks only remaining IIS
-request-tier gaps.
+Kestrel replaces IIS behavior outside System.Web. Current support lives in
+[compatibility](../compatibility.md); configuration scope belongs to
+[IIS configuration tenants](iis-integration-plan.md).
 
-## Open audit
+## Open contract
 
-- Request filtering beyond hidden segments and file extensions: double
-  escaping, URL/query limits, verb rules, high-bit characters, and
-  `maxAllowedContentLength` interaction with `maxRequestLength`.
-- Wire-only canonicalization differences: malformed static names, raw
-  non-ASCII or `#`, and static trailing separators. Both hosts refuse these,
-  but status/substatus differs; readings are in
-  [URL canonicalization](../research/iis-url-canonicalization-readings.md).
-- `httpErrors` versus `customErrors` ownership for failures before System.Web:
-  closed by the `httpErrors` tenant (ledger P104); `customErrors` converts
-  exceptions alone, every other status is the section's.
-- Compression ownership and the `TransmitFile`/static-file bypass when the
-  host adds ASP.NET Core response compression.
-- Explicitly classify Windows/anonymous authentication beyond current support,
-  W3C logging, IIS kernel/output caching, ISAPI filters, directory browsing,
-  and application warm-up.
+- Filtering switches beyond delivered extension, segment, URL/query, verb and
+  declared-content-length limits: double escaping and high-bit characters.
+- Wire canonicalization of malformed static names, raw non-ASCII or `#`, and
+  trailing separators: both hosts refuse these shapes but status/substatus differs.
+- Compression ownership and `TransmitFile`/static-file bypass when a host adds
+  ASP.NET Core response compression.
+- Explicit Windows/anonymous authentication, W3C logging, kernel/output caching,
+  ISAPI filters, directory browsing and warm-up boundaries.
 
 ## Done when
 
-Every default IIS request-path contribution is either supported with evidence
-or named as an exclusion in the compatibility map.
+Every reached IIS request-path behavior has an explicit support boundary or
+exclusion, with executable tests for supported behavior.

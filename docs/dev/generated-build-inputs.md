@@ -19,8 +19,7 @@ src/Rehost.Web/obj/<Configuration>/net10.0/generated/System.Web/
 | `regular-expressions.json` | `RegularExpressions.g.cs` |
 | `assembly-identities.json` | checked-in `AssemblyRef` constants |
 
-Machine-readable source, hash, license, and transformation records:
-[`provenance/generated-build-inputs.json`](provenance/generated-build-inputs.json).
+Imported input revisions and licenses are in [sources](sources.md).
 
 ## Identity constraints
 

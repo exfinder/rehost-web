@@ -1,11 +1,9 @@
 # Web Services scope
 
-The T1–T3 + script-services port planned here landed 2026-08-21 (see
-[web-services-compatibility](../web-services-compatibility.md) for the shipped
-profile and [system-web-services-portability](../research/system-web-services-portability.md)
-for the analysis that grounded it). What remains is deliberate backlog:
+Current profile is in [Web Services compatibility](../web-services-compatibility.md).
+Remaining decisions:
 
-- **T4 — WSDL→proxy generation** (`ServiceDescriptionImporter`, the `.wsdl`
+- **WSDL→proxy generation** (`ServiceDescriptionImporter`, the `.wsdl`
   build provider, `App_WebReferences`, encoded `?wsdl`). Blocked on eleven
   `System.Xml.Serialization` code-export APIs cut from modern .NET. Restoring
   it means vendoring an importer/exporter slice of the serialization stack
@@ -24,6 +22,8 @@ for the analysis that grounded it). What remains is deliberate backlog:
   name — other configuration sections, `.discomap` files — still resolves
   against the Framework identity and fails; decide when a real application
   carries such strings.
-- **rpc/encoded fixtures** — serving encoded requests was probe-verified in
-  the research; no standing scenario exercises it, and encoded `?wsdl`
+- **rpc/encoded fixtures** — no standing scenario exercises encoded requests, and encoded `?wsdl`
   fail-fast has no test.
+
+- **Shared-state safety** — assess cached-WSDL synchronization, static hash use
+  and discovery serializer overrides before widening concurrency claims.

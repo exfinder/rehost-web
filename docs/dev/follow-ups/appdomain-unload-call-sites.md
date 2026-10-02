@@ -23,7 +23,7 @@ it. Other live `ProcessHost` references prevent deleting the file wholesale.
 
 ## Proposed treatment
 
-Ledger treatment **unsupported**. Wrap the member body in `#if NETFRAMEWORK`,
+Treatment: **unsupported**. Wrap the member body in `#if NETFRAMEWORK`,
 with `#else` throwing `CurrentAppDomainHosting.SecondaryAppDomainsUnsupported()`,
 matching the precedent already set for `CreateObjectInNewWorkerAppDomain` at
 `ApplicationManager.cs:836`. Then drop `SYSLIB0024` from `NoWarn`.

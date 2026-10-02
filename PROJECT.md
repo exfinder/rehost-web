@@ -71,10 +71,10 @@ Use, in order:
 4. Current official .NET sources for modern implementation patterns.
 5. Mono and earlier prototypes only as design evidence.
 
-Source revisions, licenses, and transformations live under
-[`docs/dev/provenance`](docs/dev/provenance/). Imported source stays unchanged where
-practical. A shipped 4.8.1 binary reading overrides an older published-source
-snapshot when they measurably disagree.
+Imported source revisions and licenses live in
+[`docs/dev/sources.md`](docs/dev/sources.md), updated only on imports or upgrades.
+Imported source stays unchanged where practical. A shipped 4.8.1 binary reading
+overrides an older published-source snapshot when they measurably disagree.
 
 ## Direction
 

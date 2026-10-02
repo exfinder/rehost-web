@@ -48,7 +48,8 @@ Authorities:
 - [Unavailable .NET Framework technologies](https://learn.microsoft.com/dotnet/core/porting/net-framework-tech-unavailable)
 - [Modern `AppDomain` source](https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/AppDomain.cs)
 - [CAS diagnostic SYSLIB0003](https://learn.microsoft.com/dotnet/fundamentals/syslib-diagnostics/syslib0003)
-- [Reference Source provenance](provenance/reference-source.json)
+- [Imported sources](sources.md)
 
-Shutdown/restart remains open:
+Runtime restart signals process replacement. Remaining drain, disposal and
+configuration-change behavior:
 [process lifetime](follow-ups/process-lifetime-shutdown-and-recycle.md).

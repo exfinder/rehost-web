@@ -43,7 +43,7 @@ Reclamation is therefore process-level, staged as an escalation ladder:
    the budget so the client never waits on a wedged server; the server-side step
    may stay stuck. Abort only unwinds a thread blocked *in* the aborted I/O; a
    thread stuck on a lock or a continuation-scheduling cycle (see the
-   sync-over-async flush deadlock, ledger P79) will not return regardless.
+   sync-over-async flush deadlock) will not return regardless.
 3. **Account the stuck thread as leaked.** It cannot be killed, but it can be
    counted: a request past a hard budget that the abort did not free is a
    permanently consumed pool thread (its stack, plus any locks it holds).
@@ -74,7 +74,7 @@ rules so it is a backstop, not a crutch:
   server step may still be leaked — so it must feed the leaked-thread accounting
   and recycle, not stand alone.
 - **It must not mask a root-cause bug.** A known deadlock is eliminated at the
-  source (e.g. the sync-over-async flush deadlock, ledger P79, fixed by nulling
+  source (e.g. the sync-over-async flush deadlock, fixed by nulling
   the `SynchronizationContext`, not by a timeout). A bounded wait would have
   turned that permanent hang into "110s then 500", which reads like slow CI and
   could ship; the wedge must surface loudly (leaked-thread count, a recycle), not

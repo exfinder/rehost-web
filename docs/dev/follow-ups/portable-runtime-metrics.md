@@ -4,15 +4,13 @@
 
 `PerfCounters` writes about ninety counters into shared memory owned by
 `webengine4.dll`. `OpenCounter` returns immediately because `HttpRuntime`
-`IsEngineLoaded` is permanently false (P04), so the instance, global and state
+`IsEngineLoaded` is permanently false, so the instance, global and state
 handles are never populated and every write is guarded behind a null check —
 including `PerfInstanceDataHandle.ReleaseHandle`, which can only run on a handle
 that was never created. `UnsafeNativeMethods.PerfCounterInitialize` is inside
 `#if NETFRAMEWORK`.
 
-The class is therefore inert on every platform and reaches no native code. It
-blocks nothing, which is why it was left alone while the memory monitors were
-ported.
+The class is inert on every platform and reaches no native code.
 
 `AppDomainResourcePerfCounters` is inert for the same reason but not idle: it
 polls `AppDomain.MonitoringSurvivedMemorySize` and `MonitoringTotalProcessorTime`

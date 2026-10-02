@@ -25,7 +25,7 @@ then explicit unsupported failure.
   in the path even when a capability remains unsupported.
 - IIS native modules, secondary-AppDomain management, and native integrated
   notification scheduling are not prerequisites.
-- The portability ledger expands only when executable application work reaches
+- Compatibility boundaries expand only when executable application work reaches
   a new incompatible leaf.
 - Broad imported-source rewrites require evidence that the retained sequence
   cannot satisfy the contract.

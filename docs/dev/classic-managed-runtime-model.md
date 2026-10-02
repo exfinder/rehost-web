@@ -117,9 +117,9 @@ stops the registered dispatcher, requests `HostingEnvironment` shutdown through
 `ApplicationManager`, then closes the manager. The dispatcher's `Stop`
 unregisters it so hosting shutdown need not wait for its timeout.
 
-Runtime-originated restart/shutdown does not currently notify the ASP.NET Core
-host. That is an accepted target in
-[ADR 0002](adr/0002-application-lifecycle.md), not current behavior.
+Runtime-originated shutdown publishes a restart request. The adapter sets exit
+code 82 and calls `StopApplication`; the supervisor replaces the process.
+Host-initiated shutdown exits normally. See [runtime restart](adr/0012-runtime-initiated-restart.md).
 
 ## Ownership and lifetime
 
@@ -162,4 +162,4 @@ Preserve retained ordering; isolate platform dependencies at narrow leaves.
 - [Application lifecycle target](adr/0002-application-lifecycle.md)
 - [Host boundary target](adr/0003-host-boundary.md)
 - [Process lifetime follow-up](follow-ups/process-lifetime-shutdown-and-recycle.md)
-- [IIS integrated initialization research](research/aspnet-iis-integrated-initialization-pipeline.md)
+- [Integrated-pipeline identity](adr/0013-integrated-pipeline-identity.md)

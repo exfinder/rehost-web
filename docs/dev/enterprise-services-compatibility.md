@@ -15,7 +15,5 @@ claimed.
 
 Implementation:
 `src/Rehost.Web/Compatibility/EnterpriseServices`.
-Tests:
-`tests/Rehost.Web.Tests/EnterpriseServicesContractTests.cs`.
 Remaining scope:
 [Enterprise Services](follow-ups/enterprise-services.md).

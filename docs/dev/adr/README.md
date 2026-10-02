@@ -16,3 +16,4 @@ history.
 - [Portable diagnostics boundary](0011-portable-diagnostics-boundary.md)
 - [Runtime-initiated restart](0012-runtime-initiated-restart.md)
 - [Integrated-pipeline identity](0013-integrated-pipeline-identity.md)
+- [App and Host layout](0014-app-host-layout.md)

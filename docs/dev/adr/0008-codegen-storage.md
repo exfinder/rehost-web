@@ -8,13 +8,11 @@ the install directory holds no codegen root and is not writable, and
 
 The root resolves in order: the host `CompilationTempDirectory` option, the
 `REHOST_COMPILATION_TEMPDIRECTORY` environment variable, configured
-`tempDirectory`, then `~/.rehost/codegen` under the user profile
-(amended 2026-09-17). The default is the portable analogue of `Temporary
+`tempDirectory`, then `~/.rehost/codegen` under the user profile.
+The default is the portable analogue of `Temporary
 ASP.NET Files`: outside the reclaimable system temp root, outside the
-application, beside the machine keys of ADR 0010. It first sat beside the host
-binaries, which the staged site layout places in the application's `bin`; the
-`bin` tree feeds the top-level hash that decides reuse, so output written there
-invalidated itself and every restart recompiled. A profile-less process fails
+application, beside the machine keys of ADR 0010. Output under the application's
+`bin` would invalidate the top-level reuse hash on every restart. A profile-less process fails
 at boot naming the option and the variable, the same way the key store does.
 An explicit root inside the application root is accepted and warns once
 (event 14). Any two set sources that disagree fail at preflight as conflicting

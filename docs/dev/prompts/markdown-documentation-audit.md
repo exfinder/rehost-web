@@ -1,100 +1,66 @@
-# Markdown documentation audit prompt
+# Markdown documentation audit
 
-Audit this repository's Markdown documentation. Report only; do not edit docs.
+Audit the current tracked Markdown tree. Report in chat; leave files unchanged.
 
 ## Scope
 
-- Audit the current tracked tree.
-- Include human-authored Markdown under the repository root, including root
-  operational docs and application, sample, and test READMEs.
-- Exclude generated, vendored, package-cache, analyzer-release, and transient
-  report files.
-- Scan every included file. Report only actionable findings; omit clean files.
+Read repository instructions and documentation authorities. Inventory every
+included file; exclude generated, vendored, cached and transient documents.
 
-Before auditing, read all applicable repository instructions and documentation
-authority declarations. Inventory the corpus and state exact inclusions and
-exclusions.
+Protect consumer documentation: root Markdown, public guides, application
+READMEs, package/sample READMEs and published release notes. Their simplified
+summaries are intentional. Report verified factual errors separately; changing
+consumer prose requires explicit authorization.
 
-## Audit criteria
+`docs/dev` contains contributor documentation, except published release notes.
+Application DEVELOPMENT files, internal commands and test/rig documentation
+are also internal. Source-link and source-edit-rule corrections may cross the
+consumer boundary only when explicitly authorized.
 
-Assess:
+## Content policy
 
-- compactness and concision;
-- content duplication;
-- staleness;
-- contradictions;
-- clarity for a competent contributor new to the project;
-- structural defects: broken links, orphan documents, unclear ownership or
-  status, misleading names/headings, and terminology drift.
+Current code owns mechanics; tests themselves provide evidence. Keep current
+contracts, compatibility boundaries, non-obvious architectural rationale and
+unresolved work. Remove historical measurements, transcripts, evidence IDs,
+test inventories, completed plans and change ledgers. Transfer only material
+needed for an unresolved decision into its follow-up before deleting an archive.
 
-Use maximal lossless compression as the standard. Remove repetition and
-historical narration, but preserve unique facts, rationale, citations,
-provenance, unresolved decisions, and evidence. Archival documents receive the
-same compression pressure, but a higher deletion threshold. Permit at most a
-two-sentence contextual summary of material owned elsewhere, followed by a link
-to its authority. Repeated lists, status, rationale, or plans are duplication.
+Imported-source metadata belongs in `docs/dev/sources.md`, one table:
+`Import path | Upstream | Pinned revision | License`. Update only on imports or
+upgrades. Keep license files and notices; code edits require no change ledger.
 
-Treat compression broadly: shorten prose, redesign structure, collapse repeated
-setup, and replace exhaustive transcripts or classifications with tables when
-the same evidence survives. Inspect the largest documents first, then run a
-second pass specifically for:
+Honor ownership:
 
-- evidence logs repeating rig setup, requests, teardown, or conclusions;
-- completed proposals and test plans whose landed contract is authoritative;
-- overlapping inventory, portability, compatibility, and ledger summaries;
-- long ledger/map rows that re-explain their linked evidence;
-- repeated examples or exhaustive categories where representative cases and
-  counts preserve the result.
+- Code/tests: mechanics and executable evidence.
+- `PROJECT.md`: mission and contracts.
+- `ROADMAP.md`: direction and milestones.
+- `docs/dev/compatibility.md`: support claims and boundaries.
+- `docs/dev/backlog.md`: unresolved-work index and priority.
+- Follow-ups: unresolved contracts, decisions and completion criteria.
+- ADRs: architectural rationale.
 
-When normalizing raw evidence, retain its ID, stimulus, observed result, exact
-status/error where material, provenance, and contract conclusion. Stop when a
-further cut would remove a unique boundary, decision rationale, reproduction
-input, or contradictory observation.
+Backlog entries contain one-line outcomes and links to detailed follow-ups.
+Delete completed follow-ups after moving any unique current contract or rationale
+to its owner. Use brief context plus a link instead of repeating another owner.
 
-Treat staleness as mismatch with current code, tests, configuration, roadmap,
-or declared authority, not document age. Prioritize unresolved-work documents:
-flag items already implemented, superseded, unsupported, no longer applicable,
-or abandoned without roadmap relevance, owner, or evidence. Also flag
-unverifiable temporal wording such as "currently," "soon," or "former."
-Supported claims need lighter verification unless evidence conflicts.
+## Audit and verification
 
-Honor repository ownership:
+Scan every included file for duplication, verbosity, staleness, contradictions,
+unclear ownership, misleading headings and broken links. Inspect large files
+and unresolved-work documents first. Check suspected stale claims against
+current code, tests and configuration; history may help investigation but does
+not belong in the resulting docs. Verify supported claims when evidence conflicts.
 
-- code and tests own mechanics;
-- `PROJECT.md` owns mission and contracts;
-- `ROADMAP.md` owns direction and priority;
-- `docs/dev/compatibility.md` owns support claims;
-- `docs/dev/backlog.md` owns unresolved work and priority;
-- ADRs own architectural rationale.
-
-Flag any competing owner. Distinguish a true contradiction from stale copying,
-scope differences, or unclear ownership.
-
-Prefer local links for files vendored or imported into this repository. Flag
-GitHub links that effectively point back to a local file; retain external links
-for upstream provenance, issues, prior art, or unvendored sources.
-
-Keep `docs/dev/backlog.md` and `docs/dev/follow-ups/` only if they maintain a strict
-index/detail split: backlog owns priority and a one-line outcome; a follow-up
-owns only unresolved contract, evidence, and completion criteria. Recommend
-deleting or merging completed follow-ups; Git preserves history.
-
-## Verification
-
-- Check every included file for editorial and structural issues.
-- Verify every suspected stale or contradictory claim against current code,
-  tests, configuration, and relevant Git history.
-- Do not independently re-prove every supported claim.
-- Run the repository's documentation checker when available.
+Run the repository documentation checker. Identify inbound links before proposing
+a deletion, including links in protected docs. Prefer local links for repository
+files and external links for upstream sources and issues.
 
 ## Report
 
-Respond in chat only. Be extremely concise. Organize findings by action:
-`delete`, `merge`, `rewrite`, or `verify`. Rank by severity and tag each finding
-with applicable dimensions: stale, duplicate, contradictory, unclear, verbose,
-or structural.
+Be concise. Group findings by `delete`, `merge`, `rewrite`, or `verify`; rank by
+severity and tag `stale`, `duplicate`, `contradictory`, `unclear`, `verbose`, or
+`structural`. For each, give exact file/line evidence, impact and the smallest
+remedy. Report protected-document factual errors separately.
 
-For every finding, provide exact file/line evidence, why it matters, and the
-smallest concrete remedy. End with corpus coverage, finding counts, and an
-estimated reduction in lines, words, and bytes. Do not create an audit file or
-modify documentation.
+End with exact corpus inclusions/exclusions, coverage, finding counts and an
+estimated reduction in lines, words and bytes.

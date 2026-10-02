@@ -3,17 +3,14 @@
 ## Contract
 
 System.Web uses the .NET Framework-era WinForms ResX implementation from
-`dotnet/winforms` commit
-`195f89af79d550c2da1711c45c379efd63519ac1` as its behavioral baseline.
+dotnet/winforms as its behavioral baseline.
 The imported `SYSTEM_WEB` profile handles strings, whitespace, primitives,
 nulls, aliases, metadata, data nodes, relative file references, and common type
 conversion. Legacy serialized and drawing paths remain but their breadth and
 platform behavior are unassessed.
 
-The donor closure lives under
-`src/Rehost.Web/Compatibility/Resources/WinForms195f89a/`;
-its attribution is in `SOURCE.md`. `ResXBuildProvider` uses the project-owned
-reader through `src/Rehost.Web/Compatibility/Resources`.
+Imported source identity and license are in [sources](sources.md).
+`ResXBuildProvider` uses the reader under `src/Rehost.Web/Compatibility/Resources`.
 
 ## Deliberate deviation
 
@@ -25,9 +22,6 @@ runtime types may be cached.
 Legacy BinaryFormatter/Soap and drawing payloads remain trusted-input
 compatibility behavior. They are not safe for untrusted `.resx` files and can
 remain platform-limited.
-
-Tests:
-`tests/Rehost.Web.Tests/ResXResourceReaderTests.cs`.
 
 Uncovered edge cases:
 [ResX compatibility](follow-ups/resx-compatibility.md).

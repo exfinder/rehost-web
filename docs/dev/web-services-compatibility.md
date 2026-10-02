@@ -22,31 +22,19 @@ everything else to `WebServiceHandlerFactory`. Both satellite assemblies are
 named in `<compilation><assemblies>` as Framework named their originals; the
 `Rehost.Web` package ships both.
 
-Scenario evidence: `tests/Rehost.Web.AspNetCore.Tests/AsmxOverKestrelTests.cs`
-over the shared page fixture (`Calc.asmx`, `ScriptCalc.asmx`).
+## Wire boundaries
 
-## Wire readings vs full IIS (2026-08-21)
+XML output uses the platform newline. Modern XmlSerializer may reorder xmlns
+attributes and explicitly emit `namespace="##any"` on anyAttribute; XML semantics
+remain equivalent. SOAP faults keep their status, code and message contract;
+stack text follows the executing runtime. Generated proxy-script timestamps
+follow generation time.
 
-The same two services served by IIS 10 / .NET Framework 4.8 on the Windows
-validation host and by the port, nine responses diffed byte-for-byte with
-volatile headers (`Date`, `Server`, `X-AspNet-Version`, `X-Powered-By`) and
-host:port normalized:
-
-- **Byte-identical**: SOAP 1.1 invoke, SOAP 1.2 invoke, JSON script-service
-  invoke, help page HTML. The `/js` proxy script differs only in its
-  generation-time `Expires`/`Last-Modified` stamps.
-- **`Environment.NewLine`**: `XmlTextWriter` emits CRLF after the XML
-  declaration on Windows and LF off it (HTTP-POST response, `?disco`,
-  `?wsdl`). Byte-identity holds per OS, not across them.
-- **Serializer emission order**: the modern `XmlSerializer` writes `xmlns`
-  attributes in a different order than Framework's generated serializers and
-  expands `<s:anyAttribute />` to `<s:anyAttribute namespace="##any" />` in
-  `?wsdl` schema output. Semantically identical XML.
-- **Fault text is runtime-owned**: `faultstring` embeds
-  `Exception.ToString()`, where modern .NET breaks the line before
-  `--->` and includes reflection invoker frames Framework did not. Fault
-  shape (`soap:Fault`, `faultcode soap:Server`, HTTP 500, message text)
-  matches.
+Modern runtime client behavior differs where the BCL does: default encoding is
+UTF-8, legacy code pages need explicit registration, default User-Agent contains
+the runtime version, and some HttpWebRequest tuning properties are inert. Configure
+TraceSource/BooleanSwitch explicitly. Trimming/AOT is outside the reflection and
+runtime-code-generation contract.
 
 ## Excluded surface
 
@@ -68,9 +56,8 @@ host:port normalized:
   than `Disabled` reaches the runtime's `Transactions` shim, which throws
   ([enterprise-services-compatibility](enterprise-services-compatibility.md)).
 
-Original Framework-only code is retained behind `#if NETFRAMEWORK`; each
-deviation is listed in
-[provenance](provenance/system-web-services-reference-source.json).
+Original Framework-only code is retained behind `#if NETFRAMEWORK`. Imported
+source identity and licenses are in [sources](sources.md).
 
 Implementation:
 `src/Rehost.Web.Services`.

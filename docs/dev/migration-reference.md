@@ -69,8 +69,8 @@ runtime. The order of work that has held for six applications:
    driving the code paths the application invokes, not only the reference.
    A package proven in one application can still fail in the next through a
    path the first never called.
-2. Recompile only proven blockers, verbatim, with a provenance record
-   (`docs/dev/provenance/`). Katana's `Microsoft.Owin.Host.SystemWeb`, Web API's
+2. Recompile only reached blockers and record imported revisions/licenses in
+   [sources](sources.md), updated only on imports or upgrades. Katana's `Microsoft.Owin.Host.SystemWeb`, Web API's
    `Microsoft.AspNet.WebApi.WebHost` and `Microsoft.AspNet.WebPages` are the
    three shipped as `Rehost.Owin.Host.SystemWeb`,
    `Rehost.AspNet.WebApi.WebHost` and `Rehost.AspNet.WebPages`; the AJAX
@@ -79,7 +79,7 @@ runtime. The order of work that has held for six applications:
 3. Expect a Framework facade now and then: Katana's Google provider constructs
    `System.Net.Http.WebRequest.WebRequestHandler`, a type .NET 10 does not
    carry, and a 15-line stand-in assembly closes it
-   ([Wingtip Toys](../../apps/WingtipToys/DEVELOPMENT.md#the-one-unanticipated-blocker-systemnethttpwebrequest)).
+   ([Wingtip Toys](../../apps/WingtipToys/DEVELOPMENT.md#webrequest-facade)).
 
 ## Custom build steps
 
@@ -201,3 +201,20 @@ web.config, or applicationHost.config moves into the application's own
 web.config, which inherits from the shipped baselines section by section —
 the same channel Framework apps already used. The machine-key and codegen
 topics above are instances of this rule.
+
+## App and Host layout
+
+The Host stages content under `rehost_root/` and sets
+`OutDir=rehost_root/bin/`; shared targets verify that location. Debug and Release
+share that development output. Publish uses a separate site tree with content at
+its root and payload under bin. Clear an earlier publish directory before checking
+for obsolete files; publish does not remove them automatically.
+
+`dotnet publish -o X` and `RehostPublishSiteRoot=X/` both select the site's root;
+conflicting destinations fail. Stage manifests are scoped per root so publishing
+to one destination cannot remove another destination's content. Configuration XDT
+runs before Rehost XDT only during publish.
+
+Host `ContentRootPath` points at the binary directory; Web Forms PhysicalRootPath
+points at its parent. Read both from the startup binary location before activation.
+The rationale is in [App/Host layout](adr/0014-app-host-layout.md).

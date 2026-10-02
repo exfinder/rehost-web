@@ -16,7 +16,7 @@ runs an existence-agnostic handler here where IIS's mapping never matched it,
 and that is the recorded extent of the leniency. A file is hidden only when its
 filesystem `Hidden` attribute says so; dot-prefixed names remain ordinary. .NET
 off Windows reports every dot-prefixed name as `Hidden`, so one helper
-(`HiddenFile`, ledger P109) decides for every hidden check the runtime compiles —
+(`HiddenFile`) decides for every hidden check the runtime compiles —
 virtual-path enumeration (`App_Code`, `App_Browsers` and every other listing
 through the virtual path provider), static files, browser custom-tree folders
 and physical discovery — and a leading dot alone does not count. Windows keeps
@@ -38,17 +38,17 @@ value it holds and never converts by string surgery:
   http.sys did (`\\`→`/`, `%2F` decoded, repeated separators collapsed,
   `.`/`..` resolved, a climb above the root 403) and then split by handler
   mapping into `FilePath`/`PathInfo`; `Request.Path` and `RawUrl` keep the
-  client's casing (`RequestPathCanonicalizer`, `RequestPathInfo`, ledger P72).
+  client's casing (`RequestPathCanonicalizer`, `RequestPathInfo`).
 - **Virtual path** — `/`-rooted or `~/` application-relative, `/`-separated,
   compared ignore-case; every path-taking API reads a `/`-rooted string as
   virtual (`UrlPath.IsAbsolutePhysicalPath`, "Physical or virtual" below).
 - **Configuration path** — a lowercased virtual path; the map to disk folds
-  case at `UserMapPath.GetPhysicalPathForPath` (P70). Two directories differing
+  case at `UserMapPath.GetPhysicalPathForPath`. Two directories differing
   only by case are therefore one configuration path, so an application holding
-  both with a `web.config` in each refuses activation naming both files (P87).
+  both with a `web.config` in each refuses activation naming both files.
 - **Physical path** — platform separators, produced only by a map-path seam,
   folded to the filesystem's real casing below the nearest existing directory
-  (P57/P71); containment is decided on the canonical URL path, not by prefix
+; containment is decided on the canonical URL path, not by prefix
   tests on physical strings (`AspNetCoreWorkerRequestTests`).
 
 ## Enumeration order
@@ -56,7 +56,7 @@ value it holds and never converts by string surgery:
 Every directory listing the runtime takes is in NTFS order — names compared
 code unit by code unit after upper-casing (`OrdinalIgnoreCase`), an `Ordinal`
 tiebreak for the case-only pair only a case-sensitive filesystem can hold —
-whatever order the filesystem returns (`DirectoryOrder`, ledger P73). App_Code
+whatever order the filesystem returns (`DirectoryOrder`). App_Code
 and resource compilation, batch page compilation, themes, precompilation, the
 top-level directory hash, the wildcard `bin` scan, and application browser
 files all see that order, so which duplicate a compile error blames, a theme's
@@ -68,7 +68,7 @@ files. Its top-level `App_Browsers` order came from a culture sort, so
 there, and after them here; only names differing by `-`, `_` or `'` are
 affected. Every custom-tree
 level under `App_Browsers` is listed the same way, and `*.browser` matches in
-any casing (ledger P110, P111). The `bin`
+any casing. The `bin`
 scan matches `.dll` case-insensitively on every filesystem and skips a file
 with no managed metadata (native library, empty or text file named `.dll`) as
 Framework's forgiven `COR_E_ASSEMBLYEXPECTED` did; every other load failure
@@ -76,8 +76,7 @@ surfaces as it did there.
 
 URL canonicalization ahead of mapping — `\\`, `%2F`, repeated separators, dot
 segments, the above-root 403, and the handler-mapping path-info split — is the
-adapter's job and is decided by ledger P72 and the
-[IIS readings](research/iis-url-canonicalization-readings.md).
+adapter's job; [compatibility](compatibility.md) states current support.
 
 Portable separator, enumeration, stable-hash, and parent-walk repairs live in
 the imported `FileUtil` path. Case canonicalization occurs once per path-producing
@@ -98,29 +97,18 @@ shapes, `X:\` and `\\server\share` (either separator). Everything else — a
 `/`-rooted string included — is virtual, at every path-taking site: server
 includes, `<pages masterPageFile>`, site-map node urls, `MailDefinition`,
 `XmlDataSource`, `Control.OpenFile`/`MapPathSecure`, `WriteFile`/`TransmitFile`,
-`Server.MapPath` (IIS Express reading, ledger P71). The port keeps that
+`Server.MapPath` (IIS Express reading). The port keeps that
 classifier untouched, so a Unix-rooted string is a virtual path here exactly as
 `/x` is on Framework; what Unix cannot express is an absolute *physical* path in
 those APIs, since `X:\` has no spelling there — an application passing one goes
 through a virtual path instead. Only a caller that already holds a translated
 physical path needs an explicit entry point past the classifier
-(`TransmitFileTranslated`/`WriteFileTranslated`, ledger P54/P61); the
+(`TransmitFileTranslated`/`WriteFileTranslated`); the
 `FileChangesMonitor` alias checks will need the same once file-change
 notification is enabled (configuration-reload follow-up).
 
 Remaining work is indexed under path mapping and filesystem-related capability
 rows in [the backlog](backlog.md) and [compatibility map](compatibility.md).
 
-Every remaining backslash literal in compiled code is classified in the
-[backslash audit](research/backslash-literal-audit.md) (ledger P74): physical
-compositions are on `Path.DirectorySeparatorChar`; `\\`→`/` normalization of
+Physical compositions use `Path.DirectorySeparatorChar`; `\\`→`/` normalization of
 virtual paths and the `X:\\`/UNC shape checks stay by contract.
-
-Evidence: ledger P23, P25, P32, P36, P54, P56, P57, P61, P70, P71, P72, P73,
-P74, P87, and P109-P112; `FileUtilTests`, `SimpleWorkerRequestTests`, `FileEnumeratorTests`, `BinDirectoryScanTests`,
-`CodegenCompileErrorTests`, `CanonicalCasePathTests`, `CaseInsensitiveUrlOverKestrelTests`,
-`CaseSensitiveDirectoryConfigOverKestrelTests`, `IisFolderHandlersTests`, `PathCasingOverKestrelTests`,
-`PathClassificationOverKestrelTests`, `PathCanonicalizationOverKestrelTests`,
-`RequestPathCanonicalizerTests`, `RequestPathInfoTests`, `ServerIncludesOverKestrelTests`,
-`StaticFilesOverKestrelTests`, `ServerTransferOverKestrelTests`, `HiddenFileTests`,
-and `ApplicationBrowsersOverKestrelTests`.

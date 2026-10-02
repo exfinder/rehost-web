@@ -39,6 +39,6 @@ streaming behavior for bufferless readers.
 Relocating the blocking to a non-pool thread was considered and rejected: it
 costs a dedicated OS thread per body-carrying request with no reuse, and it
 depends on thread-affinity assumptions — `ExecutionContext` flow, the lock
-identity recorded as P38's neighbour P33, stack size — that no test covers. The
+identity and stack size — that no test covers. The
 cliff is measured rather than pre-empted; see
 [request-body concurrency](../follow-ups/request-body-concurrency.md).

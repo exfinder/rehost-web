@@ -1,86 +1,39 @@
 # Extensions compatibility
 
-## Implemented surface
+Current support is in [compatibility](compatibility.md). `Rehost.Web.Extensions`
+contains the ScriptManager/UpdatePanel stack, ScriptModule, ASMX JSON handlers and
+proxy generation, disabled-by-default JSON profile/authentication/role services,
+QueryExtender/QueryableDataSource and ListView/DataPager.
 
-`Rehost.Web.Extensions` compiles the `System.Web.Extensions` closure a
-frozen Web Forms application reaches, minus the exclusions below: the
-full-page ScriptManager stack (`ScriptManager`, `UpdatePanel`,
-`UpdateProgress`, `Timer`, script/service/history plumbing,
-`PageRequestManager`'s delta responses), `ScriptModule` (async-postback error
-formatting, `Response.Redirect` interception, page-method routing), the ASMX
-JSON chain (`ScriptHandlerFactory`, `RestHandler`, client proxy generation,
-`JavaScriptSerializer`), the internal JSON application services
-(`Profile/ProfileService`, `Security/{Authentication,Role}Service`) behind
-Framework's built-in `*_JSON_AppService.axd` mappings, the query stack
-(`QueryExtender`, its expression family, `QueryableDataSource`, the
-`DynamicData` contract types), and the `ListView`/`DataPager` control family.
+## Script contract
 
-The 13 release Microsoft AJAX scripts are generated from the imported `.jsa`
-recipes with era-contemporary AjaxMin and embedded;
-`MicrosoftAjaxTimer.js` is byte-identical to Framework's shipped assembly and
-the set stays within one percent in aggregate
-([provenance](provenance/system-web-extensions.md)). `ScriptResource.axd`
-serves them with `Sys.Res` appended per request. Debug scripts and localized
-satellites are absent: `ScriptMode.Auto` falls back to release and client
-strings stay invariant.
+Thirteen release Microsoft AJAX scripts are generated from imported `.jsa`
+recipes by `eng/GenerateAjaxScripts.cs` and committed under the Extensions project.
+Generation uses AjaxMin 4.12, preserves the generated banner's CRLF and omits
+DEBUGINTERNAL. ScriptResource.axd appends Sys.Res from ScriptLibrary resources per
+request; physical-file mappings do not supply those strings.
 
-The baseline configuration carries Framework's four registrations verbatim on
-Rehost assembly names: the `system.web.extensions` section group,
-`ScriptModule-4.0`, the `*_AppService.axd` handler, and the
-`System.Web.UI.WebControls.Expressions` tag mapping.
+Debug scripts require a separate validation-code generator absent from the source
+snapshot, not another preprocessor run. Localized satellites are also absent.
+ScriptMode.Auto falls back to invariant release resources. Partial rendering
+requires a recognized browser; the default capability profile disables it.
 
-Scenario evidence: `tests/Rehost.Web.AspNetCore.Tests/AjaxOverKestrelTests.cs`
-over the shared page fixture (`ajax/Panel.aspx`, `ajax/Query.aspx`);
-`AjaxScriptResourceTests` gates the generated scripts. The sample app's
-`Ajax.aspx` passed one real-browser journey (async timer ticks and button
-posts update the panel without reload, console clean) — a manual gate, not a
-standing test. Partial rendering requires a recognized browser: the default
-capability profile disables it, on Framework and here alike.
+Delta responses preserve their length framing, error tokens and encoded redirect
+shape. Generated client blocks use the platform newline; encrypted resource tokens
+and assembly timestamps are runtime-owned. Exception messages and types follow the
+service contract while stack text follows the executing runtime.
 
-## Wire readings vs full IIS (2026-08-22)
+## Exclusions
 
-The same fixture page served by IIS 10 / .NET Framework 4.8 on the Windows
-validation host and by the port, eight responses diffed byte-for-byte with
-volatile headers (`Date`, `Server`, `X-AspNet-Version`, `X-Powered-By`),
-host:port, and the `__VIEWSTATE` family normalized:
+- LinqDataSource and its LINQ-to-SQL wrappers: System.Data.Linq is unavailable;
+  declaring the control fails page compilation naming the missing type.
+- WCF proxy/build-provider code generation: missing ServiceModel code-export APIs;
+  use generated clients such as dotnet-svcutil output.
+- WCF-hosted `.svc` application services: unavailable activation stack. JSON
+  application-service routes remain separate.
+- Client Services: Windows-desktop APIs and native dependencies.
+- Upstream's unused PermaLink and duplicate LinqDataSourceContextData declarations.
 
-- **Byte-identical**: the async-postback deltas — UpdatePanel refresh, Timer
-  tick, error token (`error|500|<message>` on HTTP 200), the
-  `AsyncPostBackErrorMessage` replacement, `pageRedirect` with its URL-encoded
-  target — and the page-method JSON response, delta length prefixes included.
-- **The GET page** is identical after additionally normalizing
-  `Environment.NewLine` (client-script blocks emit CRLF on Windows, LF off it)
-  and the `WebResource.axd`/`ScriptResource.axd` `d=`/`t=` tokens
-  (machine-key encryption and assembly timestamps).
-- **Exception text is runtime-owned**: the disabled-application-service 500
-  matches on `Message` and `ExceptionType`; `StackTrace` differs in frame
-  detail and newlines, as already recorded for ASMX faults.
-
-## Excluded surface
-
-- **`LinqDataSource` and `ILinqToSql`/`LinqToSqlWrapper`** — `System.Data.Linq`
-  has no modern implementation. Absent, not stubbed; a page declaring the
-  control fails compilation naming the missing type.
-- **WCF proxy codegen (`Compilation/**`: `.svcmap`/`.datasvcmap` build
-  providers, `WCFModel`, `ProxyGenerator.cs`)** — Visual Studio designer
-  machinery over cut `System.ServiceModel.Description` codegen; dotnet-svcutil
-  is the replacement.
-- **WCF-hosted application services (`ApplicationServices/*.svc` hosts)** —
-  need `System.ServiceModel.Activation`. The JSON siblings above cover the
-  `*_JSON_AppService.axd` route; `.svc` endpoints are not served.
-- **Client Services (`ClientServices/**`)** — the Windows-desktop stack
-  (wininet P/Invokes, `WindowsIdentity`, WinForms paths, OleDb).
-- **`PermaLink.cs`** (commented out upstream) and
-  **`LinqDataSourceContextData.cs`** (duplicate type definition).
-
-Enabling the application services (`<authenticationService enabled="true"/>`
-and siblings over membership/role/profile providers) is compiled but
-unassessed; the default-disabled refusal is what the wire reading pins.
-
-Deviations from the imported tree are listed in
-[provenance](provenance/system-web-extensions.md).
-
-Implementation:
-`src/Rehost.Web.Extensions`.
-Remaining scope:
-[Extensions](follow-ups/extensions-ajax-activation.md).
+Provider-backed JSON services are compiled but unassessed when enabled. Remaining
+scope is in [Extensions follow-up](follow-ups/extensions-ajax-activation.md).
+Imported input identity and licenses are in [sources](sources.md).

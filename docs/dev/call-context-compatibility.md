@@ -23,15 +23,9 @@ System.Web restores its internal
   hold only the request's own scratch objects, so the worst case is a request
   seeing its own empty checker again. `CallContext` is internal, so no other
   caller exists. Suspended states are held weakly and pruned as their flows die,
-  bounding retention by in-flight flows rather than request history. The
-  contract suite (below) keeps the Framework reading of the boundary in
-  `FrameworkOnlyIsolationTests`, compiled into the net481 leg only. On the
-  real thread pool Framework is not absolute either: mscorlib 4.8.9337 showed a
-  same-scope value to its own `ConfigureAwait(false)` continuation 1-2 times per
-  4000 flows in some runs (winbox, 2026-08-15), the same order as the port; the
-  suite bounds that rate rather than asserting zero on either leg.
+  bounding retention by in-flight flows rather than request history.
 - `ILogicalThreadAffinative` values and host contexts flow.
-- `HostContext` survives await resumptions through a restore seam (ledger P63):
+- `HostContext` survives await resumptions through a restore seam:
   the wipe path raises a neutral hook, and System.Web's registered handler
   re-establishes the context on threads whose associated `ThreadContext` serves
   the same request — Framework's `AspNetHostExecutionContextManager` guard,
@@ -42,18 +36,13 @@ System.Web restores its internal
 - Remoting headers, principals, serialization, and internal context swapping
   are omitted because retained System.Web paths do not use them.
 
-The implementation derives from Microsoft Reference Source commit
-`ec9fa9ae770d522a5b5f0607898044b7478574a3`,
-`mscorlib/system/runtime/remoting/callcontext.cs`. Types remain internal;
+The implementation derives from Reference Source callcontext.cs; the import
+identity is in [sources](sources.md). Types remain internal;
 publishing them would imply unsupported general remoting compatibility.
 
 Implementation:
 `src/Rehost.Web/Compatibility/Remoting/CallContext.cs`.
-Tests: `tests/Rehost.Web.Tests/CallContextTests.cs`.
-Contract suite: `tests/Rehost.Web.CallContext.Contract.Tests` runs the same
-bodies against mscorlib (net481, Windows round only) and the port (net10.0); the
-Framework leg is the authority for illogical isolation. Note that mscorlib's
-`ExecutionContext.IsDefaultFTContext` ignores a lone illogical `HostContext`, so
-`Run` does not switch a thread carrying nothing else — pinned there as
-`Bare_HostContext_...`; the isolation tests install a `SynchronizationContext`
-as every ASP.NET request thread has.
+
+An ExecutionContext containing only illogical HostContext may be treated as a
+default context by Framework. Isolation fixtures need the SynchronizationContext
+an ASP.NET request carries to exercise a context transition.

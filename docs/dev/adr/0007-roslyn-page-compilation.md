@@ -16,7 +16,7 @@ carries a fixed compiler table and no configuration handler, so that section is
 unreadable here. The ASP.NET `<system.web><compilation><compilers>` collection is
 the remaining seam, and the shipped root web configuration declares the providers
 there. Applications override or replace the entries as they always could. No
-imported source changes, so the portability ledger gains no row.
+imported source changes.
 
 Two constraints keep selection on the configured type. The provider declares a
 public parameterless constructor, because `CompilationUtil.GetProviderOptions`
@@ -44,7 +44,7 @@ assemblies are among them.
 The shipped root web configuration declares what Framework inherited that the
 shared framework does not provide: the three port assemblies standing in for
 `System.Web`, `System.Web.Services`, and `System.Web.ApplicationServices`, plus
-`System.Configuration.ConfigurationManager`, `System.Drawing.Common`, and
+`System.Configuration.ConfigurationManager`, `System.Drawing.Primitives`, and
 `System.Data.SqlClient`.
 
 ## Options and diagnostics
@@ -91,4 +91,4 @@ Emission is not deterministic, matching `csc` without `/deterministic`.
 `targetFramework` needs no handling. `MultiTargetingUtil` resolves to 4.0 or the
 validated configured value, and its 2.0 and 3.5 branches require
 `BuildManagerHost.SupportsMultiTargeting`, which is a design-time flag. Values
-above the implemented surface already fail through ledger row P16.
+above the implemented surface fail during target validation.

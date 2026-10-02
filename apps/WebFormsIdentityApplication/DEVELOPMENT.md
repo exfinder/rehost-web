@@ -1,130 +1,49 @@
-# Web Forms Identity development notes
+# Web Forms Identity development
 
-For setup and things to try, see the [running guide](README.md).
+[Running guide](README.md) · [Package mapping](../../docs/migration.md#package-mapping)
 
-The Visual Studio 2022 Web Forms template application with **Individual User
-Accounts** authentication (register, login, external logins, two-factor,
-password reset), running on the ported runtime from packages — the way an
-external consumer would.
+`.App` preserves `WebFormsIdentityApplication.dll`; `.Host` owns Kestrel,
+configuration transforms and SQLite initialization. The legacy WAP remains a
+separate input tree. Shared repository workflow is in the
+[plain template notes](../WebFormsApplication/DEVELOPMENT.md).
 
-## Layout
+## Dependency choices
 
-| Folder | Role |
-| --- | --- |
-| `WebFormsIdentityApplication/` | The frozen .NET Framework 4.8.1 WAP. Never modified; stays buildable in Visual Studio on Windows. `bin/`, `obj/`, `packages/`, the `.sln`, and the LocalDb `App_Data/*.mdf\|ldf` are not imported. |
-| `WebFormsIdentityApplication.App/` | The port of the app assembly: compiles the legacy folder's `*.cs` into `WebFormsIdentityApplication.dll`, exactly what the WAP produced in `bin/`. |
-| `WebFormsIdentityApplication.Host/` | The process: a ~30-line Kestrel host, plus the app's own `Web.Rehost.config`. |
+Identity and OWIN middleware use their shipped managed packages; the System.Web
+OWIN host uses its Rehost counterpart. Katana 4.x directly registers its module,
+so the original Microsoft.Web.Infrastructure reference is unnecessary. EF6 uses
+6.5.2 for the maintained SQLite provider. Newtonsoft.Json has an explicit serviced
+pin because the middleware requests an older transitive version.
 
-The migration is the same one
-[`WebFormsApplication`](../WebFormsApplication/DEVELOPMENT.md) shows — every
-`packages.config` line becomes a package reference, the legacy folder is never
-touched — with two additions: most of this app's dependencies come from
-nuget.org unchanged, and the connection string has to move off LocalDb.
+## SQLite initialization
 
-## packages.config → PackageReference
+The host replaces LocalDb with `Data Source=|DataDirectory|Identity.db;Foreign
+Keys=True`. SQLite is this application's fixture database; it does not establish
+SQL-provider support for the runtime.
 
-Packages built on `System.Web` take the Rehost counterpart the
-[package mapping](../../docs/migration.md#package-mapping) names; the table records this
-application's decisions.
+- XDT registers `SQLiteFactory` in `system.data/DbProviderFactories`; EF's provider
+  services alone cannot identify the connection's factory.
+- The SQLite EF6 provider generates no DDL. The host applies `Identity.schema.sql`
+  to a missing database and disables EF database initialization afterwards.
+- Apply raw DDL before first request; constructing an EF context then initializes
+  configuration before the runtime installs its mapped configuration system.
+- The 2.0.x provider uses `SQLitePCLRaw.lib.e_sqlite3`, including arm64 assets.
+  The older interop provider lacks the required native arm64 closure.
 
-| `packages.config` | Here | Note |
-| --- | --- | --- |
-| `Microsoft.Owin.Host.SystemWeb` 4.2.2 | Rehost counterpart | The one binary that had to be recompiled: it binds Microsoft's strong-named `System.Web`. Katana 4.2.3 source; see [provenance](../../docs/dev/provenance/aspnet-katana.md) |
-| `Microsoft.Web.Infrastructure` 2.0 | dropped | Only Katana's `DynamicModuleUtility` dependency, and Katana 4.x calls `HttpApplication.RegisterModule` directly |
-| `Microsoft.AspNet.Web.Optimization`, `.WebForms`, `Microsoft.AspNet.FriendlyUrls*`, `Microsoft.AspNet.ScriptManager.*` | Rehost counterparts | Same set as `WebFormsApplication` |
-| `Microsoft.CodeDom.Providers.DotNetCompilerPlatform` | dropped | The runtime owns compiler selection; `<system.codedom>` is removed by XDT |
-| `Owin`, `Microsoft.Owin`, `.Security`, `.Security.Cookies`, `.Security.OAuth`, `.Security.Google`, `.Security.Facebook`, `.Security.Twitter`, `.Security.MicrosoftAccount` | same packages from nuget.org | Pure managed; consumed as shipped under `NU1701` |
-| `Microsoft.AspNet.Identity.Core`, `.Owin`, `.EntityFramework` 2.2.4 | same packages from nuget.org | Pure managed |
-| `EntityFramework` 6.4.4 | same package from nuget.org, bumped to 6.5.2 | 6.3+ ships `netstandard2.1`. The bump is what the maintained SQLite provider requires (see database) |
-| — | `System.Data.SQLite` 2.0.4, `.EF6` 2.0.3, `SQLitePCLRaw.lib.e_sqlite3` | Added by the host, not the app: the store the template pointed at LocalDb |
-| `Newtonsoft.Json` 13.0.3 | same package, pinned | `Microsoft.Owin.Security` still asks for 6.0.4 (NU1903) |
-| Antlr, WebGrease, bootstrap, jQuery, Modernizr | unchanged content/dependencies | Same as `WebFormsApplication` |
+## Configuration
 
-`Rehost.Web` and `Rehost.Web.AspNetCore` replace what the GAC gave the
-Framework app; the host adds the latter.
-
-## Database
-
-The template's `(LocalDb)\MSSQLLocalDB` connection string is the app-visible
-change (see boundaries). It points at SQLite here — a file under `App_Data`, so
-the app needs no server and no second connection string per platform:
+The Host XDT replaces package defaults, removes runtime/CodeDOM settings, retargets
+Optimization controls and installs the SQLite connection, factory and provider.
+The merged `modules` collection honors `remove name="FormsAuthentication"`.
+An unresolvable session provider is not constructed under `mode="InProc"`.
+Auto-generated machine keys persist per application; scale-out requires shared
+explicit keys. See [machine keys](../../docs/migration.md#machine-keys).
 
 ```text
-Data Source=|DataDirectory|Identity.db;Foreign Keys=True
+eng/app-linux-smoke.sh WebFormsIdentityApplication 5082
 ```
 
-Three things SQLite needs that SQL Server got for free:
+## Open application scope
 
-- **Name the ADO.NET factory in `<system.data>`.** `<entityFramework><providers>`
-  supplies provider *services*; the factory behind them is a
-  `<DbProviderFactories>` row that `Web.Rehost.config` adds. It names
-  `SQLiteFactory`, not the EF6 provider factory, because EF reverse-maps the
-  connection's own factory type back to an invariant name.
-- **Create the schema itself.** The EF6 SQLite provider generates no DDL, so
-  `Database.Create()` throws instead of building the Identity tables.
-  `Identity.schema.sql`, generated once from `ApplicationDbContext`'s model with
-  `SQLite.CodeFirst`, is applied to a missing database file at startup, and
-  `disableDatabaseInitialization` keeps EF from trying afterwards.
-- **Stay out of Entity Framework until the application is up.** Reaching EF
-  before `HostingEnvironment` initializes installs the configuration system, and
-  initialization then fails with *the configuration system has already been
-  initialized*. Hence raw DDL over a `SQLiteConnection` rather than a context.
-
-`SQLitePCLRaw.lib.e_sqlite3` carries the native library for every target,
-including `osx-arm64` and `linux-arm64`. This works only on the 2.0.x provider
-line: 1.0.x binds the SQLite team's own `SQLite.Interop.dll`, which ships
-`win-x86/x64`, `linux-x64`, and `osx-x64` only, and the community arm64 builds
-export plain `sqlite3_*` symbols the mangled managed assembly cannot call.
-
-## Commands
-
-```text
-dotnet build apps/WebFormsIdentityApplication/WebFormsIdentityApplication.slnx
-dotnet run --project apps/WebFormsIdentityApplication/WebFormsIdentityApplication.Host
-# http://127.0.0.1:5082/ (add `-- --urls <url>` to change)
-
-apps/WebFormsIdentityApplication/smoke.sh            # against the default URL
-apps/WebFormsIdentityApplication/smoke.sh http://127.0.0.1:5082
-```
-
-`smoke.sh` is bash + curl only — macOS, Linux, and Git bash on Windows all run
-it. It registers a per-run user, signs in and out, and asserts every row of the
-IIS Express baseline recorded in
-[the gaps document](../../docs/dev/research/webforms-identity-application-gaps.md):
-status codes, the absolute `Location` of the challenge redirect, the
-`.AspNet.ApplicationCookie` set and later expired, the expired `.ASPXAUTH` that
-`LoginStatus` writes, and the page markers. Every row matches; there is no
-recorded delta.
-
-One Linux round needs nothing but the runner:
-
-```text
-eng/app-linux-smoke.sh WebFormsIdentityApplication 5082   # builds and smokes the committed HEAD
-```
-
-## web.config
-
-`WebFormsIdentityApplication.Host/Web.Rehost.config` replaces the package
-default wholesale, so it repeats the default's three rules — remove `<runtime>`,
-remove `<system.codedom>`, retarget the Optimization `<controls>` assembly — and
-adds three of its own: the `DefaultConnection` connection string, the SQLite
-entry in `<entityFramework><providers>`, and `disableDatabaseInitialization` for
-`ApplicationDbContext`. Nothing else in the template's `web.config` needed a
-transform. `<sessionState>` naming a provider type from `System.Web.Providers`, which is not in
-`bin`, parses and activates exactly as it does on Framework, and the unhonored
-`<system.webServer><modules><remove name="FormsAuthentication" />` is ignored
-the same way.
-
-## Boundaries
-
-- **LocalDb is out of contract.** It is a Windows-only SQL Server flavour, so
-  the connection string is the one application-visible edit a migration must
-  make. `|DataDirectory|` itself is fine — the runtime points it at `App_Data`.
-- **SQLite is a fixture choice, not a compatibility claim.** It shows EF6 running
-  on the port against a real engine without a server; SQL Server deployment
-  belongs to Milestone 3.
-- **`<machineKey>` is auto-generated and persisted.** The template declares
-  none. The runtime stores keys per application, so sign-ins survive process
-  restarts. Multiple instances need shared explicit or environment-supplied
-  keys; see [machine-key setup](../../docs/migration.md#machine-keys) and
-  [ADR 0010](../../docs/dev/adr/0010-machine-key-persistence.md).
+External login providers, confirmation/reset mail, SMS and two-factor flows
+remain unassessed; the template does not enable them.
