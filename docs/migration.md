@@ -123,6 +123,9 @@ beside the App project:
   package. Add other Rehost packages only when the library itself uses them.
 - Add a `ProjectReference` to the new project from the App project.
 
+Example: [BlogEngine.NET](../apps/BlogEngine/DEVELOPMENT.md#layout) builds its
+`BlogEngine.Core` library this way.
+
 ## Libraries bound to System.Web
 
 A library referencing the .NET Framework's `System.Web` needs a replacement

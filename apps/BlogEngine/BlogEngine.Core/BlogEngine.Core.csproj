@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>BlogEngine.Core</AssemblyName>
+    <RootNamespace>BlogEngine.Core</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RehostAppContentRoot>../BlogEngine/BlogEngine.Core/</RehostAppContentRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(RehostAppContentRoot)**/*.cs" />
+    <Compile Remove="$(RehostAppContentRoot)bin/**" />
+    <Compile Remove="$(RehostAppContentRoot)obj/**" />
+    <Compile Remove="$(RehostAppContentRoot)packages/**" />
+    <Compile Remove="$(RehostAppContentRoot)CategoryDictionary.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Profile.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Providers/DbProvider/DbConnectionHelper.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Scripting/ContentItem.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Service References/**" />
+    <Compile Remove="$(RehostAppContentRoot)Services/Compilation/Design/**" />
+    <Compile Remove="$(RehostAppContentRoot)Services/Packaging/FileSystem.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Services/Packaging/Gallery.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Services/Packaging/Installer.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Web/AppConfig.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Web/InstallUtil.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="AjaxMin" HintPath="../lib/ajaxminify/AjaxMin.dll" />
+    <Reference Include="BlogML" HintPath="../lib/blogml/BlogML.dll" />
+    <Reference Include="ICSharpCode.SharpZipLib" HintPath="../lib/ICSharpCode.SharpZipLib.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
+    <PackageReference Include="Mindbox.Data.Linq" Version="10.8.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NuGet.Protocol" Version="7.6.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.4" />
+    <PackageReference Include="System.ServiceModel.Syndication" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Data.SQLite" Version="2.0.4" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+  </ItemGroup>
+</Project>

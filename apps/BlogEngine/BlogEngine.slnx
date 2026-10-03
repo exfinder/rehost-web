@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="BlogEngine.Core/BlogEngine.Core.csproj" />
+  <Project Path="BlogEngine.App/BlogEngine.App.csproj" />
+  <Project Path="BlogEngine.Host/BlogEngine.Host.csproj" />
+</Solution>

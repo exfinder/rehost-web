@@ -95,6 +95,14 @@ jobs:
           apps/YAF/install.sh http://127.0.0.1:5087
           apps/YAF/smoke.sh http://127.0.0.1:5087
           kill $host; wait $host || true
+      - name: BlogEngine journey
+        run: |
+          dotnet build apps/BlogEngine/BlogEngine.slnx -v q $CANDIDATE_PROPS
+          dotnet run --project apps/BlogEngine/BlogEngine.Host --no-build > blogengine.log 2>&1 &
+          host=$!
+          for _ in $(seq 1 60); do curl -fsS -o /dev/null http://127.0.0.1:5086/ && break; sleep 2; done
+          apps/BlogEngine/smoke.sh http://127.0.0.1:5086
+          kill $host; wait $host || true
       - name: Host logs
         if: failure()
-        run: tail -n 80 host.log yaf.log 2>/dev/null || true
+        run: tail -n 80 host.log yaf.log blogengine.log 2>/dev/null || true
