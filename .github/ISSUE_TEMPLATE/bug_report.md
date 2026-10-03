@@ -19,7 +19,7 @@ error line and the stack, not the last.
 - Web Application Project or Web Site:
 - Legacy target framework (`<httpRuntime targetFramework>`):
 - `packages.config` lines involved, if any:
-- Anything in `Web.Rehost.config` beyond the three default adjustments:
+- Anything in `Web.Rehost.config` beyond the four default adjustments:
 
 **To reproduce**
 The smallest project that shows it, or an application under `apps/` in this

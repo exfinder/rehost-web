@@ -35,7 +35,7 @@ for exact legacy names, redundant references, and version conflicts.
 ## Configuration
 
 Edit the generated Host project's `Web.Rehost.config`, which applies changes
-to a copy of your `Web.config`. Keep the three supplied adjustments and add
+to a copy of your `Web.config`. Keep the four supplied adjustments and add
 your own below them.
 
 Check these settings:

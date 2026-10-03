@@ -23,7 +23,7 @@ restores only from its supplied feed and nuget.org.
 
 ## Configuration
 
-The package XDT removes `runtime` and `system.codedom` and retargets Optimization
-controls. A Host-local `Web.Rehost.config` replaces that default. Publish applies
+The package XDT removes `runtime`, `system.codedom` and `system.serviceModel`,
+and retargets Optimization controls. A Host-local `Web.Rehost.config` replaces that default. Publish applies
 `Web.$(Configuration).config` first; development builds apply no configuration
 transform. Edit staged content through its source and rebuild before refreshing.
