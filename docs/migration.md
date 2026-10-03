@@ -41,9 +41,25 @@ your own below them.
 Check these settings:
 
 - **Database connections:** replace LocalDB or `AttachDbFilename` with a
-  connection your environment can use.
+  connection your environment can use. Write `|DataDirectory|/file`, not
+  `|DataDirectory|\file`: the database driver joins that path, and off Windows
+  a backslash becomes part of the file name.
 - **Modules and handlers:** remove registrations for libraries that cannot
   run on modern .NET, including any related `<location>` blocks.
+- **Compilation assemblies:** remove `<compilation><assemblies>` entries for
+  assemblies .NET does not ship, such as `System.Management` or
+  `System.Net.Http.WebRequest`:
+
+  ```xml
+  <system.web>
+    <compilation>
+      <assemblies>
+        <add xdt:Locator="Condition(starts-with(@assembly,'System.Management,'))" xdt:Transform="Remove" />
+      </assemblies>
+    </compilation>
+  </system.web>
+  ```
+
 - **Web Pages assemblies:** use the Rehost assembly names in Razor sections,
   build providers, and assembly registrations. See the
   [exact names](dev/migration-reference.md#configuration).
@@ -76,6 +92,36 @@ duplicate types or are moving a Web Site project.
 Check your old custom build steps too: generated code or assets may not exist
 until those steps run. The
 [build-step reference](dev/migration-reference.md#custom-build-steps) covers examples.
+
+## Class libraries that use System.Web
+
+Give each class library in your solution that uses `System.Web`, such as a
+`BlogEngine.Core` beside the web project, its own SDK project in a new folder
+beside the App project:
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>MyLibrary</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <RehostAppContentRoot>../MyLibrary/</RehostAppContentRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.Web" Version="…" />
+  </ItemGroup>
+</Project>
+```
+
+- Point `RehostAppContentRoot` at the library's legacy folder and add the
+  `Compile` lines from [Preserved source](#preserved-source).
+- Keep the legacy `AssemblyName`: `web.config` names the library's types by it.
+- Reference `Rehost.Web` at the App project's version, not the hosting
+  package. Add other Rehost packages only when the library itself uses them.
+- Add a `ProjectReference` to the new project from the App project.
 
 ## Libraries bound to System.Web
 
