@@ -112,19 +112,25 @@
     DependsOnTargets="RehostComputeStageItems;RehostCopyStagedFiles;RehostTransformStagedWebConfig;RehostCleanStaleStagedFiles;RehostVerifyStagedSite;RehostWriteStageManifest" />
 
   <Target Name="RehostComputeStageItems">
+    <ItemGroup>
+      <_RehostRootFile Include="$(RehostSiteContentRoot)*" />
+      <_RehostRootWebConfig Include="@(_RehostRootFile)" Condition="'%(Filename)%(Extension)' == 'web.config'" />
+      <_RehostRootConfigurationTransform Include="@(_RehostRootFile)" Condition="'%(Filename)%(Extension)' == 'web.$(Configuration).config'" />
+      <_RehostRootConfig Include="@(_RehostRootFile)" Condition="'%(Extension)' == '.config' and ('%(Filename)' == 'web' or $([System.String]::Copy('%(Filename)').ToLowerInvariant().StartsWith('web.')))" />
+    </ItemGroup>
     <Error
-      Condition="!Exists('$(RehostSiteContentRoot)Web.config')"
+      Condition="'@(_RehostRootWebConfig)' == ''"
       Text="RehostSiteContentRoot '$(RehostSiteContentRoot)' does not contain a Web.config." />
 
     <PropertyGroup>
       <_RehostWebConfigTransform Condition="'$(RehostWebConfigTransform)' != ''">$(RehostWebConfigTransform)</_RehostWebConfigTransform>
       <_RehostWebConfigTransform Condition="'$(_RehostWebConfigTransform)' == '' and Exists('$(MSBuildProjectDirectory)/Web.Rehost.config')">$(MSBuildProjectDirectory)/Web.Rehost.config</_RehostWebConfigTransform>
       <_RehostWebConfigTransform Condition="'$(_RehostWebConfigTransform)' == ''">$(MSBuildThisFileDirectory)Web.Rehost.config</_RehostWebConfigTransform>
-      <_RehostConfigurationTransform>$(RehostSiteContentRoot)Web.$(Configuration).config</_RehostConfigurationTransform>
+      <_RehostConfigurationTransform>@(_RehostRootConfigurationTransform)</_RehostConfigurationTransform>
       <!-- One manifest per stage root: a manifest shared between roots makes a publish to one
            folder delete the files an earlier publish staged in another. -->
       <_RehostStageManifest>$(IntermediateOutputPath)rehost-stage-$(_RehostStageInvocation)-$([MSBuild]::StableStringHash('$(RehostStageRoot)')).manifest</_RehostStageManifest>
-      <_RehostWebConfigSources>$(RehostSiteContentRoot)Web.config;$(_RehostWebConfigTransform)</_RehostWebConfigSources>
+      <_RehostWebConfigSources>@(_RehostRootWebConfig);$(_RehostWebConfigTransform)</_RehostWebConfigSources>
       <_RehostWebConfigSources Condition="'$(RehostApplyConfigurationTransform)' == 'true' and Exists('$(_RehostConfigurationTransform)')">$(_RehostWebConfigSources);$(_RehostConfigurationTransform)</_RehostWebConfigSources>
       <!-- Timestamps alone miss a switch to sources older than the staged web.config. Keyed by
            stage root only, because every configuration stages into the same root. -->
@@ -140,7 +146,7 @@
     <ItemGroup>
       <_RehostSiteContent
         Include="$(RehostSiteContentRoot)**/*"
-        Exclude="$(RehostSiteContentRoot)**/*.cs;$(RehostSiteContentRoot)**/*.csproj;$(RehostSiteContentRoot)**/*.user;$(RehostSiteContentRoot)bin/**;$(RehostSiteContentRoot)obj/**;$(RehostSiteContentRoot)packages/**;$(RehostSiteContentRoot)packages.config;$(RehostSiteContentRoot)Web.config;$(RehostSiteContentRoot)Web.*.config;$(RehostSiteContentRoot).vs/**;$(RehostSiteContentExcludes)" />
+        Exclude="$(RehostSiteContentRoot)**/*.cs;$(RehostSiteContentRoot)**/*.csproj;$(RehostSiteContentRoot)**/*.user;$(RehostSiteContentRoot)bin/**;$(RehostSiteContentRoot)obj/**;$(RehostSiteContentRoot)packages/**;$(RehostSiteContentRoot)packages.config;@(_RehostRootConfig);$(RehostSiteContentRoot).vs/**;$(RehostSiteContentExcludes)" />
       <_RehostDesired Include="@(_RehostSiteContent->'$(RehostStageRoot)%(RecursiveDir)%(Filename)%(Extension)')" />
       <_RehostDesired Include="$(RehostStageRoot)web.config" />
     </ItemGroup>
@@ -161,7 +167,7 @@
     Inputs="$(_RehostWebConfigSources);$(_RehostWebConfigSourcesFile)"
     Outputs="$(RehostStageRoot)web.config">
     <PropertyGroup>
-      <_RehostConfigSource>$(RehostSiteContentRoot)Web.config</_RehostConfigSource>
+      <_RehostConfigSource>@(_RehostRootWebConfig)</_RehostConfigSource>
     </PropertyGroup>
 
     <ApplyXdtTransform

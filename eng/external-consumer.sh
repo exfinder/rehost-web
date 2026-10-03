@@ -38,6 +38,8 @@ for item in WebFormsApplication smoke.sh; do
   cp -R "$REPO/apps/WebFormsApplication/$item" "$APP/"
 done
 rm -rf "$APP"/*/bin "$APP"/*/obj
+mv "$APP/WebFormsApplication/Web.config" "$APP/WebFormsApplication/Web.Config"
+mv "$APP/WebFormsApplication/Web.Release.config" "$APP/WebFormsApplication/Web.Release.Config"
 template=$(<"$REPO/eng/external-consumer/NuGet.config")
 feed_native=$(native "$FEED")
 printf '%s\n' "${template//@FEED@/$feed_native}" > "$APP/NuGet.config"
@@ -83,6 +85,7 @@ ls "$site/bin" | grep -E '^Rehost\..*\.dll$'
 ls "$site/bin/configs"
 grep -q '<runtime' "$site/web.config" && { echo "FAIL  XDT did not remove <runtime>"; exit 1; }
 grep -q 'assembly="Rehost.AspNet.Web.Optimization.WebForms"' "$site/web.config" || { echo "FAIL  XDT did not rewrite the Optimization controls assembly"; exit 1; }
+[ "$(ls "$site" | grep -ci '^web\.config$')" = 1 ] || { echo "FAIL  staged more than one web.config"; exit 1; }
 echo "PASS  staged web.config carries the XDT result"
 
 echo "== run"
