@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="$(RehostAppContentRoot)**/*.cs" />
+    <Compile Remove="$(RehostAppContentRoot)bin/**" />
+    <Compile Remove="$(RehostAppContentRoot)obj/**" />
+    <Compile Remove="$(RehostAppContentRoot)packages/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
     <PackageReference Include="Rehost.AspNet.FriendlyUrls" Version="$(RehostVersion)" />
     <PackageReference Include="Rehost.AspNet.Web.Optimization" Version="$(RehostVersion)" />

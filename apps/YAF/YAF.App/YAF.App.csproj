@@ -4,12 +4,21 @@
     <AssemblyName>YAF</AssemblyName>
     <RootNamespace>YAF</RootNamespace>
     <RehostAppContentRoot>$(YafSrc)YetAnotherForum.NET/</RehostAppContentRoot>
-    <RehostAppContentExcludes>$(RehostAppContentRoot)Pages/ModForumUser.ascx.cs;$(RehostAppContentRoot)Pages/ModForumUser.ascx.designer.cs;$(RehostAppContentRoot)Pages/Moderating.ascx.cs;$(RehostAppContentRoot)Pages/Moderating.ascx.designer.cs</RehostAppContentExcludes>
     <!-- Controls/ForumList.ascx.cs uses the C# 14 field keyword, so this one
          assembly cannot take Sidecar.props's pinned 13. -->
     <LangVersion>latest</LangVersion>
     <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(RehostAppContentRoot)**/*.cs" />
+    <Compile Remove="$(RehostAppContentRoot)bin/**" />
+    <Compile Remove="$(RehostAppContentRoot)obj/**" />
+    <Compile Remove="$(RehostAppContentRoot)packages/**" />
+    <Compile Remove="$(RehostAppContentRoot)Pages/ModForumUser.ascx.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Pages/ModForumUser.ascx.designer.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Pages/Moderating.ascx.cs" />
+    <Compile Remove="$(RehostAppContentRoot)Pages/Moderating.ascx.designer.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="$(YafSrc)GlobalAssemblyInfo.cs" Link="Properties/GlobalAssemblyInfo.cs" />
   </ItemGroup>

@@ -57,9 +57,17 @@ Examples: [Wingtip Toys](../apps/WingtipToys/DEVELOPMENT.md#webconfig),
 
 ## Preserved source
 
-The generated App project includes C# files from the application folder.
-If it picks up files your old project excluded, add them to
-`RehostAppContentExcludes`.
+The generated App project compiles every C# file in the application folder:
+
+```xml
+<Compile Include="$(RehostAppContentRoot)**/*.cs" />
+<Compile Remove="$(RehostAppContentRoot)bin/**" />
+<Compile Remove="$(RehostAppContentRoot)obj/**" />
+<Compile Remove="$(RehostAppContentRoot)packages/**" />
+```
+
+If it picks up files your old project excluded, add a `<Compile Remove>` line
+for each one below these.
 
 Special folders such as `App_Code` are compiled by the runtime. See
 [source inclusion](dev/migration-reference.md#preserved-source) if you encounter

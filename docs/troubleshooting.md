@@ -19,9 +19,9 @@ compatibility.
 
 ## CS0246 in an unused source file
 
-The App project includes C# files from the application folder, including files
-your legacy project may have left out. List unused files in
-`RehostAppContentExcludes`; see
+The App project compiles every C# file in the application folder, including
+files your legacy project may have left out. Add a `<Compile Remove>` line for
+each unused file to the App project; see
 [source inclusion](migration.md#preserved-source).
 
 ## Application assembly name

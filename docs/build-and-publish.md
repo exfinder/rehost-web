@@ -60,7 +60,7 @@ See the [migration guide](migration.md#configuration) for configuration examples
 
 | File | Purpose |
 | --- | --- |
-| `MyApp.App.csproj` | Builds application code from the folder named by `RehostAppContentRoot`. `RehostAppContentExcludes` leaves files out. |
+| `MyApp.App.csproj` | Builds application code from the folder named by `RehostAppContentRoot`. Its `Compile` lines choose the files. |
 | `MyApp.Host.csproj` | `RehostSiteContentRoot` names the application folder to copy. `OutDir` sends the binaries to `rehost_root/bin/`. |
 | `Program.cs` | Starts the ASP.NET Core host using `AddRehostWeb` and `UseRehostWeb`. |
 | `Web.Rehost.config` | Applies configuration changes to the application's copy. |

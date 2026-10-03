@@ -38,12 +38,15 @@ activation with a message naming the file and the entry; the list is in
 
 ## Preserved source
 
-`RehostAppContentRoot` includes C# source from the legacy folder and leaves
-markup for runtime compilation. It excludes `bin`, `obj`, and `packages`.
+The App project's own `Compile` lines include C# source from the legacy folder
+and leave markup for runtime compilation. `RehostAppContentRoot` is a plain
+property the App project defines and uses for that folder, with a trailing
+slash. The lines exclude `bin`, `obj`, and `packages`; the package adds no
+`Compile` items.
 Two differences from the old project's explicit file list:
 
-- files on disk that the legacy project never listed are compiled too; name
-  them in `RehostAppContentExcludes` (YAF has four orphaned code-behind files);
+- files on disk that the legacy project never listed are compiled too; add a
+  `<Compile Remove>` line for each (YAF has four orphaned code-behind files);
 - `App_Code` and `App_Data` source files are left to runtime compilation.
   `App_GlobalResources` and `App_LocalResources` are excluded from SDK resource
   embedding. A WAP that compiled `App_Code` into its assembly can encounter
