@@ -60,9 +60,10 @@ Check these settings:
   </system.web>
   ```
 
-- **Web Pages assemblies:** use the Rehost assembly names in Razor sections,
-  build providers, and assembly registrations. See the
-  [exact names](dev/migration-reference.md#configuration).
+- **Framework assembly names:** leave them as written. The build rewrites
+  `System.Web`, Web Pages, MVC, Optimization and similar assembly names in
+  every staged `web.config` to their Rehost names. See the
+  [table](dev/migration-reference.md#configuration).
 
 Carry over any application settings previously supplied by the server's
 `machine.config`, root `web.config`, or `applicationHost.config`.

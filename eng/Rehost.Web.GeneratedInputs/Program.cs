@@ -929,7 +929,7 @@ internal static class Program
             "ENGINE_FULL_NAME      = \"webengine4.dll\"",
             "ISAPI_FULL_NAME      = \"aspnet_isapi.dll\"",
             "STATE_FULL_NAME      = \"aspnet_state.exe\"",
-            "WEB_FULL_NAME        = \"Rehost.Web.dll\"",
+            "WEB_FULL_NAME        = \"System.Web.dll\"",
             "MGDENG_FULL_NAME     = \"webengine4.dll\"",
             "REG_MACHINE_APP      = \"Software\\\\Microsoft\\\\ASP.NET\"",
         ];

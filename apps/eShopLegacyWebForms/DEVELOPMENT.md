@@ -16,7 +16,7 @@
   against the recompiled integration assembly.
 - App-local `PreApplicationStartCode` registers jquery/bootstrap against committed
   physical files. General Rehost ScriptManager packages register their own names.
-- CodeDOM settings are removed; Optimization controls use the Rehost assembly.
+- CodeDOM settings are removed.
   `debug`, `requestValidationMode`, InProc session and the unused EF default
   connection factory remain application-owned.
 - RouteUrl expressions use the runtime baseline's expression-builder registration.

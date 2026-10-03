@@ -27,6 +27,7 @@
     <Compile Remove="../System.Web.ReferenceSource/Configuration/RemoteWebConfigurationHostStream.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Management/regiisutil.cs" />
     <Compile Remove="../System.Web.ReferenceSource/Util/Transactions.cs" />
+    <Compile Include="../../eng/Shared/AssemblyRetargets.cs" Link="Shared/AssemblyRetargets.cs" />
   </ItemGroup>
 
   <ItemGroup>

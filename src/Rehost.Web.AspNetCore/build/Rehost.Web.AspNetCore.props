@@ -2,4 +2,7 @@
   <UsingTask
     TaskName="Rehost.Web.Build.Tasks.ApplyXdtTransform"
     AssemblyFile="$(MSBuildThisFileDirectory)tasks/Rehost.Web.Build.Tasks.dll" />
+  <UsingTask
+    TaskName="Rehost.Web.Build.Tasks.RetargetConfigAssemblyNames"
+    AssemblyFile="$(MSBuildThisFileDirectory)tasks/Rehost.Web.Build.Tasks.dll" />
 </Project>

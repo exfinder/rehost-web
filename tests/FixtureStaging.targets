@@ -2,7 +2,9 @@
   <!--
     Shared fixture staging. Consumers declare, from a target so $(TargetDir) is set:
       FixtureTreeRoot        a source tree mirrored under $(TargetDir)<name>, with
-                             copy-on-difference and pruning owned by StageFixtureTree
+                             copy-on-difference and pruning owned by StageFixtureTree;
+                             its staged web.config files then get Framework assembly
+                             names rewritten, as the hosting package's staging does
       FixturePayloadProject  built into every bin; MustNotLeakBesideHost guards against
                              the assembly resolving beside the host instead of the bin
       FixtureBinPayload      already-built files for every bin
@@ -26,10 +28,18 @@
   <UsingTask
     TaskName="Rehost.Web.FixtureStaging.Tasks.StageFixtureBins"
     AssemblyFile="$(MSBuildThisFileDirectory)Rehost.Web.FixtureStaging.Tasks/bin/$(Configuration)/net10.0/Rehost.Web.FixtureStaging.Tasks.dll" />
+  <UsingTask
+    TaskName="Rehost.Web.Build.Tasks.RetargetConfigAssemblyNames"
+    AssemblyFile="$(MSBuildThisFileDirectory)../eng/Rehost.Web.Build.Tasks/bin/$(Configuration)/net10.0/Rehost.Web.Build.Tasks.dll" />
 
   <ItemGroup>
     <ProjectReference
       Include="$(MSBuildThisFileDirectory)Rehost.Web.FixtureStaging.Tasks/Rehost.Web.FixtureStaging.Tasks.csproj"
+      ReferenceOutputAssembly="false"
+      PrivateAssets="all"
+      SetTargetFramework="TargetFramework=net10.0" />
+    <ProjectReference
+      Include="$(MSBuildThisFileDirectory)../eng/Rehost.Web.Build.Tasks/Rehost.Web.Build.Tasks.csproj"
       ReferenceOutputAssembly="false"
       PrivateAssets="all"
       SetTargetFramework="TargetFramework=net10.0" />
@@ -52,6 +62,13 @@
       SourceRoot="%(FixtureTreeRoot.FullPath)"
       TargetRoot="$(TargetDir)%(FixtureTreeRoot.Filename)%(FixtureTreeRoot.Extension)"
       ProtectedSubtrees="*/bin" />
+    <ItemGroup Condition="'@(FixtureTreeRoot)' != ''">
+      <_FixtureStagedConfig Include="$(TargetDir)%(FixtureTreeRoot.Filename)%(FixtureTreeRoot.Extension)/**/*.config" />
+      <_FixtureStagedWebConfig Include="@(_FixtureStagedConfig)" Condition="'%(Filename)%(Extension)' == 'web.config'" />
+    </ItemGroup>
+    <RetargetConfigAssemblyNames
+      Condition="'@(_FixtureStagedWebConfig)' != ''"
+      Files="@(_FixtureStagedWebConfig)" />
     <StageMappedFiles
       Condition="'@(FixtureStagedFile)' != ''"
       Files="@(FixtureStagedFile)"

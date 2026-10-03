@@ -10,9 +10,9 @@ The legacy `Web.config` is never edited. The build applies
 `<Host>/Web.Rehost.config`, an XDT transform, and writes the result to
 `rehost_root/web.config`; publish applies `Web.$(Configuration).config` first.
 A `Web.Rehost.config` beside the Host replaces the package default wholesale, so
-keep its four adjustments (remove `<runtime>`, `<system.codedom>` and
-`<system.serviceModel>`, rewrite the Optimization controls assembly) and add
-the application's own below them. Typical additions:
+keep its three adjustments (remove `<runtime>`, `<system.codedom>` and
+`<system.serviceModel>`) and add the application's own below them. Typical
+additions:
 
 - connection strings for the environment (LocalDb is Windows-only; a named
   catalog on a server or a container replaces `AttachDbFilename`);
@@ -20,21 +20,42 @@ the application's own below them. Typical additions:
   (Elmah, Application Insights, `Microsoft.AspNet.SessionState`), and of the
   `<location>` blocks that only registered them;
 - shared `<machineKey>` values where multiple instances need the same keys
-  (see Machine keys below);
-- the Rehost assembly names wherever configuration names a Web Pages assembly:
-  the `system.web.webPages.razor` section group and its sections, a `.cshtml`
-  build provider, or `<compilation><assemblies>`. `System.Web.WebPages`,
-  `System.Web.WebPages.Razor` and `System.Web.WebPages.Deployment` become
-  `Rehost.Web.WebPages`, `Rehost.Web.WebPages.Razor` and
-  `Rehost.Web.WebPages.Deployment`, with no version or public key token. The
-  runtime does not remap the original names, and the assemblies they name do
-  not exist here.
+  (see Machine keys below).
 
 Examples: [Wingtip Toys](../../apps/WingtipToys/DEVELOPMENT.md#webconfig),
 [eShopLegacyWebForms](../../apps/eShopLegacyWebForms/DEVELOPMENT.md),
 [YAF](../../apps/YAF/DEVELOPMENT.md#webconfig). Settings the runtime refuses fail
 activation with a message naming the file and the entry; the list is in
 [compatibility](compatibility.md).
+
+Framework assembly names stay as the application wrote them. After the
+transform, staging rewrites every staged `web.config`, the root one and each
+nested one in any casing (`Views/Web.config`, an area's `Views/web.config`):
+an `assembly` attribute naming an assembly below, and any attribute holding an
+assembly-qualified type name from one, take the Rehost name with no version,
+culture or public key token. The build logs each rewrite with its file and
+line; every other byte, including namespace attributes, comments and
+`<assemblyIdentity>`, is kept.
+
+| Framework assembly | Rehost assembly |
+| --- | --- |
+| `System.Web` | `Rehost.Web` |
+| `System.Web.Extensions` | `Rehost.Web.Extensions` |
+| `System.Web.Services` | `Rehost.Web.Services` |
+| `System.Web.ApplicationServices` | `Rehost.Web.ApplicationServices` |
+| `System.Web.WebPages` | `Rehost.Web.WebPages` |
+| `System.Web.WebPages.Razor` | `Rehost.Web.WebPages.Razor` |
+| `System.Web.WebPages.Deployment` | `Rehost.Web.WebPages.Deployment` |
+| `System.Web.Mvc` | `Rehost.Web.Mvc` |
+| `System.Web.Http.WebHost` | `Rehost.Web.Http.WebHost` |
+| `System.Web.Optimization` | `Rehost.Web.Optimization` |
+| `Microsoft.AspNet.Web.Optimization.WebForms` | `Rehost.AspNet.Web.Optimization.WebForms` |
+| `Microsoft.Web.Infrastructure` | `Rehost.Web.Infrastructure` |
+| `Microsoft.Owin.Host.SystemWeb` | `Rehost.Owin.Host.SystemWeb` |
+
+The runtime itself remaps these names only in `system.webServer` module and
+handler types; configuration that does not pass through staging needs the
+Rehost names written out.
 
 ## Preserved source
 

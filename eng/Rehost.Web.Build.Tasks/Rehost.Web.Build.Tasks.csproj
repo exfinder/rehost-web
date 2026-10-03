@@ -14,4 +14,8 @@
     <PackageReference Include="Microsoft.Build.Utilities.Core" ExcludeAssets="runtime" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Web.Xdt" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../Shared/AssemblyRetargets.cs" Link="Shared/AssemblyRetargets.cs" />
+  </ItemGroup>
 </Project>

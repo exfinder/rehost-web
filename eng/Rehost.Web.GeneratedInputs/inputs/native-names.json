@@ -24,8 +24,8 @@
     "REGPATH_MACHINE_APP": "\"Software\\\\Microsoft\\\\ASP.NET\"",
     "STATE_MODULE_BASE_NAME": "\"aspnet_state\"",
     "STATE_MODULE_FULL_NAME": "\"aspnet_state.exe\"",
-    "WEB_MODULE_BASE_NAME": "\"Rehost.Web\"",
-    "WEB_MODULE_FULL_NAME": "\"Rehost.Web.dll\"",
+    "WEB_MODULE_BASE_NAME": "\"System.Web\"",
+    "WEB_MODULE_FULL_NAME": "\"System.Web.dll\"",
     "WP_MODULE_BASE_NAME": "\"aspnet_wp\"",
     "WP_MODULE_FULL_NAME": "\"aspnet_wp.exe\""
   }

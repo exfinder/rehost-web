@@ -32,8 +32,8 @@ SQL-provider support for the runtime.
 
 ## Configuration
 
-The Host XDT replaces package defaults, removes runtime/CodeDOM settings, retargets
-Optimization controls and installs the SQLite connection, factory and provider.
+The Host XDT replaces package defaults, removes runtime/CodeDOM settings and
+installs the SQLite connection, factory and provider.
 The merged `modules` collection honors `remove name="FormsAuthentication"`.
 An unresolvable session provider is not constructed under `mode="InProc"`.
 Auto-generated machine keys persist per application; scale-out requires shared

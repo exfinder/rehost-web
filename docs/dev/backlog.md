@@ -64,7 +64,7 @@ scope changes. Priority buckets: Current, Next, Later, Parked, Rejected.
 
 ### Companion assemblies and client assets
 
-- Original AspNetWebStack assembly aliases in configuration, needed for MVC `Views/web.config`.
+- Type-forwarding facades so Framework-compiled libraries bind unmodified (high priority): [Framework assembly facades](follow-ups/framework-assembly-facades.md).
 - General embedded-resource and ScriptManager physical-script deployment.
 - Enabled application services, async error handling and excluded Extensions stacks: [Extensions](follow-ups/extensions-ajax-activation.md).
 - Optimization bundle caching, `VaryBy` breadth and request handling.

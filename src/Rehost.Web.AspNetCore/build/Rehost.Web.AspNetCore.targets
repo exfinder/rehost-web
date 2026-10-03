@@ -109,7 +109,7 @@
   <Target
     Name="RehostStageCore"
     Condition="'$(_RehostStageInvocation)' != '' and '$(RehostStageRoot)' != ''"
-    DependsOnTargets="RehostComputeStageItems;RehostCopyStagedFiles;RehostTransformStagedWebConfig;RehostCleanStaleStagedFiles;RehostVerifyStagedSite;RehostWriteStageManifest" />
+    DependsOnTargets="RehostComputeStageItems;RehostCopyStagedFiles;RehostTransformStagedWebConfig;RehostRetargetStagedConfigAssemblyNames;RehostCleanStaleStagedFiles;RehostVerifyStagedSite;RehostWriteStageManifest" />
 
   <Target Name="RehostComputeStageItems">
     <ItemGroup>
@@ -183,6 +183,14 @@
       Source="$(_RehostConfigSource)"
       Transform="$(_RehostWebConfigTransform)"
       Destination="$(RehostStageRoot)web.config" />
+  </Target>
+
+  <Target Name="RehostRetargetStagedConfigAssemblyNames">
+    <ItemGroup>
+      <_RehostNestedWebConfig Include="@(_RehostSiteContent)" Condition="'%(Filename)%(Extension)' == 'web.config'" />
+      <_RehostStagedWebConfig Include="$(RehostStageRoot)web.config;@(_RehostNestedWebConfig->'$(RehostStageRoot)%(RecursiveDir)%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <RetargetConfigAssemblyNames Files="@(_RehostStagedWebConfig)" />
   </Target>
 
   <Target Name="RehostCleanStaleStagedFiles">
