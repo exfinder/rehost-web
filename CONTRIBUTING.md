@@ -80,13 +80,15 @@ Rehost.Web is maintained by volunteers.
 
 ## Shipping a fix
 
-1. Land the fix on `main` with its test. Update the package version in
-   `src/Directory.Build.props`; every package takes the
-   new version, including ones that did not change, so internal dependencies
-   keep resolving to one version.
+1. Land the fix on `main` with its test. The push to `main` runs
+   `linux-x64.yml`; its `consumer` job packs the candidate at
+   `0.1.0-alpha.<run number>` and uploads it with `SHA256SUMS`. Every package
+   takes that version, including ones that did not change, so internal
+   dependencies keep resolving to one version. `VersionPrefix` in
+   `src/Directory.Build.props` changes only for a new release line.
 2. Add `docs/dev/releases/<version>.md` starting with `# <version>`: what changed,
-   and the build record. The push to `main` runs `linux-x64.yml`; its `consumer`
-   job packs the candidate and uploads it with `SHA256SUMS`.
+   and the build record. It can land after the candidate run; publishing reads
+   it from `main`.
 3. Rerun the checks the change touches from that candidate, not from a local
    pack: `gh run download <run id> -n candidate -D candidate`, then
    `eng/external-consumer.sh candidate <version> <port>` and the affected
@@ -95,4 +97,5 @@ Rehost.Web is maintained by volunteers.
    results in the release page.
 4. Run `publish.yml` by hand with the run id and the tag, `dry_run` on, and read
    the log. Then again with `dry_run` off. It pushes the packages and creates the
-   GitHub prerelease from the release page.
+   GitHub prerelease from the release page, tagging the commit the candidate run
+   built.

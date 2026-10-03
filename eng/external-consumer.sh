@@ -11,7 +11,7 @@
 set -euo pipefail
 
 FEED=$(cd "${1:?candidate feed directory}" && pwd)
-VERSION=${2:-0.1.0-alpha.1}
+VERSION=${2:-0.1.0-alpha.dev}
 PORT=${3:-5181}
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 WORK=$(mktemp -d "${TMPDIR:-/tmp}/rehost-consumer.XXXXXX")

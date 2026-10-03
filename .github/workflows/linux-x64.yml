@@ -29,9 +29,10 @@ jobs:
           dotnet-version: '10.0.302'
       - name: Pack the candidate
         run: |
-          dotnet restore Rehost.Web.slnx
+          suffix="alpha.${{ github.run_number }}"
+          dotnet restore Rehost.Web.slnx -p:VersionSuffix="$suffix"
           for project in $(grep -o 'src/[^"]*\.csproj' eng/PackageProjects.props); do
-            dotnet pack "$project" -c Release -o candidate -v q
+            dotnet pack "$project" -c Release -o candidate -v q -p:VersionSuffix="$suffix"
           done
           (cd candidate && sha256sum *.nupkg *.snupkg > SHA256SUMS)
           cat candidate/SHA256SUMS

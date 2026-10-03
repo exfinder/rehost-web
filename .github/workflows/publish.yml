@@ -7,7 +7,7 @@ on:
         description: The linux-x64 run whose candidate artifact is published
         required: true
       tag:
-        description: Release tag, for example v0.1.0-alpha.1
+        description: Release tag, v and the candidate's version, for example v0.1.0-alpha.42
         required: true
       dry_run:
         description: Verify the candidate and stop before pushing or tagging
@@ -33,6 +33,14 @@ jobs:
         run: gh run download "${{ inputs.run_id }}" -n candidate -D candidate
         env:
           GH_TOKEN: ${{ github.token }}
+      - name: Resolve the candidate commit
+        id: candidate
+        run: |
+          sha=$(gh run view "${{ inputs.run_id }}" --json headSha --jq .headSha)
+          echo "candidate ${{ inputs.run_id }} was built from $sha"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Verify the candidate
         run: |
           cd candidate
@@ -53,7 +61,7 @@ jobs:
         if: ${{ !inputs.dry_run }}
         run: |
           version="${{ inputs.tag }}"; version="${version#v}"
-          gh release create "${{ inputs.tag }}" --prerelease --target "$GITHUB_SHA" \
+          gh release create "${{ inputs.tag }}" --prerelease --target "${{ steps.candidate.outputs.sha }}" \
             --title "${{ inputs.tag }}" --notes-file "docs/dev/releases/$version.md" \
             candidate/*.nupkg candidate/*.snupkg candidate/SHA256SUMS
         env:

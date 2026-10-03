@@ -1,7 +1,7 @@
 <Project>
   <!-- Shared shipping metadata for the Rehost.Web packages. The version is the
-       single source for the whole family; local app feeds override it on the command
-       line with PackageVersion=1.0.0-local. -->
+       single source for the whole family; CI overrides VersionSuffix with its run
+       number, and local app feeds override it with PackageVersion=1.0.0-local. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <VersionPrefix>0.1.0</VersionPrefix>
-    <VersionSuffix>alpha.1</VersionSuffix>
+    <VersionSuffix>alpha.dev</VersionSuffix>
     <Authors>Rehost.Web contributors</Authors>
     <RepositoryUrl>https://github.com/exfinder/rehost-web</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
