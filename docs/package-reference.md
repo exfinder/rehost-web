@@ -34,7 +34,7 @@ or need a different setup:
 | Legacy package | Action |
 | --- | --- |
 | `Microsoft.AspNet.FriendlyUrls.Core` | Remove; included through `Rehost.AspNet.FriendlyUrls`. |
-| `WebGrease`, `Antlr` | Remove; included through `Rehost.AspNet.Web.Optimization`. |
+| `WebGrease`, `Antlr` | Included through `Rehost.AspNet.Web.Optimization`. Keep only the template's two references, which silence `NU1701`. |
 | `Microsoft.Owin`, `Owin` | Remove; included through `Rehost.Owin.Host.SystemWeb`. |
 | `Microsoft.AspNet.WebApi.Core`, `Microsoft.AspNet.WebApi.Client` | Remove; included through `Rehost.AspNet.WebApi.WebHost`. |
 | `Microsoft.AspNet.Razor` | Remove; included through `Rehost.AspNet.WebPages`. |
@@ -65,8 +65,22 @@ An explicit dependency version older than the required version fails restore
 with `NU1605`. For example, `Rehost.AspNet.WebPages` requires
 `Microsoft.AspNet.Razor` 3.3.0; an explicit 3.2.3 reference conflicts with it.
 
-The template suppresses `NU1701` for packages that ship only a .NET Framework
-build, such as `net45`. Suppressing the warning does not prove runtime
+`NU1701` means a package ships only a .NET Framework build, such as `net45`.
+The template silences it only for `Antlr` and `WebGrease`, which
+`Rehost.AspNet.Web.Optimization` brings in: the App project references both
+directly with `NoWarn="NU1701"`. Drop those two lines if you drop that package.
+
+For any other package that raises `NU1701`, prefer a version with a .NET or
+.NET Standard build, or test the code paths your application calls. After
+testing, silence the warning on that package's own reference:
+
+```xml
+<PackageReference Include="Owin" Version="1.0.0" NoWarn="NU1701" />
+```
+
+`NoWarn` on a reference does not reach the package's dependencies; a dependency
+that raises `NU1701` needs its own direct reference. The Host project inherits
+the App project's suppressions. Silencing the warning does not prove runtime
 compatibility.
 
 ## Worked examples

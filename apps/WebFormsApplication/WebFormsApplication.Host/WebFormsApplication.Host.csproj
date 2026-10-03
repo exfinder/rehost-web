@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
     <RehostSiteContentRoot>../WebFormsApplication/</RehostSiteContentRoot>
     <OutDir>rehost_root/bin/</OutDir>
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

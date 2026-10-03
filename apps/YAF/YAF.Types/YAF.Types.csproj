@@ -11,7 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
-    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <ProjectReference Include="../ServiceStack.OrmLite/ServiceStack.OrmLite.csproj" />

@@ -13,9 +13,12 @@ An original package bound to the .NET Framework's `System.Web` may compile
 but fail at runtime. Use a replacement package or
 [rebuild the library](migration.md#libraries-bound-to-systemweb).
 
-The template suppresses `NU1701`, the restore warning for packages that only
-ship a .NET Framework build. This does not prove a package's runtime
-compatibility.
+`NU1701` is the restore warning for a package that ships only a .NET Framework
+build. The template silences it only for `Antlr` and `WebGrease`, which
+`Rehost.AspNet.Web.Optimization` brings in; drop those two lines if you drop
+that package. Any other `NU1701` means the package can fail at runtime: prefer a
+version with a .NET or .NET Standard build, or test the code paths you call.
+See [warnings](package-reference.md#version-conflicts-and-warnings).
 
 ## CS0246 in an unused source file
 

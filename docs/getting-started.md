@@ -52,8 +52,9 @@ Open `MyApp.App/MyApp.App.csproj`. Use the
 your old `packages.config`, replacing packages tied to `System.Web`.
 
 The template includes Friendly URLs, Optimization, and ScriptManager packages.
-Remove those your app does not use. Packages such as Entity Framework 6,
-Autofac, log4net, and Newtonsoft.Json keep their original names.
+Remove those your app does not use; the `Antlr` and `WebGrease` lines go with
+Optimization. Packages such as Entity Framework 6, Autofac, log4net, and
+Newtonsoft.Json keep their original names.
 
 ## 4. Adjust configuration
 

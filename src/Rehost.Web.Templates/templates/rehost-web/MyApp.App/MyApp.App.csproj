@@ -7,7 +7,6 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <RehostAppContentRoot>../WEBAPP_PATH/</RehostAppContentRoot>
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,5 +23,7 @@
     <PackageReference Include="Rehost.AspNet.Web.Optimization.WebForms" Version="REHOST_VERSION" />
     <PackageReference Include="Rehost.AspNet.ScriptManager.MSAjax" Version="REHOST_VERSION" />
     <PackageReference Include="Rehost.AspNet.ScriptManager.WebForms" Version="REHOST_VERSION" />
+    <PackageReference Include="Antlr" Version="ANTLR_VERSION" NoWarn="NU1701" />
+    <PackageReference Include="WebGrease" Version="WEBGREASE_VERSION" NoWarn="NU1701" />
   </ItemGroup>
 </Project>

@@ -7,7 +7,6 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <RehostAppContentRoot>../WebFormsIdentityApplication/</RehostAppContentRoot>
-    <NoWarn>$(NoWarn);NU1701</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,23 +24,25 @@
     <PackageReference Include="Rehost.Owin.Host.SystemWeb" Version="$(RehostVersion)" />
     <PackageReference Include="Rehost.AspNet.ScriptManager.MSAjax" Version="$(RehostVersion)" />
     <PackageReference Include="Rehost.AspNet.ScriptManager.WebForms" Version="$(RehostVersion)" />
+    <PackageReference Include="Antlr" Version="3.5.0.2" NoWarn="NU1701" />
+    <PackageReference Include="WebGrease" Version="1.6.0" NoWarn="NU1701" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.5.2" />
-    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
-    <PackageReference Include="Microsoft.AspNet.Identity.EntityFramework" Version="2.2.4" />
-    <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.4" />
-    <PackageReference Include="Microsoft.Owin" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security.Facebook" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security.Google" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security.MicrosoftAccount" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security.OAuth" Version="4.2.3" />
-    <PackageReference Include="Microsoft.Owin.Security.Twitter" Version="4.2.3" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.AspNet.Identity.EntityFramework" Version="2.2.4" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Owin" Version="2.2.4" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security.Cookies" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security.Facebook" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security.Google" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security.MicrosoftAccount" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security.OAuth" Version="4.2.3" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.Owin.Security.Twitter" Version="4.2.3" NoWarn="NU1701" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Owin" Version="1.0.0" />
+    <PackageReference Include="Owin" Version="1.0.0" NoWarn="NU1701" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
   </ItemGroup>
 </Project>

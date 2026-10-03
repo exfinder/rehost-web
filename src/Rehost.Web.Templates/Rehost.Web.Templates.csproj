@@ -21,15 +21,20 @@
   </ItemGroup>
 
   <!-- The generated package references must name this package's own version, which is
-       known only at pack time. -->
+       known only at pack time, and the central versions of the bundling dependencies. -->
   <Target Name="StampTemplateVersion" BeforeTargets="_GetPackageFiles">
     <PropertyGroup>
       <_TemplateJsonSource>$(MSBuildProjectDirectory)/templates/rehost-web/.template.config/template.json</_TemplateJsonSource>
       <_TemplateJsonStamped>$(IntermediateOutputPath)template.json</_TemplateJsonStamped>
+      <_TemplateAntlrVersion>@(PackageVersion->WithMetadataValue('Identity', 'Antlr')->'%(Version)')</_TemplateAntlrVersion>
+      <_TemplateWebGreaseVersion>@(PackageVersion->WithMetadataValue('Identity', 'WebGrease')->'%(Version)')</_TemplateWebGreaseVersion>
     </PropertyGroup>
+    <Error
+      Condition="'$(_TemplateAntlrVersion)' == '' or '$(_TemplateWebGreaseVersion)' == ''"
+      Text="Directory.Packages.props must declare PackageVersion items for Antlr and WebGrease." />
     <WriteLinesToFile
       File="$(_TemplateJsonStamped)"
-      Lines="$([System.IO.File]::ReadAllText('$(_TemplateJsonSource)').Replace('REHOST_PACKAGE_VERSION', '$(PackageVersion)'))"
+      Lines="$([System.IO.File]::ReadAllText('$(_TemplateJsonSource)').Replace('REHOST_PACKAGE_VERSION', '$(PackageVersion)').Replace('ANTLR_PACKAGE_VERSION', '$(_TemplateAntlrVersion)').Replace('WEBGREASE_PACKAGE_VERSION', '$(_TemplateWebGreaseVersion)'))"
       Overwrite="true"
       WriteOnlyWhenDifferent="true" />
     <ItemGroup>

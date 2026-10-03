@@ -60,6 +60,20 @@
       "datatype": "string",
       "replaces": "REHOST_VERSION",
       "parameters": { "value": "REHOST_PACKAGE_VERSION" }
+    },
+    "antlrVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "datatype": "string",
+      "replaces": "ANTLR_VERSION",
+      "parameters": { "value": "ANTLR_PACKAGE_VERSION" }
+    },
+    "webGreaseVersion": {
+      "type": "generated",
+      "generator": "constant",
+      "datatype": "string",
+      "replaces": "WEBGREASE_VERSION",
+      "parameters": { "value": "WEBGREASE_PACKAGE_VERSION" }
     }
   }
 }

@@ -293,11 +293,43 @@ public sealed class PackageContractTests
         {
             var references = XDocument.Parse(templates.ReadText(TemplateRoot + project))
                 .Descendants("PackageReference")
+                .Where(r => ((string)r.Attribute("Include")!).StartsWith("Rehost.", StringComparison.Ordinal))
                 .ToList();
 
             references.ShouldNotBeEmpty(project);
             references.ShouldAllBe(r => (string)r.Attribute("Version")! == token);
         }
+    }
+
+    [Fact]
+    public void TemplateSilencesNu1701OnlyOnTheBundlingDependenciesAtTheirCentralVersions()
+    {
+        var templates = PackageFeed.Package(Templates);
+        using var json = JsonDocument.Parse(templates.ReadText($"{TemplateRoot}.template.config/template.json"));
+        var constants = json.RootElement.GetProperty("symbols").EnumerateObject()
+            .Select(s => s.Value)
+            .Where(s => s.TryGetProperty("generator", out var generator) && generator.GetString() == "constant")
+            .ToDictionary(
+                s => s.GetProperty("replaces").GetString()!,
+                s => s.GetProperty("parameters").GetProperty("value").GetString()!);
+        var app = XDocument.Parse(templates.ReadText($"{TemplateRoot}MyApp.App/MyApp.App.csproj"));
+        var host = XDocument.Parse(templates.ReadText($"{TemplateRoot}MyApp.Host/MyApp.Host.csproj"));
+
+        var others = app.Descendants("PackageReference")
+            .Where(r => !((string)r.Attribute("Include")!).StartsWith("Rehost.", StringComparison.Ordinal))
+            .Select(r => (
+                Id: (string)r.Attribute("Include")!,
+                Version: constants.GetValueOrDefault((string)r.Attribute("Version")!),
+                NoWarn: (string?)r.Attribute("NoWarn")))
+            .ToList();
+
+        others.ShouldBe(
+        [
+            ("Antlr", PackageFeed.CentralVersions["Antlr"], "NU1701"),
+            ("WebGrease", PackageFeed.CentralVersions["WebGrease"], "NU1701"),
+        ]);
+        app.Descendants("NoWarn").Concat(host.Descendants("NoWarn")).ShouldBeEmpty();
+        host.Descendants("PackageReference").Select(r => (string?)r.Attribute("NoWarn")).ShouldAllBe(n => n == null);
     }
 
     [Fact]

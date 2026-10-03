@@ -24,8 +24,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
-    <PackageReference Include="Farsi.Library" Version="2.7.0" />
-    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" />
+    <PackageReference Include="Farsi.Library" Version="2.7.0" NoWarn="NU1701" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.4" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.11" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
