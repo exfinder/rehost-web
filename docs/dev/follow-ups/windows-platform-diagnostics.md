@@ -27,3 +27,11 @@ accepted solutions.
   feature and its diagnostic.
 - Project-wide suppression is removed; remaining suppressions are narrow.
 - Runtime still builds with warnings treated as errors.
+
+## Classified
+
+- Platform-guarded start-up probes: `HttpRuntime.GetCurrentUserName` (the
+  worker-process account that health-monitoring events report) and the
+  registry read behind `AppVerifier.GetAppVerifierBehaviorFromRegistry`. Off
+  Windows they return what their swallowed exceptions produced before, `null`
+  and AppVerifier disabled, without throwing first.

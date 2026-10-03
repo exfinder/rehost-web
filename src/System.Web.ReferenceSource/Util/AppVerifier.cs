@@ -81,6 +81,10 @@
         // doesn't exist or doesn't have a known value, we return 'null', signifying that
         // AppVerifier is disabled.
         private static Action<AppVerifierException> GetAppVerifierBehaviorFromRegistry() {
+            if (!OperatingSystem.IsWindows()) {
+                return null;
+            }
+
             // use 0 as the default value if the key doesn't exist or is of the wrong type
             int valueFromRegistry = (Misc.GetAspNetRegValue(subKey: null, valueName: "RuntimeVerificationBehavior", defaultValue: null) as int?) ?? 0;
 

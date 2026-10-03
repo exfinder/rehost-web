@@ -3631,6 +3631,10 @@ namespace System.Web {
         }
 
         static string GetCurrentUserName() {
+            if (!OperatingSystem.IsWindows()) {
+                return null;
+            }
+
             try {
                 return WindowsIdentity.GetCurrent().Name;
             }
