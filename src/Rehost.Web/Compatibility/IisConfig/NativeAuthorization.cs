@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Configuration;
+using System.Linq;
 using System.Xml;
 
 namespace System.Web.IisConfig;
@@ -15,6 +16,8 @@ internal static class NativeAuthorization
         + " web.config, which guards managed handlers only, so static files still serve unless"
         + " runAllManagedModulesForAllRequests is true.";
 
+    private static readonly string[] AcceptedFlags = ["Read", "Write", "Script", "Execute"];
+
     internal static void Refuse(XmlDocument document, string configPath)
     {
         var section = document.SelectSingleNode("//system.webServer/security/authorization");
@@ -24,12 +27,23 @@ internal static class NativeAuthorization
                 "<authorization> under <system.webServer><security>", section, configPath);
         }
 
-        var handlers = document.SelectSingleNode("//system.webServer/handlers[@accessPolicy]");
-        if (handlers != null)
+        var policies = document.SelectNodes("//system.webServer/handlers[@accessPolicy]")!;
+        foreach (XmlNode handlers in policies)
         {
             var policy = handlers.Attributes!["accessPolicy"]!.Value;
-            throw Refusal($"""<handlers accessPolicy="{policy}">""", handlers, configPath);
+            if (!IsReadWriteScriptExecute(policy))
+            {
+                throw Refusal($"""<handlers accessPolicy="{policy}">""", handlers, configPath);
+            }
         }
+    }
+
+    private static bool IsReadWriteScriptExecute(string policy)
+    {
+        var flags = policy.Split(',', StringSplitOptions.TrimEntries);
+
+        return flags.All(flag => AcceptedFlags.Contains(flag, StringComparer.OrdinalIgnoreCase))
+            && AcceptedFlags.All(flag => flags.Contains(flag, StringComparer.OrdinalIgnoreCase));
     }
 
     private static ConfigurationErrorsException Refusal(

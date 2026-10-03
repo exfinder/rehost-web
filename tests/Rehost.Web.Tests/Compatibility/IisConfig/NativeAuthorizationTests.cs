@@ -28,12 +28,49 @@ public sealed class NativeAuthorizationTests : IDisposable
         failure.ShouldContain("<authorization> under <system.web> in that folder's", Case.Sensitive);
     }
 
-    [Fact]
-    public void An_Access_Policy_On_The_Handlers_Section_Fails_Activation()
+    [Theory]
+    [InlineData("Read")]
+    [InlineData("Read, Write, Script")]
+    [InlineData("Read, Write, Script, Execute, Source")]
+    [InlineData("Read, Write, Script, Execute,")]
+    public void Any_Other_Access_Policy_Fails_Activation(string policy)
     {
-        var app = WriteApplication("""<handlers accessPolicy="Read" />""");
+        var app = WriteApplication($"""<handlers accessPolicy="{policy}" />""");
 
-        RefusalMessage(app).ShouldContain("""<handlers accessPolicy="Read">""", Case.Sensitive);
+        RefusalMessage(app).ShouldContain($"""<handlers accessPolicy="{policy}">""", Case.Sensitive);
+    }
+
+    [Theory]
+    [InlineData("Read, Write, Script, Execute")]
+    [InlineData("execute,Script ,  WRITE,read")]
+    public void The_Read_Write_Script_Execute_Policy_Loads(string policy)
+    {
+        var app = WriteApplication($"""<handlers accessPolicy="{policy}" />""");
+        WriteFolder("uploads", $"""<handlers accessPolicy="{policy}" />""");
+
+        Should.NotThrow(() => IisServerConfiguration.Load(ShippedBaseline, app));
+    }
+
+    [Fact]
+    public void A_Refused_Location_Policy_Fails_Beside_An_Accepted_Root_Policy()
+    {
+        var app = WriteConfig(
+            _root.FullName,
+            """
+            <system.webServer>
+            <handlers accessPolicy="Read, Write, Script, Execute" />
+            </system.webServer>
+            <location path="uploads">
+            <system.webServer>
+            <handlers accessPolicy="Read" />
+            </system.webServer>
+            </location>
+            """);
+
+        var failure = RefusalMessage(app);
+
+        failure.ShouldContain("""<handlers accessPolicy="Read">""", Case.Sensitive);
+        failure.ShouldContain("""inside <location path="uploads">""", Case.Sensitive);
     }
 
     [Theory]
