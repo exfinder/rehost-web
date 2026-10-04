@@ -2893,10 +2893,20 @@ namespace System.Web {
             }
             // If it's not a physical path, call MapPath on it
             if (!UrlPath.IsAbsolutePhysicalPath(fn)) {
+                string virtualPath = fn;
                 if (Request != null)
                     fn = Request.MapPath(fn); // relative to current request
                 else
                     fn = HostingEnvironment.MapPath(fn);
+#if !NETFRAMEWORK
+                if (Path.IsPathRooted(virtualPath) && !File.Exists(fn) && File.Exists(virtualPath)) {
+                    throw new FileNotFoundException(
+                        "'" + virtualPath + "' was read as a virtual path and mapped to '" + fn
+                        + "', which does not exist. A physical path outside the application root is"
+                        + " not supported here; use a virtual path or a path under the application root.",
+                        virtualPath);
+                }
+#endif
             }
 
             return fn;

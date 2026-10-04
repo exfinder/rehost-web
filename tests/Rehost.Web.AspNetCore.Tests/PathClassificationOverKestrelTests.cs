@@ -64,10 +64,11 @@ public sealed class PathClassificationOverKestrelTests(PageLiveScenario scenario
 
         var transmit = await Probe("t", climbing);
 
-        transmit.ShouldStartWith("transmit=EX ", Case.Sensitive);
+        transmit.ShouldStartWith("transmit=EX FileNotFoundException: ", Case.Sensitive);
         transmit.ShouldNotContain("outside-file");
-        transmit.ShouldBe(await Probe("t", outside));
-        (await Probe("w", climbing)).ShouldBe(await Probe("w", outside));
+        transmit.ShouldContain("was read as a virtual path and mapped to", Case.Sensitive);
+        (await Probe("t", outside)).ShouldContain("was read as a virtual path and mapped to", Case.Sensitive);
+        (await Probe("w", climbing)).ShouldStartWith("write=EX FileNotFoundException: ", Case.Sensitive);
     }
 
     [Fact]
