@@ -111,6 +111,16 @@ throws `PlatformNotSupportedException` on .NET, and the request is already
 terminated. Delete the call; the catch block continues without it. See
 [request termination](dev/migration-reference.md#request-termination).
 
+## Windows Principal functionality is not supported on this platform
+
+`AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal)`
+works only on Windows. On Linux and macOS, after that call, reading
+`Thread.CurrentPrincipal` on a thread with no principal of its own throws
+`PlatformNotSupportedException`. Requests still run with `HttpContext.User` as
+on .NET Framework, and the log shows one warning naming the call. Application
+code that reads `Thread.CurrentPrincipal` on its own threads still throws:
+remove the call or make it Windows-only.
+
 ## Find the application's files
 
 The startup log prints `Rehost physical root path` for the staged site and

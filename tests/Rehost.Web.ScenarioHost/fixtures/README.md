@@ -68,6 +68,11 @@ beyond the per-fixture conflicts above:
 - `TimeoutSweepOverKestrelTests` runs a dedicated host over the `page` payload
   (`SweepLiveScenario`): its probe presents every registered request as
   expired, so any co-tenant's in-flight request would be spuriously timed out.
+- `PrincipalPolicyOverKestrelTests` runs a dedicated host over the `page`
+  payload (`PrincipalPolicyLiveScenario`): its page calls
+  `SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal)`, which is
+  app-domain-wide and cannot be undone, so every later bare-thread principal
+  read in the process sees it.
 - `timeout` and the collection fixtures stay dedicated for the reasons in the
   table: their configuration or process-global claims are what is under test.
   `postback` and `body` are registry-shared like `page`.

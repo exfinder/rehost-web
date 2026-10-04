@@ -118,6 +118,16 @@ internal static partial class RehostWebLogger
         this ILogger logger,
         string directory);
 
+    [LoggerMessage(EventId = 16, Level = LogLevel.Warning, Message =
+        "Thread.CurrentPrincipal cannot be read on this platform ({reason}): the application set " +
+        "AppDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal), which .NET supports on " +
+        "Windows only. Requests run with HttpContext.User as on .NET Framework; the application's " +
+        "own reads of Thread.CurrentPrincipal outside a request will throw. Remove the call or " +
+        "make it Windows-only.")]
+    internal static partial void ThreadPrincipalUnreadable(
+        this ILogger logger,
+        string reason);
+
     [LoggerMessage(EventId = 8, Level = LogLevel.Error, Message = "Unhandled runtime error from {source}")]
     internal static partial void RuntimeError(
         this ILogger logger,

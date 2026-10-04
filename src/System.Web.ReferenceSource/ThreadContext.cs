@@ -87,7 +87,7 @@
             HttpContext.ResetSqlDependencyCookie();
 
             // set principal on the current thread
-            _originalThreadPrincipal = Thread.CurrentPrincipal;
+            _originalThreadPrincipal = ThreadPrincipalReader.ReadCurrentPrincipal();
             HttpApplication.SetCurrentPrincipalWithAssert(HttpContext.User);
 
             // only set culture on the current thread if it is not initialized

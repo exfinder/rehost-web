@@ -198,3 +198,12 @@ public sealed class SweepLiveScenario()
 {
     public void Dispose() => Host.Dispose();
 }
+
+// SetPrincipalPolicy is app-domain-wide and cannot be undone, so the page that sets it would change
+// every later request on a shared host.
+public sealed class PrincipalPolicyLiveScenario()
+    : Scenario(LiveScenario.StartIsolated(Fixtures.Page, IsolationReason.ProcessDamage)),
+    IDisposable
+{
+    public void Dispose() => Host.Dispose();
+}
