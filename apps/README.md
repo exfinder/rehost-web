@@ -9,6 +9,7 @@ Each guide has run commands, things to try in the browser, and known limits.
 | [Web Forms template](WebFormsApplication/README.md) | Master pages, postbacks, friendly URLs, script and style bundles | None |
 | [Web Forms with user accounts](WebFormsIdentityApplication/README.md) | Registration and sign-in | SQLite database created automatically |
 | [eShop catalog](eShopLegacyWebForms/README.md) | Routed catalog pages with mock data | None |
+| [eShop MVC catalog](eShopLegacyMVC/README.md) | MVC controllers and views, form posts, a Web API controller, with mock data | None |
 | [AJAX Control Toolkit](AjaxControlToolkitSampleSite/README.md) | Interactive controls and runtime page compilation | None |
 | [BlogEngine.NET blog](BlogEngine/README.md) | Posts, pages, comments, feeds, Web API, a Web Pages admin panel, and a class library that uses System.Web | SQLite database copied on first build |
 | [Wingtip Toys store](WingtipToys/README.md) | Shopping cart, administrator tools, simulated checkout | Docker for SQL Server |

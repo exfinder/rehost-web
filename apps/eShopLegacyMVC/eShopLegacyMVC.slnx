@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Autofac.Integration.Mvc/Autofac.Integration.Mvc.csproj" />
+  <Project Path="eShopLegacy.Utilities/eShopLegacy.Utilities.csproj" />
+  <Project Path="eShopLegacyMVC.App/eShopLegacyMVC.App.csproj" />
+  <Project Path="eShopLegacyMVC.Host/eShopLegacyMVC.Host.csproj" />
+</Solution>

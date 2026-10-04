@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>Autofac.Integration.Mvc</AssemblyName>
+    <RootNamespace>Autofac.Integration.Mvc</RootNamespace>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <NoWarn>$(NoWarn);CS3001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
+    <PackageReference Include="Rehost.AspNet.Mvc" Version="$(RehostVersion)" />
+    <PackageReference Include="Autofac" Version="4.0.1" />
+    <PackageReference Include="Microsoft.AspNet.Razor" Version="3.3.0" NoWarn="NU1701" />
+  </ItemGroup>
+</Project>

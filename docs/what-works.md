@@ -26,8 +26,9 @@ separate setup.
 | Session | In-process session and custom providers work. Third-party providers need compatibility validation. SQL Server session mode is not yet implemented; StateServer is unsupported. Expiry events remain untested. |
 
 See the [Web Forms template](../apps/WebFormsApplication/README.md),
-[Wingtip Toys store](../apps/WingtipToys/README.md), and
-[YAF forum](../apps/YAF/README.md) for running examples and their setup.
+[Wingtip Toys store](../apps/WingtipToys/README.md),
+[YAF forum](../apps/YAF/README.md), and
+[eShop MVC catalog](../apps/eShopLegacyMVC/README.md) for running examples and their setup.
 
 ## What might need changing?
 

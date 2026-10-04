@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RehostSiteContentRoot>../eShopLegacyMVC/</RehostSiteContentRoot>
+    <OutDir>rehost_root/bin/</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Rehost.Web.AspNetCore" Version="$(RehostVersion)" />
+    <ProjectReference Include="../eShopLegacyMVC.App/eShopLegacyMVC.App.csproj" />
+  </ItemGroup>
+</Project>
