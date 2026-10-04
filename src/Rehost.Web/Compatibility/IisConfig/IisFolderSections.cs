@@ -77,9 +77,9 @@ internal sealed class IisFolderSections
         return new IisFolderSections(applicationRoutes, applicationClientCache, folders, prefix);
     }
 
-    // The deepest folder record covering the request's directory, or the application root's list
-    // when no folder above it carries a <handlers> section - which is every request in an
-    // application that has no folder web.config at all.
+    // The deepest folder record covering the request's directory, or the application root's values
+    // when no folder above it carries a web.config - which is every request in an application that
+    // has none.
     internal IReadOnlyList<IisHandlerRoute> RoutesFor(VirtualPath? path) =>
         RecordFor(path)?.Routes ?? _rootRoutes;
 
