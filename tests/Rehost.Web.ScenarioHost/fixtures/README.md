@@ -35,6 +35,7 @@ meet the same bar.
 | `config-error` | Its `web.config` carries a section no `machine.config` declares, so activation fails in `HostingInit` and the application answers 500 to its one request before the runtime ends the process. Nothing else can be hosted on a configuration the runtime refuses to load. |
 | `classic-unflagged` | Classic registrations without the validation flag: activation is refused, so this application can never serve a request. |
 | `webpages` | ASP.NET Web Pages: `WebPageHttpModule` registers application-wide and reroutes every extensionless request to a matching `.cshtml` page, which the other fixtures' routing claims cannot tolerate. The three Web Pages assemblies ride in its bin, never beside the host, with `System.Web.Razor` staged beside them. |
+| `mvc` | ASP.NET MVC 5: `Application_Start` registers the default `{controller}/{action}/{id}` route and an area route app-wide, so every extensionless URL no file serves reaches MVC, and `webpages:Enabled=false` at the root forbids every `.cshtml`; the `webpages` claims tolerate neither. Its compiled controllers (`Rehost.Web.ScenarioMvc`), `Rehost.Web.Mvc`, the Web Pages assemblies, `System.Web.Razor` and `Mindbox.Data.Linq` ride in its bin. `Views/Web.config` and `Areas/Admin/Views/Web.config` keep the original `System.Web.Mvc` and `System.Web.WebPages.Razor` names that fixture staging rewrites. |
 
 ## Host tenancy
 

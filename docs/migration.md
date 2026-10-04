@@ -27,6 +27,7 @@ Common replacements:
 | OWIN hosting | `Rehost.Owin.Host.SystemWeb` |
 | Web API 2 hosting | `Rehost.AspNet.WebApi.WebHost` |
 | Web Pages | `Rehost.AspNet.WebPages` |
+| MVC 5 | `Rehost.AspNet.Mvc` |
 
 The template already includes the common Web Forms packages. Keep only those
 your application uses. See the [full package reference](package-reference.md)

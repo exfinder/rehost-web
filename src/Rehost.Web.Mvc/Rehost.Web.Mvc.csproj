@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>System.Web.Mvc</RootNamespace>
+    <PackageId>Rehost.AspNet.Mvc</PackageId>
+    <Description>ASP.NET MVC 5 over the Rehost.Web ASP.NET runtime.</Description>
+    <RehostAssemblyVersion>5.3.0.0</RehostAssemblyVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DefineConstants>$(DefineConstants);ASPNETMVC</DefineConstants>
+    <NoWarn>$(NoWarn);CS0618;CS3001;CS3002;CS3003;CS3009;SYSLIB0054</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties/MvcResources.resx" LogicalName="System.Web.Mvc.Properties.MvcResources.resources" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Rehost.Web.Package/Rehost.Web.Package.csproj" />
+    <ProjectReference Include="../Rehost.AspNet.WebPages/Rehost.AspNet.WebPages.csproj" />
+    <ProjectReference Include="../Rehost.Web/Rehost.Web.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.WebPages/Rehost.Web.WebPages.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.Razor" NoWarn="NU1701" />
+  </ItemGroup>
+</Project>

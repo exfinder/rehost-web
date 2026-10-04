@@ -6,7 +6,7 @@ Your app's dependencies and configuration determine what needs changing.
 
 ## What can I run?
 
-C# applications using Web Forms, Web Pages, or Web API 2. Validated platforms
+C# applications using Web Forms, Web Pages, MVC 5, or Web API 2. Validated platforms
 are Windows x64, Linux x64 and arm64, and macOS arm64.
 
 The [getting started guide](getting-started.md) covers Web Application Projects
@@ -20,6 +20,7 @@ separate setup.
 | Web Forms | Pages, common controls, master pages, user controls, postbacks, and view state work. Coverage varies by control and feature. |
 | AJAX | ScriptManager and UpdatePanel partial updates work. Some debug and localized script resources are unavailable. |
 | Web Pages | `.cshtml` pages, layouts, and page includes work. `System.Web.Helpers` and WebMatrix data/authentication libraries are not included. |
+| MVC 5 | Controllers, areas, and Razor views with layouts work through the Rehost MVC package. Libraries built against `System.Web.Mvc`, such as Autofac.Mvc5, need recompiling. |
 | Web API 2 | Controllers, JSON requests and responses, and model binding work through the Rehost Web API host package. |
 | Sign-in and roles | ASP.NET Identity 2.2 cookie sign-in and role checks are exercised. Provider-based authentication has remaining gaps. |
 | Session | In-process session and custom providers work. Third-party providers need compatibility validation. SQL Server session mode is not yet implemented; StateServer is unsupported. Expiry events remain untested. |

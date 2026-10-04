@@ -23,7 +23,8 @@ Katana                        github.com/aspnet/AspNetKatana                    
   Microsoft.Owin.Host.SystemWeb,  v4.2.3, ceea1fc0670221495b470f0b1ffcdd7526113a22
   Owin.Loader
 ASP.NET Web Stack             github.com/aspnet/AspNetWebStack                   Apache-2.0   Rehost.AspNet.WebApi.WebHost,
-  System.Web.Http.WebHost,    v3.3.0, 1231b77d79956152831b75ad7f094f844251b97f                Rehost.AspNet.WebPages
+  System.Web.Http.WebHost,    v3.3.0, 1231b77d79956152831b75ad7f094f844251b97f                Rehost.AspNet.WebPages,
+  System.Web.Mvc,                                                                             Rehost.AspNet.Mvc
   System.Web.WebPages,
   System.Web.WebPages.Razor,
   System.Web.WebPages.Deployment

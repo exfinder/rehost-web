@@ -79,6 +79,7 @@ scope changes. Priority buckets: Current, Next, Later, Parked, Rejected.
 - Roslyn ReadyToRun for package consumers: [Roslyn packaging](follow-ups/roslyn-r2r-packaging.md).
 - Clear activation failure when configuration names a missing companion in a partial deployment.
 - C# application journey projects alongside App/Host, usable by external-consumer and CI runners.
+- MVC variant of the `rehost-web` template.
 
 ## Parked
 

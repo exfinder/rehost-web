@@ -145,6 +145,9 @@ public sealed class FriendlyUrlsLiveScenario(ScenarioHostRegistry registry)
 public sealed class WebPagesLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.WebPages));
 
+public sealed class MvcLiveScenario(ScenarioHostRegistry registry)
+    : Scenario(registry.GetOrAdd(Fixtures.Mvc));
+
 public sealed class AuthLiveScenario(ScenarioHostRegistry registry)
     : Scenario(registry.GetOrAdd(Fixtures.Auth));
 

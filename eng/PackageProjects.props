@@ -13,6 +13,7 @@
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.ScriptManager.WebForms/Rehost.ScriptManager.WebForms.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.AspNetCore/Rehost.Web.AspNetCore.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
+    <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Mvc/Rehost.Web.Mvc.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Optimization/Rehost.Web.Optimization.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Package/Rehost.Web.Package.csproj" />
     <RehostPackageProject Include="$(RehostRepoRoot)src/Rehost.Web.Templates/Rehost.Web.Templates.csproj" />

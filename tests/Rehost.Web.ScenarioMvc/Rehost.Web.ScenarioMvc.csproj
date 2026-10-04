@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../eng/Repo.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Rehost.Web/Rehost.Web.csproj" />
+    <ProjectReference Include="../../src/Rehost.Web.Mvc/Rehost.Web.Mvc.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mindbox.Data.Linq" />
+  </ItemGroup>
+
+  <Import Project="$(RehostRepoRoot)src/Rehost.Web.Package/build/Rehost.Web.targets" />
+</Project>

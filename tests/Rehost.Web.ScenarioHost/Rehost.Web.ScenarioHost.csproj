@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <!-- Not referenced by the host: the OWIN, Web API and Razor assemblies are staged into the
-       friendlyurls and webpages fixture bins, where the application resolves them. -->
+       friendlyurls, webpages and mvc fixture bins, where the application resolves them. -->
   <ItemGroup>
     <PackageReference Include="Owin" NoWarn="NU1701" />
     <PackageReference Include="Microsoft.Owin" NoWarn="NU1701" />
@@ -59,20 +59,31 @@
     <FixturePayloadProject
       Include="../../src/Rehost.Web.WebPages/Rehost.Web.WebPages.csproj"
       MustNotLeakBesideHost="true"
-      Bins="webpages" />
+      Bins="webpages;mvc" />
     <FixturePayloadProject
       Include="../../src/Rehost.Web.WebPages.Razor/Rehost.Web.WebPages.Razor.csproj"
       MustNotLeakBesideHost="true"
-      Bins="webpages" />
+      Bins="webpages;mvc" />
     <FixturePayloadProject
       Include="../../src/Rehost.Web.WebPages.Deployment/Rehost.Web.WebPages.Deployment.csproj"
       MustNotLeakBesideHost="true"
-      Bins="webpages" />
+      Bins="webpages;mvc" />
+    <FixturePayloadProject
+      Include="../../src/Rehost.Web.Mvc/Rehost.Web.Mvc.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="mvc" />
+    <FixturePayloadProject
+      Include="../Rehost.Web.ScenarioMvc/Rehost.Web.ScenarioMvc.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="mvc" />
   </ItemGroup>
 
   <Target Name="StageScenarioPayload" AfterTargets="Build" DependsOnTargets="StageFixtures;StageFixtureBinPayload" />
 
   <Target Name="StageScenarioFixtureBins" BeforeTargets="StageFixtureBinPayload" DependsOnTargets="StageFixtures">
+    <MSBuild Projects="../Rehost.Web.ScenarioMvc/Rehost.Web.ScenarioMvc.csproj" Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" ItemName="_ScenarioMvcTarget" />
+    </MSBuild>
     <ItemGroup>
       <_FixtureSourceDir Include="$([System.IO.Directory]::GetDirectories('$(MSBuildProjectDirectory)/fixtures'))" />
       <!-- The probe assembly leans on the shared journal, so its dependency ships too. -->
@@ -83,7 +94,8 @@
       <FixtureBinFile
         Include="$(TargetDir)System.Web.Http.dll;$(TargetDir)System.Net.Http.Formatting.dll;$(TargetDir)Newtonsoft.Json.dll"
         Bins="friendlyurls" />
-      <FixtureBinFile Include="$(TargetDir)System.Web.Razor.dll" Bins="webpages" />
+      <FixtureBinFile Include="$(TargetDir)System.Web.Razor.dll" Bins="webpages;mvc" />
+      <FixtureBinFile Include="@(_ScenarioMvcTarget->'%(RootDir)%(Directory)Mindbox.Data.Linq.dll')" Bins="mvc" />
       <FixtureBinDir Include="@(_FixtureSourceDir->'$(TargetDir)fixtures/%(Filename)/bin')" />
     </ItemGroup>
   </Target>

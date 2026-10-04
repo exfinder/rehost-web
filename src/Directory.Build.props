@@ -21,9 +21,9 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
-  <!-- Imported Apache-2.0 trees make up nearly all of these five packages; the
+  <!-- Imported Apache-2.0 trees make up nearly all of these six packages; the
        expression follows the payload, not the repository license. -->
-  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.Web.Optimization' or '$(MSBuildProjectName)' == 'Rehost.AspNet.Web.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.Owin.Host.SystemWeb' or '$(MSBuildProjectName)' == 'Rehost.Web.Http.WebHost' or '$(MSBuildProjectName)' == 'Rehost.AspNet.WebPages'">
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Rehost.Web.Optimization' or '$(MSBuildProjectName)' == 'Rehost.AspNet.Web.Optimization.WebForms' or '$(MSBuildProjectName)' == 'Rehost.Owin.Host.SystemWeb' or '$(MSBuildProjectName)' == 'Rehost.Web.Http.WebHost' or '$(MSBuildProjectName)' == 'Rehost.AspNet.WebPages' or '$(MSBuildProjectName)' == 'Rehost.Web.Mvc'">
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
   </PropertyGroup>
 

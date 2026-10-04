@@ -1,0 +1,9 @@
+@model Rehost.Web.ScenarioMvc.Models.PayloadModel
+@{
+    Layout = null;
+}
+@using (Html.BeginForm())
+{
+@Html.HiddenFor(m => m.Payload)
+@Html.EditorFor(m => m.Payload, null, "Mirror")
+}

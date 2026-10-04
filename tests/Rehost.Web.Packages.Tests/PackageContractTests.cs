@@ -11,12 +11,14 @@ public sealed class PackageContractTests
 {
     private const string Bundle = "Rehost.Web";
     private const string WebPages = "Rehost.AspNet.WebPages";
+    private const string Mvc = "Rehost.AspNet.Mvc";
     private const string Templates = "Rehost.Web.Templates";
     private const string TemplateRoot = "content/rehost-web/";
 
     private static readonly string[] PublicPackages =
     [
         "Rehost.AspNet.FriendlyUrls",
+        "Rehost.AspNet.Mvc",
         "Rehost.AspNet.ScriptManager.MSAjax",
         "Rehost.AspNet.ScriptManager.WebForms",
         "Rehost.AspNet.Web.Optimization",
@@ -49,6 +51,7 @@ public sealed class PackageContractTests
 
     private static readonly Dictionary<string, string[]> SatelliteAssemblies = new()
     {
+        [Mvc] = ["Rehost.Web.Mvc"],
         ["Rehost.AspNet.ScriptManager.MSAjax"] = ["Rehost.ScriptManager.MSAjax"],
         ["Rehost.AspNet.ScriptManager.WebForms"] = ["Rehost.ScriptManager.WebForms"],
         ["Rehost.AspNet.Web.Optimization"] = ["Rehost.Web.Optimization"],
@@ -56,18 +59,19 @@ public sealed class PackageContractTests
         [WebPages] = ["Rehost.Web.WebPages", "Rehost.Web.WebPages.Deployment", "Rehost.Web.WebPages.Razor"],
     };
 
-    private static readonly string[] AssembliesReadingTheirOwnWebPagesVersion =
-    [
-        "Rehost.Web.WebPages.dll",
-        "Rehost.Web.WebPages.Deployment.dll",
-        "Rehost.Web.WebPages.Razor.dll",
-    ];
+    private static readonly Dictionary<string, string> AssembliesReadingTheirOwnUpstreamVersion = new()
+    {
+        ["Rehost.Web.Mvc.dll"] = "5.3.0.0",
+        ["Rehost.Web.WebPages.dll"] = "3.0.0.0",
+        ["Rehost.Web.WebPages.Deployment.dll"] = "3.0.0.0",
+        ["Rehost.Web.WebPages.Razor.dll"] = "3.0.0.0",
+    };
 
     private static IEnumerable<CandidatePackage> Satellites =>
         PackageFeed.Packages.Where(p => p.Id != Bundle && p.Id != Templates);
 
     [Fact]
-    public void FeedHoldsTheElevenPublicPackagesAtOneVersion()
+    public void FeedHoldsTheTwelvePublicPackagesAtOneVersion()
     {
         PackageFeed.Packages.Select(p => p.Id).ShouldBe(PublicPackages.Order(StringComparer.Ordinal));
         PackageFeed.Packages.Select(p => p.Version).Distinct().ShouldHaveSingleItem();
@@ -111,6 +115,7 @@ public sealed class PackageContractTests
                 "Rehost.Web.Extensions.dll",
                 "Rehost.Web.Http.WebHost.dll",
                 "Rehost.Web.Infrastructure.dll",
+                "Rehost.Web.Mvc.dll",
                 "Rehost.Web.Optimization.dll",
                 "Rehost.Web.Services.dll",
                 "Rehost.Web.WebPages.Deployment.dll",
@@ -119,10 +124,12 @@ public sealed class PackageContractTests
                 "Rehost.Web.dll",
             ]);
         versions.ShouldAllBe(v => v.FileVersion == familyVersion);
-        versions.Where(v => !AssembliesReadingTheirOwnWebPagesVersion.Contains(v.Assembly))
+        versions.Where(v => !AssembliesReadingTheirOwnUpstreamVersion.ContainsKey(v.Assembly))
             .ShouldAllBe(v => v.AssemblyVersion == familyVersion);
-        versions.Where(v => AssembliesReadingTheirOwnWebPagesVersion.Contains(v.Assembly))
-            .Select(v => v.AssemblyVersion).ShouldBe(["3.0.0.0", "3.0.0.0", "3.0.0.0"]);
+        versions.Where(v => AssembliesReadingTheirOwnUpstreamVersion.ContainsKey(v.Assembly))
+            .Select(v => $"{v.Assembly} {v.AssemblyVersion}")
+            .Order(StringComparer.Ordinal)
+            .ShouldBe(AssembliesReadingTheirOwnUpstreamVersion.Select(a => $"{a.Key} {a.Value}").Order(StringComparer.Ordinal));
     }
 
     [Fact]
@@ -225,6 +232,25 @@ public sealed class PackageContractTests
         [
             new("Microsoft.AspNet.Razor", "3.3.0"),
             new(Bundle, PackageFeed.Package(Bundle).Version),
+        ]);
+        ((string)license.Attribute("type")!).ShouldBe("expression");
+        license.Value.ShouldBe("Apache-2.0");
+    }
+
+    [Fact]
+    public void MvcDependsOnTheBundleWebPagesAndRazorUnderApache()
+    {
+        var mvc = PackageFeed.Package(Mvc);
+        var version = PackageFeed.Package(Bundle).Version;
+        var license = XDocument.Parse(mvc.ReadText($"{Mvc}.nuspec"))
+            .Descendants()
+            .Single(e => e.Name.LocalName == "license");
+
+        mvc.Dependencies.OrderBy(d => d.Key, StringComparer.Ordinal).ShouldBe(
+        [
+            new("Microsoft.AspNet.Razor", "3.3.0"),
+            new(WebPages, version),
+            new(Bundle, version),
         ]);
         ((string)license.Attribute("type")!).ShouldBe("expression");
         license.Value.ShouldBe("Apache-2.0");

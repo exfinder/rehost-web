@@ -19,6 +19,7 @@
     <Project Path="src/Rehost.Web.Extensions/Rehost.Web.Extensions.csproj" />
     <Project Path="src/Rehost.Web.Http.WebHost/Rehost.Web.Http.WebHost.csproj" />
     <Project Path="src/Rehost.Web.Infrastructure/Rehost.Web.Infrastructure.csproj" />
+    <Project Path="src/Rehost.Web.Mvc/Rehost.Web.Mvc.csproj" />
     <Project Path="src/Rehost.Web.Optimization/Rehost.Web.Optimization.csproj" />
     <Project Path="src/Rehost.Web.Package/Rehost.Web.Package.csproj" />
     <Project Path="src/Rehost.Web.Services/Rehost.Web.Services.csproj" />
@@ -54,6 +55,7 @@
     <Project Path="tests/Rehost.Web.TestSupport/Rehost.Web.TestSupport.csproj" />
     <Project Path="tests/Rehost.Web.ScenarioProbes/Rehost.Web.ScenarioProbes.csproj" />
     <Project Path="tests/Rehost.Web.ScenarioProbes.Dynamic/Rehost.Web.ScenarioProbes.Dynamic.csproj" />
+    <Project Path="tests/Rehost.Web.ScenarioMvc/Rehost.Web.ScenarioMvc.csproj" />
     <Project Path="tests/Rehost.Web.Services.Tests/Rehost.Web.Services.Tests.csproj" />
   </Folder>
 </Solution>

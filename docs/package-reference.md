@@ -21,6 +21,7 @@ the table also covers the built-in `System.Web` assemblies.
 | `Microsoft.Owin.Host.SystemWeb` | `Rehost.Owin.Host.SystemWeb` |
 | `Microsoft.AspNet.WebApi.WebHost` | `Rehost.AspNet.WebApi.WebHost` |
 | `Microsoft.AspNet.WebPages` | `Rehost.AspNet.WebPages` |
+| `Microsoft.AspNet.Mvc` | `Rehost.AspNet.Mvc` |
 
 `Rehost.Web` includes the assemblies `Rehost.Web`, `Rehost.Web.Extensions`,
 `Rehost.Web.ApplicationServices`, and `Rehost.Web.Services` in place of the

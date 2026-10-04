@@ -10,9 +10,14 @@ apps/YAF/yafsrc/** -text
 apps/BlogEngine/BlogEngine/** -text
 src/Rehost.Web.Http.WebHost/** -text
 src/Rehost.Web.Http.WebHost/*.csproj text
+src/Rehost.Web.Mvc/** -text
+src/Rehost.Web.Mvc/*.csproj text
+src/Rehost.Web.Mvc/AssemblyInfo.cs text
+src/Rehost.Web.Mvc/LinqBinary.cs text
 src/Rehost.Web.WebPages/** -text
 src/Rehost.Web.WebPages/*.csproj text
 src/Rehost.Web.WebPages/AssemblyInfo.cs text
+src/Rehost.Web.WebPages/InternalsVisibleTo.cs text
 src/Rehost.Web.WebPages.Deployment/** -text
 src/Rehost.Web.WebPages.Deployment/*.csproj text
 src/Rehost.Web.WebPages.Deployment/AssemblyInfo.cs text

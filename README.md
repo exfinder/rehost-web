@@ -4,7 +4,7 @@
 
 Rehost.Web brings classic ASP.NET applications to .NET 10 with minimal
 application changes. Keep your `.aspx` pages, code-behind, and `Web.config`.
-Also supports Web Pages and Web API.
+Also supports Web Pages, MVC 5 and Web API.
 
 It ports the .NET Framework's `System.Web` runtime from Microsoft Reference
 Source and uses Kestrel to host your application in place of IIS.
