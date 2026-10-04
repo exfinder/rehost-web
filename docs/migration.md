@@ -156,6 +156,11 @@ and limits when sharing keys with .NET Framework.
 Run the flows your users rely on: sign-in, postbacks, uploads, and any stateful
 operations. The [example applications](../apps/README.md) show concrete journeys.
 
+- Backslashes in path literals: the runtime maps virtual paths either way, but
+  a physical path your code builds with a backslash, such as
+  `Path.Combine(root, @"App_Data\x")`, names a file called `App_Data\x` on
+  Linux and macOS. Use forward slashes or separate `Path.Combine` segments. A
+  Linux run finds the ones you miss.
 - For startup failures, use [Troubleshooting](troubleshooting.md).
 - For publishing, use [Build and publish](build-and-publish.md).
 - For containers or custom file locations, check the

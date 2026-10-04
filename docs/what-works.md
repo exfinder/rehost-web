@@ -40,6 +40,8 @@ See the [Web Forms template](../apps/WebFormsApplication/README.md),
   database connection.
 - Rebuild and restart after editing pages or configuration.
   Automatic file-change reload is not implemented.
+- Fix backslash path literals in application code; on Linux and macOS a
+  backslash is part of the file name.
 
 The [migration guide](migration.md) explains these steps.
 
