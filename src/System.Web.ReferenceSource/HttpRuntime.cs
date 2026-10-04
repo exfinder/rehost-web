@@ -1072,7 +1072,7 @@ namespace System.Web {
             // .NET Framework loader, so 'bin' and the codegen directory reach the loader through
             // an explicit fallback resolver instead. Runtime-owned assemblies resolve first and
             // win, reproducing the Framework precedence where the GAC beat both.
-            GeneratedAssemblyLoader.Install(appDomainAppPath + BinDirectoryName, _codegenDir);
+            GeneratedAssemblyLoader.Install(appDomainAppPath + BinDirectoryName, _codegenDir, ProbingPaths.Read(appDomainAppPath));
 #endif
 
             _fusionInited = true;

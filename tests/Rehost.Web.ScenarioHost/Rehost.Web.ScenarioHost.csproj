@@ -48,6 +48,11 @@
       MustNotLeakBesideHost="true"
       Bins="modules;modules-rammfar" />
     <FixturePayloadProject
+      Include="../Rehost.Web.ScenarioProbes.Dynamic/Rehost.Web.ScenarioProbes.Dynamic.csproj"
+      MustNotLeakBesideHost="true"
+      Bins="page"
+      Subfolder="probing" />
+    <FixturePayloadProject
       Include="../../src/Rehost.AspNet.FriendlyUrls/Rehost.AspNet.FriendlyUrls.csproj"
       Bins="friendlyurls" />
     <FixturePayloadProject

@@ -10,10 +10,10 @@
       FixtureBinPayload      already-built files for every bin
       FixtureBinFile         already-built files for some bins; Bins names them
       FixtureBinDir          the bin directories
-    A payload's Bins metadata scopes it to the named fixtures. Build-graph edges for
-    payload projects are derived below; payload assemblies stay out of consumers' own
-    outputs and reach the application only through the fixture bin, as an application's
-    binaries do.
+    A payload's Bins metadata scopes it to the named fixtures; its Subfolder metadata
+    places it in that folder under each bin. Build-graph edges for payload projects are
+    derived below; payload assemblies stay out of consumers' own outputs and reach the
+    application only through the fixture bin, as an application's binaries do.
   -->
 
   <!-- Warm MSBuild nodes cache this assembly once loaded: after editing the task source, run

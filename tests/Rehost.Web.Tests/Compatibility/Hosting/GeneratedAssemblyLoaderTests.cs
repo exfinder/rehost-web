@@ -44,7 +44,7 @@ public sealed class GeneratedAssemblyLoaderTests
     public void Probes_The_Codegen_Directory_Before_The_Application_Bin_Directory()
     {
         var candidates = GeneratedAssemblyLoader
-            .CandidatePaths("/app/bin", "/codegen", new AssemblyName("App_Code.abc12345"))
+            .CandidatePaths("/app/bin", "/codegen", [], new AssemblyName("App_Code.abc12345"))
             .ToArray();
 
         candidates.ShouldBe(
@@ -63,13 +63,34 @@ public sealed class GeneratedAssemblyLoaderTests
         };
 
         var candidates = GeneratedAssemblyLoader
-            .CandidatePaths("/app/bin", "/codegen", name)
+            .CandidatePaths("/app/bin", "/codegen", ["/app/bin/Providers"], name)
             .ToArray();
 
-        // A satellite never lives beside the application's own binaries, so 'bin' is not probed.
+        // A satellite never lives beside the application's own binaries, so neither 'bin' nor a
+        // probing folder is probed.
         candidates.ShouldBe(
         [
             Path.Combine("/codegen", "fr", "App_GlobalResources.abc12345.resources.dll"),
+        ]);
+    }
+
+    [Fact]
+    public void Probes_The_Probing_Folders_After_The_Application_Bin_Directory_In_Written_Order()
+    {
+        var candidates = GeneratedAssemblyLoader
+            .CandidatePaths(
+                "/app/bin",
+                "/codegen",
+                ["/app/bin/Providers", "/app/modules"],
+                new AssemblyName("Contoso.Providers.Caching"))
+            .ToArray();
+
+        candidates.ShouldBe(
+        [
+            Path.Combine("/codegen", "Contoso.Providers.Caching.dll"),
+            Path.Combine("/app/bin", "Contoso.Providers.Caching.dll"),
+            Path.Combine("/app/bin/Providers", "Contoso.Providers.Caching.dll"),
+            Path.Combine("/app/modules", "Contoso.Providers.Caching.dll"),
         ]);
     }
 

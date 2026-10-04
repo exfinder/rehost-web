@@ -91,7 +91,7 @@ site="WebFormsApplication.Host/rehost_root"
 echo "== staged site"
 ls "$site/bin" | grep -E '^Rehost\..*\.dll$'
 ls "$site/bin/configs"
-grep -q '<runtime' "$site/web.config" && { echo "FAIL  XDT did not remove <runtime>"; exit 1; }
+grep -q '<dependentAssembly' "$site/web.config" && { echo "FAIL  XDT did not remove the binding redirects"; exit 1; }
 grep -q 'assembly="Rehost.AspNet.Web.Optimization.WebForms"' "$site/web.config" || { echo "FAIL  XDT did not rewrite the Optimization controls assembly"; exit 1; }
 [ "$(ls "$site" | grep -ci '^web\.config$')" = 1 ] || { echo "FAIL  staged more than one web.config"; exit 1; }
 echo "PASS  staged web.config carries the XDT result"

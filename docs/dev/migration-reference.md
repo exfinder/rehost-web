@@ -10,7 +10,9 @@ The legacy `Web.config` is never edited. The build applies
 `<Host>/Web.Rehost.config`, an XDT transform, and writes the result to
 `rehost_root/web.config`; publish applies `Web.$(Configuration).config` first.
 A `Web.Rehost.config` beside the Host replaces the package default wholesale, so
-keep its adjustments and add the application's own below them.
+keep its adjustments and add the application's own below them. The default
+transform removes binding redirects and keeps `<probing>`, which the runtime
+honors.
 Typical additions:
 
 - connection strings for the environment (LocalDb is Windows-only; a named

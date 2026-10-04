@@ -119,7 +119,7 @@ public sealed class ConfigRetargetStagingTests : IDisposable
         root.ShouldContain(
             """<add name="Mvc" type="Contoso.Wrapper`1[[Contoso.Item, System.Web.Mvc]], Rehost.Web.Mvc" />""",
             Case.Sensitive);
-        root.ShouldNotContain("<runtime");
+        root.ShouldNotContain("<dependentAssembly");
     }
 
     private void WriteSite()
@@ -144,7 +144,11 @@ public sealed class ConfigRetargetStagingTests : IDisposable
                 </httpModules>
               </system.web>
               <runtime>
-                <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1" />
+                <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+                  <dependentAssembly>
+                    <assemblyIdentity name="System.Web.Mvc" publicKeyToken="31bf3856ad364e35" />
+                  </dependentAssembly>
+                </assemblyBinding>
               </runtime>
             </configuration>
             """);

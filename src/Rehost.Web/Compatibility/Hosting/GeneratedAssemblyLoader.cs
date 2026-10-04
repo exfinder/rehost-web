@@ -19,14 +19,19 @@ namespace System.Web.Util {
         private static int _installed;
         private static string _binDirectory;
         private static string _codegenDirectory;
+        private static IReadOnlyList<string> _probingDirectories;
 
-        internal static void Install(string binDirectory, string codegenDirectory) {
+        internal static void Install(
+            string binDirectory,
+            string codegenDirectory,
+            IReadOnlyList<string> probingDirectories) {
             if (Interlocked.CompareExchange(ref _installed, 1, 0) != 0) {
                 return;
             }
 
             _binDirectory = binDirectory;
             _codegenDirectory = codegenDirectory;
+            _probingDirectories = probingDirectories;
             AssemblyLoadContext.Default.Resolving += Resolve;
         }
 
@@ -64,6 +69,7 @@ namespace System.Web.Util {
         internal static IEnumerable<string> CandidatePaths(
             string binDirectory,
             string codegenDirectory,
+            IReadOnlyList<string> probingDirectories,
             AssemblyName name) {
             if (name.Name == null) {
                 yield break;
@@ -83,8 +89,16 @@ namespace System.Web.Util {
                 }
             }
 
-            if (!String.IsNullOrEmpty(binDirectory) && String.IsNullOrEmpty(culture)) {
+            if (!String.IsNullOrEmpty(culture)) {
+                yield break;
+            }
+
+            if (!String.IsNullOrEmpty(binDirectory)) {
                 yield return Path.Combine(binDirectory, fileName);
+            }
+
+            foreach (var directory in probingDirectories) {
+                yield return Path.Combine(directory, fileName);
             }
         }
 
@@ -95,7 +109,7 @@ namespace System.Web.Util {
         }
 
         private static Assembly Resolve(AssemblyLoadContext context, AssemblyName name) {
-            foreach (var path in CandidatePaths(_binDirectory, _codegenDirectory, name)) {
+            foreach (var path in CandidatePaths(_binDirectory, _codegenDirectory, _probingDirectories, name)) {
                 if (!IsUsable(path)) {
                     continue;
                 }

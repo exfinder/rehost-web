@@ -62,6 +62,11 @@ other classes' requests interleaving:
   places in the host's disposable root, outside the application, before the
   first `/ssi/` request; nothing else reads that directory.
 
+`page/bin/probing/` holds `Rehost.Web.ScenarioProbes.Dynamic` and `page/bin/`
+does not, so `/probing` can load it only through the fixture's
+`<probing privatePath>`; its pre-application start method never runs because
+only top-level `bin` assemblies are scanned.
+
 Every other fixture keeps one host per test class. Single-tenant by necessity,
 beyond the per-fixture conflicts above:
 

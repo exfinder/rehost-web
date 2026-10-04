@@ -5,7 +5,8 @@ namespace Rehost.Web.FixtureStaging.Tasks;
 // Composes fixture bin directories from already-built payload files. Anything else in a warm
 // bin is a leftover that would keep resolving, so non-payload files are deleted rather than
 // left behind. Bins metadata scopes a payload file to the named fixture(s); empty means every
-// bin. The copy compares size and timestamp for inequality, like the tree staging.
+// bin. Subfolder metadata places it in that folder under the bin. The copy compares size and
+// timestamp for inequality, like the tree staging.
 public sealed class StageFixtureBins : Microsoft.Build.Utilities.Task
 {
     [Required]
@@ -37,15 +38,14 @@ public sealed class StageFixtureBins : Microsoft.Build.Utilities.Task
                         || bins.Split(';').Contains(fixtureName, StringComparer.Ordinal);
                 })
                 .ToDictionary(
-                    file => Path.GetFileName(file.ItemSpec),
+                    file => Path.Combine(file.GetMetadata("Subfolder"), Path.GetFileName(file.ItemSpec)),
                     file => file.ItemSpec,
                     StringComparer.Ordinal);
 
             Directory.CreateDirectory(binPath);
             foreach (var stale in Directory.GetFiles(binPath, "*", SearchOption.AllDirectories))
             {
-                if (Path.GetDirectoryName(stale) != Path.TrimEndingDirectorySeparator(binPath)
-                    || !files.ContainsKey(Path.GetFileName(stale)))
+                if (!files.ContainsKey(Path.GetRelativePath(binPath, stale)))
                 {
                     File.Delete(stale);
                 }
@@ -54,6 +54,7 @@ public sealed class StageFixtureBins : Microsoft.Build.Utilities.Task
             foreach (var (name, source) in files)
             {
                 var target = Path.Combine(binPath, name);
+                Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                 var sourceInfo = new FileInfo(source);
                 var targetInfo = new FileInfo(target);
                 if (targetInfo.Exists
