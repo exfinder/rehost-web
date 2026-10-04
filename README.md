@@ -1,5 +1,7 @@
 # Rehost.Web
 
+[![NuGet](https://img.shields.io/nuget/vpre/Rehost.Web)](https://www.nuget.org/packages/Rehost.Web)
+
 **Run ASP.NET Web Forms on Linux, macOS, and Windows.**
 
 Rehost.Web brings classic ASP.NET applications to .NET 10 with minimal
