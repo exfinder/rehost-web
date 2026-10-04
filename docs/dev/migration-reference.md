@@ -10,7 +10,7 @@ The legacy `Web.config` is never edited. The build applies
 `<Host>/Web.Rehost.config`, an XDT transform, and writes the result to
 `rehost_root/web.config`; publish applies `Web.$(Configuration).config` first.
 A `Web.Rehost.config` beside the Host replaces the package default wholesale, so
-keep its three adjustments (remove `<runtime>`, `<system.codedom>` and
+keep its adjustments (remove `<runtime>`, `<system.codedom>` and
 `<system.serviceModel>`) and add the application's own below them. Typical
 additions:
 

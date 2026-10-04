@@ -61,7 +61,7 @@ Newtonsoft.Json keep their original names.
 Open `MyApp.Host/Web.Rehost.config`. This file applies changes to a copy of
 your `Web.config`; it uses the same XDT format as `Web.Release.config`.
 
-Keep the three supplied adjustments. Add changes your app needs, such as
+Keep the supplied adjustments. Add changes your app needs, such as
 connection strings or removal of modules that cannot run on .NET 10.
 See [configuration examples](migration.md#configuration).
 
