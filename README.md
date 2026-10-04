@@ -15,7 +15,8 @@ See [compatibility](docs/what-works.md) and the [roadmap](ROADMAP.md).
 ## Quick start
 
 Requires the [.NET 10 SDK](docs/getting-started.md#before-you-start). From the folder containing
-your existing web application folder, replace `MyApp` with that folder's name:
+your existing web application folder, replace `MyApp` with the path to that
+folder (its last segment names the new projects):
 
 ```text
 dotnet new install Rehost.Web.Templates

@@ -33,6 +33,10 @@ cd path/to/solution
 dotnet new rehost-web --webapp MyApp
 ```
 
+`--webapp` is a path relative to the current folder, so the new projects can
+sit beside the legacy tree instead of inside it (`--webapp src/MyApp` from a
+parent folder); the last segment names them.
+
 The result:
 
 ```text
