@@ -62,6 +62,14 @@ public sealed class PathClassificationOverKestrelTests(PageLiveScenario scenario
         File.WriteAllText(outside, "outside-file");
         var climbing = Path.Combine(scenario.ApplicationPath, "..", "outside.txt");
 
+        if (OperatingSystem.IsWindows())
+        {
+            (await Probe("t", climbing)).ShouldBe("transmit=outside-file");
+            (await Probe("t", outside)).ShouldBe("transmit=outside-file");
+            (await Probe("w", climbing)).ShouldBe("write=outside-file");
+            return;
+        }
+
         var transmit = await Probe("t", climbing);
 
         transmit.ShouldStartWith("transmit=EX FileNotFoundException: ", Case.Sensitive);
