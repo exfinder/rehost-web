@@ -102,8 +102,9 @@ classifier untouched, so a Unix-rooted string is a virtual path here exactly as
 `/x` is on Framework; what Unix cannot express is an absolute *physical* path in
 those APIs, since `X:\` has no spelling there — an application passing one goes
 through a virtual path instead. One exception: `Response.WriteFile` and
-`TransmitFile` also take a string starting with the application's physical
-root, compared ignoring case, as physical and fold it like a mapped path, so the common `TransmitFile(Server.MapPath(...))` works
+`TransmitFile` also take a string that, with `..` resolved, starts with the
+application's physical root (ignoring case) as physical and fold it like a
+mapped path, so the common `TransmitFile(Server.MapPath(...))` works
 unchanged; on Windows that string is already `X:\`-shaped, so nothing changes
 there. A physical path outside the root still needs a virtual spelling. A
 runtime caller holding a translated physical path outside the root uses

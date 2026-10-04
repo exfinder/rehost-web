@@ -56,6 +56,21 @@ public sealed class PathClassificationOverKestrelTests(PageLiveScenario scenario
     }
 
     [Fact]
+    public async Task A_Physical_Path_Climbing_Out_Of_The_Root_Is_Virtual_Like_Its_Plain_Spelling()
+    {
+        var outside = Path.Combine(Path.GetDirectoryName(scenario.ApplicationPath)!, "outside.txt");
+        File.WriteAllText(outside, "outside-file");
+        var climbing = Path.Combine(scenario.ApplicationPath, "..", "outside.txt");
+
+        var transmit = await Probe("t", climbing);
+
+        transmit.ShouldStartWith("transmit=EX ", Case.Sensitive);
+        transmit.ShouldNotContain("outside-file");
+        transmit.ShouldBe(await Probe("t", outside));
+        (await Probe("w", climbing)).ShouldBe(await Probe("w", outside));
+    }
+
+    [Fact]
     public async Task A_Relative_Path_Climbing_Above_The_Root_Is_Refused_At_Every_Site()
     {
         foreach (var kind in new[] { "xml", "mail", "secure", "map", "rmap" })
