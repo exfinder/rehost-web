@@ -108,7 +108,8 @@ depend on a rule or handler the port does not honor. See the
 A `catch (ThreadAbortException)` around `Response.End` or a terminating
 `Response.Redirect` runs as on .NET Framework. `Thread.ResetAbort()` inside it
 throws `PlatformNotSupportedException` on .NET, and the request is already
-terminated. Delete the call; the catch block continues without it.
+terminated. Delete the call; the catch block continues without it. See
+[request termination](dev/migration-reference.md#request-termination).
 
 ## Find the application's files
 

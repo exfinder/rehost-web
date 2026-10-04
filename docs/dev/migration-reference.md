@@ -131,6 +131,25 @@ compile unchanged in most cases, but two things change meaning:
   `GenerateAssemblyInfo` is false because the tree has its own
   `AssemblyInfo.cs`. The template sets all three.
 
+## Request termination
+
+`Response.End`, `Response.Redirect(url, true)` and `Server.Transfer` end the
+request by throwing a `ThreadAbortException`, as on .NET Framework, so a
+`catch (ThreadAbortException)` around them runs and a later `catch (Exception)`
+does not. Two things differ from Framework:
+
+- Framework re-raised the abort at the end of the catch block. Here the block
+  runs to completion and the code after it continues until the pipeline step
+  returns. The response is already complete: body writes are dropped, while a
+  status, header or second `Redirect` still applies.
+- `Thread.ResetAbort()` throws `PlatformNotSupportedException` on .NET. Delete
+  the call; the catch block continues without it. Framework resumed the whole
+  pipeline after `ResetAbort`, handler included. Here the request proceeds to
+  `EndRequest` instead.
+
+The exact boundaries are in the
+[compatibility reference](compatibility.md#requests-pages-and-responses).
+
 ## Machine keys
 
 Pick by deployment shape:
