@@ -7,6 +7,21 @@ normally responds to relevant configuration changes by replacing the
 application AppDomain; current-AppDomain Rehost cannot safely reset static
 state.
 
+## Evidence
+
+DNN Platform 10.3.3 ([issue 29](https://github.com/exfinder/rehost-web/issues/29),
+item 4) writes its own root `web.config` through one `Config.Save` and relies
+on the file-change restart as the commit: the install and upgrade wizards write
+the machine key, connection string, `InstallVersion` and version-specific
+`XmlMerge` fragments, then `Response.Redirect` to themselves expecting the next
+request in a new process, because every read-back goes through the
+process-cached `ConfigurationManager`. Extension installs merge manifest
+`<config>` nodes, binding redirects and `codeSubDirectories`, then touch the
+file only when `fcnMode` reads `Disabled`. The "Restart application" actions
+are a touch of `web.config`; no DNN code calls `HttpRuntime.UnloadAppDomain`.
+Without the watch the wizard's next request runs on the old configuration and
+the operator needs an external watcher, which races the wizard's redirect.
+
 ## Required decisions
 
 - Which machine, root-web, application, and `configSource` files are watched.
