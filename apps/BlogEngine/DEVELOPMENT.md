@@ -4,8 +4,9 @@
 
 ## Layout
 
-`BlogEngine/` holds upstream's `BlogEngine.Core` and `BlogEngine.NET` folders
-unedited, and `lib/` the three upstream binaries `BlogEngine.Core` references.
+`BlogEngine/` holds upstream's `BlogEngine.Core` and `BlogEngine.NET` folders,
+with redistribution notices added to the site; existing upstream files are
+unedited. `lib/` holds the two upstream binaries `BlogEngine.Core` references.
 Three projects build them:
 
 - `BlogEngine.Core` compiles the class library as `BlogEngine.Core.dll`;
@@ -62,8 +63,12 @@ a `Compile Remove` line for the original.
   store stays XML.
 - System.Drawing.Common and System.ServiceModel.Syndication supply types that
   were part of .NET Framework.
-- AjaxMin, BlogML and SharpZipLib are upstream's .NET Framework binaries from
-  `lib/`; BlogML 2.5 has no package. Their code paths are untested.
+- AjaxMin and BlogML are upstream's .NET Framework binaries from `lib/`;
+  BlogML 2.5 has no package. Their code paths are untested.
+  SharpZipLib 1.4.2 restores from NuGet under MIT, replacing upstream's
+  GPL-licensed 0.86 DLL without changing the imported callers.
+  [Redistribution notices](BlogEngine/BlogEngine.NET/licenses/README.md)
+  accompany the staged and published site.
 - SQLite: System.Data.SQLite 2.0.4 with SQLitePCLRaw.lib.e_sqlite3, which carries
   the native library for each platform. The DLL in upstream's `setup/SQLite` is
   a Windows .NET Framework build and is not imported. BlogEngine loads the

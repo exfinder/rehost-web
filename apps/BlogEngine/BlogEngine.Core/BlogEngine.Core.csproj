@@ -30,13 +30,13 @@
   <ItemGroup>
     <Reference Include="AjaxMin" HintPath="../lib/ajaxminify/AjaxMin.dll" />
     <Reference Include="BlogML" HintPath="../lib/blogml/BlogML.dll" />
-    <Reference Include="ICSharpCode.SharpZipLib" HintPath="../lib/ICSharpCode.SharpZipLib.dll" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Rehost.Web" Version="$(RehostVersion)" />
     <PackageReference Include="Mindbox.Data.Linq" Version="10.8.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="NuGet.Protocol" Version="7.6.0" />
     <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.4" />
