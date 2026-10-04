@@ -60,12 +60,6 @@ These keep their original names; some applications need newer versions than
 their legacy project used. Check the code paths your application actually calls.
 Compatibility in one application does not prove compatibility in another.
 
-One .NET difference reaches Web API multipart handlers: `System.Net.Http`'s
-`ContentDispositionHeaderValue.Name` and `FileName` return the value without its
-quotes, where .NET Framework returned `"postfile"` with them. Code that compared
-the quoted form matches nothing; compare the bare name, or read the raw value
-from `Parameters`.
-
 ## Version conflicts and warnings
 
 An explicit dependency version older than the required version fails restore
