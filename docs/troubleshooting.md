@@ -75,8 +75,9 @@ the message. A `web.config` that cannot be parsed returns ASP.NET's
 Configuration Error page on every request, then ends the process with exit
 code 82.
 
-Fix the setting through `Web.Rehost.config`. Editing `rehost_root/web.config`
-directly loses the change on the next build. See
+Fix the setting through `Web.Rehost.config`. An edit to `rehost_root/web.config`
+survives a rebuild until `Web.config` or `Web.Rehost.config` changes, and is lost
+on the build after that. See
 [configuration changes](migration.md#configuration) and the
 [detailed compatibility reference](dev/compatibility.md#configuration-and-iis-derived-behavior)
 for individual settings.

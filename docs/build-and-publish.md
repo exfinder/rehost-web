@@ -48,7 +48,16 @@ the URL when starting the published host.
 
 During a build, `Web.Rehost.config` applies changes to the original
 `Web.config` and writes the result to `MyApp.Host/rehost_root/web.config`.
-The original file stays unchanged.
+The original file stays unchanged. The build rewrites that staged file only
+when `Web.config`, `Web.Rehost.config` or the set of transforms has changed
+since the last build; any edit the application or you made to it is lost then.
+
+An application that writes its own `web.config` at install time, for a
+machine key, a connection string or installed extensions, must be installed
+and operated from a publish output, as it was from a deployed site on IIS.
+`rehost_root` is the development copy the build owns. A later publish into
+the same folder overwrites `web.config` as a redeploy did on IIS; back it up
+and merge as the application's own upgrade instructions say.
 
 For a Release publish, `Web.Release.config` is applied first and
 `Web.Rehost.config` second. Restart the process after changing configuration;
