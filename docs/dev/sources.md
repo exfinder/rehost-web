@@ -10,7 +10,7 @@ files and notices. Current code and tests describe adaptations.
 | `src/System.Web.Services.ReferenceSource` | microsoft/referencesource, `System.Web.Services` | `ec9fa9ae770d522a5b5f0607898044b7478574a3` | MIT |
 | `src/System.Web.Extensions.ReferenceSource` | microsoft/referencesource, `System.Web.Extensions` | `ec9fa9ae770d522a5b5f0607898044b7478574a3` | MIT |
 | `eng/Rehost.Web.GeneratedInputs/inputs/regular-expressions.json` | microsoft/referencesource, `regcomp/RegexPreCompiler.cs` | `ec9fa9ae770d522a5b5f0607898044b7478574a3` | MIT |
-| `src/Rehost.Web/Compatibility/Remoting/CallContext.cs` | microsoft/referencesource, `mscorlib/system/runtime/remoting/callcontext.cs` | `ec9fa9ae770d522a5b5f0607898044b7478574a3` | MIT |
+| `src/Rehost.Web/Compatibility/Remoting/LegacyCallContext.cs` | microsoft/referencesource, `mscorlib/system/runtime/remoting/callcontext.cs` | `ec9fa9ae770d522a5b5f0607898044b7478574a3` | MIT |
 | `src/Rehost.Web/Compatibility/Resources` (ResX types) | [dotnet/winforms](https://github.com/dotnet/winforms) | `195f89af79d550c2da1711c45c379efd63519ac1` | [MIT](../../src/Rehost.Web/Compatibility/Resources/WinForms195f89a/LICENSE.TXT) |
 | `src/Rehost.Web/Compatibility/Resources/StronglyTypedResourceBuilder.cs` | [dotnet/msbuild](https://github.com/dotnet/msbuild) | `39950c6284e1fe6e68890e3655ea7704b42e6a32` | MIT; source header |
 | `src/System.Web.Optimization.ReferenceSource`, `src/Microsoft.AspNet.Web.Optimization.WebForms.ReferenceSource` | [aspnet/AspNetWebOptimization](https://github.com/aspnet/AspNetWebOptimization) | `65e3911ffed89a5a24e15e593ae74fb0f4cd6cde` | [Apache-2.0](../../third_party/aspnet/AspNetWebOptimization/LICENSE.txt) |

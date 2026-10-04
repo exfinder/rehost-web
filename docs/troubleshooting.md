@@ -68,6 +68,21 @@ Also remove an explicit `Microsoft.Web.Infrastructure` package reference:
 [package reference](package-reference.md#remove-redundant-references) lists
 other redundant packages.
 
+## CS0234 for System.Runtime.Remoting.Messaging.CallContext
+
+.NET has no `CallContext`. Code that used it, log4net's `LogicalThreadContext`
+for example, needs its `AsyncLocal` path or a replacement. The runtime's own
+compatibility type is internal and not an API.
+
+## CS0104 ambiguous MembershipProvider or another System.Web.Security name
+
+`Rehost.Web` brings `Rehost.Web.ApplicationServices`, where
+`System.Web.Security.MembershipProvider`, `RoleProvider` and their friends live,
+into every project that references the package. On .NET Framework those types
+reached a project only through an explicit `System.Web.ApplicationServices`
+reference. An application type with the same short name now needs its
+namespace written out at the ambiguous use.
+
 ## Configuration errors
 
 A refused configuration setting fails activation with the file and entry in

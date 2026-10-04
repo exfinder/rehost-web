@@ -1,5 +1,5 @@
 // The subject under test, bound per target: mscorlib's CallContext on .NET Framework, the port's
-// internal System.Runtime.Remoting.Messaging.CallContext (reached by reflection, since the type is
+// internal System.Web.Util.LegacyCallContext (reached by reflection, since the type is
 // internal to Rehost.Web) on modern .NET. Same test bodies, two implementations.
 namespace Rehost.Web.CallContext.Contract.Tests;
 
@@ -24,7 +24,7 @@ using System.Reflection;
 internal static class Cc
 {
     private static readonly Type Type = typeof(System.Web.HttpContext).Assembly
-        .GetType("System.Runtime.Remoting.Messaging.CallContext", throwOnError: true)!;
+        .GetType("System.Web.Util.LegacyCallContext", throwOnError: true)!;
 
     private static readonly MethodInfo GetDataMethod = Method("GetData");
     private static readonly MethodInfo SetDataMethod = Method("SetData");

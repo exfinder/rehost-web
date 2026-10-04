@@ -2001,14 +2001,14 @@ namespace System.Web {
         // When a thread enters the pipeline, we may need to set the cookie in the CallContext.
         internal void ResetSqlDependencyCookie() {
             if (_sqlDependencyCookie != null) {
-                System.Runtime.Remoting.Messaging.CallContext.LogicalSetData(SqlCacheDependency.SQL9_OUTPUT_CACHE_DEPENDENCY_COOKIE, _sqlDependencyCookie);
+                CallContext.LogicalSetData(SqlCacheDependency.SQL9_OUTPUT_CACHE_DEPENDENCY_COOKIE, _sqlDependencyCookie);
             }
         }
 
         // When a thread leaves the pipeline, we may need to remove the cookie from the CallContext.
         internal void RemoveSqlDependencyCookie() {
             if (_sqlDependencyCookie != null) {
-                System.Runtime.Remoting.Messaging.CallContext.LogicalSetData(SqlCacheDependency.SQL9_OUTPUT_CACHE_DEPENDENCY_COOKIE, null);
+                CallContext.LogicalSetData(SqlCacheDependency.SQL9_OUTPUT_CACHE_DEPENDENCY_COOKIE, null);
             }
         }
 
@@ -2019,7 +2019,7 @@ namespace System.Web {
 
             set {
                 _sqlDependencyCookie = value;
-                System.Runtime.Remoting.Messaging.CallContext.LogicalSetData(SqlCacheDependency.SQL9_OUTPUT_CACHE_DEPENDENCY_COOKIE, value);
+                CallContext.LogicalSetData(SqlCacheDependency.SQL9_OUTPUT_CACHE_DEPENDENCY_COOKIE, value);
             }
         }
 

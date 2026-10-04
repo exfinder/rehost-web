@@ -41,7 +41,10 @@ identity is in [sources](sources.md). Types remain internal;
 publishing them would imply unsupported general remoting compatibility.
 
 Implementation:
-`src/Rehost.Web/Compatibility/Remoting/CallContext.cs`.
+`src/Rehost.Web/Compatibility/Remoting/LegacyCallContext.cs`, as `System.Web.Util.LegacyCallContext`;
+imported code reaches it through the `CallContext` alias in `RemotingAliases.cs`, so
+no type of the Framework name exists and application code naming it gets the
+"namespace does not exist" error rather than an accessibility one.
 
 An ExecutionContext containing only illogical HostContext may be treated as a
 default context by Framework. Isolation fixtures need the SynchronizationContext

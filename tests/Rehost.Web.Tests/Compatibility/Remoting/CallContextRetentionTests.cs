@@ -1,5 +1,6 @@
 using Shouldly;
 using System.Runtime.Remoting.Messaging;
+using CallContext = System.Web.Util.LegacyCallContext;
 using Xunit;
 
 namespace Rehost.Web.Tests.Compatibility.Remoting;

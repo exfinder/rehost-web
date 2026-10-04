@@ -4,16 +4,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace System.Runtime.Remoting.Messaging;
+namespace System.Web.Util;
 
-[System.Runtime.InteropServices.ComVisible(true)]
-internal interface ILogicalThreadAffinative
-{
-}
+using System.Runtime.Remoting.Messaging;
 
 [Serializable]
 [System.Runtime.InteropServices.ComVisible(true)]
-internal sealed class CallContext
+internal sealed class LegacyCallContext
 {
     private static readonly AsyncLocal<LogicalState?> LogicalStateSlot = new();
     private static readonly AsyncLocal<IllogicalState?> IllogicalStateSlot =
@@ -39,7 +36,7 @@ internal sealed class CallContext
                 "A host context restorer is already registered; the restorer is fixed for the process lifetime.");
     }
 
-    private CallContext()
+    private LegacyCallContext()
     {
     }
 

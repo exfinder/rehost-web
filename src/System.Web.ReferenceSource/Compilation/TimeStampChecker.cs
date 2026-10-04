@@ -20,14 +20,14 @@ namespace System.Web.Compilation {
 
         private static TimeStampChecker Current {
             get {
-                TimeStampChecker tsc = (TimeStampChecker)System.Runtime.Remoting.Messaging.CallContext.GetData(
+                TimeStampChecker tsc = (TimeStampChecker)CallContext.GetData(
                     CallContextSlotName) as TimeStampChecker;
 
                 // Create it on demand
                 if (tsc == null) {
                     tsc = new TimeStampChecker();
                     Debug.Trace("TimeStampChecker", "Creating new TimeStampChecker");
-                    System.Runtime.Remoting.Messaging.CallContext.SetData(CallContextSlotName, tsc);
+                    CallContext.SetData(CallContextSlotName, tsc);
                 }
 
                 return tsc;
