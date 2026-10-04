@@ -2375,8 +2375,7 @@ namespace System.Web {
                         return null;
                     }
                 }
-                catch (CancelModuleException) {
-                    // termination is not an error; the recovery catch below owns it
+                catch (ThreadAbortException) {
                     throw;
                 }
                 catch (Exception e) {
@@ -2400,21 +2399,29 @@ namespace System.Web {
                 }
 #pragma warning restore 1058
             }
-            catch (CancelModuleException cancelException) {
-                // one of ours (Response.End or timeout); no Thread.ResetAbort to call
-                // and nothing to unmask -- the inner catch re-throws it by type
+            catch (ThreadAbortException e) {
+                CancelModuleException cancelException = e.GetLegacyExceptionState();
 
-                if (cancelException.Timeout) {
-                    // Timed out
-                    error = new HttpException(SR.GetString(SR.Request_timed_out),
-                                        null, WebEventCodes.RuntimeErrorRequestAbort);
-                    PerfCounters.IncrementCounter(AppPerfCounter.REQUESTS_TIMED_OUT);
+                if (cancelException != null) {
+                    // one of ours (Response.End or timeout)
+
+                    if (cancelException.Timeout) {
+                        // Timed out
+                        error = new HttpException(SR.GetString(SR.Request_timed_out),
+                                            null, WebEventCodes.RuntimeErrorRequestAbort);
+                        PerfCounters.IncrementCounter(AppPerfCounter.REQUESTS_TIMED_OUT);
+                    }
+                    else {
+                        // Response.End
+                        error = null;
+                        _stepManager.CompleteRequest();
+                    }
                 }
+#if !NETFRAMEWORK
                 else {
-                    // Response.End
-                    error = null;
-                    _stepManager.CompleteRequest();
+                    error = e;
                 }
+#endif
             }
 
 #if !NETFRAMEWORK
@@ -2905,16 +2912,13 @@ namespace System.Web {
         }
 
         /*
-         * Special exception to cancel module execution
-         * used in Response.End and when cancelling requests.
-         * A real exception on this runtime: with no thread abort to ride on, it unwinds
-         * directly, and the former ThreadAbortException catch sites match it by type.
+         * Special exception to cancel module execution (not really an exception)
+         * used in Response.End and when cancelling requests
          */
-        internal class CancelModuleException : Exception {
+        internal class CancelModuleException {
             private bool _timeout;
 
-            internal CancelModuleException(bool timeout)
-                : base(SR.GetString(timeout ? SR.Request_timed_out : SR.Request_terminated_by_response_end)) {
+            internal CancelModuleException(bool timeout) {
                 _timeout = timeout;
             }
 
@@ -3656,7 +3660,7 @@ namespace System.Web {
                     }
                 }
                 catch (Exception e) {
-                    if (e is CancelModuleException || e.InnerException != null && e.InnerException is CancelModuleException) {
+                    if (e is ThreadAbortException || e.InnerException != null && e.InnerException is ThreadAbortException) {
                         // Response.End happened during async operation
                         _application.CompleteRequest();
                     }

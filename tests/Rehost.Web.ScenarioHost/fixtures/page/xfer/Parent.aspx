@@ -1,4 +1,5 @@
 <%@ Page Language="C#" %>
+<%@ Import Namespace="Rehost.Web.ScenarioProbes" %>
 <script runat="server">
     protected void Page_Load(object sender, EventArgs e) {
         Response.Write("parent-before|");
@@ -36,6 +37,10 @@
                 Server.Execute(handler, null, false);
                 break;
             }
+            case "ee":
+                Server.Execute("EndChild.aspx");
+                Witness.Stage(Request, "after-execute");
+                break;
             case "es":
                 Server.Execute("probe.css");
                 break;

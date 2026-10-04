@@ -3318,7 +3318,7 @@ namespace System.Web {
         }
 
         private static void AbortCurrentThread() {
-            throw new HttpApplication.CancelModuleException(false);
+            throw LegacyThreadAbort.Create(false);
         }
 
         /*

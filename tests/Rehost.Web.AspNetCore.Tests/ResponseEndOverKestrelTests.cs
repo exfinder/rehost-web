@@ -40,7 +40,7 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before|");
-        stages.ShouldContain("swallowed:CancelModuleException");
+        stages.ShouldContain("swallowed:ThreadAbortException");
         stages.ShouldContain("after-second-end");
         stages.ShouldContain("EndRequest");
         stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
@@ -48,15 +48,56 @@ public sealed class ResponseEndOverKestrelTests(PageLiveScenario scenario)
     }
 
     [Fact]
-    public async Task Catch_By_ThreadAbortException_Name_Never_Observes_Termination()
+    public async Task Catch_By_ThreadAbortException_Observes_Termination_And_Continues()
     {
         var (response, stages) = await scenario.TracedGetAsync(this, "/CatchTae.aspx");
 
         response.StatusCode.ShouldBe(200);
         response.Text.ShouldBe("before|");
-        stages.ShouldNotContain("tae-caught");
+        stages.ShouldContain("tae-caught");
+        stages.ShouldContain("after-catch");
         stages.ShouldContain("EndRequest");
+        stages.ShouldContain("LastError-null");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
         SkippedStages.ShouldAllBe(s => !stages.Contains(s));
+    }
+
+    [Fact]
+    public async Task A_Terminating_Redirect_Takes_The_ThreadAbortException_Arm()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/DnnRedirect.aspx");
+
+        response.StatusCode.ShouldBe(302);
+        response.Header("Location").ShouldBe(PageRequests.RedirectTarget);
+        response.Header("X-From-Catch").ShouldBeNull();
+        stages.ShouldContain("tae-arm");
+        stages.ShouldNotContain("general-arm");
+        stages.ShouldContain("EndRequest");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task End_In_An_Executed_Child_Terminates_The_Parent()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/xfer/Parent.aspx?m=ee");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe("parent-before|child-end|");
+        stages.ShouldNotContain("after-execute");
+        stages.ShouldContain("EndRequest");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task End_Before_The_Async_Point_Skips_The_Rest_Of_The_Page()
+    {
+        var (response, stages) = await scenario.TracedGetAsync(this, "/async/EndInLoad.aspx");
+
+        response.StatusCode.ShouldBe(200);
+        response.Text.ShouldBe("before-end|");
+        stages.ShouldNotContain("prerender-complete-ran");
+        stages.ShouldContain("EndRequest");
+        stages.ShouldAllBe(s => !s.StartsWith("ApplicationError", StringComparison.Ordinal));
     }
 
     [Fact]

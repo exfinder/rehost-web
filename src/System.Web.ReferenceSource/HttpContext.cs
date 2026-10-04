@@ -1825,7 +1825,7 @@ namespace System.Web {
             // Consume the sweep's flag exactly once, or every later boundary re-throws.
             if (_pendingTimeout) {
                 _pendingTimeout = false;
-                throw new HttpApplication.CancelModuleException(true);
+                throw LegacyThreadAbort.Create(true);
             }
         }
 
@@ -1917,8 +1917,11 @@ namespace System.Web {
 
                 WaitForExceptionIfCancelled();  // wait outside of finally
             }
-            catch (HttpApplication.CancelModuleException e) {
-                if (e.Timeout) {
+            catch (ThreadAbortException e) {
+                HttpApplication.CancelModuleException cancelException = e.GetLegacyExceptionState();
+                if (cancelException != null &&
+                    cancelException.Timeout) {
+
                     PerfCounters.IncrementCounter(AppPerfCounter.REQUESTS_TIMED_OUT);
 
                     throw new HttpException(SR.GetString(SR.Request_timed_out),

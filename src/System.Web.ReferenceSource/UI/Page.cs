@@ -4450,6 +4450,9 @@ window.onload = WebForm_RestoreScrollPosition;
                       System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(Page)}.{nameof(ProcessRequest)}", swallowedException, "ProcessRequestEndTrace");
                   }
+#if !NETFRAMEWORK
+                throw;
+#endif
             }
             finally {
                 if (includeStagesAfterAsyncPoint) {
@@ -4497,6 +4500,9 @@ window.onload = WebForm_RestoreScrollPosition;
                       System.Web.Util.RehostWebEventSource.Log.SwallowedException(
                           $"{nameof(Page)}.{nameof(ProcessRequestAsync)}", swallowedException, "ProcessRequestEndTrace");
                   }
+#if !NETFRAMEWORK
+                throw;
+#endif
             }
             finally {
                 if (includeStagesAfterAsyncPoint) {
@@ -4874,23 +4880,24 @@ window.onload = WebForm_RestoreScrollPosition;
                 CheckRemainingAsyncTasks(false);
             }
         }
-        catch (HttpApplication.CancelModuleException cancelException) {
-            // Don't go into HandleError logic for request cancellation, since it is
-            // expected (e.g. when Response.Redirect() is called).
+        catch (ThreadAbortException e) {
+            // Don't go into HandleError logic for ThreadAbortExceptions, since they
+            // are expected (e.g. when Response.Redirect() is called).
 
-            // VSWhidbey 500309: perf improvement. We can safely stop the unwind here
+            // VSWhidbey 500309: perf improvement. We can safely cancel the thread abort here
             // to avoid re-throwing the exception if this is a redirect and we're not being executed
             // under the context of a Server.Execute call (i.e. _context.Handler == this).  Otherwise,
             // re-throw so this can be handled lower in the stack (see HttpApplication.ExecuteStep).
 
             // This perf optimization can only be applied if we are executing the entire page
-            // lifecycle within this method call (otherwise, in async pages) stopping the unwind
+            // lifecycle within this method call (otherwise, in async pages) calling ResetAbort
             // would only skip part of the lifecycle, not the entire page (as Response.End is supposed to)
 
+            HttpApplication.CancelModuleException cancelException = e.GetLegacyExceptionState();
             if (includeStagesBeforeAsyncPoint && includeStagesAfterAsyncPoint &&    // executing entire page
                 _context.Handler == this &&                                         // not in server execute
                 _context.ApplicationInstance != null &&                             // application must be non-null so we can complete the request
-                !cancelException.Timeout) {                                         // this is Response.End
+                cancelException != null && !cancelException.Timeout) {              // this is Response.End
                 _context.ApplicationInstance.CompleteRequest();
 #if !NETFRAMEWORK
                 _context.TerminationPending = false;
@@ -5196,23 +5203,24 @@ window.onload = WebForm_RestoreScrollPosition;
                 CheckRemainingAsyncTasks(false);
             }
         }
-        catch (HttpApplication.CancelModuleException cancelException) {
-            // Don't go into HandleError logic for request cancellation, since it is
-            // expected (e.g. when Response.Redirect() is called).
+        catch (ThreadAbortException e) {
+            // Don't go into HandleError logic for ThreadAbortExceptions, since they
+            // are expected (e.g. when Response.Redirect() is called).
 
-            // VSWhidbey 500309: perf improvement. We can safely stop the unwind here
+            // VSWhidbey 500309: perf improvement. We can safely cancel the thread abort here
             // to avoid re-throwing the exception if this is a redirect and we're not being executed
             // under the context of a Server.Execute call (i.e. _context.Handler == this).  Otherwise,
             // re-throw so this can be handled lower in the stack (see HttpApplication.ExecuteStep).
 
             // This perf optimization can only be applied if we are executing the entire page
-            // lifecycle within this method call (otherwise, in async pages) stopping the unwind
+            // lifecycle within this method call (otherwise, in async pages) calling ResetAbort
             // would only skip part of the lifecycle, not the entire page (as Response.End is supposed to)
 
+            HttpApplication.CancelModuleException cancelException = e.GetLegacyExceptionState();
             if (includeStagesBeforeAsyncPoint && includeStagesAfterAsyncPoint &&    // executing entire page
                 _context.Handler == this &&                                         // not in server execute
                 _context.ApplicationInstance != null &&                             // application must be non-null so we can complete the request
-                !cancelException.Timeout) {                                         // this is Response.End
+                cancelException != null && !cancelException.Timeout) {              // this is Response.End
                 _context.ApplicationInstance.CompleteRequest();
 #if !NETFRAMEWORK
                 _context.TerminationPending = false;

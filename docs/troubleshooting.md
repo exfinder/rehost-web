@@ -103,6 +103,13 @@ Check the handlers and rewrite rules serving that URL. Your application may
 depend on a rule or handler the port does not honor. See the
 [configuration reference](dev/compatibility.md#configuration-and-iis-derived-behavior).
 
+## PlatformNotSupportedException from Thread.ResetAbort
+
+A `catch (ThreadAbortException)` around `Response.End` or a terminating
+`Response.Redirect` runs as on .NET Framework. `Thread.ResetAbort()` inside it
+throws `PlatformNotSupportedException` on .NET, and the request is already
+terminated. Delete the call; the catch block continues without it.
+
 ## Find the application's files
 
 The startup log prints `Rehost physical root path` for the staged site and

@@ -13,6 +13,8 @@
         {
             Witness.Stage(Request, "tae-caught");
         }
+        Witness.Stage(Request, "after-catch");
+        Response.Write("tail|");
     }
 
 </script>
