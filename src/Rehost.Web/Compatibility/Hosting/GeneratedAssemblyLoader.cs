@@ -19,19 +19,19 @@ namespace System.Web.Util {
         private static int _installed;
         private static string _binDirectory;
         private static string _codegenDirectory;
-        private static IReadOnlyList<string> _probingDirectories;
+        private static IReadOnlyList<string> _probingDirectories = [];
 
-        internal static void Install(
-            string binDirectory,
-            string codegenDirectory,
-            IReadOnlyList<string> probingDirectories) {
+        internal static void PublishProbingDirectories(IReadOnlyList<string> probingDirectories) {
+            _probingDirectories = probingDirectories;
+        }
+
+        internal static void Install(string binDirectory, string codegenDirectory) {
             if (Interlocked.CompareExchange(ref _installed, 1, 0) != 0) {
                 return;
             }
 
             _binDirectory = binDirectory;
             _codegenDirectory = codegenDirectory;
-            _probingDirectories = probingDirectories;
             AssemblyLoadContext.Default.Resolving += Resolve;
         }
 

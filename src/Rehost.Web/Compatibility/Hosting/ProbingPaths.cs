@@ -6,28 +6,29 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
-using System.Web.Configuration;
 using System.Xml;
 
 internal static class ProbingPaths
 {
     private const string AssemblyBindingNamespace = "urn:schemas-microsoft-com:asm.v1";
 
-    internal static IReadOnlyList<string> Read(string applicationPhysicalRoot)
+    internal static IReadOnlyList<string> Parse(
+        string? runtimeRawXml,
+        string applicationPhysicalRoot,
+        string configPath)
     {
-        var configPath = Path.Combine(applicationPhysicalRoot, HttpConfigurationSystem.WebConfigFileName);
-        if (!File.Exists(configPath))
+        if (String.IsNullOrEmpty(runtimeRawXml))
         {
             return [];
         }
 
         var document = new XmlDocument { XmlResolver = null };
-        document.Load(configPath);
+        document.LoadXml(runtimeRawXml);
         var namespaces = new XmlNamespaceManager(document.NameTable);
         namespaces.AddNamespace("asm", AssemblyBindingNamespace);
         var attribute = (XmlAttribute?)(
-            document.SelectSingleNode("/configuration/runtime/asm:assemblyBinding/asm:probing/@privatePath", namespaces)
-            ?? document.SelectSingleNode("/configuration/runtime/assemblyBinding/probing/@privatePath"));
+            document.SelectSingleNode("/runtime/asm:assemblyBinding/asm:probing/@privatePath", namespaces)
+            ?? document.SelectSingleNode("/runtime/assemblyBinding/probing/@privatePath"));
         if (attribute == null)
         {
             return [];

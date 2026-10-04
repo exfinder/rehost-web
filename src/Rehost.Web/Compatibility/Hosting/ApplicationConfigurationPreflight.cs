@@ -1,6 +1,7 @@
 namespace Rehost.Web.Hosting;
 
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Common;
 using System.IO;
@@ -12,7 +13,7 @@ using System.Web.Util;
 
 internal static class ApplicationConfigurationPreflight
 {
-    internal static void Validate(ApplicationBootstrapConfiguration configuration)
+    internal static IReadOnlyList<string> Validate(ApplicationBootstrapConfiguration configuration)
     {
         ValidateRequiredFile(
             configuration.MachineConfigurationFilePath,
@@ -79,6 +80,10 @@ internal static class ApplicationConfigurationPreflight
             ValidateCompilationTempDirectory(configuration, compilation);
             ValidateMachineKey(configuration, mappedConfiguration);
             ReportUnsupportedSystemNet(mappedConfiguration);
+            return ProbingPaths.Parse(
+                (mappedConfiguration.GetSection("runtime") as IgnoreSection)?.SectionInformation.GetRawXml(),
+                configuration.PhysicalRootPath,
+                mappedConfiguration.FilePath);
         }
         catch (ConfigurationErrorsException exception)
         {

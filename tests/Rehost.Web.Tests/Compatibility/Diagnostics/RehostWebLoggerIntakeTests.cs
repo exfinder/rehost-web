@@ -62,9 +62,9 @@ public sealed class RehostWebLoggerIntakeTests : IDisposable
     {
         public string HostDirectory { get; } = baseDirectory;
 
-        public void Preflight(ApplicationBootstrapConfiguration configuration)
+        public IReadOnlyList<string> Preflight(ApplicationBootstrapConfiguration configuration)
         {
-            ApplicationConfigurationPreflight.Validate(configuration);
+            return ApplicationConfigurationPreflight.Validate(configuration);
         }
 
         public void Bind(ApplicationBootstrapConfiguration configuration)

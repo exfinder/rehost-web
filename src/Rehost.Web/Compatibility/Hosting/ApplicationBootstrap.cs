@@ -47,7 +47,8 @@ internal sealed class ApplicationBootstrap
                 configuration.ApplicationConfigurationFilePath,
                 configuration.VirtualRootPath);
             serverConfiguration.ReportUnsupported(configuration.ApplicationConfigurationFilePath);
-            _environment.Preflight(configuration);
+            var probingDirectories = _environment.Preflight(configuration);
+            System.Web.Util.GeneratedAssemblyLoader.PublishProbingDirectories(probingDirectories);
             _environment.Bind(configuration);
             System.Web.Configuration.HttpConfigurationSystem.SetConfigurationFilePaths(
                 configuration.MachineConfigurationFilePath,

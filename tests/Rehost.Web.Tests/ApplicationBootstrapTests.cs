@@ -583,6 +583,30 @@ public sealed class ApplicationBootstrapTests
     }
 
     [Fact]
+    public void Preflight_Rejects_A_Rooted_Probing_Path()
+    {
+        using var application = TemporaryApplication.Create();
+        File.WriteAllText(
+            Path.Combine(application.PhysicalRoot.FullName, "web.config"),
+            """
+            <configuration>
+              <runtime>
+                <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+                  <probing privatePath="/abs" />
+                </assemblyBinding>
+              </runtime>
+            </configuration>
+            """);
+        var configuration = application.CreateConfiguration();
+
+        var exception = Should.Throw<ConfigurationErrorsException>(
+            () => ApplicationConfigurationPreflight.Validate(configuration));
+
+        exception.Message.ShouldContain("""<probing privatePath="/abs">""", Case.Sensitive);
+        exception.Message.ShouldContain("relative to the application root", Case.Sensitive);
+    }
+
+    [Fact]
     public void Successful_Initialization_Publishes_Immutable_Configuration()
     {
         using var application = TemporaryApplication.Create();
@@ -725,10 +749,11 @@ public sealed class ApplicationBootstrapTests
 
         internal int BindCount { get; private set; }
 
-        public void Preflight(ApplicationBootstrapConfiguration configuration)
+        public IReadOnlyList<string> Preflight(ApplicationBootstrapConfiguration configuration)
         {
             PreflightCount++;
             _preflight();
+            return [];
         }
 
         public void Bind(ApplicationBootstrapConfiguration configuration)
