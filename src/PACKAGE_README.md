@@ -1,7 +1,7 @@
 # Rehost.Web
 
 System.Web on modern .NET. Run predominantly managed ASP.NET Web Forms, Web
-Pages and Web API applications across Windows, Linux, and macOS with minimal
+Pages, MVC 5 and Web API applications across Windows, Linux, and macOS with minimal
 application-source changes.
 
 The `Rehost.Web` package is the starting point: it carries the
