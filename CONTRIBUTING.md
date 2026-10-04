@@ -78,7 +78,16 @@ Rehost.Web is maintained by volunteers.
 - A fix ships as a new package set at one version, after the platform checks
   the change affects. There are no patches to an already published version.
 
-## Shipping a fix
+## Pull requests
+
+Fork the repository, push a branch to your fork, and open a pull request
+against `main`. CI runs only after a merge, so list in the pull request which
+of the checks above you ran and on which platforms. A maintainer reviews and
+merges.
+
+## Releasing (maintainers)
+
+Only a maintainer can merge to `main` and run `publish.yml`.
 
 1. Land the fix on `main` with its test. The push to `main` runs
    `linux-x64.yml`; its `consumer` job packs the candidate at
