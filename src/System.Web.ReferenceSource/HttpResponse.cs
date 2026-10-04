@@ -2884,8 +2884,11 @@ namespace System.Web {
 
         // Helper method to get absolute physical filename from the argument to WriteFile
         private String GetNormalizedFilename(String fn) {
+            if (StringUtil.StringStartsWithIgnoreCase(fn, HttpRuntime.AppDomainAppPathInternal)) {
+                fn = CanonicalCasePath.Resolve(fn, HttpRuntime.AppDomainAppPathInternal);
+            }
             // If it's not a physical path, call MapPath on it
-            if (!UrlPath.IsAbsolutePhysicalPath(fn)) {
+            else if (!UrlPath.IsAbsolutePhysicalPath(fn)) {
                 if (Request != null)
                     fn = Request.MapPath(fn); // relative to current request
                 else

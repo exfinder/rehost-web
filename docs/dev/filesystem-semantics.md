@@ -40,7 +40,7 @@ value it holds and never converts by string surgery:
   mapping into `FilePath`/`PathInfo`; `Request.Path` and `RawUrl` keep the
   client's casing (`RequestPathCanonicalizer`, `RequestPathInfo`).
 - **Virtual path** — `/`-rooted or `~/` application-relative, `/`-separated,
-  compared ignore-case; every path-taking API reads a `/`-rooted string as
+  compared ignore-case; path-taking APIs read a `/`-rooted string as
   virtual (`UrlPath.IsAbsolutePhysicalPath`, "Physical or virtual" below).
 - **Configuration path** — a lowercased virtual path; the map to disk folds
   case at `UserMapPath.GetPhysicalPathForPath`. Two directories differing
@@ -101,9 +101,13 @@ includes, `<pages masterPageFile>`, site-map node urls, `MailDefinition`,
 classifier untouched, so a Unix-rooted string is a virtual path here exactly as
 `/x` is on Framework; what Unix cannot express is an absolute *physical* path in
 those APIs, since `X:\` has no spelling there — an application passing one goes
-through a virtual path instead. Only a caller that already holds a translated
-physical path needs an explicit entry point past the classifier
-(`TransmitFileTranslated`/`WriteFileTranslated`); the
+through a virtual path instead. One exception: `Response.WriteFile` and
+`TransmitFile` also take a string starting with the application's physical
+root, compared ignoring case, as physical and fold it like a mapped path, so the common `TransmitFile(Server.MapPath(...))` works
+unchanged; on Windows that string is already `X:\`-shaped, so nothing changes
+there. A physical path outside the root still needs a virtual spelling. A
+runtime caller holding a translated physical path outside the root uses
+`TransmitFileTranslated`/`WriteFileTranslated`; the
 `FileChangesMonitor` alias checks will need the same once file-change
 notification is enabled (configuration-reload follow-up).
 

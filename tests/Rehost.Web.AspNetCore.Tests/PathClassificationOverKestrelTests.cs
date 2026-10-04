@@ -45,6 +45,17 @@ public sealed class PathClassificationOverKestrelTests(PageLiveScenario scenario
     }
 
     [Fact]
+    public async Task Response_File_Apis_Take_A_Mapped_Physical_Path_As_Is()
+    {
+        var physical = Path.Combine(scenario.ApplicationPath, "paths", "X.txt");
+
+        (await Probe("w", physical)).ShouldBe("write=site-file");
+        (await Probe("t", physical)).ShouldBe("transmit=site-file");
+        (await Probe("w", physical.ToUpperInvariant())).ShouldBe("write=site-file");
+        (await Probe("t", physical.ToUpperInvariant())).ShouldBe("transmit=site-file");
+    }
+
+    [Fact]
     public async Task A_Relative_Path_Climbing_Above_The_Root_Is_Refused_At_Every_Site()
     {
         foreach (var kind in new[] { "xml", "mail", "secure", "map", "rmap" })

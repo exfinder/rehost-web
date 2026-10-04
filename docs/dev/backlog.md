@@ -35,6 +35,7 @@ scope changes. Priority buckets: Current, Next, Later, Parked, Rejected.
 - Advanced Friendly URL escaping and rewrite mapping: [route URL escaping](follow-ups/route-url-escaping.md).
 - `Server.TransferRequest` and extensionless-handler child-request semantics.
 - Static-file `If-Range` behavior before widening support.
+- Accept a physical path under the application root at the other path-taking sites (`Control.OpenFile`, `MapPathSecure`, `MailDefinition`, data sources, site maps), as `Response.WriteFile`/`TransmitFile` already do, once an application reaches one.
 - Explicit diagnostics for unsupported build providers, including closed-source GDI+-bound ReportViewer dependencies.
 
 ### Lifecycle and platform boundaries
