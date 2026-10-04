@@ -155,10 +155,6 @@ and limits when sharing keys with .NET Framework.
 Run the flows your users rely on: sign-in, postbacks, uploads, and any stateful
 operations. The [example applications](../apps/README.md) show concrete journeys.
 
-- Off Windows, file APIs read a path starting with `/` as a site path, not a
-  disk path. `Response.WriteFile` and `TransmitFile` accept a disk path inside
-  the application folder, such as one from `Server.MapPath`; anywhere else,
-  pass a `~/` path instead.
 - For startup failures, use [Troubleshooting](troubleshooting.md).
 - For publishing, use [Build and publish](build-and-publish.md).
 - For containers or custom file locations, check the
