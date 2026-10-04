@@ -10,13 +10,12 @@
     </ItemGroup>
   </Target>
 
-  <!-- The runtime compiles these folders itself, into their own assemblies that page
-       compilation references. Letting the SDK also compile them into the host assembly puts
-       the same types in two assemblies and every page referencing them fails with CS0433 —
-       the classic "App_Code inside a Web Application Project" trap, which Visual Studio
-       warned against for the same reason. -->
-  <ItemGroup Condition="'$(RehostCompileWebSiteFolders)' != 'true'">
-    <Compile Remove="**/App_Code/**;**/App_Data/**" />
+  <!-- The runtime also compiles an App_Code folder present on the site, so a project that
+       stages those sources must not compile them too: the same types in two assemblies fail
+       every page that references them with CS0433. -->
+  <ItemGroup>
+    <Compile Remove="**/App_Data/**" />
+    <Compile Remove="**/App_Code/**" Condition="'$(RehostRuntimeCompiledAppCode)' == 'true'" />
     <EmbeddedResource Remove="**/App_GlobalResources/**;**/App_LocalResources/**" />
   </ItemGroup>
 

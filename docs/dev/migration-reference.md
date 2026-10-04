@@ -67,14 +67,18 @@ Two differences from the old project's explicit file list:
 
 - files on disk that the legacy project never listed are compiled too; add a
   `<Compile Remove>` line for each (YAF has four orphaned code-behind files);
-- `App_Code` and `App_Data` source files are left to runtime compilation.
+- `App_Code` compiles into the App assembly and its sources are not staged,
+  as in a Web Application Project. `App_Data` source files are not compiled.
   `App_GlobalResources` and `App_LocalResources` are excluded from SDK resource
-  embedding. A WAP that compiled `App_Code` into its assembly can encounter
-  duplicate types (CS0433) if the same source is also compiled at runtime.
+  embedding.
 
 A Web Site project (no csproj, `CodeFile=` pages, code in `App_Code`) runs, but
 the hosting targets stage a WAP: the `*.cs` sources are excluded from the copy,
-and a Host-local target has to copy them. That is the state recorded in
+and a Host-local target has to copy them. The runtime then compiles the staged
+`App_Code`. A project whose `Compile` items reach that folder sets
+`RehostRuntimeCompiledAppCode=true` to leave it to the runtime. Compiling the
+same source both ways puts its types in two assemblies, and pages that use them
+fail with duplicate types (CS0433). That is the state recorded in
 [AjaxControlToolkitSampleSite](../../apps/AjaxControlToolkitSampleSite/DEVELOPMENT.md)
 and the open
 [project models](follow-ups/web-site-vs-wap-project-models.md) follow-up; the

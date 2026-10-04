@@ -87,7 +87,8 @@ The generated App project compiles every C# file in the application folder:
 If it picks up files your old project excluded, add a `<Compile Remove>` line
 for each one below these.
 
-Special folders such as `App_Code` are compiled by the runtime. See
+`App_Code` compiles into the App assembly, as it did in a Web Application
+Project. `App_Data` and the resource folders are left to the runtime. See
 [source inclusion](dev/migration-reference.md#preserved-source) if you encounter
 duplicate types or are moving a Web Site project.
 

@@ -10,6 +10,7 @@
     <OutputPath>rehost_root/bin</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <IsPackable>false</IsPackable>
+    <RehostRuntimeCompiledAppCode>true</RehostRuntimeCompiledAppCode>
   </PropertyGroup>
 
   <ItemGroup>

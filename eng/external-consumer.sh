@@ -40,6 +40,14 @@ done
 rm -rf "$APP"/*/bin "$APP"/*/obj
 mv "$APP/WebFormsApplication/Web.config" "$APP/WebFormsApplication/Web.Config"
 mv "$APP/WebFormsApplication/Web.Release.config" "$APP/WebFormsApplication/Web.Release.Config"
+mkdir -p "$APP/WebFormsApplication/App_Code"
+cat > "$APP/WebFormsApplication/App_Code/Greeting.cs" <<'EOF'
+namespace WebFormsApplication { public static class Greeting { public static string Text { get { return "hello from App_Code"; } } } }
+EOF
+cat > "$APP/WebFormsApplication/AppCode.aspx" <<'EOF'
+<%@ Page Language="C#" %>
+<html><body><%= WebFormsApplication.Greeting.Text %></body></html>
+EOF
 template=$(<"$REPO/eng/external-consumer/NuGet.config")
 feed_native=$(native "$FEED")
 printf '%s\n' "${template//@FEED@/$feed_native}" > "$APP/NuGet.config"
@@ -97,6 +105,9 @@ for _ in $(seq 1 60); do
   sleep 2
 done
 ./smoke.sh "$BASE"
+{ curl -fsS -o "$WORK/appcode.html" "$BASE/AppCode" && grep -q 'hello from App_Code' "$WORK/appcode.html"; } || { echo "FAIL  App_Code type not compiled into the App assembly"; exit 1; }
+[ ! -e "$site/App_Code/Greeting.cs" ] || { echo "FAIL  App_Code source was staged"; exit 1; }
+echo "PASS  App_Code compiled into the App assembly and left out of the stage"
 
 echo "== publish (Release)"
 dotnet publish WebFormsApplication.Host -c Release -v q
@@ -106,6 +117,8 @@ echo "publish bin files: $(find "$publish/bin" -type f | wc -l | tr -d ' ')"
 echo "publish content files: $(find "$publish" -path "$publish/bin" -prune -o -type f -print | wc -l | tr -d ' ')"
 grep -q 'debug="true"' "$publish/web.config" && { echo "FAIL  publish did not apply Web.Release.config"; exit 1; }
 echo "PASS  published web.config carries the Release transform"
+[ ! -e "$publish/App_Code/Greeting.cs" ] || { echo "FAIL  App_Code source was published"; exit 1; }
+echo "PASS  publish left the App_Code source out"
 legacy_listing > "$WORK/legacy.after"
 cmp -s "$WORK/legacy.before" "$WORK/legacy.after" || { echo "FAIL  the legacy folder changed"; diff "$WORK/legacy.before" "$WORK/legacy.after" | head; exit 1; }
 echo "PASS  template, build, run and publish left the legacy folder unchanged"
