@@ -114,13 +114,21 @@ beside the App project:
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="$(RehostAppContentRoot)**/*.cs" />
+    <Compile Remove="$(RehostAppContentRoot)bin/**" />
+    <Compile Remove="$(RehostAppContentRoot)obj/**" />
+    <Compile Remove="$(RehostAppContentRoot)packages/**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Rehost.Web" Version="…" />
   </ItemGroup>
 </Project>
 ```
 
-- Point `RehostAppContentRoot` at the library's legacy folder and add the
-  `Compile` lines from [Preserved source](#preserved-source).
+- Point `RehostAppContentRoot` at the library's legacy folder. As in
+  [Preserved source](#preserved-source), add a `<Compile Remove>` line for
+  each file the old project excluded.
 - Keep the legacy `AssemblyName`: `web.config` names the library's types by it.
 - Reference `Rehost.Web` at the App project's version, not the hosting
   package. Add other Rehost packages only when the library itself uses them.
