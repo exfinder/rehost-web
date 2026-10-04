@@ -13,7 +13,7 @@ and app READMEs intentionally offer simpler summaries. Git retains history.
 - [Detailed compatibility reference](compatibility.md)
 - [Migration reference](migration-reference.md)
 - [Unresolved work](backlog.md)
-- [Release notes](releases/0.1.0-alpha.1.md)
+- [Release notes](releases/0.1.0-alpha.62.md)
 - [Shared terminology](../../CONTEXT.md)
 
 ## Runtime contracts
