@@ -68,10 +68,23 @@ internal sealed class ClientCacheSection
     private const string TextRule =
         "carries a carriage return or line feed, which no header line can hold.";
 
-    private ClientCacheMode _mode = ClientCacheMode.NoControl;
-    private TimeSpan _maxAge = TimeSpan.FromDays(1);
-    private string _httpExpires = string.Empty;
-    private string _custom = string.Empty;
+    private ClientCacheMode _mode;
+    private TimeSpan _maxAge;
+    private string _httpExpires;
+    private string _custom;
+
+    internal ClientCacheSection()
+        : this(ClientCache.Default)
+    {
+    }
+
+    internal ClientCacheSection(ClientCache inherited)
+    {
+        _mode = inherited.Mode;
+        _maxAge = inherited.MaxAge;
+        _httpExpires = inherited.HttpExpires;
+        _custom = inherited.Custom;
+    }
 
     internal ClientCache Build() => new(_mode, _maxAge, _httpExpires, _custom);
 

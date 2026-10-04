@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.Web;
 using System.Web.IisConfig;
 using Shouldly;
 using Xunit;
@@ -44,6 +45,35 @@ public sealed class ClientCacheTests : IDisposable
         configuration.ClientCache.CacheControl(null).ShouldBe("public,max-age=30");
         configuration.StaticContentTypeOf(".probe").ShouldBe("text/probe");
         configuration.StaticContentTypeOf(".json").ShouldBe("application/json");
+    }
+
+    [Fact]
+    public void A_Folder_Config_Overrides_Only_The_Attributes_It_Sets_Down_The_Directory_Tree()
+    {
+        WriteApplication(
+            """<staticContent><clientCache cacheControlMode="DisableCache" /></staticContent>""",
+            "sub");
+        WriteApplication(
+            """
+            <staticContent>
+              <clientCache cacheControlMode="UseMaxAge" cacheControlMaxAge="02:00:00" />
+            </staticContent>
+            """,
+            Path.Combine("sub", "deep"));
+        var configuration = IisServerConfiguration.Load(
+            ShippedBaseline,
+            WriteApplication(
+                """
+                <staticContent>
+                  <clientCache cacheControlMode="UseMaxAge" cacheControlMaxAge="1.00:00:00" cacheControlCustom="public" />
+                </staticContent>
+                """));
+
+        CacheControlAt(configuration, "/x.txt").ShouldBe("public,max-age=86400");
+        CacheControlAt(configuration, "/sub/x.txt").ShouldBe("public,no-cache");
+        CacheControlAt(configuration, "/sub/deep/x.txt").ShouldBe("public,max-age=7200");
+        configuration.ClientCacheFor(VirtualPath.Create("/plain/x.txt"))
+            .ShouldBeSameAs(configuration.ClientCache);
     }
 
     [Theory]
@@ -130,16 +160,23 @@ public sealed class ClientCacheTests : IDisposable
         IisServerConfiguration.Load(ShippedBaseline, WriteApplication(systemWebServerContent))
             .ClientCache;
 
-    private string WriteApplication(string systemWebServerContent) => WriteConfig(
-        $"""
-        <system.webServer>
-        {systemWebServerContent}
-        </system.webServer>
-        """);
+    private static string? CacheControlAt(IisServerConfiguration configuration, string path) =>
+        configuration.ClientCacheFor(VirtualPath.Create(path)).CacheControl(null);
 
-    private string WriteConfig(string configurationContent)
+    private string WriteApplication(string systemWebServerContent, string folder = "") =>
+        WriteConfig(
+            $"""
+            <system.webServer>
+            {systemWebServerContent}
+            </system.webServer>
+            """,
+            folder);
+
+    private string WriteConfig(string configurationContent, string folder)
     {
-        var path = Path.Combine(_root.FullName, "web.config");
+        var path = Path.Combine(
+            Directory.CreateDirectory(Path.Combine(_root.FullName, folder)).FullName,
+            "web.config");
         File.WriteAllText(
             path,
             $"""

@@ -10,95 +10,107 @@ using System.Xml;
 
 namespace System.Web.IisConfig;
 
-// <handlers> is resolved per directory, the way the managed configuration system keeps one record
-// per path: every folder web.config below the application root is read, merged and turned into a
-// handler list once at activation, and a request then only looks its directory up. The merge
-// itself stays the measured collection algorithm - the folder's section is the application root's
-// with one level added (MH27) - and the records are immutable, so a generation publishes complete
-// lists or none.
+// <handlers> and <clientCache> are resolved per directory, the way the managed configuration
+// system keeps one record per path: every folder web.config below the application root is read,
+// merged and turned into a record of the folder's handler list and clientCache once at activation,
+// and a request then only looks its directory up. The merge itself stays the measured algorithm -
+// the folder's section is the nearest ancestor's with one level added (MH27) - and the records are
+// immutable, so a generation publishes complete records or none.
 //
 // Directory keys fold case, which is the configuration-path rule (a configuration path is a
 // lowercased virtual path); two folders differing only by case are therefore one path, and a
 // case-sensitive filesystem that can hold both is refused rather than resolved arbitrarily.
-internal sealed class IisFolderHandlers
+internal sealed class IisFolderSections
 {
-    private readonly IReadOnlyList<IisHandlerRoute> _root;
-    private readonly Dictionary<string, IReadOnlyList<IisHandlerRoute>> _folders;
-    private readonly Dictionary<string, IReadOnlyList<IisHandlerRoute>>
-        .AlternateLookup<ReadOnlySpan<char>> _lookup;
+    private readonly IReadOnlyList<IisHandlerRoute> _rootRoutes;
+    private readonly ClientCache _rootClientCache;
+    private readonly Dictionary<string, Record> _folders;
+    private readonly Dictionary<string, Record>.AlternateLookup<ReadOnlySpan<char>> _lookup;
     private readonly string _virtualPrefix;
 
-    private IisFolderHandlers(
-        IReadOnlyList<IisHandlerRoute> root,
-        Dictionary<string, IReadOnlyList<IisHandlerRoute>> folders,
+    private IisFolderSections(
+        IReadOnlyList<IisHandlerRoute> rootRoutes,
+        ClientCache rootClientCache,
+        Dictionary<string, Record> folders,
         string virtualPrefix)
     {
-        _root = root;
+        _rootRoutes = rootRoutes;
+        _rootClientCache = rootClientCache;
         _folders = folders;
         _lookup = folders.GetAlternateLookup<ReadOnlySpan<char>>();
         _virtualPrefix = virtualPrefix;
     }
 
-    internal static IisFolderHandlers Empty { get; } = new(
+    internal static IisFolderSections Empty { get; } = new(
         Array.Empty<IisHandlerRoute>(),
-        new Dictionary<string, IReadOnlyList<IisHandlerRoute>>(StringComparer.OrdinalIgnoreCase),
+        ClientCache.Default,
+        new Dictionary<string, Record>(StringComparer.OrdinalIgnoreCase),
         string.Empty);
 
-    internal static IisFolderHandlers Load(
+    internal static IisFolderSections Load(
         IisRegistrationSection applicationSection,
         IReadOnlyList<IisHandlerRoute> applicationRoutes,
+        ClientCache applicationClientCache,
         string applicationPhysicalRoot,
         string applicationVirtualPath,
         bool applicationWaiver,
         Dictionary<string, string> hiddenSegments)
     {
         var prefix = VirtualPrefix(applicationVirtualPath);
-        var folders = new Dictionary<string, IReadOnlyList<IisHandlerRoute>>(
-            StringComparer.OrdinalIgnoreCase);
-        var records = new Dictionary<string, Record>(StringComparer.OrdinalIgnoreCase);
+        var folders = new Dictionary<string, Record>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var folder in Discover(applicationPhysicalRoot, prefix, hiddenSegments))
         {
-            var parent = NearestAncestor(records, folder.Key, prefix);
+            var parent = NearestAncestor(folders, folder.Key, prefix);
             var section = (parent?.Section ?? applicationSection).Nested();
-            var waiver = Apply(folder.ConfigPath, section, parent?.Waiver ?? applicationWaiver);
-            var routes = IisHandlerRoute.Build(section.Build());
+            var clientCache = new ClientCacheSection(
+                parent?.ClientCache ?? applicationClientCache);
+            var waiver = Apply(
+                folder.ConfigPath, section, clientCache, parent?.Waiver ?? applicationWaiver);
 
-            records.Add(folder.Key, new Record(section, waiver));
-            folders.Add(folder.Key, routes);
+            folders.Add(
+                folder.Key,
+                new Record(
+                    section, waiver, IisHandlerRoute.Build(section.Build()), clientCache.Build()));
         }
 
-        return new IisFolderHandlers(applicationRoutes, folders, prefix);
+        return new IisFolderSections(applicationRoutes, applicationClientCache, folders, prefix);
     }
 
     // The deepest folder record covering the request's directory, or the application root's list
     // when no folder above it carries a <handlers> section - which is every request in an
     // application that has no folder web.config at all.
-    internal IReadOnlyList<IisHandlerRoute> RoutesFor(VirtualPath? path)
+    internal IReadOnlyList<IisHandlerRoute> RoutesFor(VirtualPath? path) =>
+        RecordFor(path)?.Routes ?? _rootRoutes;
+
+    internal ClientCache ClientCacheFor(VirtualPath? path) =>
+        RecordFor(path)?.ClientCache ?? _rootClientCache;
+
+    private Record? RecordFor(VirtualPath? path)
     {
         if (_folders.Count == 0)
         {
-            return _root;
+            return null;
         }
 
         var virtualPath = path?.VirtualPathStringIfAvailable;
         if (virtualPath == null || virtualPath.Length == 0 || virtualPath[0] != '/')
         {
-            return _root;
+            return null;
         }
 
         var lastSlash = virtualPath.LastIndexOf('/');
         var directory = virtualPath.AsSpan(0, lastSlash);
         if (!directory.StartsWith(_virtualPrefix, StringComparison.OrdinalIgnoreCase))
         {
-            return _root;
+            return null;
         }
 
         while (directory.Length > _virtualPrefix.Length)
         {
-            if (_lookup.TryGetValue(directory, out var routes))
+            if (_lookup.TryGetValue(directory, out var record))
             {
-                return routes;
+                return record;
             }
 
             var slash = directory.LastIndexOf('/');
@@ -110,7 +122,7 @@ internal sealed class IisFolderHandlers
             directory = directory[..slash];
         }
 
-        return _root;
+        return null;
     }
 
     private static string VirtualPrefix(string applicationVirtualPath)
@@ -144,7 +156,11 @@ internal sealed class IisFolderHandlers
     // A folder's <modules> section is silently ignored, which is what IIS does with it (MH24);
     // reading one here would run modules IIS never ran. <validation> decides the waiver, and every
     // other element stops activation rather than running as if it were absent.
-    private static bool Apply(string configPath, IisRegistrationSection section, bool waiver)
+    private static bool Apply(
+        string configPath,
+        IisRegistrationSection section,
+        ClientCacheSection clientCache,
+        bool waiver)
     {
         var document = new XmlDocument();
         try
@@ -170,6 +186,7 @@ internal sealed class IisFolderHandlers
             section.Apply(handlersNode, configPath);
         }
 
+        clientCache.Apply(document, configPath);
         return folderWaiver;
     }
 
@@ -262,10 +279,18 @@ internal sealed class IisFolderHandlers
         internal string ConfigPath { get; } = configPath;
     }
 
-    private sealed class Record(IisRegistrationSection section, bool waiver)
+    private sealed class Record(
+        IisRegistrationSection section,
+        bool waiver,
+        IReadOnlyList<IisHandlerRoute> routes,
+        ClientCache clientCache)
     {
         internal IisRegistrationSection Section { get; } = section;
 
         internal bool Waiver { get; } = waiver;
+
+        internal IReadOnlyList<IisHandlerRoute> Routes { get; } = routes;
+
+        internal ClientCache ClientCache { get; } = clientCache;
     }
 }

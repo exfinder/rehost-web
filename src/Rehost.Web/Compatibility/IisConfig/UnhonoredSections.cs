@@ -30,7 +30,8 @@ internal static class UnhonoredSections
         "security/requestFiltering/verbs",
     ];
 
-    private static readonly string[] FolderLeaves = ["handlers", "validation", "modules"];
+    private static readonly string[] FolderLeaves =
+        ["handlers", "validation", "modules", "staticContent/clientCache"];
 
     private static readonly string[] WarnedLeaves = ["urlCompression", "httpCompression"];
 
@@ -39,8 +40,8 @@ internal static class UnhonoredSections
         + " host's ASP.NET Core pipeline in Program.cs, before UseRehostWeb().";
 
     private const string FolderRule =
-        "is not supported by this port; a folder web.config honors <handlers>, <validation> and"
-        + " <modules> only. Move it to the application root.";
+        "is not supported by this port; a folder web.config honors <handlers>, <validation>,"
+        + " <modules> and <staticContent/clientCache> only. Move it to the application root.";
 
     private const string LocationRule =
         "is not supported by this port; system.webServer is honored in the application root only."

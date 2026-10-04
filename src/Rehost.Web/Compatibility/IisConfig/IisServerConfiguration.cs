@@ -9,9 +9,8 @@ namespace System.Web.IisConfig;
 
 // Shipped applicationHost baseline merged with the app root's <system.webServer> amendments,
 // published atomically at activation. An element no reader here honors stops activation instead of
-// running as if it were absent. Only <handlers> is read from folder web.configs below the root,
-// where IIS resolves it per folder (MH27) and ignores everything else it finds there, <modules>
-// included (MH24).
+// running as if it were absent. Only <handlers> and <clientCache> are read from folder web.configs
+// below the root, where IIS resolves them per folder (MH27); IIS ignores a folder <modules> (MH24).
 internal sealed class IisServerConfiguration
 {
     private static readonly IisCollectionSchema MimeMapSchema =
@@ -38,7 +37,7 @@ internal sealed class IisServerConfiguration
         runAllManagedModulesForAllRequests: false,
         Array.Empty<IisRegistration>(),
         Array.Empty<IisHandlerRoute>(),
-        IisFolderHandlers.Empty,
+        IisFolderSections.Empty,
         rewrite: null,
         CustomHeaders.Empty,
         RequestLimits.Unlimited,
@@ -51,7 +50,7 @@ internal sealed class IisServerConfiguration
     private readonly Dictionary<string, bool> _fileExtensions;
     private readonly bool _allowUnlistedExtensions;
     private readonly Dictionary<string, IisCachingProfile> _cachingProfiles;
-    private readonly IisFolderHandlers _folderHandlers;
+    private readonly IisFolderSections _folderSections;
     private readonly IReadOnlyList<string> _warnedSections;
 
     private IisServerConfiguration(
@@ -66,7 +65,7 @@ internal sealed class IisServerConfiguration
         bool runAllManagedModulesForAllRequests,
         IReadOnlyList<IisRegistration> handlers,
         IReadOnlyList<IisHandlerRoute> handlerRoutes,
-        IisFolderHandlers folderHandlers,
+        IisFolderSections folderSections,
         RewriteSection? rewrite,
         CustomHeaders customHeaders,
         RequestLimits requestLimits,
@@ -85,7 +84,7 @@ internal sealed class IisServerConfiguration
         RunAllManagedModulesForAllRequests = runAllManagedModulesForAllRequests;
         Handlers = handlers;
         HandlerRoutes = handlerRoutes;
-        _folderHandlers = folderHandlers;
+        _folderSections = folderSections;
         Rewrite = rewrite;
         CustomHeaders = customHeaders;
         RequestLimits = requestLimits;
@@ -119,13 +118,16 @@ internal sealed class IisServerConfiguration
     internal ClientCache ClientCache { get; }
 
     internal IReadOnlyList<IisHandlerRoute> HandlerRoutesFor(VirtualPath? path) =>
-        _folderHandlers.RoutesFor(path);
+        _folderSections.RoutesFor(path);
+
+    internal ClientCache ClientCacheFor(VirtualPath? path) =>
+        _folderSections.ClientCacheFor(path);
 
     internal bool ServesStaticContent(string? extension) =>
         !string.IsNullOrEmpty(extension) && _staticContent.ContainsKey(extension);
 
-    internal string? StaticCacheControl(string? extension) =>
-        ClientCache.CacheControl(
+    internal string? StaticCacheControl(VirtualPath? path, string? extension) =>
+        ClientCacheFor(path).CacheControl(
             !string.IsNullOrEmpty(extension)
             && _cachingProfiles.TryGetValue(extension, out var profile)
                 ? profile.CacheControl
@@ -200,6 +202,7 @@ internal sealed class IisServerConfiguration
 
         var handlers = sections.Handlers.Build();
         var handlerRoutes = IisHandlerRoute.Build(handlers);
+        var clientCache = sections.ClientCache.Build();
 
         return new IisServerConfiguration(
             sections.StaticContent,
@@ -213,9 +216,10 @@ internal sealed class IisServerConfiguration
             sections.Modules.RunAllManagedModules,
             handlers,
             handlerRoutes,
-            IisFolderHandlers.Load(
+            IisFolderSections.Load(
                 sections.Handlers,
                 handlerRoutes,
+                clientCache,
                 Path.GetDirectoryName(Path.GetFullPath(applicationConfigPath))!,
                 applicationVirtualPath,
                 sections.ClassicSectionsWaived,
@@ -228,7 +232,7 @@ internal sealed class IisServerConfiguration
                 extension => sections.StaticContent.TryGetValue(extension, out var mimeType)
                     ? mimeType
                     : null),
-            sections.ClientCache.Build(),
+            clientCache,
             sections.WarnedSections);
     }
 

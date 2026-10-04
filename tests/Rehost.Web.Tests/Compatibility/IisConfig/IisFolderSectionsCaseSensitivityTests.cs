@@ -10,7 +10,7 @@ namespace Rehost.Web.Tests.Compatibility.IisConfig;
 
 // The collision only a case-sensitive filesystem can hold: two directories that differ by case
 // are one configuration path, so neither folder's handlers can be the answer.
-public sealed class IisFolderHandlersCaseSensitivityTests(CaseSensitiveVolume volume)
+public sealed class IisFolderSectionsCaseSensitivityTests(CaseSensitiveVolume volume)
     : IClassFixture<CaseSensitiveVolume>
 {
     [Fact]

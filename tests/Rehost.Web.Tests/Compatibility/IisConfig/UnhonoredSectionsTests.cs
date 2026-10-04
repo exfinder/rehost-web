@@ -1,4 +1,5 @@
 using System.Configuration;
+using System.Web;
 using System.Web.IisConfig;
 using Rehost.Web.Hosting;
 using Rehost.Web.Tests.Compatibility.Diagnostics;
@@ -57,7 +58,7 @@ public sealed class UnhonoredSectionsTests
     [InlineData(
         Placement.Folder,
         """<staticContent><mimeMap fileExtension=".probe" mimeType="text/probe" /></staticContent>""",
-        "<staticContent>")]
+        "<staticContent/mimeMap>")]
     [InlineData(
         Placement.Folder,
         """<httpProtocol><customHeaders><add name="X-Folder" value="1" /></customHeaders></httpProtocol>""",
@@ -81,6 +82,21 @@ public sealed class UnhonoredSectionsTests
 
         failure.Message.ShouldContain(named);
         failure.Message.ShouldContain(element, Case.Sensitive);
+    }
+
+    [Fact]
+    public void A_Folder_File_Carrying_ClientCache_Loads_Clean()
+    {
+        using var application = TemporaryApplication.Create();
+        Write(
+            application,
+            Placement.Folder,
+            """<staticContent><clientCache cacheControlMode="DisableCache" /></staticContent>""");
+
+        var server = Load(application.CreateConfiguration());
+
+        server.ClientCacheFor(VirtualPath.Create("/Temp/a.txt")).Mode
+            .ShouldBe(ClientCacheMode.DisableCache);
     }
 
     [Fact]

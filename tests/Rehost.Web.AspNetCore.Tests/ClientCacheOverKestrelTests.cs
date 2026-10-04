@@ -30,6 +30,28 @@ public sealed class ClientCacheOverKestrelTests(CustomErrorsLiveScenario scenari
         revalidation.ShouldContain("Cache-Control: public,max-age=60\r\n", Case.Sensitive);
     }
 
+    [Fact]
+    public async Task A_Folder_Config_Replaces_The_Mode_And_Keeps_The_Root_Custom_Text()
+    {
+        var served = Head(
+            await RawSocketProbe.GetRawResponseAsync(scenario.Address, "/sub/a.json"));
+
+        served.ShouldStartWith("HTTP/1.1 200", Case.Sensitive);
+        served.ShouldContain("Cache-Control: public,no-cache\r\n", Case.Sensitive);
+        served.Split("Cache-Control:").Length.ShouldBe(2, served);
+    }
+
+    [Fact]
+    public async Task A_Nested_Folder_Config_Merges_Over_Its_Parent_Folder()
+    {
+        var served = Head(
+            await RawSocketProbe.GetRawResponseAsync(scenario.Address, "/sub/deep/a.json"));
+
+        served.ShouldStartWith("HTTP/1.1 200", Case.Sensitive);
+        served.ShouldContain("Cache-Control: public,max-age=7200\r\n", Case.Sensitive);
+        served.Split("Cache-Control:").Length.ShouldBe(2, served);
+    }
+
     private byte[] Conditional(string lastModified) => Encoding.ASCII.GetBytes(
         $"""
         GET {Path} HTTP/1.1

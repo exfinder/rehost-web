@@ -10,7 +10,7 @@ namespace Rehost.Web.Tests.Compatibility.IisConfig;
 // Per-folder <handlers> resolution: the same merge algorithm applied one level per folder
 // web.config down the request's directory, queried by path. Compositions MH27 does not pin are
 // named "Unmeasured" and assert what applying the per-level algorithm level by level produces.
-public sealed class IisFolderHandlersTests : IDisposable
+public sealed class IisFolderSectionsTests : IDisposable
 {
     private readonly DirectoryInfo _temp = Directory.CreateTempSubdirectory("rehost-iisfolder-");
 

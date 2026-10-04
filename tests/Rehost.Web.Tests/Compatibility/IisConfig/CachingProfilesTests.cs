@@ -37,10 +37,10 @@ public sealed class CachingProfilesTests : IDisposable
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
-        configuration.StaticCacheControl(".css").ShouldBe(word);
-        configuration.StaticCacheControl(".CSS").ShouldBe(word);
-        configuration.StaticCacheControl(".js").ShouldBeNull();
-        configuration.StaticCacheControl(null).ShouldBeNull();
+        configuration.StaticCacheControl(null, ".css").ShouldBe(word);
+        configuration.StaticCacheControl(null, ".CSS").ShouldBe(word);
+        configuration.StaticCacheControl(null, ".js").ShouldBeNull();
+        configuration.StaticCacheControl(null, null).ShouldBeNull();
         configuration.UserModeCachedExtensions.ShouldBe([".css"]);
     }
 
@@ -64,7 +64,7 @@ public sealed class CachingProfilesTests : IDisposable
 
         var configuration = IisServerConfiguration.Load(Baseline(), app);
 
-        configuration.StaticCacheControl(".css").ShouldBeNull();
+        configuration.StaticCacheControl(null, ".css").ShouldBeNull();
         configuration.UserModeCachedExtensions.ShouldBeEmpty();
     }
 
@@ -86,9 +86,9 @@ public sealed class CachingProfilesTests : IDisposable
 
         var configuration = IisServerConfiguration.Load(BaselineWithProfiles(), app);
 
-        configuration.StaticCacheControl(".gif").ShouldBeNull();
-        configuration.StaticCacheControl(".svg").ShouldBe("private");
-        configuration.StaticCacheControl(".css").ShouldBe("public");
+        configuration.StaticCacheControl(null, ".gif").ShouldBeNull();
+        configuration.StaticCacheControl(null, ".svg").ShouldBe("private");
+        configuration.StaticCacheControl(null, ".css").ShouldBe("public");
         configuration.UserModeCachedExtensions.ShouldBe([".css", ".svg"]);
     }
 
