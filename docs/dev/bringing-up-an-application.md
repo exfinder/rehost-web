@@ -23,6 +23,35 @@
    outcomes. Run macOS, Linux and Windows rounds, then update current contracts
    and unresolved-work priority. Tests themselves carry evidence.
 
+## Consuming a candidate feed
+
+To build a consumer against packages that are not on nuget.org, put a
+`nuget.config` beside its solution that clears the inherited sources, adds the
+candidate folder and nuget.org, and maps `Rehost.*` to the folder so a same-named
+public package can never answer first:
+
+```xml
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="candidate" value="path/to/candidate" />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+  </packageSources>
+  <packageSourceMapping>
+    <packageSource key="candidate"><package pattern="Rehost.*" /></packageSource>
+    <packageSource key="nuget.org"><package pattern="*" /></packageSource>
+  </packageSourceMapping>
+</configuration>
+```
+
+Install the template from the folder, not the gallery:
+`dotnet new install path/to/candidate/Rehost.Web.Templates.<version>.nupkg`,
+with `--debug:custom-hive <dir>` on the `dotnet new` calls to keep the install
+out of the user profile. A candidate that reuses a version restored before
+needs an empty `RestorePackagesPath`, or the earlier packages answer.
+`eng/external-consumer.sh <candidate>` runs this whole journey against the
+stock template application.
+
 ## Rebuild constraints
 
 - Sidecars outside an imported tree do not inherit its Directory.Build settings.
