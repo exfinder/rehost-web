@@ -30,6 +30,11 @@ the operator needs an external watcher, which races the wizard's redirect.
 - Host restart notification and shutdown reason contract.
 - Behavior when the host cannot replace the process.
 - Diagnostics and loop protection for repeatedly invalid replacement config.
+- Whether to keep refusing `fcnMode` values other than `Disabled` once the
+  watch exists. Today preflight refuses them because nothing honors them. DNN
+  writes `fcnMode="Single"` into `web.config` during install, so the refusal
+  can only be answered by patching the application until the watch lands and
+  the value selects it (decided 2026-10-04: keep the refusal until then).
 - `FileChangesMonitor`'s six `UrlPath.IsAbsolutePhysicalPath(alias)` checks
   (past today's `IsFCNDisabled` return) refuse every Unix-rooted alias with
   `E_INVALIDARG`; enabling notification needs a rooted-path test there
